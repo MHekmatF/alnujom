@@ -1,0 +1,167 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:injectable/injectable.dart';
+
+import '../errors/failure.dart';
+import '../errors/result.dart';
+import '../logging/app_logger.dart';
+import 'preferences_store.dart';
+
+@LazySingleton(as: PreferencesStore)
+final class SecurePreferencesStore implements PreferencesStore {
+  SecurePreferencesStore(AppLogger logger)
+    : _logger = logger,
+      _storage = const FlutterSecureStorage();
+
+  @visibleForTesting
+  SecurePreferencesStore.test(
+    AppLogger logger, {
+    required FlutterSecureStorage storage,
+  }) : _logger = logger,
+       _storage = storage;
+
+  static const _themeKey = 'com.alnujom.preferences.theme_mode';
+  static const _localeKey = 'com.alnujom.preferences.locale_code';
+  static const _tag = 'PreferencesStore';
+
+  final AppLogger _logger;
+  final FlutterSecureStorage _storage;
+
+  @override
+  Future<Result<ThemeMode?>> readThemeMode() async {
+    try {
+      final raw = await _storage.read(key: _themeKey);
+      return Success(_parseThemeMode(raw));
+    } on Object catch (error, stackTrace) {
+      _logger.warning(
+        'Failed to read theme preference.',
+        error: error,
+        stackTrace: stackTrace,
+        tag: _tag,
+      );
+      return FailureResult(
+        CacheFailure(
+          'Failed to read theme preference.',
+          cause: error,
+          stackTrace: stackTrace,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<Result<void>> writeThemeMode(ThemeMode mode) async {
+    try {
+      final value = switch (mode) {
+        ThemeMode.light => 'light',
+        ThemeMode.dark => 'dark',
+        ThemeMode.system => null,
+      };
+
+      if (value == null) {
+        await _storage.delete(key: _themeKey);
+      } else {
+        await _storage.write(key: _themeKey, value: value);
+      }
+
+      return const Success(null);
+    } on Object catch (error, stackTrace) {
+      _logger.warning(
+        'Failed to write theme preference.',
+        error: error,
+        stackTrace: stackTrace,
+        tag: _tag,
+      );
+      return FailureResult(
+        CacheFailure(
+          'Failed to write theme preference.',
+          cause: error,
+          stackTrace: stackTrace,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<Result<Locale?>> readLocale() async {
+    try {
+      final raw = await _storage.read(key: _localeKey);
+      return Success(_parseLocale(raw));
+    } on Object catch (error, stackTrace) {
+      _logger.warning(
+        'Failed to read locale preference.',
+        error: error,
+        stackTrace: stackTrace,
+        tag: _tag,
+      );
+      return FailureResult(
+        CacheFailure(
+          'Failed to read locale preference.',
+          cause: error,
+          stackTrace: stackTrace,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<Result<void>> writeLocale(Locale locale) async {
+    try {
+      await _storage.write(key: _localeKey, value: locale.languageCode);
+      return const Success(null);
+    } on Object catch (error, stackTrace) {
+      _logger.warning(
+        'Failed to write locale preference.',
+        error: error,
+        stackTrace: stackTrace,
+        tag: _tag,
+      );
+      return FailureResult(
+        CacheFailure(
+          'Failed to write locale preference.',
+          cause: error,
+          stackTrace: stackTrace,
+        ),
+      );
+    }
+  }
+
+  ThemeMode? _parseThemeMode(String? raw) {
+    if (raw == null) {
+      return null;
+    }
+    if (raw.length > 32) {
+      _warnUnrecognized('theme mode', raw);
+      return null;
+    }
+    return switch (raw) {
+      'light' => ThemeMode.light,
+      'dark' => ThemeMode.dark,
+      _ => _warnAndReturnNull<ThemeMode>('theme mode', raw),
+    };
+  }
+
+  Locale? _parseLocale(String? raw) {
+    if (raw == null) {
+      return null;
+    }
+    if (raw.length > 32) {
+      _warnUnrecognized('locale', raw);
+      return null;
+    }
+    return switch (raw) {
+      'ar' => const Locale('ar'),
+      'en' => const Locale('en'),
+      _ => _warnAndReturnNull<Locale>('locale', raw),
+    };
+  }
+
+  T? _warnAndReturnNull<T>(String field, String raw) {
+    _warnUnrecognized(field, raw);
+    return null;
+  }
+
+  void _warnUnrecognized(String field, String raw) {
+    _logger.warning('Ignoring unrecognized $field preference: $raw', tag: _tag);
+  }
+}

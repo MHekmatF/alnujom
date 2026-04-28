@@ -1,0 +1,100 @@
+language: en-US
+early_access: false
+tone_instructions: "Concise, technical. Match the project's terse style. Skip the haiku."
+
+reviews:
+  profile: chill
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+  auto_review:
+    # Default PAUSED. Per docs/AI_AGENT_WORKFLOW.md, the agent flips this to
+    # `true` on a chore PR before opening a phase that introduces logic worth
+    # reviewing (auth, schema, money, concurrency, business workflows). Phases
+    # 1–3 of AlNujom are scaffolding/foundational and skip CodeRabbit. Re-enable
+    # for Phase 4 (Supabase base schema + RLS) and most subsequent phases.
+    # One-shot reviews are still possible via `@coderabbitai review` on a PR.
+    enabled: false
+    drafts: false
+
+  path_filters:
+    # Generated code — humans diff these, CodeRabbit shouldn't burn tokens reviewing them
+    - "!**/*.g.dart"
+    - "!**/*.freezed.dart"
+    - "!**/*.config.dart"
+    - "!**/*.mocks.dart"
+    - "!lib/l10n/app_localizations*.dart"
+    # Build artifacts and tooling caches
+    - "!build/**"
+    - "!.dart_tool/**"
+    - "!supabase/.temp/**"
+    - "!supabase/.branches/**"
+
+  path_instructions:
+    - path: "lib/core/network/supabase_client_wrapper_impl.dart"
+      instructions: |
+        This is the ONLY file in lib/ allowed to import package:supabase_flutter
+        (AlNujom Constitution Principle IX, FR-009). Do not suggest moving the
+        import elsewhere or "cleaning up" the wrapper boundary.
+
+    - path: "lib/core/**/*.dart"
+      instructions: |
+        Domain code MUST NOT throw exceptions across architectural boundaries
+        (AlNujom Constitution Principle IV, FR-010). Catch at data sources;
+        return Result<T> = Success<T> | FailureResult<T>. Flag try/catch blocks
+        in domain or use-case code that swallow the error instead of returning
+        a FailureResult.
+
+    - path: "lib/features/**/*.dart"
+      instructions: |
+        Feature code follows Clean Architecture (Constitution IV): presentation/
+        for widgets + BLoC/Cubit, domain/ for entities + use cases + repository
+        interfaces, data/ for Supabase data sources + DTOs + repository
+        implementations.
+
+        - Domain code MUST NOT import package:supabase_flutter or expose
+          Supabase types in its public API (Constitution IX, FR-009).
+        - All user-visible strings MUST be localized via AppLocalizations
+          (Constitution V). Flag inline string literals in widgets.
+        - Hex color literals (Color(0x...)) and ad-hoc TextStyle(...)
+          constructors are forbidden in feature code (Constitution VI). Use
+          Theme.of(context) and the AppTokens / token-getter API.
+        - Use EdgeInsetsDirectional and other directional primitives so layouts
+          mirror correctly under RTL/LTR (Constitution V).
+        - Min 48dp touch targets on interactive elements; every interactive
+          element carries a Semantics label (FR-017, WCAG 2.1 AA).
+
+    - path: "supabase/migrations/**/*.sql"
+      instructions: |
+        - Every application table MUST enable RLS (Constitution III,
+          NON-NEGOTIABLE). Any table intentionally without RLS MUST carry a
+          justification comment in the migration file.
+        - Per-user admin-only PII (legal_name, national_id, private contact
+          methods, inquirer phone numbers, agency verification IDs) MUST be
+          Vault-stored per ADR-0001 (docs/decisions/0001-secrets-and-pii-storage.md).
+        - Service-role keys MUST NOT appear in any committed migration.
+
+    - path: "specs/**/*.md"
+      instructions: |
+        GitHub Spec Kit artifacts (spec.md, plan.md, tasks.md, research.md,
+        data-model.md, contracts/*.md, quickstart.md). Suggest documentation
+        tightening, ambiguity resolution, and consistency fixes only. Do NOT
+        propose code changes here — code lives in lib/ and supabase/.
+
+    - path: "docs/decisions/*.md"
+      instructions: |
+        Architecture Decision Records. Suggest clarification only; do not
+        propose flipping the decision in a review comment — that requires a
+        new ADR.
+
+    - path: ".github/workflows/**/*.yml"
+      instructions: |
+        CI workflows. The `verify` job is the FR-015 enforcement: lint + test
+        + debug-APK build + Constitution-IX SDK-boundary grep guard. Do not
+        suggest removing the grep guard step. Do not suggest skipping hooks
+        or bypassing CI in commits.
+
+chat:
+  auto_reply: true

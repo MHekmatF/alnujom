@@ -1,0 +1,9 @@
+{
+  "@@locale": "ar",
+  "appTitle": "النجوم",
+  "themeToggleLabel": "بدّل المظهر",
+  "localeToggleLabel": "بدّل اللغة",
+  "currentTheme": "المظهر الحالي",
+  "currentLocale": "اللغة الحالية",
+  "backendConfigMissingWarning": "إعدادات الخادم ناقصة؛ رح نكمل بدون اتصال بالخادم."
+}

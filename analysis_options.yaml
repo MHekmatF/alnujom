@@ -1,0 +1,12 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  errors:
+    avoid_print: error
+    prefer_const_constructors: error
+
+linter:
+  rules:
+    avoid_print: true
+    prefer_const_constructors: true
+    unawaited_futures: true

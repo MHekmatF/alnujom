@@ -1,0 +1,2 @@
+-- Phase 1 seed data is intentionally empty.
+-- Real seed data lands in Phase 4+ when application tables are introduced.

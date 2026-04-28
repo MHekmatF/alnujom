@@ -1,0 +1,230 @@
+# =============================================================================
+# AlNujom Real Estate — .gitignore
+# Flutter (Android) + Supabase, Windows dev environment
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Secrets & environment (NEVER commit)
+# -----------------------------------------------------------------------------
+.env
+.env.json
+.env.*
+!.env.example
+*.env
+secrets/
+*.pem
+*.key
+*.p12
+*.jks
+*.keystore
+key.properties
+android/key.properties
+android/app/upload-keystore.jks
+android/app/release-keystore.jks
+google-services.json
+GoogleService-Info.plist
+firebase_options.dart
+service-account*.json
+
+# Supabase local credentials & generated artifacts
+supabase/.env
+supabase/.env.*
+supabase/.temp/
+supabase/.branches/
+supabase/logs/
+
+# -----------------------------------------------------------------------------
+# Flutter / Dart
+# -----------------------------------------------------------------------------
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+.fvm/
+.fvmrc
+pubspec.lock.bak
+
+# Coverage
+coverage/
+lcov.info
+*.lcov
+
+# Flutter symbolication
+app.*.symbols
+app.*.map.json
+
+# -----------------------------------------------------------------------------
+# Generated code (codegen — regenerate via build_runner / flutter gen-l10n)
+# -----------------------------------------------------------------------------
+# Injectable / json_serializable / freezed / etc.
+*.g.dart
+*.freezed.dart
+*.gr.dart
+*.mocks.dart
+*.gen.dart
+
+# Generated localization (flutter gen-l10n)
+# Regenerated automatically by `flutter pub get` because pubspec sets
+# `flutter.generate: true` and l10n.yaml uses `synthetic-package: false`.
+# Source of truth lives in lib/l10n/*.arb; the .dart outputs are reproducible.
+lib/l10n/generated/
+lib/generated/
+lib/l10n/app_localizations.dart
+lib/l10n/app_localizations_*.dart
+
+# -----------------------------------------------------------------------------
+# Android
+# -----------------------------------------------------------------------------
+android/.gradle/
+android/.idea/
+android/captures/
+android/local.properties
+android/app/release/
+android/app/debug/
+android/app/profile/
+android/gradle/
+!android/gradle/
+!android/gradle/wrapper/
+!android/gradle/wrapper/**
+android/gradlew
+android/gradlew.bat
+android/build/
+android/app/build/
+android/.cxx/
+android/app/.cxx/
+android/**/GeneratedPluginRegistrant.java
+*.iml
+*.ipr
+*.iws
+
+# APK / AAB / mapping outputs
+*.apk
+*.aab
+*.dex
+*.ap_
+mapping.txt
+
+# -----------------------------------------------------------------------------
+# Linux / macOS / Windows / iOS / Web (not targeted by v1, but Flutter scaffolds them)
+# -----------------------------------------------------------------------------
+ios/
+linux/
+macos/
+windows/
+web/
+
+# If iOS/Web/desktop folders are added later (post-v1), tighten this section.
+
+# -----------------------------------------------------------------------------
+# IDE & editors
+# -----------------------------------------------------------------------------
+# IntelliJ / Android Studio
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# VS Code (keep launch.json + settings.json optional — uncomment if shared)
+.vscode/
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/tasks.json
+
+# Cursor / Windsurf / Zed / other AI IDEs
+.cursor/
+.windsurf/
+.zed/
+
+# Vim / Emacs
+*.swp
+*.swo
+*~
+\#*\#
+.\#*
+
+# -----------------------------------------------------------------------------
+# OS-specific
+# -----------------------------------------------------------------------------
+# Windows
+Thumbs.db
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+
+# -----------------------------------------------------------------------------
+# Logs, temp, caches
+# -----------------------------------------------------------------------------
+*.log
+logs/
+*.tmp
+*.temp
+*.bak
+*.old
+*.orig
+.cache/
+tmp/
+temp/
+
+# -----------------------------------------------------------------------------
+# Test artifacts
+# -----------------------------------------------------------------------------
+test/.test_coverage.dart
+.test_runner.dart
+failures/
+golden_failures/
+
+# -----------------------------------------------------------------------------
+# AI agent / tooling caches (Claude Code, Specify, GLM, AntiGravity, etc.)
+# -----------------------------------------------------------------------------
+# Keep .claude/skills committed (project-shared skills) but ignore local state
+.claude/cache/
+.claude/logs/
+.claude/.local/
+.claude/settings.local.json
+
+# Spec Kit local state
+.specify/.cache/
+.specify/.local/
+
+# Local agent scratch
+.agents/.cache/
+.agents/.local/
+
+# -----------------------------------------------------------------------------
+# Documentation build outputs
+# -----------------------------------------------------------------------------
+doc/api/
+docs/_build/
+docs/.cache/
+site/
+
+# -----------------------------------------------------------------------------
+# Misc
+# -----------------------------------------------------------------------------
+*.pyc
+__pycache__/
+node_modules/
+.npm/
+.yarn/
+.pnpm-store/
+
+# Local-only override file (developer-specific tweaks)
+.gitignore.local
