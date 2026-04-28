@@ -72,97 +72,97 @@ This is a Flutter Android app + a source-controlled `supabase/` backend tree (se
 
 ### Errors module (Constitution Principle IV; FR-010; contract: `contracts/result-failure.md`)
 
-- [ ] T011 [P] Implement the sealed `Failure` hierarchy in `lib/core/errors/failure.dart`: abstract sealed `Failure` with `String message`, optional `Object? cause`, `StackTrace? stackTrace`; concrete `NetworkFailure`, `CacheFailure`, `ConfigFailure`, `UnknownFailure`
+- [X] T011 [P] Implement the sealed `Failure` hierarchy in `lib/core/errors/failure.dart`: abstract sealed `Failure` with `String message`, optional `Object? cause`, `StackTrace? stackTrace`; concrete `NetworkFailure`, `CacheFailure`, `ConfigFailure`, `UnknownFailure`
   - **Verify**: `flutter analyze` is clean; a Dart 3 `switch (failure) { case NetworkFailure(...) ... }` over a `Failure` value compiles with exhaustiveness checking
 
-- [ ] T012 [P] Implement `Result<T>` sealed type in `lib/core/errors/result.dart`: `sealed class Result<T>`, `final class Success<T> extends Result<T>` carrying `T value`, `final class FailureResult<T> extends Result<T>` carrying `Failure failure` (depends on T011)
+- [X] T012 [P] Implement `Result<T>` sealed type in `lib/core/errors/result.dart`: `sealed class Result<T>`, `final class Success<T> extends Result<T>` carrying `T value`, `final class FailureResult<T> extends Result<T>` carrying `Failure failure` (depends on T011)
   - **Verify**: a `switch (result) { case Success(:final value): ... case FailureResult(:final failure): ... }` compiles with exhaustiveness checking; `flutter analyze` clean
 
-- [ ] T013 [P] Add `lib/core/utils/result_extensions.dart` with `Result<T>.map<U>((T) => U)` and `Result<T>.fold<U>(onSuccess, onFailure)` extensions (depends on T011, T012)
+- [X] T013 [P] Add `lib/core/utils/result_extensions.dart` with `Result<T>.map<U>((T) => U)` and `Result<T>.fold<U>(onSuccess, onFailure)` extensions (depends on T011, T012)
   - **Verify**: helpers preserve `Failure` identity through `.map`; covered by tests in T015
 
-- [ ] T014 [P] Write unit tests in `test/core/errors/result_test.dart`: cover `Success`/`FailureResult` round-trip, exhaustive pattern match compiles, `.map` propagates failures unchanged
+- [X] T014 [P] Write unit tests in `test/core/errors/result_test.dart`: cover `Success`/`FailureResult` round-trip, exhaustive pattern match compiles, `.map` propagates failures unchanged
   - **Verify**: `flutter test test/core/errors/result_test.dart` passes; ≥4 distinct test cases
 
 ### Logging module (FR-011; contract: `contracts/logger.md`)
 
-- [ ] T015 [P] Define the `AppLogger` interface in `lib/core/logging/app_logger.dart` with `debug/info/warning/error` methods (each takes `String message`, optional `Object? error`, `StackTrace? stackTrace`, `String? tag`)
+- [X] T015 [P] Define the `AppLogger` interface in `lib/core/logging/app_logger.dart` with `debug/info/warning/error` methods (each takes `String message`, optional `Object? error`, `StackTrace? stackTrace`, `String? tag`)
   - **Verify**: `flutter analyze` clean; the interface has zero implementations yet
 
-- [ ] T016 Implement `ConsoleLogger` in `lib/core/logging/console_logger.dart` annotated `@LazySingleton(as: AppLogger)`: in `kDebugMode` forwards to `dart:developer.log` with severity numbers (300 debug, 800 info, 900 warning, 1000 error) and the `tag` as `name`; in release builds all methods are no-ops (depends on T015)
+- [X] T016 Implement `ConsoleLogger` in `lib/core/logging/console_logger.dart` annotated `@LazySingleton(as: AppLogger)`: in `kDebugMode` forwards to `dart:developer.log` with severity numbers (300 debug, 800 info, 900 warning, 1000 error) and the `tag` as `name`; in release builds all methods are no-ops (depends on T015)
   - **Verify**: covered by T017
 
-- [ ] T017 [P] Write `test/core/logging/console_logger_test.dart` using `dart:developer.log` capture (or a `Zone` override) to assert that debug-build calls produce log records with the correct severity and name; release-build behavior is verified via a build-flag-conditional test
+- [X] T017 [P] Write `test/core/logging/console_logger_test.dart` using `dart:developer.log` capture (or a `Zone` override) to assert that debug-build calls produce log records with the correct severity and name; release-build behavior is verified via a build-flag-conditional test
   - **Verify**: `flutter test test/core/logging/console_logger_test.dart` passes
 
 ### Config module (research.md Decision 13)
 
-- [ ] T018 [P] Implement `EnvConfig` in `lib/core/config/env_config.dart` annotated `@singleton`: reads `SUPABASE_URL` and `SUPABASE_ANON_KEY` via `String.fromEnvironment(...)` at compile time; exposes `bool get isConfigured` returning true iff both values are non-empty
+- [X] T018 [P] Implement `EnvConfig` in `lib/core/config/env_config.dart` annotated `@singleton`: reads `SUPABASE_URL` and `SUPABASE_ANON_KEY` via `String.fromEnvironment(...)` at compile time; exposes `bool get isConfigured` returning true iff both values are non-empty
   - **Verify**: a `flutter test` run with `--dart-define=SUPABASE_URL=foo --dart-define=SUPABASE_ANON_KEY=bar` reports `EnvConfig.isConfigured == true`; with no defines, `isConfigured == false`
 
 ### Storage module (FR-006; FR-016; contract: `contracts/preferences-store.md`; data model: data-model.md "User Preferences (local)")
 
-- [ ] T019 [P] Define the `PreferencesStore` interface in `lib/core/storage/preferences_store.dart`: `Future<Result<ThemeMode?>> readThemeMode()`, `Future<Result<void>> writeThemeMode(ThemeMode mode)`, `Future<Result<Locale?>> readLocale()`, `Future<Result<void>> writeLocale(Locale locale)` (depends on T011, T012)
+- [X] T019 [P] Define the `PreferencesStore` interface in `lib/core/storage/preferences_store.dart`: `Future<Result<ThemeMode?>> readThemeMode()`, `Future<Result<void>> writeThemeMode(ThemeMode mode)`, `Future<Result<Locale?>> readLocale()`, `Future<Result<void>> writeLocale(Locale locale)` (depends on T011, T012)
   - **Verify**: `flutter analyze` clean; types are Dart/Flutter built-ins (`ThemeMode`, `Locale`) — no Supabase types leak across this boundary
 
-- [ ] T020 Implement `SecurePreferencesStore` in `lib/core/storage/secure_preferences_store.dart` annotated `@LazySingleton(as: PreferencesStore)`: uses `FlutterSecureStorage` with default Android options; storage keys per data-model.md (`com.alnujom.preferences.theme_mode`, `com.alnujom.preferences.locale_code`); reads tolerate unrecognized values by returning `Success(null)` and logging a warning via injected `AppLogger`; writes that throw return `FailureResult(CacheFailure(...))` (depends on T011, T012, T015, T019)
+- [X] T020 Implement `SecurePreferencesStore` in `lib/core/storage/secure_preferences_store.dart` annotated `@LazySingleton(as: PreferencesStore)`: uses `FlutterSecureStorage` with default Android options; storage keys per data-model.md (`com.alnujom.preferences.theme_mode`, `com.alnujom.preferences.locale_code`); reads tolerate unrecognized values by returning `Success(null)` and logging a warning via injected `AppLogger`; writes that throw return `FailureResult(CacheFailure(...))` (depends on T011, T012, T015, T019)
   - **Verify**: covered by T021
 
-- [ ] T021 [P] Write `test/core/storage/secure_preferences_store_test.dart` using a Mockito-generated fake `FlutterSecureStorage`: cover read-absent, read-recognized (`'dark'` → `ThemeMode.dark`), read-unrecognized (`'foo'` → `Success(null)` + warning logged), write-success, write-error → `FailureResult(CacheFailure)`
+- [X] T021 [P] Write `test/core/storage/secure_preferences_store_test.dart` using a Mockito-generated fake `FlutterSecureStorage`: cover read-absent, read-recognized (`'dark'` → `ThemeMode.dark`), read-unrecognized (`'foo'` → `Success(null)` + warning logged), write-success, write-error → `FailureResult(CacheFailure)`
   - **Verify**: `flutter test test/core/storage/secure_preferences_store_test.dart` passes; ≥5 test cases
 
 ### Network wrapper (Constitution Principle IX; FR-009; contract: `contracts/supabase-client-wrapper.md`)
 
-- [ ] T022 [P] Define project-defined types `AuthState` and `RealtimeChannel` in `lib/core/network/types/`: enum `AuthState { signedOut, signedIn, error }` and `abstract interface class RealtimeChannel { ... }` — these are NOT re-exports of `supabase_flutter` types
+- [X] T022 [P] Define project-defined types `AuthState` and `RealtimeChannel` in `lib/core/network/types/`: enum `AuthState { signedOut, signedIn, error }` and `abstract interface class RealtimeChannel { ... }` — these are NOT re-exports of `supabase_flutter` types
   - **Verify**: `flutter analyze` clean; `grep -r "package:supabase_flutter" lib/core/network/types/` returns nothing
 
-- [ ] T023 [P] Define the `SupabaseClientWrapper` interface in `lib/core/network/supabase_client_wrapper.dart` per `contracts/supabase-client-wrapper.md`: required methods `isInitialized`, `initialize({url, anonKey})`, `dispose()`; stub methods `authStateChanges()`, `selectRows(...)`, `rpc(...)`, `uploadObject(...)`, `realtimeChannel(...)` (depends on T011, T012, T022)
+- [X] T023 [P] Define the `SupabaseClientWrapper` interface in `lib/core/network/supabase_client_wrapper.dart` per `contracts/supabase-client-wrapper.md`: required methods `isInitialized`, `initialize({url, anonKey})`, `dispose()`; stub methods `authStateChanges()`, `selectRows(...)`, `rpc(...)`, `uploadObject(...)`, `realtimeChannel(...)` (depends on T011, T012, T022)
   - **Verify**: `flutter analyze` clean; the interface file MUST NOT import `package:supabase_flutter`
 
-- [ ] T024 Implement `SupabaseClientWrapperImpl` in `lib/core/network/supabase_client_wrapper_impl.dart` annotated `@LazySingleton(as: SupabaseClientWrapper)`: this is the **only** file in `lib/` allowed to `import 'package:supabase_flutter/...';`. `initialize` returns `FailureResult(ConfigFailure)` if `url` or `anonKey` is empty (FR-013); otherwise calls `Supabase.initialize(url:, anonKey:)`. Stub methods throw `UnimplementedError('wired up in Phase X')` (depends on T011, T012, T015, T022, T023)
+- [X] T024 Implement `SupabaseClientWrapperImpl` in `lib/core/network/supabase_client_wrapper_impl.dart` annotated `@LazySingleton(as: SupabaseClientWrapper)`: this is the **only** file in `lib/` allowed to `import 'package:supabase_flutter/...';`. `initialize` returns `FailureResult(ConfigFailure)` if `url` or `anonKey` is empty (FR-013); otherwise calls `Supabase.initialize(url:, anonKey:)`. Stub methods throw `UnimplementedError('wired up in Phase X')` (depends on T011, T012, T015, T022, T023)
   - **Verify**: `grep -rE "package:supabase_flutter" lib --include='*.dart' --exclude='supabase_client_wrapper_impl.dart'` returns 0 matches (Constitution-IX guard); calling `initialize` with empty values returns `FailureResult(ConfigFailure)`
 
 ### Theme stubs (Constitution Principle VI)
 
-- [ ] T025 [P] Implement `lib/core/theme/tokens_stub.dart` exposing placeholder color/text token getters (e.g. `AppTokens.primary`, `AppTokens.surface`, `AppTokens.bodyTextStyle`) with values that are visibly distinct between light and dark — these are placeholders only; final tokens land in Phase 2
+- [X] T025 [P] Implement `lib/core/theme/tokens_stub.dart` exposing placeholder color/text token getters (e.g. `AppTokens.primary`, `AppTokens.surface`, `AppTokens.bodyTextStyle`) with values that are visibly distinct between light and dark — these are placeholders only; final tokens land in Phase 2
   - **Verify**: file exists; no hex literal lives outside this file; consumed by T026
 
-- [ ] T026 Implement `lib/core/theme/app_theme.dart` exporting `appLightTheme()` and `appDarkTheme()` returning `ThemeData` instances built from `AppTokens` only — no inline `Color(...)` or `TextStyle(...)` literals (depends on T025)
+- [X] T026 Implement `lib/core/theme/app_theme.dart` exporting `appLightTheme()` and `appDarkTheme()` returning `ThemeData` instances built from `AppTokens` only — no inline `Color(...)` or `TextStyle(...)` literals (depends on T025)
   - **Verify**: `grep -E "Color\\(0x" lib/core/theme/app_theme.dart` returns 0 matches; both functions return non-null `ThemeData` with distinct `brightness`
 
 ### Localization scaffolding (Constitution Principle V; research.md Decision 9)
 
-- [ ] T027 [P] Create `l10n.yaml` at the repo root pointing at `lib/l10n/`, `template-arb-file: app_en.arb`, `output-localization-file: app_localizations.dart`, `synthetic-package: false`
+- [X] T027 [P] Create `l10n.yaml` at the repo root pointing at `lib/l10n/`, `template-arb-file: app_en.arb`, `output-localization-file: app_localizations.dart`, `synthetic-package: false`
   - **Verify**: file exists with the four keys above
 
-- [ ] T028 [P] Create `lib/l10n/app_en.arb` with the placeholder Phase 1 keys: `appTitle`, `themeToggleLabel`, `localeToggleLabel`, `currentTheme`, `currentLocale`, `backendConfigMissingWarning` — English values are debug-friendly placeholders
+- [X] T028 [P] Create `lib/l10n/app_en.arb` with the placeholder Phase 1 keys: `appTitle`, `themeToggleLabel`, `localeToggleLabel`, `currentTheme`, `currentLocale`, `backendConfigMissingWarning` — English values are debug-friendly placeholders
   - **Verify**: file is valid JSON-as-ARB; running `flutter gen-l10n` produces `lib/l10n/app_localizations.dart` and `app_localizations_en.dart` without errors
 
-- [ ] T029 [P] Create `lib/l10n/app_ar.arb` with the same keys as T028 in Arabic — values are professional Syrian-Arabic placeholders, not stiff Modern Standard Arabic; mirror `appTitle` exactly across both for now (the brand reads "النجوم")
+- [X] T029 [P] Create `lib/l10n/app_ar.arb` with the same keys as T028 in Arabic — values are professional Syrian-Arabic placeholders, not stiff Modern Standard Arabic; mirror `appTitle` exactly across both for now (the brand reads "النجوم")
   - **Verify**: file is valid JSON; gen-l10n produces `app_localizations_ar.dart`; `grep -c '"' lib/l10n/app_en.arb lib/l10n/app_ar.arb` returns equal key counts (no key drift between locales — Constitution localization gate)
 
 ### DI module (FR-008; contract: `contracts/di-container.md`)
 
-- [ ] T030 Author `lib/core/di/injection.dart`: declare `final getIt = GetIt.instance;` and a top-level `Future<void> configureDependencies() async` annotated `@InjectableInit(initializerName: r'$initGetIt', preferRelativeImports: true, asExtension: false)` that calls `await $initGetIt(getIt);` (depends on T016, T018, T020, T024 — all `@LazySingleton`-annotated impls must exist for codegen to succeed)
+- [X] T030 Author `lib/core/di/injection.dart`: declare `final getIt = GetIt.instance;` and a top-level `Future<void> configureDependencies() async` annotated `@InjectableInit(initializerName: r'$initGetIt', preferRelativeImports: true, asExtension: false)` that calls `await $initGetIt(getIt);` (depends on T016, T018, T020, T024 — all `@LazySingleton`-annotated impls must exist for codegen to succeed)
   - **Verify**: `flutter analyze` is clean; the file alone does not reference any concrete implementation
 
-- [ ] T031 Run `dart run build_runner build --delete-conflicting-outputs` to generate `lib/core/di/injection.config.dart` and **commit the generated file** (research.md Decision 4) (depends on T030)
+- [X] T031 Run `dart run build_runner build --delete-conflicting-outputs` to generate `lib/core/di/injection.config.dart` and **commit the generated file** (research.md Decision 4) (depends on T030)
   - **Verify**: `git add lib/core/di/injection.config.dart && git status` shows the file as added; the generated file references all six expected bindings (`EnvConfig`, `AppLogger`, `PreferencesStore`, `SupabaseClientWrapper`, plus a `GoRouter` provider added in T033, and the cubits added in US2/US3 — those latter bindings will require a re-run of build_runner in their respective tasks)
 
 ### Routing skeleton (FR-007; contract: `contracts/app-router.md`)
 
-- [ ] T032 [P] Define `AppRoutes` and `AppRouteNames` constants in `lib/core/routing/app_router.dart` (just the constants for now — `static const shellHome = '/';` and `static const shellHome = 'shell-home';`)
+- [X] T032 [P] Define `AppRoutes` and `AppRouteNames` constants in `lib/core/routing/app_router.dart` (just the constants for now — `static const shellHome = '/';` and `static const shellHome = 'shell-home';`)
   - **Verify**: file compiles; no `GoRouter` instance constructed yet (that's T033)
 
-- [ ] T033 Add `GoRouter buildAppRouter({required AppLogger logger})` to `lib/core/routing/app_router.dart` returning a router with one `GoRoute(path: AppRoutes.shellHome, ..., builder: (c, s) => const Scaffold(body: SizedBox.shrink()))` placeholder, plus an `errorBuilder` returning a basic error view; register `GoRouter` as a singleton in DI via an `@module` provider in `lib/core/di/injection.dart` (depends on T015, T030, T032)
+- [X] T033 Add `GoRouter buildAppRouter({required AppLogger logger})` to `lib/core/routing/app_router.dart` returning a router with one `GoRoute(path: AppRoutes.shellHome, ..., builder: (c, s) => const Scaffold(body: SizedBox.shrink()))` placeholder, plus an `errorBuilder` returning a basic error view; register `GoRouter` as a singleton in DI via an `@module` provider in `lib/core/di/injection.dart` (depends on T015, T030, T032)
   - **Verify**: `getIt<GoRouter>()` returns a non-null router instance after `configureDependencies()`; `injection.config.dart` regenerated and committed
 
 ### App entry & host (FR-002, FR-013)
 
-- [ ] T034 Author `lib/main.dart`: `WidgetsFlutterBinding.ensureInitialized()`, `await configureDependencies()`, resolve `EnvConfig` and `SupabaseClientWrapper` from DI, call `wrapper.initialize(url: env.supabaseUrl, anonKey: env.supabaseAnonKey)` and log a warning via `AppLogger` if the result is a `FailureResult` (FR-013), then `runApp(const App())` (depends on T011, T012, T015, T016, T018, T024, T030, T031)
+- [X] T034 Author `lib/main.dart`: `WidgetsFlutterBinding.ensureInitialized()`, `await configureDependencies()`, resolve `EnvConfig` and `SupabaseClientWrapper` from DI, call `wrapper.initialize(url: env.supabaseUrl, anonKey: env.supabaseAnonKey)` and log a warning via `AppLogger` if the result is a `FailureResult` (FR-013), then `runApp(const App())` (depends on T011, T012, T015, T016, T018, T024, T030, T031)
   - **Verify**: launching with empty `--dart-define`s does NOT crash; the debug console contains a `[SupabaseClientWrapper] Backend configuration missing or invalid; continuing without backend.` warning line
 
-- [ ] T035 Author `lib/app.dart` with a `class App extends StatelessWidget` that returns `MaterialApp.router` configured with: `routerConfig: getIt<GoRouter>()`, `theme: appLightTheme()`, `darkTheme: appDarkTheme()`, `themeMode: ThemeMode.system` (placeholder until US2 wires the cubit), `locale: const Locale('ar')` (placeholder until US3 wires the cubit), `localizationsDelegates: AppLocalizations.localizationsDelegates`, `supportedLocales: AppLocalizations.supportedLocales`, `debugShowCheckedModeBanner: false` (depends on T026, T028, T029, T033)
+- [X] T035 Author `lib/app.dart` with a `class App extends StatelessWidget` that returns `MaterialApp.router` configured with: `routerConfig: getIt<GoRouter>()`, `theme: appLightTheme()`, `darkTheme: appDarkTheme()`, `themeMode: ThemeMode.system` (placeholder until US2 wires the cubit), `locale: const Locale('ar')` (placeholder until US3 wires the cubit), `localizationsDelegates: AppLocalizations.localizationsDelegates`, `supportedLocales: AppLocalizations.supportedLocales`, `debugShowCheckedModeBanner: false` (depends on T026, T028, T029, T033)
   - **Verify**: `flutter run` launches successfully and the app reaches an interactive frame (currently a blank scaffold from T033's placeholder route)
 
 **Checkpoint**: `lib/core/` is complete. The app boots to a blank scaffold. All later user stories build on this substrate.

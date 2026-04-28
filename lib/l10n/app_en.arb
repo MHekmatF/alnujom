@@ -1,0 +1,9 @@
+{
+  "@@locale": "en",
+  "appTitle": "النجوم",
+  "themeToggleLabel": "Toggle theme",
+  "localeToggleLabel": "Toggle language",
+  "currentTheme": "Current theme",
+  "currentLocale": "Current language",
+  "backendConfigMissingWarning": "Backend configuration is missing; continuing without backend."
+}

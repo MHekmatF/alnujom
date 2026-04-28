@@ -67,8 +67,13 @@ app.*.map.json
 *.gen.dart
 
 # Generated localization (flutter gen-l10n)
+# Regenerated automatically by `flutter pub get` because pubspec sets
+# `flutter.generate: true` and l10n.yaml uses `synthetic-package: false`.
+# Source of truth lives in lib/l10n/*.arb; the .dart outputs are reproducible.
 lib/l10n/generated/
 lib/generated/
+lib/l10n/app_localizations.dart
+lib/l10n/app_localizations_*.dart
 
 # -----------------------------------------------------------------------------
 # Android
