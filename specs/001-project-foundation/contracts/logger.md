@@ -51,7 +51,7 @@ final class ConsoleLogger implements AppLogger {
 ## Phase 1 verification
 
 - `test/core/logging/console_logger_test.dart` confirms two behaviors:
-  - **Debug-mode behavior**: when `ConsoleLogger` is constructed with `isDebug: true` (the default at runtime, supplied by `kDebugMode`), calling `info(...)` produces a single `dart:developer.log` invocation with the right severity and name. The test injects `isDebug: true` explicitly so it does not depend on how the test runner is built.
+  - **Debug-mode behavior**: when `ConsoleLogger` is constructed with `isDebug: true` (the default value of the constructor parameter is `kDebugMode` — `true` in debug builds, `false` in release/profile builds), calling `info(...)` produces a single `dart:developer.log` invocation with the right severity and name. The test injects `isDebug: true` explicitly so it does not depend on how the test runner is built.
   - **Release-mode behavior**: when `ConsoleLogger` is constructed with `isDebug: false`, every method is a no-op — no `dart:developer.log` call. The test injects `isDebug: false` explicitly.
 
 Implementation note: `ConsoleLogger`'s constructor accepts an `bool isDebug` parameter that defaults to `kDebugMode`. The DI registration uses the default; tests pass an explicit value. This keeps the logger testable without `--dart-define` gymnastics, since `kDebugMode` is a compile-time constant that cannot be flipped at runtime.
