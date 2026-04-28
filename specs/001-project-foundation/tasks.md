@@ -21,9 +21,8 @@ description: "Tasks list for Phase 1 — Project Foundation (specs/001-project-f
 This is a Flutter Android app + a source-controlled `supabase/` backend tree (see plan.md "Project Structure"). Paths below are relative to the repo root `H:\alnujom-project\`.
 
 - Flutter source: `lib/`
-- Phase-1-only landing surface: `shell/`
-- Unit/widget tests: `test/`
-- Integration smoke tests: `integration_test/`
+- Phase-1-only landing surface: `lib/shell/` (under `lib/` so Flutter compiles it; replaced in Phase 13)
+- Unit + widget + smoke-widget tests: `test/` (the FR-012 smoke test lives at `test/widgets/shell_smoke_test.dart`)
 - Backend: `supabase/`
 - CI: `.github/workflows/`
 
@@ -303,8 +302,8 @@ This is a Flutter Android app + a source-controlled `supabase/` backend tree (se
 - **Phase 1 (Setup)**: No dependencies — can start immediately on the `001-project-foundation` branch.
 - **Phase 2 (Foundational)**: Depends on Setup completion. **Blocks all user stories.**
 - **Phase 3 (US1 — P1)**: Depends on Foundational. Independent of US2 and US3.
-- **Phase 4 (US2 — P2)**: Depends on Foundational. Modifies `app.dart` and `shell/shell_home_page.dart` from US1 — therefore dependent on US1 being merged or co-developed (within-file conflict).
-- **Phase 5 (US3 — P3)**: Depends on Foundational. Modifies `app.dart` and `shell/shell_home_page.dart` — same conflict risk with US1 and US2; sequence US1 → US2 → US3 if a single developer.
+- **Phase 4 (US2 — P2)**: Depends on Foundational. Modifies `app.dart` and `lib/shell/shell_home_page.dart` from US1 — therefore dependent on US1 being merged or co-developed (within-file conflict).
+- **Phase 5 (US3 — P3)**: Depends on Foundational. Modifies `app.dart` and `lib/shell/shell_home_page.dart` — same conflict risk with US1 and US2; sequence US1 → US2 → US3 if a single developer.
 - **Phase 6 (Polish)**: Depends on whichever stories are in scope being complete.
 
 ### Critical task-level dependencies

@@ -36,8 +36,8 @@ Stand up the runnable AlNujom Android app shell that every later phase will buil
 | VII. Dynamic Roles & Permissions | **Pass (N/A)** | Phase 1 has no roles, no permissions, no admin actions. Constitutional requirement triggers from Phase 6. |
 | VIII. Approval Workflow & Publisher Identity | **Pass (N/A)** | Phase 1 has no publishers, no listings, no identity fields. Triggers from Phase 5. |
 | IX. Future Backend Portability | **Pass** | `lib/core/network/supabase_client_wrapper.dart` exposes a project-defined interface. `package:supabase_flutter` import is confined to `supabase_client_wrapper_impl.dart`. A grep guard in CI confirms no other file imports the SDK. (FR-009) |
-| X. Testable AI Workflow | **Pass** | Every FR maps to spec acceptance scenarios. The smoke test (`integration_test/shell_smoke_test.dart`) exercises FR-002, FR-003, FR-004 directly; CI runs it on every push and PR (FR-015). `tasks.md` (the next workflow step) will carry per-task acceptance criteria. |
-| XI. Android-First MVP | **Pass** | `pubspec.yaml` declares no iOS, Web, or desktop platforms. `flutter create`-generated `ios/`, `web/`, `windows/`, `macos/`, `linux/` directories are removed. Plugin compatibility verified for Android only. |
+| X. Testable AI Workflow | **Pass** | Every FR maps to spec acceptance scenarios. The smoke test (`test/widgets/shell_smoke_test.dart`) exercises FR-002, FR-003, FR-004 directly; CI runs it via `flutter test` on every push and PR (FR-015). `tasks.md` (the next workflow step) will carry per-task acceptance criteria. |
+| XI. Android-First MVP | **Pass** | `pubspec.yaml` declares no iOS, Web, or desktop platforms. `flutter create`-generated `ios/`, `web/`, `windows/`, `macOS/`, `linux/` directories are removed. Plugin compatibility verified for Android only. |
 | XII. No Hidden Product Decisions | **Pass** | The 5 deferred decisions surfaced by `/speckit-clarify` are captured in `spec.md` `## Clarifications`; remaining defaults (toggle placement, ARB key naming, log sink) are documented in `spec.md` `## Assumptions` and in `research.md`. |
 
 **Result**: All gates pass. `## Complexity Tracking` is empty.
@@ -138,7 +138,7 @@ docs/
     └── 0001-secrets-and-pii-storage.md       # (existing) ADR-0001
 ```
 
-**Structure Decision**: A single Flutter project under `lib/` (Constitution IV's feature-first Clean Architecture) plus a side-by-side `supabase/` backend tree (Constitution II). No `ios/`, `web/`, `windows/`, `macos/`, or `linux/` directories — they are deleted from the `flutter create` output (Constitution XI). The Phase-1-only `lib/shell/` directory hosts the temporary landing surface (kept under `lib/` so Flutter's package system reaches it via `package:alnujom/shell/...`); it is documented as scaffolding in `spec.md` and will be replaced in Phase 13 when the real home surface lands. The `lib/core/` directory is feature-agnostic shared infrastructure; later phases create siblings under `lib/features/<feature>/{presentation,domain,data}/` per the constitution.
+**Structure Decision**: A single Flutter project under `lib/` (Constitution IV's feature-first Clean Architecture) plus a side-by-side `supabase/` backend tree (Constitution II). No `ios/`, `web/`, `windows/`, `macOS/`, or `linux/` directories — they are deleted from the `flutter create` output (Constitution XI). The Phase-1-only `lib/shell/` directory hosts the temporary landing surface (kept under `lib/` so Flutter's package system reaches it via `package:alnujom/shell/...`); it is documented as scaffolding in `spec.md` and will be replaced in Phase 13 when the real home surface lands. The `lib/core/` directory is feature-agnostic shared infrastructure; later phases create siblings under `lib/features/<feature>/{presentation,domain,data}/` per the constitution.
 
 ## Complexity Tracking
 

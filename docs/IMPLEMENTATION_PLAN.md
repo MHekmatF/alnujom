@@ -90,7 +90,7 @@ Every constitution principle (`.specify/memory/constitution.md` v1.0.0) is enfor
 
 The repository organizes the Flutter app, Supabase backend, and project documentation into three top-level trees, plus the existing Spec Kit scaffold.
 
-```
+```text
 H:\alnujom-project\
 ├── .claude/                       # Claude Code skills (existing)
 ├── .specify/                      # Spec Kit scaffold (existing)

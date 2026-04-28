@@ -38,7 +38,7 @@ final getIt = GetIt.instance;
 | `SupabaseClientWrapper` | singleton | `SupabaseClientWrapperImpl` | `@LazySingleton(as: SupabaseClientWrapper)` on impl |
 | `ThemeCubit` | factory | `ThemeCubit` | `@injectable` on cubit |
 | `LocaleCubit` | factory | `LocaleCubit` | `@injectable` on cubit |
-| `GoRouter` | singleton | result of `appRouter()` factory in `app_router.dart` | `@module` provider |
+| `GoRouter` | singleton | result of `buildAppRouter(logger:)` factory in `app_router.dart` | `@module` provider |
 
 `@LazySingleton` is preferred over `@singleton` for everything except `EnvConfig` so DI graph startup cost is amortized.
 
@@ -50,7 +50,16 @@ final getIt = GetIt.instance;
 
 ## Test rule
 
-Test files MUST register their own DI scope or override using `getIt.allowReassignment = true` at test setup, then `await configureDependencies()` against an isolated `GetIt.asNewInstance()` if possible. The unit tests for `ThemeCubit` and `LocaleCubit` resolve dependencies via the production DI graph configured with mocked `PreferencesStore` (provided via `@test` constructors); the integration smoke test uses the real DI graph with a stubbed `EnvConfig`.
+Two patterns, depending on the test layer:
+
+**Unit / Cubit tests** — bypass DI entirely. The cubits and the impls are `@injectable`, but their constructors accept all dependencies as parameters. Tests instantiate them directly with Mockito-generated mocks: `ThemeCubit(prefs: mockPrefsStore, logger: mockLogger, initialMode: ThemeMode.system)`. No `getIt` involvement. This matches the `bloc_test` convention.
+
+**Smoke / integration test** — runs the real production DI graph by calling `configureDependencies()` once at test setup. To override the `SupabaseClientWrapper` with a stub (so the test doesn't need a real backend), either:
+
+- set `getIt.allowReassignment = true` at the start of the test and re-register the wrapper with the stub before the first resolution, or
+- inject the stub via `--dart-define=SUPABASE_URL='' --dart-define=SUPABASE_ANON_KEY=''` so `EnvConfig.isConfigured` returns `false` and the real wrapper's `initialize()` short-circuits to `FailureResult(ConfigFailure)` (FR-013 path). This is the simpler approach for Phase 1 and is what CI uses.
+
+`GetIt.asNewInstance()` is NOT used; it would require a parallel `configureDependencies()` invocation that targets the new instance, which `@InjectableInit` does not generate. Stick to the two patterns above.
 
 ## Phase 1 verification
 

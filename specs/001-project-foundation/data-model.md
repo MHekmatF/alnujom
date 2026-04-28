@@ -24,10 +24,12 @@ Persist the user's theme-mode and locale choices across cold restarts (FR-006), 
 
 ### Fields
 
-| Field | Type | Storage key | Allowed values | Default | Persisted? |
-|---|---|---|---|---|---|
-| `themeMode` | enum-like string | `com.alnujom.preferences.theme_mode` | `system`, `light`, `dark` | absent (cubit emits `system`) | Yes — written on first explicit user toggle (FR-016) |
-| `localeCode` | enum-like string | `com.alnujom.preferences.locale_code` | `ar`, `en` | absent (cubit emits `ar` per FR-005) | Yes — written on first explicit user toggle |
+The "Persisted values" column lists what may appear in secure storage on disk. The "In-memory cubit state" column lists what the cubit may emit at runtime — `system` is a runtime-only value derived from the absence of a persisted preference, and is never written to disk.
+
+| Field | Type | Storage key | Persisted values (on disk) | In-memory cubit state | First-launch default | When written |
+|---|---|---|---|---|---|---|
+| `themeMode` | enum-like string | `com.alnujom.preferences.theme_mode` | `light`, `dark`, or **absent** | `system` (when on-disk is absent), `light`, or `dark` | absent on disk → cubit emits `ThemeMode.system` | First explicit user toggle (FR-016) |
+| `localeCode` | enum-like string | `com.alnujom.preferences.locale_code` | `ar`, `en`, or **absent** | `Locale('ar')` or `Locale('en')` | absent on disk → cubit emits `Locale('ar')` (FR-005) | First explicit user toggle |
 
 `absent` is a real, observable state: it means "the user has never made an explicit choice". The cubit distinguishes "read returned null" from "read returned a value", because FR-016 changes behavior based on this distinction (system-following vs. locked).
 
@@ -42,14 +44,19 @@ Persist the user's theme-mode and locale choices across cold restarts (FR-006), 
 #### `themeMode`
 
 ```text
-absent → 'system'  (initial state on first-ever launch; not persisted)
-absent → 'light'   (user toggles to light; persisted; FR-016)
-absent → 'dark'    (user toggles to dark;  persisted; FR-016)
-'light' ↔ 'dark'   (subsequent toggles; each persisted)
-'system' (only ever held in memory, not persisted)
+[on disk: absent] ──┬─ cubit emits ThemeMode.system  (initial state on first-ever launch; nothing written)
+                    ├─ user toggles → cubit emits 'light' AND writes 'light' to disk (FR-016)
+                    └─ user toggles → cubit emits 'dark'  AND writes 'dark'  to disk (FR-016)
+
+[on disk: 'light']  ── cubit emits ThemeMode.light  (subsequent launches)
+[on disk: 'dark']   ── cubit emits ThemeMode.dark   (subsequent launches)
+
+After first toggle: 'light' ↔ 'dark' on each toggle, both in memory and on disk.
+'system' is NEVER written to disk; it is exclusively a runtime cubit state derived
+from "no persisted preference exists yet".
 ```
 
-The `system` value is held only in memory before the first explicit toggle. Once the user makes an explicit choice, `themeMode` is one of `light`/`dark` for the rest of the install's lifetime, regardless of OS theme changes (FR-016).
+Once the user makes an explicit choice, `themeMode` on disk is one of `light`/`dark` for the rest of the install's lifetime, and the cubit emits the matching value regardless of OS theme changes (FR-016).
 
 #### `localeCode`
 

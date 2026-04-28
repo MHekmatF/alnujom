@@ -15,11 +15,11 @@ Install on the workstation:
 
 | Tool | Version | Why |
 |---|---|---|
-| Flutter SDK | latest stable (3.x) | Project pinned via `pubspec.yaml` `environment.flutter` |
-| Android SDK | API 24 + a current API for `targetSdk` | minSdk floor (spec Assumptions) |
+| Flutter SDK | **3.35.2** (per `pubspec.yaml`'s `environment.flutter`) | Pinned for CI / local parity; bump only via a PR that updates `pubspec.yaml` |
+| Android SDK | API 24 minSdk + a current API for `targetSdk` | minSdk floor (spec Clarification Q1) |
 | Java | 17 (Temurin) | Gradle toolchain |
 | Supabase CLI | latest | Local backend; `supabase init`/`supabase start` |
-| Docker Desktop | latest | Required by the Supabase CLI for the local Postgres |
+| Docker Desktop | latest | Required by the Supabase CLI for the local Postgres (becomes mandatory at Phase 4 when application tables and RLS land; not required for Phase 1 verification) |
 
 Confirm:
 
@@ -164,7 +164,9 @@ Push the branch (or open a PR). The GitHub Actions `verify` workflow MUST run an
 - ✅ `flutter build apk --debug` succeeds with placeholder env values
 - ✅ The PR status check shows `verify / verify (pull_request)` green
 
-A failed CI run MUST block merge per FR-015. **Branch protection** (T061) is the mechanism that enforces this: the `verify` status check is a *required* check on `main` via GitHub Settings → Branches. Without that branch-protection rule in place, a maintainer could merge a red PR despite FR-015 — confirm at least once via the GitHub UI that the `verify` check is listed as required.
+A failed CI run SHOULD block merge per FR-015. The mechanism that enforces this is GitHub branch protection — `verify` set as a required status check on `main` via GitHub Settings → Branches. That branch-protection rule lands as **task T061 in the Polish phase**, not as part of this PR's verification recipe. Until T061 lands, a maintainer technically *can* merge a red PR — the FR-015 requirement is satisfied by the workflow existing and posting status; T061 is the post-merge follow-up that closes the gate.
+
+For this PR's verification recipe, "CI green" is enough. Branch protection is verified separately when T061 runs.
 
 ---
 

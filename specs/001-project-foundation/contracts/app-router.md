@@ -27,10 +27,17 @@ GoRouter buildAppRouter({
         builder: (context, state) => const ShellHomePage(),
       ),
     ],
-    errorBuilder: (context, state) => ErrorState(
-      title: 'Routing error',
-      message: state.error?.toString() ?? 'Unknown route',
-    ),
+    errorBuilder: (context, state) {
+      logger.warning(
+        'Unknown route: ${state.uri}',
+        error: state.error,
+        tag: 'AppRouter',
+      );
+      return ErrorState(
+        title: 'Routing error',
+        message: state.error?.toString() ?? 'Unknown route',
+      );
+    },
   );
 }
 
