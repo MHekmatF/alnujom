@@ -33,34 +33,34 @@ This is a Flutter Android app + a source-controlled `supabase/` backend tree (se
 
 **Purpose**: Project bootstrap — generate the Flutter scaffold, lock dependency versions, configure Android Gradle for the constitutional minSdk floor, set up the Supabase tree, and ship the GitHub Actions CI workflow so every later task lands with a green/red signal.
 
-- [ ] T001 Bootstrap a Flutter project at the repo root via `flutter create --platforms=android --org com.alnujom --project-name alnujom .`, then delete the generated `ios/`, `web/`, `windows/`, `macos/`, `linux/` directories per Constitution Principle XI
+- [X] T001 Bootstrap a Flutter project at the repo root via `flutter create --platforms=android --org com.alnujom --project-name alnujom .`, then delete the generated `ios/`, `web/`, `windows/`, `macos/`, `linux/` directories per Constitution Principle XI
   - **Verify**: `git status` shows no `ios/`, `web/`, `windows/`, `macos/`, or `linux/` directories at the repo root; only `android/`, `lib/`, `test/`, `pubspec.yaml`, etc. exist after this task
 
-- [ ] T002 [P] Configure `pubspec.yaml`: set `name: alnujom`, pin `environment.flutter` to the latest stable Flutter version, add the locked Phase 1 dependencies (`flutter_bloc`, `go_router`, `get_it`, `injectable`, `supabase_flutter`, `flutter_localizations`, `intl`, `flutter_secure_storage`, `equatable`, `cached_network_image`) and dev_dependencies (`injectable_generator`, `build_runner`, `bloc_test`, `mockito`, `integration_test`); set `flutter.generate: true` for ARB codegen
+- [X] T002 [P] Configure `pubspec.yaml`: set `name: alnujom`, pin `environment.flutter` to the latest stable Flutter version, add the locked Phase 1 dependencies (`flutter_bloc`, `go_router`, `get_it`, `injectable`, `supabase_flutter`, `flutter_localizations`, `intl`, `flutter_secure_storage`, `equatable`, `cached_network_image`) and dev_dependencies (`injectable_generator`, `build_runner`, `bloc_test`, `mockito`, `integration_test`); set `flutter.generate: true` for ARB codegen
   - **Verify**: `flutter pub get` resolves cleanly with no warnings about unsupported plugins; `pubspec.lock` records the locked versions
 
-- [ ] T003 [P] Configure `android/app/build.gradle.kts`: set `minSdk = 24`, `targetSdk` to the current Flutter-recommended target, JavaVersion `VERSION_17`, applicationId `com.alnujom.app`
+- [X] T003 [P] Configure `android/app/build.gradle.kts`: set `minSdk = 24`, `targetSdk` to the current Flutter-recommended target, JavaVersion `VERSION_17`, applicationId `com.alnujom.app`
   - **Verify**: `flutter build apk --debug` succeeds; the resulting APK's `aapt dump badging` reports `sdkVersion:'24'`
 
-- [ ] T004 [P] Author `analysis_options.yaml` at the repo root: extend `package:flutter_lints/flutter.yaml`, set `avoid_print` and `prefer_const_constructors` to error severity, enable `unawaited_futures`
+- [X] T004 [P] Author `analysis_options.yaml` at the repo root: extend `package:flutter_lints/flutter.yaml`, set `avoid_print` and `prefer_const_constructors` to error severity, enable `unawaited_futures`
   - **Verify**: `flutter analyze --fatal-infos` runs without errors against the freshly generated project
 
-- [ ] T005 [P] Add `.gitignore` entries (or extend the existing `.gitignore`): `.env.json`, `build/`, `.dart_tool/`, `.flutter-plugins`, `.flutter-plugins-dependencies`, `*.iml`, `.idea/`, `android/.gradle/`, `android/local.properties`, `coverage/`, `*.lock` is NOT ignored (commit `pubspec.lock`)
+- [X] T005 [P] Add `.gitignore` entries (or extend the existing `.gitignore`): `.env.json`, `build/`, `.dart_tool/`, `.flutter-plugins`, `.flutter-plugins-dependencies`, `*.iml`, `.idea/`, `android/.gradle/`, `android/local.properties`, `coverage/`, `*.lock` is NOT ignored (commit `pubspec.lock`)
   - **Verify**: `git check-ignore -v .env.json build/ .dart_tool/` returns each path's matched rule from `.gitignore`
 
-- [ ] T006 Run `supabase init` in the repo root to generate `supabase/config.toml`, then commit only `supabase/config.toml` (not the Docker volumes / runtime artifacts)
+- [X] T006 Run `supabase init` in the repo root to generate `supabase/config.toml`, then commit only `supabase/config.toml` (not the Docker volumes / runtime artifacts)
   - **Verify**: `supabase/config.toml` exists, references the project name, and `supabase start && supabase status` succeeds locally
 
-- [ ] T007 [P] Create `supabase/migrations/00000000000000_init_extensions.sql` containing `CREATE EXTENSION IF NOT EXISTS pgcrypto;` and `CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`
+- [X] T007 [P] Create `supabase/migrations/00000000000000_init_extensions.sql` containing `CREATE EXTENSION IF NOT EXISTS pgcrypto;` and `CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`
   - **Verify**: `supabase db reset` rebuilds the local database with both extensions present (`SELECT extname FROM pg_extension;` returns `pgcrypto` and `uuid-ossp`)
 
-- [ ] T008 [P] Create `supabase/seed.sql` containing only a header comment that says it's intentionally empty for Phase 1 and that real seed data lands in Phase 4+
+- [X] T008 [P] Create `supabase/seed.sql` containing only a header comment that says it's intentionally empty for Phase 1 and that real seed data lands in Phase 4+
   - **Verify**: file exists, contains the placeholder comment, and `supabase db reset` runs it without error
 
-- [ ] T009 [P] Create the empty directory structure with placeholder `.gitkeep` files: `lib/core/{config,di,errors,logging,network,routing,storage,theme,localization,utils,widgets}/`, `lib/l10n/`, `lib/shell/`, `test/core/{errors,logging,storage,theme,localization}/`, `test/widgets/`. Note: `lib/shell/` is under `lib/` so Flutter compiles it; do NOT create a top-level `shell/`. No `integration_test/` is needed in Phase 1 — the smoke test ships as a widget test under `test/widgets/`.
+- [X] T009 [P] Create the empty directory structure with placeholder `.gitkeep` files: `lib/core/{config,di,errors,logging,network,routing,storage,theme,localization,utils,widgets}/`, `lib/l10n/`, `lib/shell/`, `test/core/{errors,logging,storage,theme,localization}/`, `test/widgets/`. Note: `lib/shell/` is under `lib/` so Flutter compiles it; do NOT create a top-level `shell/`. No `integration_test/` is needed in Phase 1 — the smoke test ships as a widget test under `test/widgets/`.
   - **Verify**: `git ls-files | grep -c .gitkeep` reports `19` (one `.gitkeep` per leaf directory listed above: 11 under `lib/core/`, plus `lib/l10n/`, `lib/shell/`, 5 under `test/core/`, and `test/widgets/`); `find lib/shell test/widgets -maxdepth 1` confirms both are present; no top-level `shell/` or `integration_test/` directory exists
 
-- [ ] T010 [P] Create `.github/workflows/ci.yml` per research.md Decision 14: trigger on `pull_request` (any target) and on `push` to `001-*` branches; steps in order — checkout, setup-java@v4 (Temurin 17), subosito/flutter-action@v2 (channel stable, pinned to pubspec), `flutter pub get`, `dart run build_runner build --delete-conflicting-outputs`, `dart format --output=none --set-exit-if-changed .`, `flutter analyze --fatal-infos`, the Constitution-IX grep guard `! grep -rE "package:supabase_flutter" lib --include='*.dart' --exclude='supabase_client_wrapper_impl.dart'`, `flutter test`, `flutter build apk --debug --dart-define=SUPABASE_URL='' --dart-define=SUPABASE_ANON_KEY=''`
+- [X] T010 [P] Create `.github/workflows/ci.yml` per research.md Decision 14: trigger on `pull_request` (any target) and on `push` to `001-*` branches; steps in order — checkout, setup-java@v4 (Temurin 17), subosito/flutter-action@v2 (channel stable, pinned to pubspec), `flutter pub get`, `dart run build_runner build --delete-conflicting-outputs`, `dart format --output=none --set-exit-if-changed .`, `flutter analyze --fatal-infos`, the Constitution-IX grep guard `! grep -rE "package:supabase_flutter" lib --include='*.dart' --exclude='supabase_client_wrapper_impl.dart'`, `flutter test`, `flutter build apk --debug --dart-define=SUPABASE_URL='' --dart-define=SUPABASE_ANON_KEY=''`
   - **Verify**: pushing the branch triggers the `verify` workflow on GitHub Actions; the workflow file passes `actionlint` (or GitHub's own validator) with no syntax errors
 
 **Checkpoint**: project compiles to a debug APK; CI workflow file is present and the workflow runs (it may currently fail at later steps because no source code is in place — that's expected and the next phases land it).

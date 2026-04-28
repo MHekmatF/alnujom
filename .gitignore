@@ -7,6 +7,7 @@
 # Secrets & environment (NEVER commit)
 # -----------------------------------------------------------------------------
 .env
+.env.json
 .env.*
 !.env.example
 *.env
@@ -61,7 +62,6 @@ app.*.map.json
 # Injectable / json_serializable / freezed / etc.
 *.g.dart
 *.freezed.dart
-*.config.dart
 *.gr.dart
 *.mocks.dart
 *.gen.dart
@@ -81,7 +81,9 @@ android/app/release/
 android/app/debug/
 android/app/profile/
 android/gradle/
+!android/gradle/
 !android/gradle/wrapper/
+!android/gradle/wrapper/**
 android/gradlew
 android/gradlew.bat
 android/build/
