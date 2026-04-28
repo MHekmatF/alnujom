@@ -26,8 +26,12 @@ abstract interface class AppLogger {
 
 @LazySingleton(as: AppLogger)
 final class ConsoleLogger implements AppLogger {
-  // In debug builds (kDebugMode), forward to dart:developer.log with severity.
-  // In release builds, all methods are no-ops (FR-011: verbose only in debug).
+  // Behavior is controlled by an `isDebug` constructor parameter that defaults
+  // to `kDebugMode` (see "Phase 1 verification" below — tests pass an explicit
+  // value, so they don't depend on the build's compile-time flag).
+  //
+  // When isDebug == true: forward to dart:developer.log with severity.
+  // When isDebug == false: all methods are no-ops (FR-011: verbose only in debug).
 }
 ```
 
