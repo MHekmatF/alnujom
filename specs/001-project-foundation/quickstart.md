@@ -111,7 +111,7 @@ adb shell am start -n com.alnujom.app/.MainActivity   # adjust package as config
 
 1. ✅ **AS-1.1** — From the steps above, the app launches without crashes. The debug console shows no errors.
 2. ✅ **AS-1.2** — Rotate the emulator (`Ctrl+→` / `Ctrl+←`) twice. The shell re-renders without losing visual state. Background the app (`Home` button) and resume — same outcome.
-3. ✅ **AS-1.3** — Edit `.env.json` to set `SUPABASE_URL` and `SUPABASE_ANON_KEY` to `""`. Rebuild and run. The shell still launches; the debug console contains a warning line tagged `SupabaseClientWrapper` saying "Backend configuration missing or invalid; continuing without backend." No crash dialog.
+3. ✅ **AS-1.3** — Edit `.env.json` to set `SUPABASE_URL` and `SUPABASE_ANON_KEY` to `""`. Rebuild and run via `flutter run --dart-define-from-file=.env.json`. The shell still launches; the **`flutter run` terminal** contains a warning line tagged `SupabaseClientWrapper` saying "Backend configuration missing or invalid; continuing without backend." No crash dialog. (The warning is emitted via `dart:developer.log`, which is captured by `flutter run` and DevTools — *not* by `adb logcat`. If you launch the installed APK with `am start` and run `adb logcat` you will not see it; that is by design.)
 
 ### User Story 2 — "Theme switching scaffolding works end-to-end" (P2)
 
@@ -175,8 +175,15 @@ For this PR's verification recipe, "CI green" is enough. Branch protection is ve
 On the **Infinix Note 8** (or an equivalent Helio G80-class device with 4–6 GB RAM on API 24+):
 
 1. Connect via USB; confirm `adb devices` shows it.
-2. Build + install the debug APK as in §4.
-3. Cold-launch the app (force-stop, then `am start`) 20 times. Use `adb shell am start -W` to capture `WaitTime`.
+2. Build + install a **profile** APK:
+
+   ```bash
+   flutter build apk --profile --dart-define-from-file=.env.json
+   adb install -r build/app/outputs/flutter-apk/app-profile.apk
+   ```
+
+   Profile mode is required (not debug). A debug APK ships JIT-compiled Dart bytecode plus assertions; its cold-start time is ~1.5–2× the user-installed app and is not a meaningful proxy for SC-002, which is about user-visible startup of the app a real user would install. Release mode is closer still but lacks the instrumentation needed for diagnostics; profile is the standard Flutter benchmark mode.
+3. Cold-launch the app (force-stop, then `am start`) 20 times. Use `adb shell am start -W` to capture `WaitTime` (interactive-ready) — not `TotalTime`, which can include first-frame paint.
 4. Compute the 95th percentile of `WaitTime`. Expected: ≤ 3000 ms (SC-002).
 5. Toggle theme + locale 20 times each, force-stop and relaunch each time, confirm 100% restore (SC-003).
 
