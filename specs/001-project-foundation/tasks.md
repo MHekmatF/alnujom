@@ -177,25 +177,29 @@ This is a Flutter Android app + a source-controlled `supabase/` backend tree (se
 
 ### Tests for User Story 1
 
-- [ ] T036 [P] [US1] Write `test/widgets/shell_home_page_test.dart` (widget test): pump `ShellHomePage` inside a `MaterialApp` with `AppLocalizations` delegates; assert `find.text(AppLocalizations.of(context)!.appTitle)` resolves; assert no buttons / interactive elements exist yet (US2 and US3 add them)
+- [X] T036 [P] [US1] Write `test/widgets/shell_home_page_test.dart` (widget test): pump `ShellHomePage` inside a `MaterialApp` with `AppLocalizations` delegates; assert `find.text(AppLocalizations.of(context)!.appTitle)` resolves; assert no buttons / interactive elements exist yet (US2 and US3 add them)
   - **Verify**: test FAILS before T037 (file does not exist), PASSES after
 
-- [ ] T037 [P] [US1] Write `test/widgets/shell_smoke_test.dart` v1 using `testWidgets(...)`: `await tester.pumpWidget(const App())`, `await tester.pumpAndSettle()`, assert the brand title (`AppLocalizations.of(context).appTitle`) is on screen, assert `tester.takeException() == null`. NOTE: this is a widget test under `test/` (NOT `integration_test/`) so it runs in plain `flutter test` and therefore in CI without an emulator (research.md Decision 14, Open items)
+- [X] T037 [P] [US1] Write `test/widgets/shell_smoke_test.dart` v1 using `testWidgets(...)`: `await tester.pumpWidget(const App())`, `await tester.pumpAndSettle()`, assert the brand title (`AppLocalizations.of(context).appTitle`) is on screen, assert `tester.takeException() == null`. NOTE: this is a widget test under `test/` (NOT `integration_test/`) so it runs in plain `flutter test` and therefore in CI without an emulator (research.md Decision 14, Open items)
   - **Verify**: test FAILS before T038 (placeholder scaffold has no brand text), PASSES after; runs as part of `flutter test` with no `flutter test integration_test/...` invocation needed
 
 ### Implementation for User Story 1
 
-- [ ] T038 [US1] Create `lib/shell/shell_home_page.dart` — a `StatelessWidget` that returns a `Scaffold` with a centered `Text(AppLocalizations.of(context).appTitle)` styled via `Theme.of(context).textTheme.headlineMedium` (no hex literals, no `TextStyle(...)`); WCAG 2.1 AA: text contrast against scaffold background ≥ 4.5:1, semantic label inherited from the Text widget (depends on T028, T029, T035)
+- [X] T038 [US1] Create `lib/shell/shell_home_page.dart` — a `StatelessWidget` that returns a `Scaffold` with a centered `Text(AppLocalizations.of(context).appTitle)` styled via `Theme.of(context).textTheme.headlineMedium` (no hex literals, no `TextStyle(...)`); WCAG 2.1 AA: text contrast against scaffold background ≥ 4.5:1, semantic label inherited from the Text widget (depends on T028, T029, T035)
   - **Verify**: T036 passes; manually launching the app shows "النجوم" in Arabic on first launch (FR-002, FR-005)
 
-- [ ] T039 [US1] Update `lib/core/routing/app_router.dart`: import `package:alnujom/shell/shell_home_page.dart` and replace the placeholder `Scaffold(body: SizedBox.shrink())` with `const ShellHomePage()` in the shell-home route's `builder` (depends on T033, T038)
+- [X] T039 [US1] Update `lib/core/routing/app_router.dart`: import `package:alnujom/shell/shell_home_page.dart` and replace the placeholder `Scaffold(body: SizedBox.shrink())` with `const ShellHomePage()` in the shell-home route's `builder` (depends on T033, T038)
   - **Verify**: T037 passes; `flutter run` reaches an interactive shell within the SC-002 budget on emulator; `flutter analyze` clean (no unresolved import)
 
-- [ ] T040 [US1] Manual hardware verification on the Infinix Note 8 per quickstart.md §8: cold-launch the app 20 times, capture `adb shell am start -W`'s `WaitTime`, verify p95 ≤ 3000 ms (SC-002); record results in the PR description
-  - **Verify**: results table pasted into PR; if p95 > 3000 ms, file a follow-up task to investigate and add a polish task before declaring Phase 1 done
+- [X] T040 [US1] Manual hardware verification on the Infinix Note 8 per quickstart.md §8: build a **profile** APK (`flutter build apk --profile --dart-define-from-file=.env.json`), cold-launch the app 20 times, capture `adb shell am start -W`'s `WaitTime` (interactive-ready, *not* `TotalTime`), verify p95 ≤ 3000 ms (SC-002); record results in the PR description
+  - **Verify**: results table pasted into PR; if profile-mode p95 > 3000 ms, file a follow-up task to investigate and add a polish task before declaring Phase 1 done
+  - **Phase 3 check 2026-04-29 (initial, failed)**: First run measured WaitTime p95 = 5493 ms over 20 cold starts on a **debug** APK with empty Supabase config. Debug Flutter ships JIT bytecode and assertions, so its cold-start is ~1.5–2× the user-installed app and is not a meaningful proxy for SC-002. The recipe in quickstart.md §8 was corrected to require a profile APK; T062 tracks the re-measurement.
+  - **Phase 3 check 2026-04-29 (re-measurement, PASS)**: 20 cold-start `WaitTime` samples on Infinix Note 8 (X692) with the profile APK and empty Supabase config — min 2520 ms, median 2542 ms, mean 2566 ms, **p95 ≈ 2649 ms** (nearest-rank), max 2662 ms. Comfortably under the 3000 ms SC-002 budget. T062 closed.
 
-- [ ] T041 [US1] Manual edge-case verification on emulator: rotate device twice (AS-1.2), background and resume (AS-1.2), launch with empty `SUPABASE_URL`/`SUPABASE_ANON_KEY` (AS-1.3) — confirm in each case the app stays interactive and the appropriate warning (if any) is in `adb logcat`
+- [X] T041 [US1] Manual edge-case verification on an Android target (emulator OR primary verification device — spec.md AS-1.2/AS-1.3 do not mandate emulator): rotate device twice (AS-1.2), background and resume (AS-1.2), launch with empty `SUPABASE_URL`/`SUPABASE_ANON_KEY` (AS-1.3) — confirm in each case the app stays interactive and the missing-config warning appears in the `flutter run` terminal
   - **Verify**: each scenario observed and a one-line note added to the PR description
+  - **Phase 3 check 2026-04-29 (initial, partial fail)**: First run on physical Infinix X692. Rotation, background/resume, and missing-config launch all kept the shell interactive. The missing-config warning did not appear in `adb logcat` *or* in `flutter run`'s terminal because `ConsoleLogger` was using `dart:developer.log` alone, which only surfaces in DevTools. Root-cause fix: `ConsoleLogger._log` now mirrors each entry via `debugPrint` so the warning is visible in `flutter run`'s terminal — see `lib/core/logging/console_logger.dart`.
+  - **Phase 3 check 2026-04-29 (re-run, PASS)**: With the logger fix, re-ran on Infinix X692 with empty defines. `flutter run` terminal showed `[Bootstrap] INFO: Dependency injection configured.` followed by `[SupabaseClientWrapper] WARNING: Backend configuration missing or invalid; continuing without backend.` Rotation × 2, background/resume, and missing-config launch all kept the shell interactive. AS-1.2 and AS-1.3 verified.
 
 **Checkpoint**: User Story 1 is complete and independently testable. The shell launches, displays the brand, and survives rotation, backgrounding, and missing backend config. **This is the MVP — Phase 1 could ship here if scope is cut.**
 
@@ -292,6 +296,10 @@ This is a Flutter Android app + a source-controlled `supabase/` backend tree (se
 
 - [ ] T061 Configure GitHub branch protection on `main`: require the `verify` workflow status check to pass before any PR can merge; require linear history; disallow direct pushes (FR-015 "Pipeline failure MUST block merge"). This is a one-time admin action via the GitHub repo Settings → Branches UI (or `gh api -X PUT repos/:owner/:repo/branches/main/protection ...` for an automatable equivalent)
   - **Verify**: opening a PR against `main` shows "Required" next to the `verify` status check on the merge page; trying to merge with a failing CI run shows the merge button disabled; a screenshot or `gh api repos/:owner/:repo/branches/main/protection` JSON output is pasted into the PR description as evidence
+
+- [X] T062 Close the Phase 3 SC-002 verification: re-run T040 on a **profile** APK per the corrected quickstart.md §8 recipe and paste the new 20-launch `WaitTime` results table into the Phase 3 PR. Pass condition: p95 ≤ 3000 ms on Infinix Note 8. If profile-mode p95 also fails, only then escalate to a startup-profiling investigation; otherwise mark T040 [X] and close T062
+  - **Verify**: updated 20-launch table for the profile APK shows p95 ≤ 3000 ms on Infinix Note 8; T040 marked [X]; T062 closed before Phase 1 PR merges (per quickstart.md §9 final gate)
+  - **Closed 2026-04-29**: profile-mode p95 = 2649 ms on Infinix Note 8, ~350 ms under the 3000 ms budget. T040 marked [X]. See T040's Phase 3 check note for the full 20-sample distribution.
 
 ---
 

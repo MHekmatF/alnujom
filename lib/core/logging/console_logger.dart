@@ -88,6 +88,22 @@ final class ConsoleLogger implements AppLogger {
       error: error,
       stackTrace: stackTrace,
     );
+
+    // `developer.log` only surfaces in DevTools; mirror to `debugPrint` so the
+    // line is also visible in `flutter run`'s terminal (spec.md AS-1.3).
+    final severity = switch (level) {
+      >= 1000 => 'ERROR',
+      >= 900 => 'WARNING',
+      >= 800 => 'INFO',
+      _ => 'DEBUG',
+    };
+    debugPrint('[${tag ?? 'AlNujom'}] $severity: $message');
+    if (error != null) {
+      debugPrint('  error: $error');
+    }
+    if (stackTrace != null) {
+      debugPrint('  stack: $stackTrace');
+    }
   }
 
   static void _developerLog(

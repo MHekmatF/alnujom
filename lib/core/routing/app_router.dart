@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../shell/shell_home_page.dart';
 import '../logging/app_logger.dart';
 
 abstract final class AppRoutes {
@@ -20,7 +21,7 @@ GoRouter buildAppRouter({required AppLogger logger}) {
       GoRoute(
         path: AppRoutes.shellHome,
         name: AppRouteNames.shellHome,
-        builder: (context, state) => const Scaffold(body: SizedBox.shrink()),
+        builder: (context, state) => const ShellHomePage(),
       ),
     ],
     errorBuilder: (context, state) {
