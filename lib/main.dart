@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 import 'app.dart';
 import 'core/config/env_config.dart';
@@ -6,6 +6,7 @@ import 'core/di/injection.dart';
 import 'core/errors/result.dart';
 import 'core/logging/app_logger.dart';
 import 'core/network/supabase_client_wrapper.dart';
+import 'core/storage/preferences_store.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,5 +26,19 @@ Future<void> main() async {
     logger.warning(failure.message, tag: 'SupabaseClientWrapper');
   }
 
-  runApp(const App());
+  var initialThemeMode = ThemeMode.system;
+  final themeModeResult = await getIt<PreferencesStore>().readThemeMode();
+  switch (themeModeResult) {
+    case Success(:final value):
+      initialThemeMode = value ?? ThemeMode.system;
+    case FailureResult(:final failure):
+      logger.warning(
+        'Failed to read theme preference; using system theme.',
+        error: failure.cause,
+        stackTrace: failure.stackTrace,
+        tag: 'Bootstrap',
+      );
+  }
+
+  runApp(App(initialThemeMode: initialThemeMode));
 }
