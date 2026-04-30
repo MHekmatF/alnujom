@@ -1,4 +1,5 @@
 import 'package:alnujom/core/errors/result.dart';
+import 'package:alnujom/core/localization/locale_cubit.dart';
 import 'package:alnujom/core/logging/app_logger.dart';
 import 'package:alnujom/core/storage/preferences_store.dart';
 import 'package:alnujom/core/theme/theme_cubit.dart';
@@ -9,15 +10,26 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('renders the localized brand and theme toggle', (tester) async {
+  testWidgets('renders the localized brand and toggles', (tester) async {
     await tester.pumpWidget(
-      BlocProvider(
-        create: (_) => ThemeCubit.test(
-          preferencesStore: _FakePreferencesStore(),
-          logger: _NoopLogger(),
-          initialMode: ThemeMode.system,
-          platformBrightness: Brightness.light,
-        ),
+      MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (_) => ThemeCubit.test(
+              preferencesStore: _FakePreferencesStore(),
+              logger: _NoopLogger(),
+              initialMode: ThemeMode.system,
+              platformBrightness: Brightness.light,
+            ),
+          ),
+          BlocProvider(
+            create: (_) => LocaleCubit(
+              _FakePreferencesStore(),
+              _NoopLogger(),
+              const Locale('ar'),
+            ),
+          ),
+        ],
         child: const MaterialApp(
           locale: Locale('ar'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -32,7 +44,9 @@ void main() {
 
     expect(find.text(l10n.appTitle), findsOneWidget);
     expect(find.byKey(ShellHomePage.themeToggleKey), findsOneWidget);
+    expect(find.byKey(ShellHomePage.localeToggleKey), findsOneWidget);
     expect(find.text(l10n.themeToggleLabel), findsOneWidget);
+    expect(find.text(l10n.localeToggleLabel), findsOneWidget);
   });
 }
 

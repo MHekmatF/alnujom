@@ -249,28 +249,29 @@ This is a Flutter Android app + a source-controlled `supabase/` backend tree (se
 
 ### Tests for User Story 3
 
-- [ ] T049 [P] [US3] Write `test/core/localization/locale_cubit_test.dart` using `bloc_test`: cover initial state = `Locale('ar')` when persisted is null (FR-005); initial state = `Locale('en')` when persisted is `'en'`; `toggle()` from `ar` → `en` writes through; from `en` → `ar` writes through; persistence-write-failure logs a warning but does not revert in-memory state
+- [X] T049 [P] [US3] Write `test/core/localization/locale_cubit_test.dart` using `bloc_test`: cover initial state = `Locale('ar')` when persisted is null (FR-005); initial state = `Locale('en')` when persisted is `'en'`; `toggle()` from `ar` → `en` writes through; from `en` → `ar` writes through; persistence-write-failure logs a warning but does not revert in-memory state
   - **Verify**: test FAILS before T050 (cubit doesn't exist), PASSES after
 
 ### Implementation for User Story 3
 
-- [ ] T050 [US3] Implement `lib/core/localization/locale_cubit.dart` annotated `@injectable`: `class LocaleCubit extends Cubit<Locale>`; constructor takes injected `PreferencesStore` and `AppLogger` plus the initial `Locale` (default `Locale('ar')` if persisted is null per FR-005); `toggle()` flips between `Locale('ar')` and `Locale('en')`; writes through to store and logs warnings on failure (depends on T015, T019)
+- [X] T050 [US3] Implement `lib/core/localization/locale_cubit.dart` annotated `@injectable`: `class LocaleCubit extends Cubit<Locale>`; constructor takes injected `PreferencesStore` and `AppLogger` plus the initial `Locale` (default `Locale('ar')` if persisted is null per FR-005); `toggle()` flips between `Locale('ar')` and `Locale('en')`; writes through to store and logs warnings on failure (depends on T015, T019)
   - **Verify**: T049 passes; `flutter analyze` clean
 
-- [ ] T051 [US3] Update `lib/main.dart` to read persisted locale via `PreferencesStore.readLocale()` BEFORE `runApp`; resolve the initial `Locale` to the persisted value or `Locale('ar')` if null; supply it to `LocaleCubit` via an `@injectable` `factoryParam` so `getIt<LocaleCubit>(param1: initialLocale)` constructs a fresh cubit seeded with persisted state (mirroring T044's pattern for theme). Do NOT use `BlocProvider.value` (depends on T020, T044, T050)
+- [X] T051 [US3] Update `lib/main.dart` to read persisted locale via `PreferencesStore.readLocale()` BEFORE `runApp`; resolve the initial `Locale` to the persisted value or `Locale('ar')` if null; supply it to `LocaleCubit` via an `@injectable` `factoryParam` so `getIt<LocaleCubit>(param1: initialLocale)` constructs a fresh cubit seeded with persisted state (mirroring T044's pattern for theme). Do NOT use `BlocProvider.value` (depends on T020, T044, T050)
   - **Verify**: a fresh install launches in Arabic regardless of device system locale (FR-005, AS-3.1); `injection.config.dart` regenerated and committed
 
-- [ ] T052 [US3] Update `lib/app.dart`: add `BlocProvider<LocaleCubit>(create: (_) => getIt<LocaleCubit>())` and a `BlocBuilder<LocaleCubit, Locale>` that supplies the `locale:` parameter to `MaterialApp.router` (depends on T045, T050, T051)
+- [X] T052 [US3] Update `lib/app.dart`: add `BlocProvider<LocaleCubit>(create: (_) => getIt<LocaleCubit>())` and a `BlocBuilder<LocaleCubit, Locale>` that supplies the `locale:` parameter to `MaterialApp.router` (depends on T045, T050, T051)
   - **Verify**: changing the cubit's state flips both visible strings AND `Directionality.of(context)` within one frame (FR-004, AS-3.2)
 
-- [ ] T053 [US3] Update `lib/shell/shell_home_page.dart` to add a locale toggle control adjacent to the theme toggle — an `OutlinedButton.icon` labelled with `AppLocalizations.of(context).localeToggleLabel`; uses `EdgeInsetsDirectional` and other directional primitives so the layout flips correctly under RTL (Constitution Principle V); `onPressed: () => context.read<LocaleCubit>().toggle()`; min 48dp touch target; Semantics label includes current locale (depends on T046, T050)
+- [X] T053 [US3] Update `lib/shell/shell_home_page.dart` to add a locale toggle control adjacent to the theme toggle — an `OutlinedButton.icon` labelled with `AppLocalizations.of(context).localeToggleLabel`; uses `EdgeInsetsDirectional` and other directional primitives so the layout flips correctly under RTL (Constitution Principle V); `onPressed: () => context.read<LocaleCubit>().toggle()`; min 48dp touch target; Semantics label includes current locale (depends on T046, T050)
   - **Verify**: tapping the toggle flips the layout direction visibly; manual reviewer confirms the toggle position swaps left↔right edges of the screen as locale flips
 
-- [ ] T054 [US3] Extend `test/widgets/shell_smoke_test.dart` v3: after the theme toggle assertion, locate and tap the locale toggle, `await tester.pumpAndSettle()`, assert `Directionality.of(tester.element(...)) == TextDirection.ltr` after toggling away from Arabic; tap again to confirm round-trip (FR-012, SC-004)
+- [X] T054 [US3] Extend `test/widgets/shell_smoke_test.dart` v3: after the theme toggle assertion, locate and tap the locale toggle, `await tester.pumpAndSettle()`, assert `Directionality.of(tester.element(...)) == TextDirection.ltr` after toggling away from Arabic; tap again to confirm round-trip (FR-012, SC-004)
   - **Verify**: `flutter test` passes; the smoke test now exercises FR-002 + FR-003 + FR-004 (the full FR-012 surface) and runs in CI as part of the default test suite
 
-- [ ] T055 [US3] Manual hardware verification on Infinix Note 8: fresh install launches in Arabic + RTL even with device system locale set to English (AS-3.1); toggle flips within one frame (AS-3.2); force-stop and relaunch preserves selection (AS-3.3); change device system locale at OS level — app stays on its in-app locale
+- [X] T055 [US3] Manual hardware verification on Infinix Note 8: fresh install launches in Arabic + RTL even with device system locale set to English (AS-3.1); toggle flips within one frame (AS-3.2); force-stop and relaunch preserves selection (AS-3.3); change device system locale at OS level — app stays on its in-app locale
   - **Verify**: results captured in PR description
+  - **Phase 5 check 2026-04-30 (PASS)**: Verified on Infinix X692 (`060002509R005033`) with OS locale initially `en-US` and `system_locales=en-US,ar-EG`. Fresh install via `pm clear` launched in Arabic with RTL layout: theme toggle bounds `[362,784][604,880]`, locale toggle bounds `[116,784][338,880]`, and locale semantic value `ar`. Tapping the locale toggle flipped to English/LTR within one frame: theme bounds `[48,784][353,880]`, locale bounds `[377,784][718,880]`, and locale semantic value `en`. Force-stop/relaunch restored English/LTR. Temporarily changed `system_locales` to `ar-EG,en-US`; after force-stop/relaunch the app stayed on in-app English (`Current language: en`). Restored `system_locales` to `en-US,ar-EG` after the check.
 
 **Checkpoint**: All three user stories complete and independently functional.
 
