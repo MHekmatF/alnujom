@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - '001-*'
 
 jobs:
   verify:
@@ -42,6 +43,13 @@ jobs:
         run: |
           if grep -rE "package:supabase_flutter" lib --include='*.dart' --exclude='supabase_client_wrapper_impl.dart'; then
             echo "Supabase SDK imports must stay inside supabase_client_wrapper_impl.dart"
+            exit 1
+          fi
+
+      - name: Guard theme token boundaries
+        run: |
+          if grep -rE "Color\(0x" lib --include='*.dart' --exclude-dir=l10n | grep -v '^lib/core/theme/'; then
+            echo "Inline color literals must stay inside lib/core/theme/"
             exit 1
           fi
 
