@@ -1,16 +1,7 @@
-# alnujom
+# AlNujom
 
-A new Flutter project.
+AlNujom is an Arabic-first Flutter Android application for the real-estate marketplace foundation, currently shipping the Phase 1 runnable shell with theme and locale scaffolding, Clean Architecture core services, Supabase boundary setup, and CI verification.
 
-## Getting Started
+See [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) for the cross-phase implementation roadmap.
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+For Phase 1 setup and verification, follow [specs/001-project-foundation/quickstart.md](specs/001-project-foundation/quickstart.md).
