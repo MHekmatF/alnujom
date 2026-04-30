@@ -213,28 +213,29 @@ This is a Flutter Android app + a source-controlled `supabase/` backend tree (se
 
 ### Tests for User Story 2
 
-- [ ] T042 [P] [US2] Write `test/core/theme/theme_cubit_test.dart` using `bloc_test` with a Mockito-generated fake `PreferencesStore`: cover initial state = `ThemeMode.system` when persisted is null; initial state = `ThemeMode.dark` when persisted is `dark`; `toggle()` from system → light writes through to store; `toggle()` from light → dark writes through; persistence-write-failure logs a warning but does not revert in-memory state (FR-016)
+- [X] T042 [P] [US2] Write `test/core/theme/theme_cubit_test.dart` using `bloc_test` with a Mockito-generated fake `PreferencesStore`: cover initial state = `ThemeMode.system` when persisted is null; initial state = `ThemeMode.dark` when persisted is `dark`; `toggle()` from system → light writes through to store; `toggle()` from light → dark writes through; persistence-write-failure logs a warning but does not revert in-memory state (FR-016)
   - **Verify**: test FAILS before T043 (cubit doesn't exist), PASSES after
 
 ### Implementation for User Story 2
 
-- [ ] T043 [US2] Implement `lib/core/theme/theme_cubit.dart` annotated `@injectable`: `class ThemeCubit extends Cubit<ThemeMode>`; constructor takes injected `PreferencesStore` and `AppLogger` plus the initial `ThemeMode` resolved from store-read in `main.dart`; method `toggle()` flips between `light` and `dark` (if current is `system`, picks the opposite of the platform brightness as the first explicit choice); writes through to store and logs warnings on failure (depends on T015, T019, FR-016)
+- [X] T043 [US2] Implement `lib/core/theme/theme_cubit.dart` annotated `@injectable`: `class ThemeCubit extends Cubit<ThemeMode>`; constructor takes injected `PreferencesStore` and `AppLogger` plus the initial `ThemeMode` resolved from store-read in `main.dart`; method `toggle()` flips between `light` and `dark` (if current is `system`, picks the opposite of the platform brightness as the first explicit choice); writes through to store and logs warnings on failure (depends on T015, T019, FR-016)
   - **Verify**: T042 passes; `flutter analyze` clean
 
-- [ ] T044 [US2] Update `lib/main.dart` to read persisted theme via `PreferencesStore.readThemeMode()` BEFORE `runApp`; supply the resolved initial `ThemeMode` (or `ThemeMode.system` if null) to `ThemeCubit` via an `@injectable` `factoryParam` so `getIt<ThemeCubit>(param1: initialMode)` constructs a fresh cubit seeded with the persisted state. Do NOT use `BlocProvider.value` here — `BlocProvider(create:)` in T045 owns the cubit lifecycle (depends on T020, T034, T043)
+- [X] T044 [US2] Update `lib/main.dart` to read persisted theme via `PreferencesStore.readThemeMode()` BEFORE `runApp`; supply the resolved initial `ThemeMode` (or `ThemeMode.system` if null) to `ThemeCubit` via an `@injectable` `factoryParam` so `getIt<ThemeCubit>(param1: initialMode)` constructs a fresh cubit seeded with the persisted state. Do NOT use `BlocProvider.value` here — `BlocProvider(create:)` in T045 owns the cubit lifecycle (depends on T020, T034, T043)
   - **Verify**: a fresh install launches with `ThemeMode.system`; on a second launch after a toggle, the stored value is restored; `injection.config.dart` regenerated and committed to reflect the new `factoryParam`
 
-- [ ] T045 [US2] Update `lib/app.dart`: wrap `MaterialApp.router` in `BlocProvider<ThemeCubit>(create: (_) => getIt<ThemeCubit>())` and inside, a `BlocBuilder<ThemeCubit, ThemeMode>` that supplies the `themeMode:` parameter (depends on T035, T043, T044)
+- [X] T045 [US2] Update `lib/app.dart`: wrap `MaterialApp.router` in `BlocProvider<ThemeCubit>(create: (_) => getIt<ThemeCubit>())` and inside, a `BlocBuilder<ThemeCubit, ThemeMode>` that supplies the `themeMode:` parameter (depends on T035, T043, T044)
   - **Verify**: changing the cubit's state visibly re-themes the app within one frame (FR-003); covered by the smoke-test extension in T047
 
-- [ ] T046 [US2] Update `lib/shell/shell_home_page.dart` to add a theme toggle control beneath the brand mark — an `OutlinedButton.icon` labelled with `AppLocalizations.of(context).themeToggleLabel`; `onPressed: () => context.read<ThemeCubit>().toggle()`; minimum touch-target 48×48 dp (FR-017); `Semantics(label: ..., value: <currentTheme>)` wrapper for TalkBack (depends on T038, T043)
+- [X] T046 [US2] Update `lib/shell/shell_home_page.dart` to add a theme toggle control beneath the brand mark — an `OutlinedButton.icon` labelled with `AppLocalizations.of(context).themeToggleLabel`; `onPressed: () => context.read<ThemeCubit>().toggle()`; minimum touch-target 48×48 dp (FR-017); `Semantics(label: ..., value: <currentTheme>)` wrapper for TalkBack (depends on T038, T043)
   - **Verify**: launching the app and tapping the toggle once flips theme visibly (AS-2.1); contrast spot-check ≥ 3:1 on the icon against the button surface
 
-- [ ] T047 [US2] Extend `test/widgets/shell_smoke_test.dart` v2: after the brand-visible assertion, locate the theme toggle (e.g., by `find.bySemanticsLabel(...)` or a stable widget Key), `await tester.tap(...)`, `await tester.pumpAndSettle()`, assert that `Theme.of(tester.element(...)).brightness` flipped from its initial value
+- [X] T047 [US2] Extend `test/widgets/shell_smoke_test.dart` v2: after the brand-visible assertion, locate the theme toggle (e.g., by `find.bySemanticsLabel(...)` or a stable widget Key), `await tester.tap(...)`, `await tester.pumpAndSettle()`, assert that `Theme.of(tester.element(...)).brightness` flipped from its initial value
   - **Verify**: `flutter test` passes (the smoke test runs as part of the default test suite); CI step "flutter test" stays green
 
-- [ ] T048 [US2] Manual hardware verification on Infinix Note 8: tap toggle, force-stop the app via `adb shell am force-stop com.alnujom.app`, relaunch, confirm restored theme (AS-2.2); rapid-toggle 10× in 2 seconds and confirm final state is persisted exactly once (edge case "Rapid repeated toggling")
+- [X] T048 [US2] Manual hardware verification on Infinix Note 8: tap toggle, force-stop the app via `adb shell am force-stop com.alnujom.app`, relaunch, confirm restored theme (AS-2.2); rapid-toggle 10× in 2 seconds and confirm final state is persisted exactly once (edge case "Rapid repeated toggling")
   - **Verify**: results captured in PR description
+  - **Phase 4 check 2026-04-29 (PASS)**: Installed debug APK on connected Android device `060002509R005033`; after stopping overlay package `com.zaz.translate`, UI hierarchy showed theme toggle bounds `[239,784][481,880]`. Single tap changed semantic state from `المظهر الحالي: dark` to `المظهر الحالي: light`; force-stop/relaunch restored `light`. Ten rapid `adb shell input tap 360 832` actions left the semantic state at `light`; force-stop/relaunch again restored `light`, confirming the final persisted value survived restart.
 
 **Checkpoint**: User Stories 1 AND 2 work independently. The shell launches, displays the brand, toggles theme, and persists.
 
