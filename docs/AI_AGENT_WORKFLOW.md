@@ -50,21 +50,23 @@ Commit at every checkpoint, not at every line of code. If using Spec Kit, the `t
 ## Branch strategy
 
 - **`main`** — protected; only mergeable via PR with linear history. No direct pushes.
-- **`<NNN>-<spec-name>`** — one branch per Spec Kit spec, but **PRs are per-phase, not per-spec**. After each phase merges, the branch is auto-deleted on the remote and recreated from `main` for the next phase.
+- **`<NNN>-<spec-name>`** — one branch per Spec Kit spec. The branch persists across **all phases** of the spec; commits accumulate per phase. After each SPEC PR merges, the branch is auto-deleted on the remote and recreated from `main` for the next spec.
 - **`chore/<topic>`** — short-lived branches for tooling/config fixes that need to land on `main` independently of feature work. Squash-merged to `main` and deleted.
 
 When `main` advances (via chore PRs) while a feature branch is alive, **merge `main` into the feature branch** (don't rebase repeatedly). Avoids force-push overhead.
 
-## PR strategy: one PR per phase
+## PR strategy: one PR per spec
 
-This is the cleanest pattern for solo-dev / heavy-AI-agent workflows:
+This is the cleanest pattern for solo-dev / heavy-AI-agent workflows where pushes are cheap and CI minutes only burn when a PR is open:
 
-1. **Per phase**: agent opens a PR when first push to the feature branch happens. PR accumulates commits across all checkpoints of that phase.
-2. **At phase end**: agent marks PR ready-for-review, runs the test/lint suite one more time, squash-merges to `main`. Auto-delete deletes the remote branch.
-3. **Next phase**: recreate the same branch name locally from `main`, push first commit, open new PR.
-4. **Tag at spec milestones**: not at every phase merge. Only when a full spec is done (e.g., `v0.0.1-phase0` after the spec's final phase).
+1. **Spec branch persists across phases**: the agent commits each phase to the spec branch as it finishes, pushes after every commit. No PR is opened during the spec.
+2. **At end of spec** (all phases complete): the agent opens ONE PR for the whole spec, runs the test/lint suite one more time, squash-merges to `main` once CI is green. Auto-delete deletes the remote branch.
+3. **Next spec**: create the new spec branch (`<NNN+1>-<next-spec-name>`) locally from `main`, accumulate phases, repeat.
+4. **Tag at spec milestones**: when the spec PR merges (e.g., `v0.0.1-001-project-foundation`).
 
-If you have CodeRabbit or human reviewers who do incremental review on long-running PRs, you can flip to "one long-running draft PR per spec" instead. But for solo-dev with paused/no review tooling, per-phase merging keeps each main commit small and revertible.
+Pushing to the spec branch without a PR open costs **zero CI minutes** — CI only fires once the PR opens (at end-of-spec) or on `main` pushes (after merge). This is what makes per-spec viable: commits stay frequent, but heavy CI runs are amortized to one per spec.
+
+If you have CodeRabbit or human reviewers who do incremental review on long-running PRs, you can open a long-running draft PR earlier in the spec. But for solo-dev with paused/no review tooling, holding the PR until end-of-spec keeps both CI minutes and reviewer noise minimal.
 
 PR titles use Conventional Commits prefixes: `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test:`, `build:`, `ci:`. Bodies follow this template:
 
@@ -270,4 +272,4 @@ No long retrospectives. No "what's next" unless the user asked.
 
 If you don't want to copy this whole file, the absolute minimum prompt that captures the spirit of the workflow:
 
-> Auto-commit and push at every checkpoint and at the end of every phase. Open a PR per phase, squash-merge when the phase is complete and tests pass, then start the next phase on the same branch name re-pushed from main. Use chore branches for tooling fixes that need to land on main independently. Never force-push, never `git clean -fdx` or `git reset --hard` on uncommitted work, never merge a PR with failing checks. End every turn with a one-line summary of git state. Save this rule to memory so future sessions follow it without me re-asking.
+> Auto-commit and push at every checkpoint and at the end of every phase. Commit each phase to the spec branch as you finish it; open ONE PR per spec at end-of-spec, squash-merge when all phases are done and CI is green, then start the next spec on a new branch from main. Use chore branches for tooling fixes that need to land on main independently. Never force-push, never `git clean -fdx` or `git reset --hard` on uncommitted work, never merge a PR with failing checks. End every turn with a one-line summary of git state. Save this rule to memory so future sessions follow it without me re-asking.
