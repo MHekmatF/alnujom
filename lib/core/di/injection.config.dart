@@ -9,12 +9,15 @@
 // coverage:ignore-file
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'dart:ui' as _i264;
+
 import 'package:flutter/material.dart' as _i409;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:go_router/go_router.dart' as _i583;
 import 'package:injectable/injectable.dart' as _i526;
 
 import '../config/env_config.dart' as _i373;
+import '../localization/locale_cubit.dart' as _i960;
 import '../logging/app_logger.dart' as _i354;
 import '../logging/console_logger.dart' as _i1026;
 import '../network/supabase_client_wrapper.dart' as _i752;
@@ -42,6 +45,13 @@ _i174.GetIt $initGetIt(
   );
   gh.singleton<_i583.GoRouter>(
     () => routerModule.router(gh<_i354.AppLogger>()),
+  );
+  gh.factoryParam<_i960.LocaleCubit, _i264.Locale?, dynamic>(
+    (initialLocale, _) => _i960.LocaleCubit(
+      gh<_i753.PreferencesStore>(),
+      gh<_i354.AppLogger>(),
+      initialLocale,
+    ),
   );
   gh.factoryParam<_i611.ThemeCubit, _i409.ThemeMode?, dynamic>(
     (initialMode, _) => _i611.ThemeCubit(
