@@ -83,6 +83,14 @@ A developer modifies a shared component (e.g., changes the padding inside `Prope
 - **Palette Tester touched in production build**: Impossible — the chip is tree-shaken behind a build-time flag and is absent from the release widget tree.
 - **Conflicting radius scale between source documents**: The screens-and-components catalog scale (`sm 8 / md 12 / lg 16 / xl 20 / pill 999`) is authoritative; the legacy scale in `decision.md` is superseded (see Assumptions).
 
+## Clarifications
+
+### Session 2026-05-02
+
+- Q: How many components must Phase 2 cover with visual-regression goldens? → A: `PropertyCard` only (every theme × locale × palette combination). Other components are out of scope for Phase 2 visual-regression coverage and are tracked separately.
+- Q: In production builds, can end users choose the palette? → A: No. Production renders the Modern palette only; no end-user-facing palette switch exists in Settings, no hidden gesture, no deep link. The Trust palette remains in source for internal QA comparison only.
+- Q: What is the default theme mode for a fresh install? → A: Follow OS theme by default on first launch (`auto`). An explicit user choice in Settings (Light / Dark / Auto) overrides and persists across launches until the user clears it back to `auto`.
+
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
@@ -101,6 +109,8 @@ A developer modifies a shared component (e.g., changes the padding inside `Prope
 - **FR-012**: All touch targets in design-system components MUST be at least 48 × 48 dp, and no state communicated by a component MUST rely on color alone — color MUST always be paired with an icon, a text label, or a shape.
 - **FR-013**: System MUST expose a unified component contract: each component is one named entity with one canonical visual treatment per variant; ad-hoc per-screen restyling is forbidden, and any new variant requires extending the component library — not inlining styles.
 - **FR-014**: System MUST surface the rejected design direction (Direction A — Luxury) only as an archived reference document; no Luxury tokens, fonts, or components MUST be reachable from production code paths.
+- **FR-015**: In production builds, the active color palette MUST be fixed to **Modern**; no end-user-facing palette switch MUST exist anywhere in the shipped surface (no Settings row, no hidden gesture, no deep link, no remote config flip). The Trust palette MUST remain in source as a reference for internal QA only, reachable solely via the debug-build Palette Tester chip (FR-009).
+- **FR-016**: On first launch, the active theme mode MUST follow the operating-system theme preference (treated as `auto`). Settings MUST expose an explicit override with three values — `auto` / `light` / `dark` — and the chosen override MUST persist across launches until the user resets it back to `auto`. While `auto` is selected, the rendered theme MUST update live when the OS theme changes without requiring an app restart.
 
 ### Key Entities
 
