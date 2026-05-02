@@ -59,16 +59,23 @@ This file records the locked technical decisions that drive Phase 2. Each entry 
 
 ## R-05 Font asset strategy
 
-**Decision**: Vendor full Cairo, IBM Plex Sans Arabic, and Inter at four weights each (Regular/Medium/SemiBold/Bold) — twelve TTF files total under `assets/fonts/`, declared in `pubspec.yaml`.
+**Decision**: Vendor full Cairo, IBM Plex Sans Arabic, and Inter under `assets/fonts/`, declared in `pubspec.yaml`.
 
-**Rationale**: FR-010 requires offline-identical rendering. Full vendoring is the simplest path. APK-size impact (estimated 4–8 MB) sits below the Phase 24 release-polish threshold where size optimization is treated as a product concern.
+- **Cairo**: single variable font (`Cairo-VariableFont_slnt_wght.ttf`, ~600 KB) declared without `weight:` keys; the `wght` axis supplies all weights at consumption time.
+- **IBM Plex Sans Arabic**: four static weight TTFs (Regular / Medium / SemiBold / Bold), declared with `weight: 400/500/600/700`.
+- **Inter**: four static weight TTFs (Regular / Medium / SemiBold / Bold), declared with `weight: 400/500/600/700`.
+
+Total: nine TTF files under `assets/fonts/`.
+
+**Rationale**: FR-010 requires offline-identical rendering. Full vendoring is the simplest path. APK-size impact (estimated 3–7 MB) sits below the Phase 24 release-polish threshold where size optimization is treated as a product concern. Cairo is delivered as a variable font because that is the only canonical distribution the upstream (`Gue3bara/Cairo`) and the Google Fonts mirror (`google/fonts/ofl/cairo`) ship — static weight TTFs are no longer published. Flutter's text engine selects the correct `wght` axis value automatically when the consumer specifies `FontWeight.w400/w500/w600/w700`, so feature code (and `lib/core/theme/typography.dart`, T013) treats Cairo identically to the static-weight families. IBM Plex Sans Arabic and Inter remain on static weights because their canonical distributions still ship them and the four files we vendored verify as distinct, genuine weights (different SHA-256, different sizes).
 
 **Alternatives considered**:
+- Static Cairo from non-canonical mirrors (e.g., `@fontsource/cairo`) — files exist but are themselves derived from the variable font; no quality gain over consuming the variable font directly, and adds a provenance question.
 - Subsetting to Arabic + Latin glyph ranges only — saves ~2–4 MB; deferred to a follow-up because it adds a build step (`pyftsubset` or `fonttools`) and risks missing edge characters in user-generated content (listing titles, prices) until proven safe.
 - `google_fonts` runtime fetch — violates FR-010 (offline render parity) and Constitution's offline expectation.
 - Single weight per family — kills the typography catalog (display = 700, body = 400, label = 500).
 
-**Follow-up**: Phase 24 release polish revisits subsetting with measured APK numbers from the reference device.
+**Follow-up**: Phase 24 release polish revisits subsetting with measured APK numbers from the reference device. If a subsetting build step is introduced, Cairo's variable font can additionally be axis-pinned to the four weights actually used and re-emitted as static TTFs at that point — purely as a size optimization, not a correctness fix.
 
 ---
 

@@ -35,25 +35,25 @@ This is a Flutter Android app. Paths below are relative to the repo root `H:\aln
 
 **Purpose**: Vendor the locked font families, register them in `pubspec.yaml`, declare the build-time gating constants the design tools depend on, lock the icon library dependency, and remove the Phase 1 token stub now that the real tokens are about to land.
 
-- [ ] T001 Add `flutter_lucide` to `pubspec.yaml` `dependencies` per research R-02 (locked icon library)
+- [X] T001 Add `flutter_lucide` to `pubspec.yaml` `dependencies` per research R-02 (locked icon library)
   - **Verify**: `flutter pub get` resolves without conflict; `import 'package:flutter_lucide/flutter_lucide.dart';` compiles in a scratch Dart file
 
-- [ ] T002 [P] Vendor four Cairo TTF weights (Regular / Medium / SemiBold / Bold) under `assets/fonts/`
-  - **Verify**: `ls assets/fonts/Cairo-*.ttf` lists 4 files; the SIL Open Font License file is present at `assets/fonts/LICENSE-Cairo.txt`
+- [X] T002 [P] Vendor the canonical Cairo variable font (`Cairo[slnt,wght].ttf` from the `google/fonts` mirror, renamed to `Cairo-VariableFont_slnt_wght.ttf`) under `assets/fonts/`. **Cairo is shipped as a single variable font, not four static weights** — the canonical Cairo distribution at both upstream `Gue3bara/Cairo` and `google/fonts` no longer ships static weight TTFs; weight selection happens via the `wght` axis at runtime. See R-05 amendment.
+  - **Verify**: `ls assets/fonts/Cairo-VariableFont_slnt_wght.ttf` finds the file (~600 KB); the SIL Open Font License file is present at `assets/fonts/LICENSE-Cairo.txt`; `TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w400)` and the `w500/w600/w700` siblings render visually distinct weights at runtime (verified during T013).
 
-- [ ] T003 [P] Vendor four IBM Plex Sans Arabic TTF weights (Regular / Medium / SemiBold / Bold) under `assets/fonts/`
+- [X] T003 [P] Vendor four IBM Plex Sans Arabic TTF weights (Regular / Medium / SemiBold / Bold) under `assets/fonts/`
   - **Verify**: `ls assets/fonts/IBMPlexSansArabic-*.ttf` lists 4 files; license file present at `assets/fonts/LICENSE-IBMPlexSansArabic.txt`
 
-- [ ] T004 [P] Vendor four Inter TTF weights (Regular / Medium / SemiBold / Bold) under `assets/fonts/`
+- [X] T004 [P] Vendor four Inter TTF weights (Regular / Medium / SemiBold / Bold) under `assets/fonts/`
   - **Verify**: `ls assets/fonts/Inter-*.ttf` lists 4 files; license file present at `assets/fonts/LICENSE-Inter.txt`
 
-- [ ] T005 Declare the three families in `pubspec.yaml` under `flutter.fonts` — `Cairo`, `IBMPlexSansArabic`, `Inter` — each with the four weight assets and matching `weight: 400/500/600/700` entries (depends on T002–T004)
+- [X] T005 Declare the three families in `pubspec.yaml` under `flutter.fonts` — `Cairo` as a single variable-font asset (no `weight:` keys; axis selection at consumption time per T002 / R-05); `IBMPlexSansArabic` and `Inter` each with the four static weight assets and matching `weight: 400/500/600/700` entries (depends on T002–T004)
   - **Verify**: `flutter pub get` succeeds; `flutter run` shows no "font not found" warnings on first launch
 
-- [ ] T006 [P] Create `lib/core/flags/app_flags.dart` declaring a single `const bool kDesignToolsEnabled = bool.fromEnvironment('DESIGN_TOOLS', defaultValue: false);` per research R-07. This single flag gates BOTH the Palette Tester chip and the Theme Gallery surface — they ship together
+- [X] T006 [P] Create `lib/core/flags/app_flags.dart` declaring a single `const bool kDesignToolsEnabled = bool.fromEnvironment('DESIGN_TOOLS', defaultValue: false);` per research R-07. This single flag gates BOTH the Palette Tester chip and the Theme Gallery surface — they ship together
   - **Verify**: `flutter analyze` clean; the constant is reachable from any `lib/` import path; `flutter run` (no `--dart-define`) treats it as `false`; `flutter run --dart-define=DESIGN_TOOLS=true` flips it to `true`
 
-- [ ] T007 [P] Add the two new preference key constants to `lib/core/storage/preferences_keys.dart` (or create the file if Phase 1 used inline strings): `kPrefThemeMode = 'app.theme_mode'`, `kPrefPalette = 'app.palette'`
+- [X] T007 [P] Add the two new preference key constants to `lib/core/storage/preferences_keys.dart` (or create the file if Phase 1 used inline strings): `kPrefThemeMode = 'app.theme_mode'`, `kPrefPalette = 'app.palette'`
   - **Verify**: `grep -rE "'app\\.(theme_mode|palette)'" lib --include='*.dart'` only matches `preferences_keys.dart`; no other call site uses raw key strings
 
 - [ ] T008 Delete `lib/core/theme/tokens_stub.dart` and remove its export from any barrel file (depends on Phase 2 tokens existing — this task is recorded here for visibility but executed at the end of Phase 2 after T012 lands)
