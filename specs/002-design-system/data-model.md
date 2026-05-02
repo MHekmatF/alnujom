@@ -96,7 +96,7 @@ These follow from spec FRs and are restated here so reviewers can map each to th
 - **FR-002 / SC-002 — WCAG AA contrast**: For every `(palette, theme)` combination above, every text-token / background-token pair in the resulting `ColorScheme` MUST meet 4.5 : 1 (body) or 3 : 1 (large text & UI). Verified by `test/core/theme/color_scheme_contrast_test.dart`.
 - **FR-005 — state coverage**: Each component MUST visibly support every state in its applicable subset. Verified by per-component widget tests under `test/core/widgets/`.
 - **FR-006 — RTL/LTR correctness**: Every component renders correctly under both `Directionality.rtl` and `Directionality.ltr`; no left/right hardcoding. Verified by directional widget tests + golden tests on `PropertyCard`.
-- **FR-009 / FR-015 — Palette Tester gating**: `kPaletteTesterEnabled` resolves to `false` in release; the chip widget is absent and `PreferencesStore` writes for `app.palette` are no-ops in release. Verified by tree-shake assertion in the quickstart.
+- **FR-009 / FR-015 — Palette Tester gating**: `kDesignToolsEnabled` resolves to `false` in release; the chip widget is absent (along with the Theme Gallery surface, which shares the same flag) and `PreferencesStore` writes for `app.palette` are no-ops in release. Verified by tree-shake assertion in the quickstart.
 - **FR-016 — theme-mode default + live update**: First-launch reads of `app.theme_mode` return `auto`; while `auto` is active, OS-theme changes re-render without app restart. Verified by `test/core/theme/theme_cubit_test.dart`.
 
 ## State transitions

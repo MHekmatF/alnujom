@@ -22,7 +22,7 @@ flutter pub get
 ## 2. Run debug build on the reference device
 
 ```bash
-flutter run --debug --dart-define=PALETTE_TESTER=true --dart-define=DESIGN_TOOLS=true
+flutter run --debug --dart-define=DESIGN_TOOLS=true
 ```
 
 **Pass signal**: app launches to the Phase 1 shell home with the new typography + Modern palette visibly applied (no Phase 1 stub colors left). The Palette Tester chip is visible in the top-leading corner.
@@ -50,6 +50,12 @@ For each combination of:
 - Color-only state signaling (badge that loses meaning if you turn it grayscale).
 
 **Pass signal**: all 8 combinations render cleanly with no clipping, no untranslated strings, all states visible.
+
+## 4b. System text-size sweep (SC-008)
+
+Without leaving the Theme Gallery, change the Android system text size to **130 %** (Settings → Display → Font size), return to the app, and scroll the gallery again. Repeat at **200 %**.
+
+**Pass signal**: at 130 % and at 200 %, every component still renders without clipped text, layout overflow, horizontal scroll, or `RenderFlex overflowed` exceptions. Touch targets remain ≥ 48 × 48 dp at all scales.
 
 ## 5. Palette Tester smoke
 
@@ -101,7 +107,7 @@ flutter build apk --release
 flutter build apk --release --analyze-size
 ```
 
-(Or extract the resulting APK and grep for the gallery route string.)
+(Or extract the resulting APK and grep for the gallery route string.) Note: release builds omit `--dart-define=DESIGN_TOOLS=true`, so `kDesignToolsEnabled` defaults to `false` and tree-shakes both the chip and the gallery together.
 
 **Pass signal**:
 
@@ -123,7 +129,7 @@ On the Infinix Note 8, with the Android system contrast checker (or a third-part
 Run a quick scroll test in `flutter run --profile`:
 
 ```bash
-flutter run --profile --dart-define=PALETTE_TESTER=true
+flutter run --profile --dart-define=DESIGN_TOOLS=true
 ```
 
 In the running profile build, navigate to the Theme Gallery, scroll through the long components list with a fling.
@@ -144,7 +150,7 @@ flutter pub get
 flutter analyze
 dart run tool/lint_design_tokens.dart
 flutter test
-flutter build apk --debug --dart-define=PALETTE_TESTER=true --dart-define=DESIGN_TOOLS=true
+flutter build apk --debug --dart-define=DESIGN_TOOLS=true
 flutter build apk --release
 ```
 

@@ -42,7 +42,7 @@ Define the canonical list of reusable widgets Phase 2 ships under `lib/core/widg
 | 30 | `ChatBubble` | `lib/core/widgets/chat_bubble.dart` | `mine`, `theirs` | `default` | §5.16 |
 | 31 | `PriceTag` | `lib/core/widgets/price_tag.dart` | one variant (bold primary number + currency suffix; optional alt-currency line) | `default` | §5.17 |
 | 32 | `AppBottomNav` | `lib/core/widgets/app_bottom_nav.dart` | 5-tab spine (RTL-ordered) | `default`, `selected`, `disabled` (per tab) | §6 |
-| 33 | `PaletteTester` | `lib/core/widgets/palette_tester.dart` | one variant — debug only (gated by `kPaletteTesterEnabled`) | `default`, `pressed`, `aftercycle` (with snackbar) | §5.18 |
+| 33 | `PaletteTester` | `lib/core/widgets/palette_tester.dart` | one variant — debug only (gated by `kDesignToolsEnabled`) | `default`, `pressed`, `aftercycle` (with snackbar) | §5.18 |
 
 > Note: the 21-component count in `IMPLEMENTATION_PLAN.md` collapses several siblings (the form fields are counted as a single "form fields" entry, etc.). The table above expands those siblings into the actual one-file-per-widget structure Phase 2 ships, totaling 33 files. The naming and visual treatments are unchanged from the source catalog.
 
@@ -66,4 +66,4 @@ Define the canonical list of reusable widgets Phase 2 ships under `lib/core/widg
 
 - One widget test per component under `test/core/widgets/<component>_test.dart`. Each test exercises every applicable state and asserts: rendered colors come from `AppColors.of(context)`, rendered styles come from `AppTextStyles.of(context)`, hit-target dimensions ≥ 48 dp, RTL layout under `Directionality.rtl`.
 - Per FR-011 / SC-006, `PropertyCard` adds golden tests in 4 environment combinations (light × ar, light × en, dark × ar, dark × en) under the Modern palette.
-- The Palette Tester widget test asserts that with `kPaletteTesterEnabled = false`, the chip widget does not render.
+- The Palette Tester widget test asserts that with `kDesignToolsEnabled = false`, the chip widget does not render.

@@ -209,7 +209,7 @@ Modern Marketplace was the cheaper landing because it reuses the existing Phase 
 1. Expand Phase 1 stub `tokens_stub.dart` into full Material 3 `ColorScheme` for both palettes (Modern light/dark + Trust light/dark = 4 schemes).
 2. Vendor font assets under `assets/fonts/`: Cairo, IBM Plex Sans Arabic, Inter (regular + medium + semibold + bold for each).
 3. Build the component library defined in [`screens-and-components.md` §5](screens-and-components.md) — 21 components, one widget per file under `lib/core/widgets/`.
-4. Wire the PaletteTester chip ([`screens-and-components.md` §5.18](screens-and-components.md)) behind a `kPaletteTesterEnabled` const that resolves to `false` in release builds (tree-shaken).
+4. Wire the PaletteTester chip ([`screens-and-components.md` §5.18](screens-and-components.md)) behind a single `kDesignToolsEnabled` const (the same flag that gates the Theme Gallery) that resolves to `false` in release builds — chip and gallery tree-shake together out of production.
 5. Golden tests for every component under each of the 4 theme-palette combinations.
 
 ---

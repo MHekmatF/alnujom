@@ -56,7 +56,7 @@ cycle()
 
 ## Invariants
 
-1. **Release pin (FR-015)**: When `kPaletteTesterEnabled` (or the parallel `kDesignToolsEnabled`) is `false` at compile time, `state` MUST always be `ModernPalette`. `cycle()` MUST be a no-op. `PreferencesStore[app.palette]` MUST not be read.
+1. **Release pin (FR-015)**: When `kDesignToolsEnabled` is `false` at compile time, `state` MUST always be `ModernPalette`. `cycle()` MUST be a no-op. `PreferencesStore[app.palette]` MUST not be read.
 2. **Tree-shake guarantee**: Because the `if (kDesignToolsEnabled)` branch is gated by a `const bool`, Dart's tree-shaker drops the persistence + cycle code paths from release bundles entirely (research R-07).
 3. After `initialize()`, `state` is non-null and is a valid `ColorPalette` subclass — never indeterminate.
 4. The cubit MUST NOT depend on `BuildContext` or `MediaQuery`.

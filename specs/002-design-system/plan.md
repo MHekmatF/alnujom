@@ -7,7 +7,7 @@
 
 Replace the Phase 1 token stubs with the locked Modern Marketplace design system: a typed token API for colors / typography / spacing / radii / elevation; light + dark `ThemeData` for both the Modern (default, primary `#1D4ED8`) and Trust (alternate, primary `#2457A6`) palettes; a 21-component reusable widget kit under `lib/core/widgets/`; bilingual font assets (Cairo, IBM Plex Sans Arabic, Inter) vendored under `assets/fonts/`; a debug-only Theme Gallery surface and Palette Tester chip; an automated lint guard that fails the build on any raw hex / `TextStyle(...)` / raw pixel spacing in feature code; and golden tests for `PropertyCard` across light/dark × ar/en.
 
-**Technical approach**: All token sources live under `lib/core/theme/` and are exposed via typed wrappers (`AppColors`, `AppTextStyles`, `AppSpacing`, `AppRadii`, `AppElevation`) sourced from `Theme.of(context)` extensions so feature code never touches a hex literal. Two `ColorPalette` instances (Modern, Trust) each produce a `light` and `dark` `ColorScheme`; a `PaletteCubit` provides the active `ColorPalette` (defaulted to Modern, persisted under `app.palette` in `PreferencesStore` only when `kDesignToolsEnabled` is true). The existing `ThemeCubit` from Phase 1 is extended to honor the OS theme on first launch (FR-016) and update live when the OS theme changes while in `auto` mode. The 21 components in `screens-and-components.md` §5 each ship as one file under `lib/core/widgets/` with the documented states; three feature-shared widgets (`ListingCard` as a thin alias of `PropertyCard`, `PriceDisplay` as an alias of `PriceTag`, plus `AdminListItem`) sit under `lib/shared/presentation/widgets/` per `IMPLEMENTATION_PLAN.md` §Phase 2. The Theme Gallery page lives under `lib/debug/` and registers its route conditionally on `kDesignToolsEnabled`, so it tree-shakes out of release builds. The Palette Tester chip is the same — its `kPaletteTesterEnabled` resolves to a `const false` in release. A standalone Dart script (`tool/lint_design_tokens.dart`) wired into CI provides the FR-007 grep guard. Golden tests for `PropertyCard` use `flutter_test`'s `matchesGoldenFile` running on the host (no emulator), matching Phase 1's "no hosted-emulator" stance.
+**Technical approach**: All token sources live under `lib/core/theme/` and are exposed via typed wrappers (`AppColors`, `AppTextStyles`, `AppSpacing`, `AppRadii`, `AppElevation`) sourced from `Theme.of(context)` extensions so feature code never touches a hex literal. Two `ColorPalette` instances (Modern, Trust) each produce a `light` and `dark` `ColorScheme`; a `PaletteCubit` provides the active `ColorPalette` (defaulted to Modern, persisted under `app.palette` in `PreferencesStore` only when `kDesignToolsEnabled` is true). The existing `ThemeCubit` from Phase 1 is extended to honor the OS theme on first launch (FR-016) and update live when the OS theme changes while in `auto` mode. The components in `contracts/component-library.md` each ship as one file under `lib/core/widgets/` with the documented states; three feature-shared widgets (`ListingCard` as a thin alias of `PropertyCard`, `PriceDisplay` as an alias of `PriceTag`, plus `AdminListItem`) sit under `lib/shared/presentation/widgets/` per `IMPLEMENTATION_PLAN.md` §Phase 2. The Theme Gallery page and the Palette Tester chip both gate on a single build-time constant `kDesignToolsEnabled` (sourced from `--dart-define=DESIGN_TOOLS=true`), so they tree-shake together out of release builds. A standalone Dart script (`tool/lint_design_tokens.dart`) wired into CI provides the FR-007 grep guard. Golden tests for `PropertyCard` use `flutter_test`'s `matchesGoldenFile` running on the host (no emulator), matching Phase 1's "no hosted-emulator" stance.
 
 ## Technical Context
 
@@ -73,7 +73,7 @@ lib/
 ├── app.dart                                      # (existing) MaterialApp.router host; updated to read both ThemeCubit and PaletteCubit
 ├── core/
 │   ├── flags/
-│   │   └── app_flags.dart                        # NEW — kDesignToolsEnabled, kPaletteTesterEnabled (const, false in release)
+│   │   └── app_flags.dart                        # NEW — kDesignToolsEnabled (single const, false in release; gates BOTH chip + gallery)
 │   ├── theme/
 │   │   ├── app_theme.dart                        # REWRITE — ThemeData.light/dark builders parameterised by ColorPalette
 │   │   ├── color_palette.dart                    # NEW — sealed ColorPalette (Modern, Trust); each emits a light + dark ColorScheme
@@ -118,7 +118,7 @@ lib/
 │       ├── chat_bubble.dart
 │       ├── price_tag.dart                        # bold primary number + currency suffix
 │       ├── app_bottom_nav.dart                   # 5-tab spine
-│       └── palette_tester.dart                   # debug-only floating chip (gated by kPaletteTesterEnabled)
+│       └── palette_tester.dart                   # debug-only floating chip (gated by kDesignToolsEnabled)
 ├── shared/
 │   └── presentation/
 │       └── widgets/                              # NEW — feature-shared shims per IMPLEMENTATION_PLAN §Phase 2
@@ -146,7 +146,7 @@ test/
 │       ├── app_text_field_test.dart
 │       ├── property_card_test.dart
 │       ├── ... (one per kit component)
-│       └── palette_tester_test.dart              # confirms tree-shake guard: chip is absent under kPaletteTesterEnabled=false
+│       └── palette_tester_test.dart              # confirms tree-shake guard: chip is absent under kDesignToolsEnabled=false
 ├── widgets/
 │   └── property_card_golden_test.dart            # NEW — 4-combo golden suite (FR-011, SC-006)
 └── lint/

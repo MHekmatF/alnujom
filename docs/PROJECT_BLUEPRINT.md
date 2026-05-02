@@ -183,7 +183,7 @@ Before building any feature widget, the design tokens must be in place. This is 
 
 ### 5.2 PaletteTester (debug-only)
 
-`lib/core/theme/palette_tester/` contains the runtime palette-cycling chip described in `screens-and-components.md` §5.18. It is gated by a `kPaletteTesterEnabled` const that resolves to `false` in release builds — tree-shaken out of production.
+`lib/core/widgets/palette_tester.dart` contains the runtime palette-cycling chip described in `screens-and-components.md` §5.18. It is gated by a single `kDesignToolsEnabled` const (the same flag that gates the Theme Gallery) which resolves to `false` in release builds — chip and gallery tree-shake together out of production.
 
 ### 5.3 Fonts
 

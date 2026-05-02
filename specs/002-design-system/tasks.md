@@ -50,8 +50,8 @@ This is a Flutter Android app. Paths below are relative to the repo root `H:\aln
 - [ ] T005 Declare the three families in `pubspec.yaml` under `flutter.fonts` — `Cairo`, `IBMPlexSansArabic`, `Inter` — each with the four weight assets and matching `weight: 400/500/600/700` entries (depends on T002–T004)
   - **Verify**: `flutter pub get` succeeds; `flutter run` shows no "font not found" warnings on first launch
 
-- [ ] T006 [P] Create `lib/core/flags/app_flags.dart` declaring `const bool kDesignToolsEnabled = bool.fromEnvironment('DESIGN_TOOLS', defaultValue: false);` and `const bool kPaletteTesterEnabled = bool.fromEnvironment('PALETTE_TESTER', defaultValue: false);` per research R-07
-  - **Verify**: `flutter analyze` clean; both constants are reachable from any `lib/` import path; `flutter run` (no `--dart-define`) treats both as `false`; `flutter run --dart-define=DESIGN_TOOLS=true --dart-define=PALETTE_TESTER=true` flips them
+- [ ] T006 [P] Create `lib/core/flags/app_flags.dart` declaring a single `const bool kDesignToolsEnabled = bool.fromEnvironment('DESIGN_TOOLS', defaultValue: false);` per research R-07. This single flag gates BOTH the Palette Tester chip and the Theme Gallery surface — they ship together
+  - **Verify**: `flutter analyze` clean; the constant is reachable from any `lib/` import path; `flutter run` (no `--dart-define`) treats it as `false`; `flutter run --dart-define=DESIGN_TOOLS=true` flips it to `true`
 
 - [ ] T007 [P] Add the two new preference key constants to `lib/core/storage/preferences_keys.dart` (or create the file if Phase 1 used inline strings): `kPrefThemeMode = 'app.theme_mode'`, `kPrefPalette = 'app.palette'`
   - **Verify**: `grep -rE "'app\\.(theme_mode|palette)'" lib --include='*.dart'` only matches `preferences_keys.dart`; no other call site uses raw key strings
@@ -122,14 +122,14 @@ This is a Flutter Android app. Paths below are relative to the repo root `H:\aln
 
 ### Lint guard (FR-007 — gates feature code from this point forward)
 
-- [ ] T018 [P] [US1] Create `tool/lint_design_tokens.dart` per `contracts/lint-guard.md`: scans `lib/**/*.dart`, flags banned patterns L1 (raw `Color(0x…)`), L2 (inline `TextStyle(`), L3 (raw integer in `EdgeInsets(Directional)?` constructors), L4 (raw integer in `BorderRadius.circular`), L5 (raw integer in `BoxShadow(`); honors the allow-list (token files); exit 0 on clean, exit 1 on violation
-  - **Verify**: `dart run tool/lint_design_tokens.dart` exits 0 against the current tree; piping a file with `Color(0xFFAA0000)` through the script flags it with `path:line:column: forbidden raw color literal …`
+- [ ] T018 [P] [US1] Create `tool/lint_design_tokens.dart` per `contracts/lint-guard.md`: scans `lib/**/*.dart`, flags banned patterns L1 (raw `Color(0x…)`), L2 (inline `TextStyle(`), L3 (raw integer in `EdgeInsets(Directional)?` constructors), L4 (raw integer in `BorderRadius.circular`), L5 (raw integer in `BoxShadow(`), L6 (any reference to `archive/luxury` import paths or the archived font names `Playfair Display` / `Reem Kufi` — enforces FR-014); honors the allow-list (token files); exit 0 on clean, exit 1 on violation
+  - **Verify**: `dart run tool/lint_design_tokens.dart` exits 0 against the current tree; piping a file with `Color(0xFFAA0000)` through the script flags it with `path:line:column: forbidden raw color literal …`; piping a file with `import 'package:alnujom/archive/luxury/foo.dart';` flags it with the L6 message
 
-- [ ] T019 [P] [US1] Create `test/lint/fixtures/clean.dart` containing only design-token-API uses, and `test/lint/fixtures/violations.dart` containing one of each banned pattern with comments naming the rule
+- [ ] T019 [P] [US1] Create `test/lint/fixtures/clean.dart` containing only design-token-API uses, and `test/lint/fixtures/violations.dart` containing one of each banned pattern (L1–L6 — including a synthetic `import 'package:alnujom/archive/luxury/foo.dart';` for L6) with comments naming the rule
   - **Verify**: `clean.dart` compiles; `violations.dart` is excluded from the analyzer via `// ignore_for_file:` directives so the project's `flutter analyze` stays green
 
 - [ ] T020 [US1] Create `test/lint/design_tokens_lint_test.dart` calling the reusable scanning library (extracted from `tool/lint_design_tokens.dart` into `tool/src/lint_design_tokens_lib.dart` per `contracts/lint-guard.md`) against the two fixtures (depends on T018, T019)
-  - **Verify**: `flutter test test/lint/` reports 5 violations on `violations.dart` and 0 on `clean.dart`
+  - **Verify**: `flutter test test/lint/` reports 6 violations on `violations.dart` (one per L1–L6) and 0 on `clean.dart`
 
 - [ ] T021 [US1] Update `.github/workflows/ci.yml` adding a `Lint design tokens` step that runs `dart run tool/lint_design_tokens.dart` after `flutter analyze` (depends on T018)
   - **Verify**: a deliberate `Color(0xFFAA0000)` PR fails the workflow at the lint step; the same PR with that line removed passes
@@ -142,7 +142,7 @@ This is a Flutter Android app. Paths below are relative to the repo root `H:\aln
 - [ ] T023 [P] [US1] Create `lib/core/widgets/app_app_bar.dart` per component-library #1: variants `default / withBack / withSearch / transparentOnImage`; back-arrow mirrors under `Directionality.of(context)`; elevation flips from 0 → 1 on scroll
   - **Verify**: a widget test mounts each variant under both `Directionality.rtl` and `Directionality.ltr`; back-arrow icon resolves to the correct chevron direction in each
 
-- [ ] T024 [P] [US1] Create `lib/core/widgets/app_bottom_nav.dart` per component-library #32: 5-tab spine (RTL-ordered: الرئيسية / البحث / إضافة / المفضلة / حسابي); active tab shows `primary` label and 2 dp top accent bar; "إضافة" tab has filled `primary` icon at 28 dp; `kPaletteTesterEnabled` is irrelevant here
+- [ ] T024 [P] [US1] Create `lib/core/widgets/app_bottom_nav.dart` per component-library #32: 5-tab spine (RTL-ordered: الرئيسية / البحث / إضافة / المفضلة / حسابي); active tab shows `primary` label and 2 dp top accent bar; "إضافة" tab has filled `primary` icon at 28 dp
   - **Verify**: tab labels render in correct RTL order under `Locale('ar')`; tapping the "إضافة" slot does NOT route — it triggers a callback parameter (the actual modal flow lands in Phase 12)
 
 ### Inputs (search, location, category)
@@ -255,8 +255,8 @@ This is a Flutter Android app. Paths below are relative to the repo root `H:\aln
 
 ### Per-component widget tests (FR-005 state coverage — these are not goldens; goldens are US4)
 
-- [ ] T057 [US1] Create one widget test per kit component under `test/core/widgets/<component>_test.dart` (28 files: T022–T053 minus the per-shim T054–T056). Each test mounts every applicable state and asserts (a) rendered colors come from `AppColors.of(context)`, (b) rendered styles come from `AppTextStyles.of(context)`, (c) hit targets ≥ 48 × 48 dp, (d) RTL layout under `Directionality.rtl` is correct (e.g., back arrow swaps direction)
-  - **Verify**: `flutter test test/core/widgets/` runs, all tests pass, `flutter test --coverage` reports each component file ≥ 70 % line coverage
+- [ ] T057 [US1] Create one widget test per kit component under `test/core/widgets/<component>_test.dart` (28 files: T022–T053 minus the per-shim T054–T056). Each test mounts every applicable state and asserts (a) rendered colors come from `AppColors.of(context)`, (b) rendered styles come from `AppTextStyles.of(context)`, (c) hit targets ≥ 48 × 48 dp, (d) RTL layout under `Directionality.rtl` is correct (e.g., back arrow swaps direction), (e) FR-012 second clause: for every state that visually communicates information via color (badges, status outlines, error text, focus borders, success/danger affordances), the rendered subtree contains at least one of an icon, a text label, or a shape change — color is never the sole signal
+  - **Verify**: `flutter test test/core/widgets/` runs, all tests pass, `flutter test --coverage` reports each component file ≥ 70 % line coverage; deliberately removing the icon from `AppBadge.statusApproved` (leaving only the green color) flips its widget test red on the new color-paired-with-icon-or-label assertion
 
 **Checkpoint**: User Story 1 is complete — every feature phase from Phase 4 onwards can compose screens from `lib/core/widgets/` and consume only design tokens. The lint guard makes drift impossible.
 
@@ -297,7 +297,7 @@ This is a Flutter Android app. Paths below are relative to the repo root `H:\aln
 
 **Goal**: Designers and QA can compare Modern vs Trust palettes on real screens with a single tap on a floating chip. Choice persists across reload in QA builds; the chip is entirely absent (tree-shaken) in release.
 
-**Independent Test**: Run `flutter run --debug --dart-define=PALETTE_TESTER=true --dart-define=DESIGN_TOOLS=true`. Tap the chip on the Phase 1 shell home — palette cross-fades within 240 ms, snackbar names the now-active palette. Kill app, relaunch with the same flags — last selection persists. Build `flutter build apk --release` (no flags) — chip is absent.
+**Independent Test**: Run `flutter run --debug --dart-define=DESIGN_TOOLS=true`. Tap the chip on the Phase 1 shell home — palette cross-fades within 240 ms, snackbar names the now-active palette. Kill app, relaunch with the same flag — last selection persists. Build `flutter build apk --release` (no flag) — chip is absent.
 
 ### Palette cubit + persistence
 
@@ -309,11 +309,11 @@ This is a Flutter Android app. Paths below are relative to the repo root `H:\aln
 
 ### PaletteTester chip widget
 
-- [ ] T065 [US3] Create `lib/core/widgets/palette_tester.dart` per component-library #33 + screens-and-components §5.18: 32 dp pill; swatch dot (active primary) + name label + cycle icon; absolute floating position top-leading with `lg` (16) inset; `kPaletteTesterEnabled` gate at the top of `build()` returning `SizedBox.shrink()` when `false`; tap triggers `PaletteCubit.cycle()` then a snackbar; long-press opens a fullscreen palette explorer modal showing every token side-by-side
-  - **Verify**: a widget test with `kPaletteTesterEnabled` simulated as `true` mounts the chip, taps it, asserts a `Cubit` `cycle()` call and a snackbar appearance; with `kPaletteTesterEnabled` simulated as `false`, the widget is `SizedBox.shrink()`
+- [ ] T065 [US3] Create `lib/core/widgets/palette_tester.dart` per component-library #33 + screens-and-components §5.18: 32 dp pill; swatch dot (active primary) + name label + cycle icon; absolute floating position top-leading with `lg` (16) inset; `kDesignToolsEnabled` gate at the top of `build()` returning `SizedBox.shrink()` when `false`; tap triggers `PaletteCubit.cycle()` then a snackbar; long-press opens a fullscreen palette explorer modal showing every token side-by-side
+  - **Verify**: a widget test with `kDesignToolsEnabled` simulated as `true` mounts the chip, taps it, asserts a `Cubit` `cycle()` call and a snackbar appearance; with `kDesignToolsEnabled` simulated as `false`, the widget is `SizedBox.shrink()`
 
 - [ ] T066 [US3] Wire the chip overlay into `lib/app.dart`: stack the `PaletteTester` above the router outlet inside the `MaterialApp.builder`, surfaced on every screen; the tree-shake guard inside the chip handles release absence (depends on T065)
-  - **Verify**: `flutter run --debug --dart-define=PALETTE_TESTER=true` renders the chip on the shell home; building release `flutter build apk --release` and inspecting size with `flutter build apk --analyze-size` shows `palette_tester.dart` absent from the reachable code list
+  - **Verify**: `flutter run --debug --dart-define=DESIGN_TOOLS=true` renders the chip on the shell home; building release `flutter build apk --release` and inspecting size with `flutter build apk --analyze-size` shows `palette_tester.dart` absent from the reachable code list
 
 ### Tree-shake assertion
 

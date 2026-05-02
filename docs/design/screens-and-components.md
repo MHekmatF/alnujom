@@ -539,7 +539,7 @@ A floating chip that **cycles the active palette** (Modern ⇄ Trust) without re
 - Doesn't pollute the real Settings screen with dev-only options.
 - Mirrors the same pattern in Figma (a button on every frame wired to a Figma Variable) — § 4.13 of [`figma-prompts.md`](figma-prompts.md).
 
-**Removing it for prod**: tree-shaken. The widget references a const `kPaletteTesterEnabled` that resolves to `false` in release builds, so the entire branch + its assets are stripped.
+**Removing it for prod**: tree-shaken. The widget references a const `kDesignToolsEnabled` (the single design-tools flag, shared with the Theme Gallery) that resolves to `false` in release builds, so the entire branch + its assets are stripped.
 
 ---
 

@@ -538,7 +538,7 @@ Each phase produces a `specs/<###-name>/` folder via `/speckit.specify`, followe
 **Frontend deliverables**:
 - `lib/core/theme/colors.dart`, `typography.dart`, `spacing.dart`, `radii.dart`, `elevation.dart`.
 - `ThemeData.light()` and `ThemeData.dark()` exported via `app_theme.dart`.
-- Reusable widgets in `lib/core/widgets/`: `AppButton`, `AppTextField`, `AppCard`, `EmptyState`, `LoadingState`, `ErrorState`, `AppDialog`, `AppBottomNav`, `AppAppBar`.
+- Reusable widgets in `lib/core/widgets/`: see [`specs/002-design-system/contracts/component-library.md`](../specs/002-design-system/contracts/component-library.md) for the canonical 33-row catalog (locked at spec 002 time, derived from `docs/design/screens-and-components.md` §5). The Phase 2 floor explicitly omits a generic `AppCard` primitive — typed cards (`PropertyCard`, `OfficeCard`, `AdminListItem`) are the canonical surface and compose directly from the design-token primitives. Earlier drafts of this list mentioned `AppCard`; the typed-cards-only direction is recorded in [`specs/002-design-system/research.md`](../specs/002-design-system/research.md) §R-09b.
 - Feature-specific shared widgets (in `lib/shared/presentation/widgets/`): `ListingCard`, `PriceDisplay`, `AdminListItem`.
 - A `theme_gallery_page.dart` (debug-only) exercising every component in light + dark + ar + en.
 

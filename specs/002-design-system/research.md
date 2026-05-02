@@ -84,13 +84,14 @@ This file records the locked technical decisions that drive Phase 2. Each entry 
 
 ---
 
-## R-07 Palette Tester gating mechanism
+## R-07 Design-tools gating mechanism
 
-**Decision**: A build-time constant — `const bool kPaletteTesterEnabled = bool.fromEnvironment('PALETTE_TESTER', defaultValue: false);` — declared in `lib/core/flags/app_flags.dart`. Debug/QA builds pass `--dart-define=PALETTE_TESTER=true`; release builds omit the flag (defaults to `false`). The Theme Gallery uses a parallel constant `kDesignToolsEnabled` resolved the same way.
+**Decision**: A single build-time constant — `const bool kDesignToolsEnabled = bool.fromEnvironment('DESIGN_TOOLS', defaultValue: false);` — declared in `lib/core/flags/app_flags.dart`. The same constant gates BOTH the Palette Tester chip AND the Theme Gallery surface; they are two parts of one design-tools surface and ship together. Debug / internal-QA builds pass `--dart-define=DESIGN_TOOLS=true`; release builds omit the flag and default to `false`.
 
-**Rationale**: A `const bool` known at compile time enables dead-code elimination — Dart's tree-shaker drops the entire Palette Tester widget, its assets, and its imports from the release bundle. FR-009 and FR-015 explicitly demand this; a runtime feature flag cannot satisfy them.
+**Rationale**: A `const bool` known at compile time enables dead-code elimination — Dart's tree-shaker drops the Palette Tester widget, the Theme Gallery page, their assets, and their imports from the release bundle. FR-009 and FR-015 explicitly demand this; a runtime feature flag cannot satisfy them. Collapsing to a single flag (rather than parallel `kPaletteTesterEnabled` + `kDesignToolsEnabled` constants) eliminates the confused state where, e.g., the cubit accepts cycles + persists but no chip renders.
 
 **Alternatives considered**:
+- Two parallel flags (`kPaletteTesterEnabled` + `kDesignToolsEnabled`) — admits the confused state above; rejected on simplicity grounds during /speckit-analyze remediation.
 - Runtime feature flag (e.g., remote config, env-injected at runtime) — cannot tree-shake; chip is shipped to end users; FR-015 violation.
 - Separate debug-only entry point (`lib/main_debug.dart`) — heavier separation; loses single-binary review.
 - Build flavors (`flutter build apk --flavor`) — doable but adds gradle complexity for one binary axis.
@@ -119,6 +120,18 @@ This file records the locked technical decisions that drive Phase 2. Each entry 
 - One name only (`ListingCard`) — drops the more precise term; rejects `screens-and-components.md` §5.5.
 - One name only (`PropertyCard`) — forces every feature-phase author to remember the rename; contradicts `IMPLEMENTATION_PLAN.md`.
 - Two parallel implementations — guaranteed drift.
+
+## R-09b Generic `AppCard` is dropped — typed cards only
+
+**Decision**: Phase 2 does **not** ship a generic `AppCard` primitive. The kit ships the typed cards `PropertyCard` (vertical + horizontal), `OfficeCard`, and `AdminListItem` directly composed from design-token primitives (`AppColors`, `AppTextStyles`, `AppSpacing`, `AppRadii`, `AppElevation`). No shared abstract `AppCard` widget exists.
+
+**Rationale**: `screens-and-components.md` §5 enumerates only typed cards — no generic card component is described. The `AppCard` mention in `docs/IMPLEMENTATION_PLAN.md` §Phase 2 was an early stub that pre-dated the screens-and-components catalog; carrying both a generic `AppCard` and the typed cards forward would either (a) duplicate visual treatment, or (b) force the typed cards to be wrappers over a generic that does not match any actual screen. Neither earns its weight.
+
+**Alternatives considered**:
+- Ship `AppCard` as a generic `Container`-wrapped primitive — adds a layer of indirection that no screen needs.
+- Ship `AppCard` as the abstract base of `PropertyCard` / `OfficeCard` — possible but premature; if a third typed card later wants to share more structure, that refactor is cheap and motivated by real shared code, not speculation.
+
+**Implication**: `docs/IMPLEMENTATION_PLAN.md` §Phase 2 widget list is amended to drop `AppCard`. The Phase 2 plan, contracts, and tasks already reflect the typed-cards-only direction.
 
 ---
 

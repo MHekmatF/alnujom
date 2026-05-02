@@ -31,8 +31,9 @@ The script scans every `.dart` file under `lib/` (and optionally `test/`) exclud
 | L3 | Raw integer in a directional `EdgeInsets` constructor | matches `EdgeInsets(Directional)?\\.\\w+\\(` followed by integer/double literal arguments | Bypasses `AppSpacing`. |
 | L4 | Raw integer in a `BorderRadius.circular(N)` call | `\\bBorderRadius\\.circular\\(\\s*\\d+` | Bypasses `AppRadii`. |
 | L5 | Raw integer in a `BoxShadow(blurRadius:` argument | `\\bBoxShadow\\s*\\(` followed by integer literals | Bypasses `AppElevation`. |
+| L6 | Import or string reference to the archived Luxury direction | `archive/luxury` OR `Playfair Display` OR `Reem Kufi` (in import strings or asset paths) | Enforces FR-014 — Direction A archived fonts / tokens / components MUST NOT be reachable from production code paths. |
 
-L1 and L2 are the highest-value rules (the most-common drift sources). L3–L5 are added to lock down the spacing/radii/elevation surface; if false-positive friction is high during Phase 2 implementation, L3–L5 may be relaxed to "warning" tier in a follow-up while L1 + L2 remain build-blocking.
+L1 and L2 are the highest-value rules (the most-common drift sources). L3–L5 are added to lock down the spacing/radii/elevation surface; if false-positive friction is high during Phase 2 implementation, L3–L5 may be relaxed to "warning" tier in a follow-up while L1 + L2 remain build-blocking. L6 is build-blocking — there is no legitimate reason for any code path under `lib/` to reference the archive.
 
 ## Allow-list
 
