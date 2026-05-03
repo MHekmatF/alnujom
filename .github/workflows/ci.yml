@@ -39,6 +39,9 @@ jobs:
       - name: Analyze
         run: flutter analyze --fatal-infos
 
+      - name: Lint design tokens
+        run: dart run tool/lint_design_tokens.dart
+
       - name: Guard Supabase SDK boundary
         run: |
           if grep -rE "package:supabase_flutter" lib --include='*.dart' --exclude='supabase_client_wrapper_impl.dart'; then

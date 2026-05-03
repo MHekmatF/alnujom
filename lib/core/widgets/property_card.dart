@@ -1,0 +1,181 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
+
+import '../theme/colors.dart';
+import '../theme/radii.dart';
+import '../theme/spacing.dart';
+import '../theme/typography.dart';
+import '_widget_support.dart';
+import 'app_badge.dart';
+import 'dimens.dart';
+import 'loading_state.dart';
+import 'price_tag.dart';
+
+enum PropertyCardLayout { vertical, horizontal }
+
+class PropertyCard extends StatelessWidget {
+  const PropertyCard({
+    required this.title,
+    required this.price,
+    required this.location,
+    this.currency = 'ل.س',
+    this.imageUrl,
+    this.layout = PropertyCardLayout.vertical,
+    this.loading = false,
+    this.featured = false,
+    this.favorite = false,
+    this.onTap,
+    this.onLongPress,
+    this.onFavoritePressed,
+    super.key,
+  });
+
+  final String title;
+  final String price;
+  final String currency;
+  final String location;
+  final String? imageUrl;
+  final PropertyCardLayout layout;
+  final bool loading;
+  final bool featured;
+  final bool favorite;
+  final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
+  final VoidCallback? onFavoritePressed;
+
+  @override
+  Widget build(BuildContext context) {
+    if (loading) return const LoadingState.card();
+    return GestureDetector(
+      onLongPress: onLongPress,
+      child: AppSurface(
+        onTap: onTap,
+        elevated: true,
+        padding: EdgeInsets.zero,
+        child: layout == PropertyCardLayout.horizontal
+            ? _horizontal(context)
+            : _vertical(context),
+      ),
+    );
+  }
+
+  Widget _vertical(BuildContext context) {
+    return SizedBox(
+      width: AppDimens.propertyCardVerticalWidth,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          AspectRatio(
+            aspectRatio: AppDimens.aspect4x3,
+            child: _image(context),
+          ),
+          Padding(
+            padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+            child: _body(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _horizontal(BuildContext context) {
+    return SizedBox(
+      width: AppDimens.propertyCardHorizontalWidth,
+      child: Row(
+        children: [
+          SizedBox(
+            width: AppDimens.propertyCardHorizontalImageWidth,
+            child: AspectRatio(
+              aspectRatio: AppDimens.aspect16x10,
+              child: _image(context),
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsetsDirectional.all(AppSpacing.md),
+              child: _body(context),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _body(BuildContext context) {
+    final styles = AppTextStyles.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: styles.titleMedium,
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        PriceTag(amount: price, currency: currency),
+        const SizedBox(height: AppSpacing.sm),
+        Row(
+          children: [
+            const Icon(LucideIcons.map_pin, size: AppSpacing.lg),
+            const SizedBox(width: AppSpacing.xs),
+            Expanded(
+              child: Text(
+                location,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: styles.bodyMedium,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _image(BuildContext context) {
+    final colors = AppColors.of(context);
+    return ClipRRect(
+      borderRadius: appRadius(AppRadii.md),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (imageUrl == null || imageUrl!.isEmpty)
+            ColoredBox(
+              color: colors.primaryContainer,
+              child: Icon(LucideIcons.image, color: colors.primary),
+            )
+          else
+            CachedNetworkImage(
+              imageUrl: imageUrl!,
+              fit: BoxFit.cover,
+              errorWidget: (_, _, _) =>
+                  ColoredBox(color: colors.primaryContainer),
+            ),
+          PositionedDirectional(
+            top: AppSpacing.sm,
+            start: AppSpacing.sm,
+            child: featured
+                ? const AppBadge(
+                    label: 'Featured',
+                    variant: AppBadgeVariant.featured,
+                  )
+                : const SizedBox.shrink(),
+          ),
+          PositionedDirectional(
+            top: AppSpacing.sm,
+            end: AppSpacing.sm,
+            child: IconButton(
+              onPressed: onFavoritePressed,
+              icon: Icon(
+                favorite ? Icons.favorite : Icons.favorite_border,
+                color: favorite ? colors.error : colors.onPrimary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

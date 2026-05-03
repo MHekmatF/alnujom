@@ -122,140 +122,140 @@ This is a Flutter Android app. Paths below are relative to the repo root `H:\aln
 
 ### Lint guard (FR-007 — gates feature code from this point forward)
 
-- [ ] T018 [P] [US1] Create `tool/lint_design_tokens.dart` per `contracts/lint-guard.md`: scans `lib/**/*.dart`, flags banned patterns L1 (raw `Color(0x…)`), L2 (inline `TextStyle(`), L3 (raw integer in `EdgeInsets(Directional)?` constructors), L4 (raw integer in `BorderRadius.circular`), L5 (raw integer in `BoxShadow(`), L6 (any reference to `archive/luxury` import paths or the archived font names `Playfair Display` / `Reem Kufi` — enforces FR-014); honors the allow-list (token files); exit 0 on clean, exit 1 on violation
+- [X] T018 [P] [US1] Create `tool/lint_design_tokens.dart` per `contracts/lint-guard.md`: scans `lib/**/*.dart`, flags banned patterns L1 (raw `Color(0x…)`), L2 (inline `TextStyle(`), L3 (raw integer in `EdgeInsets(Directional)?` constructors), L4 (raw integer in `BorderRadius.circular`), L5 (raw integer in `BoxShadow(`), L6 (any reference to `archive/luxury` import paths or the archived font names `Playfair Display` / `Reem Kufi` — enforces FR-014); honors the allow-list (token files); exit 0 on clean, exit 1 on violation
   - **Verify**: `dart run tool/lint_design_tokens.dart` exits 0 against the current tree; piping a file with `Color(0xFFAA0000)` through the script flags it with `path:line:column: forbidden raw color literal …`; piping a file with `import 'package:alnujom/archive/luxury/foo.dart';` flags it with the L6 message
 
-- [ ] T019 [P] [US1] Create `test/lint/fixtures/clean.dart` containing only design-token-API uses, and `test/lint/fixtures/violations.dart` containing one of each banned pattern (L1–L6 — including a synthetic `import 'package:alnujom/archive/luxury/foo.dart';` for L6) with comments naming the rule
+- [X] T019 [P] [US1] Create `test/lint/fixtures/clean.dart` containing only design-token-API uses, and `test/lint/fixtures/violations.dart` containing one of each banned pattern (L1–L6 — including a synthetic `import 'package:alnujom/archive/luxury/foo.dart';` for L6) with comments naming the rule
   - **Verify**: `clean.dart` compiles; `violations.dart` is excluded from the analyzer via `// ignore_for_file:` directives so the project's `flutter analyze` stays green
 
-- [ ] T020 [US1] Create `test/lint/design_tokens_lint_test.dart` calling the reusable scanning library (extracted from `tool/lint_design_tokens.dart` into `tool/src/lint_design_tokens_lib.dart` per `contracts/lint-guard.md`) against the two fixtures (depends on T018, T019)
+- [X] T020 [US1] Create `test/lint/design_tokens_lint_test.dart` calling the reusable scanning library (extracted from `tool/lint_design_tokens.dart` into `tool/src/lint_design_tokens_lib.dart` per `contracts/lint-guard.md`) against the two fixtures (depends on T018, T019)
   - **Verify**: `flutter test test/lint/` reports 6 violations on `violations.dart` (one per L1–L6) and 0 on `clean.dart`
 
-- [ ] T021 [US1] Update `.github/workflows/ci.yml` adding a `Lint design tokens` step that runs `dart run tool/lint_design_tokens.dart` after `flutter analyze` (depends on T018)
+- [X] T021 [US1] Update `.github/workflows/ci.yml` adding a `Lint design tokens` step that runs `dart run tool/lint_design_tokens.dart` after `flutter analyze` (depends on T018)
   - **Verify**: a deliberate `Color(0xFFAA0000)` PR fails the workflow at the lint step; the same PR with that line removed passes
 
 ### Buttons + chrome (highest reuse first)
 
-- [ ] T022 [P] [US1] Create `lib/core/widgets/app_button.dart` per component-library #7: variants `filledPrimary / filledSuccess / outlined / tonal / text / destructive / iconButton / fab`; sizes `regular` (48 dp) / `dense` (36 dp); states `default / pressed / focused / loading / disabled`; loading replaces label with an inline 16 dp `CircularProgressIndicator`; `EdgeInsetsDirectional` only
+- [X] T022 [P] [US1] Create `lib/core/widgets/app_button.dart` per component-library #7: variants `filledPrimary / filledSuccess / outlined / tonal / text / destructive / iconButton / fab`; sizes `regular` (48 dp) / `dense` (36 dp); states `default / pressed / focused / loading / disabled`; loading replaces label with an inline 16 dp `CircularProgressIndicator`; `EdgeInsetsDirectional` only
   - **Verify**: a widget test (T057 batch) mounts each variant × each state and asserts color comes from `AppColors.of(context)`, hit-target ≥ 48 × 48 dp on `regular`, label hidden when `loading`
 
-- [ ] T023 [P] [US1] Create `lib/core/widgets/app_app_bar.dart` per component-library #1: variants `default / withBack / withSearch / transparentOnImage`; back-arrow mirrors under `Directionality.of(context)`; elevation flips from 0 → 1 on scroll
+- [X] T023 [P] [US1] Create `lib/core/widgets/app_app_bar.dart` per component-library #1: variants `default / withBack / withSearch / transparentOnImage`; back-arrow mirrors under `Directionality.of(context)`; elevation flips from 0 → 1 on scroll
   - **Verify**: a widget test mounts each variant under both `Directionality.rtl` and `Directionality.ltr`; back-arrow icon resolves to the correct chevron direction in each
 
-- [ ] T024 [P] [US1] Create `lib/core/widgets/app_bottom_nav.dart` per component-library #32: 5-tab spine (RTL-ordered: الرئيسية / البحث / إضافة / المفضلة / حسابي); active tab shows `primary` label and 2 dp top accent bar; "إضافة" tab has filled `primary` icon at 28 dp
+- [X] T024 [P] [US1] Create `lib/core/widgets/app_bottom_nav.dart` per component-library #32: 5-tab spine (RTL-ordered: الرئيسية / البحث / إضافة / المفضلة / حسابي); active tab shows `primary` label and 2 dp top accent bar; "إضافة" tab has filled `primary` icon at 28 dp
   - **Verify**: tab labels render in correct RTL order under `Locale('ar')`; tapping the "إضافة" slot does NOT route — it triggers a callback parameter (the actual modal flow lands in Phase 12)
 
 ### Inputs (search, location, category)
 
-- [ ] T025 [P] [US1] Create `lib/core/widgets/search_field.dart` per component-library #2: `pill` radius from `AppRadii.pill`; states `default / focused / loading (debounced) / disabled`; trailing clear-X appears when text is non-empty; optional trailing filter icon prop
+- [X] T025 [P] [US1] Create `lib/core/widgets/search_field.dart` per component-library #2: `pill` radius from `AppRadii.pill`; states `default / focused / loading (debounced) / disabled`; trailing clear-X appears when text is non-empty; optional trailing filter icon prop
   - **Verify**: typing fills the field, focus shifts the border to `primary`, the loading state replaces the leading search icon with a spinner
 
-- [ ] T026 [P] [US1] Create `lib/core/widgets/location_selector.dart` per component-library #3: row showing `📍 city / area` with chevron; tap opens a placeholder callback (real cascading picker lands in Phase 8)
+- [X] T026 [P] [US1] Create `lib/core/widgets/location_selector.dart` per component-library #3: row showing `📍 city / area` with chevron; tap opens a placeholder callback (real cascading picker lands in Phase 8)
   - **Verify**: pressed state visible; disabled state respects 50 % opacity rule
 
-- [ ] T027 [P] [US1] Create `lib/core/widgets/category_chip.dart` per component-library #4: pill with leading icon + label; states `default / pressed / focused / selected / disabled`; selected uses `primary` fill + `onPrimary` label
+- [X] T027 [P] [US1] Create `lib/core/widgets/category_chip.dart` per component-library #4: pill with leading icon + label; states `default / pressed / focused / selected / disabled`; selected uses `primary` fill + `onPrimary` label
   - **Verify**: visual state changes are token-driven; tapping toggles `selected` via the onPressed callback
 
 ### Form fields
 
-- [ ] T028 [P] [US1] Create `lib/core/widgets/app_text_field.dart` per component-library #8: anatomy label / input / helper-or-error; states `default / focused / filled / error / disabled`; uses `EdgeInsetsDirectional` for the inner padding
+- [X] T028 [P] [US1] Create `lib/core/widgets/app_text_field.dart` per component-library #8: anatomy label / input / helper-or-error; states `default / focused / filled / error / disabled`; uses `EdgeInsetsDirectional` for the inner padding
   - **Verify**: error helper text renders in `AppColors.of(context).error`; the field resolves to ≥ 48 dp tall
 
-- [ ] T029 [P] [US1] Create `lib/core/widgets/app_phone_field.dart` per component-library #9: composes `AppTextField` with a leading `+963` prefix dropdown for country codes
+- [X] T029 [P] [US1] Create `lib/core/widgets/app_phone_field.dart` per component-library #9: composes `AppTextField` with a leading `+963` prefix dropdown for country codes
   - **Verify**: the prefix dropdown is selectable; the value passed to onChanged includes the country code
 
-- [ ] T030 [P] [US1] Create `lib/core/widgets/app_password_field.dart` per component-library #10: composes `AppTextField` with `obscureText` and a trailing eye-toggle IconButton
+- [X] T030 [P] [US1] Create `lib/core/widgets/app_password_field.dart` per component-library #10: composes `AppTextField` with `obscureText` and a trailing eye-toggle IconButton
   - **Verify**: tapping the eye toggle flips `obscureText`; the IconButton has its own ≥ 48 dp hit area
 
-- [ ] T031 [P] [US1] Create `lib/core/widgets/app_multi_line_field.dart` per component-library #11: composes `AppTextField` with `maxLines: null`, optional character counter (e.g., `0/1000`)
+- [X] T031 [P] [US1] Create `lib/core/widgets/app_multi_line_field.dart` per component-library #11: composes `AppTextField` with `maxLines: null`, optional character counter (e.g., `0/1000`)
   - **Verify**: counter updates live as the user types
 
-- [ ] T032 [P] [US1] Create `lib/core/widgets/app_number_field.dart` per component-library #12: composes `AppTextField` with `TextInputType.number` and an optional leading or trailing unit suffix slot
+- [X] T032 [P] [US1] Create `lib/core/widgets/app_number_field.dart` per component-library #12: composes `AppTextField` with `TextInputType.number` and an optional leading or trailing unit suffix slot
   - **Verify**: `م²` and `ل.س` suffixes render correctly under RTL
 
-- [ ] T033 [P] [US1] Create `lib/core/widgets/app_currency_field.dart` per component-library #13: composes `AppNumberField` with a USD/SYP segmented toggle; emits `(amount, currency)` tuple
+- [X] T033 [P] [US1] Create `lib/core/widgets/app_currency_field.dart` per component-library #13: composes `AppNumberField` with a USD/SYP segmented toggle; emits `(amount, currency)` tuple
   - **Verify**: switching the toggle re-formats the displayed value (no destructive parse)
 
-- [ ] T034 [P] [US1] Create `lib/core/widgets/app_dropdown.dart` per component-library #14: standard dropdown with `default / focused / error / disabled` states
+- [X] T034 [P] [US1] Create `lib/core/widgets/app_dropdown.dart` per component-library #14: standard dropdown with `default / focused / error / disabled` states
   - **Verify**: error state borders + helper text are token-driven
 
-- [ ] T035 [P] [US1] Create `lib/core/widgets/app_stepper_input.dart` per component-library #15: `−` / value / `+` row; min/max props; `default / disabled`
+- [X] T035 [P] [US1] Create `lib/core/widgets/app_stepper_input.dart` per component-library #15: `−` / value / `+` row; min/max props; `default / disabled`
   - **Verify**: tapping `+` past `max` is no-op; tapping `−` past `min` is no-op
 
-- [ ] T036 [P] [US1] Create `lib/core/widgets/app_date_picker.dart` per component-library #16: trigger field that opens Material `showDatePicker` themed by the active `AppTheme`
+- [X] T036 [P] [US1] Create `lib/core/widgets/app_date_picker.dart` per component-library #16: trigger field that opens Material `showDatePicker` themed by the active `AppTheme`
   - **Verify**: the opened picker visually matches the active palette; selected date is formatted via `intl` (Arabic locale → Arabic numerals or Latin per `intl` defaults)
 
-- [ ] T037 [P] [US1] Create `lib/core/widgets/app_toggle.dart` per component-library #17: themed `Switch` wrapper; `default / disabled`
+- [X] T037 [P] [US1] Create `lib/core/widgets/app_toggle.dart` per component-library #17: themed `Switch` wrapper; `default / disabled`
   - **Verify**: track and thumb colors come from `AppColors.of(context)`
 
-- [ ] T038 [P] [US1] Create `lib/core/widgets/app_checkbox.dart` per component-library #18: themed `Checkbox` wrapper; `default / pressed / disabled`
+- [X] T038 [P] [US1] Create `lib/core/widgets/app_checkbox.dart` per component-library #18: themed `Checkbox` wrapper; `default / pressed / disabled`
   - **Verify**: ≥ 48 dp hit area extends beyond the visual 24 dp box
 
-- [ ] T039 [P] [US1] Create `lib/core/widgets/app_radio_group.dart` per component-library #19 + #20-radio-side: composable radio group + segmented-control variant; `default / pressed / disabled`
+- [X] T039 [P] [US1] Create `lib/core/widgets/app_radio_group.dart` per component-library #19 + #20-radio-side: composable radio group + segmented-control variant; `default / pressed / disabled`
   - **Verify**: tapping a non-selected radio emits its value via onChanged; segmented variant supports 2 / 3 / 4 segments
 
-- [ ] T040 [P] [US1] Create `lib/core/widgets/app_tabs.dart` per component-library #20-tabs-side: `segmented` (2 / 3 segments) + `underline` (4 + items) variants; `default / selected / disabled`
+- [X] T040 [P] [US1] Create `lib/core/widgets/app_tabs.dart` per component-library #20-tabs-side: `segmented` (2 / 3 segments) + `underline` (4 + items) variants; `default / selected / disabled`
   - **Verify**: selected segment background = `primary`; underline-tab indicator height = 2 dp
 
 ### Badges + dialogs + sheets
 
-- [ ] T041 [P] [US1] Create `lib/core/widgets/app_badge.dart` per component-library #21: variants `featured / new / statusPending / statusApproved / statusRejected / verifiedOffice`; non-interactive
+- [X] T041 [P] [US1] Create `lib/core/widgets/app_badge.dart` per component-library #21: variants `featured / new / statusPending / statusApproved / statusRejected / verifiedOffice`; non-interactive
   - **Verify**: every variant pairs color with an icon or label (FR-012 — never color alone); status colors come from `AppColors.of(context).success/warning/error`
 
-- [ ] T042 [P] [US1] Create `lib/core/widgets/app_bottom_sheet.dart` per component-library #22: drag handle 4 × 32 dp; `xl` top radius; max ~85 % screen height; sticky footer slot
+- [X] T042 [P] [US1] Create `lib/core/widgets/app_bottom_sheet.dart` per component-library #22: drag handle 4 × 32 dp; `xl` top radius; max ~85 % screen height; sticky footer slot
   - **Verify**: opening a sheet with content > screen height exposes a scrollable content slot while keeping the footer pinned
 
-- [ ] T043 [P] [US1] Create `lib/core/widgets/app_dialog.dart` per component-library #23: variants `confirm / destructive`; trailing-aligned cancel + leading-aligned action under RTL
+- [X] T043 [P] [US1] Create `lib/core/widgets/app_dialog.dart` per component-library #23: variants `confirm / destructive`; trailing-aligned cancel + leading-aligned action under RTL
   - **Verify**: `destructive` variant uses `AppColors.of(context).error` for the action button
 
 ### Feedback states
 
-- [ ] T044 [P] [US1] Create `lib/core/widgets/empty_state.dart` per component-library #24: illustration → headline → body → CTA composition; takes string parameters (no internalised copy — Phase 3 owns translations)
+- [X] T044 [P] [US1] Create `lib/core/widgets/empty_state.dart` per component-library #24: illustration → headline → body → CTA composition; takes string parameters (no internalised copy — Phase 3 owns translations)
   - **Verify**: rendering with each parameter null collapses correctly (only headline → headline + body → headline + body + CTA)
 
-- [ ] T045 [P] [US1] Create `lib/core/widgets/loading_state.dart` per component-library #25: skeleton helpers — `LoadingState.card()`, `LoadingState.row()`, `LoadingState.avatar()`; uses `surfaceVariant` background and a 1200 ms shimmer animation
+- [X] T045 [P] [US1] Create `lib/core/widgets/loading_state.dart` per component-library #25: skeleton helpers — `LoadingState.card()`, `LoadingState.row()`, `LoadingState.avatar()`; uses `surfaceVariant` background and a 1200 ms shimmer animation
   - **Verify**: skeleton dimensions match the rendered content they substitute for; no layout shift when real content arrives
 
-- [ ] T046 [P] [US1] Create `lib/core/widgets/error_state.dart` per component-library #26: variants `default / network`; both expose a Retry CTA via callback
+- [X] T046 [P] [US1] Create `lib/core/widgets/error_state.dart` per component-library #26: variants `default / network`; both expose a Retry CTA via callback
   - **Verify**: tapping Retry invokes the callback exactly once per tap
 
 ### Composite + media
 
-- [ ] T047 [P] [US1] Create `lib/core/widgets/property_card.dart` per component-library #5: layouts `vertical` (full-bleed image top, photo:card 4:3) and `horizontal` (16:10 image, 280 dp wide); states `default / pressed / loading (skeleton) / empty (placeholder image)`; favorite / featured / "للبيع" overlays via slotted props
+- [X] T047 [P] [US1] Create `lib/core/widgets/property_card.dart` per component-library #5: layouts `vertical` (full-bleed image top, photo:card 4:3) and `horizontal` (16:10 image, 280 dp wide); states `default / pressed / loading (skeleton) / empty (placeholder image)`; favorite / featured / "للبيع" overlays via slotted props
   - **Verify**: long-press surfaces a context menu (Save / Share / Report) via callback; missing image renders the `primaryContainer` placeholder block, never a broken-image glyph
 
-- [ ] T048 [P] [US1] Create `lib/core/widgets/office_card.dart` per component-library #6: logo + name + verified badge + listings count + visit-link CTA
+- [X] T048 [P] [US1] Create `lib/core/widgets/office_card.dart` per component-library #6: logo + name + verified badge + listings count + visit-link CTA
   - **Verify**: visited state visually distinct (only via icon swap, never color alone)
 
-- [ ] T049 [P] [US1] Create `lib/core/widgets/stepper_indicator.dart` per component-library #27: N segments; completed / current / future use `success / primary / outline` fills; trailing label "(1/N)"
+- [X] T049 [P] [US1] Create `lib/core/widgets/stepper_indicator.dart` per component-library #27: N segments; completed / current / future use `success / primary / outline` fills; trailing label "(1/N)"
   - **Verify**: width adjusts to N; label updates as `currentIndex` changes
 
-- [ ] T050 [P] [US1] Create `lib/core/widgets/image_gallery.dart` per component-library #28: pageable carousel; bottom-overlaid `3/12` page indicator; tap → fullscreen with pinch-zoom; `loading (skeleton) / empty (placeholder)` states
+- [X] T050 [P] [US1] Create `lib/core/widgets/image_gallery.dart` per component-library #28: pageable carousel; bottom-overlaid `3/12` page indicator; tap → fullscreen with pinch-zoom; `loading (skeleton) / empty (placeholder)` states
   - **Verify**: page indicator reads RTL under `Directionality.rtl`
 
-- [ ] T051 [P] [US1] Create `lib/core/widgets/map_preview.dart` per component-library #29: 16:9 static placeholder block with a centered marker icon; tap → navigates via callback (real `flutter_map` integration is Phase 15)
+- [X] T051 [P] [US1] Create `lib/core/widgets/map_preview.dart` per component-library #29: 16:9 static placeholder block with a centered marker icon; tap → navigates via callback (real `flutter_map` integration is Phase 15)
   - **Verify**: placeholder uses `primaryContainer` background, not a third-party tile; tap callback fires exactly once
 
-- [ ] T052 [P] [US1] Create `lib/core/widgets/chat_bubble.dart` per component-library #30: variants `mine` (`primary` fill, trailing-aligned) and `theirs` (`card` fill, leading-aligned with 1 px border)
+- [X] T052 [P] [US1] Create `lib/core/widgets/chat_bubble.dart` per component-library #30: variants `mine` (`primary` fill, trailing-aligned) and `theirs` (`card` fill, leading-aligned with 1 px border)
   - **Verify**: under RTL, `mine` aligns to the leading visual edge (left side under ar) — confirmed via golden-style snapshot, not just measurement
 
-- [ ] T053 [P] [US1] Create `lib/core/widgets/price_tag.dart` per component-library #31: bold primary number + currency suffix on one line; optional secondary alt-currency line in `textSecondary`
+- [X] T053 [P] [US1] Create `lib/core/widgets/price_tag.dart` per component-library #31: bold primary number + currency suffix on one line; optional secondary alt-currency line in `textSecondary`
   - **Verify**: under `Locale('ar')`, the currency suffix follows the number (RTL); under `Locale('en')`, the suffix follows but reads LTR
 
 ### Feature-shared shims
 
-- [ ] T054 [P] [US1] Create `lib/shared/presentation/widgets/listing_card.dart` per research R-09: one-line `export 'package:alnujom/core/widgets/property_card.dart';` plus `typedef ListingCard = PropertyCard;`
+- [X] T054 [P] [US1] Create `lib/shared/presentation/widgets/listing_card.dart` per research R-09: one-line `export 'package:alnujom/core/widgets/property_card.dart';` plus `typedef ListingCard = PropertyCard;`
   - **Verify**: importing `ListingCard` from `package:alnujom/shared/presentation/widgets/listing_card.dart` resolves to the same class as importing `PropertyCard` from `package:alnujom/core/widgets/property_card.dart`
 
-- [ ] T055 [P] [US1] Create `lib/shared/presentation/widgets/price_display.dart`: similar shim re-exporting `PriceTag` under the `IMPLEMENTATION_PLAN.md` Phase 2 name
+- [X] T055 [P] [US1] Create `lib/shared/presentation/widgets/price_display.dart`: similar shim re-exporting `PriceTag` under the `IMPLEMENTATION_PLAN.md` Phase 2 name
   - **Verify**: `PriceDisplay` and `PriceTag` are the same type
 
-- [ ] T056 [P] [US1] Create `lib/shared/presentation/widgets/admin_list_item.dart`: admin-row primitive composed of `AppListTile`-style internals built on `AppColors`/`AppTextStyles`/`AppSpacing` (no inline styles); leading icon + title + subtitle + trailing action slot
+- [X] T056 [P] [US1] Create `lib/shared/presentation/widgets/admin_list_item.dart`: admin-row primitive composed of `AppListTile`-style internals built on `AppColors`/`AppTextStyles`/`AppSpacing` (no inline styles); leading icon + title + subtitle + trailing action slot
   - **Verify**: no hex literal, no inline `TextStyle`, no raw spacing — passes the lint guard
 
 ### Per-component widget tests (FR-005 state coverage — these are not goldens; goldens are US4)
 
-- [ ] T057 [US1] Create one widget test per kit component under `test/core/widgets/<component>_test.dart` (28 files: T022–T053 minus the per-shim T054–T056). Each test mounts every applicable state and asserts (a) rendered colors come from `AppColors.of(context)`, (b) rendered styles come from `AppTextStyles.of(context)`, (c) hit targets ≥ 48 × 48 dp, (d) RTL layout under `Directionality.rtl` is correct (e.g., back arrow swaps direction), (e) FR-012 second clause: for every state that visually communicates information via color (badges, status outlines, error text, focus borders, success/danger affordances), the rendered subtree contains at least one of an icon, a text label, or a shape change — color is never the sole signal
+- [X] T057 [US1] Create one widget test per kit component under `test/core/widgets/<component>_test.dart` (28 files: T022–T053 minus the per-shim T054–T056). Each test mounts every applicable state and asserts (a) rendered colors come from `AppColors.of(context)`, (b) rendered styles come from `AppTextStyles.of(context)`, (c) hit targets ≥ 48 × 48 dp, (d) RTL layout under `Directionality.rtl` is correct (e.g., back arrow swaps direction), (e) FR-012 second clause: for every state that visually communicates information via color (badges, status outlines, error text, focus borders, success/danger affordances), the rendered subtree contains at least one of an icon, a text label, or a shape change — color is never the sole signal
   - **Verify**: `flutter test test/core/widgets/` runs, all tests pass, `flutter test --coverage` reports each component file ≥ 70 % line coverage; deliberately removing the icon from `AppBadge.statusApproved` (leaving only the green color) flips its widget test red on the new color-paired-with-icon-or-label assertion
 
 **Checkpoint**: User Story 1 is complete — every feature phase from Phase 4 onwards can compose screens from `lib/core/widgets/` and consume only design tokens. The lint guard makes drift impossible.
