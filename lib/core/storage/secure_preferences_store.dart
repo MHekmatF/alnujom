@@ -5,7 +5,9 @@ import 'package:injectable/injectable.dart';
 import '../errors/failure.dart';
 import '../errors/result.dart';
 import '../logging/app_logger.dart';
+import '../theme/color_palette.dart';
 import '../theme/app_theme_mode.dart';
+import 'preferences_keys.dart';
 import 'preferences_store.dart';
 
 @LazySingleton(as: PreferencesStore)
@@ -23,6 +25,7 @@ final class SecurePreferencesStore implements PreferencesStore {
 
   static const _themeKey = 'com.alnujom.preferences.theme_mode';
   static const _localeKey = 'com.alnujom.preferences.locale_code';
+  static const _paletteKey = kPrefPalette;
   static const _tag = 'PreferencesStore';
 
   final AppLogger _logger;
@@ -109,6 +112,54 @@ final class SecurePreferencesStore implements PreferencesStore {
       return FailureResult(
         CacheFailure(
           'Failed to write locale preference.',
+          cause: error,
+          stackTrace: stackTrace,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<Result<String?>> readPaletteName() async {
+    try {
+      final raw = await _storage.read(key: _paletteKey);
+      if (raw != null && raw.length > 32) {
+        _warnUnrecognized('palette', raw);
+        return const Success(null);
+      }
+      return Success(raw);
+    } on Object catch (error, stackTrace) {
+      _logger.warning(
+        'Failed to read palette preference.',
+        error: error,
+        stackTrace: stackTrace,
+        tag: _tag,
+      );
+      return FailureResult(
+        CacheFailure(
+          'Failed to read palette preference.',
+          cause: error,
+          stackTrace: stackTrace,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<Result<void>> writePalette(ColorPalette palette) async {
+    try {
+      await _storage.write(key: _paletteKey, value: palette.name);
+      return const Success(null);
+    } on Object catch (error, stackTrace) {
+      _logger.warning(
+        'Failed to write palette preference.',
+        error: error,
+        stackTrace: stackTrace,
+        tag: _tag,
+      );
+      return FailureResult(
+        CacheFailure(
+          'Failed to write palette preference.',
           cause: error,
           stackTrace: stackTrace,
         ),

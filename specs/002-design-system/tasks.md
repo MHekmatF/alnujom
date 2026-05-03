@@ -301,23 +301,23 @@ This is a Flutter Android app. Paths below are relative to the repo root `H:\aln
 
 ### Palette cubit + persistence
 
-- [ ] T063 [US3] Create `lib/core/theme/palette_cubit.dart` per [`contracts/palette-cubit.md`](contracts/palette-cubit.md): `Cubit<ColorPalette>`; `initialize()` reads `kPrefPalette` only when `kDesignToolsEnabled`, defaults to `ModernPalette`; `cycle()` toggles Modern↔Trust and persists ONLY when `kDesignToolsEnabled`; release pin (`kDesignToolsEnabled = false`) makes `cycle()` a no-op
+- [X] T063 [US3] Create `lib/core/theme/palette_cubit.dart` per [`contracts/palette-cubit.md`](contracts/palette-cubit.md): `Cubit<ColorPalette>`; `initialize()` reads `kPrefPalette` only when `kDesignToolsEnabled`, defaults to `ModernPalette`; `cycle()` toggles Modern↔Trust and persists ONLY when `kDesignToolsEnabled`; release pin (`kDesignToolsEnabled = false`) makes `cycle()` a no-op
   - **Verify**: a unit test under `kDesignToolsEnabled = true` confirms `cycle()` flips the state and persists; a separate test path simulates `kDesignToolsEnabled = false` (via a runtime shim that mirrors the compile-time const) and confirms `cycle()` is a no-op
 
-- [ ] T064 [US3] Create `test/core/theme/palette_cubit_test.dart` covering all transitions from `contracts/palette-cubit.md` (fresh / persisted / corrupt / cycle / cycle×2 / release-pin)
+- [X] T064 [US3] Create `test/core/theme/palette_cubit_test.dart` covering all transitions from `contracts/palette-cubit.md` (fresh / persisted / corrupt / cycle / cycle×2 / release-pin)
   - **Verify**: `flutter test test/core/theme/palette_cubit_test.dart` passes all six cases
 
 ### PaletteTester chip widget
 
-- [ ] T065 [US3] Create `lib/core/widgets/palette_tester.dart` per component-library #33 + screens-and-components §5.18: 32 dp pill; swatch dot (active primary) + name label + cycle icon; absolute floating position top-leading with `lg` (16) inset; `kDesignToolsEnabled` gate at the top of `build()` returning `SizedBox.shrink()` when `false`; tap triggers `PaletteCubit.cycle()` then a snackbar; long-press opens a fullscreen palette explorer modal showing every token side-by-side
+- [X] T065 [US3] Create `lib/core/widgets/palette_tester.dart` per component-library #33 + screens-and-components §5.18: 32 dp pill; swatch dot (active primary) + name label + cycle icon; absolute floating position top-leading with `lg` (16) inset; `kDesignToolsEnabled` gate at the top of `build()` returning `SizedBox.shrink()` when `false`; tap triggers `PaletteCubit.cycle()` then a snackbar; long-press opens a fullscreen palette explorer modal showing every token side-by-side
   - **Verify**: a widget test with `kDesignToolsEnabled` simulated as `true` mounts the chip, taps it, asserts a `Cubit` `cycle()` call and a snackbar appearance; with `kDesignToolsEnabled` simulated as `false`, the widget is `SizedBox.shrink()`
 
-- [ ] T066 [US3] Wire the chip overlay into `lib/app.dart`: stack the `PaletteTester` above the router outlet inside the `MaterialApp.builder`, surfaced on every screen; the tree-shake guard inside the chip handles release absence (depends on T065)
+- [X] T066 [US3] Wire the chip overlay into `lib/app.dart`: stack the `PaletteTester` above the router outlet inside the `MaterialApp.builder`, surfaced on every screen; the tree-shake guard inside the chip handles release absence (depends on T065)
   - **Verify**: `flutter run --debug --dart-define=DESIGN_TOOLS=true` renders the chip on the shell home; building release `flutter build apk --release` and inspecting size with `flutter build apk --analyze-size` shows `palette_tester.dart` absent from the reachable code list
 
 ### Tree-shake assertion
 
-- [ ] T067 [US3] Add a manual verification step to `quickstart.md` step 8 (already drafted) confirming the chip is absent in release; also add a `test/widgets/palette_tester_release_pin_test.dart` widget test that asserts under a simulated release-equivalent flag the widget produces no rendered output (depends on T065)
+- [X] T067 [US3] Add a manual verification step to `quickstart.md` step 8 (already drafted) confirming the chip is absent in release; also add a `test/widgets/palette_tester_release_pin_test.dart` widget test that asserts under a simulated release-equivalent flag the widget produces no rendered output (depends on T065)
   - **Verify**: the widget test passes; the manual quickstart step is reproducible
 
 **Checkpoint**: User Story 3 is complete — the runtime palette comparison loop is closed for QA; production end users see only Modern (FR-015 unchanged).

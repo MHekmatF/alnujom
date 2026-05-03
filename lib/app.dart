@@ -6,25 +6,25 @@ import 'core/di/injection.dart';
 import 'core/localization/locale_cubit.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/color_palette.dart';
+import 'core/theme/palette_cubit.dart';
 import 'core/theme/theme_cubit.dart';
+import 'core/widgets/palette_tester.dart';
 import 'l10n/app_localizations.dart';
 
 class App extends StatelessWidget {
-  const App({
-    super.key,
-    this.initialLocale = LocaleCubit.defaultLocale,
-  });
+  const App({super.key, this.initialLocale = LocaleCubit.defaultLocale});
 
   final Locale initialLocale;
 
   @override
   Widget build(BuildContext context) {
-    const palette = ColorPalette.defaultPalette;
-
     return MultiBlocProvider(
       providers: [
         BlocProvider<ThemeCubit>(
           create: (_) => getIt<ThemeCubit>()..initialize(),
+        ),
+        BlocProvider<PaletteCubit>(
+          create: (_) => getIt<PaletteCubit>()..initialize(),
         ),
         BlocProvider<LocaleCubit>(
           create: (_) => getIt<LocaleCubit>(param1: initialLocale),
@@ -39,23 +39,35 @@ class App extends StatelessWidget {
           };
           return BlocBuilder<LocaleCubit, Locale>(
             builder: (context, locale) {
-              return MaterialApp.router(
-                routerConfig: getIt<GoRouter>(),
-                theme: buildAppTheme(
-                  palette: palette,
-                  brightness: Brightness.light,
-                  locale: locale,
-                ),
-                darkTheme: buildAppTheme(
-                  palette: palette,
-                  brightness: Brightness.dark,
-                  locale: locale,
-                ),
-                themeMode: themeMode,
-                locale: locale,
-                localizationsDelegates: AppLocalizations.localizationsDelegates,
-                supportedLocales: AppLocalizations.supportedLocales,
-                debugShowCheckedModeBanner: false,
+              return BlocBuilder<PaletteCubit, ColorPalette>(
+                builder: (context, palette) {
+                  return MaterialApp.router(
+                    routerConfig: getIt<GoRouter>(),
+                    theme: buildAppTheme(
+                      palette: palette,
+                      brightness: Brightness.light,
+                      locale: locale,
+                    ),
+                    darkTheme: buildAppTheme(
+                      palette: palette,
+                      brightness: Brightness.dark,
+                      locale: locale,
+                    ),
+                    themeMode: themeMode,
+                    themeAnimationDuration: const Duration(milliseconds: 240),
+                    locale: locale,
+                    localizationsDelegates:
+                        AppLocalizations.localizationsDelegates,
+                    supportedLocales: AppLocalizations.supportedLocales,
+                    debugShowCheckedModeBanner: false,
+                    builder: (context, child) => Stack(
+                      children: [
+                        child ?? const SizedBox.shrink(),
+                        const PaletteTester(),
+                      ],
+                    ),
+                  );
+                },
               );
             },
           );

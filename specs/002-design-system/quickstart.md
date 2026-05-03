@@ -112,6 +112,7 @@ flutter build apk --release --analyze-size
 **Pass signal**:
 
 - `--analyze-size` output does NOT list `theme_gallery_page.dart` or `palette_tester.dart` under reachable code.
+- The Palette Tester chip is absent on the release shell home; there is no top-leading palette pill to tap.
 - Searching the unpacked APK for the literal route `_debug/theme-gallery` returns no hits.
 - Installing the release APK, opening the app, and trying to navigate to `/_debug/theme-gallery` results in the router's "no route" handler (404 / fallback).
 

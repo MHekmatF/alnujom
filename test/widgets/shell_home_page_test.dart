@@ -2,6 +2,7 @@ import 'package:alnujom/core/errors/result.dart';
 import 'package:alnujom/core/localization/locale_cubit.dart';
 import 'package:alnujom/core/logging/app_logger.dart';
 import 'package:alnujom/core/storage/preferences_store.dart';
+import 'package:alnujom/core/theme/color_palette.dart';
 import 'package:alnujom/core/theme/theme_cubit.dart';
 import 'package:alnujom/l10n/app_localizations.dart';
 import 'package:alnujom/shell/shell_home_page.dart';
@@ -61,6 +62,13 @@ final class _FakePreferencesStore implements PreferencesStore {
 
   @override
   Future<Result<void>> writeLocale(Locale locale) async => const Success(null);
+
+  @override
+  Future<Result<String?>> readPaletteName() async => const Success(null);
+
+  @override
+  Future<Result<void>> writePalette(ColorPalette palette) async =>
+      const Success(null);
 }
 
 final class _NoopLogger implements AppLogger {

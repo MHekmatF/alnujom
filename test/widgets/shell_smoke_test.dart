@@ -3,6 +3,7 @@ import 'package:alnujom/core/di/injection.dart';
 import 'package:alnujom/core/errors/result.dart';
 import 'package:alnujom/core/storage/preferences_store.dart';
 import 'package:alnujom/core/theme/app_theme_mode.dart';
+import 'package:alnujom/core/theme/color_palette.dart';
 import 'package:alnujom/l10n/app_localizations.dart';
 import 'package:alnujom/shell/shell_home_page.dart';
 import 'package:flutter/material.dart';
@@ -76,4 +77,11 @@ final class _FakePreferencesStore implements PreferencesStore {
     this.locale = locale;
     return const Success(null);
   }
+
+  @override
+  Future<Result<String?>> readPaletteName() async => const Success(null);
+
+  @override
+  Future<Result<void>> writePalette(ColorPalette palette) async =>
+      const Success(null);
 }

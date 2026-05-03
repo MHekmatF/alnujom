@@ -2,6 +2,7 @@ import 'package:alnujom/core/errors/failure.dart';
 import 'package:alnujom/core/errors/result.dart';
 import 'package:alnujom/core/logging/app_logger.dart';
 import 'package:alnujom/core/storage/preferences_store.dart';
+import 'package:alnujom/core/theme/color_palette.dart';
 import 'package:alnujom/core/theme/theme_cubit.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
@@ -76,13 +77,16 @@ void main() {
       expect(store.writtenThemeModes, [AppThemeMode.dark]);
     });
 
-    test('setMode(currentState) is a no-op — no emit, no store write', () async {
-      final store = _FakePreferencesStore();
-      final cubit = _buildCubit(store: store);
-      // initial state is auto; calling setMode(auto) is a no-op
-      await cubit.setMode(AppThemeMode.auto);
-      expect(store.writtenThemeModes, isEmpty);
-    });
+    test(
+      'setMode(currentState) is a no-op — no emit, no store write',
+      () async {
+        final store = _FakePreferencesStore();
+        final cubit = _buildCubit(store: store);
+        // initial state is auto; calling setMode(auto) is a no-op
+        await cubit.setMode(AppThemeMode.auto);
+        expect(store.writtenThemeModes, isEmpty);
+      },
+    );
 
     test('write failure logs warning but still updates state', () async {
       final logger = _RecordingLogger();
@@ -96,10 +100,9 @@ void main() {
       'ThemeMode.system re-renders with opposite theme when OS brightness '
       'flips — no cubit involved',
       (tester) async {
-        addTearDown(
-          tester.platformDispatcher.clearPlatformBrightnessTestValue,
-        );
-        tester.platformDispatcher.platformBrightnessTestValue = Brightness.light;
+        addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
+        tester.platformDispatcher.platformBrightnessTestValue =
+            Brightness.light;
         await tester.pumpWidget(
           MaterialApp(
             themeMode: ThemeMode.system,
@@ -170,6 +173,13 @@ final class _FakePreferencesStore implements PreferencesStore {
 
   @override
   Future<Result<void>> writeLocale(Locale locale) async => const Success(null);
+
+  @override
+  Future<Result<String?>> readPaletteName() async => const Success(null);
+
+  @override
+  Future<Result<void>> writePalette(ColorPalette palette) async =>
+      const Success(null);
 }
 
 final class _RecordingLogger implements AppLogger {

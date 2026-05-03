@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../errors/result.dart';
+import '../theme/color_palette.dart';
 import '../theme/app_theme_mode.dart';
 
 abstract interface class PreferencesStore {
@@ -11,4 +12,8 @@ abstract interface class PreferencesStore {
   Future<Result<Locale?>> readLocale();
 
   Future<Result<void>> writeLocale(Locale locale);
+
+  Future<Result<String?>> readPaletteName();
+
+  Future<Result<void>> writePalette(ColorPalette palette);
 }
