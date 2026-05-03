@@ -332,21 +332,21 @@ This is a Flutter Android app. Paths below are relative to the repo root `H:\aln
 
 ### Golden suite
 
-- [ ] T068 [US4] Create `test/widgets/property_card_golden_test.dart`: mounts `PropertyCard` with deterministic sample data (locked title, price, location, area, bed/bath counts, image asset), iterates the 4 combinations (light × ar, light × en, dark × ar, dark × en) under Modern, and calls `matchesGoldenFile('test/goldens/property_card/<theme>_<locale>.png')` for each
+- [X] T068 [US4] Create `test/widgets/property_card_golden_test.dart`: mounts `PropertyCard` with deterministic sample data (locked title, price, location, area, bed/bath counts, image asset), iterates the 4 combinations (light × ar, light × en, dark × ar, dark × en) under Modern, and calls `matchesGoldenFile('test/goldens/property_card/<theme>_<locale>.png')` for each
   - **Verify**: running `flutter test --update-goldens test/widgets/property_card_golden_test.dart` once on a clean tree generates 4 PNG files; subsequent `flutter test test/widgets/property_card_golden_test.dart` runs match those goldens
 
-- [ ] T069 [US4] Commit the four generated golden PNGs at `test/goldens/property_card/{light_ar,light_en,dark_ar,dark_en}.png` (depends on T068)
+- [X] T069 [US4] Commit the four generated golden PNGs at `test/goldens/property_card/{light_ar,light_en,dark_ar,dark_en}.png` (depends on T068)
   - **Verify**: `git ls-files test/goldens/property_card/` lists exactly 4 PNG files; `git diff` after `flutter test test/widgets/property_card_golden_test.dart` is empty
 
 ### Theme Gallery (debug surface — supports US4 visual review + US3 palette QA)
 
-- [ ] T070 [US4] Create `lib/debug/theme_gallery_page.dart` per [`contracts/theme-gallery.md`](contracts/theme-gallery.md): switcher row at top (locale / theme / palette pill segments); component sections below grouped by category (Chrome / Inputs / Cards / Badges / Sheets / Dialogs / Feedback / Media / Chat / Price / BottomNav / PaletteTester); each section renders every variant × every applicable state with labels
+- [X] T070 [US4] Create `lib/debug/theme_gallery_page.dart` per [`contracts/theme-gallery.md`](contracts/theme-gallery.md): switcher row at top (locale / theme / palette pill segments); component sections below grouped by category (Chrome / Inputs / Cards / Badges / Sheets / Dialogs / Feedback / Media / Chat / Price / BottomNav / PaletteTester); each section renders every variant × every applicable state with labels
   - **Verify**: opening `/_debug/theme-gallery` in a debug build renders the page without exceptions in all 8 combinations
 
-- [ ] T071 [US4] Update `lib/core/routing/app_router.dart` to register `/_debug/theme-gallery` route conditionally on `kDesignToolsEnabled`; the import of `theme_gallery_page.dart` MUST sit inside the `if (kDesignToolsEnabled)` branch so dead-code elimination drops the page from release builds (depends on T070)
+- [X] T071 [US4] Update `lib/core/routing/app_router.dart` to register `/_debug/theme-gallery` route conditionally on `kDesignToolsEnabled`; the import of `theme_gallery_page.dart` MUST sit inside the `if (kDesignToolsEnabled)` branch so dead-code elimination drops the page from release builds (depends on T070)
   - **Verify**: `flutter run --debug --dart-define=DESIGN_TOOLS=true` reaches the gallery via `context.go('/_debug/theme-gallery')`; `flutter build apk --release` with no flags produces an APK where searching for the literal `_debug/theme-gallery` returns no hits
 
-- [ ] T072 [US4] Create `test/widgets/theme_gallery_test.dart` mounting `ThemeGalleryPage` in each of the 4 base combinations (light × ar, light × en, dark × ar, dark × en) under Modern and asserting no exceptions, every section header renders, and the three switcher pills are tappable
+- [X] T072 [US4] Create `test/widgets/theme_gallery_test.dart` mounting `ThemeGalleryPage` in each of the 4 base combinations (light × ar, light × en, dark × ar, dark × en) under Modern and asserting no exceptions, every section header renders, and the three switcher pills are tappable
   - **Verify**: `flutter test test/widgets/theme_gallery_test.dart` passes
 
 **Checkpoint**: User Story 4 is complete — `PropertyCard` regressions are blocked at PR time; the Theme Gallery exists as the design-review surface for the next 22 phases.
