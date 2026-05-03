@@ -68,6 +68,34 @@ void main() {
       expect(storage.values['com.alnujom.preferences.theme_mode'], 'light');
     });
 
+    test('writeThemeMode stores auto as enum name', () async {
+      final storage = _MemorySecureStorage();
+      final store = SecurePreferencesStore.test(
+        _RecordingLogger(),
+        storage: storage,
+      );
+
+      final result = await store.writeThemeMode(AppThemeMode.auto);
+
+      expect(result, isA<Success<void>>());
+      expect(storage.values['com.alnujom.preferences.theme_mode'], 'auto');
+    });
+
+    test('readThemeMode round-trips auto', () async {
+      final storage = _MemorySecureStorage(
+        values: {'com.alnujom.preferences.theme_mode': 'auto'},
+      );
+      final store = SecurePreferencesStore.test(
+        _RecordingLogger(),
+        storage: storage,
+      );
+
+      final result = await store.readThemeMode();
+
+      expect(result, isA<Success<AppThemeMode?>>());
+      expect((result as Success<AppThemeMode?>).value, AppThemeMode.auto);
+    });
+
     test('writeThemeMode errors return CacheFailure', () async {
       final store = SecurePreferencesStore.test(
         _RecordingLogger(),

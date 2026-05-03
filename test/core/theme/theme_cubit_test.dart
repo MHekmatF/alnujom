@@ -36,16 +36,35 @@ void main() {
     );
 
     test(
-      'initialize() with read failure emits auto and logs warning',
+      'initialize() with FailureResult emits auto and logs warning at cubit',
       () async {
         final logger = _RecordingLogger();
         final cubit = _buildCubit(
-          readResult: const FailureResult(CacheFailure('corrupt')),
+          readResult: const FailureResult(CacheFailure('disk error')),
           logger: logger,
         );
         await cubit.initialize();
         expect(cubit.state, AppThemeMode.auto);
         expect(logger.warningMessages, isNotEmpty);
+      },
+    );
+
+    // The "corrupt persisted value" path (e.g. someone wrote 'foobar' to the
+    // store) is collapsed to Success(null) by SecurePreferencesStore — the
+    // warning is emitted at the storage layer (see
+    // secure_preferences_store_test.dart). At the cubit, that path is
+    // indistinguishable from "no persisted value": both emit auto silently.
+    test(
+      'initialize() with Success(null) emits auto without cubit-level warning',
+      () async {
+        final logger = _RecordingLogger();
+        final cubit = _buildCubit(
+          readResult: const Success(null),
+          logger: logger,
+        );
+        await cubit.initialize();
+        expect(cubit.state, AppThemeMode.auto);
+        expect(logger.warningMessages, isEmpty);
       },
     );
 

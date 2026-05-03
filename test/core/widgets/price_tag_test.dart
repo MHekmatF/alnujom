@@ -17,25 +17,27 @@ void main() {
 
   // RTL/LTR matrix — T062
   testWidgets(
-    'PriceTag price text carries explicit TextDirection.ltr — renders '
-    'correctly under RTL UI direction',
+    'PriceTag price text carries explicit TextDirection.ltr under RTL UI',
     (tester) async {
       await pumpWidgetKit(
         tester,
         const PriceTag(amount: '250', currency: 'USD'),
       );
-      // Explicit textDirection: TextDirection.ltr on price text keeps number
-      // formatting LTR even inside the RTL widget tree.
-      expect(find.text('250 USD'), findsOneWidget);
+      final priceText = tester.widget<Text>(find.text('250 USD'));
+      expect(priceText.textDirection, TextDirection.ltr);
     },
   );
 
-  testWidgets('PriceTag renders without error under LTR', (tester) async {
-    await pumpWidgetKit(
-      tester,
-      const PriceTag(amount: '250', currency: 'USD'),
-      direction: TextDirection.ltr,
-    );
-    expect(find.text('250 USD'), findsOneWidget);
-  });
+  testWidgets(
+    'PriceTag price text keeps explicit TextDirection.ltr under LTR UI',
+    (tester) async {
+      await pumpWidgetKit(
+        tester,
+        const PriceTag(amount: '250', currency: 'USD'),
+        direction: TextDirection.ltr,
+      );
+      final priceText = tester.widget<Text>(find.text('250 USD'));
+      expect(priceText.textDirection, TextDirection.ltr);
+    },
+  );
 }

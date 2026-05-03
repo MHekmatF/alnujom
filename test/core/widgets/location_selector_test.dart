@@ -1,5 +1,6 @@
 import 'package:alnujom/core/widgets/location_selector.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'widget_test_support.dart';
@@ -28,28 +29,31 @@ void main() {
   });
 
   testWidgets(
-    'LocationSelector start-padding is symmetric — content at same inset '
-    'from both edges under both directions',
+    'LocationSelector Row reverses under RTL — map_pin trails chevron, '
+    'and the order flips back under LTR',
     (tester) async {
-      const city = 'Test';
-
       await pumpWidgetKit(
         tester,
-        const LocationSelector(city: city),
+        const LocationSelector(city: 'Test'),
       );
-      final textRtl = tester.getTopLeft(find.text(city));
+      final pinRtl = tester.getCenter(find.byIcon(LucideIcons.map_pin)).dx;
+      final chevronRtl = tester
+          .getCenter(find.byIcon(LucideIcons.chevron_down))
+          .dx;
+      // RTL: first child (map_pin) sits on the visual right
+      expect(pinRtl, greaterThan(chevronRtl));
 
       await pumpWidgetKit(
         tester,
-        const LocationSelector(city: city),
+        const LocationSelector(city: 'Test'),
         direction: TextDirection.ltr,
       );
-      final textLtr = tester.getTopLeft(find.text(city));
-
-      // Both directions render the text — positions differ (RTL/LTR flip)
-      // but neither should be at x=0 (padding is applied in both directions)
-      expect(textRtl.dx, isNonZero);
-      expect(textLtr.dx, isNonZero);
+      final pinLtr = tester.getCenter(find.byIcon(LucideIcons.map_pin)).dx;
+      final chevronLtr = tester
+          .getCenter(find.byIcon(LucideIcons.chevron_down))
+          .dx;
+      // LTR: first child (map_pin) sits on the visual left
+      expect(pinLtr, lessThan(chevronLtr));
     },
   );
 }

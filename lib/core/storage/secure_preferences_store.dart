@@ -53,18 +53,7 @@ final class SecurePreferencesStore implements PreferencesStore {
   @override
   Future<Result<void>> writeThemeMode(AppThemeMode mode) async {
     try {
-      final value = switch (mode) {
-        AppThemeMode.light => 'light',
-        AppThemeMode.dark => 'dark',
-        AppThemeMode.auto => null,
-      };
-
-      if (value == null) {
-        await _storage.delete(key: _themeKey);
-      } else {
-        await _storage.write(key: _themeKey, value: value);
-      }
-
+      await _storage.write(key: _themeKey, value: mode.name);
       return const Success(null);
     } on Object catch (error, stackTrace) {
       _logger.warning(
