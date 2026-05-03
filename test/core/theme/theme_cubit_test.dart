@@ -9,101 +9,136 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('ThemeCubit', () {
-    late _FakePreferencesStore store;
-    late _RecordingLogger logger;
-
-    test('initial state is system when persisted value is null', () {
-      final cubit = _buildCubit(initialMode: null);
-
-      expect(cubit.state, ThemeMode.system);
+    test('initial state is auto', () {
+      final cubit = _buildCubit();
+      expect(cubit.state, AppThemeMode.auto);
     });
 
-    test('initial state is dark when persisted value is dark', () {
-      final cubit = _buildCubit(initialMode: ThemeMode.dark);
-
-      expect(cubit.state, ThemeMode.dark);
-    });
-
-    blocTest<ThemeCubit, ThemeMode>(
-      'toggle from system chooses light when platform is dark and writes through',
-      build: () {
-        store = _FakePreferencesStore();
-        return _buildCubit(
-          initialMode: ThemeMode.system,
-          platformBrightness: Brightness.dark,
-          preferencesStore: store,
-        );
-      },
-      act: (cubit) => cubit.toggle(),
-      expect: () => [ThemeMode.light],
-      verify: (_) => expect(store.writtenThemeModes, [ThemeMode.light]),
+    blocTest<ThemeCubit, AppThemeMode>(
+      'initialize() with no persisted value emits auto',
+      build: () => _buildCubit(readResult: const Success(null)),
+      act: (cubit) => cubit.initialize(),
+      expect: () => [AppThemeMode.auto],
     );
 
-    blocTest<ThemeCubit, ThemeMode>(
-      'toggle from light chooses dark and writes through',
-      build: () {
-        store = _FakePreferencesStore();
-        return _buildCubit(
-          initialMode: ThemeMode.light,
-          preferencesStore: store,
-        );
-      },
-      act: (cubit) => cubit.toggle(),
-      expect: () => [ThemeMode.dark],
-      verify: (_) => expect(store.writtenThemeModes, [ThemeMode.dark]),
+    blocTest<ThemeCubit, AppThemeMode>(
+      'initialize() with light persisted emits light',
+      build: () => _buildCubit(readResult: const Success(AppThemeMode.light)),
+      act: (cubit) => cubit.initialize(),
+      expect: () => [AppThemeMode.light],
     );
 
-    blocTest<ThemeCubit, ThemeMode>(
-      'write failure logs a warning without reverting in-memory state',
-      build: () {
-        logger = _RecordingLogger();
-        return _buildCubit(
-          initialMode: ThemeMode.light,
-          writeThemeFailure: true,
+    blocTest<ThemeCubit, AppThemeMode>(
+      'initialize() with dark persisted emits dark',
+      build: () => _buildCubit(readResult: const Success(AppThemeMode.dark)),
+      act: (cubit) => cubit.initialize(),
+      expect: () => [AppThemeMode.dark],
+    );
+
+    test(
+      'initialize() with read failure emits auto and logs warning',
+      () async {
+        final logger = _RecordingLogger();
+        final cubit = _buildCubit(
+          readResult: const FailureResult(CacheFailure('corrupt')),
           logger: logger,
         );
+        await cubit.initialize();
+        expect(cubit.state, AppThemeMode.auto);
+        expect(logger.warningMessages, isNotEmpty);
       },
-      act: (cubit) => cubit.toggle(),
-      expect: () => [ThemeMode.dark],
-      verify: (cubit) {
-        expect(logger.warningMessages.single, contains('persist theme'));
-        expect(cubit.state, ThemeMode.dark);
+    );
+
+    test('setMode(dark) persists dark to store', () async {
+      final store = _FakePreferencesStore();
+      final cubit = _buildCubit(store: store);
+      await cubit.setMode(AppThemeMode.dark);
+      expect(cubit.state, AppThemeMode.dark);
+      expect(store.writtenThemeModes, [AppThemeMode.dark]);
+    });
+
+    test('setMode(currentState) is a no-op — no emit, no store write', () async {
+      final store = _FakePreferencesStore();
+      final cubit = _buildCubit(store: store);
+      // initial state is auto; calling setMode(auto) is a no-op
+      await cubit.setMode(AppThemeMode.auto);
+      expect(store.writtenThemeModes, isEmpty);
+    });
+
+    test('write failure logs warning but still updates state', () async {
+      final logger = _RecordingLogger();
+      final cubit = _buildCubit(writeThemeFailure: true, logger: logger);
+      await cubit.setMode(AppThemeMode.light);
+      expect(cubit.state, AppThemeMode.light);
+      expect(logger.warningMessages.single, contains('persist theme'));
+    });
+
+    testWidgets(
+      'ThemeMode.system re-renders with opposite theme when OS brightness '
+      'flips — no cubit involved',
+      (tester) async {
+        addTearDown(
+          tester.platformDispatcher.clearPlatformBrightnessTestValue,
+        );
+        tester.platformDispatcher.platformBrightnessTestValue = Brightness.light;
+        await tester.pumpWidget(
+          MaterialApp(
+            themeMode: ThemeMode.system,
+            theme: ThemeData.light(),
+            darkTheme: ThemeData.dark(),
+            home: const _BrightnessLabel(),
+          ),
+        );
+        expect(find.text('light'), findsOneWidget);
+
+        tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
+        await tester.pumpAndSettle();
+        expect(find.text('dark'), findsOneWidget);
       },
     );
   });
 }
 
+class _BrightnessLabel extends StatelessWidget {
+  const _BrightnessLabel();
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(Theme.of(context).brightness.name);
+  }
+}
+
 ThemeCubit _buildCubit({
-  ThemeMode? initialMode,
-  Brightness platformBrightness = Brightness.light,
+  Result<AppThemeMode?>? readResult,
+  _FakePreferencesStore? store,
   bool writeThemeFailure = false,
-  _FakePreferencesStore? preferencesStore,
   _RecordingLogger? logger,
 }) {
   final resolvedStore =
-      preferencesStore ??
-      _FakePreferencesStore(writeThemeFailure: writeThemeFailure);
+      store ??
+      _FakePreferencesStore(
+        readResult: readResult ?? const Success(null),
+        writeThemeFailure: writeThemeFailure,
+      );
   final resolvedLogger = logger ?? _RecordingLogger();
-
-  return ThemeCubit.test(
-    preferencesStore: resolvedStore,
-    logger: resolvedLogger,
-    initialMode: initialMode ?? ThemeMode.system,
-    platformBrightness: platformBrightness,
-  );
+  return ThemeCubit.test(store: resolvedStore, log: resolvedLogger);
 }
 
 final class _FakePreferencesStore implements PreferencesStore {
-  _FakePreferencesStore({this.writeThemeFailure = false});
+  _FakePreferencesStore({
+    this.readResult = const Success(null),
+    this.writeThemeFailure = false,
+  });
 
+  final Result<AppThemeMode?> readResult;
   final bool writeThemeFailure;
-  final writtenThemeModes = <ThemeMode>[];
+  final writtenThemeModes = <AppThemeMode>[];
 
   @override
-  Future<Result<ThemeMode?>> readThemeMode() async => const Success(null);
+  Future<Result<AppThemeMode?>> readThemeMode() async => readResult;
 
   @override
-  Future<Result<void>> writeThemeMode(ThemeMode mode) async {
+  Future<Result<void>> writeThemeMode(AppThemeMode mode) async {
     writtenThemeModes.add(mode);
     if (writeThemeFailure) {
       return const FailureResult(CacheFailure('write failed'));

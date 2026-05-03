@@ -21,7 +21,7 @@ class ShellHomePage extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final colors = AppColors.of(context);
     final textStyles = AppTextStyles.of(context);
-    final themeMode = context.watch<ThemeCubit>().state;
+    final appThemeMode = context.watch<ThemeCubit>().state;
     final locale = context.watch<LocaleCubit>().state;
 
     return Scaffold(
@@ -45,7 +45,7 @@ class ShellHomePage extends StatelessWidget {
                 children: [
                   Semantics(
                     label: l10n.themeToggleLabel,
-                    value: '${l10n.currentTheme}: ${themeMode.name}',
+                    value: '${l10n.currentTheme}: ${appThemeMode.name}',
                     button: true,
                     child: OutlinedButton.icon(
                       key: themeToggleKey,
@@ -53,9 +53,14 @@ class ShellHomePage extends StatelessWidget {
                         minimumSize: const Size(48, 48),
                       ),
                       onPressed: () {
-                        unawaited(context.read<ThemeCubit>().toggle());
+                        final next = switch (appThemeMode) {
+                          AppThemeMode.auto => AppThemeMode.light,
+                          AppThemeMode.light => AppThemeMode.dark,
+                          AppThemeMode.dark => AppThemeMode.auto,
+                        };
+                        unawaited(context.read<ThemeCubit>().setMode(next));
                       },
-                      icon: Icon(_themeIcon(themeMode)),
+                      icon: Icon(_themeIcon(appThemeMode)),
                       label: Text(l10n.themeToggleLabel),
                     ),
                   ),
@@ -85,9 +90,9 @@ class ShellHomePage extends StatelessWidget {
     );
   }
 
-  IconData _themeIcon(ThemeMode themeMode) => switch (themeMode) {
-    ThemeMode.dark => Icons.dark_mode_outlined,
-    ThemeMode.light => Icons.light_mode_outlined,
-    ThemeMode.system => Icons.brightness_auto_outlined,
+  IconData _themeIcon(AppThemeMode mode) => switch (mode) {
+    AppThemeMode.dark => Icons.dark_mode_outlined,
+    AppThemeMode.light => Icons.light_mode_outlined,
+    AppThemeMode.auto => Icons.brightness_auto_outlined,
   };
 }

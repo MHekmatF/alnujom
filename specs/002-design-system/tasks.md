@@ -270,23 +270,23 @@ This is a Flutter Android app. Paths below are relative to the repo root `H:\aln
 
 ### Theme cubit extension (FR-016)
 
-- [ ] T058 [US2] Update `lib/core/theme/theme_cubit.dart` per [`contracts/theme-cubit.md`](contracts/theme-cubit.md): add `AppThemeMode { auto, light, dark }`; `initialize()` reads `kPrefThemeMode` (defaults to `auto`); `setMode(m)` persists then emits; corrupt-value → `auto` + warning log; the cubit emits `auto/light/dark` only — `MaterialApp.themeMode` mapping happens at the consumer (T016)
+- [X] T058 [US2] Update `lib/core/theme/theme_cubit.dart` per [`contracts/theme-cubit.md`](contracts/theme-cubit.md): add `AppThemeMode { auto, light, dark }`; `initialize()` reads `kPrefThemeMode` (defaults to `auto`); `setMode(m)` persists then emits; corrupt-value → `auto` + warning log; the cubit emits `auto/light/dark` only — `MaterialApp.themeMode` mapping happens at the consumer (T016)
   - **Verify**: a Cubit test asserts the four state-transition cases listed in `contracts/theme-cubit.md`; the corrupt-value case logs via the injected `AppLogger`
 
-- [ ] T059 [US2] Create `test/core/theme/theme_cubit_test.dart` covering all transitions from `contracts/theme-cubit.md` plus a widget test that mounts `MaterialApp(themeMode: ThemeMode.system)`, simulates an `MediaQueryData.copyWith(platformBrightness: …)` flip, and asserts the rendered theme switches without rebuilding the cubit
+- [X] T059 [US2] Create `test/core/theme/theme_cubit_test.dart` covering all transitions from `contracts/theme-cubit.md` plus a widget test that mounts `MaterialApp(themeMode: ThemeMode.system)`, simulates an `MediaQueryData.copyWith(platformBrightness: …)` flip, and asserts the rendered theme switches without rebuilding the cubit
   - **Verify**: `flutter test test/core/theme/theme_cubit_test.dart` passes; the live-OS-theme-flip test does NOT call `cubit.emit` — it confirms the framework path works
 
 ### Color palette + contrast verification
 
-- [ ] T060 [P] [US2] Create `test/core/theme/color_palette_test.dart` asserting `ModernPalette().lightScheme().primary == Color(0xFF1D4ED8)` and the locked hex values for the entire shared-token block in both palettes × both brightnesses (depends on T011)
+- [X] T060 [P] [US2] Create `test/core/theme/color_palette_test.dart` asserting `ModernPalette().lightScheme().primary == Color(0xFF1D4ED8)` and the locked hex values for the entire shared-token block in both palettes × both brightnesses (depends on T011)
   - **Verify**: the test passes; if a hex value drifts in `color_palette.dart`, the test fails with the offending token name
 
-- [ ] T061 [P] [US2] Create `test/core/theme/color_scheme_contrast_test.dart` walking every "text" / "background" token pair across (Modern × light, Modern × dark, Trust × light, Trust × dark) and asserting WCAG AA (4.5:1 for body, 3:1 for large text and UI) using a `contrastRatio(Color, Color)` helper in the test file
+- [X] T061 [P] [US2] Create `test/core/theme/color_scheme_contrast_test.dart` walking every "text" / "background" token pair across (Modern × light, Modern × dark, Trust × light, Trust × dark) and asserting WCAG AA (4.5:1 for body, 3:1 for large text and UI) using a `contrastRatio(Color, Color)` helper in the test file
   - **Verify**: all 4 combinations × every relevant token pair pass; if the test fails, the output names exactly which (palette, theme, foreground, background) violates the floor and by what ratio
 
 ### Locale-aware components — RTL/LTR sweep
 
-- [ ] T062 [US2] Add an RTL/LTR matrix dimension to the per-component widget tests in T057 — for the components whose layout is direction-sensitive (`AppAppBar`, `PropertyCard`, `ChatBubble`, `AppBottomNav`, `PriceTag`, `LocationSelector`, `EmptyState`), each test mounts the component twice (under `Directionality.rtl` and `Directionality.ltr`) and asserts directional padding/alignment correctness
+- [X] T062 [US2] Add an RTL/LTR matrix dimension to the per-component widget tests in T057 — for the components whose layout is direction-sensitive (`AppAppBar`, `PropertyCard`, `ChatBubble`, `AppBottomNav`, `PriceTag`, `LocationSelector`, `EmptyState`), each test mounts the component twice (under `Directionality.rtl` and `Directionality.ltr`) and asserts directional padding/alignment correctness
   - **Verify**: `flutter test test/core/widgets/` includes the new RTL/LTR cases; a deliberate `EdgeInsets.only(left: 8)` introduced into a tested component flips the rtl test red
 
 **Checkpoint**: User Story 2 is complete — the design system meets the WCAG / RTL / live-theme bar; the kit is now demonstrably correct across all 4 base environment combinations in both palettes.

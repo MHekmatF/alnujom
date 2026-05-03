@@ -5,6 +5,7 @@ import 'package:injectable/injectable.dart';
 import '../errors/failure.dart';
 import '../errors/result.dart';
 import '../logging/app_logger.dart';
+import '../theme/app_theme_mode.dart';
 import 'preferences_store.dart';
 
 @LazySingleton(as: PreferencesStore)
@@ -28,7 +29,7 @@ final class SecurePreferencesStore implements PreferencesStore {
   final FlutterSecureStorage _storage;
 
   @override
-  Future<Result<ThemeMode?>> readThemeMode() async {
+  Future<Result<AppThemeMode?>> readThemeMode() async {
     try {
       final raw = await _storage.read(key: _themeKey);
       return Success(_parseThemeMode(raw));
@@ -50,12 +51,12 @@ final class SecurePreferencesStore implements PreferencesStore {
   }
 
   @override
-  Future<Result<void>> writeThemeMode(ThemeMode mode) async {
+  Future<Result<void>> writeThemeMode(AppThemeMode mode) async {
     try {
       final value = switch (mode) {
-        ThemeMode.light => 'light',
-        ThemeMode.dark => 'dark',
-        ThemeMode.system => null,
+        AppThemeMode.light => 'light',
+        AppThemeMode.dark => 'dark',
+        AppThemeMode.auto => null,
       };
 
       if (value == null) {
@@ -126,25 +127,22 @@ final class SecurePreferencesStore implements PreferencesStore {
     }
   }
 
-  ThemeMode? _parseThemeMode(String? raw) {
-    if (raw == null) {
-      return null;
-    }
+  AppThemeMode? _parseThemeMode(String? raw) {
+    if (raw == null) return null;
     if (raw.length > 32) {
       _warnUnrecognized('theme mode', raw);
       return null;
     }
     return switch (raw) {
-      'light' => ThemeMode.light,
-      'dark' => ThemeMode.dark,
-      _ => _warnAndReturnNull<ThemeMode>('theme mode', raw),
+      'auto' => AppThemeMode.auto,
+      'light' => AppThemeMode.light,
+      'dark' => AppThemeMode.dark,
+      _ => _warnAndReturnNull<AppThemeMode>('theme mode', raw),
     };
   }
 
   Locale? _parseLocale(String? raw) {
-    if (raw == null) {
-      return null;
-    }
+    if (raw == null) return null;
     if (raw.length > 32) {
       _warnUnrecognized('locale', raw);
       return null;

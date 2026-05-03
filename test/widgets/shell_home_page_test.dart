@@ -16,10 +16,8 @@ void main() {
         providers: [
           BlocProvider(
             create: (_) => ThemeCubit.test(
-              preferencesStore: _FakePreferencesStore(),
-              logger: _NoopLogger(),
-              initialMode: ThemeMode.system,
-              platformBrightness: Brightness.light,
+              store: _FakePreferencesStore(),
+              log: _NoopLogger(),
             ),
           ),
           BlocProvider(
@@ -52,10 +50,10 @@ void main() {
 
 final class _FakePreferencesStore implements PreferencesStore {
   @override
-  Future<Result<ThemeMode?>> readThemeMode() async => const Success(null);
+  Future<Result<AppThemeMode?>> readThemeMode() async => const Success(null);
 
   @override
-  Future<Result<void>> writeThemeMode(ThemeMode mode) async =>
+  Future<Result<void>> writeThemeMode(AppThemeMode mode) async =>
       const Success(null);
 
   @override

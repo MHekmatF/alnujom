@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../errors/result.dart';
+import '../theme/app_theme_mode.dart';
 
 abstract interface class PreferencesStore {
-  Future<Result<ThemeMode?>> readThemeMode();
+  Future<Result<AppThemeMode?>> readThemeMode();
 
-  Future<Result<void>> writeThemeMode(ThemeMode mode);
+  Future<Result<void>> writeThemeMode(AppThemeMode mode);
 
   Future<Result<Locale?>> readLocale();
 

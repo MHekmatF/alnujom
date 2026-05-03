@@ -2,7 +2,7 @@ import 'package:alnujom/core/errors/failure.dart';
 import 'package:alnujom/core/errors/result.dart';
 import 'package:alnujom/core/logging/app_logger.dart';
 import 'package:alnujom/core/storage/secure_preferences_store.dart';
-import 'package:flutter/material.dart';
+import 'package:alnujom/core/theme/app_theme_mode.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -16,8 +16,8 @@ void main() {
 
       final result = await store.readThemeMode();
 
-      expect(result, isA<Success<ThemeMode?>>());
-      expect((result as Success<ThemeMode?>).value, isNull);
+      expect(result, isA<Success<AppThemeMode?>>());
+      expect((result as Success<AppThemeMode?>).value, isNull);
     });
 
     test('readThemeMode returns recognized dark value', () async {
@@ -31,8 +31,8 @@ void main() {
 
       final result = await store.readThemeMode();
 
-      expect(result, isA<Success<ThemeMode?>>());
-      expect((result as Success<ThemeMode?>).value, ThemeMode.dark);
+      expect(result, isA<Success<AppThemeMode?>>());
+      expect((result as Success<AppThemeMode?>).value, AppThemeMode.dark);
     });
 
     test(
@@ -46,8 +46,8 @@ void main() {
 
         final result = await store.readThemeMode();
 
-        expect(result, isA<Success<ThemeMode?>>());
-        expect((result as Success<ThemeMode?>).value, isNull);
+        expect(result, isA<Success<AppThemeMode?>>());
+        expect((result as Success<AppThemeMode?>).value, isNull);
         expect(
           logger.warningMessages.single,
           contains('unrecognized theme mode'),
@@ -62,7 +62,7 @@ void main() {
         storage: storage,
       );
 
-      final result = await store.writeThemeMode(ThemeMode.light);
+      final result = await store.writeThemeMode(AppThemeMode.light);
 
       expect(result, isA<Success<void>>());
       expect(storage.values['com.alnujom.preferences.theme_mode'], 'light');
@@ -74,7 +74,7 @@ void main() {
         storage: _MemorySecureStorage(throwOnWrite: true),
       );
 
-      final result = await store.writeThemeMode(ThemeMode.dark);
+      final result = await store.writeThemeMode(AppThemeMode.dark);
 
       expect(result, isA<FailureResult<void>>());
       expect((result as FailureResult<void>).failure, isA<CacheFailure>());

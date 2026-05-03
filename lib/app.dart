@@ -12,11 +12,9 @@ import 'l10n/app_localizations.dart';
 class App extends StatelessWidget {
   const App({
     super.key,
-    this.initialThemeMode = ThemeMode.system,
     this.initialLocale = LocaleCubit.defaultLocale,
   });
 
-  final ThemeMode initialThemeMode;
   final Locale initialLocale;
 
   @override
@@ -26,14 +24,19 @@ class App extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider<ThemeCubit>(
-          create: (_) => getIt<ThemeCubit>(param1: initialThemeMode),
+          create: (_) => getIt<ThemeCubit>()..initialize(),
         ),
         BlocProvider<LocaleCubit>(
           create: (_) => getIt<LocaleCubit>(param1: initialLocale),
         ),
       ],
-      child: BlocBuilder<ThemeCubit, ThemeMode>(
-        builder: (context, themeMode) {
+      child: BlocBuilder<ThemeCubit, AppThemeMode>(
+        builder: (context, appThemeMode) {
+          final themeMode = switch (appThemeMode) {
+            AppThemeMode.auto => ThemeMode.system,
+            AppThemeMode.light => ThemeMode.light,
+            AppThemeMode.dark => ThemeMode.dark,
+          };
           return BlocBuilder<LocaleCubit, Locale>(
             builder: (context, locale) {
               return MaterialApp.router(
