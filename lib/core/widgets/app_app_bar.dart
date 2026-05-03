@@ -34,15 +34,14 @@ class AppAppBar extends StatelessWidget implements PreferredSizeWidget {
     final foreground = variant == AppAppBarVariant.transparentOnImage
         ? colors.onPrimary
         : colors.onSurface;
+    final isTransparent = variant == AppAppBarVariant.transparentOnImage;
     return AppBar(
       title: Text(title, style: styles.titleLarge.copyWith(color: foreground)),
-      backgroundColor: variant == AppAppBarVariant.transparentOnImage
-          ? Colors.transparent
-          : colors.surface,
+      backgroundColor: isTransparent ? Colors.transparent : colors.surface,
       foregroundColor: foreground,
-      elevation: variant == AppAppBarVariant.transparentOnImage
-          ? 0
-          : AppDimens.strokeThin,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      scrolledUnderElevation: isTransparent ? 0 : AppDimens.strokeThin,
       leading: variant == AppAppBarVariant.withBack
           ? IconButton(
               onPressed: onBack,

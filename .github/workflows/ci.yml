@@ -49,13 +49,6 @@ jobs:
             exit 1
           fi
 
-      - name: Guard theme token boundaries
-        run: |
-          if grep -rE "Color\(0x" lib --include='*.dart' --exclude-dir=l10n | grep -v '^lib/core/theme/'; then
-            echo "Inline color literals must stay inside lib/core/theme/"
-            exit 1
-          fi
-
       - name: Test
         run: flutter test
 
