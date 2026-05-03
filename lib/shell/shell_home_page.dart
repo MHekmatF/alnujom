@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../core/localization/locale_cubit.dart';
+import '../core/theme/colors.dart';
+import '../core/theme/spacing.dart';
 import '../core/theme/theme_cubit.dart';
+import '../core/theme/typography.dart';
 import '../l10n/app_localizations.dart';
 
 class ShellHomePage extends StatelessWidget {
@@ -16,21 +19,27 @@ class ShellHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    final textStyles = AppTextStyles.of(context);
     final themeMode = context.watch<ThemeCubit>().state;
     final locale = context.watch<LocaleCubit>().state;
 
     return Scaffold(
       body: Center(
         child: Padding(
-          padding: const EdgeInsetsDirectional.symmetric(horizontal: 24),
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: AppSpacing.xl,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 l10n.appTitle,
-                style: Theme.of(context).textTheme.headlineMedium,
+                style: textStyles.headlineMedium.copyWith(
+                  color: colors.primary,
+                ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xl),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -50,7 +59,7 @@ class ShellHomePage extends StatelessWidget {
                       label: Text(l10n.themeToggleLabel),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: AppSpacing.md),
                   Semantics(
                     label: l10n.localeToggleLabel,
                     value: '${l10n.currentLocale}: ${locale.languageCode}',

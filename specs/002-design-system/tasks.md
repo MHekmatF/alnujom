@@ -56,7 +56,7 @@ This is a Flutter Android app. Paths below are relative to the repo root `H:\aln
 - [X] T007 [P] Add the two new preference key constants to `lib/core/storage/preferences_keys.dart` (or create the file if Phase 1 used inline strings): `kPrefThemeMode = 'app.theme_mode'`, `kPrefPalette = 'app.palette'`
   - **Verify**: `grep -rE "'app\\.(theme_mode|palette)'" lib --include='*.dart'` only matches `preferences_keys.dart`; no other call site uses raw key strings
 
-- [ ] T008 Delete `lib/core/theme/tokens_stub.dart` and remove its export from any barrel file (depends on Phase 2 tokens existing — this task is recorded here for visibility but executed at the end of Phase 2 after T012 lands)
+- [X] T008 Delete `lib/core/theme/tokens_stub.dart` and remove its export from any barrel file (depends on Phase 2 tokens existing — this task is recorded here for visibility but executed at the end of Phase 2 after T012 lands)
   - **Verify**: `git ls-files lib/core/theme/tokens_stub.dart` returns nothing; `grep -rE "tokens_stub" lib --include='*.dart'` returns nothing; `flutter analyze` clean
 
 **Checkpoint**: dependency + asset infrastructure ready; the build-time flags are wired; no user-visible change yet.
@@ -71,41 +71,41 @@ This is a Flutter Android app. Paths below are relative to the repo root `H:\aln
 
 ### Token primitives (palette-agnostic)
 
-- [ ] T009 [P] Create `lib/core/theme/spacing.dart` exposing `abstract final class AppSpacing` with `static const double` members `xs=4`, `sm=8`, `md=12`, `lg=16`, `xl=24`, `xxl=32`, `xxxl=48` per design-tokens contract
+- [X] T009 [P] Create `lib/core/theme/spacing.dart` exposing `abstract final class AppSpacing` with `static const double` members `xs=4`, `sm=8`, `md=12`, `lg=16`, `xl=24`, `xxl=32`, `xxxl=48` per design-tokens contract
   - **Verify**: `flutter analyze` clean; `AppSpacing.lg == 16.0` evaluates true from any test
 
-- [ ] T010 [P] Create `lib/core/theme/radii.dart` exposing `abstract final class AppRadii` with `static const double` members `sm=8`, `md=12`, `lg=16`, `xl=20`, `pill=999` per research R-10 (reconciled scale)
+- [X] T010 [P] Create `lib/core/theme/radii.dart` exposing `abstract final class AppRadii` with `static const double` members `sm=8`, `md=12`, `lg=16`, `xl=20`, `pill=999` per research R-10 (reconciled scale)
   - **Verify**: `flutter analyze` clean; `AppRadii.md == 12.0` evaluates true from any test
 
 ### Color palette + scheme
 
-- [ ] T011 Create `lib/core/theme/color_palette.dart` declaring `sealed class ColorPalette` with `name` getter and abstract `lightScheme()` / `darkScheme()` factories returning Material 3 `ColorScheme`s; subclasses `ModernPalette` (primary `#1D4ED8` light / `#60A5FA` dark) and `TrustPalette` (primary `#2457A6` light / `#9FC5FF` dark); both share the palette-agnostic shared-token block from `decision.md` §"Shared tokens"; expose `ColorPalette.fromName(String)` and `static const ColorPalette defaultPalette = ModernPalette();`
+- [X] T011 Create `lib/core/theme/color_palette.dart` declaring `sealed class ColorPalette` with `name` getter and abstract `lightScheme()` / `darkScheme()` factories returning Material 3 `ColorScheme`s; subclasses `ModernPalette` (primary `#1D4ED8` light / `#60A5FA` dark) and `TrustPalette` (primary `#2457A6` light / `#9FC5FF` dark); both share the palette-agnostic shared-token block from `decision.md` §"Shared tokens"; expose `ColorPalette.fromName(String)` and `static const ColorPalette defaultPalette = ModernPalette();`
   - **Verify**: a unit test (`test/core/theme/color_palette_test.dart`, written under T060) confirms each subclass returns the locked hex quintet in light + dark
 
-- [ ] T012 [P] Create `lib/core/theme/colors.dart` exposing `class AppColors` with field-style accessors for every token role from `contracts/design-tokens.md` and a `static AppColors of(BuildContext context)` resolving values from `Theme.of(context).colorScheme` plus `ThemeExtension`s for project-specific tokens (depends on T011 for `ColorPalette` types)
+- [X] T012 [P] Create `lib/core/theme/colors.dart` exposing `class AppColors` with field-style accessors for every token role from `contracts/design-tokens.md` and a `static AppColors of(BuildContext context)` resolving values from `Theme.of(context).colorScheme` plus `ThemeExtension`s for project-specific tokens (depends on T011 for `ColorPalette` types)
   - **Verify**: `AppColors.of(context).primary` returns the active palette's primary color; rebuilding under a different palette returns the alternate value; `flutter analyze` clean
 
 ### Typography
 
-- [ ] T013 Create `lib/core/theme/typography.dart` exposing `class AppTextStyles` with field-style accessors for all 12 type-scale roles from `contracts/design-tokens.md` and a `static AppTextStyles of(BuildContext context)` that selects Cairo / IBM Plex Sans Arabic vs Inter based on `Localizations.localeOf(context)` (depends on T005 for fonts)
+- [X] T013 Create `lib/core/theme/typography.dart` exposing `class AppTextStyles` with field-style accessors for all 12 type-scale roles from `contracts/design-tokens.md` and a `static AppTextStyles of(BuildContext context)` that selects Cairo / IBM Plex Sans Arabic vs Inter based on `Localizations.localeOf(context)` (depends on T005 for fonts)
   - **Verify**: under `Locale('ar')` the rendered `bodyLarge.fontFamily` resolves to `'IBMPlexSansArabic'`; under `Locale('en')` it resolves to `'Inter'`; line-height and tracking match `decision.md` §Typography
 
 ### Elevation
 
-- [ ] T014 Create `lib/core/theme/elevation.dart` exposing `class AppElevation` with `level0/1/2/3` shadow lists and `hairline` outline; `static AppElevation of(BuildContext context)` returns light-mode shadows when `Brightness.light` and dark-mode (empty shadows + 1 px outline border) when `Brightness.dark` per `decision.md` §Elevation note
+- [X] T014 Create `lib/core/theme/elevation.dart` exposing `class AppElevation` with `level0/1/2/3` shadow lists and `hairline` outline; `static AppElevation of(BuildContext context)` returns light-mode shadows when `Brightness.light` and dark-mode (empty shadows + 1 px outline border) when `Brightness.dark` per `decision.md` §Elevation note
   - **Verify**: under `Theme(data: ThemeData(brightness: Brightness.dark))` `AppElevation.of(context).level1` returns `<BoxShadow>[]` and `hairline` returns a `Border.all(width: 1, color: …outline)`
 
 ### Theme builder
 
-- [ ] T015 Create / rewrite `lib/core/theme/app_theme.dart` exposing `ThemeData buildAppTheme({required ColorPalette palette, required Brightness brightness, required Locale locale})` consolidating the `ColorScheme`, `TextTheme` (from `AppTextStyles`), `IconThemeData`, `AppBarTheme`, `ButtonTheme`, etc., into one Material 3 `ThemeData`; default `useMaterial3: true`; expose `ThemeData.light()` / `ThemeData.dark()` adapters that take only a `ColorPalette` and locale (depends on T011, T012, T013, T014)
+- [X] T015 Create / rewrite `lib/core/theme/app_theme.dart` exposing `ThemeData buildAppTheme({required ColorPalette palette, required Brightness brightness, required Locale locale})` consolidating the `ColorScheme`, `TextTheme` (from `AppTextStyles`), `IconThemeData`, `AppBarTheme`, `ButtonTheme`, etc., into one Material 3 `ThemeData`; default `useMaterial3: true`; expose `ThemeData.light()` / `ThemeData.dark()` adapters that take only a `ColorPalette` and locale (depends on T011, T012, T013, T014)
   - **Verify**: a smoke widget test mounts `MaterialApp(theme: buildAppTheme(palette: ModernPalette(), brightness: light, locale: ar))` and renders without errors; `Theme.of(context).colorScheme.primary == Color(0xFF1D4ED8)`
 
 ### Wiring + cleanup
 
-- [ ] T016 Update `lib/app.dart` to read both the existing `ThemeCubit` (Phase 1) and a soon-to-exist `PaletteCubit` (added in US3, but the plumbing is wired now with a default `ModernPalette` constant) and pass `(palette, locale)` to `buildAppTheme` for both `theme:` and `darkTheme:` slots; `themeMode:` is driven by `ThemeCubit` (depends on T015)
+- [X] T016 Update `lib/app.dart` to read both the existing `ThemeCubit` (Phase 1) and a soon-to-exist `PaletteCubit` (added in US3, but the plumbing is wired now with a default `ModernPalette` constant) and pass `(palette, locale)` to `buildAppTheme` for both `theme:` and `darkTheme:` slots; `themeMode:` is driven by `ThemeCubit` (depends on T015)
   - **Verify**: `flutter run` boots the existing Phase 1 shell home with the locked Modern primary visible; toggling system theme between light and dark updates the rendered theme without restart
 
-- [ ] T017 Migrate `lib/shell/shell_home_page.dart` to consume the new token API — replace any `tokens_stub` references with `AppColors.of(context)` / `AppTextStyles.of(context)` / `AppSpacing.lg` / etc. Do this BEFORE T008 so the deletion is safe (depends on T009–T015)
+- [X] T017 Migrate `lib/shell/shell_home_page.dart` to consume the new token API — replace any `tokens_stub` references with `AppColors.of(context)` / `AppTextStyles.of(context)` / `AppSpacing.lg` / etc. Do this BEFORE T008 so the deletion is safe (depends on T009–T015)
   - **Verify**: `grep -rE "tokens_stub" lib --include='*.dart'` returns nothing in `lib/shell/`; the shell home renders identically to its Phase 1 appearance modulo the locked typography + Modern primary
 
 **Checkpoint**: tokens land, `app_theme.dart` builds Material 3 `ThemeData` for Modern light/dark, the shell still boots, no widget kit yet.

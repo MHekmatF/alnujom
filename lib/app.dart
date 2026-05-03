@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'core/di/injection.dart';
 import 'core/localization/locale_cubit.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/color_palette.dart';
 import 'core/theme/theme_cubit.dart';
 import 'l10n/app_localizations.dart';
 
@@ -20,6 +21,8 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const palette = ColorPalette.defaultPalette;
+
     return MultiBlocProvider(
       providers: [
         BlocProvider<ThemeCubit>(
@@ -35,8 +38,16 @@ class App extends StatelessWidget {
             builder: (context, locale) {
               return MaterialApp.router(
                 routerConfig: getIt<GoRouter>(),
-                theme: appLightTheme(),
-                darkTheme: appDarkTheme(),
+                theme: buildAppTheme(
+                  palette: palette,
+                  brightness: Brightness.light,
+                  locale: locale,
+                ),
+                darkTheme: buildAppTheme(
+                  palette: palette,
+                  brightness: Brightness.dark,
+                  locale: locale,
+                ),
                 themeMode: themeMode,
                 locale: locale,
                 localizationsDelegates: AppLocalizations.localizationsDelegates,
