@@ -43,12 +43,7 @@ void main() {
 
     await pumpWidgetKit(
       tester,
-      const PropertyCard(
-        title: 'A',
-        price: '1',
-        location: 'X',
-        favorite: true,
-      ),
+      const PropertyCard(title: 'A', price: '1', location: 'X', favorite: true),
     );
     expect(find.byIcon(Icons.favorite), findsOneWidget);
     expect(find.byIcon(Icons.favorite_border), findsNothing);
@@ -75,12 +70,7 @@ void main() {
   ) async {
     await pumpWidgetKit(
       tester,
-      const PropertyCard(
-        title: 'T',
-        price: '1',
-        location: 'L',
-        featured: true,
-      ),
+      const PropertyCard(title: 'T', price: '1', location: 'L', featured: true),
     );
 
     final cardCenter = tester.getCenter(find.byType(PropertyCard));
@@ -94,12 +84,7 @@ void main() {
   ) async {
     await pumpWidgetKit(
       tester,
-      const PropertyCard(
-        title: 'T',
-        price: '1',
-        location: 'L',
-        featured: true,
-      ),
+      const PropertyCard(title: 'T', price: '1', location: 'L', featured: true),
       direction: TextDirection.ltr,
     );
 

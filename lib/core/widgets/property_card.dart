@@ -66,10 +66,7 @@ class PropertyCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AspectRatio(
-            aspectRatio: AppDimens.aspect4x3,
-            child: _image(context),
-          ),
+          AspectRatio(aspectRatio: AppDimens.aspect4x3, child: _image(context)),
           Padding(
             padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
             child: _body(context),

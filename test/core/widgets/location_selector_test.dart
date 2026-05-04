@@ -32,10 +32,7 @@ void main() {
     'LocationSelector Row reverses under RTL — map_pin trails chevron, '
     'and the order flips back under LTR',
     (tester) async {
-      await pumpWidgetKit(
-        tester,
-        const LocationSelector(city: 'Test'),
-      );
+      await pumpWidgetKit(tester, const LocationSelector(city: 'Test'));
       final pinRtl = tester.getCenter(find.byIcon(LucideIcons.map_pin)).dx;
       final chevronRtl = tester
           .getCenter(find.byIcon(LucideIcons.chevron_down))

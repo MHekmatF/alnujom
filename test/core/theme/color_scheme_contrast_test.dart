@@ -16,7 +16,11 @@ void main() {
         final scheme = palette.scheme(brightness);
 
         _bodyPair('onPrimary on primary', tokens.onPrimary, tokens.primary);
-        _bodyPair('onSecondary on secondary', tokens.onSecondary, tokens.secondary);
+        _bodyPair(
+          'onSecondary on secondary',
+          tokens.onSecondary,
+          tokens.secondary,
+        );
         _bodyPair('onSurface on surface', tokens.onSurface, tokens.surface);
         _bodyPair(
           'onPrimaryContainer on primaryContainer',
@@ -29,8 +33,16 @@ void main() {
           tokens.surface,
         );
 
-        _uiPair('primary on surface (UI element)', tokens.primary, tokens.surface);
-        _uiPair('error on surface (error indicator)', tokens.error, tokens.surface);
+        _uiPair(
+          'primary on surface (UI element)',
+          tokens.primary,
+          tokens.surface,
+        );
+        _uiPair(
+          'error on surface (error indicator)',
+          tokens.error,
+          tokens.surface,
+        );
 
         // Material ColorScheme slots should also respect the floor
         _bodyPair(
@@ -61,7 +73,8 @@ void _bodyPair(String label, Color foreground, Color background) {
     expect(
       ratio,
       greaterThanOrEqualTo(_bodyMinRatio),
-      reason: '$label ratio was ${ratio.toStringAsFixed(2)}:1 '
+      reason:
+          '$label ratio was ${ratio.toStringAsFixed(2)}:1 '
           '(fg=$foreground, bg=$background)',
     );
   });
@@ -73,7 +86,8 @@ void _uiPair(String label, Color foreground, Color background) {
     expect(
       ratio,
       greaterThanOrEqualTo(_uiMinRatio),
-      reason: '$label ratio was ${ratio.toStringAsFixed(2)}:1 '
+      reason:
+          '$label ratio was ${ratio.toStringAsFixed(2)}:1 '
           '(fg=$foreground, bg=$background)',
     );
   });

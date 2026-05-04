@@ -15,22 +15,19 @@ void main() {
   });
 
   // RTL/LTR matrix — T062
-  testWidgets(
-    'ChatBubble mine aligns to left visual edge under RTL '
-    '(AlignmentDirectional.centerEnd → centerLeft in RTL)',
-    (tester) async {
-      await pumpWidgetKit(
-        tester,
-        const ChatBubble(message: 'Hi', variant: ChatBubbleVariant.mine),
-      );
+  testWidgets('ChatBubble mine aligns to left visual edge under RTL '
+      '(AlignmentDirectional.centerEnd → centerLeft in RTL)', (tester) async {
+    await pumpWidgetKit(
+      tester,
+      const ChatBubble(message: 'Hi', variant: ChatBubbleVariant.mine),
+    );
 
-      final bubbleCenter = tester.getCenter(find.text('Hi'));
-      final screenWidth =
-          tester.view.physicalSize.width / tester.view.devicePixelRatio;
-      // AlignmentDirectional.centerEnd resolves to center-left under RTL
-      expect(bubbleCenter.dx, lessThan(screenWidth / 2));
-    },
-  );
+    final bubbleCenter = tester.getCenter(find.text('Hi'));
+    final screenWidth =
+        tester.view.physicalSize.width / tester.view.devicePixelRatio;
+    // AlignmentDirectional.centerEnd resolves to center-left under RTL
+    expect(bubbleCenter.dx, lessThan(screenWidth / 2));
+  });
 
   testWidgets('ChatBubble mine aligns to right visual edge under LTR', (
     tester,

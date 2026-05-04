@@ -14,12 +14,10 @@ final class ThemeCubit extends Cubit<AppThemeMode> {
   ThemeCubit(this._store, this._log) : super(AppThemeMode.auto);
 
   @visibleForTesting
-  ThemeCubit.test({
-    required PreferencesStore store,
-    required AppLogger log,
-  }) : _store = store,
-       _log = log,
-       super(AppThemeMode.auto);
+  ThemeCubit.test({required PreferencesStore store, required AppLogger log})
+    : _store = store,
+      _log = log,
+      super(AppThemeMode.auto);
 
   static const _tag = 'ThemeCubit';
 

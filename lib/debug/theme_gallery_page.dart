@@ -459,7 +459,8 @@ final class _GalleryCopy {
     AppBadgeVariant.statusPending => isArabic ? 'قيد المراجعة' : 'Pending',
     AppBadgeVariant.statusApproved => isArabic ? 'مقبول' : 'Approved',
     AppBadgeVariant.statusRejected => isArabic ? 'مرفوض' : 'Rejected',
-    AppBadgeVariant.verifiedOffice => isArabic ? 'مكتب موثق' : 'Verified office',
+    AppBadgeVariant.verifiedOffice =>
+      isArabic ? 'مكتب موثق' : 'Verified office',
   };
 
   String get stickyFooter => isArabic ? 'تذييل ثابت' : 'Sticky footer';
