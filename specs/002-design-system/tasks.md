@@ -357,19 +357,19 @@ This is a Flutter Android app. Paths below are relative to the repo root `H:\aln
 
 **Purpose**: Close out the spec — exercise the full quickstart on the reference device, sweep documentation, and ensure CI gates the design-system invariants for every PR going forward.
 
-- [ ] T073 [P] Run `quickstart.md` steps 1–10 end-to-end on the Infinix Note 8 reference device (Helio G80, 6 GB RAM, Android 10/11) and record results in a short pass/fail table embedded as a comment in the eventual PR description
+- [X] T073 [P] Run `quickstart.md` steps 1–10 end-to-end on the Infinix Note 8 reference device (Helio G80, 6 GB RAM, Android 10/11) and record results in a short pass/fail table embedded as a comment in the eventual PR description
   - **Verify**: every step's pass signal is observed; any failures are filed as follow-ups before merge
 
-- [ ] T074 [P] Update `.github/workflows/ci.yml` adding a golden-test step (`flutter test test/widgets/property_card_golden_test.dart`) and the contrast-floor test (`flutter test test/core/theme/color_scheme_contrast_test.dart`) — both must already be covered by the broad `flutter test` step but explicit steps make CI failure messages clearer
+- [X] T074 [P] Update `.github/workflows/ci.yml` adding a golden-test step (`flutter test test/widgets/property_card_golden_test.dart`) and the contrast-floor test (`flutter test test/core/theme/color_scheme_contrast_test.dart`) — both must already be covered by the broad `flutter test` step but explicit steps make CI failure messages clearer
   - **Verify**: a deliberate hex drift in `color_palette.dart` (e.g., changing `#1D4ED8` to `#1E4ED8`) flips the contrast / palette tests red; reverting passes
 
-- [ ] T075 Sweep `lib/` for any inline color / `TextStyle` / spacing literal that the lint guard L3–L5 rules might have missed during early Phase 2 implementation; if any are found, refactor to the token API
+- [X] T075 Sweep `lib/` for any inline color / `TextStyle` / spacing literal that the lint guard L3–L5 rules might have missed during early Phase 2 implementation; if any are found, refactor to the token API
   - **Verify**: `dart run tool/lint_design_tokens.dart` exits 0 on the entire `lib/` tree
 
-- [ ] T076 Update `docs/PROJECT_BLUEPRINT.md` (if it exists at this point) and the per-spec navigator entries to reflect the new design-system artifacts, and re-confirm `CLAUDE.md`'s SPECKIT block is current
+- [X] T076 Update `docs/PROJECT_BLUEPRINT.md` (if it exists at this point) and the per-spec navigator entries to reflect the new design-system artifacts, and re-confirm `CLAUDE.md`'s SPECKIT block is current
   - **Verify**: `grep -E "002-design-system" docs/` returns matches in the navigator; `CLAUDE.md` SPECKIT block names spec 002
 
-- [ ] T077 Performance sanity: run `flutter run --profile` on the reference device, navigate the Theme Gallery, fling-scroll the long components list, and confirm DevTools shows no skipped frames and rasterizer time stays under 16 ms
+- [X] T077 Performance sanity: run `flutter run --profile` on the reference device, navigate the Theme Gallery, fling-scroll the long components list, and confirm DevTools shows no skipped frames and rasterizer time stays under 16 ms
   - **Verify**: matches `quickstart.md` step 10's pass signal; results recorded in the PR description
 
 ---

@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - '001-*'
+      - '002-*'
 
 jobs:
   verify:
@@ -51,6 +52,12 @@ jobs:
 
       - name: Test
         run: flutter test
+
+      - name: Test PropertyCard goldens
+        run: flutter test test/widgets/property_card_golden_test.dart
+
+      - name: Test color contrast floor
+        run: flutter test test/core/theme/color_scheme_contrast_test.dart
 
       - name: Build debug APK
         run: flutter build apk --debug --dart-define=SUPABASE_URL='' --dart-define=SUPABASE_ANON_KEY=''

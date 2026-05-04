@@ -40,8 +40,10 @@ class ShellHomePage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: AppSpacing.xl),
-              Row(
-                mainAxisSize: MainAxisSize.min,
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: AppSpacing.md,
+                runSpacing: AppSpacing.md,
                 children: [
                   Semantics(
                     label: l10n.themeToggleLabel,
@@ -64,7 +66,6 @@ class ShellHomePage extends StatelessWidget {
                       label: Text(l10n.themeToggleLabel),
                     ),
                   ),
-                  const SizedBox(width: AppSpacing.md),
                   Semantics(
                     label: l10n.localeToggleLabel,
                     value: '${l10n.currentLocale}: ${locale.languageCode}',

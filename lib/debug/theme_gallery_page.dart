@@ -36,7 +36,6 @@ import '../core/widgets/loading_state.dart';
 import '../core/widgets/location_selector.dart';
 import '../core/widgets/map_preview.dart';
 import '../core/widgets/office_card.dart';
-import '../core/widgets/palette_tester.dart';
 import '../core/widgets/price_tag.dart';
 import '../core/widgets/property_card.dart';
 import '../core/widgets/search_field.dart';
@@ -66,8 +65,10 @@ class ThemeGalleryPage extends StatefulWidget {
     'Chat',
     'Price',
     'BottomNav',
-    'PaletteTester',
   ];
+
+  static List<String> sectionHeadersFor(Locale locale) =>
+      _GalleryCopy.forLocale(locale).sectionHeaders;
 
   @override
   State<ThemeGalleryPage> createState() => _ThemeGalleryPageState();
@@ -96,9 +97,10 @@ class _ThemeGalleryPageState extends State<ThemeGalleryPage> {
         child: Builder(
           builder: (context) {
             final colors = AppColors.of(context);
+            final copy = _GalleryCopy.forLocale(_locale);
             return Scaffold(
               backgroundColor: colors.surface,
-              appBar: const AppAppBar(title: 'Theme Gallery'),
+              appBar: AppAppBar(title: copy.title),
               body: SingleChildScrollView(
                 padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
                 child: Column(
@@ -120,16 +122,16 @@ class _ThemeGalleryPageState extends State<ThemeGalleryPage> {
                     ),
                     const SizedBox(height: AppSpacing.xl),
                     _Section(
-                      title: 'Chrome',
+                      title: copy.chrome,
                       children: [
-                        const AppAppBar(title: 'Default'),
+                        AppAppBar(title: copy.defaultLabel),
                         AppAppBar(
-                          title: 'Back',
+                          title: copy.back,
                           variant: AppAppBarVariant.withBack,
                           onBack: () {},
                         ),
                         AppAppBar(
-                          title: 'Search',
+                          title: copy.search,
                           variant: AppAppBarVariant.withSearch,
                           onSearch: () {},
                         ),
@@ -137,19 +139,19 @@ class _ThemeGalleryPageState extends State<ThemeGalleryPage> {
                           spacing: AppSpacing.sm,
                           runSpacing: AppSpacing.sm,
                           children: [
-                            AppButton(label: 'Primary', onPressed: () {}),
+                            AppButton(label: copy.primary, onPressed: () {}),
                             AppButton(
-                              label: 'Success',
+                              label: copy.success,
                               variant: AppButtonVariant.filledSuccess,
                               onPressed: () {},
                             ),
                             AppButton(
-                              label: 'Outlined',
+                              label: copy.outlined,
                               variant: AppButtonVariant.outlined,
                               onPressed: () {},
                             ),
                             AppButton(
-                              label: 'Loading',
+                              label: copy.loading,
                               loading: true,
                               onPressed: () {},
                             ),
@@ -162,63 +164,63 @@ class _ThemeGalleryPageState extends State<ThemeGalleryPage> {
                       ],
                     ),
                     _Section(
-                      title: 'Inputs',
+                      title: copy.inputs,
                       children: [
-                        const SearchField(hint: 'Search listings'),
+                        SearchField(hint: copy.searchListings),
                         SearchField(
-                          hint: 'Loading search',
+                          hint: copy.loadingSearch,
                           loading: true,
                           showFilterIcon: true,
                           onFilterPressed: () {},
                         ),
                         LocationSelector(
-                          city: 'Damascus',
-                          area: 'Malki',
+                          city: copy.damascus,
+                          area: copy.malki,
                           onTap: () {},
                         ),
                         Wrap(
                           spacing: AppSpacing.sm,
                           children: [
                             CategoryChip(
-                              label: 'Apartment',
+                              label: copy.apartment,
                               icon: LucideIcons.building_2,
                               selected: true,
                               onPressed: () {},
                             ),
                             CategoryChip(
-                              label: 'Land',
+                              label: copy.land,
                               icon: LucideIcons.trees,
                               onPressed: () {},
                             ),
                           ],
                         ),
-                        const AppTextField(
-                          label: 'Name',
-                          initialValue: 'Ahmad',
+                        AppTextField(
+                          label: copy.name,
+                          initialValue: copy.sampleName,
                         ),
-                        const AppTextField(
-                          label: 'Error field',
-                          errorText: 'Required',
+                        AppTextField(
+                          label: copy.errorField,
+                          errorText: copy.required,
                         ),
-                        const AppPhoneField(label: 'Phone'),
-                        const AppPasswordField(label: 'Password'),
-                        const AppMultiLineField(
-                          label: 'Description',
+                        AppPhoneField(label: copy.phone),
+                        AppPasswordField(label: copy.password),
+                        AppMultiLineField(
+                          label: copy.description,
                           maxLength: 1000,
                         ),
-                        const AppNumberField(label: 'Area', unit: 'm2'),
-                        const AppCurrencyField(label: 'Price'),
+                        AppNumberField(label: copy.area, unit: copy.areaUnit),
+                        AppCurrencyField(label: copy.price),
                         AppDropdown<String>(
-                          label: 'Type',
+                          label: copy.type,
                           value: 'sale',
-                          items: const [
+                          items: [
                             DropdownMenuItem(
                               value: 'sale',
-                              child: Text('Sale'),
+                              child: Text(copy.sale),
                             ),
                             DropdownMenuItem(
                               value: 'rent',
-                              child: Text('Rent'),
+                              child: Text(copy.rent),
                             ),
                           ],
                           onChanged: (_) {},
@@ -236,7 +238,7 @@ class _ThemeGalleryPageState extends State<ThemeGalleryPage> {
                         ),
                         AppRadioGroup<int>(
                           values: const [1, 2, 3],
-                          labels: const ['One', 'Two', 'Three'],
+                          labels: [copy.one, copy.two, copy.three],
                           groupValue: 1,
                           onChanged: (_) {},
                         ),
@@ -248,25 +250,25 @@ class _ThemeGalleryPageState extends State<ThemeGalleryPage> {
                       ],
                     ),
                     _Section(
-                      title: 'Cards',
+                      title: copy.cards,
                       children: [
                         PropertyCard(
-                          title: 'Modern apartment with balcony',
+                          title: copy.propertyTitle,
                           price: '250,000,000',
-                          location: 'Damascus / Malki',
+                          location: copy.propertyLocation,
                           featured: true,
                           favorite: true,
                           onLongPress: () {},
                         ),
-                        const PropertyCard(
-                          title: 'Horizontal card',
+                        PropertyCard(
+                          title: copy.horizontalCard,
                           price: '800',
                           currency: 'USD',
-                          location: 'Aleppo',
+                          location: copy.aleppo,
                           layout: PropertyCardLayout.horizontal,
                         ),
                         OfficeCard(
-                          name: 'AlNujom Office',
+                          name: copy.officeName,
                           listingsCount: 42,
                           verified: true,
                           onVisit: () {},
@@ -274,77 +276,80 @@ class _ThemeGalleryPageState extends State<ThemeGalleryPage> {
                       ],
                     ),
                     _Section(
-                      title: 'Badges',
+                      title: copy.badges,
                       children: [
                         Wrap(
                           spacing: AppSpacing.sm,
                           runSpacing: AppSpacing.sm,
                           children: [
                             for (final variant in AppBadgeVariant.values)
-                              AppBadge(label: variant.name, variant: variant),
+                              AppBadge(
+                                label: copy.badgeLabel(variant),
+                                variant: variant,
+                              ),
                           ],
                         ),
                       ],
                     ),
-                    const _Section(
-                      title: 'Sheets',
+                    _Section(
+                      title: copy.sheets,
                       children: [
                         SizedBox(
                           height: 220,
                           child: AppBottomSheet(
-                            footer: Text('Sticky footer'),
-                            child: Text('Scrollable sheet body'),
+                            footer: Text(copy.stickyFooter),
+                            child: Text(copy.scrollableSheetBody),
                           ),
                         ),
                       ],
                     ),
                     _Section(
-                      title: 'Dialogs',
+                      title: copy.dialogs,
                       children: [
                         AppDialog(
-                          title: 'Confirm listing',
-                          message: 'This previews the confirm dialog.',
-                          actionLabel: 'Confirm',
+                          title: copy.confirmListing,
+                          message: copy.confirmMessage,
+                          actionLabel: copy.confirm,
                           onAction: () {},
                         ),
                       ],
                     ),
                     _Section(
-                      title: 'Feedback',
+                      title: copy.feedback,
                       children: [
-                        const EmptyState(
-                          headline: 'No listings yet',
-                          body: 'Create the first listing to see it here.',
+                        EmptyState(
+                          headline: copy.noListings,
+                          body: copy.createFirstListing,
                         ),
                         const LoadingState.card(),
-                        ErrorState(title: 'Could not load', onRetry: () {}),
+                        ErrorState(title: copy.couldNotLoad, onRetry: () {}),
                       ],
                     ),
                     _Section(
-                      title: 'Media',
+                      title: copy.media,
                       children: [
                         const StepperIndicator(steps: 4, currentIndex: 1),
                         const ImageGallery(imageUrls: []),
                         MapPreview(onTap: () {}),
                       ],
                     ),
-                    const _Section(
-                      title: 'Chat',
+                    _Section(
+                      title: copy.chat,
                       children: [
                         ChatBubble(
-                          message: 'Is this listing still available?',
+                          message: copy.chatQuestion,
                           variant: ChatBubbleVariant.theirs,
                         ),
                         ChatBubble(
-                          message: 'Yes, you can visit today.',
+                          message: copy.chatAnswer,
                           variant: ChatBubbleVariant.mine,
                         ),
                       ],
                     ),
-                    const _Section(
-                      title: 'Price',
+                    _Section(
+                      title: copy.priceSection,
                       children: [
-                        PriceTag(
+                        const PriceTag(
                           amount: '250,000,000',
                           currency: 'ل.س',
                           altText: '≈ 18,000 USD',
@@ -352,7 +357,7 @@ class _ThemeGalleryPageState extends State<ThemeGalleryPage> {
                       ],
                     ),
                     _Section(
-                      title: 'BottomNav',
+                      title: copy.bottomNav,
                       children: [
                         AppBottomNav(
                           currentIndex: _bottomNavIndex,
@@ -360,22 +365,6 @@ class _ThemeGalleryPageState extends State<ThemeGalleryPage> {
                             _bottomNavIndex = index;
                           }),
                           onAddPressed: () {},
-                        ),
-                      ],
-                    ),
-                    const _Section(
-                      title: 'PaletteTester',
-                      children: [
-                        // Chip is mounted globally as a floating overlay in
-                        // app.dart; the disabled preview avoids double-mount
-                        // and keeps this section free of a PaletteCubit dep.
-                        SizedBox(
-                          height: 80,
-                          child: Stack(
-                            children: [
-                              PaletteTester(designToolsEnabled: false),
-                            ],
-                          ),
                         ),
                       ],
                     ),
@@ -388,6 +377,109 @@ class _ThemeGalleryPageState extends State<ThemeGalleryPage> {
       ),
     );
   }
+}
+
+final class _GalleryCopy {
+  const _GalleryCopy({required this.isArabic});
+
+  factory _GalleryCopy.forLocale(Locale locale) =>
+      _GalleryCopy(isArabic: locale.languageCode == 'ar');
+
+  final bool isArabic;
+
+  String get title => isArabic ? 'معرض التصميم' : 'Theme Gallery';
+  String get chrome => isArabic ? 'الشريط والتنقل' : 'Chrome';
+  String get inputs => isArabic ? 'الإدخالات' : 'Inputs';
+  String get cards => isArabic ? 'البطاقات' : 'Cards';
+  String get badges => isArabic ? 'الشارات' : 'Badges';
+  String get sheets => isArabic ? 'الألواح' : 'Sheets';
+  String get dialogs => isArabic ? 'الحوارات' : 'Dialogs';
+  String get feedback => isArabic ? 'الحالات' : 'Feedback';
+  String get media => isArabic ? 'الوسائط' : 'Media';
+  String get chat => isArabic ? 'المحادثة' : 'Chat';
+  String get priceSection => isArabic ? 'السعر' : 'Price';
+  String get bottomNav => isArabic ? 'التنقل السفلي' : 'BottomNav';
+
+  List<String> get sectionHeaders => [
+    chrome,
+    inputs,
+    cards,
+    badges,
+    sheets,
+    dialogs,
+    feedback,
+    media,
+    chat,
+    priceSection,
+    bottomNav,
+  ];
+
+  String get defaultLabel => isArabic ? 'افتراضي' : 'Default';
+  String get back => isArabic ? 'رجوع' : 'Back';
+  String get search => isArabic ? 'بحث' : 'Search';
+  String get primary => isArabic ? 'أساسي' : 'Primary';
+  String get success => isArabic ? 'نجاح' : 'Success';
+  String get outlined => isArabic ? 'محدد' : 'Outlined';
+  String get loading => isArabic ? 'تحميل' : 'Loading';
+
+  String get searchListings => isArabic ? 'ابحث عن عقارات' : 'Search listings';
+  String get loadingSearch => isArabic ? 'جار البحث' : 'Loading search';
+  String get damascus => isArabic ? 'دمشق' : 'Damascus';
+  String get malki => isArabic ? 'المالكي' : 'Malki';
+  String get aleppo => isArabic ? 'حلب' : 'Aleppo';
+  String get apartment => isArabic ? 'شقة' : 'Apartment';
+  String get land => isArabic ? 'أرض' : 'Land';
+  String get name => isArabic ? 'الاسم' : 'Name';
+  String get sampleName => isArabic ? 'أحمد' : 'Ahmad';
+  String get errorField => isArabic ? 'حقل فيه خطأ' : 'Error field';
+  String get required => isArabic ? 'مطلوب' : 'Required';
+  String get phone => isArabic ? 'الهاتف' : 'Phone';
+  String get password => isArabic ? 'كلمة المرور' : 'Password';
+  String get description => isArabic ? 'الوصف' : 'Description';
+  String get area => isArabic ? 'المساحة' : 'Area';
+  String get areaUnit => isArabic ? 'م²' : 'm2';
+  String get price => isArabic ? 'السعر' : 'Price';
+  String get type => isArabic ? 'النوع' : 'Type';
+  String get sale => isArabic ? 'بيع' : 'Sale';
+  String get rent => isArabic ? 'إيجار' : 'Rent';
+  String get one => isArabic ? 'واحد' : 'One';
+  String get two => isArabic ? 'اثنان' : 'Two';
+  String get three => isArabic ? 'ثلاثة' : 'Three';
+
+  String get propertyTitle =>
+      isArabic ? 'شقة حديثة مع شرفة' : 'Modern apartment with balcony';
+  String get propertyLocation =>
+      isArabic ? 'دمشق / المالكي' : 'Damascus / Malki';
+  String get horizontalCard => isArabic ? 'بطاقة أفقية' : 'Horizontal card';
+  String get officeName => isArabic ? 'مكتب النجوم' : 'AlNujom Office';
+
+  String badgeLabel(AppBadgeVariant variant) => switch (variant) {
+    AppBadgeVariant.featured => isArabic ? 'مميز' : 'Featured',
+    AppBadgeVariant.fresh => isArabic ? 'جديد' : 'New',
+    AppBadgeVariant.statusPending => isArabic ? 'قيد المراجعة' : 'Pending',
+    AppBadgeVariant.statusApproved => isArabic ? 'مقبول' : 'Approved',
+    AppBadgeVariant.statusRejected => isArabic ? 'مرفوض' : 'Rejected',
+    AppBadgeVariant.verifiedOffice => isArabic ? 'مكتب موثق' : 'Verified office',
+  };
+
+  String get stickyFooter => isArabic ? 'تذييل ثابت' : 'Sticky footer';
+  String get scrollableSheetBody =>
+      isArabic ? 'محتوى قابل للتمرير' : 'Scrollable sheet body';
+  String get confirmListing => isArabic ? 'تأكيد الإعلان' : 'Confirm listing';
+  String get confirmMessage => isArabic
+      ? 'هذه معاينة لحوار التأكيد.'
+      : 'This previews the confirm dialog.';
+  String get confirm => isArabic ? 'تأكيد' : 'Confirm';
+  String get noListings => isArabic ? 'لا توجد إعلانات بعد' : 'No listings yet';
+  String get createFirstListing => isArabic
+      ? 'أنشئ أول إعلان ليظهر هنا.'
+      : 'Create the first listing to see it here.';
+  String get couldNotLoad => isArabic ? 'تعذر التحميل' : 'Could not load';
+  String get chatQuestion => isArabic
+      ? 'هل ما زال هذا العقار متاحا؟'
+      : 'Is this listing still available?';
+  String get chatAnswer =>
+      isArabic ? 'نعم، يمكنك زيارته اليوم.' : 'Yes, you can visit today.';
 }
 
 class _Switchers extends StatelessWidget {

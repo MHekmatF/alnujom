@@ -29,7 +29,9 @@ void main() {
         await tester.pump();
 
         expect(tester.takeException(), isNull);
-        for (final header in ThemeGalleryPage.sectionHeaders) {
+        for (final header in ThemeGalleryPage.sectionHeadersFor(
+          testCase.locale,
+        )) {
           expect(find.text(header), findsAtLeastNWidgets(1));
         }
         expect(

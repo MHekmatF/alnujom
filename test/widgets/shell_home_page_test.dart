@@ -47,6 +47,46 @@ void main() {
     expect(find.text(l10n.themeToggleLabel), findsOneWidget);
     expect(find.text(l10n.localeToggleLabel), findsOneWidget);
   });
+
+  testWidgets(
+    'English shell controls wrap without overflow on narrow screens',
+    (tester) async {
+      tester.view.physicalSize = const Size(480, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (_) => ThemeCubit.test(
+                store: _FakePreferencesStore(),
+                log: _NoopLogger(),
+              ),
+            ),
+            BlocProvider(
+              create: (_) => LocaleCubit(
+                _FakePreferencesStore(),
+                _NoopLogger(),
+                const Locale('en'),
+              ),
+            ),
+          ],
+          child: const MaterialApp(
+            locale: Locale('en'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: ShellHomePage(),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(find.byKey(ShellHomePage.themeToggleKey), findsOneWidget);
+      expect(find.byKey(ShellHomePage.localeToggleKey), findsOneWidget);
+    },
+  );
 }
 
 final class _FakePreferencesStore implements PreferencesStore {

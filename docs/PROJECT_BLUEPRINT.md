@@ -197,7 +197,7 @@ Declare them all in `pubspec.yaml`. License files (OFL / Apache-2.0) go alongsid
 
 ### 5.4 Component library
 
-`lib/core/widgets/` — one component per file, mapping 1:1 to `screens-and-components.md` §5. Build them in this order so screens never block on missing primitives:
+`lib/core/widgets/` — one component per file, mapping 1:1 to `screens-and-components.md` §5 and `specs/002-design-system/contracts/component-library.md`. Phase 2 has expanded the reusable kit to the canonical 33-row component catalog, plus the shared shims in `lib/shared/presentation/widgets/`.
 
 1. `app_text.dart` (typography wrapper)
 2. `app_button.dart` (Filled / Outlined / Tonal / Text / Destructive variants)
@@ -221,7 +221,7 @@ Declare them all in `pubspec.yaml`. License files (OFL / Apache-2.0) go alongsid
 20. `snackbar_helpers.dart`
 21. `palette_tester_chip.dart` (debug-only)
 
-Every component gets a widget test in `test/core/widgets/<component>_test.dart` — golden test for visual regression + interaction tests for state transitions.
+Every component gets a widget test in `test/core/widgets/<component>_test.dart`; `PropertyCard` carries the Phase 2 golden baseline under `test/goldens/property_card/`, and CI runs the explicit golden + WCAG contrast gates from `specs/002-design-system/tasks.md` Phase 7.
 
 ---
 
@@ -232,7 +232,7 @@ Ordered to maximize "the app feels like an app" early. Each step lands behind a 
 | Phase | What lands | Reference spec |
 |---|---|---|
 | 1 | Project foundation: brand-bearing shell, theme switching, locale switching, DI, router, Supabase client wrapper, Result/Failure, AppLogger, PreferencesStore | `specs/001-project-foundation/` |
-| 2 | Design system: tokens, fonts, component library scaffolding, PaletteTester | `specs/002-design-system/` (TBD) |
+| 2 | Design system: typed tokens, vendored fonts, 33-row component kit, feature-shared shims, PaletteTester, Theme Gallery, PropertyCard goldens, design-token lint guard | `specs/002-design-system/` |
 | 3 | Auth: Splash, Onboarding ×3, Login, Register, Pending Approval | `specs/003-auth/` (TBD) |
 | 4 | Supabase Vault wiring + admin-only PII paths (per ADR-0001) | TBD |
 | 5 | Home screen (anonymous variant) — search bar, categories, featured + latest sections | TBD |
