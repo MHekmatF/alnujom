@@ -88,12 +88,12 @@ class _SearchFieldState extends State<SearchField> {
         children: [
           if (hasText)
             IconButton(
-              onPressed: _handleClear,
+              onPressed: widget.enabled ? _handleClear : null,
               icon: Icon(LucideIcons.x, color: colors.textMuted),
             ),
           if (widget.showFilterIcon)
             IconButton(
-              onPressed: widget.onFilterPressed,
+              onPressed: widget.enabled ? widget.onFilterPressed : null,
               icon: Icon(LucideIcons.sliders_horizontal, color: colors.primary),
             ),
         ],

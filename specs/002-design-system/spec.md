@@ -74,7 +74,7 @@ A developer modifies a shared component (e.g., changes the padding inside `Prope
 
 ### Edge Cases
 
-- **Missing translation string**: If a string key resolves only in Arabic but the app is rendered in English (or vice versa), the component falls back to the available locale and logs a missing-translation warning — no broken layout, no untranslated `key.like.this` displayed verbatim.
+- **Missing translation string**: Components consume already-resolved strings supplied by their callers; locale fallback and missing-translation logging are owned by the Phase 3 localization layer (see line 142). The design system's responsibility is to render whatever string it receives without breaking layout — no untranslated `key.like.this` ever reaches a component.
 - **Network image fails in `PropertyCard`**: The placeholder strategy renders a soft `primaryContainer` block with the property-type icon centered. The broken-image system glyph is never shown.
 - **Empty data set on a list-driven screen**: The screen routes through the design system's `EmptyState` component (illustration + headline + body + CTA) — never a blank screen, never a system-default "no data" string.
 - **Dark mode shadow invisibility**: Cards substitute a 1 px hairline `border`/`outline` for the elevation shadow in dark theme, preserving card delineation.

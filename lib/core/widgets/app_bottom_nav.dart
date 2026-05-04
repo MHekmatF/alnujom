@@ -18,6 +18,18 @@ class AppBottomNav extends StatelessWidget {
          'AppBottomNav requires exactly 5 labels (الرئيسية / البحث / إضافة / المفضلة / حسابي)',
        );
 
+  // Runtime guard — `assert` only fires in debug. Release builds silently
+  // hit RangeError when iterating `_icons` if labels has the wrong length.
+  void _validateLabels() {
+    if (labels.length != _icons.length) {
+      throw ArgumentError.value(
+        labels,
+        'labels',
+        'AppBottomNav requires exactly ${_icons.length} labels',
+      );
+    }
+  }
+
   /// Default Arabic labels in canonical RTL order:
   /// `[الرئيسية, البحث, إضافة, المفضلة, حسابي]`. Callers should pass
   /// a localized list when targeting English flows.
@@ -44,35 +56,38 @@ class AppBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    _validateLabels();
     final colors = AppColors.of(context);
     final tabs = <_BottomTab>[
       for (var i = 0; i < labels.length; i += 1)
         _BottomTab(labels[i], _icons[i]),
     ];
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colors.card,
-        border: Border(top: BorderSide(color: colors.outline)),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Row(
-          children: [
-            for (var i = 0; i < tabs.length; i += 1)
-              Expanded(
-                child: InkWell(
-                  onTap: i == AppDimens.bottomNavAddIndex
-                      ? onAddPressed
-                      : () => onTabSelected(i),
-                  child: _BottomNavItem(
-                    tab: tabs[i],
-                    selected: currentIndex == i,
-                    isAdd: i == AppDimens.bottomNavAddIndex,
+    return Material(
+      color: colors.card,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: colors.outline)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Row(
+            children: [
+              for (var i = 0; i < tabs.length; i += 1)
+                Expanded(
+                  child: InkWell(
+                    onTap: i == AppDimens.bottomNavAddIndex
+                        ? onAddPressed
+                        : () => onTabSelected(i),
+                    child: _BottomNavItem(
+                      tab: tabs[i],
+                      selected: currentIndex == i,
+                      isAdd: i == AppDimens.bottomNavAddIndex,
+                    ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );

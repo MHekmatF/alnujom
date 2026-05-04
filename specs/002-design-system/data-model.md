@@ -103,7 +103,7 @@ These follow from spec FRs and are restated here so reviewers can map each to th
 
 ### `ThemeCubit`
 
-```
+```text
 [no value persisted]  →  emit(auto)
 auto                  →  emit(light)   when user picks "Light" in Settings
 auto                  →  emit(dark)    when user picks "Dark" in Settings
@@ -114,7 +114,7 @@ All transitions persist the new value to `app.theme_mode` immediately.
 
 ### `PaletteCubit`
 
-```
+```text
 [debug build, no value persisted]   →  emit(modern)
 [release build, regardless of key]  →  emit(modern)   (FR-015; reads ignored)
 

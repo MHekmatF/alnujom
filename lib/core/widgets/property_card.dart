@@ -135,22 +135,22 @@ class PropertyCard extends StatelessWidget {
 
   Widget _image(BuildContext context) {
     final colors = AppColors.of(context);
+    final placeholder = ColoredBox(
+      color: colors.primaryContainer,
+      child: Center(child: Icon(LucideIcons.image, color: colors.primary)),
+    );
     return ClipRRect(
       borderRadius: appRadius(AppRadii.md),
       child: Stack(
         fit: StackFit.expand,
         children: [
           if (imageUrl == null || imageUrl!.isEmpty)
-            ColoredBox(
-              color: colors.primaryContainer,
-              child: Icon(LucideIcons.image, color: colors.primary),
-            )
+            placeholder
           else
             CachedNetworkImage(
               imageUrl: imageUrl!,
               fit: BoxFit.cover,
-              errorWidget: (_, _, _) =>
-                  ColoredBox(color: colors.primaryContainer),
+              errorWidget: (_, _, _) => placeholder,
             ),
           PositionedDirectional(
             top: AppSpacing.sm,

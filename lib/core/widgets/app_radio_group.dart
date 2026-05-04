@@ -19,6 +19,20 @@ class AppRadioGroup<T> extends StatelessWidget {
        ),
        assert(values.length > 0, 'values must not be empty');
 
+  // Caller-side invariant: `groupValue ∈ values` (or null) and `values`
+  // contains no duplicates. Asserted at first build so test errors point
+  // at the offending callsite, not deep inside Flutter's framework.
+  void _validateInvariants() {
+    assert(
+      values.toSet().length == values.length,
+      'AppRadioGroup.values must not contain duplicates',
+    );
+    assert(
+      values.contains(groupValue),
+      'AppRadioGroup.groupValue must be one of values',
+    );
+  }
+
   final List<T> values;
   final List<String> labels;
   final T groupValue;
@@ -28,6 +42,7 @@ class AppRadioGroup<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    _validateInvariants();
     final colors = AppColors.of(context);
     if (segmented) {
       return SegmentedButton<T>(
@@ -45,29 +60,38 @@ class AppRadioGroup<T> extends StatelessWidget {
     return Column(
       children: [
         for (var i = 0; i < values.length; i += 1)
-          InkWell(
+          Semantics(
+            checked: values[i] == groupValue,
+            inMutuallyExclusiveGroup: true,
+            label: labels[i],
+            enabled: enabled,
             onTap: enabled ? () => onChanged(values[i]) : null,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: kAppMinTouchTarget),
-              child: Padding(
-                padding: const EdgeInsetsDirectional.symmetric(
-                  vertical: AppSpacing.sm,
+            child: InkWell(
+              onTap: enabled ? () => onChanged(values[i]) : null,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  minHeight: kAppMinTouchTarget,
                 ),
-                child: Row(
-                  children: [
-                    AppTapTarget(
-                      child: Icon(
-                        values[i] == groupValue
-                            ? Icons.radio_button_checked
-                            : Icons.radio_button_unchecked,
-                        color: values[i] == groupValue
-                            ? colors.primary
-                            : colors.outlineStrong,
+                child: Padding(
+                  padding: const EdgeInsetsDirectional.symmetric(
+                    vertical: AppSpacing.sm,
+                  ),
+                  child: Row(
+                    children: [
+                      AppTapTarget(
+                        child: Icon(
+                          values[i] == groupValue
+                              ? Icons.radio_button_checked
+                              : Icons.radio_button_unchecked,
+                          color: values[i] == groupValue
+                              ? colors.primary
+                              : colors.outlineStrong,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Text(labels[i]),
-                  ],
+                      const SizedBox(width: AppSpacing.sm),
+                      Text(labels[i]),
+                    ],
+                  ),
                 ),
               ),
             ),

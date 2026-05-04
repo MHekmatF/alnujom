@@ -67,7 +67,7 @@ Do not relitigate these without an ADR. They are decided.
 
 ## 3. Repository layout
 
-```
+```text
 H:\alnujom-project\
 ├── .specify\
 │   └── memory\constitution.md         # the rules
@@ -117,7 +117,7 @@ H:\alnujom-project\
 
 Each `lib/feature/<name>/` folder follows this internal shape (declared in Phase 2):
 
-```
+```text
 feature\<name>\
 ├── data\               # repositories, data sources, DTOs
 ├── domain\             # entities, use cases, contracts
