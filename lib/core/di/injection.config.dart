@@ -23,7 +23,7 @@ import '../network/supabase_client_wrapper.dart' as _i752;
 import '../network/supabase_client_wrapper_impl.dart' as _i748;
 import '../storage/preferences_store.dart' as _i753;
 import '../storage/secure_preferences_store.dart' as _i190;
-import '../theme/palette_cubit.dart' as _i920;
+import '../theme/palette_cubit.dart' as _i394;
 import '../theme/theme_cubit.dart' as _i611;
 import 'injection.dart' as _i464;
 
@@ -53,12 +53,12 @@ _i174.GetIt $initGetIt(
       initialLocale,
     ),
   );
+  gh.factory<_i394.PaletteCubit>(
+    () =>
+        _i394.PaletteCubit(gh<_i753.PreferencesStore>(), gh<_i354.AppLogger>()),
+  );
   gh.factory<_i611.ThemeCubit>(
     () => _i611.ThemeCubit(gh<_i753.PreferencesStore>(), gh<_i354.AppLogger>()),
-  );
-  gh.factory<_i920.PaletteCubit>(
-    () =>
-        _i920.PaletteCubit(gh<_i753.PreferencesStore>(), gh<_i354.AppLogger>()),
   );
   return getIt;
 }

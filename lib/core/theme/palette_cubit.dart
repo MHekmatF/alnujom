@@ -10,12 +10,12 @@ import 'color_palette.dart';
 
 @injectable
 final class PaletteCubit extends Cubit<ColorPalette> {
-  PaletteCubit(
-    this._store,
-    this._log, {
-    bool designToolsEnabled = kDesignToolsEnabled,
-  }) : _designToolsEnabled = designToolsEnabled,
-       super(ColorPalette.defaultPalette);
+  // Production constructor — DI-friendly, no parameters that injectable_generator
+  // would try to resolve from GetIt. The design-tools flag is read from the
+  // compile-time const directly so release builds tree-shake correctly.
+  PaletteCubit(this._store, this._log)
+    : _designToolsEnabled = kDesignToolsEnabled,
+      super(ColorPalette.defaultPalette);
 
   @visibleForTesting
   PaletteCubit.test({

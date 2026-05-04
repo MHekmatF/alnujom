@@ -56,6 +56,15 @@ jobs:
       - name: Test PropertyCard goldens
         run: flutter test test/widgets/property_card_golden_test.dart
 
+      - name: Upload golden failure renders
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-failures
+          path: test/widgets/failures/
+          if-no-files-found: ignore
+          retention-days: 7
+
       - name: Test color contrast floor
         run: flutter test test/core/theme/color_scheme_contrast_test.dart
 
