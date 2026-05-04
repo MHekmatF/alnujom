@@ -162,17 +162,18 @@ class PropertyCard extends StatelessWidget {
                   )
                 : const SizedBox.shrink(),
           ),
-          PositionedDirectional(
-            top: AppSpacing.sm,
-            end: AppSpacing.sm,
-            child: IconButton(
-              onPressed: onFavoritePressed,
-              icon: Icon(
-                favorite ? Icons.favorite : Icons.favorite_border,
-                color: favorite ? colors.error : colors.onPrimary,
+          if (onFavoritePressed != null)
+            PositionedDirectional(
+              top: AppSpacing.sm,
+              end: AppSpacing.sm,
+              child: IconButton(
+                onPressed: onFavoritePressed,
+                icon: Icon(
+                  favorite ? Icons.favorite : Icons.favorite_border,
+                  color: favorite ? colors.error : colors.onPrimary,
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

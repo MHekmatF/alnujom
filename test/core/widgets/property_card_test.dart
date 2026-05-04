@@ -29,13 +29,15 @@ void main() {
   testWidgets('PropertyCard favorite state swaps icon, not just color', (
     tester,
   ) async {
+    void noop() {}
     await pumpWidgetKit(
       tester,
-      const PropertyCard(
+      PropertyCard(
         title: 'A',
         price: '1',
         location: 'X',
         favorite: false,
+        onFavoritePressed: noop,
       ),
     );
     expect(find.byIcon(Icons.favorite_border), findsOneWidget);
@@ -43,7 +45,13 @@ void main() {
 
     await pumpWidgetKit(
       tester,
-      const PropertyCard(title: 'A', price: '1', location: 'X', favorite: true),
+      PropertyCard(
+        title: 'A',
+        price: '1',
+        location: 'X',
+        favorite: true,
+        onFavoritePressed: noop,
+      ),
     );
     expect(find.byIcon(Icons.favorite), findsOneWidget);
     expect(find.byIcon(Icons.favorite_border), findsNothing);

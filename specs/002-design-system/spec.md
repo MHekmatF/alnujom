@@ -46,7 +46,7 @@ A designer or QA reviewer is testing a feature on a development build. They want
 
 **Why this priority**: The team has explicitly locked two palettes as swappable rather than commit blind. Without a one-tap runtime comparison, every palette decision becomes a code-change-rebuild-redeploy cycle. The chip is cheap to ship and saves dozens of design-cycle iterations.
 
-**Independent Test**: In a development build, the Palette Tester chip appears on every screen. Tap it once → app re-tints to the alternate palette within ~200 ms. Tap it again → it tints back. Kill the app and relaunch → the last-selected palette is restored. Build with the production flag → the chip is entirely absent (no widget tree branch, no asset).
+**Independent Test**: In a development build, the Palette Tester chip appears on every screen. Tap it once → app re-tints to the alternate palette within 240 ms (consistent with FR-009 and SC-003). Tap it again → it tints back. Kill the app and relaunch → the last-selected palette is restored. Build with the production flag → the chip is entirely absent (no widget tree branch, no asset).
 
 **Acceptance Scenarios**:
 
@@ -104,7 +104,7 @@ A developer modifies a shared component (e.g., changes the padding inside `Prope
 - **FR-007**: System MUST prevent raw visual literals from leaking into feature code — an automated, build-blocking check MUST fail if any non-design-system file contains a raw hex color, an inline `TextStyle` constructor, or a raw pixel spacing/radius number.
 - **FR-008**: System MUST provide a debug-only "Theme Gallery" surface exercising every component in every applicable state, with controls to switch live across locale (ar/en), theme (light/dark), and palette (Modern/Trust) without app restart.
 - **FR-009**: System MUST provide a Palette Tester chip that — in development and internal-QA builds only — floats on every screen, toggles between Modern and Trust palettes within 240 ms via cross-fade, persists the selection across app reloads, and is entirely absent (tree-shaken) from production builds.
-- **FR-010**: System MUST vendor the Cairo, IBM Plex Sans Arabic, and Inter font families locally (each with at minimum regular, medium, semibold, and bold weights) so the app renders identically without network access and without operating-system font fallback.
+- **FR-010**: System MUST vendor the Cairo, IBM Plex Sans Arabic, and Inter font families locally so the app renders identically without network access and without operating-system font fallback. **Cairo** ships as a single variable-font asset whose `wght` axis covers the 400–700 range (per `research.md` R-05); **IBM Plex Sans Arabic** and **Inter** ship as four static-weight files each (regular 400, medium 500, semibold 600, bold 700).
 - **FR-011**: System MUST provide visual-regression coverage (deterministic golden image comparison) for the highest-traffic shared component (`PropertyCard`) across all 4 combinations of theme × locale in the Modern palette, with the suite failing on any unapproved visual change.
 - **FR-012**: All touch targets in design-system components MUST be at least 48 × 48 dp, and no state communicated by a component MUST rely on color alone — color MUST always be paired with an icon, a text label, or a shape.
 - **FR-013**: System MUST expose a unified component contract: each component is one named entity with one canonical visual treatment per variant; ad-hoc per-screen restyling is forbidden, and any new variant requires extending the component library — not inlining styles.
@@ -135,6 +135,7 @@ A developer modifies a shared component (e.g., changes the padding inside `Prope
 - **SC-006**: Visual regressions in `PropertyCard` are detected automatically before merge: the golden suite covers all 4 environment combinations, and any pixel-level diff above the configured threshold fails the build until the new baseline is explicitly approved.
 - **SC-007**: First-render performance on the reference device (Infinix Note 8, Helio G80, 6 GB RAM, Android 10/11) for a screen composed entirely of design-system components is within the standard mid-range Android budget — no perceptible jank on initial layout, smooth 60 fps scroll for a 50-item PropertyCard list.
 - **SC-008**: System text scaling at 100%, 130%, and 200% renders every component without clipping, overflow, or horizontal scroll.
+- **SC-009** (FR-016 measurability): With the active theme override set to `auto`, flipping the operating-system theme causes the rendered app theme to switch within one frame (≤ 16 ms after the platform brightness change is propagated) without an app restart; an explicit override of `light` or `dark` persists across cold launches until the user resets it back to `auto`. Verified by `test/core/theme/theme_cubit_test.dart` (live OS-theme flip case) and on the reference device during quickstart step 3.
 
 ## Assumptions
 

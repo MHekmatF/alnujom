@@ -71,6 +71,9 @@ class _GoldenHarness extends StatelessWidget {
                 location: 'Damascus / Malki',
                 featured: true,
                 favorite: true,
+                // Pass a no-op so the favorite IconButton renders; without
+                // this, the new conditional in PropertyCard hides the heart.
+                onFavoritePressed: _noop,
               ),
             ),
           ),
@@ -88,3 +91,5 @@ final class _GoldenCase {
   final Locale locale;
   final TextDirection direction;
 }
+
+void _noop() {}
