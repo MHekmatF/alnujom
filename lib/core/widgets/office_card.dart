@@ -16,6 +16,8 @@ class OfficeCard extends StatelessWidget {
     this.verified = false,
     this.visited = false,
     this.loading = false,
+    this.verifiedLabel = 'موثق',
+    this.listingsLabel,
     this.onVisit,
     super.key,
   });
@@ -26,6 +28,15 @@ class OfficeCard extends StatelessWidget {
   final bool verified;
   final bool visited;
   final bool loading;
+
+  /// Label for the verified badge (default: Arabic "موثق").
+  /// Callers should pass a localized value.
+  final String verifiedLabel;
+
+  /// Label for the listings count line. If null, falls back to
+  /// `'<count> إعلان'` (Arabic). Callers should pass a localized value
+  /// — typically `Intl.plural(...)` — that already includes the count.
+  final String? listingsLabel;
   final VoidCallback? onVisit;
 
   @override
@@ -59,13 +70,16 @@ class OfficeCard extends StatelessWidget {
                     ),
                     if (verified) const SizedBox(width: AppSpacing.xs),
                     if (verified)
-                      const AppBadge(
-                        label: 'Verified',
+                      AppBadge(
+                        label: verifiedLabel,
                         variant: AppBadgeVariant.verifiedOffice,
                       ),
                   ],
                 ),
-                Text('$listingsCount listings', style: styles.bodyMedium),
+                Text(
+                  listingsLabel ?? '$listingsCount إعلان',
+                  style: styles.bodyMedium,
+                ),
               ],
             ),
           ),

@@ -23,6 +23,15 @@ EdgeInsetsDirectional appPadding({
   );
 }
 
+/// Reserves a 48×48 dp layout slot around [child].
+///
+/// Layout helper only — does NOT install a gesture detector. The actual
+/// hit area still depends on the *interactive* widget inside the slot
+/// (e.g., `IconButton`, `TextButton`, `FloatingActionButton`, all of which
+/// already enforce a 48 dp minimum). Wrapping a non-interactive child
+/// here will not enlarge the tap region; for that case use a wrapper
+/// that owns the gesture (`InkWell`, `GestureDetector`) and apply these
+/// constraints directly to the interactive widget instead.
 class AppTapTarget extends StatelessWidget {
   const AppTapTarget({required this.child, super.key});
 
@@ -66,31 +75,55 @@ class AppSurface extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final elevation = AppElevation.of(context);
-    final content = AnimatedOpacity(
-      duration: const Duration(milliseconds: 120),
-      opacity: opacity,
-      child: Container(
-        padding: padding,
-        decoration: BoxDecoration(
-          color: color ?? colors.card,
-          borderRadius: appRadius(radius),
-          border: Border.all(color: borderColor ?? colors.outline),
-          boxShadow: elevated ? elevation.level1 : elevation.level0,
-        ),
-        child: child,
-      ),
+    final surfaceColor = color ?? colors.card;
+    final outlineColor = borderColor ?? colors.outline;
+    final shape = RoundedRectangleBorder(
+      borderRadius: appRadius(radius),
+      side: BorderSide(color: outlineColor),
     );
 
+    final paddedChild = padding == null
+        ? child
+        : Padding(padding: padding!, child: child);
+
     if (onTap == null) {
-      return content;
+      // Non-interactive surface — no Material/InkWell needed.
+      return AnimatedOpacity(
+        duration: const Duration(milliseconds: 120),
+        opacity: opacity,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: surfaceColor,
+            borderRadius: appRadius(radius),
+            border: Border.all(color: outlineColor),
+            boxShadow: elevated ? elevation.level1 : elevation.level0,
+          ),
+          child: paddedChild,
+        ),
+      );
     }
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: appRadius(radius),
-        onTap: onTap,
-        child: content,
+    // Interactive surface — Material owns the colour so InkWell splash
+    // paints on top of the surface, not behind it.
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 120),
+      opacity: opacity,
+      child: Material(
+        color: surfaceColor,
+        shape: shape,
+        elevation: 0,
+        shadowColor: Colors.transparent,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: appRadius(radius),
+            boxShadow: elevated ? elevation.level1 : elevation.level0,
+          ),
+          child: InkWell(
+            borderRadius: appRadius(radius),
+            onTap: onTap,
+            child: paddedChild,
+          ),
+        ),
       ),
     );
   }
@@ -120,13 +153,13 @@ class AppSectionText extends StatelessWidget {
   }
 }
 
-Widget appInlineSpinner(BuildContext context) {
+Widget appInlineSpinner(BuildContext context, {Color? color}) {
   final colors = AppColors.of(context);
   return SizedBox.square(
     dimension: AppSpacing.lg,
     child: CircularProgressIndicator(
       strokeWidth: AppDimens.strokeThin,
-      valueColor: AlwaysStoppedAnimation<Color>(colors.primary),
+      valueColor: AlwaysStoppedAnimation<Color>(color ?? colors.primary),
     ),
   );
 }

@@ -11,22 +11,43 @@ class AppBottomNav extends StatelessWidget {
     required this.currentIndex,
     required this.onTabSelected,
     required this.onAddPressed,
+    this.labels = defaultArabicLabels,
     super.key,
-  });
+  }) : assert(
+         labels.length == 5,
+         'AppBottomNav requires exactly 5 labels (الرئيسية / البحث / إضافة / المفضلة / حسابي)',
+       );
+
+  /// Default Arabic labels in canonical RTL order:
+  /// `[الرئيسية, البحث, إضافة, المفضلة, حسابي]`. Callers should pass
+  /// a localized list when targeting English flows.
+  static const List<String> defaultArabicLabels = [
+    'الرئيسية',
+    'البحث',
+    'إضافة',
+    'المفضلة',
+    'حسابي',
+  ];
+
+  static const List<IconData> _icons = [
+    LucideIcons.house,
+    LucideIcons.search,
+    LucideIcons.plus,
+    LucideIcons.heart,
+    LucideIcons.user,
+  ];
 
   final int currentIndex;
   final ValueChanged<int> onTabSelected;
   final VoidCallback onAddPressed;
+  final List<String> labels;
 
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final tabs = <_BottomTab>[
-      const _BottomTab('الرئيسية', LucideIcons.house),
-      const _BottomTab('البحث', LucideIcons.search),
-      const _BottomTab('إضافة', LucideIcons.plus),
-      const _BottomTab('المفضلة', LucideIcons.heart),
-      const _BottomTab('حسابي', LucideIcons.user),
+      for (var i = 0; i < labels.length; i += 1)
+        _BottomTab(labels[i], _icons[i]),
     ];
 
     return DecoratedBox(

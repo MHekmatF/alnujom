@@ -19,24 +19,39 @@ class AppPhoneField extends StatefulWidget {
 }
 
 class _AppPhoneFieldState extends State<AppPhoneField> {
+  static const String _fallbackCode = '+';
+
   late String _code;
   String _number = '';
+
+  List<String> get _effectiveCodes =>
+      widget.countryCodes.isEmpty ? const [_fallbackCode] : widget.countryCodes;
 
   @override
   void initState() {
     super.initState();
-    _code = widget.countryCodes.first;
+    _code = _effectiveCodes.first;
+  }
+
+  @override
+  void didUpdateWidget(covariant AppPhoneField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final codes = _effectiveCodes;
+    if (!codes.contains(_code)) {
+      setState(() => _code = codes.first);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final codes = _effectiveCodes;
     return AppTextField(
       label: widget.label,
       keyboardType: TextInputType.phone,
       prefix: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: _code,
-          items: widget.countryCodes
+          items: codes
               .map(
                 (code) =>
                     DropdownMenuItem<String>(value: code, child: Text(code)),

@@ -13,7 +13,11 @@ class AppRadioGroup<T> extends StatelessWidget {
     this.segmented = false,
     this.enabled = true,
     super.key,
-  });
+  }) : assert(
+         values.length == labels.length,
+         'values and labels must have the same length',
+       ),
+       assert(values.length > 0, 'values must not be empty');
 
   final List<T> values;
   final List<String> labels;
@@ -43,25 +47,28 @@ class AppRadioGroup<T> extends StatelessWidget {
         for (var i = 0; i < values.length; i += 1)
           InkWell(
             onTap: enabled ? () => onChanged(values[i]) : null,
-            child: Padding(
-              padding: const EdgeInsetsDirectional.symmetric(
-                vertical: AppSpacing.sm,
-              ),
-              child: Row(
-                children: [
-                  AppTapTarget(
-                    child: Icon(
-                      values[i] == groupValue
-                          ? Icons.radio_button_checked
-                          : Icons.radio_button_unchecked,
-                      color: values[i] == groupValue
-                          ? colors.primary
-                          : colors.outlineStrong,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: kAppMinTouchTarget),
+              child: Padding(
+                padding: const EdgeInsetsDirectional.symmetric(
+                  vertical: AppSpacing.sm,
+                ),
+                child: Row(
+                  children: [
+                    AppTapTarget(
+                      child: Icon(
+                        values[i] == groupValue
+                            ? Icons.radio_button_checked
+                            : Icons.radio_button_unchecked,
+                        color: values[i] == groupValue
+                            ? colors.primary
+                            : colors.outlineStrong,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Text(labels[i]),
-                ],
+                    const SizedBox(width: AppSpacing.sm),
+                    Text(labels[i]),
+                  ],
+                ),
               ),
             ),
           ),

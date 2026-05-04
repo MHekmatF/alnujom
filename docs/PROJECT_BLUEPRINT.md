@@ -19,10 +19,11 @@ Everything in `docs/` and `specs/` exists for a reason. Here is what each one is
 | `docs/design/decision.md` | The **design-direction** decision (A: Luxury vs B: Modern Marketplace). | Before building any UI widget. |
 | `docs/design/screens-and-components.md` | **Every screen, every component**, every state. Arabic-first, RTL. | Before building any screen. |
 | `docs/design/figma-prompts.md` | Copy-paste prompts for Figma First Draft / Make so designs and code stay in lockstep. | When iterating on visual design. |
-| `specs/001-project-foundation/plan.md` | Active spec — the Phase 1 plan. | When working on anything in Phase 1. |
-| `specs/001-project-foundation/spec.md` | User stories + functional requirements + clarifications for Phase 1. | Same. |
-| `specs/001-project-foundation/contracts/` | Internal interface contracts (`SupabaseClientWrapper`, DI, router, `Result`/`Failure`, `AppLogger`, `PreferencesStore`). | When implementing or consuming any of those interfaces. |
-| `specs/001-project-foundation/quickstart.md` | End-to-end verification recipe — does the foundation actually run? | After landing every Phase 1 PR. |
+| `specs/002-design-system/plan.md` | Active spec — the Phase 2 design-system plan. | When working on anything in Phase 2. |
+| `specs/002-design-system/spec.md` | User stories + functional requirements + clarifications for Phase 2. | Same. |
+| `specs/002-design-system/contracts/` | Internal interface contracts (`design-tokens`, `component-library`, `theme-cubit`, `palette-cubit`, `theme-gallery`, `lint-guard`). | When implementing or consuming any of those interfaces. |
+| `specs/002-design-system/quickstart.md` | End-to-end verification recipe — does the design system actually run on the reference device? | After landing every Phase 2 PR. |
+| `specs/001-project-foundation/` | Frozen — Phase 1 plan/spec/contracts/quickstart. Read for context on how the shell, router, DI, Supabase wrapper, `Result`/`Failure`, `AppLogger`, and `PreferencesStore` were designed. | When the question is about the foundation those Phase 2 widgets sit on. |
 | `CLAUDE.md` | Pointer file Claude Code loads on every session. Tells the agent which spec is active and where the source-of-truth lives. | Always loaded automatically. |
 
 **Plain-language note**: a "spec" is a per-feature folder under `specs/` containing a frozen contract for what that feature does and how it's built. We write the spec first, then the code.
@@ -187,41 +188,30 @@ Before building any feature widget, the design tokens must be in place. This is 
 
 ### 5.3 Fonts
 
-Vendor under `assets/fonts/`:
+Vendor under `assets/fonts/` per `specs/002-design-system/research.md` R-05 (font strategy):
 
-- `Cairo-Regular.ttf`, `Cairo-Medium.ttf`, `Cairo-SemiBold.ttf`, `Cairo-Bold.ttf`
-- `IBMPlexSansArabic-Regular.ttf`, `IBMPlexSansArabic-Medium.ttf`
-- `Inter-Regular.ttf`, `Inter-Medium.ttf`, `Inter-SemiBold.ttf`, `Inter-Bold.ttf`
+- `Cairo-VariableFont_slnt_wght.ttf` — single Cairo variable font, weights 400/500/600/700 selected via the `wght` axis at runtime (canonical Cairo distribution no longer ships static weight TTFs).
+- `IBMPlexSansArabic-Regular.ttf`, `IBMPlexSansArabic-Medium.ttf`, `IBMPlexSansArabic-SemiBold.ttf`, `IBMPlexSansArabic-Bold.ttf`.
+- `Inter-Regular.ttf`, `Inter-Medium.ttf`, `Inter-SemiBold.ttf`, `Inter-Bold.ttf`.
 
-Declare them all in `pubspec.yaml`. License files (OFL / Apache-2.0) go alongside the font files.
+Declare them all in `pubspec.yaml` (Cairo as a single variable-font asset with no `weight:` keys; IBM Plex Sans Arabic + Inter each with their four static weight assets and matching `weight: 400/500/600/700` entries). License files (OFL / Apache-2.0) go alongside the font files.
 
 ### 5.4 Component library
 
-`lib/core/widgets/` — one component per file, mapping 1:1 to `screens-and-components.md` §5 and `specs/002-design-system/contracts/component-library.md`. Phase 2 has expanded the reusable kit to the canonical 33-row component catalog, plus the shared shims in `lib/shared/presentation/widgets/`.
+`lib/core/widgets/` — one component per file, mapping 1:1 to `screens-and-components.md` §5 and `specs/002-design-system/contracts/component-library.md`. Phase 2 ships the canonical 33-row component catalog (see the contract for the full enumeration), plus three feature-shared shims in `lib/shared/presentation/widgets/` (`listing_card.dart`, `price_display.dart`, `admin_list_item.dart`).
 
-1. `app_text.dart` (typography wrapper)
-2. `app_button.dart` (Filled / Outlined / Tonal / Text / Destructive variants)
-3. `app_text_field.dart` + variants (phone, password, currency, multi-line)
-4. `app_chip.dart` (CategoryChip + filter chip)
-5. `app_badge.dart` (status badges + Featured ribbon)
-6. `app_app_bar.dart` (variants: default, withBack, withSearch, transparentOnImage)
-7. `search_field.dart`
-8. `location_selector.dart`
-9. `property_card.dart` (vertical + horizontal variants)
-10. `office_card.dart`
-11. `tabs.dart` (segmented control + underline tabs)
-12. `stepper_indicator.dart`
-13. `image_gallery.dart`
-14. `map_preview.dart`
-15. `chat_bubble.dart`
-16. `price_tag.dart`
-17. `empty_state.dart`
-18. `bottom_sheet_scaffold.dart`
-19. `confirm_dialog.dart`
-20. `snackbar_helpers.dart`
-21. `palette_tester_chip.dart` (debug-only)
+The catalog covers, by category:
 
-Every component gets a widget test in `test/core/widgets/<component>_test.dart`; `PropertyCard` carries the Phase 2 golden baseline under `test/goldens/property_card/`, and CI runs the explicit golden + WCAG contrast gates from `specs/002-design-system/tasks.md` Phase 7.
+- **Chrome** — `app_app_bar` (default / withBack / withSearch / transparentOnImage), `app_bottom_nav`.
+- **Inputs** — `search_field`, `location_selector`, `category_chip`, `app_text_field`, `app_phone_field`, `app_password_field`, `app_multi_line_field`, `app_number_field`, `app_currency_field`, `app_dropdown`, `app_stepper_input`, `app_date_picker`, `app_toggle`, `app_checkbox`, `app_radio_group`, `app_tabs`.
+- **Buttons** — `app_button` (filledPrimary / filledSuccess / outlined / tonal / text / destructive / iconButton / fab; regular + dense sizes).
+- **Cards & badges** — `property_card` (vertical + horizontal), `office_card`, `app_badge`.
+- **Sheets & dialogs** — `app_bottom_sheet`, `app_dialog`.
+- **Feedback states** — `empty_state`, `loading_state`, `error_state`.
+- **Composite & media** — `stepper_indicator`, `image_gallery`, `map_preview`, `chat_bubble`, `price_tag`.
+- **Debug-only** — `palette_tester` (gated by `kDesignToolsEnabled`).
+
+`contracts/component-library.md` is the source of truth for any drift; the list above is a categorical summary, not an alternate spec. Every component carries a widget test in `test/core/widgets/<component>_test.dart`; `PropertyCard` carries the Phase 2 golden baseline under `test/goldens/property_card/`, and CI runs the explicit golden + WCAG contrast gates from `specs/002-design-system/tasks.md` Phase 7.
 
 ---
 
@@ -347,7 +337,7 @@ After that, in order:
 1. `docs/IMPLEMENTATION_PLAN.md` — the 24-phase roadmap.
 2. `docs/design/screens-and-components.md` — every screen + every widget.
 3. `docs/AI_AGENT_WORKFLOW.md` — git workflow contract.
-4. `specs/001-project-foundation/plan.md` — the active phase's plan.
+4. `specs/002-design-system/plan.md` — the active phase's plan.
 
 Once those four are in your head, you are ready to ship.
 

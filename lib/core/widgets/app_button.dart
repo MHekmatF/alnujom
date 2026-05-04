@@ -97,7 +97,7 @@ class AppButton extends StatelessWidget {
         child: IconButton(
           onPressed: enabled ? onPressed : null,
           icon: loading
-              ? appInlineSpinner(context)
+              ? appInlineSpinner(context, color: colors.primary)
               : Icon(icon ?? LucideIcons.circle),
           color: colors.primary,
           tooltip: label.isEmpty ? null : label,
@@ -112,7 +112,7 @@ class AppButton extends StatelessWidget {
           backgroundColor: colors.primary,
           foregroundColor: colors.onPrimary,
           child: loading
-              ? appInlineSpinner(context)
+              ? appInlineSpinner(context, color: colors.onPrimary)
               : Icon(icon ?? LucideIcons.plus),
         ),
       );
@@ -124,7 +124,7 @@ class AppButton extends StatelessWidget {
         ? BorderSide(color: colors.outlineStrong)
         : BorderSide.none;
     final child = loading
-        ? appInlineSpinner(context)
+        ? appInlineSpinner(context, color: foreground)
         : Row(
             mainAxisSize: MainAxisSize.min,
             children: [

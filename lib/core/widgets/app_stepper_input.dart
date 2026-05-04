@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 
 import '../theme/spacing.dart';
+import '../theme/typography.dart';
 import 'app_button.dart';
 
 class AppStepperInput extends StatelessWidget {
@@ -22,6 +23,7 @@ class AppStepperInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final styles = AppTextStyles.of(context);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -33,7 +35,7 @@ class AppStepperInput extends StatelessWidget {
           padding: const EdgeInsetsDirectional.symmetric(
             horizontal: AppSpacing.lg,
           ),
-          child: Text('$value'),
+          child: Text('$value', style: styles.bodyLarge),
         ),
         AppButton.iconButton(
           icon: LucideIcons.plus,

@@ -162,9 +162,9 @@ Type scale (logical pixels):
 
 ## Radii
 
-`sm 4`, `md 8`, `lg 12`, `xl 16`, `pill 999`. Cards: `md` (8). Buttons: `md` (8). Dialogs: `lg` (12).
+**LOCKED scale (reconciled in spec 002, research R-10):** `sm 8`, `md 12`, `lg 16`, `xl 20`, `pill 999`. This matches `screens-and-components.md` §2.5 and the Figma comp. Cards: `md` (12). Buttons: `md` (12). Dialogs: `lg` (16). Bottom sheets / large surfaces: `xl` (20).
 
-> Note: `screens-and-components.md` §2.5 uses a slightly larger radius scale (`md 12`, `lg 16`) tuned to the Figma comp. Spec 002 must reconcile — pick one scale and propagate. Recommendation: adopt the screens-and-components.md scale (it matches the comp the team is reviewing).
+> Earlier draft of this doc carried a smaller `sm 4 / md 8 / lg 12 / xl 16` scale and flagged the conflict as unresolved. Spec 002 closed it on the screens-and-components scale; `lib/core/theme/radii.dart` is now the source of truth.
 
 ## Elevation
 
@@ -208,7 +208,7 @@ Modern Marketplace was the cheaper landing because it reuses the existing Phase 
 
 1. Expand Phase 1 stub `tokens_stub.dart` into full Material 3 `ColorScheme` for both palettes (Modern light/dark + Trust light/dark = 4 schemes).
 2. Vendor font assets under `assets/fonts/`: Cairo, IBM Plex Sans Arabic, Inter (regular + medium + semibold + bold for each).
-3. Build the component library defined in [`screens-and-components.md` §5](screens-and-components.md) — 21 components, one widget per file under `lib/core/widgets/`.
+3. Build the component library defined in [`screens-and-components.md` §5](screens-and-components.md) — the canonical 33-row catalog (see `specs/002-design-system/contracts/component-library.md`), one widget per file under `lib/core/widgets/`, plus the feature-shared shims in `lib/shared/presentation/widgets/`.
 4. Wire the PaletteTester chip ([`screens-and-components.md` §5.18](screens-and-components.md)) behind a single `kDesignToolsEnabled` const (the same flag that gates the Theme Gallery) that resolves to `false` in release builds — chip and gallery tree-shake together out of production.
 5. Golden tests for every component under each of the 4 theme-palette combinations.
 

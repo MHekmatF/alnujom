@@ -25,6 +25,7 @@ class PropertyCard extends StatelessWidget {
     this.loading = false,
     this.featured = false,
     this.favorite = false,
+    this.featuredLabel = 'مميز',
     this.onTap,
     this.onLongPress,
     this.onFavoritePressed,
@@ -40,6 +41,7 @@ class PropertyCard extends StatelessWidget {
   final bool loading;
   final bool featured;
   final bool favorite;
+  final String featuredLabel;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
   final VoidCallback? onFavoritePressed;
@@ -154,8 +156,8 @@ class PropertyCard extends StatelessWidget {
             top: AppSpacing.sm,
             start: AppSpacing.sm,
             child: featured
-                ? const AppBadge(
-                    label: 'Featured',
+                ? AppBadge(
+                    label: featuredLabel,
                     variant: AppBadgeVariant.featured,
                   )
                 : const SizedBox.shrink(),

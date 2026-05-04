@@ -14,6 +14,8 @@ class AppAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.onBack,
     this.onSearch,
     this.actions = const [],
+    this.backTooltip = 'رجوع',
+    this.searchTooltip = 'بحث',
     super.key,
   });
 
@@ -22,6 +24,14 @@ class AppAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onBack;
   final VoidCallback? onSearch;
   final List<Widget> actions;
+
+  /// Accessibility label for the back button (default: Arabic "رجوع").
+  /// Callers should pass a localized value.
+  final String backTooltip;
+
+  /// Accessibility label for the search button (default: Arabic "بحث").
+  /// Callers should pass a localized value.
+  final String searchTooltip;
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -45,6 +55,7 @@ class AppAppBar extends StatelessWidget implements PreferredSizeWidget {
       leading: variant == AppAppBarVariant.withBack
           ? IconButton(
               onPressed: onBack,
+              tooltip: backTooltip,
               icon: Icon(
                 isRtl ? LucideIcons.chevron_right : LucideIcons.chevron_left,
               ),
@@ -52,7 +63,11 @@ class AppAppBar extends StatelessWidget implements PreferredSizeWidget {
           : null,
       actions: [
         if (variant == AppAppBarVariant.withSearch)
-          IconButton(onPressed: onSearch, icon: const Icon(LucideIcons.search)),
+          IconButton(
+            onPressed: onSearch,
+            tooltip: searchTooltip,
+            icon: const Icon(LucideIcons.search),
+          ),
         ...actions,
       ],
     );

@@ -6,9 +6,13 @@ import 'widget_test_support.dart';
 
 void main() {
   testWidgets('AppDatePicker renders formatted value', (tester) async {
+    // Pin LTR/en so the intl `yMd` formatter uses Latin digits regardless
+    // of the active locale delegates. RTL locales render Arabic-Indic
+    // numerals once GlobalMaterialLocalizations is wired in.
     await pumpWidgetKit(
       tester,
       AppDatePicker(label: 'Date', value: DateTime(2026, 5, 3)),
+      direction: TextDirection.ltr,
     );
 
     expect(find.byType(AppDatePicker), findsOneWidget);

@@ -87,7 +87,7 @@ A developer modifies a shared component (e.g., changes the padding inside `Prope
 
 ### Session 2026-05-02
 
-- Q: How many components must Phase 2 cover with visual-regression goldens? → A: `PropertyCard` only (every theme × locale × palette combination). Other components are out of scope for Phase 2 visual-regression coverage and are tracked separately.
+- Q: How many components must Phase 2 cover with visual-regression goldens? → A: `PropertyCard` only, and only the four `theme × locale` combinations under the **Modern** palette (matches FR-011 / SC-006 and the plan's "PropertyCard golden suite only … across 4 combinations using Modern palette" hard requirement). Palette-expanded coverage and additional-component goldens are explicitly out of scope for Phase 2 and tracked as separate follow-ups.
 - Q: In production builds, can end users choose the palette? → A: No. Production renders the Modern palette only; no end-user-facing palette switch exists in Settings, no hidden gesture, no deep link. The Trust palette remains in source for internal QA comparison only.
 - Q: What is the default theme mode for a fresh install? → A: Follow OS theme by default on first launch (`auto`). An explicit user choice in Settings (Light / Dark / Auto) overrides and persists across launches until the user clears it back to `auto`.
 

@@ -30,15 +30,21 @@ class LocationSelector extends StatelessWidget {
         horizontal: AppSpacing.lg,
         vertical: AppSpacing.sm,
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(LucideIcons.map_pin, color: colors.primary),
-          const SizedBox(width: AppSpacing.sm),
-          Flexible(child: AppSectionText(text: text, maxLines: 1)),
-          const SizedBox(width: AppSpacing.sm),
-          Icon(LucideIcons.chevron_down, color: colors.textMuted),
-        ],
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minWidth: kAppMinTouchTarget,
+          minHeight: kAppMinTouchTarget,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(LucideIcons.map_pin, color: colors.primary),
+            const SizedBox(width: AppSpacing.sm),
+            Flexible(child: AppSectionText(text: text, maxLines: 1)),
+            const SizedBox(width: AppSpacing.sm),
+            Icon(LucideIcons.chevron_down, color: colors.textMuted),
+          ],
+        ),
       ),
     );
   }

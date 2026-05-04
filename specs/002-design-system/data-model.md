@@ -87,7 +87,7 @@ The keys Phase 2 reads/writes through the Phase 1 `PreferencesStore` interface.
 
 ### Per-component state matrix
 
-Phase 2 ships 21 components plus the Palette Tester. The full matrix of component × applicable states × variants is kept canonical in `docs/design/screens-and-components.md` §5 and condensed for reviewer scan in `contracts/component-library.md`. To avoid duplication, this file does not restate it — see those two documents.
+Phase 2 ships the canonical 33-row component catalog plus the Palette Tester (matches `contracts/component-library.md` and the kit under `lib/core/widgets/`). The full matrix of component × applicable states × variants is kept canonical in `docs/design/screens-and-components.md` §5 and condensed for reviewer scan in `contracts/component-library.md`. To avoid duplication, this file does not restate it — see those two documents.
 
 ## Validation rules
 

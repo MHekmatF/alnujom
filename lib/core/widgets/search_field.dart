@@ -5,7 +5,7 @@ import '../theme/colors.dart';
 import 'app_text_field.dart';
 import '_widget_support.dart';
 
-class SearchField extends StatelessWidget {
+class SearchField extends StatefulWidget {
   const SearchField({
     this.controller,
     this.hint = 'Search',
@@ -28,15 +28,59 @@ class SearchField extends StatelessWidget {
   final VoidCallback? onFilterPressed;
 
   @override
+  State<SearchField> createState() => _SearchFieldState();
+}
+
+class _SearchFieldState extends State<SearchField> {
+  TextEditingController? _internalController;
+
+  TextEditingController get _controller =>
+      widget.controller ?? (_internalController ??= TextEditingController());
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(_handleTextChange);
+  }
+
+  @override
+  void didUpdateWidget(covariant SearchField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      (oldWidget.controller ?? _internalController)?.removeListener(
+        _handleTextChange,
+      );
+      _controller.addListener(_handleTextChange);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_handleTextChange);
+    _internalController?.dispose();
+    super.dispose();
+  }
+
+  void _handleTextChange() {
+    if (mounted) setState(() {});
+  }
+
+  void _handleClear() {
+    _controller.clear();
+    widget.onChanged?.call('');
+    widget.onClear?.call();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    final hasText = controller?.text.isNotEmpty ?? false;
+    final hasText = _controller.text.isNotEmpty;
     return AppTextField(
-      label: hint,
-      controller: controller,
-      enabled: enabled,
-      onChanged: onChanged,
-      prefix: loading
+      label: widget.hint,
+      controller: _controller,
+      enabled: widget.enabled,
+      onChanged: widget.onChanged,
+      prefix: widget.loading
           ? appInlineSpinner(context)
           : Icon(LucideIcons.search, color: colors.textMuted),
       suffix: Row(
@@ -44,12 +88,12 @@ class SearchField extends StatelessWidget {
         children: [
           if (hasText)
             IconButton(
-              onPressed: onClear,
+              onPressed: _handleClear,
               icon: Icon(LucideIcons.x, color: colors.textMuted),
             ),
-          if (showFilterIcon)
+          if (widget.showFilterIcon)
             IconButton(
-              onPressed: onFilterPressed,
+              onPressed: widget.onFilterPressed,
               icon: Icon(LucideIcons.sliders_horizontal, color: colors.primary),
             ),
         ],

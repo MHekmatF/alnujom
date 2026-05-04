@@ -42,7 +42,13 @@ const Set<String> _defaultAllowedFiles = {
 final RegExp _rawColor = RegExp(r'\bColor\(\s*0x[0-9A-Fa-f]+');
 final RegExp _inlineTextStyle = RegExp(r'\bTextStyle\s*\(');
 final RegExp _edgeInsetsLiteral = RegExp(
-  r'\bEdgeInsets(?:Directional)?\.(?:all|symmetric|only|fromLTRB|fromSTEB)\s*\([^\)]*(?:^|[^A-Za-z_])\d+(?:\.\d+)?',
+  // Catches both positional (`EdgeInsets.all(16)`) and named-parameter
+  // forms (`EdgeInsets.symmetric(horizontal: 16, vertical: 8)`,
+  // `EdgeInsets.only(top: 4)`). The first `\d` group covers the bare
+  // positional case; the second covers literals after a name+colon or
+  // a comma separator.
+  r'\bEdgeInsets(?:Directional)?\.(?:all|symmetric|only|fromLTRB|fromSTEB)\s*\('
+  r'\s*(?:\d+(?:\.\d+)?|[^)]*[: ,]\s*\d+(?:\.\d+)?)',
 );
 final RegExp _borderRadiusLiteral = RegExp(
   r'\bBorderRadius\.circular\(\s*\d+(?:\.\d+)?',

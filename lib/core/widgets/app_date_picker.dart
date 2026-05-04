@@ -24,11 +24,19 @@ class AppDatePicker extends StatelessWidget {
       onTap: enabled
           ? () async {
               final now = DateTime.now();
+              final firstDate = DateTime(now.year - 100, 1, 1);
+              final lastDate = DateTime(now.year + 100, 12, 31);
+              final candidate = value ?? now;
+              final initialDate = switch (candidate) {
+                final v when v.isBefore(firstDate) => firstDate,
+                final v when v.isAfter(lastDate) => lastDate,
+                final v => v,
+              };
               final selected = await showDatePicker(
                 context: context,
-                firstDate: DateTime(now.year - 100),
-                lastDate: DateTime(now.year + 100),
-                initialDate: value ?? now,
+                firstDate: firstDate,
+                lastDate: lastDate,
+                initialDate: initialDate,
               );
               if (selected != null) onChanged?.call(selected);
             }

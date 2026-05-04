@@ -33,6 +33,7 @@ class LoadingState extends StatefulWidget {
 class _LoadingStateState extends State<LoadingState>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
+  bool _animationsDisabled = false;
 
   @override
   void initState() {
@@ -40,7 +41,21 @@ class _LoadingStateState extends State<LoadingState>
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
-    )..repeat();
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final disabled = MediaQuery.of(context).disableAnimations;
+    if (disabled == _animationsDisabled) return;
+    _animationsDisabled = disabled;
+    if (disabled) {
+      _controller.stop();
+      _controller.value = 0.5; // Mid-shimmer alpha — neutral, static look.
+    } else {
+      _controller.repeat();
+    }
   }
 
   @override
@@ -52,6 +67,16 @@ class _LoadingStateState extends State<LoadingState>
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
+    if (_animationsDisabled) {
+      return Container(
+        width: widget.width,
+        height: widget.height,
+        decoration: BoxDecoration(
+          color: colors.surfaceVariant.withAlpha(0xA0),
+          borderRadius: appRadius(widget.radius),
+        ),
+      );
+    }
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {

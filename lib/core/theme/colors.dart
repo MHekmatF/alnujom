@@ -102,6 +102,57 @@ final class AppColors {
   final Color textMuted;
   final Color divider;
   final Color disabledOverlay;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AppColors &&
+          primary == other.primary &&
+          onPrimary == other.onPrimary &&
+          primaryContainer == other.primaryContainer &&
+          onPrimaryContainer == other.onPrimaryContainer &&
+          accent == other.accent &&
+          secondary == other.secondary &&
+          onSecondary == other.onSecondary &&
+          tertiary == other.tertiary &&
+          success == other.success &&
+          warning == other.warning &&
+          error == other.error &&
+          surface == other.surface &&
+          surfaceVariant == other.surfaceVariant &&
+          card == other.card &&
+          outline == other.outline &&
+          outlineStrong == other.outlineStrong &&
+          onSurface == other.onSurface &&
+          onSurfaceVariant == other.onSurfaceVariant &&
+          textMuted == other.textMuted &&
+          divider == other.divider &&
+          disabledOverlay == other.disabledOverlay;
+
+  @override
+  int get hashCode => Object.hashAll([
+    primary,
+    onPrimary,
+    primaryContainer,
+    onPrimaryContainer,
+    accent,
+    secondary,
+    onSecondary,
+    tertiary,
+    success,
+    warning,
+    error,
+    surface,
+    surfaceVariant,
+    card,
+    outline,
+    outlineStrong,
+    onSurface,
+    onSurfaceVariant,
+    textMuted,
+    divider,
+    disabledOverlay,
+  ]);
 }
 
 @immutable
