@@ -5,5 +5,16 @@
   "localeToggleLabel": "Toggle language",
   "currentTheme": "Current theme",
   "currentLocale": "Current language",
-  "backendConfigMissingWarning": "Backend configuration is missing; continuing without backend."
+  "backendConfigMissingWarning": "Backend configuration is missing; continuing without backend.",
+  "themeGalleryTitle": "Theme Gallery",
+  "themeGalleryPaletteSectionHeader": "Color Palettes",
+  "themeGalleryThemeSectionHeader": "Theme Settings",
+  "themeGalleryLocaleSectionHeader": "Locale Settings",
+  "themeGalleryComponentsSectionHeader": "Components",
+  "errorOffline": "You appear to be offline",
+  "errorGeneric": "Something went wrong",
+  "errorMissingBackendConfig": "Backend configuration is missing",
+  "errorRetryAction": "Try again",
+  "missingTranslationMarkerPrefix": "⟦missing:",
+  "missingTranslationMarkerSuffix": "⟧"
 }
