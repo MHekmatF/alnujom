@@ -54,9 +54,13 @@ final class PaletteCubit extends Cubit<ColorPalette> {
   Future<void> cycle() async {
     if (!_designToolsEnabled) return;
 
+    // Emit before awaiting persistence so a rapid second cycle() observes
+    // the new state and doesn't compute the same `next` from stale state
+    // (which would drop the intermediate transition).
     final next = state is ModernPalette
         ? const TrustPalette()
         : ColorPalette.defaultPalette;
+    emit(next);
     final result = await _store.writePalette(next);
     if (result case FailureResult(:final failure)) {
       _log.warning(
@@ -66,7 +70,6 @@ final class PaletteCubit extends Cubit<ColorPalette> {
         tag: _tag,
       );
     }
-    emit(next);
   }
 
   ColorPalette _paletteFromStoredName(String? raw) {
