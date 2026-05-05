@@ -163,21 +163,37 @@ final class _LiteralVisitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitInstanceCreationExpression(InstanceCreationExpression node) {
-    final typeName = _baseTypeName(node);
-    final args = node.argumentList.arguments;
+    final typeName = _firstSegment(node.constructorName.type.toString());
+    _checkConstructorCall(typeName, node.argumentList.arguments);
+    super.visitInstanceCreationExpression(node);
+  }
 
-    if (typeName != null && _textWidgetConstructors.contains(typeName)) {
-      if (args.isNotEmpty) {
-        final first = args.first;
-        if (first is! NamedExpression && first is StringLiteral) {
-          _flag(first, '$typeName()');
-        }
+  @override
+  void visitMethodInvocation(MethodInvocation node) {
+    // Without semantic resolution, unprefixed non-const constructor calls
+    // (e.g. `Text('foo')`) parse as MethodInvocation, not
+    // InstanceCreationExpression. Heuristic: unprefixed PascalCase invocations
+    // are treated as constructor calls and run through the same checks.
+    if (node.target == null) {
+      final name = node.methodName.name;
+      if (name.isNotEmpty && _isUpperCaseLetter(name.codeUnitAt(0))) {
+        _checkConstructorCall(name, node.argumentList.arguments);
+      }
+    }
+    super.visitMethodInvocation(node);
+  }
+
+  void _checkConstructorCall(String? typeName, NodeList<Expression> args) {
+    if (typeName == null || typeName.isEmpty) return;
+
+    if (_textWidgetConstructors.contains(typeName) && args.isNotEmpty) {
+      final first = args.first;
+      if (first is! NamedExpression && first is StringLiteral) {
+        _flag(first, '$typeName()');
       }
     }
 
-    final allowedParams = typeName == null
-        ? null
-        : _stringNamedParams[typeName];
+    final allowedParams = _stringNamedParams[typeName];
     if (allowedParams != null) {
       for (final arg in args) {
         if (arg is! NamedExpression) continue;
@@ -189,8 +205,6 @@ final class _LiteralVisitor extends RecursiveAstVisitor<void> {
         }
       }
     }
-
-    super.visitInstanceCreationExpression(node);
   }
 
   void _flag(AstNode node, String construct) {
@@ -216,15 +230,17 @@ final class _LiteralVisitor extends RecursiveAstVisitor<void> {
   }
 }
 
-String? _baseTypeName(InstanceCreationExpression node) {
-  final raw = node.constructorName.type.toString();
+bool _isUpperCaseLetter(int codeUnit) => codeUnit >= 0x41 && codeUnit <= 0x5A;
+
+String? _firstSegment(String raw) {
   final withoutGeneric = raw.contains('<')
       ? raw.substring(0, raw.indexOf('<'))
       : raw;
-  final withoutPrefix = withoutGeneric.contains('.')
-      ? withoutGeneric.substring(withoutGeneric.lastIndexOf('.') + 1)
+  final firstDot = withoutGeneric.indexOf('.');
+  final segment = firstDot >= 0
+      ? withoutGeneric.substring(0, firstDot)
       : withoutGeneric;
-  final trimmed = withoutPrefix.trim();
+  final trimmed = segment.trim();
   return trimmed.isEmpty ? null : trimmed;
 }
 
