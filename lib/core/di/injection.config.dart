@@ -11,7 +11,6 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:ui' as _i264;
 
-import 'package:flutter/material.dart' as _i409;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:go_router/go_router.dart' as _i583;
 import 'package:injectable/injectable.dart' as _i526;
@@ -24,6 +23,7 @@ import '../network/supabase_client_wrapper.dart' as _i752;
 import '../network/supabase_client_wrapper_impl.dart' as _i748;
 import '../storage/preferences_store.dart' as _i753;
 import '../storage/secure_preferences_store.dart' as _i190;
+import '../theme/palette_cubit.dart' as _i394;
 import '../theme/theme_cubit.dart' as _i611;
 import 'injection.dart' as _i464;
 
@@ -53,12 +53,12 @@ _i174.GetIt $initGetIt(
       initialLocale,
     ),
   );
-  gh.factoryParam<_i611.ThemeCubit, _i409.ThemeMode?, dynamic>(
-    (initialMode, _) => _i611.ThemeCubit(
-      gh<_i753.PreferencesStore>(),
-      gh<_i354.AppLogger>(),
-      initialMode,
-    ),
+  gh.factory<_i394.PaletteCubit>(
+    () =>
+        _i394.PaletteCubit(gh<_i753.PreferencesStore>(), gh<_i354.AppLogger>()),
+  );
+  gh.factory<_i611.ThemeCubit>(
+    () => _i611.ThemeCubit(gh<_i753.PreferencesStore>(), gh<_i354.AppLogger>()),
   );
   return getIt;
 }

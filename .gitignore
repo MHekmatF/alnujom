@@ -191,6 +191,10 @@ test/.test_coverage.dart
 failures/
 golden_failures/
 
+# Local QA evidence (device screenshots / screen recordings) — summarize in PR
+# descriptions instead of committing the binaries.
+screenshots/
+
 # -----------------------------------------------------------------------------
 # AI agent / tooling caches (Claude Code, Specify, GLM, AntiGravity, etc.)
 # -----------------------------------------------------------------------------

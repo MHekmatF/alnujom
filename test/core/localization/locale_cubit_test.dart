@@ -3,6 +3,8 @@ import 'package:alnujom/core/errors/result.dart';
 import 'package:alnujom/core/localization/locale_cubit.dart';
 import 'package:alnujom/core/logging/app_logger.dart';
 import 'package:alnujom/core/storage/preferences_store.dart';
+import 'package:alnujom/core/theme/app_theme_mode.dart';
+import 'package:alnujom/core/theme/color_palette.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -97,10 +99,10 @@ final class _FakePreferencesStore implements PreferencesStore {
   final writtenLocales = <Locale>[];
 
   @override
-  Future<Result<ThemeMode?>> readThemeMode() async => const Success(null);
+  Future<Result<AppThemeMode?>> readThemeMode() async => const Success(null);
 
   @override
-  Future<Result<void>> writeThemeMode(ThemeMode mode) async =>
+  Future<Result<void>> writeThemeMode(AppThemeMode mode) async =>
       const Success(null);
 
   @override
@@ -114,6 +116,13 @@ final class _FakePreferencesStore implements PreferencesStore {
     }
     return const Success(null);
   }
+
+  @override
+  Future<Result<String?>> readPaletteName() async => const Success(null);
+
+  @override
+  Future<Result<void>> writePalette(ColorPalette palette) async =>
+      const Success(null);
 }
 
 final class _RecordingLogger implements AppLogger {

@@ -2,6 +2,7 @@ import 'package:alnujom/core/errors/result.dart';
 import 'package:alnujom/core/localization/locale_cubit.dart';
 import 'package:alnujom/core/logging/app_logger.dart';
 import 'package:alnujom/core/storage/preferences_store.dart';
+import 'package:alnujom/core/theme/color_palette.dart';
 import 'package:alnujom/core/theme/theme_cubit.dart';
 import 'package:alnujom/l10n/app_localizations.dart';
 import 'package:alnujom/shell/shell_home_page.dart';
@@ -16,10 +17,8 @@ void main() {
         providers: [
           BlocProvider(
             create: (_) => ThemeCubit.test(
-              preferencesStore: _FakePreferencesStore(),
-              logger: _NoopLogger(),
-              initialMode: ThemeMode.system,
-              platformBrightness: Brightness.light,
+              store: _FakePreferencesStore(),
+              log: _NoopLogger(),
             ),
           ),
           BlocProvider(
@@ -48,14 +47,54 @@ void main() {
     expect(find.text(l10n.themeToggleLabel), findsOneWidget);
     expect(find.text(l10n.localeToggleLabel), findsOneWidget);
   });
+
+  testWidgets(
+    'English shell controls wrap without overflow on narrow screens',
+    (tester) async {
+      tester.view.physicalSize = const Size(480, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (_) => ThemeCubit.test(
+                store: _FakePreferencesStore(),
+                log: _NoopLogger(),
+              ),
+            ),
+            BlocProvider(
+              create: (_) => LocaleCubit(
+                _FakePreferencesStore(),
+                _NoopLogger(),
+                const Locale('en'),
+              ),
+            ),
+          ],
+          child: const MaterialApp(
+            locale: Locale('en'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: ShellHomePage(),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(find.byKey(ShellHomePage.themeToggleKey), findsOneWidget);
+      expect(find.byKey(ShellHomePage.localeToggleKey), findsOneWidget);
+    },
+  );
 }
 
 final class _FakePreferencesStore implements PreferencesStore {
   @override
-  Future<Result<ThemeMode?>> readThemeMode() async => const Success(null);
+  Future<Result<AppThemeMode?>> readThemeMode() async => const Success(null);
 
   @override
-  Future<Result<void>> writeThemeMode(ThemeMode mode) async =>
+  Future<Result<void>> writeThemeMode(AppThemeMode mode) async =>
       const Success(null);
 
   @override
@@ -63,6 +102,13 @@ final class _FakePreferencesStore implements PreferencesStore {
 
   @override
   Future<Result<void>> writeLocale(Locale locale) async => const Success(null);
+
+  @override
+  Future<Result<String?>> readPaletteName() async => const Success(null);
+
+  @override
+  Future<Result<void>> writePalette(ColorPalette palette) async =>
+      const Success(null);
 }
 
 final class _NoopLogger implements AppLogger {

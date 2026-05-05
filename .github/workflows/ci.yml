@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - '001-*'
+      - '002-*'
 
 jobs:
   verify:
@@ -39,6 +40,9 @@ jobs:
       - name: Analyze
         run: flutter analyze --fatal-infos
 
+      - name: Lint design tokens
+        run: dart run tool/lint_design_tokens.dart
+
       - name: Guard Supabase SDK boundary
         run: |
           if grep -rE "package:supabase_flutter" lib --include='*.dart' --exclude='supabase_client_wrapper_impl.dart'; then
@@ -46,15 +50,23 @@ jobs:
             exit 1
           fi
 
-      - name: Guard theme token boundaries
-        run: |
-          if grep -rE "Color\(0x" lib --include='*.dart' --exclude-dir=l10n | grep -v '^lib/core/theme/'; then
-            echo "Inline color literals must stay inside lib/core/theme/"
-            exit 1
-          fi
-
       - name: Test
         run: flutter test
+
+      - name: Test PropertyCard goldens
+        run: flutter test test/widgets/property_card_golden_test.dart
+
+      - name: Upload golden failure renders
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-failures
+          path: test/widgets/failures/
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Test color contrast floor
+        run: flutter test test/core/theme/color_scheme_contrast_test.dart
 
       - name: Build debug APK
         run: flutter build apk --debug --dart-define=SUPABASE_URL='' --dart-define=SUPABASE_ANON_KEY=''

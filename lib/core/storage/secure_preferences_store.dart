@@ -5,6 +5,9 @@ import 'package:injectable/injectable.dart';
 import '../errors/failure.dart';
 import '../errors/result.dart';
 import '../logging/app_logger.dart';
+import '../theme/color_palette.dart';
+import '../theme/app_theme_mode.dart';
+import 'preferences_keys.dart';
 import 'preferences_store.dart';
 
 @LazySingleton(as: PreferencesStore)
@@ -22,13 +25,14 @@ final class SecurePreferencesStore implements PreferencesStore {
 
   static const _themeKey = 'com.alnujom.preferences.theme_mode';
   static const _localeKey = 'com.alnujom.preferences.locale_code';
+  static const _paletteKey = kPrefPalette;
   static const _tag = 'PreferencesStore';
 
   final AppLogger _logger;
   final FlutterSecureStorage _storage;
 
   @override
-  Future<Result<ThemeMode?>> readThemeMode() async {
+  Future<Result<AppThemeMode?>> readThemeMode() async {
     try {
       final raw = await _storage.read(key: _themeKey);
       return Success(_parseThemeMode(raw));
@@ -50,20 +54,9 @@ final class SecurePreferencesStore implements PreferencesStore {
   }
 
   @override
-  Future<Result<void>> writeThemeMode(ThemeMode mode) async {
+  Future<Result<void>> writeThemeMode(AppThemeMode mode) async {
     try {
-      final value = switch (mode) {
-        ThemeMode.light => 'light',
-        ThemeMode.dark => 'dark',
-        ThemeMode.system => null,
-      };
-
-      if (value == null) {
-        await _storage.delete(key: _themeKey);
-      } else {
-        await _storage.write(key: _themeKey, value: value);
-      }
-
+      await _storage.write(key: _themeKey, value: mode.name);
       return const Success(null);
     } on Object catch (error, stackTrace) {
       _logger.warning(
@@ -126,25 +119,70 @@ final class SecurePreferencesStore implements PreferencesStore {
     }
   }
 
-  ThemeMode? _parseThemeMode(String? raw) {
-    if (raw == null) {
-      return null;
+  @override
+  Future<Result<String?>> readPaletteName() async {
+    try {
+      final raw = await _storage.read(key: _paletteKey);
+      if (raw != null && raw.length > 32) {
+        _warnUnrecognized('palette', raw);
+        return const Success(null);
+      }
+      return Success(raw);
+    } on Object catch (error, stackTrace) {
+      _logger.warning(
+        'Failed to read palette preference.',
+        error: error,
+        stackTrace: stackTrace,
+        tag: _tag,
+      );
+      return FailureResult(
+        CacheFailure(
+          'Failed to read palette preference.',
+          cause: error,
+          stackTrace: stackTrace,
+        ),
+      );
     }
+  }
+
+  @override
+  Future<Result<void>> writePalette(ColorPalette palette) async {
+    try {
+      await _storage.write(key: _paletteKey, value: palette.name);
+      return const Success(null);
+    } on Object catch (error, stackTrace) {
+      _logger.warning(
+        'Failed to write palette preference.',
+        error: error,
+        stackTrace: stackTrace,
+        tag: _tag,
+      );
+      return FailureResult(
+        CacheFailure(
+          'Failed to write palette preference.',
+          cause: error,
+          stackTrace: stackTrace,
+        ),
+      );
+    }
+  }
+
+  AppThemeMode? _parseThemeMode(String? raw) {
+    if (raw == null) return null;
     if (raw.length > 32) {
       _warnUnrecognized('theme mode', raw);
       return null;
     }
     return switch (raw) {
-      'light' => ThemeMode.light,
-      'dark' => ThemeMode.dark,
-      _ => _warnAndReturnNull<ThemeMode>('theme mode', raw),
+      'auto' => AppThemeMode.auto,
+      'light' => AppThemeMode.light,
+      'dark' => AppThemeMode.dark,
+      _ => _warnAndReturnNull<AppThemeMode>('theme mode', raw),
     };
   }
 
   Locale? _parseLocale(String? raw) {
-    if (raw == null) {
-      return null;
-    }
+    if (raw == null) return null;
     if (raw.length > 32) {
       _warnUnrecognized('locale', raw);
       return null;

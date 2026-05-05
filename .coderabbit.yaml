@@ -10,13 +10,11 @@ reviews:
   review_status: true
   collapse_walkthrough: false
   auto_review:
-    # Default PAUSED. Per docs/AI_AGENT_WORKFLOW.md, the agent flips this to
-    # `true` on a chore PR before opening a phase that introduces logic worth
-    # reviewing (auth, schema, money, concurrency, business workflows). Phases
-    # 1–3 of AlNujom are scaffolding/foundational and skip CodeRabbit. Re-enable
-    # for Phase 4 (Supabase base schema + RLS) and most subsequent phases.
-    # One-shot reviews are still possible via `@coderabbitai review` on a PR.
-    enabled: false
+    # Enabled from spec-002 onward. Spec 002 ships the design-system kit + lint
+    # guard, which is high-leverage code worth a second pair of eyes. Earlier
+    # scaffolding phases (spec-001) ran without CodeRabbit per the prior policy.
+    # Disable again with care if a future spec is purely docs/config.
+    enabled: true
     drafts: false
 
   path_filters:
