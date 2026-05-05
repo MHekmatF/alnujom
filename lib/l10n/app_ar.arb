@@ -16,5 +16,30 @@
   "errorMissingBackendConfig": "إعدادات الخادم ناقصة",
   "errorRetryAction": "حاول مرة ثانية",
   "missingTranslationMarkerPrefix": "⟦missing:",
-  "missingTranslationMarkerSuffix": "⟧"
+  "missingTranslationMarkerSuffix": "⟧",
+  "paginationCounter": "{current}/{total}",
+  "@paginationCounter": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "stepCounter": "({current}/{total})",
+  "@stepCounter": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "priceWithCurrency": "{amount} {currency}",
+  "@priceWithCurrency": {
+    "placeholders": {
+      "amount": { "type": "String" },
+      "currency": { "type": "String" }
+    }
+  },
+  "currencyUsdName": "دولار أمريكي",
+  "currencySypName": "ليرة سورية",
+  "currencyUsdSymbol": "USD",
+  "currencySypSymbol": "ل.س"
 }

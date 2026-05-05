@@ -40,6 +40,7 @@ import '../core/widgets/price_tag.dart';
 import '../core/widgets/property_card.dart';
 import '../core/widgets/search_field.dart';
 import '../core/widgets/stepper_indicator.dart';
+import '../l10n/app_localizations.dart';
 
 class ThemeGalleryPage extends StatefulWidget {
   const ThemeGalleryPage({
@@ -98,9 +99,11 @@ class _ThemeGalleryPageState extends State<ThemeGalleryPage> {
           builder: (context) {
             final colors = AppColors.of(context);
             final copy = _GalleryCopy.forLocale(_locale);
+            final loc = lookupAppLocalizations(_locale);
+            final styles = AppTextStyles.of(context);
             return Scaffold(
               backgroundColor: colors.surface,
-              appBar: AppAppBar(title: copy.title),
+              appBar: AppAppBar(title: loc.themeGalleryTitle),
               body: SingleChildScrollView(
                 padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
                 child: Column(
@@ -121,6 +124,11 @@ class _ThemeGalleryPageState extends State<ThemeGalleryPage> {
                       }),
                     ),
                     const SizedBox(height: AppSpacing.xl),
+                    Text(
+                      loc.themeGalleryComponentsSectionHeader,
+                      style: styles.titleLarge,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
                     _Section(
                       title: copy.chrome,
                       children: [
@@ -502,42 +510,68 @@ class _Switchers extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = lookupAppLocalizations(locale);
+    final styles = AppTextStyles.of(context);
     return Wrap(
       spacing: AppSpacing.md,
       runSpacing: AppSpacing.md,
       children: [
-        SegmentedButton<String>(
-          key: const ValueKey<String>('theme-gallery-locale-switcher'),
-          segments: const [
-            ButtonSegment(value: 'ar', label: Text('ar')),
-            ButtonSegment(value: 'en', label: Text('en')),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(loc.themeGalleryLocaleSectionHeader, style: styles.labelMedium),
+            const SizedBox(height: AppSpacing.xs),
+            SegmentedButton<String>(
+              key: const ValueKey<String>('theme-gallery-locale-switcher'),
+              segments: const [
+                ButtonSegment(value: 'ar', label: Text('ar')),
+                ButtonSegment(value: 'en', label: Text('en')),
+              ],
+              selected: {locale.languageCode},
+              onSelectionChanged: (selected) {
+                onLocaleChanged(Locale(selected.first));
+              },
+            ),
           ],
-          selected: {locale.languageCode},
-          onSelectionChanged: (selected) {
-            onLocaleChanged(Locale(selected.first));
-          },
         ),
-        SegmentedButton<Brightness>(
-          key: const ValueKey<String>('theme-gallery-theme-switcher'),
-          segments: const [
-            ButtonSegment(value: Brightness.light, label: Text('light')),
-            ButtonSegment(value: Brightness.dark, label: Text('dark')),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(loc.themeGalleryThemeSectionHeader, style: styles.labelMedium),
+            const SizedBox(height: AppSpacing.xs),
+            SegmentedButton<Brightness>(
+              key: const ValueKey<String>('theme-gallery-theme-switcher'),
+              segments: const [
+                ButtonSegment(value: Brightness.light, label: Text('light')),
+                ButtonSegment(value: Brightness.dark, label: Text('dark')),
+              ],
+              selected: {brightness},
+              onSelectionChanged: (selected) {
+                onBrightnessChanged(selected.first);
+              },
+            ),
           ],
-          selected: {brightness},
-          onSelectionChanged: (selected) {
-            onBrightnessChanged(selected.first);
-          },
         ),
-        SegmentedButton<String>(
-          key: const ValueKey<String>('theme-gallery-palette-switcher'),
-          segments: const [
-            ButtonSegment(value: 'modern', label: Text('Modern')),
-            ButtonSegment(value: 'trust', label: Text('Trust')),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(loc.themeGalleryPaletteSectionHeader, style: styles.labelMedium),
+            const SizedBox(height: AppSpacing.xs),
+            SegmentedButton<String>(
+              key: const ValueKey<String>('theme-gallery-palette-switcher'),
+              segments: const [
+                ButtonSegment(value: 'modern', label: Text('Modern')),
+                ButtonSegment(value: 'trust', label: Text('Trust')),
+              ],
+              selected: {palette.name},
+              onSelectionChanged: (selected) {
+                onPaletteChanged(ColorPalette.fromName(selected.first));
+              },
+            ),
           ],
-          selected: {palette.name},
-          onSelectionChanged: (selected) {
-            onPaletteChanged(ColorPalette.fromName(selected.first));
-          },
         ),
       ],
     );

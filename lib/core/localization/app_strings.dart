@@ -47,7 +47,11 @@ final class _DebugAppLocalizations extends AppLocalizations {
   final AppLogger _logger;
 
   static const _tag = 'AppStrings';
-  static const _intentionallyIdenticalKeys = <String>{'appTitle'};
+  static const _intentionallyIdenticalKeys = <String>{
+    'appTitle',
+    'currencyUsdSymbol',
+    'currencySypSymbol',
+  };
 
   bool get _isArabicLocale => _active.localeName.startsWith('ar');
 
@@ -149,4 +153,32 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String get missingTranslationMarkerSuffix =>
       _active.missingTranslationMarkerSuffix;
+
+  @override
+  String get currencyUsdName =>
+      _resolve('currencyUsdName', (loc) => loc.currencyUsdName);
+
+  @override
+  String get currencySypName =>
+      _resolve('currencySypName', (loc) => loc.currencySypName);
+
+  @override
+  String get currencyUsdSymbol =>
+      _resolve('currencyUsdSymbol', (loc) => loc.currencyUsdSymbol);
+
+  @override
+  String get currencySypSymbol =>
+      _resolve('currencySypSymbol', (loc) => loc.currencySypSymbol);
+
+  @override
+  String paginationCounter(int current, int total) =>
+      _active.paginationCounter(current, total);
+
+  @override
+  String stepCounter(int current, int total) =>
+      _active.stepCounter(current, total);
+
+  @override
+  String priceWithCurrency(String amount, String currency) =>
+      _active.priceWithCurrency(amount, currency);
 }

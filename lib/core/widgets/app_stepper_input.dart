@@ -35,7 +35,7 @@ class AppStepperInput extends StatelessWidget {
           padding: const EdgeInsetsDirectional.symmetric(
             horizontal: AppSpacing.lg,
           ),
-          child: Text('$value', style: styles.bodyLarge),
+          child: Text(value.toString(), style: styles.bodyLarge),
         ),
         AppButton.iconButton(
           icon: LucideIcons.plus,

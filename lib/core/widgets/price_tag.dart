@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../localization/app_strings.dart';
 import '../theme/spacing.dart';
 import '../theme/typography.dart';
 
@@ -23,7 +24,7 @@ class PriceTag extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          '$amount $currency',
+          AppStrings.of(context).loc.priceWithCurrency(amount, currency),
           textDirection: TextDirection.ltr,
           style: styles.priceLarge,
         ),

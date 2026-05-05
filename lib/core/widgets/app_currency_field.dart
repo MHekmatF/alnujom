@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../localization/app_strings.dart';
 import '../theme/spacing.dart';
 import 'app_number_field.dart';
 
@@ -21,13 +22,20 @@ class _AppCurrencyFieldState extends State<AppCurrencyField> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppStrings.of(context).loc;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SegmentedButton<AppCurrency>(
-          segments: const [
-            ButtonSegment(value: AppCurrency.usd, label: Text('USD')),
-            ButtonSegment(value: AppCurrency.syp, label: Text('SYP')),
+          segments: [
+            ButtonSegment(
+              value: AppCurrency.usd,
+              label: Text(loc.currencyUsdName),
+            ),
+            ButtonSegment(
+              value: AppCurrency.syp,
+              label: Text(loc.currencySypName),
+            ),
           ],
           selected: {_currency},
           onSelectionChanged: (selected) {
@@ -38,7 +46,9 @@ class _AppCurrencyFieldState extends State<AppCurrencyField> {
         const SizedBox(height: AppSpacing.sm),
         AppNumberField(
           label: widget.label,
-          unit: _currency == AppCurrency.usd ? 'USD' : 'ل.س',
+          unit: _currency == AppCurrency.usd
+              ? loc.currencyUsdSymbol
+              : loc.currencySypSymbol,
           onChanged: (value) {
             _amount = value;
             widget.onChanged?.call(value, _currency);

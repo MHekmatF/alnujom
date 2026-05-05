@@ -5,7 +5,7 @@ import 'package:alnujom/core/theme/app_theme.dart';
 import 'package:alnujom/core/theme/app_theme_mode.dart';
 import 'package:alnujom/core/theme/color_palette.dart';
 import 'package:alnujom/core/theme/palette_cubit.dart';
-import 'package:alnujom/core/widgets/palette_tester.dart';
+import 'package:alnujom/debug/palette_tester.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';

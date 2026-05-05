@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../core/localization/app_strings.dart';
 import '../core/localization/locale_cubit.dart';
 import '../core/theme/colors.dart';
 import '../core/theme/spacing.dart';
 import '../core/theme/theme_cubit.dart';
 import '../core/theme/typography.dart';
-import '../l10n/app_localizations.dart';
 
 class ShellHomePage extends StatelessWidget {
   const ShellHomePage({super.key});
@@ -18,7 +18,7 @@ class ShellHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context).loc;
     final colors = AppColors.of(context);
     final textStyles = AppTextStyles.of(context);
     final appThemeMode = context.watch<ThemeCubit>().state;

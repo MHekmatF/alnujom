@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../localization/app_strings.dart';
 import '../theme/colors.dart';
 import '../theme/radii.dart';
 import '../theme/spacing.dart';
@@ -38,7 +39,10 @@ class StepperIndicator extends StatelessWidget {
             ),
           ),
         const SizedBox(width: AppSpacing.sm),
-        Text('(${currentIndex + 1}/$steps)', style: styles.labelMedium),
+        Text(
+          AppStrings.of(context).loc.stepCounter(currentIndex + 1, steps),
+          style: styles.labelMedium,
+        ),
       ],
     );
   }

@@ -16,5 +16,30 @@
   "errorMissingBackendConfig": "Backend configuration is missing",
   "errorRetryAction": "Try again",
   "missingTranslationMarkerPrefix": "⟦missing:",
-  "missingTranslationMarkerSuffix": "⟧"
+  "missingTranslationMarkerSuffix": "⟧",
+  "paginationCounter": "{current}/{total}",
+  "@paginationCounter": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "stepCounter": "({current}/{total})",
+  "@stepCounter": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "priceWithCurrency": "{amount} {currency}",
+  "@priceWithCurrency": {
+    "placeholders": {
+      "amount": { "type": "String" },
+      "currency": { "type": "String" }
+    }
+  },
+  "currencyUsdName": "US Dollar",
+  "currencySypName": "Syrian Pound",
+  "currencyUsdSymbol": "USD",
+  "currencySypSymbol": "ل.س"
 }
