@@ -55,8 +55,8 @@ This is a Flutter Android app. Paths below are relative to the repo root `H:\aln
 - [X] T003 [P] Expand `lib/l10n/app_en.arb` with the parallel English entries for every key landed in T002. The set of non-metadata keys in `app_en.arb` MUST be identical to `app_ar.arb` so the parity check (T013) will pass. English copy is professional and clear.
   - **Verify**: `Get-Content lib/l10n/app_en.arb -Raw | ConvertFrom-Json` succeeds; running T013's parity script (after it lands) on this state exits 0 with `Translation key parity check passed (~17 keys).`; before T013 lands, manual diff of the two ARB key sets confirms parity.
 
-- [X] T004 Run `flutter gen-l10n` from the repo root to regenerate `lib/l10n/app_localizations.dart`, `lib/l10n/app_localizations_ar.dart`, and `lib/l10n/app_localizations_en.dart` from the expanded ARB corpus. Commit the generated Dart files (the project uses `synthetic-package: false`, so generated files are checked in). Depends on T002, T003.
-  - **Verify**: `flutter gen-l10n` exits 0 with no errors; `git diff lib/l10n/app_localizations*.dart` shows new typed getters for every floor key (e.g., `String get themeGalleryTitle;`); `flutter analyze` passes against the regenerated files.
+- [X] T004 Run `flutter gen-l10n` from the repo root (or rely on `flutter pub get`, which auto-runs gen-l10n because `pubspec.yaml` sets `flutter.generate: true`) to (re)generate `lib/l10n/app_localizations.dart`, `lib/l10n/app_localizations_ar.dart`, and `lib/l10n/app_localizations_en.dart` from the expanded ARB corpus. **Do NOT commit the generated files** — they are gitignored per `.gitignore:69-76` (build artifacts; ARB files are the source of truth, the `.dart` outputs are reproducible). CI's `flutter pub get` step regenerates them before `flutter analyze` runs. Depends on T002, T003.
+  - **Verify**: `flutter gen-l10n` exits 0 with no errors; `Get-Content lib\l10n\app_localizations.dart | Select-String -Pattern 'String get themeGalleryTitle'` finds the new typed getter (and similarly for every floor key); `flutter analyze` passes against the regenerated files.
 
 ### Localization runtime safety net
 

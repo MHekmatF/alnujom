@@ -23,6 +23,8 @@ output-localization-file: app_localizations.dart
 synthetic-package: false
 ```
 
+**Note on regeneration and tracking**: Combined with `flutter.generate: true` in `pubspec.yaml`, `flutter pub get` auto-runs `gen_localizations` — so the generated `app_localizations*.dart` outputs are gitignored as reproducible build artifacts (see `.gitignore:69-76`). CI's `flutter pub get` step regenerates them before `flutter analyze` runs; ARB files are the source of truth.
+
 **Note on the template-ARB choice**: `template-arb-file: app_en.arb` is the existing setting. The template determines which ARB drives placeholder declarations and key-existence; runtime locale defaulting is governed by `MaterialApp.locale`, which Phase 1 already pins to the Arabic-default value via `LocaleCubit.defaultLocale`. Keeping the template as `app_en.arb` (rather than flipping to `app_ar.arb`) avoids an unnecessary diff and is orthogonal to the Arabic-first runtime behavior.
 
 ---
