@@ -82,10 +82,9 @@ class _ImageGalleryState extends State<ImageGallery> {
               ),
               color: colors.onSurface.withAlpha(0x99),
               child: Text(
-                AppStrings.of(context).loc.paginationCounter(
-                  _page + 1,
-                  widget.imageUrls.length,
-                ),
+                AppStrings.of(
+                  context,
+                ).loc.paginationCounter(_page + 1, widget.imageUrls.length),
                 style: styles.labelMedium.copyWith(color: colors.surface),
               ),
             ),

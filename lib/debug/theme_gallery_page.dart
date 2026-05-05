@@ -520,7 +520,10 @@ class _Switchers extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(loc.themeGalleryLocaleSectionHeader, style: styles.labelMedium),
+            Text(
+              loc.themeGalleryLocaleSectionHeader,
+              style: styles.labelMedium,
+            ),
             const SizedBox(height: AppSpacing.xs),
             SegmentedButton<String>(
               key: const ValueKey<String>('theme-gallery-locale-switcher'),
@@ -558,7 +561,10 @@ class _Switchers extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(loc.themeGalleryPaletteSectionHeader, style: styles.labelMedium),
+            Text(
+              loc.themeGalleryPaletteSectionHeader,
+              style: styles.labelMedium,
+            ),
             const SizedBox(height: AppSpacing.xs),
             SegmentedButton<String>(
               key: const ValueKey<String>('theme-gallery-palette-switcher'),

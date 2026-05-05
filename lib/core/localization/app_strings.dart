@@ -90,7 +90,8 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('localeToggleLabel', (loc) => loc.localeToggleLabel);
 
   @override
-  String get currentTheme => _resolve('currentTheme', (loc) => loc.currentTheme);
+  String get currentTheme =>
+      _resolve('currentTheme', (loc) => loc.currentTheme);
 
   @override
   String get currentLocale =>
@@ -131,10 +132,12 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
-  String get errorOffline => _resolve('errorOffline', (loc) => loc.errorOffline);
+  String get errorOffline =>
+      _resolve('errorOffline', (loc) => loc.errorOffline);
 
   @override
-  String get errorGeneric => _resolve('errorGeneric', (loc) => loc.errorGeneric);
+  String get errorGeneric =>
+      _resolve('errorGeneric', (loc) => loc.errorGeneric);
 
   @override
   String get errorMissingBackendConfig => _resolve(

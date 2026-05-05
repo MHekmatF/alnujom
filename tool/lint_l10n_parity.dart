@@ -85,9 +85,7 @@ Set<String>? _readTranslationKeys(String path) {
 void _writeMissingSection(String path, Set<String> keys) {
   final sorted = keys.toList()..sort();
   final count = sorted.length;
-  stdout.writeln(
-    'Missing in $path ($count ${count == 1 ? 'key' : 'keys'}):',
-  );
+  stdout.writeln('Missing in $path ($count ${count == 1 ? 'key' : 'keys'}):');
   for (final key in sorted) {
     stdout.writeln('  - $key');
   }
