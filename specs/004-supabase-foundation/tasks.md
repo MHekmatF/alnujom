@@ -63,7 +63,7 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
 
 **Purpose**: Create the new directory structure and confirm Supabase MCP can reach the remote project before any migration is authored.
 
-- [ ] T001 [P] Create the new policy authoring directory `supabase/policies/` (sibling of `supabase/migrations/`). Add a `README.md` inside it with this exact body:
+- [X] T001 [P] Create the new policy authoring directory `supabase/policies/` (sibling of `supabase/migrations/`). Add a `README.md` inside it with this exact body:
   ```markdown
   # supabase/policies/
 
@@ -77,10 +77,10 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
   ```
   - **Verify**: `Test-Path supabase/policies/` returns True; `supabase/policies/README.md` exists with the above content.
 
-- [ ] T002 [P] Create the new docs directory `supabase/docs/` (sibling of `supabase/migrations/`). Empty for now — content lands in T037 / T038 under US1.
+- [X] T002 [P] Create the new docs directory `supabase/docs/` (sibling of `supabase/migrations/`). Empty for now — content lands in T037 / T038 under US1.
   - **Verify**: `Test-Path supabase/docs/` returns True; the directory is initially empty.
 
-- [ ] T003 Verify Supabase MCP connectivity to the project: call `mcp__plugin_supabase_supabase__list_tables` (with `schemas: ["public", "auth"]`) and confirm the response returns the existing `auth.users` table. Call `mcp__plugin_supabase_supabase__list_migrations` and confirm the existing Phase-1 migration `00000000000000_init_extensions` is present. If either call fails, do NOT proceed to authoring migrations — fix MCP authentication / project linkage first.
+- [X] T003 Verify Supabase MCP connectivity to the project: call `mcp__plugin_supabase_supabase__list_tables` (with `schemas: ["public", "auth"]`) and confirm the response returns the existing `auth.users` table. Call `mcp__plugin_supabase_supabase__list_migrations` and confirm the existing Phase-1 migration `00000000000000_init_extensions` is present. If either call fails, do NOT proceed to authoring migrations — fix MCP authentication / project linkage first.
   - **Verify**: `list_tables` returns at least the `auth.users` row; `list_migrations` returns at least the row whose `name` is `00000000000000_init_extensions`; both calls return without error.
 
 **Checkpoint**: Directories in place; Supabase MCP confirmed reaching the right remote project.
