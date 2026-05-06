@@ -95,7 +95,7 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
 
 ### Enum migration
 
-- [ ] T004 Author `supabase/migrations/20260506120001_init_enums.sql` containing nine `CREATE TYPE … AS ENUM (...)` statements per [data-model.md](data-model.md#status-enums-63-of-the-implementation-plan). Each `CREATE TYPE` MUST be wrapped in a `DO`/`EXCEPTION` block per research [R-03](research.md#r-03--enum-representation-native-postgres-enum-types-vs-check-constraints) so re-application is safe. Use this exact pattern (worked example for the first enum; repeat for all nine):
+- [X] T004 Author `supabase/migrations/20260506120001_init_enums.sql` containing nine `CREATE TYPE … AS ENUM (...)` statements per [data-model.md](data-model.md#status-enums-63-of-the-implementation-plan). Each `CREATE TYPE` MUST be wrapped in a `DO`/`EXCEPTION` block per research [R-03](research.md#r-03--enum-representation-native-postgres-enum-types-vs-check-constraints) so re-application is safe. Use this exact pattern (worked example for the first enum; repeat for all nine):
   ```sql
   -- Migration 1: Init Enums
   -- Phase 4 — Supabase Foundation (specs/004-supabase-foundation)
@@ -139,7 +139,7 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
   ```
   - **Verify**: File exists at the path; the file contains exactly 9 `DO $$ BEGIN CREATE TYPE … EXCEPTION` blocks; the value lists match data-model.md exactly; the header comment is present.
 
-- [ ] T005 Apply `20260506120001_init_enums.sql` to the remote project via Supabase MCP `apply_migration` with `name: "20260506120001_init_enums"` and `query` set to the file's full content. Then via Supabase MCP `execute_sql`, run:
+- [X] T005 Apply `20260506120001_init_enums.sql` to the remote project via Supabase MCP `apply_migration` with `name: "20260506120001_init_enums"` and `query` set to the file's full content. Then via Supabase MCP `execute_sql`, run:
   ```sql
   SELECT typname FROM pg_type
    WHERE typname IN ('account_status_enum','publisher_status_enum',
@@ -153,7 +153,7 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
 
 ### Policy SQL skeletons (authored now, applied via 0005 in T024)
 
-- [ ] T006 [P] Author `supabase/policies/profiles_policies.sql` with this exact content. Header comment + 4 named policies. Note the `TO authenticated` clause on every policy so anon explicitly cannot match (defense in depth — `auth.uid() = user_id` would already fail for anon, but explicit role binding is clearer):
+- [X] T006 [P] Author `supabase/policies/profiles_policies.sql` with this exact content. Header comment + 4 named policies. Note the `TO authenticated` clause on every policy so anon explicitly cannot match (defense in depth — `auth.uid() = user_id` would already fail for anon, but explicit role binding is clearer):
   ```sql
   -- Source-of-truth policies for profiles
   -- Phase 4 — Supabase Foundation (FR-006)
@@ -181,7 +181,7 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
   ```
   - **Verify**: File exists with exactly 4 named policies (`profiles_select_self`, `profiles_select_admin`, `profiles_update_self`, `profiles_update_admin`); each carries `TO authenticated`; admin policies reference `current_user_is_admin()`. There is intentionally NO `profiles_insert_self` (rows are created by the auto-provision trigger as SECURITY DEFINER; no self-INSERT path) and NO `profiles_delete_self` (deletion happens via auth.users CASCADE).
 
-- [ ] T007 [P] Author `supabase/policies/user_preferences_policies.sql` with this exact content (4 named policies, all self-only, all `TO authenticated`):
+- [X] T007 [P] Author `supabase/policies/user_preferences_policies.sql` with this exact content (4 named policies, all self-only, all `TO authenticated`):
   ```sql
   -- Source-of-truth policies for user_preferences
   -- Phase 4 — Supabase Foundation (FR-007)
@@ -207,7 +207,7 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
   ```
   - **Verify**: File exists with exactly 4 named policies; no policy references `current_user_is_admin()`; all four policies are `TO authenticated` and self-scoped.
 
-- [ ] T008 [P] Author `supabase/policies/audit_logs_policies.sql` with this exact content (1 named policy — admin-only SELECT; no INSERT/UPDATE/DELETE policies, which means non-superuser writes are blocked entirely):
+- [X] T008 [P] Author `supabase/policies/audit_logs_policies.sql` with this exact content (1 named policy — admin-only SELECT; no INSERT/UPDATE/DELETE policies, which means non-superuser writes are blocked entirely):
   ```sql
   -- Source-of-truth policies for audit_logs
   -- Phase 4 — Supabase Foundation (FR-008)
