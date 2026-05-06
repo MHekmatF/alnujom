@@ -7,6 +7,7 @@ on:
       - main
       - '001-*'
       - '002-*'
+      - '003-*'
 
 jobs:
   verify:
@@ -42,6 +43,12 @@ jobs:
 
       - name: Lint design tokens
         run: dart run tool/lint_design_tokens.dart
+
+      - name: Lint l10n parity
+        run: dart run tool/lint_l10n_parity.dart
+
+      - name: Lint l10n literals
+        run: dart run tool/lint_l10n_literals.dart
 
       - name: Guard Supabase SDK boundary
         run: |

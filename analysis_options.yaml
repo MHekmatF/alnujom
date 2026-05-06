@@ -1,5 +1,11 @@
 include: package:flutter_lints/flutter.yaml
 
+l10n_lint_exempt:
+  - lib/l10n/**.arb
+  - lib/l10n/app_localizations*.dart
+  - lib/debug/**
+  - test/goldens/**
+
 analyzer:
   errors:
     avoid_print: error

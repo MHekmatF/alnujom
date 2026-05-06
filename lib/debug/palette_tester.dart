@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 
-import '../flags/app_flags.dart';
-import '../theme/color_palette.dart';
-import '../theme/colors.dart';
-import '../theme/palette_cubit.dart';
-import '../theme/radii.dart';
-import '../theme/spacing.dart';
-import '../theme/typography.dart';
-import '_widget_support.dart';
+import '../core/flags/app_flags.dart';
+import '../core/theme/color_palette.dart';
+import '../core/theme/colors.dart';
+import '../core/theme/palette_cubit.dart';
+import '../core/theme/radii.dart';
+import '../core/theme/spacing.dart';
+import '../core/theme/typography.dart';
+import '../core/widgets/_widget_support.dart';
 
 class PaletteTester extends StatelessWidget {
   const PaletteTester({

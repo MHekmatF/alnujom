@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+import '../localization/app_strings.dart';
 import '../theme/colors.dart';
 import '../theme/radii.dart';
 import '../theme/spacing.dart';
@@ -81,7 +82,9 @@ class _ImageGalleryState extends State<ImageGallery> {
               ),
               color: colors.onSurface.withAlpha(0x99),
               child: Text(
-                '${_page + 1}/${widget.imageUrls.length}',
+                AppStrings.of(
+                  context,
+                ).loc.paginationCounter(_page + 1, widget.imageUrls.length),
                 style: styles.labelMedium.copyWith(color: colors.surface),
               ),
             ),

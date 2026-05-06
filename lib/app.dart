@@ -9,7 +9,7 @@ import 'core/theme/app_theme.dart';
 import 'core/theme/color_palette.dart';
 import 'core/theme/palette_cubit.dart';
 import 'core/theme/theme_cubit.dart';
-import 'core/widgets/palette_tester.dart';
+import 'debug/palette_tester.dart';
 import 'l10n/app_localizations.dart';
 
 class App extends StatelessWidget {

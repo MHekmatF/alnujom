@@ -40,6 +40,7 @@ import '../core/widgets/price_tag.dart';
 import '../core/widgets/property_card.dart';
 import '../core/widgets/search_field.dart';
 import '../core/widgets/stepper_indicator.dart';
+import '../l10n/app_localizations.dart';
 
 class ThemeGalleryPage extends StatefulWidget {
   const ThemeGalleryPage({
@@ -92,287 +93,298 @@ class _ThemeGalleryPageState extends State<ThemeGalleryPage> {
         brightness: _brightness,
         locale: _locale,
       ),
-      child: Directionality(
-        textDirection: direction,
-        child: Builder(
-          builder: (context) {
-            final colors = AppColors.of(context);
-            final copy = _GalleryCopy.forLocale(_locale);
-            return Scaffold(
-              backgroundColor: colors.surface,
-              appBar: AppAppBar(title: copy.title),
-              body: SingleChildScrollView(
-                padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _Switchers(
-                      locale: _locale,
-                      brightness: _brightness,
-                      palette: _palette,
-                      onLocaleChanged: (locale) => setState(() {
-                        _locale = locale;
-                      }),
-                      onBrightnessChanged: (brightness) => setState(() {
-                        _brightness = brightness;
-                      }),
-                      onPaletteChanged: (palette) => setState(() {
-                        _palette = palette;
-                      }),
-                    ),
-                    const SizedBox(height: AppSpacing.xl),
-                    _Section(
-                      title: copy.chrome,
-                      children: [
-                        AppAppBar(title: copy.defaultLabel),
-                        AppAppBar(
-                          title: copy.back,
-                          variant: AppAppBarVariant.withBack,
-                          onBack: () {},
-                        ),
-                        AppAppBar(
-                          title: copy.search,
-                          variant: AppAppBarVariant.withSearch,
-                          onSearch: () {},
-                        ),
-                        Wrap(
-                          spacing: AppSpacing.sm,
-                          runSpacing: AppSpacing.sm,
-                          children: [
-                            AppButton(label: copy.primary, onPressed: () {}),
-                            AppButton(
-                              label: copy.success,
-                              variant: AppButtonVariant.filledSuccess,
-                              onPressed: () {},
-                            ),
-                            AppButton(
-                              label: copy.outlined,
-                              variant: AppButtonVariant.outlined,
-                              onPressed: () {},
-                            ),
-                            AppButton(
-                              label: copy.loading,
-                              loading: true,
-                              onPressed: () {},
-                            ),
-                            AppButton.iconButton(
-                              icon: LucideIcons.search,
-                              onPressed: () {},
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    _Section(
-                      title: copy.inputs,
-                      children: [
-                        SearchField(hint: copy.searchListings),
-                        SearchField(
-                          hint: copy.loadingSearch,
-                          loading: true,
-                          showFilterIcon: true,
-                          onFilterPressed: () {},
-                        ),
-                        LocationSelector(
-                          city: copy.damascus,
-                          area: copy.malki,
-                          onTap: () {},
-                        ),
-                        Wrap(
-                          spacing: AppSpacing.sm,
-                          children: [
-                            CategoryChip(
-                              label: copy.apartment,
-                              icon: LucideIcons.building_2,
-                              selected: true,
-                              onPressed: () {},
-                            ),
-                            CategoryChip(
-                              label: copy.land,
-                              icon: LucideIcons.trees,
-                              onPressed: () {},
-                            ),
-                          ],
-                        ),
-                        AppTextField(
-                          label: copy.name,
-                          initialValue: copy.sampleName,
-                        ),
-                        AppTextField(
-                          label: copy.errorField,
-                          errorText: copy.required,
-                        ),
-                        AppPhoneField(label: copy.phone),
-                        AppPasswordField(label: copy.password),
-                        AppMultiLineField(
-                          label: copy.description,
-                          maxLength: 1000,
-                        ),
-                        AppNumberField(label: copy.area, unit: copy.areaUnit),
-                        AppCurrencyField(label: copy.price),
-                        AppDropdown<String>(
-                          label: copy.type,
-                          value: 'sale',
-                          items: [
-                            DropdownMenuItem(
-                              value: 'sale',
-                              child: Text(copy.sale),
-                            ),
-                            DropdownMenuItem(
-                              value: 'rent',
-                              child: Text(copy.rent),
-                            ),
-                          ],
-                          onChanged: (_) {},
-                        ),
-                        AppStepperInput(value: 2, onChanged: (_) {}),
-                        AppDatePicker(
-                          value: DateTime(2026, 5, 3),
-                          label: 'Date',
-                        ),
-                        Row(
-                          children: [
-                            AppToggle(value: true, onChanged: (_) {}),
-                            AppCheckbox(value: true, onChanged: (_) {}),
-                          ],
-                        ),
-                        AppRadioGroup<int>(
-                          values: const [1, 2, 3],
-                          labels: [copy.one, copy.two, copy.three],
-                          groupValue: 1,
-                          onChanged: (_) {},
-                        ),
-                        AppTabs(
-                          labels: const ['A', 'B', 'C'],
-                          selectedIndex: 0,
-                          onChanged: (_) {},
-                        ),
-                      ],
-                    ),
-                    _Section(
-                      title: copy.cards,
-                      children: [
-                        PropertyCard(
-                          title: copy.propertyTitle,
-                          price: '250,000,000',
-                          location: copy.propertyLocation,
-                          featured: true,
-                          favorite: true,
-                          onLongPress: () {},
-                        ),
-                        PropertyCard(
-                          title: copy.horizontalCard,
-                          price: '800',
-                          currency: 'USD',
-                          location: copy.aleppo,
-                          layout: PropertyCardLayout.horizontal,
-                        ),
-                        OfficeCard(
-                          name: copy.officeName,
-                          listingsCount: 42,
-                          verified: true,
-                          onVisit: () {},
-                        ),
-                      ],
-                    ),
-                    _Section(
-                      title: copy.badges,
-                      children: [
-                        Wrap(
-                          spacing: AppSpacing.sm,
-                          runSpacing: AppSpacing.sm,
-                          children: [
-                            for (final variant in AppBadgeVariant.values)
-                              AppBadge(
-                                label: copy.badgeLabel(variant),
-                                variant: variant,
-                              ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    _Section(
-                      title: copy.sheets,
-                      children: [
-                        SizedBox(
-                          height: 220,
-                          child: AppBottomSheet(
-                            footer: Text(copy.stickyFooter),
-                            child: Text(copy.scrollableSheetBody),
+      child: Localizations(
+        locale: _locale,
+        delegates: AppLocalizations.localizationsDelegates,
+        child: Directionality(
+          textDirection: direction,
+          child: Builder(
+            builder: (context) {
+              final colors = AppColors.of(context);
+              final copy = _GalleryCopy.forLocale(_locale);
+              final loc = lookupAppLocalizations(_locale);
+              final styles = AppTextStyles.of(context);
+              return Scaffold(
+                backgroundColor: colors.surface,
+                appBar: AppAppBar(title: loc.themeGalleryTitle),
+                body: SingleChildScrollView(
+                  padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _Switchers(
+                        locale: _locale,
+                        brightness: _brightness,
+                        palette: _palette,
+                        onLocaleChanged: (locale) => setState(() {
+                          _locale = locale;
+                        }),
+                        onBrightnessChanged: (brightness) => setState(() {
+                          _brightness = brightness;
+                        }),
+                        onPaletteChanged: (palette) => setState(() {
+                          _palette = palette;
+                        }),
+                      ),
+                      const SizedBox(height: AppSpacing.xl),
+                      Text(
+                        loc.themeGalleryComponentsSectionHeader,
+                        style: styles.titleLarge,
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      _Section(
+                        title: copy.chrome,
+                        children: [
+                          AppAppBar(title: copy.defaultLabel),
+                          AppAppBar(
+                            title: copy.back,
+                            variant: AppAppBarVariant.withBack,
+                            onBack: () {},
                           ),
-                        ),
-                      ],
-                    ),
-                    _Section(
-                      title: copy.dialogs,
-                      children: [
-                        AppDialog(
-                          title: copy.confirmListing,
-                          message: copy.confirmMessage,
-                          actionLabel: copy.confirm,
-                          onAction: () {},
-                        ),
-                      ],
-                    ),
-                    _Section(
-                      title: copy.feedback,
-                      children: [
-                        EmptyState(
-                          headline: copy.noListings,
-                          body: copy.createFirstListing,
-                        ),
-                        const LoadingState.card(),
-                        ErrorState(title: copy.couldNotLoad, onRetry: () {}),
-                      ],
-                    ),
-                    _Section(
-                      title: copy.media,
-                      children: [
-                        const StepperIndicator(steps: 4, currentIndex: 1),
-                        const ImageGallery(imageUrls: []),
-                        MapPreview(onTap: () {}),
-                      ],
-                    ),
-                    _Section(
-                      title: copy.chat,
-                      children: [
-                        ChatBubble(
-                          message: copy.chatQuestion,
-                          variant: ChatBubbleVariant.theirs,
-                        ),
-                        ChatBubble(
-                          message: copy.chatAnswer,
-                          variant: ChatBubbleVariant.mine,
-                        ),
-                      ],
-                    ),
-                    _Section(
-                      title: copy.priceSection,
-                      children: [
-                        const PriceTag(
-                          amount: '250,000,000',
-                          currency: 'ل.س',
-                          altText: '≈ 18,000 USD',
-                        ),
-                      ],
-                    ),
-                    _Section(
-                      title: copy.bottomNav,
-                      children: [
-                        AppBottomNav(
-                          currentIndex: _bottomNavIndex,
-                          onTabSelected: (index) => setState(() {
-                            _bottomNavIndex = index;
-                          }),
-                          onAddPressed: () {},
-                        ),
-                      ],
-                    ),
-                  ],
+                          AppAppBar(
+                            title: copy.search,
+                            variant: AppAppBarVariant.withSearch,
+                            onSearch: () {},
+                          ),
+                          Wrap(
+                            spacing: AppSpacing.sm,
+                            runSpacing: AppSpacing.sm,
+                            children: [
+                              AppButton(label: copy.primary, onPressed: () {}),
+                              AppButton(
+                                label: copy.success,
+                                variant: AppButtonVariant.filledSuccess,
+                                onPressed: () {},
+                              ),
+                              AppButton(
+                                label: copy.outlined,
+                                variant: AppButtonVariant.outlined,
+                                onPressed: () {},
+                              ),
+                              AppButton(
+                                label: copy.loading,
+                                loading: true,
+                                onPressed: () {},
+                              ),
+                              AppButton.iconButton(
+                                icon: LucideIcons.search,
+                                onPressed: () {},
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      _Section(
+                        title: copy.inputs,
+                        children: [
+                          SearchField(hint: copy.searchListings),
+                          SearchField(
+                            hint: copy.loadingSearch,
+                            loading: true,
+                            showFilterIcon: true,
+                            onFilterPressed: () {},
+                          ),
+                          LocationSelector(
+                            city: copy.damascus,
+                            area: copy.malki,
+                            onTap: () {},
+                          ),
+                          Wrap(
+                            spacing: AppSpacing.sm,
+                            children: [
+                              CategoryChip(
+                                label: copy.apartment,
+                                icon: LucideIcons.building_2,
+                                selected: true,
+                                onPressed: () {},
+                              ),
+                              CategoryChip(
+                                label: copy.land,
+                                icon: LucideIcons.trees,
+                                onPressed: () {},
+                              ),
+                            ],
+                          ),
+                          AppTextField(
+                            label: copy.name,
+                            initialValue: copy.sampleName,
+                          ),
+                          AppTextField(
+                            label: copy.errorField,
+                            errorText: copy.required,
+                          ),
+                          AppPhoneField(label: copy.phone),
+                          AppPasswordField(label: copy.password),
+                          AppMultiLineField(
+                            label: copy.description,
+                            maxLength: 1000,
+                          ),
+                          AppNumberField(label: copy.area, unit: copy.areaUnit),
+                          AppCurrencyField(label: copy.price),
+                          AppDropdown<String>(
+                            label: copy.type,
+                            value: 'sale',
+                            items: [
+                              DropdownMenuItem(
+                                value: 'sale',
+                                child: Text(copy.sale),
+                              ),
+                              DropdownMenuItem(
+                                value: 'rent',
+                                child: Text(copy.rent),
+                              ),
+                            ],
+                            onChanged: (_) {},
+                          ),
+                          AppStepperInput(value: 2, onChanged: (_) {}),
+                          AppDatePicker(
+                            value: DateTime(2026, 5, 3),
+                            label: 'Date',
+                          ),
+                          Row(
+                            children: [
+                              AppToggle(value: true, onChanged: (_) {}),
+                              AppCheckbox(value: true, onChanged: (_) {}),
+                            ],
+                          ),
+                          AppRadioGroup<int>(
+                            values: const [1, 2, 3],
+                            labels: [copy.one, copy.two, copy.three],
+                            groupValue: 1,
+                            onChanged: (_) {},
+                          ),
+                          AppTabs(
+                            labels: const ['A', 'B', 'C'],
+                            selectedIndex: 0,
+                            onChanged: (_) {},
+                          ),
+                        ],
+                      ),
+                      _Section(
+                        title: copy.cards,
+                        children: [
+                          PropertyCard(
+                            title: copy.propertyTitle,
+                            price: '250,000,000',
+                            location: copy.propertyLocation,
+                            featured: true,
+                            favorite: true,
+                            onLongPress: () {},
+                          ),
+                          PropertyCard(
+                            title: copy.horizontalCard,
+                            price: '800',
+                            currency: 'USD',
+                            location: copy.aleppo,
+                            layout: PropertyCardLayout.horizontal,
+                          ),
+                          OfficeCard(
+                            name: copy.officeName,
+                            listingsCount: 42,
+                            verified: true,
+                            onVisit: () {},
+                          ),
+                        ],
+                      ),
+                      _Section(
+                        title: copy.badges,
+                        children: [
+                          Wrap(
+                            spacing: AppSpacing.sm,
+                            runSpacing: AppSpacing.sm,
+                            children: [
+                              for (final variant in AppBadgeVariant.values)
+                                AppBadge(
+                                  label: copy.badgeLabel(variant),
+                                  variant: variant,
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      _Section(
+                        title: copy.sheets,
+                        children: [
+                          SizedBox(
+                            height: 220,
+                            child: AppBottomSheet(
+                              footer: Text(copy.stickyFooter),
+                              child: Text(copy.scrollableSheetBody),
+                            ),
+                          ),
+                        ],
+                      ),
+                      _Section(
+                        title: copy.dialogs,
+                        children: [
+                          AppDialog(
+                            title: copy.confirmListing,
+                            message: copy.confirmMessage,
+                            actionLabel: copy.confirm,
+                            onAction: () {},
+                          ),
+                        ],
+                      ),
+                      _Section(
+                        title: copy.feedback,
+                        children: [
+                          EmptyState(
+                            headline: copy.noListings,
+                            body: copy.createFirstListing,
+                          ),
+                          const LoadingState.card(),
+                          ErrorState(title: copy.couldNotLoad, onRetry: () {}),
+                        ],
+                      ),
+                      _Section(
+                        title: copy.media,
+                        children: [
+                          const StepperIndicator(steps: 4, currentIndex: 1),
+                          const ImageGallery(imageUrls: []),
+                          MapPreview(onTap: () {}),
+                        ],
+                      ),
+                      _Section(
+                        title: copy.chat,
+                        children: [
+                          ChatBubble(
+                            message: copy.chatQuestion,
+                            variant: ChatBubbleVariant.theirs,
+                          ),
+                          ChatBubble(
+                            message: copy.chatAnswer,
+                            variant: ChatBubbleVariant.mine,
+                          ),
+                        ],
+                      ),
+                      _Section(
+                        title: copy.priceSection,
+                        children: [
+                          const PriceTag(
+                            amount: '250,000,000',
+                            currency: 'ل.س',
+                            altText: '≈ 18,000 USD',
+                          ),
+                        ],
+                      ),
+                      _Section(
+                        title: copy.bottomNav,
+                        children: [
+                          AppBottomNav(
+                            currentIndex: _bottomNavIndex,
+                            onTabSelected: (index) => setState(() {
+                              _bottomNavIndex = index;
+                            }),
+                            onAddPressed: () {},
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );
@@ -502,42 +514,74 @@ class _Switchers extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = lookupAppLocalizations(locale);
+    final styles = AppTextStyles.of(context);
     return Wrap(
       spacing: AppSpacing.md,
       runSpacing: AppSpacing.md,
       children: [
-        SegmentedButton<String>(
-          key: const ValueKey<String>('theme-gallery-locale-switcher'),
-          segments: const [
-            ButtonSegment(value: 'ar', label: Text('ar')),
-            ButtonSegment(value: 'en', label: Text('en')),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              loc.themeGalleryLocaleSectionHeader,
+              style: styles.labelMedium,
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            SegmentedButton<String>(
+              key: const ValueKey<String>('theme-gallery-locale-switcher'),
+              segments: const [
+                ButtonSegment(value: 'ar', label: Text('ar')),
+                ButtonSegment(value: 'en', label: Text('en')),
+              ],
+              selected: {locale.languageCode},
+              onSelectionChanged: (selected) {
+                onLocaleChanged(Locale(selected.first));
+              },
+            ),
           ],
-          selected: {locale.languageCode},
-          onSelectionChanged: (selected) {
-            onLocaleChanged(Locale(selected.first));
-          },
         ),
-        SegmentedButton<Brightness>(
-          key: const ValueKey<String>('theme-gallery-theme-switcher'),
-          segments: const [
-            ButtonSegment(value: Brightness.light, label: Text('light')),
-            ButtonSegment(value: Brightness.dark, label: Text('dark')),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(loc.themeGalleryThemeSectionHeader, style: styles.labelMedium),
+            const SizedBox(height: AppSpacing.xs),
+            SegmentedButton<Brightness>(
+              key: const ValueKey<String>('theme-gallery-theme-switcher'),
+              segments: const [
+                ButtonSegment(value: Brightness.light, label: Text('light')),
+                ButtonSegment(value: Brightness.dark, label: Text('dark')),
+              ],
+              selected: {brightness},
+              onSelectionChanged: (selected) {
+                onBrightnessChanged(selected.first);
+              },
+            ),
           ],
-          selected: {brightness},
-          onSelectionChanged: (selected) {
-            onBrightnessChanged(selected.first);
-          },
         ),
-        SegmentedButton<String>(
-          key: const ValueKey<String>('theme-gallery-palette-switcher'),
-          segments: const [
-            ButtonSegment(value: 'modern', label: Text('Modern')),
-            ButtonSegment(value: 'trust', label: Text('Trust')),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              loc.themeGalleryPaletteSectionHeader,
+              style: styles.labelMedium,
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            SegmentedButton<String>(
+              key: const ValueKey<String>('theme-gallery-palette-switcher'),
+              segments: const [
+                ButtonSegment(value: 'modern', label: Text('Modern')),
+                ButtonSegment(value: 'trust', label: Text('Trust')),
+              ],
+              selected: {palette.name},
+              onSelectionChanged: (selected) {
+                onPaletteChanged(ColorPalette.fromName(selected.first));
+              },
+            ),
           ],
-          selected: {palette.name},
-          onSelectionChanged: (selected) {
-            onPaletteChanged(ColorPalette.fromName(selected.first));
-          },
         ),
       ],
     );

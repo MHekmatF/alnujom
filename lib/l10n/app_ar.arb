@@ -5,5 +5,41 @@
   "localeToggleLabel": "بدّل اللغة",
   "currentTheme": "المظهر الحالي",
   "currentLocale": "اللغة الحالية",
-  "backendConfigMissingWarning": "إعدادات الخادم ناقصة؛ رح نكمل بدون اتصال بالخادم."
+  "backendConfigMissingWarning": "إعدادات الخادم ناقصة؛ رح نكمل بدون اتصال بالخادم.",
+  "themeGalleryTitle": "معرض الثيم",
+  "themeGalleryPaletteSectionHeader": "لوحات الألوان",
+  "themeGalleryThemeSectionHeader": "إعدادات المظهر",
+  "themeGalleryLocaleSectionHeader": "إعدادات اللغة",
+  "themeGalleryComponentsSectionHeader": "المكوّنات",
+  "errorOffline": "أنت غير متصل بالإنترنت",
+  "errorGeneric": "صار خطأ غير متوقع",
+  "errorMissingBackendConfig": "إعدادات الخادم ناقصة",
+  "errorRetryAction": "حاول مرة ثانية",
+  "missingTranslationMarkerPrefix": "⟦missing:",
+  "missingTranslationMarkerSuffix": "⟧",
+  "paginationCounter": "{current}/{total}",
+  "@paginationCounter": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "stepCounter": "({current}/{total})",
+  "@stepCounter": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "priceWithCurrency": "{amount} {currency}",
+  "@priceWithCurrency": {
+    "placeholders": {
+      "amount": { "type": "String" },
+      "currency": { "type": "String" }
+    }
+  },
+  "currencyUsdName": "دولار أمريكي",
+  "currencySypName": "ليرة سورية",
+  "currencyUsdSymbol": "USD",
+  "currencySypSymbol": "ل.س"
 }
