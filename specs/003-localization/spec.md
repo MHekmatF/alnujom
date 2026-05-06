@@ -2,7 +2,7 @@
 
 **Feature Branch**: `003-localization`
 **Created**: 2026-05-05
-**Status**: Draft
+**Status**: Implemented
 **Input**: User description: "Phase 3 — Localization. ARB-driven localization wired through the app, RTL/LTR working end-to-end, locale persisted. Initial keys cover the app shell, the Phase 2 Theme Gallery, and the project's standard error messages; a build-blocking lint guard prevents new untranslated literals from leaking into feature code."
 
 ## User Scenarios & Testing *(mandatory)*
