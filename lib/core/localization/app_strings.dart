@@ -26,10 +26,51 @@ final class AppStrings {
       );
     }
 
-    return AppStrings._(active: active, logger: getIt<AppLogger>());
+    // GetIt may not be bootstrapped in widget-test environments. Fall back to
+    // a silent logger so AppStrings stays safe to mount in tests.
+    final logger = getIt.isRegistered<AppLogger>()
+        ? getIt<AppLogger>()
+        : const _SilentAppLogger();
+    return AppStrings._(active: active, logger: logger);
   }
 
   AppLocalizations get loc => _loc;
+}
+
+final class _SilentAppLogger implements AppLogger {
+  const _SilentAppLogger();
+
+  @override
+  void debug(
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+    String? tag,
+  }) {}
+
+  @override
+  void info(
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+    String? tag,
+  }) {}
+
+  @override
+  void warning(
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+    String? tag,
+  }) {}
+
+  @override
+  void error(
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+    String? tag,
+  }) {}
 }
 
 final class _DebugAppLocalizations extends AppLocalizations {

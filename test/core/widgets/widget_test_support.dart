@@ -1,7 +1,7 @@
 import 'package:alnujom/core/theme/app_theme.dart';
 import 'package:alnujom/core/theme/color_palette.dart';
+import 'package:alnujom/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Future<void> pumpWidgetKit(
@@ -15,12 +15,8 @@ Future<void> pumpWidgetKit(
   return tester.pumpWidget(
     MaterialApp(
       locale: locale,
-      supportedLocales: const [Locale('ar'), Locale('en')],
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ],
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
       theme: buildAppTheme(
         palette: const ModernPalette(),
         brightness: Brightness.light,

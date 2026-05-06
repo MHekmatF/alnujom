@@ -1,6 +1,7 @@
 import 'package:alnujom/core/theme/app_theme.dart';
 import 'package:alnujom/core/theme/color_palette.dart';
 import 'package:alnujom/core/widgets/property_card.dart';
+import 'package:alnujom/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -53,6 +54,8 @@ class _GoldenHarness extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       locale: locale,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
       theme: buildAppTheme(
         palette: const ModernPalette(),
         brightness: brightness,
