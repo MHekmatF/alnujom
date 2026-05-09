@@ -783,7 +783,7 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
 
 > Contracts: [`contracts/vault-helper.md`](contracts/vault-helper.md). Decisions: research [R-06](research.md#r-06--app_vault_secret-helper-signature-and-missing-name-semantics), [R-08](research.md#r-08--pgsodium-and-vault-baseline-migration).
 
-- [ ] T034 [US4] Author `supabase/migrations/20260506120006_enable_vault.sql` with this exact body:
+- [X] T034 [US4] Author `supabase/migrations/20260506120006_enable_vault.sql` with this exact body:
   ```sql
   -- Migration 6: Enable Vault scaffolding (forward-prep, no secrets stored)
   -- Phase 4 — Supabase Foundation (FR-012, FR-013)
@@ -801,7 +801,7 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
   ```
   - **Verify**: File exists with exactly the three logical sections (header comment, `CREATE EXTENSION`, `CREATE OR REPLACE FUNCTION`); the file contains NO `INSERT INTO vault.secrets` statement (FR-013); the function is `SECURITY DEFINER STABLE`.
 
-- [ ] T035 [US4] Apply `20260506120006_enable_vault.sql` via Supabase MCP `apply_migration` with `name: "20260506120006_enable_vault"`. Then verify per quickstart [Steps 14, 15](quickstart.md#step-14--confirm-pgsodium-and-vault-scaffolding-are-in-place):
+- [X] T035 [US4] Apply `20260506120006_enable_vault.sql` via Supabase MCP `apply_migration` with `name: "20260506120006_enable_vault"`. Then verify per quickstart [Steps 14, 15](quickstart.md#step-14--confirm-pgsodium-and-vault-scaffolding-are-in-place):
   ```sql
   -- (1) extension
   SELECT extname FROM pg_extension WHERE extname='pgsodium';
