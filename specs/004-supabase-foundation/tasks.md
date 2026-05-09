@@ -520,7 +520,7 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
 
 ### Backend — audit_logs table + log_audit + concrete trigger
 
-- [ ] T021 [US3] Author `supabase/migrations/20260506120004_create_audit_logs.sql` containing the three sections below. The `log_audit()` function uses the **full table-agnostic body from research [R-04](research.md#r-04--log_audit-trigger-function-signature)** — copy it verbatim. The function reads PK column name from `TG_ARGV[2]` and uses `to_jsonb(NEW or OLD) ->> COALESCE(TG_ARGV[2], 'id')` to compute `target_id`, so the function body contains NO references to specific column names. The Phase 4 trigger declaration passes `'user_id'` as `TG_ARGV[2]` because `profiles.user_id` is the PK.
+- [X] T021 [US3] Author `supabase/migrations/20260506120004_create_audit_logs.sql` containing the three sections below. The `log_audit()` function uses the **full table-agnostic body from research [R-04](research.md#r-04--log_audit-trigger-function-signature)** — copy it verbatim. The function reads PK column name from `TG_ARGV[2]` and uses `to_jsonb(NEW or OLD) ->> COALESCE(TG_ARGV[2], 'id')` to compute `target_id`, so the function body contains NO references to specific column names. The Phase 4 trigger declaration passes `'user_id'` as `TG_ARGV[2]` because `profiles.user_id` is the PK.
   ```sql
   -- Migration 4: Create Audit Logs + reusable log_audit() trigger function
   -- Phase 4 — Supabase Foundation (FR-003, FR-009, FR-010)
@@ -555,7 +555,7 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
   ```
   - **Verify**: File exists; the table DDL has 10 columns with `id UUID PRIMARY KEY DEFAULT gen_random_uuid()` and `created_at TIMESTAMPTZ NOT NULL DEFAULT now()`; the function body is the verbatim R-04 code (search for `to_jsonb(NEW) ->> v_pk_col` to confirm the PK-agnostic resolver is present); the trigger declaration passes three arguments to `log_audit()` and the third is `'user_id'`; `Get-Content` of the file shows zero references to `NEW.id` or `OLD.id` (the function uses `to_jsonb(NEW or OLD) ->> v_pk_col` instead).
 
-- [ ] T022 [US3] Apply `20260506120004_create_audit_logs.sql` via Supabase MCP `apply_migration` with `name: "20260506120004_create_audit_logs"`. Then verify:
+- [X] T022 [US3] Apply `20260506120004_create_audit_logs.sql` via Supabase MCP `apply_migration` with `name: "20260506120004_create_audit_logs"`. Then verify:
   ```sql
   -- (1) columns
   SELECT column_name FROM information_schema.columns
@@ -572,7 +572,7 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
 
 ### Backend — RLS bundle migration (closes both US2 and US3 RLS posture)
 
-- [ ] T023 [US3] Author `supabase/migrations/20260506120005_enable_rls_default.sql` per research [R-02](research.md#r-02--migration-filenames-ordering-and-policy-bundling). The migration has two sections: (1) ENABLE RLS on the three tables; (2) inline the bodies of the three `supabase/policies/*.sql` files (T006/T007/T008), each block prefixed with a `-- generated from supabase/policies/<filename>` comment, and each `CREATE POLICY` wrapped with a `DROP POLICY IF EXISTS <name> ON <table>;` line for idempotency. Use the policy names from T006/T007/T008 verbatim. Note: `current_user_is_admin()` is NOT created here — it shipped in 0002 (T009).
+- [X] T023 [US3] Author `supabase/migrations/20260506120005_enable_rls_default.sql` per research [R-02](research.md#r-02--migration-filenames-ordering-and-policy-bundling). The migration has two sections: (1) ENABLE RLS on the three tables; (2) inline the bodies of the three `supabase/policies/*.sql` files (T006/T007/T008), each block prefixed with a `-- generated from supabase/policies/<filename>` comment, and each `CREATE POLICY` wrapped with a `DROP POLICY IF EXISTS <name> ON <table>;` line for idempotency. Use the policy names from T006/T007/T008 verbatim. Note: `current_user_is_admin()` is NOT created here — it shipped in 0002 (T009).
   ```sql
   -- Migration 5: Enable RLS by Default + apply policies
   -- Phase 4 — Supabase Foundation (FR-005, FR-006, FR-007, FR-008)
@@ -637,7 +637,7 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
   ```
   - **Verify**: File exists; reading it confirms three `ALTER TABLE … ENABLE ROW LEVEL SECURITY` lines and exactly 9 `CREATE POLICY` blocks (4 profiles + 4 user_preferences + 1 audit_logs), each preceded by a `DROP POLICY IF EXISTS` line; the inlined bodies are byte-equivalent (modulo the DROP wrappers and source comments) to the source `.sql` files in `supabase/policies/`; the file does NOT redefine `current_user_is_admin()`.
 
-- [ ] T024 [US3] Apply `20260506120005_enable_rls_default.sql` via Supabase MCP `apply_migration` with `name: "20260506120005_enable_rls_default"`. Then verify:
+- [X] T024 [US3] Apply `20260506120005_enable_rls_default.sql` via Supabase MCP `apply_migration` with `name: "20260506120005_enable_rls_default"`. Then verify:
   ```sql
   -- (1) RLS enabled
   SELECT relname, relrowsecurity FROM pg_class
@@ -657,7 +657,7 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
 
 ### Backend — verification of audit emission and RLS isolation
 
-- [ ] T025 [US3] Quickstart [Step 9](quickstart.md#step-9--confirm-the-audit-trigger-fires-on-account_status-changes). Via privileged `execute_sql` (the privileged-session bypass on the R-12 enforce_status trigger lets this UPDATE through):
+- [X] T025 [US3] Quickstart [Step 9](quickstart.md#step-9--confirm-the-audit-trigger-fires-on-account_status-changes). Via privileged `execute_sql` (the privileged-session bypass on the R-12 enforce_status trigger lets this UPDATE through):
   ```sql
   UPDATE profiles SET account_status = 'approved' WHERE user_id = '<$TEST_ID>';
 
@@ -669,7 +669,7 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
   Depends on T024.
   - **Verify**: Exactly one audit_logs row with `action='profile.status_changed'`, `target_type='profiles'`, `target_id='<$TEST_ID>'` (note: TEXT, not UUID — the resolver casts via JSONB), `before_state` JSON contains `"account_status":"pending"`, `after_state` JSON contains `"account_status":"approved"`.
 
-- [ ] T026 [US3] Quickstart [Step 10](quickstart.md#step-10--confirm-the-audit-trigger-does-not-fire-on-unrelated-changes): test the audit-noise filter via privileged `execute_sql`:
+- [X] T026 [US3] Quickstart [Step 10](quickstart.md#step-10--confirm-the-audit-trigger-does-not-fire-on-unrelated-changes): test the audit-noise filter via privileged `execute_sql`:
   ```sql
   UPDATE profiles SET full_name = 'Different Name' WHERE user_id = '<$TEST_ID>';
   SELECT COUNT(*) FROM audit_logs WHERE target_type='profiles' AND target_id='<$TEST_ID>';
@@ -677,7 +677,7 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
   Depends on T025.
   - **Verify**: COUNT unchanged from T025 (still 1, not 2). The `IS DISTINCT FROM` filter inside `log_audit()` skipped the insert.
 
-- [ ] T027 [US3] Quickstart [Step 11](quickstart.md#step-11--confirm-audit_logs-rejects-client-writes). Use the multi-statement MCP wrap pattern from "Required reading" §3 to simulate authenticated and anon roles. Issue this **single `execute_sql` call**:
+- [X] T027 [US3] Quickstart [Step 11](quickstart.md#step-11--confirm-audit_logs-rejects-client-writes). Use the multi-statement MCP wrap pattern from "Required reading" §3 to simulate authenticated and anon roles. Issue this **single `execute_sql` call**:
   ```sql
   BEGIN;
   -- Try as authenticated user $TEST_ID
@@ -691,7 +691,7 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
   Repeat the pattern with `UPDATE audit_logs SET action='tampered' WHERE target_type='profiles';` and `DELETE FROM audit_logs WHERE target_type='profiles';`. Repeat the same three statements with `SET LOCAL ROLE anon;` (omit the set_config since anon has no JWT claims). Depends on T024.
   - **Verify**: Every attempt either errors with a permission/policy violation OR the `ROLLBACK` reports zero rows affected for the offending statement; `SELECT COUNT(*) FROM audit_logs WHERE target_type='profiles' AND target_id='<$TEST_ID>'` from a privileged session is unchanged from T025/T026 (= 1).
 
-- [ ] T028 [US3] Quickstart [Step 12](quickstart.md#step-12--confirm-audit_logs-reads-are-blocked-for-normal-users). Single `execute_sql` call:
+- [X] T028 [US3] Quickstart [Step 12](quickstart.md#step-12--confirm-audit_logs-reads-are-blocked-for-normal-users). Single `execute_sql` call:
   ```sql
   BEGIN;
   SELECT set_config('request.jwt.claims',
@@ -703,7 +703,7 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
   Depends on T024.
   - **Verify**: COUNT = 0. The user whose status changed cannot read the audit row from their own session — `current_user_is_admin()` returns FALSE.
 
-- [ ] T029 [US3] Quickstart [Step 13](quickstart.md#step-13--confirm-the-placeholder-admin-predicate-evaluates-to-false). Three separate `execute_sql` calls:
+- [X] T029 [US3] Quickstart [Step 13](quickstart.md#step-13--confirm-the-placeholder-admin-predicate-evaluates-to-false). Three separate `execute_sql` calls:
   ```sql
   -- Call 1 (privileged): SELECT current_user_is_admin();
   -- Call 2 (authenticated): wrap in BEGIN/SET LOCAL ROLE authenticated/SELECT/ROLLBACK
@@ -714,7 +714,7 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
 
 ### US2 RLS-isolation follow-on (newly verifiable after T024)
 
-- [ ] T030 [US2] Quickstart [Step 8a (NEW per R-12)](quickstart.md#step-8a--confirm-self-elevation-of-status-is-blocked-r-12-fr-006). Single `execute_sql` call simulating user `$TEST_ID` trying to self-elevate status:
+- [X] T030 [US2] Quickstart [Step 8a (NEW per R-12)](quickstart.md#step-8a--confirm-self-elevation-of-status-is-blocked-r-12-fr-006). Single `execute_sql` call simulating user `$TEST_ID` trying to self-elevate status:
   ```sql
   BEGIN;
   SELECT set_config('request.jwt.claims',
@@ -728,7 +728,7 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
   Depends on T024.
   - **Verify**: The UPDATE raises an exception; the error code is `42501 insufficient_privilege`; the message contains `'Only admins can change account_status or publisher_status'`. Confirm via privileged read after the rollback that `account_status` is unchanged from its previous value (`'approved'` from T025, since T025 was privileged and succeeded).
 
-- [ ] T031 [US2] Quickstart [Step 6](quickstart.md#step-6--confirm-anonymous-reads-return-zero-rows). Single `execute_sql` call:
+- [X] T031 [US2] Quickstart [Step 6](quickstart.md#step-6--confirm-anonymous-reads-return-zero-rows). Single `execute_sql` call:
   ```sql
   BEGIN;
   SET LOCAL ROLE anon;
@@ -741,7 +741,7 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
   Depends on T024.
   - **Verify**: All three counts return 0.
 
-- [ ] T032 [US2] Quickstart [Step 7](quickstart.md#step-7--confirm-cross-user-reads-are-blocked). Two single-call `execute_sql` blocks (one per user):
+- [X] T032 [US2] Quickstart [Step 7](quickstart.md#step-7--confirm-cross-user-reads-are-blocked). Two single-call `execute_sql` blocks (one per user):
   ```sql
   -- As $TEST_ID — own reads return 1, cross-user reads return 0:
   BEGIN;
@@ -757,7 +757,7 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
   Depends on T024.
   - **Verify**: `own_profile` = 1, `own_prefs` = 1, `other_profile` = 0, `other_prefs` = 0.
 
-- [ ] T033 [US2] Quickstart [Step 8](quickstart.md#step-8--confirm-self-write-works-cross-user-write-fails). Single `execute_sql`:
+- [X] T033 [US2] Quickstart [Step 8](quickstart.md#step-8--confirm-self-write-works-cross-user-write-fails). Single `execute_sql`:
   ```sql
   BEGIN;
   SELECT set_config('request.jwt.claims', json_build_object('sub','<$TEST_ID>','role','authenticated')::text, true);
