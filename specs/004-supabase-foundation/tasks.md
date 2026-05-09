@@ -235,7 +235,7 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
 
 ### Backend — profiles table + helpers + enforce trigger
 
-- [ ] T009 [US2] Author `supabase/migrations/20260506120002_create_profiles.sql` containing the seven sections below in this order. Use `CREATE TABLE IF NOT EXISTS`, `CREATE OR REPLACE FUNCTION`, and `DROP TRIGGER IF EXISTS … CREATE TRIGGER …` for idempotency. Do NOT include the auto-provision trigger or the `handle_new_auth_user()` function — those land in `0003` after `user_preferences` exists.
+- [X] T009 [US2] Author `supabase/migrations/20260506120002_create_profiles.sql` containing the seven sections below in this order. Use `CREATE TABLE IF NOT EXISTS`, `CREATE OR REPLACE FUNCTION`, and `DROP TRIGGER IF EXISTS … CREATE TRIGGER …` for idempotency. Do NOT include the auto-provision trigger or the `handle_new_auth_user()` function — those land in `0003` after `user_preferences` exists.
   ```sql
   -- Migration 2: Create Profiles + admin helper + status-enforcement trigger
   -- Phase 4 — Supabase Foundation (FR-001, FR-006, FR-020, Q2, Q4)
@@ -308,7 +308,7 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
   Note: NULL-distinct `UNIQUE` semantics on `username` and `phone` are Postgres's default — multiple NULLs coexist (Q4). The file does NOT reference `user_preferences` (deferred to 0003).
   - **Verify**: File exists; reading it confirms all seven sections (table, set_updated_at, updated_at trigger, current_user_is_admin, enforce_status function, enforce_status trigger, header); columns match data-model.md exactly (no `preferred_language`/`preferred_currency` per Q2); `created_at` and `updated_at` are `NOT NULL DEFAULT now()`.
 
-- [ ] T010 [US2] Apply `20260506120002_create_profiles.sql` via Supabase MCP `apply_migration` with `name: "20260506120002_create_profiles"`. Then verify via `execute_sql`:
+- [X] T010 [US2] Apply `20260506120002_create_profiles.sql` via Supabase MCP `apply_migration` with `name: "20260506120002_create_profiles"`. Then verify via `execute_sql`:
   ```sql
   -- (1) columns
   SELECT column_name, data_type, is_nullable
@@ -330,7 +330,7 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
 
 ### Backend — user_preferences table + auto-provision trigger
 
-- [ ] T011 [US2] Author `supabase/migrations/20260506120003_create_user_preferences.sql` containing the four sections below. The auto-provision function references both `profiles` and `user_preferences` — Postgres PL/pgSQL late-binds table references, so the function definition succeeds. The function actually executes only when `auth.users` receives an INSERT; by that time both tables exist (this migration creates `user_preferences` BEFORE creating the function). **Do NOT move the function or trigger to 0002** — they live here, after `user_preferences` exists, by design.
+- [X] T011 [US2] Author `supabase/migrations/20260506120003_create_user_preferences.sql` containing the four sections below. The auto-provision function references both `profiles` and `user_preferences` — Postgres PL/pgSQL late-binds table references, so the function definition succeeds. The function actually executes only when `auth.users` receives an INSERT; by that time both tables exist (this migration creates `user_preferences` BEFORE creating the function). **Do NOT move the function or trigger to 0002** — they live here, after `user_preferences` exists, by design.
   ```sql
   -- Migration 3: Create User Preferences + auto-provision trigger
   -- Phase 4 — Supabase Foundation (FR-002, FR-004, FR-019, Q1)
@@ -377,7 +377,7 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
   ```
   - **Verify**: File exists; reading it confirms all four sections; the function is `SECURITY DEFINER` with `SET search_path = public`; both INSERT statements use the FR-019/FR-020 defaults; the trigger fires `AFTER INSERT ON auth.users`.
 
-- [ ] T012 [US2] Apply `20260506120003_create_user_preferences.sql` via Supabase MCP `apply_migration` with `name: "20260506120003_create_user_preferences"`. Then verify:
+- [X] T012 [US2] Apply `20260506120003_create_user_preferences.sql` via Supabase MCP `apply_migration` with `name: "20260506120003_create_user_preferences"`. Then verify:
   ```sql
   -- (1) columns
   SELECT column_name, is_nullable, column_default
@@ -394,7 +394,7 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
 
 ### Backend — verification of auto-provision (works without RLS)
 
-- [ ] T013 [US2] Quickstart [Step 4](quickstart.md#step-4--confirm-the-auto-provision-trigger-creates-both-rows). Note: this insert IS the spec's "manually-inserted auth user" edge case — passing it confirms the auto-provision trigger fires regardless of insert source. Via Supabase MCP `execute_sql`, run this exact SQL and capture the returned UUID as `$TEST_ID`:
+- [X] T013 [US2] Quickstart [Step 4](quickstart.md#step-4--confirm-the-auto-provision-trigger-creates-both-rows). Note: this insert IS the spec's "manually-inserted auth user" edge case — passing it confirms the auto-provision trigger fires regardless of insert source. Via Supabase MCP `execute_sql`, run this exact SQL and capture the returned UUID as `$TEST_ID`:
   ```sql
   INSERT INTO auth.users (id, email, encrypted_password, role, aud, instance_id)
     VALUES (gen_random_uuid(),
@@ -415,7 +415,7 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
   Depends on T012. **Save the returned UUID as `$TEST_ID`** for use in T014, T015, T015a, T025-T033, T046.
   - **Verify**: profiles row exists with `account_status='pending'`, `publisher_status='pending'`; user_preferences row exists with `locale='ar'`, `theme_mode='system'`, `display_currency='SYP'`, `notifications_enabled=true`.
 
-- [ ] T014 [US2] Quickstart [Step 5](quickstart.md#step-5--confirm-the-auto-provision-trigger-is-idempotent-under-retry): test the trigger's idempotency directly (NOT through `auth.users` PK uniqueness — see Step 5 note about why). Via privileged `execute_sql`, manually invoke the trigger function with the same NEW.id twice in one call:
+- [X] T014 [US2] Quickstart [Step 5](quickstart.md#step-5--confirm-the-auto-provision-trigger-is-idempotent-under-retry): test the trigger's idempotency directly (NOT through `auth.users` PK uniqueness — see Step 5 note about why). Via privileged `execute_sql`, manually invoke the trigger function with the same NEW.id twice in one call:
   ```sql
   -- Direct trigger invocation, simulating two near-simultaneous fires:
   -- The function uses ON CONFLICT (user_id) DO NOTHING on each target,
@@ -438,7 +438,7 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
   Depends on T013.
   - **Verify**: Both COUNTs return exactly 1 (the trigger's `ON CONFLICT DO NOTHING` absorbs the retry; no duplicate rows). If the simulator function doesn't exist (it's not part of Phase 4's deliverables), the `auth.users` `ON CONFLICT` path is sufficient because it tests the same invariant: the auth.users PK rejects the duplicate before the trigger fires, so the system as a whole produces 1+1 rows.
 
-- [ ] T015 [US2] Create a second test auth user via the auto-provision path. Capture the returned UUID as `$OTHER_ID`. Via privileged `execute_sql`:
+- [X] T015 [US2] Create a second test auth user via the auto-provision path. Capture the returned UUID as `$OTHER_ID`. Via privileged `execute_sql`:
   ```sql
   INSERT INTO auth.users (id, email, encrypted_password, role, aud, instance_id)
     VALUES (gen_random_uuid(),
@@ -453,7 +453,7 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
   Depends on T014.
   - **Verify**: After insertion, `SELECT COUNT(*) FROM profiles;` and `SELECT COUNT(*) FROM user_preferences;` each return at least 2 (your `$TEST_ID` and `$OTHER_ID` plus any pre-existing). Both counts are equal.
 
-- [ ] T015a [US2] Quickstart [Step 16](quickstart.md#step-16--confirm-uniqueness-on-usernamephone-allows-multiple-nulls). Verify that NULL-distinct UNIQUE on `username` allows multiple NULLs (Q4) and rejects non-NULL duplicates:
+- [X] T015a [US2] Quickstart [Step 16](quickstart.md#step-16--confirm-uniqueness-on-usernamephone-allows-multiple-nulls). Verify that NULL-distinct UNIQUE on `username` allows multiple NULLs (Q4) and rejects non-NULL duplicates:
   ```sql
   -- (1) Multiple NULLs allowed
   SELECT COUNT(*) FROM profiles WHERE username IS NULL;
@@ -470,7 +470,7 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
 
 ### Flutter — Supabase-free domain layer
 
-- [ ] T016 [P] [US2] Author `lib/shared/domain/value_objects/account_status.dart` with this exact body:
+- [X] T016 [P] [US2] Author `lib/shared/domain/value_objects/account_status.dart` with this exact body:
   ```dart
   /// Mirror of the SQL `account_status_enum` from
   /// supabase/migrations/20260506120001_init_enums.sql.
@@ -480,7 +480,7 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
   ```
   - **Verify**: `flutter analyze lib/shared/domain/value_objects/account_status.dart` reports zero issues; the file's import list is empty.
 
-- [ ] T017 [P] [US2] Author `lib/shared/domain/value_objects/publisher_status.dart` with this exact body:
+- [X] T017 [P] [US2] Author `lib/shared/domain/value_objects/publisher_status.dart` with this exact body:
   ```dart
   /// Mirror of the SQL `publisher_status_enum` from
   /// supabase/migrations/20260506120001_init_enums.sql.
@@ -490,15 +490,15 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
   ```
   - **Verify**: `flutter analyze` reports zero issues; no imports.
 
-- [ ] T018 [P] [US2] Author `lib/shared/domain/entities/profile.dart` per [`contracts/profile-entity.md`](contracts/profile-entity.md) and research [R-10](research.md#r-10--domain-entity-shape-and-serialization). Use the exact body from R-10 (plain Dart class extending `Equatable`; hand-written `copyWith` and `props`). Imports: ONLY `package:equatable/equatable.dart`, `../value_objects/account_status.dart`, `../value_objects/publisher_status.dart`. NO `supabase_flutter`, NO Freezed, NO data-layer imports.
+- [X] T018 [P] [US2] Author `lib/shared/domain/entities/profile.dart` per [`contracts/profile-entity.md`](contracts/profile-entity.md) and research [R-10](research.md#r-10--domain-entity-shape-and-serialization). Use the exact body from R-10 (plain Dart class extending `Equatable`; hand-written `copyWith` and `props`). Imports: ONLY `package:equatable/equatable.dart`, `../value_objects/account_status.dart`, `../value_objects/publisher_status.dart`. NO `supabase_flutter`, NO Freezed, NO data-layer imports.
   - **Verify**: File exists; `flutter analyze` reports zero issues; `Get-Content lib/shared/domain/entities/profile.dart | Select-String -Pattern 'supabase_flutter'` returns zero matches; instantiation `Profile(userId: 'x', accountStatus: AccountStatus.pending, publisherStatus: PublisherStatus.pending, createdAt: DateTime.now(), updatedAt: DateTime.now())` compiles in a temporary scratch file.
 
-- [ ] T019 [P] [US2] Author `lib/shared/domain/entities/user_preferences.dart` per [`contracts/user-preferences-entity.md`](contracts/user-preferences-entity.md) and research [R-10](research.md#r-10--domain-entity-shape-and-serialization). Use the exact body from R-10. Imports: ONLY `package:equatable/equatable.dart`, `dart:ui` (with `show Locale`), `package:flutter/material.dart` (with `show ThemeMode`).
+- [X] T019 [P] [US2] Author `lib/shared/domain/entities/user_preferences.dart` per [`contracts/user-preferences-entity.md`](contracts/user-preferences-entity.md) and research [R-10](research.md#r-10--domain-entity-shape-and-serialization). Use the exact body from R-10. Imports: ONLY `package:equatable/equatable.dart`, `dart:ui` (with `show Locale`), `package:flutter/material.dart` (with `show ThemeMode`).
   - **Verify**: File exists; `flutter analyze` reports zero issues; `Select-String -Pattern 'supabase_flutter'` returns zero matches; the import list contains exactly the three documented imports with `show` clauses.
 
 ### Flutter — Supabase client wrapper
 
-- [ ] T020 [US2] Edit `lib/core/network/supabase_client_wrapper_impl.dart` per research [R-09](research.md#r-09--flutter-supabaseclientwrapperauthstatechanges-real-wiring). Make the following changes:
+- [X] T020 [US2] Edit `lib/core/network/supabase_client_wrapper_impl.dart` per research [R-09](research.md#r-09--flutter-supabaseclientwrapperauthstatechanges-real-wiring). Make the following changes:
   - **Add import** (if not present): `import 'dart:async' show EventSink, StreamTransformer;`
   - **Replace `authStateChanges()` body** with the full implementation from R-09 (uses `StreamTransformer.fromHandlers` for error mapping — NOT `Stream.handleError`, which would silently swallow errors and never emit `AuthState.error`).
   - **Add the `_mapAuthChangeEvent` helper method** below `authStateChanges()` per R-09.

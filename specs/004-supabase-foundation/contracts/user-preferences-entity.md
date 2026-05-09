@@ -63,8 +63,8 @@ dart analyze lib/shared/domain/entities/user_preferences.dart   # zero issues
 
 ```text
 # Manual check — open user_preferences.dart and confirm the imports are exactly:
-# 1. freezed_annotation
-# 2. dart:ui (for Locale)
+# 1. dart:ui (for Locale)
+# 2. package:equatable/equatable.dart
 # 3. package:flutter/material.dart (for ThemeMode)
-# No supabase_flutter import; no data-layer import.
+# No supabase_flutter import; no freezed_annotation import; no data-layer import.
 ```

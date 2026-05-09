@@ -74,7 +74,8 @@ dart analyze lib/shared/domain/entities/profile.dart   # zero issues
 
 ```text
 # Manual check — open profile.dart and confirm the only imports are:
-# 1. freezed_annotation
+# 1. package:equatable/equatable.dart
 # 2. account_status.dart
 # 3. publisher_status.dart
+# No supabase_flutter import; no freezed_annotation import; no data-layer import.
 ```
