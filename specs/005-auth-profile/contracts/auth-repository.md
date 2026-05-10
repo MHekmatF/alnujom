@@ -55,7 +55,7 @@ abstract class AuthRepository {
 }
 ```
 
-(`Either<L, R>` and `Unit` are domain-layer aliases; the project does NOT add `dartz` as a dependency — they are tiny in-house types in `lib/shared/domain/result.dart`. If the project chooses to keep raw nullable returns instead, the interface stays equivalent: `Future<Session?>` returning null on validated failure, with a separate `lastFailure` getter — but this contract recommends the explicit `Either` to avoid sentinel-value ambiguity.)
+(`Either<L, R>` and `Unit` above are documented as illustrative of the shape. **The actual implementation uses the project's existing `Result<T>` / `FailureResult<T>` from `lib/core/errors/` instead** — see research R-22 for the decision and rationale. Wherever this contract shows `Either<AuthFailure, T>`, read it as `Result<T>` carrying the typed `AuthFailure` via `FailureResult<T>`. Phase 4's `Failure` base class was loosened from `sealed` to `abstract` so `AuthFailure extends Failure` slots in cleanly — the only Phase 4 file edit Phase 5 makes, captured in research R-22.)
 
 ## Behavior contract
 

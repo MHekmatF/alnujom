@@ -304,6 +304,7 @@ class Profile extends Equatable {
 - **No Supabase imports** (Constitution IX).
 - **`PhoneNumber`** is the Phase-5-introduced value object (§2.6).
 - **Default `isAdmin = false`** for forward-compat with code paths that don't yet read the column.
+- **`ProfileRepository.updateProfile(...)` accepts an optional `phone: PhoneNumber?` parameter** — used **only by the registration flow** (FR-002 writes the E.164 phone to the profile in the same call as `fullName` + `email`, immediately after Phase 4's auto-provision trigger creates the row with a NULL phone). The profile-edit page (US2 / T078) MUST NOT pass `phone`; phone is read-only post-registration. See `contracts/profile-repository.md` for the full signature.
 
 ### 2.2 `Credentials` (NEW)
 
@@ -347,8 +348,9 @@ class NetworkError extends AuthFailure { final Object cause; ... }
 class UnknownAuthError extends AuthFailure { final String message; ... }
 ```
 
-- All localization keys for these failures live in `intl_ar.arb` + `intl_en.arb`. The presentation layer maps each failure case to its key (no string in the failure constructor — keep failure classes localization-free per Constitution V).
+- All localization keys for these failures live in `app_ar.arb` + `app_en.arb`. The presentation layer maps each failure case to its key (no string in the failure constructor — keep failure classes localization-free per Constitution V).
 - The reset-password path emits no Phase-5-specific failure type. By the account-enumeration-resistance contract (`contracts/request-password-reset-edge-fn.md`), `requestPasswordReset` returns `Right(Unit)` on any parseable input — the user-facing copy is uniform across "phone known with email", "phone known without email", and "phone unknown". Only transport-level failures (network unreachable, 5xx from the Edge Function) surface, mapped to `NetworkError`.
+- **Carrier type**: `AuthFailure` extends Phase 4's `Failure` base class (loosened from `sealed` to `abstract` per research R-22) and is carried via the project's existing `Result<T>` / `FailureResult<T>` from `lib/core/errors/`. Wherever this document writes `Either<AuthFailure, T>`, read it as `Result<T>` carrying the typed failure — no `Either<L, R>` type is added in Phase 5. See research R-22.
 
 ### 2.5 `AccountApprovalRequest` (NEW)
 
@@ -450,6 +452,8 @@ Per R-18. Sealed-class hierarchy in `lib/features/auth/presentation/bloc/auth_st
 | `AuthError` | `AuthFailure` | API failure surfaced for UI display |
 
 The `go_router` redirect helper does an exhaustive `switch` over this state to compute the destination route. `AuthState.deleted` is not represented (no `deleted` lifecycle in v1 per the Session 2026-05-10 account-status-enum-scope clarification).
+
+**Handling `profiles.account_status = 'deleted'` defensively**: Phase 5 has no UI flow that produces this state, but the SQL enum from Phase 4 includes the value, so an out-of-band privileged write (`execute_sql` running as `postgres`) could theoretically land a user there. The bloc's destination computation MUST treat `deleted` as a hard sign-out: emit `Unauthenticated` and force the session token to clear. The router then routes to `/login`. This is one line in the bloc's status-to-state switch — no new state, no new screen. The proper account-deletion flow (with user-facing copy, data-retention rules, recovery window) is post-v1 and lands in its own spec.
 
 ---
 

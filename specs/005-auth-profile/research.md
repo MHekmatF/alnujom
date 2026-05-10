@@ -6,7 +6,7 @@ This document locks the technical decisions Phase 5 makes (or inherits), with th
 
 ## R-01 — Migration filenames, ordering, and the divergence from IMPLEMENTATION_PLAN.md's `0007_…` / `0008_…` hints
 
-**Decision**: Five migration files under `supabase/migrations/` named with Supabase's standard 14-digit-timestamp prefix `<YYYYMMDDhhmmss>_<title>.sql`. Phase 5 uses synthetic-monotonic timestamps `20260510120001` through `20260510120005`, which sort after Phase 4's `20260506120006_enable_vault.sql` and before any future phase's migrations.
+**Decision**: Six migration files under `supabase/migrations/` named with Supabase's standard 14-digit-timestamp prefix `<YYYYMMDDhhmmss>_<title>.sql`. Phase 5 uses synthetic-monotonic timestamps `20260510120001` through `20260510120006`, which sort after Phase 4's `20260506120006_enable_vault.sql` and before any future phase's migrations. Migrations 1–5 implement the FR deliverables; migration 6 was added during implementation to close `mcp__supabase__get_advisors` warnings introduced by the SECURITY DEFINER helpers in 1–5 (search_path + anon-executable hardening).
 
 | # | Filename | Purpose |
 |---|---|---|
@@ -15,6 +15,7 @@ This document locks the technical decisions Phase 5 makes (or inherits), with th
 | 3 | `20260510120003_swap_admin_predicate.sql` | `CREATE OR REPLACE FUNCTION current_user_is_admin()` body swap to read `profiles.is_admin` (FR-007, R-12) |
 | 4 | `20260510120004_profiles_vault_pii_helpers.sql` | The five SECURITY DEFINER Vault PII helpers (FR-005, FR-006, R-13) |
 | 5 | `20260510120005_attach_audit_trigger_account_approval_requests.sql` | Concrete audit trigger on `account_approval_requests` reusing `log_audit()` (FR-010, R-05 reusability invariant) |
+| 6 | `20260510120006_phase5_advisor_hardening.sql` | Re-create `current_user_is_admin()` with explicit `SET search_path = public`; `REVOKE EXECUTE … FROM PUBLIC, anon` on the seven Phase-5 SECURITY DEFINER functions; explicit `GRANT EXECUTE … TO authenticated` for the user-callable subset. Closes the `function_search_path_mutable` and `function_anon_executable` advisor warnings introduced by 3/4/5 (Constitution III defense-in-depth; preserves the R-12 central-helper invariant — only the function definition is touched, not any policy file). |
 
 **Rationale**: `docs/IMPLEMENTATION_PLAN.md` Phase 5 names the deliverables `0007_create_account_approval_requests.sql` and `0008_profiles_vault_columns.sql` — those filenames are historical (they predate Phase 4's R-02 lock-in of the 14-digit-timestamp convention) and Phase 4 did not edit them in the implementation plan. Phase 5 uses the timestamp convention so every migration filename in the repository (Phase 1's `00000000000000_init_extensions.sql`, the six Phase 4 migrations, the five Phase 5 migrations) follows one consistent shape and the migration tracker orders them deterministically. Pre-implementation analysis confirmed Supabase MCP's `apply_migration` and `list_migrations` use the timestamped name as the migration identifier in `supabase_migrations.schema_migrations`, so the verify queries in `tasks.md` and `quickstart.md` reference the full timestamped names.
 
@@ -575,6 +576,23 @@ Real-time suspension push (Supabase Realtime channel on `profiles` for the user'
 - Subscribe to `profiles` realtime channel for the user's own row — rejected for Phase 5; deferred to Phase 22.
 - Poll `profiles.account_status` every N seconds — rejected. Wasteful; foreground-refresh is sufficient.
 - Tie suspension to a session-revocation step (admin sets suspended → background job revokes Supabase Auth session) — rejected for v1. Adds a moving piece that has to coordinate with the auto-refresh token flow; not worth the Phase 5 complexity budget.
+
+---
+
+## R-22 — Reuse `Result<T>` instead of introducing `Either<L, R>`; loosen `Failure` base class
+
+**Decision**: Phase 5 reuses the project's existing `Result<T>` / `FailureResult<T>` types from `lib/core/errors/` (introduced by earlier phases) as the repository return shape. The new file `lib/shared/domain/result.dart` originally proposed by tasks.md T025 is **not created**. Wherever `data-model.md` §2.4 and the auth/profile repository contracts use `Either<AuthFailure, T>` / `Either<ProfileFailure, T>`, the actual implementation uses `Result<T>` with the typed failure subclass surfaced via `FailureResult<T>(failure: AuthFailure | ProfileFailure)`. The contract documents (`contracts/auth-repository.md` L58, `contracts/profile-repository.md`) explicitly permit this swap ("raw nullable + typed failure is equivalent — keep the explicit `Either` to avoid sentinel-value ambiguity, but `Result<T>` is acceptable").
+
+To make `Result<T>` carry feature-typed failures, `lib/core/errors/failure.dart`'s base class is loosened from `sealed class Failure` to `abstract class Failure`. This is the **only Phase 4 file Phase 5 edits**. The four existing `final class` failures (`NetworkFailure`, `CacheFailure`, `ConfigFailure`, `UnknownFailure`) keep their `final` modifier and their bodies are unchanged; no Phase 4 call site references the `sealed` modifier (verified by `grep`). `AuthFailure` and `ProfileFailure` then `extends Failure` so they slot into `Result<T>` natively.
+
+**Rationale**: Adding a parallel `Either<L, R>` hierarchy when a working `Result<T>` already exists is duplicate plumbing — the two types model the same domain shape (success + typed failure). Phase 5 chose the simpler path during implementation. The `sealed` → `abstract` loosening is a single-keyword edit with zero behavioral side-effects (Dart's `sealed` keyword only restricts where subclasses can be declared, not how the type behaves at runtime); the cost is that consumers of `Failure` can no longer rely on exhaustive `switch` over the four built-in subclasses. In practice none do — `Failure` is consumed via `is`-checks at the presentation layer.
+
+**How this affects spec/plan/contracts**: `data-model.md` §2.4 + the two repository contracts' `Either<L, R>` examples are read as illustrative of the shape, not literal — see this R-22 decision for the actual chosen type. The footer note in `auth-repository.md` L58 is now load-bearing, not optional.
+
+**Alternatives considered**:
+- Add `dartz` as a dependency for `Either<L, R>` — rejected. New runtime package for one type, when the project already has an equivalent. `pubspec.yaml` is locked at zero new packages for Phase 5.
+- Hand-roll `lib/shared/domain/result.dart` with `Either` + `Unit` aliases (the original T025 plan) — rejected during implementation. Would have required mapping `Result<T>` ↔ `Either<L, R>` at data-source boundaries; pointless duplication.
+- Keep `Failure` as `sealed` and have `AuthFailure` / `ProfileFailure` NOT extend it (use a parallel hierarchy) — rejected. The presentation layer's error-display widgets are written against `Failure`; bypassing them for feature failures would require a parallel error-display path.
 
 ---
 

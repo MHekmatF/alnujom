@@ -11,6 +11,8 @@
 
 The single domain-layer entry point to profile reads, profile writes, and Vault-PII reads/writes. The interface is provider-agnostic (Constitution IX); the impl translates to Postgrest queries + RPCs to the SECURITY DEFINER PII helpers.
 
+> **Note on `Either<L, R>`**: every `Either<ProfileFailure, T>` signature in this contract is documented as illustrative. The actual implementation uses the project's existing `Result<T>` / `FailureResult<T>` from `lib/core/errors/` — see research R-22. `ProfileFailure` extends Phase 4's `Failure` base class (which Phase 5 loosened from `sealed` to `abstract`). The contract shape is unchanged; only the carrier type differs.
+
 ## Interface
 
 ```dart
@@ -28,9 +30,18 @@ abstract class ProfileRepository {
   /// Updates non-status, non-admin, non-PII fields on the calling user's profile.
   /// Username uniqueness is enforced server-side; the impl maps Postgres '23505'
   /// on profiles_username_key to Left(UsernameTaken).
+  ///
+  /// **The `phone` parameter is for the registration flow only** (FR-002 — Phase 4's
+  /// auto-provision trigger creates the profile with a NULL phone, and the registration
+  /// use case writes the E.164 phone here in the same call as `fullName` + `email`).
+  /// The profile-edit page (US2 / T078) MUST NOT pass `phone` — phone is read-only
+  /// post-registration. The DB-level `UNIQUE(phone)` constraint is the second line of
+  /// defense; a `'23505'` collision on `profiles_phone_key` maps to a typed phone-uniqueness
+  /// failure (mirrors `AccountAlreadyExists` on the auth side).
   Future<Either<ProfileFailure, Profile>> updateProfile({
     String? fullName,        // omit to keep current; pass empty/null to clear (validation rejects)
     String? username,
+    PhoneNumber? phone,      // registration flow only; profile-edit page MUST omit this
     String? email,
     String? avatarUrl,
   });
