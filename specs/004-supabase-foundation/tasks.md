@@ -832,21 +832,21 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
 
 ### Documentation
 
-- [ ] T036 [P] [US1] Author `supabase/docs/profiles.md` per FR-018: human-readable description of the `profiles` table — its purpose, every column with type/default/nullable from data-model.md, the auto-provision trigger contract (cross-link `../../specs/004-supabase-foundation/contracts/auto-provision-trigger.md`), the RLS posture (self-read/write on non-status; admin-gated for status), the column-level enforcement trigger `enforce_profile_status_admin_only` (cross-link to R-12), the audit fields covered (`account_status`, `publisher_status` via `trg_profiles_audit_status`), and the deliberate omission of `preferred_language` / `preferred_currency` (Q2 — `user_preferences` is canonical).
+- [X] T036 [P] [US1] Author `supabase/docs/profiles.md` per FR-018: human-readable description of the `profiles` table — its purpose, every column with type/default/nullable from data-model.md, the auto-provision trigger contract (cross-link `../../specs/004-supabase-foundation/contracts/auto-provision-trigger.md`), the RLS posture (self-read/write on non-status; admin-gated for status), the column-level enforcement trigger `enforce_profile_status_admin_only` (cross-link to R-12), the audit fields covered (`account_status`, `publisher_status` via `trg_profiles_audit_status`), and the deliberate omission of `preferred_language` / `preferred_currency` (Q2 — `user_preferences` is canonical).
   - **Verify**: File exists; reading it confirms seven sections (purpose, columns, auto-provision, RLS, R-12 trigger, audit, Q2 omission); column list matches `20260506120002_create_profiles.sql` exactly.
 
-- [ ] T037 [P] [US1] Author `supabase/docs/audit_logs.md` per FR-018: human-readable description of the `audit_logs` table — its purpose, every column with type/default/nullable, the `log_audit()` trigger function contract (cross-link `../../specs/004-supabase-foundation/contracts/log-audit-trigger-fn.md`) with the `TG_ARGV[0]/[1]/[2]` convention and the `IS DISTINCT FROM` filter, the RLS posture (admin-only read; no client write), how later phases attach the function to new tables (Phase 5 `account_approval_requests`, Phase 6 roles, Phase 12 listings, Phase 18 reports, Phase 19 agencies, Phase 21 ads), and the convention that `ip`/`user_agent` are NULL in trigger-context writes and populated by Edge Functions from Phase 7+.
+- [X] T037 [P] [US1] Author `supabase/docs/audit_logs.md` per FR-018: human-readable description of the `audit_logs` table — its purpose, every column with type/default/nullable, the `log_audit()` trigger function contract (cross-link `../../specs/004-supabase-foundation/contracts/log-audit-trigger-fn.md`) with the `TG_ARGV[0]/[1]/[2]` convention and the `IS DISTINCT FROM` filter, the RLS posture (admin-only read; no client write), how later phases attach the function to new tables (Phase 5 `account_approval_requests`, Phase 6 roles, Phase 12 listings, Phase 18 reports, Phase 19 agencies, Phase 21 ads), and the convention that `ip`/`user_agent` are NULL in trigger-context writes and populated by Edge Functions from Phase 7+.
   - **Verify**: File exists; reading it confirms five sections; column list matches `20260506120004_create_audit_logs.sql`; the `TG_ARGV[2]` PK convention is described.
 
 ### Meta-verification of source-of-truth invariant
 
-- [ ] T038 [US1] Quickstart [Step 1](quickstart.md#step-1--confirm-the-migrations-applied-cleanly): call Supabase MCP `list_migrations` and confirm exactly seven entries — `00000000000000_init_extensions` (pre-existing) plus the six Phase 4 filenames in order: `20260506120001_init_enums`, `20260506120002_create_profiles`, `20260506120003_create_user_preferences`, `20260506120004_create_audit_logs`, `20260506120005_enable_rls_default`, `20260506120006_enable_vault`. Depends on T035.
+- [X] T038 [US1] Quickstart [Step 1](quickstart.md#step-1--confirm-the-migrations-applied-cleanly): call Supabase MCP `list_migrations` and confirm exactly seven entries — `00000000000000_init_extensions` (pre-existing) plus the six Phase 4 filenames in order: `20260506120001_init_enums`, `20260506120002_create_profiles`, `20260506120003_create_user_preferences`, `20260506120004_create_audit_logs`, `20260506120005_enable_rls_default`, `20260506120006_enable_vault`. Depends on T035.
   - **Verify**: `list_migrations` returns the seven expected names in numeric (timestamp) order; no duplicates.
 
-- [ ] T039 [US1] Quickstart [Step 2](quickstart.md#step-2--confirm-rls-is-enabled-on-every-phase-4-table): same query as T024 query 1 — confirm RLS is still enabled on all three tables. Depends on T024.
+- [X] T039 [US1] Quickstart [Step 2](quickstart.md#step-2--confirm-rls-is-enabled-on-every-phase-4-table): same query as T024 query 1 — confirm RLS is still enabled on all three tables. Depends on T024.
   - **Verify**: All three tables return `relrowsecurity = true`.
 
-- [ ] T040 [US1] Quickstart [Step 3](quickstart.md#step-3--confirm-every-63-enum-exists): use the explicit IN-list (NOT `LIKE '%_enum'` — the IN-list rejects platform-managed enums that happen to end in `_enum`):
+- [X] T040 [US1] Quickstart [Step 3](quickstart.md#step-3--confirm-every-63-enum-exists): use the explicit IN-list (NOT `LIKE '%_enum'` — the IN-list rejects platform-managed enums that happen to end in `_enum`):
   ```sql
   SELECT typname FROM pg_type
    WHERE typname IN ('account_status_enum','publisher_status_enum',
@@ -858,7 +858,7 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
   Depends on T005.
   - **Verify**: 9 rows.
 
-- [ ] T041 [US1] Quickstart [Step 19](quickstart.md#step-19--confirm-every-backend-artifact-has-a-checked-in-sql-source): walk every Phase 4 artifact reported by the remote and confirm each has a matching `.sql` definition in `supabase/migrations/` or `supabase/policies/` at this commit:
+- [X] T041 [US1] Quickstart [Step 19](quickstart.md#step-19--confirm-every-backend-artifact-has-a-checked-in-sql-source): walk every Phase 4 artifact reported by the remote and confirm each has a matching `.sql` definition in `supabase/migrations/` or `supabase/policies/` at this commit:
   ```sql
   -- Tables
   SELECT tablename FROM pg_tables
@@ -886,7 +886,7 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
   For each artifact, locate the `.sql` source line in the repo. Depends on T035.
   - **Verify**: 3 tables, 6 functions, 5 triggers, 1 extension, 9 policies, 9 enums — each present on the remote AND with a matching definition in `supabase/migrations/` or `supabase/policies/`. Any artifact present on the remote with no repo source is a defect.
 
-- [ ] T042 [US1] Confirm idempotent re-apply produces no schema drift. Capture a schema snapshot, attempt re-application, capture again, and diff:
+- [X] T042 [US1] Confirm idempotent re-apply produces no schema drift. Capture a schema snapshot, attempt re-application, capture again, and diff:
   ```sql
   -- Snapshot 1 (before re-apply)
   SELECT proname, pg_get_functiondef(oid) FROM pg_proc
@@ -905,10 +905,10 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
 
 **Purpose**: Final cleanup and the Flutter regression-launch verification.
 
-- [ ] T043 Quickstart [Step 17](quickstart.md#step-17--confirm-the-flutter-app-builds-and-launches-on-the-reference-device): on the developer machine, `flutter clean`, `flutter pub get`, `flutter analyze` (zero issues), then deploy to the Infinix Note 8 (Helio G80, Android 10/11) via `flutter run --release -d <device-id>` or `flutter build apk --release` + `adb install -r`. Open the app; walk the existing Phase 1/2/3 surfaces (first launch in Arabic with RTL, theme toggle, locale toggle, Theme Gallery) and confirm everything still works. Depends on T020.
+- [X] T043 Quickstart [Step 17](quickstart.md#step-17--confirm-the-flutter-app-builds-and-launches-on-the-reference-device): on the developer machine, `flutter clean`, `flutter pub get`, `flutter analyze` (zero issues), then deploy to the Infinix Note 8 (Helio G80, Android 10/11) via `flutter run --release -d <device-id>` or `flutter build apk --release` + `adb install -r`. Open the app; walk the existing Phase 1/2/3 surfaces (first launch in Arabic with RTL, theme toggle, locale toggle, Theme Gallery) and confirm everything still works. Depends on T020.
   - **Verify**: `flutter analyze` reports zero issues; APK installs cleanly; app launches without crash; Phase 1/2/3 surfaces behave identically to pre-Phase-4 state; `adb logcat | Select-String 'AuthState'` shows the auth-state listener emitting one initial event with no errors.
 
-- [ ] T044 [P] Quickstart [Step 18](quickstart.md#step-18--confirm-domain-layer-entities-dont-import-supabase): Grep the four files for forbidden imports:
+- [X] T044 [P] Quickstart [Step 18](quickstart.md#step-18--confirm-domain-layer-entities-dont-import-supabase): Grep the four files for forbidden imports:
   ```text
   Get-ChildItem lib/shared/domain -Recurse -Filter *.dart |
     Select-String -Pattern 'package:supabase_flutter|lib/data|features/.*/data'
@@ -916,17 +916,17 @@ This project is a Flutter Android app with a remote Supabase backend. Paths are 
   Depends on T016, T017, T018, T019.
   - **Verify**: The Grep returns zero matches across `profile.dart`, `user_preferences.dart`, `account_status.dart`, `publisher_status.dart`.
 
-- [ ] T045 [P] Confirm `CLAUDE.md` is current: open the file and verify the `<!-- SPECKIT START -->` block points at `specs/004-supabase-foundation/plan.md` and references the six Phase 4 contracts.
+- [X] T045 [P] Confirm `CLAUDE.md` is current: open the file and verify the `<!-- SPECKIT START -->` block points at `specs/004-supabase-foundation/plan.md` and references the six Phase 4 contracts.
   - **Verify**: Reading `CLAUDE.md` confirms the block is correct.
 
-- [ ] T046 [P] Quickstart [Step 20](quickstart.md#step-20--cleanup-the-test-data): via privileged Supabase MCP `execute_sql`:
+- [X] T046 [P] Quickstart [Step 20](quickstart.md#step-20--cleanup-the-test-data): via privileged Supabase MCP `execute_sql`:
   ```sql
   DELETE FROM auth.users WHERE id IN ('<$TEST_ID>', '<$OTHER_ID>');
   ```
   The `ON DELETE CASCADE` FK propagates to `profiles` and `user_preferences`; `audit_logs` rows persist (intentional — append-only; `actor_user_id` becomes NULL via `ON DELETE SET NULL`). Depends on T030/T032/T033 (after all verifications using the test users).
   - **Verify**: Subsequent `SELECT` from `profiles` / `user_preferences` for either id returns 0 rows; `SELECT COUNT(*) FROM audit_logs WHERE target_id IN ('<$TEST_ID>','<$OTHER_ID>')` returns the audit rows that were created in T025/T026 (still present).
 
-- [ ] T047 Run Supabase MCP `get_advisors` against the remote project and confirm there are no NEW security-class advisors introduced by Phase 4. Depends on T035.
+- [X] T047 Run Supabase MCP `get_advisors` against the remote project and confirm there are no NEW security-class advisors introduced by Phase 4. Depends on T035.
   - **Verify**: `get_advisors` returns no new RLS-disabled-on-user-facing-table warnings on `profiles`, `user_preferences`, `audit_logs`; no new "function with `SECURITY DEFINER` and unsafe search_path" warnings on `handle_new_auth_user` (sets `search_path = public`) or `log_audit` (sets `search_path = public`). The `app_vault_secret` and `enforce_profile_status_admin_only` functions are SECURITY DEFINER / INVOKER respectively per their R-06 / R-12 design.
 
 **Checkpoint**: Phase 4 ready for the Git workflow squash-merge per `feedback_git_workflow.md`.
