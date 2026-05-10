@@ -1,0 +1,160 @@
+import 'dart:async';
+
+import 'package:flutter/widgets.dart' show Locale;
+import 'package:injectable/injectable.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
+
+import '../../../../core/errors/failure.dart';
+import '../../../../core/errors/result.dart';
+import '../../../../core/logging/app_logger.dart';
+import '../../../../shared/domain/value_objects/phone_number.dart';
+import '../../../profile/domain/repositories/profile_repository.dart';
+import '../../domain/entities/auth_failure.dart';
+import '../../domain/entities/session.dart';
+import '../../domain/repositories/auth_repository.dart';
+import '../datasources/supabase_auth_datasource.dart';
+import '../dtos/session_dto.dart';
+
+@LazySingleton(as: AuthRepository)
+class AuthRepositoryImpl implements AuthRepository {
+  AuthRepositoryImpl(this._authDs, this._profileRepository, this._logger) {
+    // Bridge Supabase's auth-state stream into the domain-shaped session stream.
+    _sub = _authDs.authStateChanges.listen(
+      (state) {
+        _sessionController.add(state.session?.toDomain());
+      },
+      onError: (Object error, StackTrace st) {
+        _logger.warning(
+          'Auth state stream error.',
+          error: error,
+          stackTrace: st,
+          tag: _tag,
+        );
+        _sessionController.add(null);
+      },
+    );
+    // Seed the controller with the current snapshot so subscribers don't miss state.
+    _sessionController.add(_authDs.currentSession?.toDomain());
+  }
+
+  static const _tag = 'AuthRepositoryImpl';
+
+  final SupabaseAuthDataSource _authDs;
+  final ProfileRepository _profileRepository;
+  final AppLogger _logger;
+
+  final _sessionController = StreamController<Session?>.broadcast();
+  StreamSubscription<supabase.AuthState>? _sub;
+
+  @override
+  Stream<Session?> get sessionStream => _sessionController.stream;
+
+  @override
+  Session? get currentSession => _authDs.currentSession?.toDomain();
+
+  @override
+  Future<Result<Session>> register({
+    required PhoneNumber phone,
+    required String password,
+    required String? fullName,
+    required String? optionalRealEmail,
+    required Locale deviceLocale,
+  }) async {
+    try {
+      final res = await _authDs.signUp(phone: phone, password: password);
+      final supSession = res.session;
+      if (supSession == null) {
+        return const FailureResult(
+          UnknownAuthError(
+            'signup_succeeded_without_session',
+          ),
+        );
+      }
+
+      // Phase 4 auto-provision trigger has fired by now. Fill in the profile
+      // with the form's full_name, phone (in E.164), and optional real email.
+      // Trim user input; pass nulls so the data layer skips unset fields.
+      final trimmedName = fullName?.trim();
+      final trimmedEmail = optionalRealEmail?.trim();
+      final cleanName = (trimmedName?.isEmpty ?? true) ? null : trimmedName;
+      final cleanEmail = (trimmedEmail?.isEmpty ?? true)
+          ? null
+          : trimmedEmail!.toLowerCase();
+      await _profileRepository.updateProfile(
+        fullName: cleanName,
+        phone: phone.e164,
+        email: cleanEmail,
+      );
+      // Phase 5 R-11 first-sign-in locale handoff.
+      await _profileRepository.updateLocale(deviceLocale);
+
+      return Success(supSession.toDomain());
+    } on Object catch (error, stackTrace) {
+      return FailureResult(_authDs.mapAuthException(error, stackTrace));
+    }
+  }
+
+  @override
+  Future<Result<Session>> login({
+    required PhoneNumber phone,
+    required String password,
+  }) async {
+    try {
+      final res = await _authDs.signInWithPassword(
+        phone: phone,
+        password: password,
+      );
+      final supSession = res.session;
+      if (supSession == null) {
+        return const FailureResult(
+          UnknownAuthError('login_succeeded_without_session'),
+        );
+      }
+      return Success(supSession.toDomain());
+    } on Object catch (error, stackTrace) {
+      return FailureResult(_authDs.mapAuthException(error, stackTrace));
+    }
+  }
+
+  @override
+  Future<void> logout() async {
+    try {
+      await _authDs.signOut();
+    } on Object catch (error, stackTrace) {
+      _logger.warning(
+        'Sign-out failed (ignored).',
+        error: error,
+        stackTrace: stackTrace,
+        tag: _tag,
+      );
+    }
+  }
+
+  @override
+  Future<Result<void>> requestPasswordReset({required PhoneNumber phone}) async {
+    try {
+      await _authDs.invokeRequestPasswordReset(phone: phone);
+      return const Success(null);
+    } on Object catch (error, stackTrace) {
+      _logger.warning(
+        'request_password_reset transport error.',
+        error: error,
+        stackTrace: stackTrace,
+        tag: _tag,
+      );
+      return FailureResult(
+        NetworkFailure(
+          'request_password_reset transport failure',
+          cause: error,
+          stackTrace: stackTrace,
+        ),
+      );
+    }
+  }
+
+  @disposeMethod
+  Future<void> dispose() async {
+    await _sub?.cancel();
+    await _sessionController.close();
+  }
+}

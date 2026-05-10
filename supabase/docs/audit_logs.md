@@ -53,7 +53,15 @@ No INSERT/UPDATE/DELETE client policies are defined. Writes occur through
 Later phases attach the same `log_audit()` function to additional tables by adding
 new triggers and appropriate `TG_ARGV` values (action key, column list, PK column):
 
-- Phase 5: `account_approval_requests`
+- Phase 5: `account_approval_requests` ✅ **Shipped** in
+  `20260510120005_attach_audit_trigger_account_approval_requests.sql` with
+  `TG_ARGV = ('account_approval.status_changed',
+  'status,rejection_reason,reviewed_by,reviewed_at', 'user_id')`. This is the
+  first concrete reuse of `log_audit()` and validates the Phase 4 reusability
+  invariant. Approve/reject through the
+  `approve_account_approval_request` / `reject_account_approval_request` RPCs
+  produces one `audit_logs` row with the admin as `actor_user_id` and the
+  affected user's UUID as `target_id`.
 - Phase 6: roles/permissions tables
 - Phase 12: listings workflow
 - Phase 18: reports/moderation
