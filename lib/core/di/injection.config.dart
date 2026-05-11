@@ -15,6 +15,24 @@ import 'package:get_it/get_it.dart' as _i174;
 import 'package:go_router/go_router.dart' as _i583;
 import 'package:injectable/injectable.dart' as _i526;
 
+import '../../features/auth/data/datasources/supabase_auth_datasource.dart'
+    as _i76;
+import '../../features/auth/data/repositories/auth_repository_impl.dart'
+    as _i153;
+import '../../features/auth/domain/repositories/auth_repository.dart' as _i787;
+import '../../features/auth/presentation/bloc/auth_bloc.dart' as _i797;
+import '../../features/onboarding/data/datasources/onboarding_seen_storage.dart'
+    as _i144;
+import '../../features/onboarding/data/repositories/onboarding_repository_impl.dart'
+    as _i452;
+import '../../features/onboarding/domain/repositories/onboarding_repository.dart'
+    as _i430;
+import '../../features/profile/data/datasources/supabase_profile_datasource.dart'
+    as _i825;
+import '../../features/profile/data/repositories/profile_repository_impl.dart'
+    as _i334;
+import '../../features/profile/domain/repositories/profile_repository.dart'
+    as _i894;
 import '../config/env_config.dart' as _i373;
 import '../localization/locale_cubit.dart' as _i960;
 import '../logging/app_logger.dart' as _i354;
@@ -36,15 +54,39 @@ _i174.GetIt $initGetIt(
   final gh = _i526.GetItHelper(getIt, environment, environmentFilter);
   final routerModule = _$RouterModule();
   gh.singleton<_i373.EnvConfig>(() => const _i373.EnvConfig());
+  gh.lazySingleton<_i825.SupabaseProfileDataSource>(
+    () => _i825.SupabaseProfileDataSource(),
+  );
   gh.lazySingleton<_i354.AppLogger>(() => _i1026.ConsoleLogger());
   gh.lazySingleton<_i753.PreferencesStore>(
     () => _i190.SecurePreferencesStore(gh<_i354.AppLogger>()),
   );
+  gh.lazySingleton<_i894.ProfileRepository>(
+    () => _i334.ProfileRepositoryImpl(
+      gh<_i825.SupabaseProfileDataSource>(),
+      gh<_i354.AppLogger>(),
+    ),
+    dispose: (i) => i.dispose(),
+  );
+  gh.lazySingleton<_i76.SupabaseAuthDataSource>(
+    () => _i76.SupabaseAuthDataSource(gh<_i354.AppLogger>()),
+  );
+  gh.lazySingleton<_i144.OnboardingSeenStorage>(
+    () => _i144.OnboardingSeenStorage(gh<_i354.AppLogger>()),
+  );
   gh.lazySingleton<_i752.SupabaseClientWrapper>(
     () => _i748.SupabaseClientWrapperImpl(gh<_i354.AppLogger>()),
   );
-  gh.singleton<_i583.GoRouter>(
-    () => routerModule.router(gh<_i354.AppLogger>()),
+  gh.lazySingleton<_i430.OnboardingRepository>(
+    () => _i452.OnboardingRepositoryImpl(gh<_i144.OnboardingSeenStorage>()),
+  );
+  gh.lazySingleton<_i787.AuthRepository>(
+    () => _i153.AuthRepositoryImpl(
+      gh<_i76.SupabaseAuthDataSource>(),
+      gh<_i894.ProfileRepository>(),
+      gh<_i354.AppLogger>(),
+    ),
+    dispose: (i) => i.dispose(),
   );
   gh.factoryParam<_i960.LocaleCubit, _i264.Locale?, dynamic>(
     (initialLocale, _) => _i960.LocaleCubit(
@@ -59,6 +101,16 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i611.ThemeCubit>(
     () => _i611.ThemeCubit(gh<_i753.PreferencesStore>(), gh<_i354.AppLogger>()),
+  );
+  gh.lazySingleton<_i797.AuthBloc>(
+    () => _i797.AuthBloc(
+      gh<_i787.AuthRepository>(),
+      gh<_i894.ProfileRepository>(),
+    ),
+    dispose: (i) => i.dispose(),
+  );
+  gh.singleton<_i583.GoRouter>(
+    () => routerModule.router(gh<_i354.AppLogger>(), gh<_i797.AuthBloc>()),
   );
   return getIt;
 }

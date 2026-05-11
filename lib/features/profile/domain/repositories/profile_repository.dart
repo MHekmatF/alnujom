@@ -58,6 +58,9 @@ abstract class ProfileRepository {
   Future<Result<void>> updatePrivateContactMethods(
     PrivateContactMethods methods,
   );
+
+  /// Release the internal broadcast stream controller.
+  Future<void> dispose();
 }
 
 // ───────────────────────────────────────────────────────────────────────────

@@ -10,6 +10,7 @@ import 'core/theme/color_palette.dart';
 import 'core/theme/palette_cubit.dart';
 import 'core/theme/theme_cubit.dart';
 import 'debug/palette_tester.dart';
+import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'l10n/app_localizations.dart';
 
 class App extends StatelessWidget {
@@ -29,6 +30,9 @@ class App extends StatelessWidget {
         ),
         BlocProvider<LocaleCubit>(
           create: (_) => getIt<LocaleCubit>(param1: initialLocale),
+        ),
+        BlocProvider<AuthBloc>.value(
+          value: getIt<AuthBloc>(),
         ),
       ],
       child: BlocBuilder<ThemeCubit, AppThemeMode>(
@@ -63,9 +67,6 @@ class App extends StatelessWidget {
                     supportedLocales: AppLocalizations.supportedLocales,
                     debugShowCheckedModeBanner: false,
                     builder: (context, child) {
-                      // Snapshot read of the current route — relies on the
-                      // builder re-firing whenever the Navigator's child
-                      // changes (which is what GoRouter does on navigation).
                       final currentPath =
                           router.routeInformationProvider.value.uri.path;
                       final showPaletteTester =

@@ -152,6 +152,7 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  @override
   @disposeMethod
   Future<void> dispose() async {
     await _sub?.cancel();

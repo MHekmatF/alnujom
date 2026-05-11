@@ -188,6 +188,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
     );
   }
 
+  @override
   @disposeMethod
   Future<void> dispose() async {
     await _profileController.close();

@@ -35,4 +35,7 @@ abstract class AuthRepository {
   /// Reset-password (account-enumeration-resistant per FR-017).
   /// Always returns Success on parseable input; only transport failures surface.
   Future<Result<void>> requestPasswordReset({required PhoneNumber phone});
+
+  /// Release stream subscriptions and close the internal broadcast controller.
+  Future<void> dispose();
 }
