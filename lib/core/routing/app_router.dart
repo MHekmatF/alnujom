@@ -3,8 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../debug/theme_gallery_page.dart';
+import '../../features/admin/account_approvals/presentation/pages/account_approvals_page.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
+import '../../features/auth/presentation/pages/login_page.dart';
+import '../../features/auth/presentation/pages/pending_approval_page.dart';
+import '../../features/auth/presentation/pages/register_page.dart';
+import '../../features/auth/presentation/pages/rejected_page.dart';
+import '../../features/auth/presentation/pages/suspended_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
+import '../../features/onboarding/presentation/pages/onboarding_page.dart';
+import '../../features/onboarding/presentation/pages/splash_page.dart';
 import '../../shell/shell_home_page.dart';
 import '../flags/app_flags.dart';
 import '../logging/app_logger.dart';
@@ -43,7 +51,6 @@ abstract final class AppRouteNames {
 }
 
 /// Placeholder page used for routes whose real page is created in a later phase.
-/// Replaced one-by-one as US1/US3/US4 land their real pages.
 Widget _placeholder(String label) => Scaffold(
   appBar: AppBar(title: Text(label)),
   body: Center(child: Text(label)),
@@ -53,7 +60,7 @@ GoRouter buildAppRouter({required AppLogger logger, required AuthBloc authBloc})
   final refreshListenable = AuthBlocListenable(authBloc);
 
   return GoRouter(
-    initialLocation: AppRoutes.login,
+    initialLocation: AppRoutes.splash,
     debugLogDiagnostics: kDebugMode,
     refreshListenable: refreshListenable,
     redirect: (context, state) => authRedirect(authBloc, context, state),
@@ -62,37 +69,37 @@ GoRouter buildAppRouter({required AppLogger logger, required AuthBloc authBloc})
       GoRoute(
         path: AppRoutes.splash,
         name: AppRouteNames.splash,
-        builder: (context, state) => _placeholder('Splash'),
+        builder: (context, state) => const SplashPage(),
       ),
       GoRoute(
         path: AppRoutes.onboarding,
         name: AppRouteNames.onboarding,
-        builder: (context, state) => _placeholder('Onboarding'),
+        builder: (context, state) => const OnboardingPage(),
       ),
       GoRoute(
         path: AppRoutes.login,
         name: AppRouteNames.login,
-        builder: (context, state) => _placeholder('Login'),
+        builder: (context, state) => const LoginPage(),
       ),
       GoRoute(
         path: AppRoutes.register,
         name: AppRouteNames.register,
-        builder: (context, state) => _placeholder('Register'),
+        builder: (context, state) => const RegisterPage(),
       ),
       GoRoute(
         path: AppRoutes.pending,
         name: AppRouteNames.pending,
-        builder: (context, state) => _placeholder('Pending Approval'),
+        builder: (context, state) => const PendingApprovalPage(),
       ),
       GoRoute(
         path: AppRoutes.rejected,
         name: AppRouteNames.rejected,
-        builder: (context, state) => _placeholder('Rejected'),
+        builder: (context, state) => const RejectedPage(),
       ),
       GoRoute(
         path: AppRoutes.suspended,
         name: AppRouteNames.suspended,
-        builder: (context, state) => _placeholder('Suspended'),
+        builder: (context, state) => const SuspendedPage(),
       ),
       GoRoute(
         path: AppRoutes.home,
@@ -107,7 +114,7 @@ GoRouter buildAppRouter({required AppLogger logger, required AuthBloc authBloc})
           GoRoute(
             path: 'approvals',
             name: AppRouteNames.adminApprovals,
-            builder: (context, state) => _placeholder('Account Approvals'),
+            builder: (context, state) => const AccountApprovalsPage(),
           ),
         ],
       ),

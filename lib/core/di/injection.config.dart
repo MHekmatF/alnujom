@@ -15,6 +15,20 @@ import 'package:get_it/get_it.dart' as _i174;
 import 'package:go_router/go_router.dart' as _i583;
 import 'package:injectable/injectable.dart' as _i526;
 
+import '../../features/admin/account_approvals/data/datasources/supabase_account_approvals_datasource.dart'
+    as _i396;
+import '../../features/admin/account_approvals/data/repositories/account_approvals_repository_impl.dart'
+    as _i278;
+import '../../features/admin/account_approvals/domain/repositories/account_approvals_repository.dart'
+    as _i120;
+import '../../features/admin/account_approvals/domain/usecases/approve_account.dart'
+    as _i858;
+import '../../features/admin/account_approvals/domain/usecases/load_pending_queue.dart'
+    as _i138;
+import '../../features/admin/account_approvals/domain/usecases/reject_account.dart'
+    as _i431;
+import '../../features/admin/account_approvals/presentation/cubit/account_approvals_cubit.dart'
+    as _i295;
 import '../../features/auth/data/datasources/supabase_auth_datasource.dart'
     as _i76;
 import '../../features/auth/data/repositories/auth_repository_impl.dart'
@@ -27,6 +41,8 @@ import '../../features/onboarding/data/repositories/onboarding_repository_impl.d
     as _i452;
 import '../../features/onboarding/domain/repositories/onboarding_repository.dart'
     as _i430;
+import '../../features/onboarding/presentation/cubit/onboarding_cubit.dart'
+    as _i807;
 import '../../features/profile/data/datasources/supabase_profile_datasource.dart'
     as _i825;
 import '../../features/profile/data/repositories/profile_repository_impl.dart'
@@ -57,7 +73,32 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i825.SupabaseProfileDataSource>(
     () => _i825.SupabaseProfileDataSource(),
   );
+  gh.lazySingleton<_i396.SupabaseAccountApprovalsDatasource>(
+    () => _i396.SupabaseAccountApprovalsDatasource(),
+  );
   gh.lazySingleton<_i354.AppLogger>(() => _i1026.ConsoleLogger());
+  gh.lazySingleton<_i120.AccountApprovalsRepository>(
+    () => _i278.AccountApprovalsRepositoryImpl(
+      gh<_i396.SupabaseAccountApprovalsDatasource>(),
+      gh<_i354.AppLogger>(),
+    ),
+  );
+  gh.factory<_i858.ApproveAccount>(
+    () => _i858.ApproveAccount(gh<_i120.AccountApprovalsRepository>()),
+  );
+  gh.factory<_i138.LoadPendingQueue>(
+    () => _i138.LoadPendingQueue(gh<_i120.AccountApprovalsRepository>()),
+  );
+  gh.factory<_i431.RejectAccount>(
+    () => _i431.RejectAccount(gh<_i120.AccountApprovalsRepository>()),
+  );
+  gh.factory<_i295.AccountApprovalsCubit>(
+    () => _i295.AccountApprovalsCubit(
+      gh<_i138.LoadPendingQueue>(),
+      gh<_i858.ApproveAccount>(),
+      gh<_i431.RejectAccount>(),
+    ),
+  );
   gh.lazySingleton<_i753.PreferencesStore>(
     () => _i190.SecurePreferencesStore(gh<_i354.AppLogger>()),
   );
@@ -101,6 +142,9 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i611.ThemeCubit>(
     () => _i611.ThemeCubit(gh<_i753.PreferencesStore>(), gh<_i354.AppLogger>()),
+  );
+  gh.factory<_i807.OnboardingCubit>(
+    () => _i807.OnboardingCubit(gh<_i430.OnboardingRepository>()),
   );
   gh.lazySingleton<_i797.AuthBloc>(
     () => _i797.AuthBloc(

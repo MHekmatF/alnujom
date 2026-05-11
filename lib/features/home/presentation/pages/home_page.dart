@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/routing/app_router.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
@@ -47,7 +49,13 @@ class HomePage extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
                 // US2 (T079) inserts Profile tile here.
-                // US4 (T072) inserts Admin tile here (only when profile.isAdmin).
+                if (profile?.isAdmin == true)
+                  ListTile(
+                    leading: const Icon(Icons.admin_panel_settings_outlined),
+                    title: Text(l10n.admin_tile_account_approvals),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.push(AppRoutes.adminApprovals),
+                  ),
               ],
             ),
           ),
