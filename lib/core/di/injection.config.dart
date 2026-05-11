@@ -83,22 +83,6 @@ _i174.GetIt $initGetIt(
       gh<_i354.AppLogger>(),
     ),
   );
-  gh.factory<_i858.ApproveAccount>(
-    () => _i858.ApproveAccount(gh<_i120.AccountApprovalsRepository>()),
-  );
-  gh.factory<_i138.LoadPendingQueue>(
-    () => _i138.LoadPendingQueue(gh<_i120.AccountApprovalsRepository>()),
-  );
-  gh.factory<_i431.RejectAccount>(
-    () => _i431.RejectAccount(gh<_i120.AccountApprovalsRepository>()),
-  );
-  gh.factory<_i295.AccountApprovalsCubit>(
-    () => _i295.AccountApprovalsCubit(
-      gh<_i138.LoadPendingQueue>(),
-      gh<_i858.ApproveAccount>(),
-      gh<_i431.RejectAccount>(),
-    ),
-  );
   gh.lazySingleton<_i753.PreferencesStore>(
     () => _i190.SecurePreferencesStore(gh<_i354.AppLogger>()),
   );
@@ -129,6 +113,15 @@ _i174.GetIt $initGetIt(
     ),
     dispose: (i) => i.dispose(),
   );
+  gh.factory<_i858.ApproveAccount>(
+    () => _i858.ApproveAccount(gh<_i120.AccountApprovalsRepository>()),
+  );
+  gh.factory<_i138.LoadPendingQueue>(
+    () => _i138.LoadPendingQueue(gh<_i120.AccountApprovalsRepository>()),
+  );
+  gh.factory<_i431.RejectAccount>(
+    () => _i431.RejectAccount(gh<_i120.AccountApprovalsRepository>()),
+  );
   gh.factoryParam<_i960.LocaleCubit, _i264.Locale?, dynamic>(
     (initialLocale, _) => _i960.LocaleCubit(
       gh<_i753.PreferencesStore>(),
@@ -143,6 +136,13 @@ _i174.GetIt $initGetIt(
   gh.factory<_i611.ThemeCubit>(
     () => _i611.ThemeCubit(gh<_i753.PreferencesStore>(), gh<_i354.AppLogger>()),
   );
+  gh.factory<_i295.AccountApprovalsCubit>(
+    () => _i295.AccountApprovalsCubit(
+      gh<_i138.LoadPendingQueue>(),
+      gh<_i858.ApproveAccount>(),
+      gh<_i431.RejectAccount>(),
+    ),
+  );
   gh.factory<_i807.OnboardingCubit>(
     () => _i807.OnboardingCubit(gh<_i430.OnboardingRepository>()),
   );
@@ -153,7 +153,7 @@ _i174.GetIt $initGetIt(
     ),
     dispose: (i) => i.dispose(),
   );
-  gh.singleton<_i583.GoRouter>(
+  gh.lazySingleton<_i583.GoRouter>(
     () => routerModule.router(gh<_i354.AppLogger>(), gh<_i797.AuthBloc>()),
   );
   return getIt;

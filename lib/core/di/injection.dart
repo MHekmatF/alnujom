@@ -20,7 +20,7 @@ Future<void> configureDependencies() async {
 
 @module
 abstract class RouterModule {
-  @singleton
+  @lazySingleton
   GoRouter router(AppLogger logger, AuthBloc authBloc) =>
       buildAppRouter(logger: logger, authBloc: authBloc);
 }
