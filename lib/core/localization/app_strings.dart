@@ -286,6 +286,10 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('login_forgot_password', (loc) => loc.login_forgot_password);
 
   @override
+  String get login_no_account =>
+      _resolve('login_no_account', (loc) => loc.login_no_account);
+
+  @override
   String get pending_approval_title => _resolve(
     'pending_approval_title',
     (loc) => loc.pending_approval_title,

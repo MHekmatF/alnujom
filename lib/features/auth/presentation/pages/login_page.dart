@@ -151,6 +151,11 @@ class _LoginPageState extends State<LoginPage> {
                             )
                           : Text(l10n.login_submit),
                     ),
+                    const SizedBox(height: 8),
+                    TextButton(
+                      onPressed: () => context.push(AppRoutes.register),
+                      child: Text(l10n.login_no_account),
+                    ),
                   ],
                 ),
               ),
