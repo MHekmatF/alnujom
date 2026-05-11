@@ -43,9 +43,10 @@ abstract final class AppRouteNames {
 }
 
 /// Placeholder page used for routes whose real page is created in a later phase.
+/// Replaced one-by-one as US1/US3/US4 land their real pages.
 Widget _placeholder(String label) => Scaffold(
   appBar: AppBar(title: Text(label)),
-  body: Center(child: Text('$label — coming in Phase 3/4')),
+  body: Center(child: Text(label)),
 );
 
 GoRouter buildAppRouter({required AppLogger logger, required AuthBloc authBloc}) {
