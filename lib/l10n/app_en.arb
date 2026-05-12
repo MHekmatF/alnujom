@@ -51,6 +51,7 @@
   "register_real_email_label_optional": "Email (optional)",
   "register_full_name_label": "Full Name (optional)",
   "register_submit": "Create Account",
+  "register_have_account": "Already have an account? Login",
 
   "login_title": "Sign In",
   "login_phone_label": "Phone Number",

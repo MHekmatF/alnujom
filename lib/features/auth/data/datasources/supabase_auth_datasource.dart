@@ -61,6 +61,20 @@ class SupabaseAuthDataSource {
     );
   }
 
+  /// Fetches the most recent rejection reason for the current user, or null.
+  /// Used by the rejected screen to show the admin's reason.
+  Future<String?> fetchMyRejectionReason({required String userId}) async {
+    final row = await supabase.Supabase.instance.client
+        .from('account_approval_requests')
+        .select('rejection_reason')
+        .eq('user_id', userId)
+        .eq('status', 'rejected')
+        .order('reviewed_at', ascending: false)
+        .limit(1)
+        .maybeSingle();
+    return row?['rejection_reason'] as String?;
+  }
+
   /// Maps a Supabase auth exception to a domain [AuthFailure].
   AuthFailure mapAuthException(Object error, [StackTrace? stackTrace]) {
     if (error is supabase.AuthApiException) {

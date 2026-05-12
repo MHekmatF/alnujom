@@ -80,13 +80,26 @@ class AuthRepositoryImpl implements AuthRepository {
       final cleanEmail = (trimmedEmail?.isEmpty ?? true)
           ? null
           : trimmedEmail!.toLowerCase();
-      await _profileRepository.updateProfile(
-        fullName: cleanName,
-        phone: phone.e164,
-        email: cleanEmail,
-      );
-      // Phase 5 R-11 first-sign-in locale handoff.
-      await _profileRepository.updateLocale(deviceLocale);
+
+      // Non-fatal: signUp already created the auth user. If the PATCH hangs
+      // (e.g. HiOS network throttling on second registration), time out and
+      // continue rather than leaving the BLoC in Authenticating forever.
+      try {
+        await _profileRepository
+            .updateProfile(fullName: cleanName, phone: phone.e164, email: cleanEmail)
+            .timeout(const Duration(seconds: 12));
+        // Phase 5 R-11 first-sign-in locale handoff.
+        await _profileRepository
+            .updateLocale(deviceLocale)
+            .timeout(const Duration(seconds: 8));
+      } on Object catch (e, st) {
+        _logger.warning(
+          'Post-register profile fill failed (non-fatal); user is registered.',
+          error: e,
+          stackTrace: st,
+          tag: _tag,
+        );
+      }
 
       return Success(supSession.toDomain());
     } on Object catch (error, stackTrace) {
@@ -149,6 +162,21 @@ class AuthRepositoryImpl implements AuthRepository {
           stackTrace: stackTrace,
         ),
       );
+    }
+  }
+
+  @override
+  Future<String?> fetchRejectionReason({required String userId}) async {
+    try {
+      return await _authDs.fetchMyRejectionReason(userId: userId);
+    } on Object catch (error, stackTrace) {
+      _logger.warning(
+        'fetchRejectionReason failed (ignored).',
+        error: error,
+        stackTrace: stackTrace,
+        tag: _tag,
+      );
+      return null;
     }
   }
 

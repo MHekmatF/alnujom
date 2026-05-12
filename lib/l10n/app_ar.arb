@@ -51,6 +51,7 @@
   "register_real_email_label_optional": "البريد الإلكتروني (اختياري)",
   "register_full_name_label": "الاسم الكامل (اختياري)",
   "register_submit": "إنشاء حساب",
+  "register_have_account": "لديك حساب بالفعل؟ سجّل دخولك",
 
   "login_title": "تسجيل الدخول",
   "login_phone_label": "رقم الهاتف",

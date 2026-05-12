@@ -290,6 +290,10 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('login_no_account', (loc) => loc.login_no_account);
 
   @override
+  String get register_have_account =>
+      _resolve('register_have_account', (loc) => loc.register_have_account);
+
+  @override
   String get pending_approval_title => _resolve(
     'pending_approval_title',
     (loc) => loc.pending_approval_title,

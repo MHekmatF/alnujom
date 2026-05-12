@@ -36,6 +36,10 @@ abstract class AuthRepository {
   /// Always returns Success on parseable input; only transport failures surface.
   Future<Result<void>> requestPasswordReset({required PhoneNumber phone});
 
+  /// Fetches the latest rejection reason for [userId], or null.
+  /// Used by the Rejected screen to show why the admin rejected the account.
+  Future<String?> fetchRejectionReason({required String userId});
+
   /// Release stream subscriptions and close the internal broadcast controller.
   Future<void> dispose();
 }

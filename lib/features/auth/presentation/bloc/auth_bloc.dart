@@ -139,7 +139,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState>
     }
     final profileResult = await _profileRepository.getCurrentProfile();
     if (profileResult is Success<Profile>) {
-      emit(_stateFromProfile(profileResult.value));
+      emit(await _stateFromProfile(profileResult.value));
     } else {
       emit(const Unauthenticated());
     }
@@ -150,7 +150,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState>
     Emitter<AuthState> emit,
   ) async {
     if (_authRepository.currentSession == null) return;
-    emit(_stateFromProfile(event.profile));
+    emit(await _stateFromProfile(event.profile));
   }
 
   Future<void> _onAppResumedRefresh(
@@ -160,18 +160,26 @@ class AuthBloc extends Bloc<AuthEvent, AuthState>
     if (state is Unauthenticated || state is Authenticating) return;
     final result = await _profileRepository.refresh();
     if (result is Success<Profile>) {
-      emit(_stateFromProfile(result.value));
+      emit(await _stateFromProfile(result.value));
     }
   }
 
-  AuthState _stateFromProfile(Profile profile) {
-    return switch (profile.accountStatus) {
-      AccountStatus.approved => Authenticated(profile),
-      AccountStatus.pending => PendingApproval(profile),
-      AccountStatus.rejected => Rejected(profile),
-      AccountStatus.suspended => Suspended(profile),
-      AccountStatus.deleted => const Unauthenticated(),
-    };
+  Future<AuthState> _stateFromProfile(Profile profile) async {
+    switch (profile.accountStatus) {
+      case AccountStatus.approved:
+        return Authenticated(profile);
+      case AccountStatus.pending:
+        return PendingApproval(profile);
+      case AccountStatus.rejected:
+        final reason = await _authRepository.fetchRejectionReason(
+          userId: profile.userId,
+        );
+        return Rejected(profile, reason: reason ?? '');
+      case AccountStatus.suspended:
+        return Suspended(profile);
+      case AccountStatus.deleted:
+        return const Unauthenticated();
+    }
   }
 
   @disposeMethod

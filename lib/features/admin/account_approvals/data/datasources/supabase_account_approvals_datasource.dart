@@ -5,9 +5,9 @@ import '../../domain/entities/account_approval_request.dart';
 
 /// Wraps Supabase queries against `account_approval_requests` and the approve/reject RPCs.
 ///
-/// Two-query approach: pending requests + profile snippets joined in Dart,
-/// because account_approval_requests.user_id FKs to auth.users(id) rather than
-/// profiles.user_id, so PostgREST cannot infer the join path directly.
+/// Single-query approach: uses PostgREST embedded select (profiles FK added in Phase 5)
+/// to fetch queue items + profile snippets in one HTTPS request, avoiding HiOS throttling
+/// that occurs when two consecutive requests are made in quick succession.
 @LazySingleton()
 class SupabaseAccountApprovalsDatasource {
   SupabaseAccountApprovalsDatasource();
@@ -15,27 +15,20 @@ class SupabaseAccountApprovalsDatasource {
   supabase.SupabaseClient get _client => supabase.Supabase.instance.client;
 
   Future<List<AccountApprovalRequest>> loadPendingQueue() async {
-    final requests = await _client
+    // Single request: embedded select joins profiles via the FK added in Phase 5.
+    // Timeout guards against HiOS throttling; TimeoutException propagates to repository.
+    final Future<List<dynamic>> queueFuture = _client
         .from('account_approval_requests')
-        .select()
+        .select('*, profiles(phone, email, full_name)')
         .eq('status', 'pending')
         .order('created_at', ascending: false);
+    final requests = await queueFuture.timeout(const Duration(seconds: 15));
 
     if (requests.isEmpty) return [];
 
-    final userIds = requests.map((r) => r['user_id'] as String).toList();
-    final profiles = await _client
-        .from('profiles')
-        .select('user_id, phone, email, full_name')
-        .inFilter('user_id', userIds);
-
-    final profileMap = <String, Map<String, dynamic>>{
-      for (final p in profiles) p['user_id'] as String: p,
-    };
-
     return requests.map((r) {
       final uid = r['user_id'] as String;
-      final profile = profileMap[uid];
+      final profile = r['profiles'] as Map<String, dynamic>?;
       return AccountApprovalRequest(
         id: r['id'] as String,
         userId: uid,

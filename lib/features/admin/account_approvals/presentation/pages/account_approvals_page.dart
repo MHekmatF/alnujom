@@ -195,7 +195,9 @@ class _RequestCard extends StatelessWidget {
     );
 
     final reason = controller.text.trim();
-    controller.dispose();
+    // Defer dispose by one frame — the dialog is still animating out when showDialog
+    // returns, and calling dispose() immediately causes widget tree corruption.
+    WidgetsBinding.instance.addPostFrameCallback((_) => controller.dispose());
 
     if (confirmed == true && context.mounted) {
       await context

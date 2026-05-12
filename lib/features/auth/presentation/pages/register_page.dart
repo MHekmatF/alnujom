@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/localization/locale_cubit.dart';
+import '../../../../core/routing/app_router.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/phone_number.dart';
 import '../bloc/auth_bloc.dart';
@@ -173,6 +175,11 @@ class _RegisterPageState extends State<RegisterPage> {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : Text(l10n.register_submit),
+                    ),
+                    const SizedBox(height: 8),
+                    TextButton(
+                      onPressed: () => context.go(AppRoutes.login),
+                      child: Text(l10n.register_have_account),
                     ),
                   ],
                 ),
