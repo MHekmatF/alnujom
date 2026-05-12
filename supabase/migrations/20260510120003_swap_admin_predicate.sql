@@ -7,7 +7,10 @@
 -- Every Phase 4 admin-gated policy that calls current_user_is_admin() picks up the
 -- new behavior automatically. This is the central-helper invariant Phase 5 preserves.
 
+-- SECURITY DEFINER bypasses RLS on profiles so the function doesn't recurse:
+-- account_approval_requests_admin_read calls this → this queries profiles →
+-- profiles_select_admin calls this again → stack overflow without SECURITY DEFINER.
 CREATE OR REPLACE FUNCTION current_user_is_admin() RETURNS BOOLEAN
-LANGUAGE SQL STABLE AS $$
+LANGUAGE SQL STABLE SECURITY DEFINER SET search_path = 'public' AS $$
   SELECT COALESCE((SELECT is_admin FROM profiles WHERE user_id = auth.uid()), FALSE);
 $$;

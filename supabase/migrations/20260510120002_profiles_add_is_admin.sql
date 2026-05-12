@@ -19,8 +19,9 @@ CREATE OR REPLACE FUNCTION enforce_profile_status_admin_only()
   SET search_path = public
 AS $$
 DECLARE
-  caller_role TEXT := current_setting('role', true);
-  is_privileged BOOLEAN := caller_role IN ('postgres', 'supabase_admin', 'service_role');
+  -- current_user reflects SECURITY DEFINER ownership (e.g. 'postgres' inside approve_account_approval_request).
+  -- current_setting('role') only reflects PostgREST's SET LOCAL role, not the DEFINER owner.
+  is_privileged BOOLEAN := current_user IN ('postgres', 'supabase_admin', 'service_role');
 BEGIN
   IF is_privileged THEN
     RETURN NEW;

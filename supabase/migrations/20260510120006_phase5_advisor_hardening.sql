@@ -11,10 +11,14 @@
 -- per Phase 4 R-01 and NOT touched here (FR-007 / R-05 central-helper invariant).
 
 -- ───────────────────────────────────────────────────────────────────────────
--- 1. Re-create current_user_is_admin with explicit search_path
+-- 1. Re-create current_user_is_admin with explicit search_path AND SECURITY DEFINER.
+--    SECURITY DEFINER is required: when this function is called inside admin-gated
+--    RLS policies on profiles, it must bypass RLS itself to query is_admin —
+--    otherwise the profiles_select_admin policy recurses into this function
+--    and triggers PostgreSQL's stack depth limit.
 -- ───────────────────────────────────────────────────────────────────────────
 CREATE OR REPLACE FUNCTION current_user_is_admin() RETURNS BOOLEAN
-LANGUAGE SQL STABLE
+LANGUAGE SQL STABLE SECURITY DEFINER
 SET search_path = public
 AS $$
   SELECT COALESCE((SELECT is_admin FROM profiles WHERE user_id = auth.uid()), FALSE);
