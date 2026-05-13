@@ -217,14 +217,14 @@ description: "Phase 5 — Auth & Profile task list (no automated tests per durab
 
 ### Profile use cases (US2)
 
-- [ ] T075 [P] [US2] Create `lib/features/profile/domain/usecases/load_profile.dart`. Depends on T035.
-- [ ] T076 [P] [US2] Create `lib/features/profile/domain/usecases/update_profile.dart` — domain-layer validation per `data-model.md` §6 (R-17): full_name (1..100 trimmed chars), username (`[a-z0-9_]{3,30}`), email (basic regex), avatar_url (HTTPS URL). Calls `ProfileRepository.updateProfile(...)`. Maps `UsernameTaken` (Postgres `'23505'` on `profiles_username_key`) → returns `Left(UsernameTaken)` to the cubit.
+- [X] T075 [P] [US2] Create `lib/features/profile/domain/usecases/load_profile.dart`. Depends on T035.
+- [X] T076 [P] [US2] Create `lib/features/profile/domain/usecases/update_profile.dart` — domain-layer validation per `data-model.md` §6 (R-17): full_name (1..100 trimmed chars), username (`[a-z0-9_]{3,30}`), email (basic regex), avatar_url (HTTPS URL). Calls `ProfileRepository.updateProfile(...)`. Maps `UsernameTaken` (Postgres `'23505'` on `profiles_username_key`) → returns `Left(UsernameTaken)` to the cubit.
 
 ### Profile presentation (US2)
 
-- [ ] T077 [P] [US2] Create `lib/features/profile/presentation/cubit/profile_cubit.dart` + `profile_state.dart`. State: `loading | loaded(Profile) | editing(Profile, draft) | saving | savedFailure(ProfileFailure)`. Methods: `load()`, `startEdit()`, `updateDraft(...)`, `save()`, `cancelEdit()`.
-- [ ] T078 [US2] Create `lib/features/profile/presentation/pages/profile_page.dart` (read-only) AND `lib/features/profile/presentation/pages/profile_edit_page.dart` (form). Add `/profile` and `/profile/edit` routes to `lib/app.dart`'s router (extending T041's route table). Constitution V/VI: ARB strings + Theme tokens; RTL/LTR via `Directionality`.
-- [ ] T079 [US2] Add a "Profile" tile to the home page (`lib/features/home/presentation/pages/home_page.dart` — the placeholder created in T041's empty tile region). Tapping the tile routes to `/profile`. ARB key `home_tile_profile` (add to T039 ARB additions if not already present). Constitution V/VI: ARB + tokens.
+- [X] T077 [P] [US2] Create `lib/features/profile/presentation/cubit/profile_cubit.dart` + `profile_state.dart`. State: `loading | loaded(Profile) | editing(Profile, draft) | saving | savedFailure(ProfileFailure)`. Methods: `load()`, `startEdit()`, `updateDraft(...)`, `save()`, `cancelEdit()`.
+- [X] T078 [US2] Create `lib/features/profile/presentation/pages/profile_page.dart` (read-only) AND `lib/features/profile/presentation/pages/profile_edit_page.dart` (form). Add `/profile` and `/profile/edit` routes to `lib/app.dart`'s router (extending T041's route table). Constitution V/VI: ARB strings + Theme tokens; RTL/LTR via `Directionality`.
+- [X] T079 [US2] Add a "Profile" tile to the home page (`lib/features/home/presentation/pages/home_page.dart` — the placeholder created in T041's empty tile region). Tapping the tile routes to `/profile`. ARB key `home_tile_profile` (add to T039 ARB additions if not already present). Constitution V/VI: ARB + tokens.
 - [ ] T080 [US2] **Manual verification on the reference device**: walk `quickstart.md` Step 13. **Ship-ready signal for US2.**
 
 **Checkpoint**: User Stories 1, 2, 4 are independently functional. Approved users have a profile they can read and edit; the database invariants on status/admin fields are intact.
@@ -239,12 +239,12 @@ description: "Phase 5 — Auth & Profile task list (no automated tests per durab
 
 ### Reset-password use case (US3)
 
-- [ ] T081 [US3] Create `lib/features/auth/domain/usecases/request_password_reset.dart` — calls `AuthRepository.requestPasswordReset(phone)` (T033). Returns `Right(Unit)` on success; `Left(NetworkError)` only on transport failure. The use case does NOT distinguish "email known" / "email unknown" / "phone unknown" — the Edge Function's response is uniform per `contracts/request-password-reset-edge-fn.md`.
+- [X] T081 [US3] Create `lib/features/auth/domain/usecases/request_password_reset.dart` — calls `AuthRepository.requestPasswordReset(phone)` (T033). Returns `Right(Unit)` on success; `Left(NetworkError)` only on transport failure. The use case does NOT distinguish "email known" / "email unknown" / "phone unknown" — the Edge Function's response is uniform per `contracts/request-password-reset-edge-fn.md`.
 
 ### Reset-password page (US3)
 
-- [ ] T082 [US3] Create `lib/features/auth/presentation/pages/reset_password_page.dart`: phone field (uses `PhoneNumber.tryParse`); submit dispatches `AuthBloc.add(ResetPasswordRequested(...))`; on completion the page shows the localized `reset_password_generic_response` regardless of outcome (FR-017). Constitution V/VI: ARB + tokens.
-- [ ] T083 [US3] Wire the `ResetPasswordRequested` event in the AuthBloc (T045) to call the use case (T081); on completion emit either `Unauthenticated` (the user typed a phone that resulted in success) or `AuthError(NetworkError)` for transport failures (the page handles `AuthError` by showing the localized network error and offering retry).
+- [X] T082 [US3] Create `lib/features/auth/presentation/pages/reset_password_page.dart`: phone field (uses `PhoneNumber.tryParse`); submit dispatches `AuthBloc.add(ResetPasswordRequested(...))`; on completion the page shows the localized `reset_password_generic_response` regardless of outcome (FR-017). Constitution V/VI: ARB + tokens.
+- [X] T083 [US3] Wire the `ResetPasswordRequested` event in the AuthBloc (T045) to call the use case (T081); on completion emit either `Unauthenticated` (the user typed a phone that resulted in success) or `AuthError(NetworkError)` for transport failures (the page handles `AuthError` by showing the localized network error and offering retry).
 - [ ] T084 [US3] **Manual verification on the reference device**: walk `quickstart.md` Step 15 (phone with real email — reset email arrives at real address), Step 16 (phone without real email — generic response, no email anywhere), Step 17 (unknown phone — generic response). Inspect Edge Function logs via Supabase MCP `get_logs` to confirm the lookup happened in Steps 16 and 17 but no reset was issued. **Ship-ready signal for US3.**
 
 **Checkpoint**: User Stories 1, 2, 3, 4 functional; reset-password is account-enumeration-resistant.
@@ -259,13 +259,13 @@ description: "Phase 5 — Auth & Profile task list (no automated tests per durab
 
 ### PII use cases (US5)
 
-- [ ] T085 [P] [US5] Create `lib/features/profile/domain/usecases/load_pii.dart` — calls `ProfileRepository.loadPii()` (T035), returns the `PiiBundle` or a domain failure.
-- [ ] T086 [P] [US5] Create `lib/features/profile/domain/usecases/update_pii.dart` — dispatches by field-shape: `legalName: String` → `updateLegalName`, `nationalId: String` → `updateNationalId`, `methods: PrivateContactMethods` → `updatePrivateContactMethods`. Each dispatch maps `Forbidden` / network failures to typed domain failures.
+- [X] T085 [P] [US5] Create `lib/features/profile/domain/usecases/load_pii.dart` — calls `ProfileRepository.loadPii()` (T035), returns the `PiiBundle` or a domain failure.
+- [X] T086 [P] [US5] Create `lib/features/profile/domain/usecases/update_pii.dart` — dispatches by field-shape: `legalName: String` → `updateLegalName`, `nationalId: String` → `updateNationalId`, `methods: PrivateContactMethods` → `updatePrivateContactMethods`. Each dispatch maps `Forbidden` / network failures to typed domain failures.
 
 ### PII presentation (US5)
 
-- [ ] T087 [US5] Extend `ProfileCubit` (T077) with PII-specific state slices (`piiLoading`, `piiLoaded(PiiBundle)`, `piiSaving`, `piiSavedFailure`) and methods (`loadPii()`, `saveLegalName(String)`, `saveNationalId(String)`, `saveContactMethods(PrivateContactMethods)`). Keep the public-profile state and PII state decoupled in the cubit so the read-only profile page does not pay the cost of fetching PII.
-- [ ] T088 [US5] Create `lib/features/profile/presentation/pages/profile_private_page.dart` — separate page (route `/profile/private`, added to `lib/app.dart`'s router extending T041). Sections: `Legal name`, `National ID`, `Private contact methods` (form rows for each `ContactChannel`: WhatsApp, Telegram, Signal, Private email, Secondary phone — the secondary-phone field passes through `PhoneNumber.tryParse`). Save button calls `profileCubit.saveLegalName(...)` etc. Constitution V/VI: ARB + tokens.
+- [X] T087 [US5] Extend `ProfileCubit` (T077) with PII-specific state slices (`piiLoading`, `piiLoaded(PiiBundle)`, `piiSaving`, `piiSavedFailure`) and methods (`loadPii()`, `saveLegalName(String)`, `saveNationalId(String)`, `saveContactMethods(PrivateContactMethods)`). Keep the public-profile state and PII state decoupled in the cubit so the read-only profile page does not pay the cost of fetching PII.
+- [X] T088 [US5] Create `lib/features/profile/presentation/pages/profile_private_page.dart` — separate page (route `/profile/private`, added to `lib/app.dart`'s router extending T041). Sections: `Legal name`, `National ID`, `Private contact methods` (form rows for each `ContactChannel`: WhatsApp, Telegram, Signal, Private email, Secondary phone — the secondary-phone field passes through `PhoneNumber.tryParse`). Save button calls `profileCubit.saveLegalName(...)` etc. Constitution V/VI: ARB + tokens.
 - [ ] T089 [US5] **Manual verification on the reference device**: walk `quickstart.md` Step 14. Then `pg_dump` (or its MCP-exposed equivalent) and `grep` the dump for the test plaintext (`'Hekmat Al Fanar'`, `'01010101010'`); confirm zero matches outside of `vault.secrets` ciphertext (SC-008 verification). **Ship-ready signal for US5.**
 
 **Checkpoint**: All five user stories functional. The MVP slice (US1+US4) was demonstrable after Phase 4; Phase 5 of this task list now ships every additional Phase-5-spec increment.

@@ -48,7 +48,13 @@ class HomePage extends StatelessWidget {
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 const SizedBox(height: 24),
-                // US2 (T079) inserts Profile tile here.
+                // US2 (T079): Profile tile.
+                ListTile(
+                  leading: const Icon(Icons.person_outline),
+                  title: Text(l10n.home_tile_profile),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push(AppRoutes.profile),
+                ),
                 if (profile?.isAdmin == true)
                   ListTile(
                     leading: const Icon(Icons.admin_panel_settings_outlined),

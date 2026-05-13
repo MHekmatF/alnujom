@@ -49,6 +49,11 @@ import '../../features/profile/data/repositories/profile_repository_impl.dart'
     as _i334;
 import '../../features/profile/domain/repositories/profile_repository.dart'
     as _i894;
+import '../../features/profile/domain/usecases/load_pii.dart' as _i201;
+import '../../features/profile/domain/usecases/load_profile.dart' as _i202;
+import '../../features/profile/domain/usecases/update_pii.dart' as _i203;
+import '../../features/profile/domain/usecases/update_profile.dart' as _i204;
+import '../../features/profile/presentation/cubit/profile_cubit.dart' as _i205;
 import '../config/env_config.dart' as _i373;
 import '../localization/locale_cubit.dart' as _i960;
 import '../logging/app_logger.dart' as _i354;
@@ -141,6 +146,26 @@ _i174.GetIt $initGetIt(
       gh<_i138.LoadPendingQueue>(),
       gh<_i858.ApproveAccount>(),
       gh<_i431.RejectAccount>(),
+    ),
+  );
+  gh.factory<_i202.LoadProfile>(
+    () => _i202.LoadProfile(gh<_i894.ProfileRepository>()),
+  );
+  gh.factory<_i204.UpdateProfile>(
+    () => _i204.UpdateProfile(gh<_i894.ProfileRepository>()),
+  );
+  gh.factory<_i201.LoadPii>(
+    () => _i201.LoadPii(gh<_i894.ProfileRepository>()),
+  );
+  gh.factory<_i203.UpdatePii>(
+    () => _i203.UpdatePii(gh<_i894.ProfileRepository>()),
+  );
+  gh.factory<_i205.ProfileCubit>(
+    () => _i205.ProfileCubit(
+      gh<_i202.LoadProfile>(),
+      gh<_i204.UpdateProfile>(),
+      gh<_i201.LoadPii>(),
+      gh<_i203.UpdatePii>(),
     ),
   );
   gh.factory<_i807.OnboardingCubit>(

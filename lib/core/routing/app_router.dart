@@ -9,10 +9,14 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/pending_approval_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/auth/presentation/pages/rejected_page.dart';
+import '../../features/auth/presentation/pages/reset_password_page.dart';
 import '../../features/auth/presentation/pages/suspended_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/onboarding/presentation/pages/onboarding_page.dart';
 import '../../features/onboarding/presentation/pages/splash_page.dart';
+import '../../features/profile/presentation/pages/profile_edit_page.dart';
+import '../../features/profile/presentation/pages/profile_page.dart';
+import '../../features/profile/presentation/pages/profile_private_page.dart';
 import '../../shell/shell_home_page.dart';
 import '../flags/app_flags.dart';
 import '../logging/app_logger.dart';
@@ -30,6 +34,9 @@ abstract final class AppRoutes {
   static const admin = '/admin';
   static const adminApprovals = '/admin/approvals';
   static const resetPassword = '/reset-password';
+  static const profile = '/profile';
+  static const profileEdit = '/profile/edit';
+  static const profilePrivate = '/profile/private';
   static const shellHome = '/';
   static const themeGallery = '/_debug/theme-gallery';
 }
@@ -46,6 +53,9 @@ abstract final class AppRouteNames {
   static const admin = 'admin';
   static const adminApprovals = 'admin-approvals';
   static const resetPassword = 'reset-password';
+  static const profile = 'profile';
+  static const profileEdit = 'profile-edit';
+  static const profilePrivate = 'profile-private';
   static const shellHome = 'shell-home';
   static const themeGallery = 'theme-gallery';
 }
@@ -121,7 +131,22 @@ GoRouter buildAppRouter({required AppLogger logger, required AuthBloc authBloc})
       GoRoute(
         path: AppRoutes.resetPassword,
         name: AppRouteNames.resetPassword,
-        builder: (context, state) => _placeholder('Reset Password'),
+        builder: (context, state) => const ResetPasswordPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.profile,
+        name: AppRouteNames.profile,
+        builder: (context, state) => const ProfilePage(),
+      ),
+      GoRoute(
+        path: AppRoutes.profileEdit,
+        name: AppRouteNames.profileEdit,
+        builder: (context, state) => const ProfileEditPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.profilePrivate,
+        name: AppRouteNames.profilePrivate,
+        builder: (context, state) => const ProfilePrivatePage(),
       ),
 
       // ─── Phase 1–4 legacy routes (kept for design tools) ───
