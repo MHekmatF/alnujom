@@ -42,10 +42,33 @@ class SupabaseAuthDataSource {
     required PhoneNumber phone,
     required String password,
   }) async {
-    return _auth.signInWithPassword(
-      email: syntheticEmailFor(phone),
-      password: password,
-    );
+    // Option B fix: auth.users.email may be the user's REAL email (if they
+    // provided one) or the synthetic <phone>@alnujom.local (if they didn't).
+    // We can't know which from the client, so we ask the lookup Edge Function
+    // and use whatever it returns. For unknown phones it returns the synthetic
+    // form, which fails signIn with `invalid_credentials` — same as a wrong
+    // password against a known phone (account-enumeration resistant).
+    String email = syntheticEmailFor(phone);
+    try {
+      final response = await supabase.Supabase.instance.client.functions.invoke(
+        'lookup_email_by_phone',
+        body: {'phone': phone.e164},
+      );
+      final data = response.data;
+      if (data is Map && data['email'] is String) {
+        final candidate = data['email'] as String;
+        if (candidate.isNotEmpty) email = candidate;
+      }
+    } on Object catch (error, stackTrace) {
+      _logger.warning(
+        'lookup_email_by_phone failed; falling back to synthetic email.',
+        error: error,
+        stackTrace: stackTrace,
+        tag: _tag,
+      );
+    }
+
+    return _auth.signInWithPassword(email: email, password: password);
   }
 
   Future<void> signOut() async {
