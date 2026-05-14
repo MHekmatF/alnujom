@@ -18,7 +18,7 @@ CREATE POLICY account_approval_requests_self_read
   ON account_approval_requests
   FOR SELECT
   TO authenticated
-  USING (user_id = auth.uid());
+  USING (user_id = (SELECT auth.uid()));  -- (SELECT ...) avoids per-row re-evaluation (auth_rls_initplan)
 
 DROP POLICY IF EXISTS account_approval_requests_admin_read ON account_approval_requests;
 CREATE POLICY account_approval_requests_admin_read
