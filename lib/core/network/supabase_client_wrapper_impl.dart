@@ -70,19 +70,20 @@ final class SupabaseClientWrapperImpl implements SupabaseClientWrapper {
         .map(_mapAuthChangeEvent)
         .transform(
           StreamTransformer<AuthState, AuthState>.fromHandlers(
-            handleError: (
-              Object error,
-              StackTrace stackTrace,
-              EventSink<AuthState> sink,
-            ) {
-              _logger.warning(
-                'Auth state subscription error.',
-                error: error,
-                stackTrace: stackTrace,
-                tag: _tag,
-              );
-              sink.add(AuthState.error);
-            },
+            handleError:
+                (
+                  Object error,
+                  StackTrace stackTrace,
+                  EventSink<AuthState> sink,
+                ) {
+                  _logger.warning(
+                    'Auth state subscription error.',
+                    error: error,
+                    stackTrace: stackTrace,
+                    tag: _tag,
+                  );
+                  sink.add(AuthState.error);
+                },
           ),
         );
   }

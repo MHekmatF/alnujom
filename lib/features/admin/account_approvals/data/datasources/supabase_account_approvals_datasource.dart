@@ -54,10 +54,7 @@ class SupabaseAccountApprovalsDatasource {
     );
   }
 
-  Future<void> reject({
-    required String userId,
-    required String reason,
-  }) async {
+  Future<void> reject({required String userId, required String reason}) async {
     await _client.rpc(
       'reject_account_approval_request',
       params: {'p_user_id': userId, 'p_reason': reason},

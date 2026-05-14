@@ -34,8 +34,7 @@ class _AccountApprovalsView extends StatelessWidget {
       body: BlocBuilder<AccountApprovalsCubit, AccountApprovalsState>(
         builder: (context, state) {
           return switch (state) {
-            AccountApprovalsInitial() ||
-            AccountApprovalsLoading() =>
+            AccountApprovalsInitial() || AccountApprovalsLoading() =>
               const Center(child: CircularProgressIndicator()),
 
             AccountApprovalsError(:final failure) => Center(
@@ -109,7 +108,9 @@ class _RequestCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final dateStr = DateFormat.yMMMd().add_Hm().format(request.createdAt.toLocal());
+    final dateStr = DateFormat.yMMMd().add_Hm().format(
+      request.createdAt.toLocal(),
+    );
 
     return Card(
       child: Padding(
@@ -118,7 +119,10 @@ class _RequestCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (request.registrantFullName != null)
-              _Row(l10n.admin_queue_full_name_label, request.registrantFullName!),
+              _Row(
+                l10n.admin_queue_full_name_label,
+                request.registrantFullName!,
+              ),
             if (request.registrantPhone != null)
               _Row(l10n.admin_queue_phone_label, request.registrantPhone!),
             if (request.registrantEmail != null)
@@ -138,8 +142,7 @@ class _RequestCard extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () =>
-                        _onRejectTap(context, l10n).ignore(),
+                    onPressed: () => _onRejectTap(context, l10n).ignore(),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: theme.colorScheme.error,
                     ),
@@ -170,10 +173,9 @@ class _RequestCard extends StatelessWidget {
             decoration: InputDecoration(
               labelText: l10n.admin_action_reject_reason_label,
             ),
-            validator: (v) =>
-                (v == null || v.trim().isEmpty)
-                    ? l10n.admin_action_reject_reason_required
-                    : null,
+            validator: (v) => (v == null || v.trim().isEmpty)
+                ? l10n.admin_action_reject_reason_required
+                : null,
             maxLines: 3,
           ),
         ),
@@ -200,9 +202,10 @@ class _RequestCard extends StatelessWidget {
     WidgetsBinding.instance.addPostFrameCallback((_) => controller.dispose());
 
     if (confirmed == true && context.mounted) {
-      await context
-          .read<AccountApprovalsCubit>()
-          .reject(request.userId, reason);
+      await context.read<AccountApprovalsCubit>().reject(
+        request.userId,
+        reason,
+      );
     }
   }
 }

@@ -63,7 +63,8 @@ class _PrivateViewState extends State<_PrivateView> {
     _telegramController.text = methods[ContactChannel.telegram] ?? '';
     _signalController.text = methods[ContactChannel.signal] ?? '';
     _privateEmailController.text = methods[ContactChannel.privateEmail] ?? '';
-    _secondaryPhoneController.text = methods[ContactChannel.secondaryPhone] ?? '';
+    _secondaryPhoneController.text =
+        methods[ContactChannel.secondaryPhone] ?? '';
   }
 
   Future<void> _saveAll(AppLocalizations l10n) async {

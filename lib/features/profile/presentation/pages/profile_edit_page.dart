@@ -99,7 +99,9 @@ class _ProfileEditViewState extends State<_ProfileEditView> {
         final failure = state.status == ProfileStatus.saveFailure
             ? state.failure
             : null;
-        final errorText = failure == null ? null : _localizeFailure(failure, l10n);
+        final errorText = failure == null
+            ? null
+            : _localizeFailure(failure, l10n);
 
         return Scaffold(
           appBar: AppBar(
@@ -126,7 +128,8 @@ class _ProfileEditViewState extends State<_ProfileEditView> {
                     validator: (v) {
                       if (v == null) return null;
                       final t = v.trim();
-                      if (t.isNotEmpty && t.length > 100) return l10n.invalid_full_name;
+                      if (t.isNotEmpty && t.length > 100)
+                        return l10n.invalid_full_name;
                       return null;
                     },
                   ),
@@ -154,7 +157,9 @@ class _ProfileEditViewState extends State<_ProfileEditView> {
                     ),
                     validator: (v) {
                       if (v == null || v.trim().isEmpty) return null;
-                      if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(v.trim())) {
+                      if (!RegExp(
+                        r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
+                      ).hasMatch(v.trim())) {
                         return l10n.invalid_email;
                       }
                       return null;
@@ -201,7 +206,8 @@ class _ProfileEditViewState extends State<_ProfileEditView> {
                     onPressed: isSaving
                         ? null
                         : () {
-                            if (Navigator.canPop(context)) Navigator.pop(context);
+                            if (Navigator.canPop(context))
+                              Navigator.pop(context);
                           },
                     child: Text(l10n.profile_cancel_button),
                   ),

@@ -104,7 +104,9 @@ class SupabaseProfileDataSource {
       email: row['email'] as String?,
       avatarUrl: row['avatar_url'] as String?,
       accountStatus: _parseAccountStatus(row['account_status'] as String?),
-      publisherStatus: _parsePublisherStatus(row['publisher_status'] as String?),
+      publisherStatus: _parsePublisherStatus(
+        row['publisher_status'] as String?,
+      ),
       isAdmin: (row['is_admin'] as bool?) ?? false,
       createdAt: DateTime.parse(row['created_at'] as String),
       updatedAt: DateTime.parse(row['updated_at'] as String),

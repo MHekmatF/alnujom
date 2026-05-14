@@ -30,7 +30,11 @@ class ProfileCubit extends Cubit<ProfileState> {
       emit(state.profileLoaded(result.value));
     } else {
       final f = (result as FailureResult<Profile>).failure;
-      emit(state.profileSaveFailure(f is ProfileFailure ? f : UnknownProfileError(f.message)));
+      emit(
+        state.profileSaveFailure(
+          f is ProfileFailure ? f : UnknownProfileError(f.message),
+        ),
+      );
     }
   }
 
@@ -72,7 +76,11 @@ class ProfileCubit extends Cubit<ProfileState> {
       emit(state.profileLoaded(result.value));
     } else {
       final f = (result as FailureResult<Profile>).failure;
-      emit(state.profileSaveFailure(f is ProfileFailure ? f : UnknownProfileError(f.message)));
+      emit(
+        state.profileSaveFailure(
+          f is ProfileFailure ? f : UnknownProfileError(f.message),
+        ),
+      );
     }
   }
 
@@ -90,7 +98,11 @@ class ProfileCubit extends Cubit<ProfileState> {
       emit(state.piiLoaded(result.value));
     } else {
       final f = (result as FailureResult<PiiBundle>).failure;
-      emit(state.piiSaveFailure(f is ProfileFailure ? f : UnknownProfileError(f.message)));
+      emit(
+        state.piiSaveFailure(
+          f is ProfileFailure ? f : UnknownProfileError(f.message),
+        ),
+      );
     }
   }
 
@@ -111,7 +123,11 @@ class ProfileCubit extends Cubit<ProfileState> {
       );
     } else {
       final f = (result as FailureResult<void>).failure;
-      emit(state.piiSaveFailure(f is ProfileFailure ? f : UnknownProfileError(f.message)));
+      emit(
+        state.piiSaveFailure(
+          f is ProfileFailure ? f : UnknownProfileError(f.message),
+        ),
+      );
     }
   }
 
@@ -132,7 +148,11 @@ class ProfileCubit extends Cubit<ProfileState> {
       );
     } else {
       final f = (result as FailureResult<void>).failure;
-      emit(state.piiSaveFailure(f is ProfileFailure ? f : UnknownProfileError(f.message)));
+      emit(
+        state.piiSaveFailure(
+          f is ProfileFailure ? f : UnknownProfileError(f.message),
+        ),
+      );
     }
   }
 
@@ -153,7 +173,11 @@ class ProfileCubit extends Cubit<ProfileState> {
       );
     } else {
       final f = (result as FailureResult<void>).failure;
-      emit(state.piiSaveFailure(f is ProfileFailure ? f : UnknownProfileError(f.message)));
+      emit(
+        state.piiSaveFailure(
+          f is ProfileFailure ? f : UnknownProfileError(f.message),
+        ),
+      );
     }
   }
 }

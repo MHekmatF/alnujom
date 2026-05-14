@@ -266,8 +266,7 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('register_submit', (loc) => loc.register_submit);
 
   @override
-  String get login_title =>
-      _resolve('login_title', (loc) => loc.login_title);
+  String get login_title => _resolve('login_title', (loc) => loc.login_title);
 
   @override
   String get login_phone_label =>
@@ -294,10 +293,8 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('register_have_account', (loc) => loc.register_have_account);
 
   @override
-  String get pending_approval_title => _resolve(
-    'pending_approval_title',
-    (loc) => loc.pending_approval_title,
-  );
+  String get pending_approval_title =>
+      _resolve('pending_approval_title', (loc) => loc.pending_approval_title);
 
   @override
   String get pending_approval_body =>
@@ -354,10 +351,8 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('password_too_short', (loc) => loc.password_too_short);
 
   @override
-  String get account_already_exists => _resolve(
-    'account_already_exists',
-    (loc) => loc.account_already_exists,
-  );
+  String get account_already_exists =>
+      _resolve('account_already_exists', (loc) => loc.account_already_exists);
 
   @override
   String get invalid_phone_or_password => _resolve(
@@ -381,10 +376,8 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('profile_title', (loc) => loc.profile_title);
 
   @override
-  String get profile_full_name_label => _resolve(
-    'profile_full_name_label',
-    (loc) => loc.profile_full_name_label,
-  );
+  String get profile_full_name_label =>
+      _resolve('profile_full_name_label', (loc) => loc.profile_full_name_label);
 
   @override
   String get profile_username_label =>
@@ -539,16 +532,12 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
-  String get admin_queue_phone_label => _resolve(
-    'admin_queue_phone_label',
-    (loc) => loc.admin_queue_phone_label,
-  );
+  String get admin_queue_phone_label =>
+      _resolve('admin_queue_phone_label', (loc) => loc.admin_queue_phone_label);
 
   @override
-  String get admin_queue_email_label => _resolve(
-    'admin_queue_email_label',
-    (loc) => loc.admin_queue_email_label,
-  );
+  String get admin_queue_email_label =>
+      _resolve('admin_queue_email_label', (loc) => loc.admin_queue_email_label);
 
   @override
   String get admin_queue_full_name_label => _resolve(
@@ -603,30 +592,24 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
-  String get onboarding_step_1_title => _resolve(
-    'onboarding_step_1_title',
-    (loc) => loc.onboarding_step_1_title,
-  );
+  String get onboarding_step_1_title =>
+      _resolve('onboarding_step_1_title', (loc) => loc.onboarding_step_1_title);
 
   @override
   String get onboarding_step_1_body =>
       _resolve('onboarding_step_1_body', (loc) => loc.onboarding_step_1_body);
 
   @override
-  String get onboarding_step_2_title => _resolve(
-    'onboarding_step_2_title',
-    (loc) => loc.onboarding_step_2_title,
-  );
+  String get onboarding_step_2_title =>
+      _resolve('onboarding_step_2_title', (loc) => loc.onboarding_step_2_title);
 
   @override
   String get onboarding_step_2_body =>
       _resolve('onboarding_step_2_body', (loc) => loc.onboarding_step_2_body);
 
   @override
-  String get onboarding_step_3_title => _resolve(
-    'onboarding_step_3_title',
-    (loc) => loc.onboarding_step_3_title,
-  );
+  String get onboarding_step_3_title =>
+      _resolve('onboarding_step_3_title', (loc) => loc.onboarding_step_3_title);
 
   @override
   String get onboarding_step_3_body =>

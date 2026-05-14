@@ -136,10 +136,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
   @override
   Future<Result<void>> updateLegalName(String legalName) async {
     try {
-      await _ds.writePiiTextField(
-        fieldName: 'legal_name',
-        value: legalName,
-      );
+      await _ds.writePiiTextField(fieldName: 'legal_name', value: legalName);
       return const Success(null);
     } on Object catch (error, stackTrace) {
       return FailureResult(_mapError(error, stackTrace));
@@ -149,10 +146,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
   @override
   Future<Result<void>> updateNationalId(String nationalId) async {
     try {
-      await _ds.writePiiTextField(
-        fieldName: 'national_id',
-        value: nationalId,
-      );
+      await _ds.writePiiTextField(fieldName: 'national_id', value: nationalId);
       return const Success(null);
     } on Object catch (error, stackTrace) {
       return FailureResult(_mapError(error, stackTrace));

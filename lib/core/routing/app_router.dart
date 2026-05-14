@@ -66,7 +66,10 @@ Widget _placeholder(String label) => Scaffold(
   body: Center(child: Text(label)),
 );
 
-GoRouter buildAppRouter({required AppLogger logger, required AuthBloc authBloc}) {
+GoRouter buildAppRouter({
+  required AppLogger logger,
+  required AuthBloc authBloc,
+}) {
   final refreshListenable = AuthBlocListenable(authBloc);
 
   return GoRouter(

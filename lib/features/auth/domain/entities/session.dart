@@ -5,11 +5,7 @@ import 'package:equatable/equatable.dart';
 /// Wraps the existence/absence of an authenticated session + the linked user id.
 /// Constitution IX: no Supabase types.
 class Session extends Equatable {
-  const Session({
-    required this.userId,
-    required this.isActive,
-    this.expiresAt,
-  });
+  const Session({required this.userId, required this.isActive, this.expiresAt});
 
   final String userId;
   final bool isActive;

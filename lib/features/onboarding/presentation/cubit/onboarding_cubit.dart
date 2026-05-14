@@ -22,11 +22,13 @@ class OnboardingCubit extends Cubit<OnboardingState> {
       if (step + 1 >= totalSteps) {
         markSeen();
       } else {
-        emit(OnboardingInProgress(
-          step: step + 1,
-          totalSteps: totalSteps,
-          selectedLocale: selectedLocale,
-        ));
+        emit(
+          OnboardingInProgress(
+            step: step + 1,
+            totalSteps: totalSteps,
+            selectedLocale: selectedLocale,
+          ),
+        );
       }
     }
   }
@@ -34,22 +36,26 @@ class OnboardingCubit extends Cubit<OnboardingState> {
   void previousStep() {
     if (state case OnboardingInProgress(:final step, :final selectedLocale)) {
       if (step > 0) {
-        emit(OnboardingInProgress(
-          step: step - 1,
-          totalSteps: totalSteps,
-          selectedLocale: selectedLocale,
-        ));
+        emit(
+          OnboardingInProgress(
+            step: step - 1,
+            totalSteps: totalSteps,
+            selectedLocale: selectedLocale,
+          ),
+        );
       }
     }
   }
 
   void selectLocale(Locale locale) {
     if (state case OnboardingInProgress(:final step, :final totalSteps)) {
-      emit(OnboardingInProgress(
-        step: step,
-        totalSteps: totalSteps,
-        selectedLocale: locale,
-      ));
+      emit(
+        OnboardingInProgress(
+          step: step,
+          totalSteps: totalSteps,
+          selectedLocale: locale,
+        ),
+      );
     }
   }
 

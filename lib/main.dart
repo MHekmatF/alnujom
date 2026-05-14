@@ -36,8 +36,7 @@ Future<void> main() async {
     final supported = AppLocalizations.supportedLocales
         .map((l) => l.languageCode)
         .toSet();
-    final systemLocale =
-        WidgetsBinding.instance.platformDispatcher.locale;
+    final systemLocale = WidgetsBinding.instance.platformDispatcher.locale;
     if (supported.contains(systemLocale.languageCode)) {
       return Locale(systemLocale.languageCode);
     }

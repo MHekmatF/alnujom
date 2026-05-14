@@ -7,7 +7,11 @@ import '../entities/private_contact_methods.dart';
 
 /// Bundle of the three Vault-backed PII fields (FR-005 / FR-006).
 class PiiBundle {
-  const PiiBundle({this.legalName, this.nationalId, this.privateContactMethods});
+  const PiiBundle({
+    this.legalName,
+    this.nationalId,
+    this.privateContactMethods,
+  });
 
   final String? legalName;
   final String? nationalId;
@@ -72,7 +76,8 @@ sealed class ProfileFailure extends Failure {
 }
 
 final class UsernameTaken extends ProfileFailure {
-  const UsernameTaken({super.cause, super.stackTrace}) : super('username_taken');
+  const UsernameTaken({super.cause, super.stackTrace})
+    : super('username_taken');
 }
 
 final class InvalidFullName extends ProfileFailure {

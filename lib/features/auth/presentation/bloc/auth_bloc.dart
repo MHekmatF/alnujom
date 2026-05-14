@@ -19,8 +19,7 @@ import 'auth_state.dart';
 /// Subscribes to [AuthRepository.sessionStream] for session changes and to
 /// [WidgetsBindingObserver] for foreground-resume suspension detection (R-21).
 @LazySingleton()
-class AuthBloc extends Bloc<AuthEvent, AuthState>
-    with WidgetsBindingObserver {
+class AuthBloc extends Bloc<AuthEvent, AuthState> with WidgetsBindingObserver {
   AuthBloc(this._authRepository, this._profileRepository)
     : super(const Unauthenticated()) {
     WidgetsBinding.instance.addObserver(this);
@@ -64,9 +63,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState>
       final failure = result.failure;
       emit(
         AuthError(
-          failure is AuthFailure
-              ? failure
-              : UnknownAuthError(failure.message),
+          failure is AuthFailure ? failure : UnknownAuthError(failure.message),
         ),
       );
     }
@@ -86,9 +83,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState>
       final failure = result.failure;
       emit(
         AuthError(
-          failure is AuthFailure
-              ? failure
-              : UnknownAuthError(failure.message),
+          failure is AuthFailure ? failure : UnknownAuthError(failure.message),
         ),
       );
     }

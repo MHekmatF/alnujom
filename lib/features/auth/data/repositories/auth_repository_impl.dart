@@ -65,9 +65,7 @@ class AuthRepositoryImpl implements AuthRepository {
       final supSession = res.session;
       if (supSession == null) {
         return const FailureResult(
-          UnknownAuthError(
-            'signup_succeeded_without_session',
-          ),
+          UnknownAuthError('signup_succeeded_without_session'),
         );
       }
 
@@ -86,7 +84,11 @@ class AuthRepositoryImpl implements AuthRepository {
       // continue rather than leaving the BLoC in Authenticating forever.
       try {
         await _profileRepository
-            .updateProfile(fullName: cleanName, phone: phone.e164, email: cleanEmail)
+            .updateProfile(
+              fullName: cleanName,
+              phone: phone.e164,
+              email: cleanEmail,
+            )
             .timeout(const Duration(seconds: 12));
         // Phase 5 R-11 first-sign-in locale handoff.
         await _profileRepository
@@ -144,7 +146,9 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Result<void>> requestPasswordReset({required PhoneNumber phone}) async {
+  Future<Result<void>> requestPasswordReset({
+    required PhoneNumber phone,
+  }) async {
     try {
       await _authDs.invokeRequestPasswordReset(phone: phone);
       return const Success(null);

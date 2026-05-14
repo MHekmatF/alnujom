@@ -31,9 +31,7 @@ class App extends StatelessWidget {
         BlocProvider<LocaleCubit>(
           create: (_) => getIt<LocaleCubit>(param1: initialLocale),
         ),
-        BlocProvider<AuthBloc>.value(
-          value: getIt<AuthBloc>(),
-        ),
+        BlocProvider<AuthBloc>.value(value: getIt<AuthBloc>()),
       ],
       child: BlocBuilder<ThemeCubit, AppThemeMode>(
         builder: (context, appThemeMode) {

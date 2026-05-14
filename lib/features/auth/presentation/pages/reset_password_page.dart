@@ -74,7 +74,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
             body: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
               child: _submitted
-                  ? _GenericResponse(message: l10n.reset_password_generic_response)
+                  ? _GenericResponse(
+                      message: l10n.reset_password_generic_response,
+                    )
                   : Form(
                       key: _formKey,
                       child: Column(
@@ -95,7 +97,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                               }
                               return null;
                             },
-                            onChanged: (_) => setState(() => _submitted = false),
+                            onChanged: (_) =>
+                                setState(() => _submitted = false),
                           ),
                           const SizedBox(height: 24),
                           FilledButton(

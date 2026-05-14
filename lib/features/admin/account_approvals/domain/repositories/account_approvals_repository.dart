@@ -20,7 +20,8 @@ sealed class AccountApprovalsFailure extends Failure {
 }
 
 final class AdminForbidden extends AccountApprovalsFailure {
-  const AdminForbidden({super.cause, super.stackTrace}) : super('admin_forbidden');
+  const AdminForbidden({super.cause, super.stackTrace})
+    : super('admin_forbidden');
 }
 
 final class RequestAlreadyResolved extends AccountApprovalsFailure {

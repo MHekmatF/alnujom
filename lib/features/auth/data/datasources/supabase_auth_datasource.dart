@@ -32,10 +32,7 @@ class SupabaseAuthDataSource {
     required PhoneNumber phone,
     required String password,
   }) async {
-    return _auth.signUp(
-      email: syntheticEmailFor(phone),
-      password: password,
-    );
+    return _auth.signUp(email: syntheticEmailFor(phone), password: password);
   }
 
   Future<supabase.AuthResponse> signInWithPassword({
@@ -75,9 +72,7 @@ class SupabaseAuthDataSource {
     await _auth.signOut();
   }
 
-  Future<void> invokeRequestPasswordReset({
-    required PhoneNumber phone,
-  }) async {
+  Future<void> invokeRequestPasswordReset({required PhoneNumber phone}) async {
     await supabase.Supabase.instance.client.functions.invoke(
       'request_password_reset',
       body: {'phone': phone.e164},

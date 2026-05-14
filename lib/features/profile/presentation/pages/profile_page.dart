@@ -127,7 +127,8 @@ class _StatusBadge extends StatelessWidget {
     final color = switch (status) {
       AccountStatus.approved => theme.colorScheme.primary,
       AccountStatus.pending => theme.colorScheme.secondary,
-      AccountStatus.rejected || AccountStatus.suspended => theme.colorScheme.error,
+      AccountStatus.rejected ||
+      AccountStatus.suspended => theme.colorScheme.error,
       _ => theme.colorScheme.outline,
     };
 

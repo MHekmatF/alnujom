@@ -154,9 +154,7 @@ _i174.GetIt $initGetIt(
   gh.factory<_i204.UpdateProfile>(
     () => _i204.UpdateProfile(gh<_i894.ProfileRepository>()),
   );
-  gh.factory<_i201.LoadPii>(
-    () => _i201.LoadPii(gh<_i894.ProfileRepository>()),
-  );
+  gh.factory<_i201.LoadPii>(() => _i201.LoadPii(gh<_i894.ProfileRepository>()));
   gh.factory<_i203.UpdatePii>(
     () => _i203.UpdatePii(gh<_i894.ProfileRepository>()),
   );
