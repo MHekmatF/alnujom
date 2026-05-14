@@ -33,18 +33,18 @@ The Edge Function calls `generateLink` without an explicit `options.redirectTo`,
 
 ## D-02 — Step 14 SQL/pg_dump verification (US5 Vault PII security proof)
 
-**Status:** UI verified 2026-05-14; SQL/pg_dump checks deferred to Phase 8's T090.
+**Status:** ✅ CLOSED 2026-05-14 during T090 quickstart walk.
 
-**What works today:** ProfilePrivatePage stores legal_name + national_id + contact methods via the Vault PII helpers; values reload correctly on revisit. The Vault round-trip is functioning at the app layer.
+**What was verified during T090 (user 2's PII = "Hekmat Al Fanatlr" / "0101010101"):**
+- Three vault rows present: `pii.<uuid>.legal_name`, `pii.<uuid>.national_id`, `pii.<uuid>.private_contact_methods`
+- `vault.secrets.secret` column contains long ciphertext (>50 chars), not plaintext
+- Self-decrypt via `app_vault_secret_for_self` returns plaintext for the owner
+- Cross-user read as non-admin (user 3 querying user 2) → `NULL` silently (no error leak)
+- Cross-user read as admin (user 1 querying user 2) → decrypted plaintext returned
+- Allowlist guard: `app_vault_set_private_contact_methods_for_self('{"skype": ...}')` → ERROR 22023 `unknown channel key: skype`
+- SC-008 pg_dump proxy: grep across `profiles`, `audit_logs`, `account_approval_requests` for the actual stored strings → 0 matches in any column (confirming PII never leaks to non-Vault tables)
 
-**What's missing:** The security-property proofs from `quickstart.md` Step 14:
-- cross-user read as non-admin returns NULL silently
-- cross-user read as admin returns decrypted value
-- `pg_dump` plaintext grep finds no matches outside `vault.secrets` ciphertext (SC-008)
-
-These are SQL/CLI checks against the remote project. They're naturally bundled into Phase 8's T090 (the full quickstart end-to-end walk), so deferring them there is consistent with the task plan.
-
-**Where the gap matters:** Until T090 lands, we've only proven the user-facing flow, not the encryption-at-rest guarantee. The cryptographic property is what makes ADR-0001 meaningful.
+This closes SC-008 and SC-009.
 
 ---
 
