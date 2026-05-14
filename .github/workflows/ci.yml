@@ -50,10 +50,17 @@ jobs:
       - name: Lint l10n literals
         run: dart run tool/lint_l10n_literals.dart
 
-      - name: Guard Supabase SDK boundary
+      - name: Guard Supabase SDK boundary (Constitution IX — no package:supabase_flutter in any domain/)
         run: |
-          if grep -rE "package:supabase_flutter" lib --include='*.dart' --exclude='supabase_client_wrapper_impl.dart'; then
-            echo "Supabase SDK imports must stay inside supabase_client_wrapper_impl.dart"
+          # Constitution IX / SC-014: Supabase types may appear in core/network wrappers
+          # and feature data/ layers (Clean Architecture data sources, DTOs, repository
+          # impls); they MUST NOT appear in any domain/ folder. Phase 4 originally
+          # restricted Supabase to the wrapper alone, but Phase 5's auth/profile/admin
+          # data sources legitimately import the SDK — only domain purity is enforced.
+          matches=$(grep -rEl "package:supabase_flutter" lib --include='*.dart' | grep '/domain/' || true)
+          if [ -n "$matches" ]; then
+            echo "Constitution IX violation: package:supabase_flutter must NOT appear in any domain/ folder:"
+            echo "$matches"
             exit 1
           fi
 
