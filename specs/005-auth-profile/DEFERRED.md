@@ -62,6 +62,32 @@ This satisfies T019b's intent ("once US1 ships and at least one user is register
 
 ---
 
+## D-04 — In-app onboarding locale picker UI
+
+**Status:** Deferred to a follow-up spec or Phase 8 (decision pending).
+
+**What works today (verified 2026-05-14):**
+- `OnboardingCubit.selectLocale(Locale)` exists.
+- `OnboardingState.OnboardingInProgress.selectedLocale` field exists.
+- The underlying Flutter localization system honors the Android device-locale setting (Settings → System → Languages); changing the device language correctly flips the app between Arabic (RTL + Arabic-family font) and English (LTR + English-family font), proving Phase 3's localization + Phase 2's bilingual font stack work.
+- R-11 first-sign-in locale handoff to `user_preferences.locale` works: a fresh user registered on a default-Arabic device gets `locale='ar'` written to `user_preferences` (verified during T090 walk).
+
+**What's missing:**
+- The onboarding page does NOT render any UI to call `selectLocale(...)`.
+- Even if it did, `selectLocale` only mutates state — it does NOT persist to `flutter_secure_storage` and is NOT applied to `MaterialApp.locale`, so the choice cannot affect what the user sees.
+
+To complete this:
+1. Add a segmented control / two-button widget to `lib/features/onboarding/presentation/pages/onboarding_page.dart` (top of the screen, near the Skip button) that calls `context.read<OnboardingCubit>().selectLocale(...)`.
+2. Persist the choice via the existing `flutter_secure_storage` wrapper (e.g., key `user_locale_v1`) inside the cubit method.
+3. Wire `MaterialApp.locale` in `lib/app.dart` to read this preference at startup and rebuild when it changes (likely via a small `LocaleCubit` listened to in `app.dart`).
+4. Update the R-11 handoff path to read the chosen locale (rather than just the device default) when writing `user_preferences.locale` at registration time.
+
+**Where the gap matters:** Users on devices with non-Arabic/non-English system locales can't experience the app in their preferred language without changing their device-wide setting. For SC-013 verification, this gap is bypassed by testing via Android Settings → Languages, but the in-app picker is a documented part of the onboarding flow per `quickstart.md` Step 5.
+
+**Spec interpretation:** SC-013 reads "toggle device locale Arabic ↔ English"; if "device locale" means the Android system setting, this gap doesn't violate SC-013 directly. But `quickstart.md` Step 5 names "the locale picker" as part of onboarding, so the gap is between the quickstart's expected UX and the shipped UX.
+
+---
+
 ## Follow-up trigger
 
 Before any final "Phase 5 fully shipped" commit (squash-merge of the 005-auth-profile branch), review this file. Each entry must be either:
