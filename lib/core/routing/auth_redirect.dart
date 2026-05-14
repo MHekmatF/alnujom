@@ -60,7 +60,8 @@ String? _redirectIfProtected(String path) {
 
 String? _redirectAuthenticated(String path, {required bool isAdmin}) {
   if (_authOnlyPaths.contains(path) || path == '/') return '/home';
-  if ((path == '/admin' || path.startsWith('/admin/')) && !isAdmin)
+  if ((path == '/admin' || path.startsWith('/admin/')) && !isAdmin) {
     return '/home';
+  }
   return null;
 }

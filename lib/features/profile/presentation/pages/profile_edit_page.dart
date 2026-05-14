@@ -128,8 +128,9 @@ class _ProfileEditViewState extends State<_ProfileEditView> {
                     validator: (v) {
                       if (v == null) return null;
                       final t = v.trim();
-                      if (t.isNotEmpty && t.length > 100)
+                      if (t.isNotEmpty && t.length > 100) {
                         return l10n.invalid_full_name;
+                      }
                       return null;
                     },
                   ),
@@ -206,8 +207,9 @@ class _ProfileEditViewState extends State<_ProfileEditView> {
                     onPressed: isSaving
                         ? null
                         : () {
-                            if (Navigator.canPop(context))
+                            if (Navigator.canPop(context)) {
                               Navigator.pop(context);
+                            }
                           },
                     child: Text(l10n.profile_cancel_button),
                   ),
