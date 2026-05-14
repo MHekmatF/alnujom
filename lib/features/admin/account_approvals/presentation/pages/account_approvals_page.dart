@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../../core/di/injection.dart';
+import '../../../../../core/theme/spacing.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../domain/entities/account_approval_request.dart';
 import '../cubit/account_approvals_cubit.dart';
@@ -87,7 +88,7 @@ class _AccountApprovalsView extends StatelessWidget {
         child: Opacity(
           opacity: isMutating ? 0.6 : 1.0,
           child: ListView.separated(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppSpacing.lg),
             itemCount: requests.length,
             separatorBuilder: (_, __) => const SizedBox(height: 12),
             itemBuilder: (context, index) =>
@@ -114,7 +115,7 @@ class _RequestCard extends StatelessWidget {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -220,7 +221,7 @@ class _Row extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

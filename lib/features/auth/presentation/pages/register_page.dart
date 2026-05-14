@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/localization/locale_cubit.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/phone_number.dart';
 import '../bloc/auth_bloc.dart';
@@ -100,7 +101,7 @@ class _RegisterPageState extends State<RegisterPage> {
           return Scaffold(
             appBar: AppBar(title: Text(l10n.register_title)),
             body: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(AppSpacing.xl),
               child: Form(
                 key: _formKey,
                 child: Column(

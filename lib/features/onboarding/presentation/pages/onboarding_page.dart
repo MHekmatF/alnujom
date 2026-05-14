@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/radii.dart';
+import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../cubit/onboarding_cubit.dart';
 import '../cubit/onboarding_state.dart';
@@ -93,7 +95,7 @@ class _OnboardingViewState extends State<_OnboardingView> {
                       itemBuilder: (context, index) {
                         final s = steps[index];
                         return Padding(
-                          padding: const EdgeInsets.all(32),
+                          padding: const EdgeInsets.all(AppSpacing.xxl),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -119,21 +121,25 @@ class _OnboardingViewState extends State<_OnboardingView> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(total, (i) {
                       return Container(
-                        margin: const EdgeInsets.all(4),
+                        margin: const EdgeInsets.all(AppSpacing.xs),
                         width: i == step ? 16 : 8,
                         height: 8,
                         decoration: BoxDecoration(
                           color: i == step
                               ? theme.colorScheme.primary
                               : theme.colorScheme.outline,
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(AppRadii.pill),
                         ),
                       );
                     }),
                   ),
                   const SizedBox(height: 16),
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                    padding: const EdgeInsets.only(
+                      left: AppSpacing.xl,
+                      right: AppSpacing.xl,
+                      bottom: AppSpacing.xl,
+                    ),
                     child: FilledButton(
                       onPressed: () =>
                           context.read<OnboardingCubit>().nextStep(),

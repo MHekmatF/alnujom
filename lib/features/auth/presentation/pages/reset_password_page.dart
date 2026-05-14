@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/phone_number.dart';
 import '../bloc/auth_bloc.dart';
@@ -72,7 +73,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           return Scaffold(
             appBar: AppBar(title: Text(l10n.reset_password_title)),
             body: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(AppSpacing.xl),
               child: _submitted
                   ? _GenericResponse(
                       message: l10n.reset_password_generic_response,
@@ -116,7 +117,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                           const SizedBox(height: 8),
                           if (state is AuthError)
                             Padding(
-                              padding: const EdgeInsets.only(top: 8),
+                              padding: const EdgeInsets.only(
+                                top: AppSpacing.sm,
+                              ),
                               child: Text(
                                 l10n.network_error,
                                 style: theme.textTheme.bodyMedium?.copyWith(
