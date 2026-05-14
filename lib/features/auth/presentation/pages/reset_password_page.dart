@@ -23,6 +23,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   final _phoneController = TextEditingController();
 
   bool _submitted = false;
+  bool _submitting = false;
 
   @override
   void dispose() {
@@ -40,6 +41,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       return;
     }
 
+    setState(() => _submitting = true);
     context.read<AuthBloc>().add(ResetPasswordRequested(phone: phone));
   }
 
@@ -50,13 +52,22 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
-        if (state is! Authenticating) {
-          setState(() => _submitted = true);
+        if (!_submitting || state is Authenticating) return;
+        // Bloc finished processing our submission.
+        if (state is AuthError) {
+          // Transport failure — keep form visible, show retry inline.
+          setState(() => _submitting = false);
+        } else {
+          // Any other outcome is a successful request → generic response.
+          setState(() {
+            _submitting = false;
+            _submitted = true;
+          });
         }
       },
       child: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
-          final isLoading = state is Authenticating;
+          final isLoading = _submitting || state is Authenticating;
 
           return Scaffold(
             appBar: AppBar(title: Text(l10n.reset_password_title)),

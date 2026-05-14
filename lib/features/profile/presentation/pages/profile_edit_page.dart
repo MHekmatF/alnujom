@@ -34,6 +34,7 @@ class _ProfileEditViewState extends State<_ProfileEditView> {
   final _avatarUrlController = TextEditingController();
 
   bool _initialized = false;
+  bool _savePending = false;
 
   @override
   void dispose() {
@@ -59,6 +60,7 @@ class _ProfileEditViewState extends State<_ProfileEditView> {
     if (!_formKey.currentState!.validate()) return;
 
     final cubit = context.read<ProfileCubit>();
+    setState(() => _savePending = true);
     cubit.updateDraft(
       fullName: _fullNameController.text.trim(),
       username: _usernameController.text.trim(),
@@ -75,12 +77,13 @@ class _ProfileEditViewState extends State<_ProfileEditView> {
 
     return BlocConsumer<ProfileCubit, ProfileState>(
       listener: (context, state) {
-        if (!_initialized && state.status == ProfileStatus.loaded) {
-          _initControllers(state);
-        }
-        if (state.status == ProfileStatus.loaded && _initialized) {
-          // Save succeeded — pop back to profile page.
-          if (Navigator.canPop(context)) Navigator.pop(context);
+        if (state.status == ProfileStatus.loaded) {
+          if (!_initialized) {
+            _initControllers(state);
+          } else if (_savePending) {
+            _savePending = false;
+            if (Navigator.canPop(context)) Navigator.pop(context);
+          }
         }
       },
       builder: (context, state) {
@@ -104,7 +107,6 @@ class _ProfileEditViewState extends State<_ProfileEditView> {
             leading: IconButton(
               icon: const Icon(Icons.close),
               onPressed: () {
-                context.read<ProfileCubit>().cancelEdit();
                 if (Navigator.canPop(context)) Navigator.pop(context);
               },
             ),
@@ -199,7 +201,6 @@ class _ProfileEditViewState extends State<_ProfileEditView> {
                     onPressed: isSaving
                         ? null
                         : () {
-                            context.read<ProfileCubit>().cancelEdit();
                             if (Navigator.canPop(context)) Navigator.pop(context);
                           },
                     child: Text(l10n.profile_cancel_button),

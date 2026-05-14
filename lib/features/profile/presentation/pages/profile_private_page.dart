@@ -16,7 +16,7 @@ class ProfilePrivatePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<ProfileCubit>(
-      create: (_) => getIt<ProfileCubit>()..load()..loadPii(),
+      create: (_) => getIt<ProfileCubit>()..loadPii(),
       child: const _PrivateView(),
     );
   }
@@ -104,9 +104,7 @@ class _PrivateViewState extends State<_PrivateView> {
       }
     }
 
-    if (channels.isNotEmpty || wa.isEmpty && tg.isEmpty && sig.isEmpty && pe.isEmpty && sp.isEmpty) {
-      await cubit.saveContactMethods(PrivateContactMethods(channels));
-    }
+    await cubit.saveContactMethods(PrivateContactMethods(channels));
   }
 
   @override
