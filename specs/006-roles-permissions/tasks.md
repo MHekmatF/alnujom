@@ -304,9 +304,9 @@ description: "Phase 6 — Roles & Permissions task list (no automated tests per 
 
 **Purpose**: Closure tasks for the Phase 6 PR — operational bootstrap, doc updates, drift checks, DEFERRED.md.
 
-- [ ] T057 [P] Update `supabase/docs/profiles.md` to remove the `is_admin` column entry (the column is dropped). Append a section noting the new stacked cross-user read policy `profiles_phase6_users_view` gated by `users.view`; note that `current_user_is_admin()` now resolves to a role-membership check (admin or super_admin role). Cross-link to `contracts/admin-predicate-v6.md` and `contracts/profiles-users-view-policy.md`.
-- [ ] T058 [P] Update `supabase/docs/account_approval_requests.md` (Phase 5's doc) to append a note: the admin-read / admin-update policies continue to gate on `current_user_is_admin()` whose body Phase 6 swapped to a role-membership check. The same set of users (prior Phase 5 admins, now holding the `admin` role) is admitted; Phase 5's behavior is unchanged.
-- [ ] T059 Verify the no-Supabase-import invariant (SC-019) by running from the repo root:
+- [X] T057 [P] Update `supabase/docs/profiles.md` to remove the `is_admin` column entry (the column is dropped). Append a section noting the new stacked cross-user read policy `profiles_phase6_users_view` gated by `users.view`; note that `current_user_is_admin()` now resolves to a role-membership check (admin or super_admin role). Cross-link to `contracts/admin-predicate-v6.md` and `contracts/profiles-users-view-policy.md`.
+- [X] T058 [P] Update `supabase/docs/account_approval_requests.md` (Phase 5's doc) to append a note: the admin-read / admin-update policies continue to gate on `current_user_is_admin()` whose body Phase 6 swapped to a role-membership check. The same set of users (prior Phase 5 admins, now holding the `admin` role) is admitted; Phase 5's behavior is unchanged.
+- [X] T059 Verify the no-Supabase-import invariant (SC-019) by running from the repo root:
   ```bash
   grep -R "package:supabase_flutter" lib/core/security/permission_checker.dart \
                                      lib/core/security/permission_keys.dart \
@@ -315,7 +315,7 @@ description: "Phase 6 — Roles & Permissions task list (no automated tests per 
                                      lib/features/profile/domain/
   ```
   Expected: zero output. (`permission_catalog_repository_impl.dart` IS allowed to import Supabase — verify it shows up in `grep "package:supabase_flutter" lib/core/security/permission_catalog_repository_impl.dart` with one match.)
-- [ ] T060 Verify the no-Phase-4/5-policy-edit invariant (SC-016) by running from the repo root:
+- [X] T060 Verify the no-Phase-4/5-policy-edit invariant (SC-016) by running from the repo root:
   ```bash
   git diff main..006-roles-permissions -- supabase/policies/profiles_policies.sql \
                                           supabase/policies/user_preferences_policies.sql \
@@ -323,7 +323,7 @@ description: "Phase 6 — Roles & Permissions task list (no automated tests per 
                                           supabase/policies/account_approval_requests_policies.sql
   ```
   Expected: zero output — none of the Phase 4 or Phase 5 policy files is edited. Confirm the new policy files DO appear via `git diff --name-only` on `supabase/policies/`.
-- [ ] T060a Verify SC-013 — a non-admin user cannot INSERT into `user_roles` — per `quickstart.md` (add this as a verification step alongside the existing audit checks). JWT-claims-simulate a regular user via Supabase MCP `execute_sql`:
+- [X] T060a Verify SC-013 — a non-admin user cannot INSERT into `user_roles` — per `quickstart.md` (add this as a verification step alongside the existing audit checks). JWT-claims-simulate a regular user via Supabase MCP `execute_sql`:
   ```sql
   DO $$ BEGIN PERFORM set_config('request.jwt.claims', '{"sub":"<regular-user-uuid>","role":"authenticated"}', true); END $$;
   SET LOCAL ROLE authenticated;
@@ -334,22 +334,22 @@ description: "Phase 6 — Roles & Permissions task list (no automated tests per 
   RESET ROLE;
   ```
   **SC-013 satisfied.** Also confirm via `pg_policies` that no INSERT policy exists on `user_roles` (Phase 6 ships only SELECT policies; Phase 7 adds INSERT/DELETE policies).
-- [ ] T061 Verify the no-hardcoded-role-check invariant (SC-020, FR-019) by grep'ing for forbidden patterns over the Phase 6-touched files:
+- [X] T061 Verify the no-hardcoded-role-check invariant (SC-020, FR-019) by grep'ing for forbidden patterns over the Phase 6-touched files:
   ```bash
   grep -RnE "role[s]?\\s*==\\s*['\"]\\w+['\"]|isAdmin\\s*==\\s*true" \
        lib/features/admin/ lib/features/profile/ lib/core/security/ lib/features/home/ lib/core/routing/
   ```
   Expected: zero matches. Permission gating is via `PermissionChecker.has(...)` exclusively.
-- [ ] T062 [P] Run Supabase MCP `get_advisors` with `type: 'security'` against the remote project and document the final advisor state in `specs/006-roles-permissions/HANDOFF.md`. Expected: zero new warnings beyond the Phase 4 + Phase 5 baseline (any new warnings must be resolved before squash-merge).
-- [ ] T063 [P] Re-apply each of the eight Phase 6 migrations via Supabase MCP `apply_migration` with the same names (SC-017 idempotency check). Confirm each apply succeeds, row counts in `roles` / `permissions` / `role_permissions` / `user_roles` are unchanged, the `is_admin` column stays dropped. The duplicate-tracker-row caveat (`project_supabase_mcp_apply_migration.md`) means the migration tracker gains a second row per migration — that's cosmetic, not a regression.
-- [ ] T064 (OPERATIONAL — post-deploy) Bootstrap the first super_admin per R-16 / Q1 — Option C: run via Supabase MCP `execute_sql` as `postgres`:
+- [X] T062 [P] Run Supabase MCP `get_advisors` with `type: 'security'` against the remote project and document the final advisor state in `specs/006-roles-permissions/HANDOFF.md`. Expected: zero new warnings beyond the Phase 4 + Phase 5 baseline (any new warnings must be resolved before squash-merge).
+- [X] T063 [P] Re-apply each of the eight Phase 6 migrations via Supabase MCP `apply_migration` with the same names (SC-017 idempotency check). Confirm each apply succeeds, row counts in `roles` / `permissions` / `role_permissions` / `user_roles` are unchanged, the `is_admin` column stays dropped. The duplicate-tracker-row caveat (`project_supabase_mcp_apply_migration.md`) means the migration tracker gains a second row per migration — that's cosmetic, not a regression.
+- [X] T064 (OPERATIONAL — post-deploy) Bootstrap the first super_admin per R-16 / Q1 — Option C: run via Supabase MCP `execute_sql` as `postgres`:
   ```sql
   INSERT INTO public.user_roles (user_id, role_id, granted_by, granted_at)
   VALUES ('<chosen-super-admin-uuid>', (SELECT id FROM public.roles WHERE key = 'super_admin'), NULL, now())
   ON CONFLICT (user_id, role_id) DO NOTHING;
   ```
   Choose `<chosen-super-admin-uuid>` operationally (typically the project owner's user_id). Document the chosen user in the Phase 6 PR merge-commit message OR in a non-checked-in operational note. Verify: `SELECT count(DISTINCT ur.user_id) FROM public.user_roles ur JOIN public.roles r ON r.id = ur.role_id WHERE r.key = 'super_admin'` returns 1. (Phase 7's super-admin UI requires this step to function on first deploy.)
-- [ ] T065 Create `specs/006-roles-permissions/DEFERRED.md` per `project_deferred_work.md`. If no deferrals surfaced during implement (the typical case for a clean Phase 6), the file contains a single line: "No deferrals — Phase 6 ships complete." If any intentional gap surfaced (e.g., the lint guard from R-21 was decided to be deferred to a future spec), document the gap with the standard DEFERRED entry shape (Status / What works today / What's missing / Where the gap matters / How to close).
+- [X] T065 Create `specs/006-roles-permissions/DEFERRED.md` per `project_deferred_work.md`. If no deferrals surfaced during implement (the typical case for a clean Phase 6), the file contains a single line: "No deferrals — Phase 6 ships complete." If any intentional gap surfaced (e.g., the lint guard from R-21 was decided to be deferred to a future spec), document the gap with the standard DEFERRED entry shape (Status / What works today / What's missing / Where the gap matters / How to close).
 - [ ] T066 Final end-to-end manual walkthrough on the reference Infinix Note 8 per `quickstart.md` Step 12 / 18 / 20: cold app launch → sign in as the post-T064 super_admin → main navigation shows admin tile → tap → admin home → tap "Account approvals" → queue loads → approve a pending registration → SUCCESS → sign out → sign in as a regular user → main navigation does NOT show admin tile → profile page shows "User" role only. **SC-018 satisfied.**
 
 ---

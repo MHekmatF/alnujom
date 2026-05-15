@@ -96,6 +96,15 @@ a failure on either rolls back both.
 Contract reference:
 `../../specs/005-auth-profile/research.md` (R-14).
 
+> **Phase 6 note**: The admin-read and admin-update policies (`account_approval_requests_admin_read`,
+> `account_approval_requests_admin_update`) continue to gate on `current_user_is_admin()` whose
+> body Phase 6 swapped from a column-read to a role-membership check
+> (`20260515120006_swap_admin_predicate_to_role_check.sql`). The same set of users is admitted —
+> prior Phase 5 admins, now holding the `admin` role in `user_roles`. Phase 5's admin queue
+> behaviour is unchanged. No policy file for this table is edited by Phase 6.
+>
+> Contract reference: `../../specs/006-roles-permissions/contracts/admin-predicate-v6.md`.
+
 ## Audit Coverage
 
 `trg_account_approval_requests_audit_status` fires
