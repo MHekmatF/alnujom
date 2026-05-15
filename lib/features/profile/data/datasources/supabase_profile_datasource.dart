@@ -107,7 +107,6 @@ class SupabaseProfileDataSource {
       publisherStatus: _parsePublisherStatus(
         row['publisher_status'] as String?,
       ),
-      isAdmin: (row['is_admin'] as bool?) ?? false,
       createdAt: DateTime.parse(row['created_at'] as String),
       updatedAt: DateTime.parse(row['updated_at'] as String),
     );

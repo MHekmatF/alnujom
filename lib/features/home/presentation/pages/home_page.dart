@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/security/permission_checker.dart';
+import '../../../../core/security/permission_keys.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
@@ -56,7 +59,7 @@ class HomePage extends StatelessWidget {
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push(AppRoutes.profile),
                 ),
-                if (profile?.isAdmin == true)
+                if (getIt<PermissionChecker>().any(PermissionKeys.adminCategoryKeys))
                   ListTile(
                     leading: const Icon(Icons.admin_panel_settings_outlined),
                     title: Text(l10n.admin_tile_account_approvals),

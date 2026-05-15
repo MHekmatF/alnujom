@@ -3,12 +3,13 @@ import 'package:equatable/equatable.dart';
 import '../value_objects/account_status.dart';
 import '../value_objects/publisher_status.dart';
 
-/// Profile entity (Phase 4 + Phase 5).
+/// Profile entity (Phase 4 + Phase 5 + Phase 6).
 ///
-/// Phase 5 adds [isAdmin] (FR-007). Phone is kept as `String?` (raw E.164 from
-/// the DB column) rather than a `PhoneNumber` value object to avoid forcing
-/// every read path to handle parse failures; consumers wrap with
-/// `PhoneNumber.tryParse` when they need to operate on the value.
+/// Phase 6 removes [isAdmin] — permission gating is via PermissionChecker.
+/// Phone is kept as `String?` (raw E.164 from the DB column) rather than a
+/// `PhoneNumber` value object to avoid forcing every read path to handle parse
+/// failures; consumers wrap with `PhoneNumber.tryParse` when they need to
+/// operate on the value.
 class Profile extends Equatable {
   const Profile({
     required this.userId,
@@ -19,7 +20,6 @@ class Profile extends Equatable {
     this.avatarUrl,
     required this.accountStatus,
     required this.publisherStatus,
-    this.isAdmin = false,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -32,7 +32,6 @@ class Profile extends Equatable {
   final String? avatarUrl;
   final AccountStatus accountStatus;
   final PublisherStatus publisherStatus;
-  final bool isAdmin;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -45,7 +44,6 @@ class Profile extends Equatable {
     String? avatarUrl,
     AccountStatus? accountStatus,
     PublisherStatus? publisherStatus,
-    bool? isAdmin,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => Profile(
@@ -57,7 +55,6 @@ class Profile extends Equatable {
     avatarUrl: avatarUrl ?? this.avatarUrl,
     accountStatus: accountStatus ?? this.accountStatus,
     publisherStatus: publisherStatus ?? this.publisherStatus,
-    isAdmin: isAdmin ?? this.isAdmin,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -72,7 +69,6 @@ class Profile extends Equatable {
     avatarUrl,
     accountStatus,
     publisherStatus,
-    isAdmin,
     createdAt,
     updatedAt,
   ];
