@@ -9,6 +9,7 @@ import 'package:alnujom/shell/shell_home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+
 void main() {
   // Test body is `skip: true` (see D-05 in specs/005-auth-profile/DEFERRED.md).
   // setUpAll is intentionally minimal — when the test is restored, it will
