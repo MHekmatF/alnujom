@@ -40,7 +40,7 @@ Junction table mapping roles to their permitted actions. The Flutter `Permission
 | `admin`         | 17 | moderator's 5 + `users.approve`, `users.reject`, `users.suspend`, `listings.edit_any`, `locations.manage`, `currencies.manage`, `ads.manage`, `agencies.approve`, `agencies.suspend`, `audit_logs.view`, `agencies.view`, `inquiries.view_all` |
 | `super_admin`   | 24 | All keys |
 
-Note: The admin row count is 17, not 16 as written in the spec table — the spec table has a counting error. The seed SQL in `data-model.md` lists 17 keys and is the authoritative source.
+Seed total = **46 rows** (0+0+0+0+5+17+24). Admin = 5 moderator keys + 10 admin-only §9.1 keys (incl. `audit_logs.view`) + 2 R-04 additions (`agencies.view`, `inquiries.view_all`).
 
 ## Cross-References
 

@@ -40,16 +40,16 @@ CREATE TABLE IF NOT EXISTS public.role_permissions (
 | `agent`         | (none)             | 0 |
 | `agency_admin`  | (none — Phase 19 adds agency-member keys) | 0 |
 | `moderator`     | `users.view`, `listings.view_all`, `listings.approve`, `listings.reject`, `reports.manage` | 5 |
-| `admin`         | (the 5 moderator keys) + `users.approve`, `users.reject`, `users.suspend`, `listings.edit_any`, `locations.manage`, `currencies.manage`, `ads.manage`, `agencies.approve`, `agencies.suspend`, `audit_logs.view`, `agencies.view`, `inquiries.view_all` | 16 |
+| `admin`         | (the 5 moderator keys) + `users.approve`, `users.reject`, `users.suspend`, `listings.edit_any`, `locations.manage`, `currencies.manage`, `ads.manage`, `agencies.approve`, `agencies.suspend`, `audit_logs.view`, `agencies.view`, `inquiries.view_all` | 17 |
 | `super_admin`   | every row in `permissions` | 24 |
 
-**Phase 6 R-04 documents the admin = 16 (not 15) decision and the addition of `agencies.view` + `inquiries.view_all` beyond §9.1's literal list.**
+**Phase 6 R-04 documents the admin = 17 (not 15) decision and the addition of `agencies.view` + `inquiries.view_all` beyond §9.1's literal list.**
 
 See `data-model.md` → "Seeded role-permission mappings" for the full INSERT blocks.
 
 ## Invariants
 
-- **Seed total = 45 rows**: 0+0+0+0+5+16+24.
+- **Seed total = 46 rows**: 0+0+0+0+5+17+24.
 - **No orphan**: every `role_id` ⇒ exists in `roles`; every `permission_id` ⇒ exists in `permissions` (FK-enforced).
 - **No duplicate**: composite PK prevents.
 
@@ -60,7 +60,7 @@ SELECT r.key AS role, count(*) AS perm_count
 FROM public.role_permissions rp JOIN public.roles r ON r.id = rp.role_id
 GROUP BY r.key ORDER BY r.key;
 -- Expected:
--- admin: 16, moderator: 5, super_admin: 24
+-- admin: 17, moderator: 5, super_admin: 24
 -- (user, owner, agent, agency_admin do not appear because they have 0 rows.)
 
 SELECT p.key FROM public.role_permissions rp

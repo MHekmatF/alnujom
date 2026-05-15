@@ -423,7 +423,7 @@ Lives in `20260515120002_create_permissions.sql`.
 
 ## Seeded role-permission mappings
 
-Per R-04 (admin = 16 rows, the §9.1 literal 15 + `agencies.view` + `inquiries.view_all`):
+Per R-04 (admin = 17 rows, the §9.1 literal 15 + `agencies.view` + `inquiries.view_all`):
 
 | Role            | Permissions mapped | Row count |
 |-----------------|--------------------|-----------|
@@ -432,7 +432,7 @@ Per R-04 (admin = 16 rows, the §9.1 literal 15 + `agencies.view` + `inquiries.v
 | `agent`         | (none — same)      | 0         |
 | `agency_admin`  | (none — agency-member management keys are added in Phase 19) | 0 |
 | `moderator`     | `users.view`, `listings.view_all`, `listings.approve`, `listings.reject`, `reports.manage` | 5 |
-| `admin`         | (moderator's 5) + `users.approve`, `users.reject`, `users.suspend`, `listings.edit_any`, `locations.manage`, `currencies.manage`, `ads.manage`, `agencies.approve`, `agencies.suspend`, `audit_logs.view`, `agencies.view`, `inquiries.view_all` | 16 |
+| `admin`         | (moderator's 5) + `users.approve`, `users.reject`, `users.suspend`, `listings.edit_any`, `locations.manage`, `currencies.manage`, `ads.manage`, `agencies.approve`, `agencies.suspend`, `audit_logs.view`, `agencies.view`, `inquiries.view_all` | 17 |
 | `super_admin`   | every row in `permissions` | 24 |
 
 Seed SQL pattern (idempotent, three blocks):
@@ -447,7 +447,7 @@ FROM public.permissions p
 WHERE p.key IN ('users.view', 'listings.view_all', 'listings.approve', 'listings.reject', 'reports.manage')
 ON CONFLICT (role_id, permission_id) DO NOTHING;
 
--- Admin: 16 rows (moderator + admin-only writes + agencies.view + inquiries.view_all)
+-- Admin: 17 rows (moderator + admin-only writes + agencies.view + inquiries.view_all)
 INSERT INTO public.role_permissions (role_id, permission_id)
 SELECT
   (SELECT id FROM public.roles WHERE key = 'admin'),

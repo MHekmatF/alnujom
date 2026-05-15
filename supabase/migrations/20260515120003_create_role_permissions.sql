@@ -34,7 +34,7 @@ WHERE p.key IN (
 )
 ON CONFLICT (role_id, permission_id) DO NOTHING;
 
--- Seed: admin — 16 rows (moderator's 5 + admin-only writes + agencies.view + inquiries.view_all per R-04)
+-- Seed: admin — 17 rows (moderator's 5 + admin-only writes + agencies.view + inquiries.view_all per R-04)
 INSERT INTO public.role_permissions (role_id, permission_id)
 SELECT
   (SELECT id FROM public.roles WHERE key = 'admin'),

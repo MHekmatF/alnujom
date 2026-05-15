@@ -94,10 +94,10 @@ JOIN public.permissions p ON p.id = rp.permission_id
 WHERE r.key = 'moderator' ORDER BY p.key;
 -- Expected: listings.approve, listings.reject, listings.view_all, reports.manage, users.view
 
--- Admin: 16 rows
+-- Admin: 17 rows
 SELECT count(*) FROM public.role_permissions rp
 JOIN public.roles r ON r.id = rp.role_id WHERE r.key = 'admin';
--- Expected: 16
+-- Expected: 17
 
 -- Super_admin: all 24
 SELECT count(*) FROM public.role_permissions rp

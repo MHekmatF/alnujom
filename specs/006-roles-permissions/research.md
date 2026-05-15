@@ -52,9 +52,9 @@ The numbering continues the spec-005 R-NN convention.
 
 ---
 
-## R-04 — Admin role permission count: §9.1 says 15 + agencies.view + inquiries.view_all = 16 rows for the admin role
+## R-04 — Admin role permission count: §9.1 says 15 + agencies.view + inquiries.view_all = 17 rows for the admin role
 
-**Decision**: The seeded `admin` role's `role_permissions` mapping has **16 rows**, not the literal 15 implied by §9.1's bullet ("the moderator perms + agencies.approve + agencies.suspend + ads.manage + audit_logs.view + currencies.manage + listings.edit_any + locations.manage + users.approve + users.reject + users.suspend" = 5 + 10 = 15 rows). Phase 6's seed adds `agencies.view` and `inquiries.view_all` to admin, bringing the total to 16. The justification: admins observably need `agencies.view` to see what `agencies.approve` is for (the approve action without the view permission is a UX dead-end); and admins need `inquiries.view_all` because the implementation plan's §9.1 lists it as a cross-publisher visibility perm and there is no role above admin (other than super_admin) — without admin holding it, only super_admin would ever see cross-publisher inquiries, which is too narrow.
+**Decision**: The seeded `admin` role's `role_permissions` mapping has **17 rows**, not the literal 15 implied by §9.1's bullet ("the moderator perms + agencies.approve + agencies.suspend + ads.manage + audit_logs.view + currencies.manage + listings.edit_any + locations.manage + users.approve + users.reject + users.suspend" = 5 + 10 = 15 rows). Phase 6's seed adds `agencies.view` and `inquiries.view_all` to admin, bringing the total to 17. The justification: admins observably need `agencies.view` to see what `agencies.approve` is for (the approve action without the view permission is a UX dead-end); and admins need `inquiries.view_all` because the implementation plan's §9.1 lists it as a cross-publisher visibility perm and there is no role above admin (other than super_admin) — without admin holding it, only super_admin would ever see cross-publisher inquiries, which is too narrow.
 
 **Rationale**: §9.1's literal bullet for admin omits these two because the bullet was written as "moderator perms + admin-only writes" — `agencies.view` is technically also a moderator-visible read in spirit, and `inquiries.view_all` was listed standalone. Phase 6's seed reads §9.1 as a list of intent ("admins have everything in their categories that the moderator has plus their writes"), not as a literal enumeration. Constitution XII (No Hidden Product Decisions) requires this be documented — it's documented here.
 
@@ -62,11 +62,13 @@ The numbering continues the spec-005 R-NN convention.
 - Strictly seeding admin with exactly the 15 keys §9.1 lists. REJECTED: produces an inconsistent UX where admin can `agencies.approve` but cannot `agencies.view`; produces a security model where only super_admin sees cross-publisher inquiries even though admin holds every PII decrypt path through `current_user_is_admin()`.
 - Adding ALL permissions to admin (effectively making admin == super_admin without the `roles.*` and `permissions.manage` and `listings.delete_any` keys). REJECTED: blurs the admin/super_admin distinction that §9.1 establishes. Super_admin is distinguished by: `roles.create`, `roles.update`, `roles.delete`, `permissions.manage`, `settings.manage`, `listings.delete_any`. Admin should NOT hold those.
 
-**Final admin permission count**: 16. Specifically:
+**Final admin permission count**: 17. Specifically:
 - From moderator (5): `users.view`, `listings.view_all`, `listings.approve`, `listings.reject`, `reports.manage`.
-- From admin-only writes (9): `users.approve`, `users.reject`, `users.suspend`, `listings.edit_any`, `locations.manage`, `currencies.manage`, `ads.manage`, `agencies.approve`, `agencies.suspend`.
+- From admin-only writes (10): `users.approve`, `users.reject`, `users.suspend`, `listings.edit_any`, `locations.manage`, `currencies.manage`, `ads.manage`, `agencies.approve`, `agencies.suspend`, `audit_logs.view`.
 - From admin-required reads (2): `agencies.view`, `inquiries.view_all`.
-- Total: 5 + 9 + 2 = **16**.
+- Total: 5 + 10 + 2 = **17**.
+
+**Note (2026-05-15 review)**: The previous version of this entry stated "16" because the admin-only-writes enumeration omitted `audit_logs.view` (an arithmetic/enumeration error). The seed SQL in `data-model.md` and the migration `20260515120003_create_role_permissions.sql` both include `audit_logs.view`, which produces 17 rows. All downstream documents have been aligned to 17.
 
 ---
 
