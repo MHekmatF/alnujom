@@ -8,9 +8,11 @@ import 'package:supabase_flutter/supabase_flutter.dart' show PostgrestException;
 import '../../../../core/errors/result.dart';
 import '../../../../core/logging/app_logger.dart';
 import '../../../../shared/domain/entities/profile.dart';
+import '../../domain/entities/assigned_role.dart';
 import '../../domain/entities/private_contact_methods.dart';
 import '../../domain/repositories/profile_repository.dart';
 import '../datasources/supabase_profile_datasource.dart';
+import '../dtos/role_assignment_dto.dart';
 
 @LazySingleton(as: ProfileRepository)
 class ProfileRepositoryImpl implements ProfileRepository {
@@ -162,6 +164,27 @@ class ProfileRepositoryImpl implements ProfileRepository {
       return const Success(null);
     } on Object catch (error, stackTrace) {
       return FailureResult(_mapError(error, stackTrace));
+    }
+  }
+
+  @override
+  Future<List<AssignedRole>> loadAssignedRoles(String localeCode) async {
+    try {
+      final rows = await _ds.loadAssignedRoles();
+      final roles = rows
+          .map(RoleAssignmentDto.fromRow)
+          .map((dto) => dto.toAssignedRole(localeCode))
+          .toList()
+        ..sort((a, b) => a.roleKey.compareTo(b.roleKey));
+      return roles;
+    } on Object catch (error, stackTrace) {
+      _logger.warning(
+        'Failed to load assigned roles.',
+        error: error,
+        stackTrace: stackTrace,
+        tag: _tag,
+      );
+      return const [];
     }
   }
 

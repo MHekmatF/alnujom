@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart' show Locale;
 import '../../../../core/errors/failure.dart';
 import '../../../../core/errors/result.dart';
 import '../../../../shared/domain/entities/profile.dart';
+import '../entities/assigned_role.dart';
 import '../entities/private_contact_methods.dart';
 
 /// Bundle of the three Vault-backed PII fields (FR-005 / FR-006).
@@ -62,6 +63,10 @@ abstract class ProfileRepository {
   Future<Result<void>> updatePrivateContactMethods(
     PrivateContactMethods methods,
   );
+
+  /// Loads the signed-in user's assigned roles, resolving display names for
+  /// [localeCode] with fallback per FR-017 (other locale → role key).
+  Future<List<AssignedRole>> loadAssignedRoles(String localeCode);
 
   /// Release the internal broadcast stream controller.
   Future<void> dispose();

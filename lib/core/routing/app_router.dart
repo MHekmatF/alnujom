@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../debug/theme_gallery_page.dart';
 import '../../features/admin/account_approvals/presentation/pages/account_approvals_page.dart';
+import '../../features/admin/presentation/pages/admin_home_page.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/pending_approval_page.dart';
@@ -122,7 +123,7 @@ GoRouter buildAppRouter({
       GoRoute(
         path: AppRoutes.admin,
         name: AppRouteNames.admin,
-        builder: (context, state) => _placeholder('Admin'),
+        builder: (context, state) => const AdminHomePage(),
         routes: [
           GoRoute(
             path: 'approvals',

@@ -69,6 +69,16 @@ class SupabaseProfileDataSource {
         .eq('user_id', user.id);
   }
 
+  Future<List<Map<String, dynamic>>> loadAssignedRoles() async {
+    final user = _client.auth.currentUser;
+    if (user == null) return const [];
+    final raw = await _client
+        .from('user_roles')
+        .select('role:roles(key, display_name, is_system)')
+        .eq('user_id', user.id);
+    return (raw as List).cast<Map<String, dynamic>>();
+  }
+
   // ─── Vault PII RPCs ───
   Future<String?> readPiiField(String fieldName) async {
     final result = await _client.rpc(

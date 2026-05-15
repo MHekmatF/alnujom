@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/errors/result.dart';
+import '../../../../core/security/permission_checker.dart';
 import '../../../../shared/domain/entities/profile.dart';
 import '../../../../shared/domain/value_objects/account_status.dart';
 import '../../../profile/domain/repositories/profile_repository.dart';
@@ -20,8 +21,11 @@ import 'auth_state.dart';
 /// [WidgetsBindingObserver] for foreground-resume suspension detection (R-21).
 @LazySingleton()
 class AuthBloc extends Bloc<AuthEvent, AuthState> with WidgetsBindingObserver {
-  AuthBloc(this._authRepository, this._profileRepository)
-    : super(const Unauthenticated()) {
+  AuthBloc(
+    this._authRepository,
+    this._profileRepository,
+    this._permissionChecker,
+  ) : super(const Unauthenticated()) {
     WidgetsBinding.instance.addObserver(this);
     on<RegisterRequested>(_onRegisterRequested);
     on<LoginRequested>(_onLoginRequested);
@@ -38,6 +42,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> with WidgetsBindingObserver {
 
   final AuthRepository _authRepository;
   final ProfileRepository _profileRepository;
+  final PermissionChecker _permissionChecker;
   late final StreamSubscription<Session?> _sessionSub;
 
   @override
@@ -129,13 +134,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> with WidgetsBindingObserver {
   ) async {
     final session = event.session;
     if (session == null || !session.isActive) {
+      _permissionChecker.clear();
       emit(const Unauthenticated());
       return;
     }
+    await _permissionChecker.load();
     final profileResult = await _profileRepository.getCurrentProfile();
     if (profileResult is Success<Profile>) {
       emit(await _stateFromProfile(profileResult.value));
     } else {
+      _permissionChecker.clear();
       emit(const Unauthenticated());
     }
   }
@@ -153,6 +161,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> with WidgetsBindingObserver {
     Emitter<AuthState> emit,
   ) async {
     if (state is Unauthenticated || state is Authenticating) return;
+    await _permissionChecker.refresh();
     final result = await _profileRepository.refresh();
     if (result is Success<Profile>) {
       emit(await _stateFromProfile(result.value));

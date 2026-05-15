@@ -62,9 +62,9 @@ class HomePage extends StatelessWidget {
                 if (getIt<PermissionChecker>().any(PermissionKeys.adminCategoryKeys))
                   ListTile(
                     leading: const Icon(Icons.admin_panel_settings_outlined),
-                    title: Text(l10n.admin_tile_account_approvals),
+                    title: Text(l10n.admin_home_title),
                     trailing: const Icon(Icons.chevron_right),
-                    onTap: () => context.push(AppRoutes.adminApprovals),
+                    onTap: () => context.push(AppRoutes.admin),
                   ),
               ],
             ),

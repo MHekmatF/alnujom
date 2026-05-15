@@ -49,6 +49,8 @@ import '../../features/profile/data/repositories/profile_repository_impl.dart'
     as _i334;
 import '../../features/profile/domain/repositories/profile_repository.dart'
     as _i894;
+import '../../features/profile/domain/usecases/load_assigned_roles.dart'
+    as _i547;
 import '../../features/profile/domain/usecases/load_pii.dart' as _i363;
 import '../../features/profile/domain/usecases/load_profile.dart' as _i1052;
 import '../../features/profile/domain/usecases/update_pii.dart' as _i281;
@@ -119,6 +121,9 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i430.OnboardingRepository>(
     () => _i452.OnboardingRepositoryImpl(gh<_i144.OnboardingSeenStorage>()),
   );
+  gh.factory<_i547.LoadAssignedRoles>(
+    () => _i547.LoadAssignedRoles(gh<_i894.ProfileRepository>()),
+  );
   gh.factory<_i363.LoadPii>(() => _i363.LoadPii(gh<_i894.ProfileRepository>()));
   gh.factory<_i1052.LoadProfile>(
     () => _i1052.LoadProfile(gh<_i894.ProfileRepository>()),
@@ -152,6 +157,7 @@ _i174.GetIt $initGetIt(
       gh<_i78.UpdateProfile>(),
       gh<_i363.LoadPii>(),
       gh<_i281.UpdatePii>(),
+      gh<_i547.LoadAssignedRoles>(),
     ),
   );
   gh.factoryParam<_i960.LocaleCubit, _i264.Locale?, dynamic>(
@@ -182,6 +188,7 @@ _i174.GetIt $initGetIt(
     () => _i797.AuthBloc(
       gh<_i787.AuthRepository>(),
       gh<_i894.ProfileRepository>(),
+      gh<_i650.PermissionChecker>(),
     ),
     dispose: (i) => i.dispose(),
   );
