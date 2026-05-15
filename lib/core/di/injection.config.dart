@@ -50,7 +50,7 @@ import '../../features/profile/data/repositories/profile_repository_impl.dart'
 import '../../features/profile/domain/repositories/profile_repository.dart'
     as _i894;
 import '../../features/profile/domain/usecases/load_assigned_roles.dart'
-    as _i547;
+    as _i941;
 import '../../features/profile/domain/usecases/load_pii.dart' as _i363;
 import '../../features/profile/domain/usecases/load_profile.dart' as _i1052;
 import '../../features/profile/domain/usecases/update_pii.dart' as _i281;
@@ -121,9 +121,6 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i430.OnboardingRepository>(
     () => _i452.OnboardingRepositoryImpl(gh<_i144.OnboardingSeenStorage>()),
   );
-  gh.factory<_i547.LoadAssignedRoles>(
-    () => _i547.LoadAssignedRoles(gh<_i894.ProfileRepository>()),
-  );
   gh.factory<_i363.LoadPii>(() => _i363.LoadPii(gh<_i894.ProfileRepository>()));
   gh.factory<_i1052.LoadProfile>(
     () => _i1052.LoadProfile(gh<_i894.ProfileRepository>()),
@@ -134,11 +131,22 @@ _i174.GetIt $initGetIt(
   gh.factory<_i78.UpdateProfile>(
     () => _i78.UpdateProfile(gh<_i894.ProfileRepository>()),
   );
+  gh.factory<_i941.LoadAssignedRoles>(
+    () => _i941.LoadAssignedRoles(gh<_i894.ProfileRepository>()),
+  );
   gh.lazySingleton<_i787.AuthRepository>(
     () => _i153.AuthRepositoryImpl(
       gh<_i76.SupabaseAuthDataSource>(),
       gh<_i894.ProfileRepository>(),
       gh<_i354.AppLogger>(),
+    ),
+    dispose: (i) => i.dispose(),
+  );
+  gh.lazySingleton<_i797.AuthBloc>(
+    () => _i797.AuthBloc(
+      gh<_i787.AuthRepository>(),
+      gh<_i894.ProfileRepository>(),
+      gh<_i650.PermissionChecker>(),
     ),
     dispose: (i) => i.dispose(),
   );
@@ -150,15 +158,6 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i431.RejectAccount>(
     () => _i431.RejectAccount(gh<_i120.AccountApprovalsRepository>()),
-  );
-  gh.factory<_i36.ProfileCubit>(
-    () => _i36.ProfileCubit(
-      gh<_i1052.LoadProfile>(),
-      gh<_i78.UpdateProfile>(),
-      gh<_i363.LoadPii>(),
-      gh<_i281.UpdatePii>(),
-      gh<_i547.LoadAssignedRoles>(),
-    ),
   );
   gh.factoryParam<_i960.LocaleCubit, _i264.Locale?, dynamic>(
     (initialLocale, _) => _i960.LocaleCubit(
@@ -181,16 +180,17 @@ _i174.GetIt $initGetIt(
       gh<_i431.RejectAccount>(),
     ),
   );
+  gh.factory<_i36.ProfileCubit>(
+    () => _i36.ProfileCubit(
+      gh<_i1052.LoadProfile>(),
+      gh<_i78.UpdateProfile>(),
+      gh<_i363.LoadPii>(),
+      gh<_i281.UpdatePii>(),
+      gh<_i941.LoadAssignedRoles>(),
+    ),
+  );
   gh.factory<_i807.OnboardingCubit>(
     () => _i807.OnboardingCubit(gh<_i430.OnboardingRepository>()),
-  );
-  gh.lazySingleton<_i797.AuthBloc>(
-    () => _i797.AuthBloc(
-      gh<_i787.AuthRepository>(),
-      gh<_i894.ProfileRepository>(),
-      gh<_i650.PermissionChecker>(),
-    ),
-    dispose: (i) => i.dispose(),
   );
   gh.lazySingleton<_i583.GoRouter>(
     () => routerModule.router(gh<_i354.AppLogger>(), gh<_i797.AuthBloc>()),

@@ -639,4 +639,22 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String get home_tile_profile =>
       _resolve('home_tile_profile', (loc) => loc.home_tile_profile);
+
+  // ── Phase 6 Admin home / Profile roles ───────────────────────────────────
+
+  @override
+  String get admin_home_title =>
+      _resolve('admin_home_title', (loc) => loc.admin_home_title);
+
+  @override
+  String get admin_home_empty_title =>
+      _resolve('admin_home_empty_title', (loc) => loc.admin_home_empty_title);
+
+  @override
+  String get admin_home_empty_body =>
+      _resolve('admin_home_empty_body', (loc) => loc.admin_home_empty_body);
+
+  @override
+  String get profile_section_roles =>
+      _resolve('profile_section_roles', (loc) => loc.profile_section_roles);
 }

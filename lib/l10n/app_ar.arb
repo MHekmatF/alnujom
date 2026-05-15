@@ -156,6 +156,5 @@
   "admin_home_title": "الإدارة",
   "admin_home_empty_title": "لا توجد إجراءات إدارية متاحة",
   "admin_home_empty_body": "صلاحياتك الحالية لا تمنحك الوصول إلى أي ميزات إدارية في هذا الإصدار.",
-  "admin_tile_account_approvals": "طلبات الانضمام",
   "profile_section_roles": "الأدوار"
 }

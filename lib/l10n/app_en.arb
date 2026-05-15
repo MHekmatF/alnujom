@@ -156,6 +156,5 @@
   "admin_home_title": "Admin",
   "admin_home_empty_title": "No admin actions available",
   "admin_home_empty_body": "Your role doesn't grant access to any admin features in this version.",
-  "admin_tile_account_approvals": "Account Approvals",
   "profile_section_roles": "Roles"
 }

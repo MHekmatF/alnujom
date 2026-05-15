@@ -61,12 +61,6 @@ abstract final class AppRouteNames {
   static const themeGallery = 'theme-gallery';
 }
 
-/// Placeholder page used for routes whose real page is created in a later phase.
-Widget _placeholder(String label) => Scaffold(
-  appBar: AppBar(title: Text(label)),
-  body: Center(child: Text(label)),
-);
-
 GoRouter buildAppRouter({
   required AppLogger logger,
   required AuthBloc authBloc,
