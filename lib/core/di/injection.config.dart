@@ -16,7 +16,7 @@ import 'package:go_router/go_router.dart' as _i583;
 import 'package:injectable/injectable.dart' as _i526;
 
 import '../../features/admin/account_approvals/data/datasources/supabase_account_approvals_datasource.dart'
-    as _i396;
+    as _i394;
 import '../../features/admin/account_approvals/data/repositories/account_approvals_repository_impl.dart'
     as _i278;
 import '../../features/admin/account_approvals/domain/repositories/account_approvals_repository.dart'
@@ -49,17 +49,20 @@ import '../../features/profile/data/repositories/profile_repository_impl.dart'
     as _i334;
 import '../../features/profile/domain/repositories/profile_repository.dart'
     as _i894;
-import '../../features/profile/domain/usecases/load_pii.dart' as _i201;
-import '../../features/profile/domain/usecases/load_profile.dart' as _i202;
-import '../../features/profile/domain/usecases/update_pii.dart' as _i203;
-import '../../features/profile/domain/usecases/update_profile.dart' as _i204;
-import '../../features/profile/presentation/cubit/profile_cubit.dart' as _i205;
+import '../../features/profile/domain/usecases/load_pii.dart' as _i363;
+import '../../features/profile/domain/usecases/load_profile.dart' as _i1052;
+import '../../features/profile/domain/usecases/update_pii.dart' as _i281;
+import '../../features/profile/domain/usecases/update_profile.dart' as _i78;
+import '../../features/profile/presentation/cubit/profile_cubit.dart' as _i36;
 import '../config/env_config.dart' as _i373;
 import '../localization/locale_cubit.dart' as _i960;
 import '../logging/app_logger.dart' as _i354;
 import '../logging/console_logger.dart' as _i1026;
 import '../network/supabase_client_wrapper.dart' as _i752;
 import '../network/supabase_client_wrapper_impl.dart' as _i748;
+import '../security/permission_catalog_repository.dart' as _i1015;
+import '../security/permission_catalog_repository_impl.dart' as _i753;
+import '../security/permission_checker.dart' as _i650;
 import '../storage/preferences_store.dart' as _i753;
 import '../storage/secure_preferences_store.dart' as _i190;
 import '../theme/palette_cubit.dart' as _i394;
@@ -75,16 +78,22 @@ _i174.GetIt $initGetIt(
   final gh = _i526.GetItHelper(getIt, environment, environmentFilter);
   final routerModule = _$RouterModule();
   gh.singleton<_i373.EnvConfig>(() => const _i373.EnvConfig());
+  gh.lazySingleton<_i394.SupabaseAccountApprovalsDatasource>(
+    () => _i394.SupabaseAccountApprovalsDatasource(),
+  );
   gh.lazySingleton<_i825.SupabaseProfileDataSource>(
     () => _i825.SupabaseProfileDataSource(),
   );
-  gh.lazySingleton<_i396.SupabaseAccountApprovalsDatasource>(
-    () => _i396.SupabaseAccountApprovalsDatasource(),
+  gh.lazySingleton<_i1015.PermissionCatalogRepository>(
+    () => _i753.PermissionCatalogRepositoryImpl(),
+  );
+  gh.lazySingleton<_i650.PermissionChecker>(
+    () => _i650.PermissionChecker(gh<_i1015.PermissionCatalogRepository>()),
   );
   gh.lazySingleton<_i354.AppLogger>(() => _i1026.ConsoleLogger());
   gh.lazySingleton<_i120.AccountApprovalsRepository>(
     () => _i278.AccountApprovalsRepositoryImpl(
-      gh<_i396.SupabaseAccountApprovalsDatasource>(),
+      gh<_i394.SupabaseAccountApprovalsDatasource>(),
       gh<_i354.AppLogger>(),
     ),
   );
@@ -110,6 +119,16 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i430.OnboardingRepository>(
     () => _i452.OnboardingRepositoryImpl(gh<_i144.OnboardingSeenStorage>()),
   );
+  gh.factory<_i363.LoadPii>(() => _i363.LoadPii(gh<_i894.ProfileRepository>()));
+  gh.factory<_i1052.LoadProfile>(
+    () => _i1052.LoadProfile(gh<_i894.ProfileRepository>()),
+  );
+  gh.factory<_i281.UpdatePii>(
+    () => _i281.UpdatePii(gh<_i894.ProfileRepository>()),
+  );
+  gh.factory<_i78.UpdateProfile>(
+    () => _i78.UpdateProfile(gh<_i894.ProfileRepository>()),
+  );
   gh.lazySingleton<_i787.AuthRepository>(
     () => _i153.AuthRepositoryImpl(
       gh<_i76.SupabaseAuthDataSource>(),
@@ -126,6 +145,14 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i431.RejectAccount>(
     () => _i431.RejectAccount(gh<_i120.AccountApprovalsRepository>()),
+  );
+  gh.factory<_i36.ProfileCubit>(
+    () => _i36.ProfileCubit(
+      gh<_i1052.LoadProfile>(),
+      gh<_i78.UpdateProfile>(),
+      gh<_i363.LoadPii>(),
+      gh<_i281.UpdatePii>(),
+    ),
   );
   gh.factoryParam<_i960.LocaleCubit, _i264.Locale?, dynamic>(
     (initialLocale, _) => _i960.LocaleCubit(
@@ -146,24 +173,6 @@ _i174.GetIt $initGetIt(
       gh<_i138.LoadPendingQueue>(),
       gh<_i858.ApproveAccount>(),
       gh<_i431.RejectAccount>(),
-    ),
-  );
-  gh.factory<_i202.LoadProfile>(
-    () => _i202.LoadProfile(gh<_i894.ProfileRepository>()),
-  );
-  gh.factory<_i204.UpdateProfile>(
-    () => _i204.UpdateProfile(gh<_i894.ProfileRepository>()),
-  );
-  gh.factory<_i201.LoadPii>(() => _i201.LoadPii(gh<_i894.ProfileRepository>()));
-  gh.factory<_i203.UpdatePii>(
-    () => _i203.UpdatePii(gh<_i894.ProfileRepository>()),
-  );
-  gh.factory<_i205.ProfileCubit>(
-    () => _i205.ProfileCubit(
-      gh<_i202.LoadProfile>(),
-      gh<_i204.UpdateProfile>(),
-      gh<_i201.LoadPii>(),
-      gh<_i203.UpdatePii>(),
     ),
   );
   gh.factory<_i807.OnboardingCubit>(

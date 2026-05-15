@@ -62,7 +62,12 @@ new triggers and appropriate `TG_ARGV` values (action key, column list, PK colum
   `approve_account_approval_request` / `reject_account_approval_request` RPCs
   produces one `audit_logs` row with the admin as `actor_user_id` and the
   affected user's UUID as `target_id`.
-- Phase 6: roles/permissions tables
+- Phase 6: `user_roles` ✅ **Shipped** in `20260515120004_create_user_roles.sql` via **two separate triggers** — `log_audit()` takes the action string verbatim from `TG_ARGV[0]`, so one trigger per legal mutation event is required:
+  - `trg_user_roles_audit_granted` — AFTER INSERT, action key `user_role.granted`, target column `user_id`.
+  - `trg_user_roles_audit_revoked` — AFTER DELETE, action key `user_role.revoked`, target column `user_id`.
+  - No UPDATE trigger in v1 — `user_roles` rows are immutable post-insert.
+  - The Phase 6 backfill migration (`20260515120007`) emits many `user_role.granted` rows with `actor_user_id = NULL` (runs as `postgres`, no `auth.uid()`). Phase 7+ in-app grants will have `actor_user_id = <super_admin uuid>`.
+  - `roles`, `permissions`, `role_permissions` tables get audit triggers in Phase 7 alongside their mutation UI.
 - Phase 12: listings workflow
 - Phase 18: reports/moderation
 - Phase 19: agency flows
