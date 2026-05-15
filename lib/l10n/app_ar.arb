@@ -41,5 +41,115 @@
   "currencyUsdName": "دولار أمريكي",
   "currencySypName": "ليرة سورية",
   "currencyUsdSymbol": "USD",
-  "currencySypSymbol": "ل.س"
+  "currencySypSymbol": "ل.س",
+
+  "register_title": "إنشاء حساب",
+  "register_phone_label": "رقم الهاتف",
+  "register_phone_hint": "+963 9XX XXX XXX",
+  "register_password_label": "كلمة المرور",
+  "register_password_hint": "٨ أحرف على الأقل",
+  "register_real_email_label_optional": "البريد الإلكتروني (اختياري)",
+  "register_full_name_label": "الاسم الكامل (اختياري)",
+  "register_submit": "إنشاء حساب",
+  "register_have_account": "لديك حساب بالفعل؟ سجّل دخولك",
+
+  "login_title": "تسجيل الدخول",
+  "login_phone_label": "رقم الهاتف",
+  "login_password_label": "كلمة المرور",
+  "login_submit": "دخول",
+  "login_forgot_password": "نسيت كلمة المرور؟",
+  "login_no_account": "ليس لديك حساب؟ سجّل",
+
+  "pending_approval_title": "الحساب قيد المراجعة",
+  "pending_approval_body": "حسابك بانتظار موافقة المسؤول. رح نعلمك بعد المراجعة.",
+
+  "rejected_title": "لم يتم قبول الحساب",
+  "rejected_body_with_reason": "للأسف، لم يتم قبول تسجيلك. السبب: {reason}",
+  "@rejected_body_with_reason": {
+    "placeholders": {
+      "reason": { "type": "String" }
+    }
+  },
+
+  "suspended_title": "الحساب موقوف",
+  "suspended_body": "تم إيقاف حسابك. تواصل مع الدعم للمزيد من المعلومات.",
+
+  "reset_password_title": "إعادة تعيين كلمة المرور",
+  "reset_password_phone_label": "رقم الهاتف",
+  "reset_password_submit": "أرسل رابط الإعادة",
+  "reset_password_generic_response": "إذا كان هناك حساب مرتبط بهذا الرقم، فقد تم إرسال رابط إعادة تعيين كلمة المرور.",
+
+  "phone_required": "رقم الهاتف مطلوب.",
+  "phone_invalid": "أدخل رقم هاتف صحيح (مثال: +963 9XX XXX XXX).",
+  "password_too_short": "كلمة المرور يجب أن تكون ٨ أحرف على الأقل.",
+  "account_already_exists": "يوجد حساب مسجّل بهذا الرقم مسبقاً.",
+  "invalid_phone_or_password": "رقم الهاتف أو كلمة المرور غير صحيحة.",
+  "network_error": "حدث خطأ في الشبكة. تحقق من اتصالك وحاول مرة ثانية.",
+  "unknown_auth_error": "حدث خطأ غير متوقع. حاول مرة ثانية.",
+  "sign_out": "تسجيل الخروج",
+
+  "profile_title": "ملفي الشخصي",
+  "profile_full_name_label": "الاسم الكامل",
+  "profile_username_label": "اسم المستخدم",
+  "profile_phone_label": "رقم الهاتف",
+  "profile_email_label": "البريد الإلكتروني",
+  "profile_avatar_label": "رابط الصورة الشخصية",
+  "profile_edit_button": "تعديل الملف",
+  "profile_save_button": "حفظ",
+  "profile_cancel_button": "إلغاء",
+  "profile_account_status_badge_pending": "قيد المراجعة",
+  "profile_account_status_badge_approved": "مقبول",
+  "profile_account_status_badge_rejected": "مرفوض",
+  "profile_account_status_badge_suspended": "موقوف",
+  "username_taken": "اسم المستخدم مأخوذ. اختر اسماً آخر.",
+  "invalid_full_name": "الاسم الكامل يجب أن يكون بين ١ و١٠٠ حرف.",
+  "invalid_username": "اسم المستخدم يجب أن يكون ٣–٣٠ حرفاً: أحرف وأرقام وشرطة سفلية فقط.",
+  "invalid_email": "أدخل بريداً إلكترونياً صحيحاً.",
+  "invalid_avatar_url": "رابط الصورة يجب أن يكون عنوان HTTPS صحيح.",
+  "profile_private_section_title": "الهوية الخاصة",
+  "profile_private_legal_name": "الاسم القانوني",
+  "profile_private_national_id": "رقم الهوية الوطنية",
+  "profile_private_contact_methods_title": "طرق التواصل الخاصة",
+  "profile_private_contact_methods_whatsapp": "واتساب",
+  "profile_private_contact_methods_telegram": "تيليغرام",
+  "profile_private_contact_methods_signal": "سيغنال",
+  "profile_private_contact_methods_private_email": "بريد إلكتروني خاص",
+  "profile_private_contact_methods_secondary_phone": "رقم هاتف ثانوي",
+  "profile_private_unknown_channel": "قناة غير معروفة",
+
+  "admin_tile_account_approvals": "موافقات الحسابات",
+  "admin_queue_title": "طلبات الموافقة المعلّقة",
+  "admin_queue_empty": "لا توجد طلبات موافقة معلّقة.",
+  "admin_queue_pull_to_refresh": "اسحب للتحديث",
+  "admin_queue_phone_label": "الهاتف",
+  "admin_queue_email_label": "البريد الإلكتروني",
+  "admin_queue_full_name_label": "الاسم الكامل",
+  "admin_queue_created_at_label": "تاريخ الطلب",
+  "admin_action_approve": "قبول",
+  "admin_action_reject": "رفض",
+  "admin_action_reject_reason_title": "سبب الرفض",
+  "admin_action_reject_reason_label": "السبب",
+  "admin_action_reject_reason_required": "سبب الرفض مطلوب.",
+  "admin_action_confirm": "تأكيد",
+  "admin_action_cancel": "إلغاء",
+  "admin_request_already_resolved": "هذا الطلب تمت معالجته مسبقاً.",
+
+  "onboarding_step_1_title": "تواصل مع أشخاص موثوقين",
+  "onboarding_step_1_body": "ابحث عن محترفين موثّقين وتواصل معهم بأمان.",
+  "onboarding_step_2_title": "هويتك، محميّة",
+  "onboarding_step_2_body": "معلوماتك الخاصة مشفّرة ولا تُشارَك إلا بموافقتك.",
+  "onboarding_step_3_title": "ابدأ اليوم",
+  "onboarding_step_3_body": "أنشئ حسابك وانضم إلى مجتمع النجوم.",
+  "onboarding_get_started": "ابدأ الآن",
+  "onboarding_skip": "تخطّى",
+  "onboarding_locale_picker_label": "اللغة",
+
+  "home_title": "الرئيسية",
+  "home_signed_in_as": "مرحباً، {name}",
+  "@home_signed_in_as": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "home_tile_profile": "ملفي الشخصي"
 }

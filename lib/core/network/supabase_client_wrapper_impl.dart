@@ -1,3 +1,5 @@
+import 'dart:async' show EventSink, StreamTransformer;
+
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
@@ -61,7 +63,45 @@ final class SupabaseClientWrapperImpl implements SupabaseClientWrapper {
 
   @override
   Stream<AuthState> authStateChanges() {
-    throw UnimplementedError('wired up in Phase 5');
+    if (!_isInitialized) {
+      return Stream<AuthState>.value(AuthState.signedOut);
+    }
+    return supabase.Supabase.instance.client.auth.onAuthStateChange
+        .map(_mapAuthChangeEvent)
+        .transform(
+          StreamTransformer<AuthState, AuthState>.fromHandlers(
+            handleError:
+                (
+                  Object error,
+                  StackTrace stackTrace,
+                  EventSink<AuthState> sink,
+                ) {
+                  _logger.warning(
+                    'Auth state subscription error.',
+                    error: error,
+                    stackTrace: stackTrace,
+                    tag: _tag,
+                  );
+                  sink.add(AuthState.error);
+                },
+          ),
+        );
+  }
+
+  AuthState _mapAuthChangeEvent(supabase.AuthState data) {
+    switch (data.event) {
+      case supabase.AuthChangeEvent.signedIn:
+      case supabase.AuthChangeEvent.tokenRefreshed:
+      case supabase.AuthChangeEvent.userUpdated:
+      case supabase.AuthChangeEvent.initialSession:
+        return data.session != null ? AuthState.signedIn : AuthState.signedOut;
+      case supabase.AuthChangeEvent.passwordRecovery:
+      case supabase.AuthChangeEvent.mfaChallengeVerified:
+        return AuthState.signedIn;
+      case supabase.AuthChangeEvent.signedOut:
+      default:
+        return AuthState.signedOut;
+    }
   }
 
   @override
@@ -70,7 +110,7 @@ final class SupabaseClientWrapperImpl implements SupabaseClientWrapper {
     Map<String, dynamic>? filters,
     int? limit,
   }) {
-    throw UnimplementedError('wired up in Phase 4');
+    throw UnimplementedError('wired up in Phase 5');
   }
 
   @override

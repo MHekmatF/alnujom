@@ -6,6 +6,7 @@ import 'core/localization/locale_cubit.dart';
 import 'core/logging/app_logger.dart';
 import 'core/network/supabase_client_wrapper.dart';
 import 'core/storage/preferences_store.dart';
+import 'l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 Future<void> main() async {
@@ -28,14 +29,28 @@ Future<void> main() async {
 
   final preferencesStore = getIt<PreferencesStore>();
 
-  var initialLocale = LocaleCubit.defaultLocale;
+  // Resolution: stored preference > device system locale (if supported) > Arabic.
+  // Constitution V: Arabic-first remains the final fallback when the device
+  // locale isn't a supported one.
+  Locale defaultFromDevice() {
+    final supported = AppLocalizations.supportedLocales
+        .map((l) => l.languageCode)
+        .toSet();
+    final systemLocale = WidgetsBinding.instance.platformDispatcher.locale;
+    if (supported.contains(systemLocale.languageCode)) {
+      return Locale(systemLocale.languageCode);
+    }
+    return LocaleCubit.defaultLocale;
+  }
+
+  var initialLocale = defaultFromDevice();
   final localeResult = await preferencesStore.readLocale();
   switch (localeResult) {
     case Success(:final value):
-      initialLocale = value ?? LocaleCubit.defaultLocale;
+      if (value != null) initialLocale = value;
     case FailureResult(:final failure):
       logger.warning(
-        'Failed to read locale preference; using Arabic locale.',
+        'Failed to read locale preference; using device locale fallback.',
         error: failure.cause,
         stackTrace: failure.stackTrace,
         tag: 'Bootstrap',

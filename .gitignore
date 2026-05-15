@@ -203,6 +203,7 @@ screenshots/
 .claude/logs/
 .claude/.local/
 .claude/settings.local.json
+.claude/scheduled_tasks.lock
 
 # Spec Kit local state
 .specify/.cache/

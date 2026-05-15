@@ -41,5 +41,115 @@
   "currencyUsdName": "US Dollar",
   "currencySypName": "Syrian Pound",
   "currencyUsdSymbol": "USD",
-  "currencySypSymbol": "ل.س"
+  "currencySypSymbol": "ل.س",
+
+  "register_title": "Create Account",
+  "register_phone_label": "Phone Number",
+  "register_phone_hint": "+963 9XX XXX XXX",
+  "register_password_label": "Password",
+  "register_password_hint": "At least 8 characters",
+  "register_real_email_label_optional": "Email (optional)",
+  "register_full_name_label": "Full Name (optional)",
+  "register_submit": "Create Account",
+  "register_have_account": "Already have an account? Login",
+
+  "login_title": "Sign In",
+  "login_phone_label": "Phone Number",
+  "login_password_label": "Password",
+  "login_submit": "Sign In",
+  "login_forgot_password": "Forgot password?",
+  "login_no_account": "Don't have an account? Register",
+
+  "pending_approval_title": "Account Pending Approval",
+  "pending_approval_body": "Your account is awaiting admin approval. You will be notified once it is reviewed.",
+
+  "rejected_title": "Account Not Approved",
+  "rejected_body_with_reason": "Your account registration was not approved. Reason: {reason}",
+  "@rejected_body_with_reason": {
+    "placeholders": {
+      "reason": { "type": "String" }
+    }
+  },
+
+  "suspended_title": "Account Suspended",
+  "suspended_body": "Your account has been suspended. Please contact support for more information.",
+
+  "reset_password_title": "Reset Password",
+  "reset_password_phone_label": "Phone Number",
+  "reset_password_submit": "Send Reset Link",
+  "reset_password_generic_response": "If an account exists for this phone, a reset link has been sent.",
+
+  "phone_required": "Phone number is required.",
+  "phone_invalid": "Enter a valid phone number (e.g. +963 9XX XXX XXX).",
+  "password_too_short": "Password must be at least 8 characters.",
+  "account_already_exists": "An account with this phone number already exists.",
+  "invalid_phone_or_password": "Invalid phone or password.",
+  "network_error": "A network error occurred. Please check your connection and try again.",
+  "unknown_auth_error": "An unexpected error occurred. Please try again.",
+  "sign_out": "Sign Out",
+
+  "profile_title": "My Profile",
+  "profile_full_name_label": "Full Name",
+  "profile_username_label": "Username",
+  "profile_phone_label": "Phone Number",
+  "profile_email_label": "Email",
+  "profile_avatar_label": "Avatar URL",
+  "profile_edit_button": "Edit Profile",
+  "profile_save_button": "Save",
+  "profile_cancel_button": "Cancel",
+  "profile_account_status_badge_pending": "Pending",
+  "profile_account_status_badge_approved": "Approved",
+  "profile_account_status_badge_rejected": "Rejected",
+  "profile_account_status_badge_suspended": "Suspended",
+  "username_taken": "This username is already taken. Please choose another.",
+  "invalid_full_name": "Full name must be between 1 and 100 characters.",
+  "invalid_username": "Username must be 3–30 characters: letters, numbers, and underscores only.",
+  "invalid_email": "Enter a valid email address.",
+  "invalid_avatar_url": "Avatar URL must be a valid HTTPS address.",
+  "profile_private_section_title": "Private Identity",
+  "profile_private_legal_name": "Legal Name",
+  "profile_private_national_id": "National ID",
+  "profile_private_contact_methods_title": "Private Contact Methods",
+  "profile_private_contact_methods_whatsapp": "WhatsApp",
+  "profile_private_contact_methods_telegram": "Telegram",
+  "profile_private_contact_methods_signal": "Signal",
+  "profile_private_contact_methods_private_email": "Private Email",
+  "profile_private_contact_methods_secondary_phone": "Secondary Phone",
+  "profile_private_unknown_channel": "Unknown channel",
+
+  "admin_tile_account_approvals": "Account Approvals",
+  "admin_queue_title": "Pending Approvals",
+  "admin_queue_empty": "No pending approval requests.",
+  "admin_queue_pull_to_refresh": "Pull to refresh",
+  "admin_queue_phone_label": "Phone",
+  "admin_queue_email_label": "Email",
+  "admin_queue_full_name_label": "Full Name",
+  "admin_queue_created_at_label": "Requested",
+  "admin_action_approve": "Approve",
+  "admin_action_reject": "Reject",
+  "admin_action_reject_reason_title": "Rejection Reason",
+  "admin_action_reject_reason_label": "Reason",
+  "admin_action_reject_reason_required": "A rejection reason is required.",
+  "admin_action_confirm": "Confirm",
+  "admin_action_cancel": "Cancel",
+  "admin_request_already_resolved": "This request has already been resolved.",
+
+  "onboarding_step_1_title": "Connect with Trusted People",
+  "onboarding_step_1_body": "Find verified professionals and connect securely.",
+  "onboarding_step_2_title": "Your Identity, Protected",
+  "onboarding_step_2_body": "Your private information is encrypted and only shared on your terms.",
+  "onboarding_step_3_title": "Get Started Today",
+  "onboarding_step_3_body": "Create your account and join the AlNujom community.",
+  "onboarding_get_started": "Get Started",
+  "onboarding_skip": "Skip",
+  "onboarding_locale_picker_label": "Language",
+
+  "home_title": "Home",
+  "home_signed_in_as": "Signed in as {name}",
+  "@home_signed_in_as": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "home_tile_profile": "My Profile"
 }
