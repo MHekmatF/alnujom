@@ -171,11 +171,12 @@ class ProfileRepositoryImpl implements ProfileRepository {
   Future<List<AssignedRole>> loadAssignedRoles(String localeCode) async {
     try {
       final rows = await _ds.loadAssignedRoles();
-      final roles = rows
-          .map(RoleAssignmentDto.fromRow)
-          .map((dto) => dto.toAssignedRole(localeCode))
-          .toList()
-        ..sort((a, b) => a.roleKey.compareTo(b.roleKey));
+      final roles =
+          rows
+              .map(RoleAssignmentDto.fromRow)
+              .map((dto) => dto.toAssignedRole(localeCode))
+              .toList()
+            ..sort((a, b) => a.roleKey.compareTo(b.roleKey));
       return roles;
     } on Object catch (error, stackTrace) {
       _logger.warning(

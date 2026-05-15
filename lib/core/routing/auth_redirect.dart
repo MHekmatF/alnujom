@@ -60,8 +60,9 @@ String? _redirectIfProtected(String path) {
 
 String? _redirectAuthenticated(String path) {
   if (_authOnlyPaths.contains(path) || path == '/') return '/home';
-  final hasAdminAccess =
-      getIt<PermissionChecker>().any(PermissionKeys.adminCategoryKeys);
+  final hasAdminAccess = getIt<PermissionChecker>().any(
+    PermissionKeys.adminCategoryKeys,
+  );
   if ((path == '/admin' || path.startsWith('/admin/')) && !hasAdminAccess) {
     return '/home';
   }

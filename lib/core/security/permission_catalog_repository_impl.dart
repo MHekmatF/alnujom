@@ -29,7 +29,7 @@ class PermissionCatalogRepositoryImpl implements PermissionCatalogRepository {
       for (final row in (raw as List)) {
         final rolePermissions =
             ((row as Map)['role'] as Map?)?['role_permissions'] as List? ??
-                const [];
+            const [];
         for (final rp in rolePermissions) {
           final key = ((rp as Map)['permission'] as Map?)?['key'] as String?;
           if (key != null) keys.add(key);

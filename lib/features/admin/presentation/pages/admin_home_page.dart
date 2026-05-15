@@ -28,9 +28,7 @@ class AdminHomePage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.admin_home_title)),
-      body: tiles.isEmpty
-          ? _EmptyState(l10n: l10n)
-          : ListView(children: tiles),
+      body: tiles.isEmpty ? _EmptyState(l10n: l10n) : ListView(children: tiles),
     );
   }
 }

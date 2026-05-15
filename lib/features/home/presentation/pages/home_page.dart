@@ -59,7 +59,9 @@ class HomePage extends StatelessWidget {
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push(AppRoutes.profile),
                 ),
-                if (getIt<PermissionChecker>().any(PermissionKeys.adminCategoryKeys))
+                if (getIt<PermissionChecker>().any(
+                  PermissionKeys.adminCategoryKeys,
+                ))
                   ListTile(
                     leading: const Icon(Icons.admin_panel_settings_outlined),
                     title: Text(l10n.admin_home_title),

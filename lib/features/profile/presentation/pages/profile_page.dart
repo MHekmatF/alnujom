@@ -116,8 +116,7 @@ class _ProfileView extends StatelessWidget {
                             role.displayName,
                             style: theme.textTheme.labelMedium,
                           ),
-                          backgroundColor:
-                              theme.colorScheme.secondaryContainer,
+                          backgroundColor: theme.colorScheme.secondaryContainer,
                           side: BorderSide.none,
                         ),
                     ],
