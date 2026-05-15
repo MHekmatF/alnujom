@@ -5,6 +5,7 @@ import '../../../../core/errors/result.dart';
 import '../../../../shared/domain/entities/profile.dart';
 import '../../domain/entities/private_contact_methods.dart';
 import '../../domain/repositories/profile_repository.dart';
+import '../../domain/usecases/load_assigned_roles.dart';
 import '../../domain/usecases/load_pii.dart';
 import '../../domain/usecases/load_profile.dart';
 import '../../domain/usecases/update_pii.dart';
@@ -13,13 +14,19 @@ import 'profile_state.dart';
 
 @injectable
 class ProfileCubit extends Cubit<ProfileState> {
-  ProfileCubit(this._load, this._update, this._loadPii, this._updatePii)
-    : super(const ProfileState());
+  ProfileCubit(
+    this._load,
+    this._update,
+    this._loadPii,
+    this._updatePii,
+    this._loadAssignedRoles,
+  ) : super(const ProfileState());
 
   final LoadProfile _load;
   final UpdateProfile _update;
   final LoadPii _loadPii;
   final UpdatePii _updatePii;
+  final LoadAssignedRoles _loadAssignedRoles;
 
   // ── Public profile ───────────────────────────────────────────────────────
 
@@ -87,6 +94,13 @@ class ProfileCubit extends Cubit<ProfileState> {
   void cancelEdit() {
     if (!state.isEditing) return;
     emit(state.profileLoaded(state.profile!));
+  }
+
+  // ── Assigned roles ───────────────────────────────────────────────────────
+
+  Future<void> loadRoles(String localeCode) async {
+    final roles = await _loadAssignedRoles(localeCode);
+    emit(state.withRoles(roles));
   }
 
   // ── PII ──────────────────────────────────────────────────────────────────

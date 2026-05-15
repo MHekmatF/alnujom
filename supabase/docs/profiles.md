@@ -20,7 +20,6 @@ Defined in `supabase/migrations/20260506120002_create_profiles.sql`:
 | `avatar_url` | `TEXT` | YES | `NULL` | |
 | `account_status` | `account_status_enum` | NO | `'pending'` | Admin-governed |
 | `publisher_status` | `publisher_status_enum` | NO | `'pending'` | Admin-governed |
-| `is_admin` | `BOOLEAN` | NO | `FALSE` | Phase 5 interim flag (FR-007); replaced by Phase 6 role/permission system |
 | `created_at` | `TIMESTAMPTZ` | NO | `now()` | |
 | `updated_at` | `TIMESTAMPTZ` | NO | `now()` | Updated by trigger |
 
@@ -47,17 +46,16 @@ Self access is based on `auth.uid() = user_id`. Admin-gated access uses
 
 ## R-12 Status-Field Enforcement Trigger
 
-Phase 4 enforces column-level admin-only control of `account_status`,
-`publisher_status`, and (Phase 5 extension, FR-009) `is_admin` with:
+Phase 4 enforces column-level admin-only control of `account_status` and
+`publisher_status` with:
 
-- Function: `enforce_profile_status_admin_only()` (Phase 5 rewrites the body via
-  `CREATE OR REPLACE FUNCTION` in `20260510120002_profiles_add_is_admin.sql` to
-  additionally reject `is_admin` mutations from non-privileged callers)
-- Trigger: `trg_profiles_enforce_status_admin_only` (`BEFORE UPDATE`) — unchanged
-  from Phase 4; the body update covers the new column.
+- Function: `enforce_profile_status_admin_only()` — Phase 5 extended the body
+  to also reject `is_admin` mutations; Phase 6 removes that extension (the
+  column is dropped) and the function reverts to guarding the two status columns only.
+- Trigger: `trg_profiles_enforce_status_admin_only` (`BEFORE UPDATE`) — unchanged.
 
-If a non-admin, non-privileged session attempts changes to any of the three
-governed columns, the trigger raises SQLSTATE `42501`.
+If a non-admin, non-privileged session attempts changes to either governed
+column, the trigger raises SQLSTATE `42501`.
 
 Privileged-role bypass list (per Phase 4 R-12, unchanged in Phase 5): `postgres`,
 `supabase_admin`, `service_role`. Supabase MCP `execute_sql` runs as `postgres`
@@ -71,7 +69,7 @@ Rationale references: `../../specs/004-supabase-foundation/research.md` (R-12),
 
 `current_user_is_admin()` is the single helper every admin-gated policy across
 `profiles`, `audit_logs`, and `account_approval_requests` calls. Phase 4 shipped
-the placeholder body `SELECT FALSE`; Phase 5 swaps it (in
+the placeholder body `SELECT FALSE`; Phase 5 swapped it (in
 `20260510120003_swap_admin_predicate.sql` with `SET search_path = public` added in
 the `20260510120006_phase5_advisor_hardening.sql` follow-up) to:
 
@@ -80,8 +78,60 @@ SELECT COALESCE((SELECT is_admin FROM profiles WHERE user_id = auth.uid()), FALS
 ```
 
 **No Phase 4 policy file is edited** in Phase 5 — the central-helper invariant
-(SC-015) is preserved. Phase 6 swaps the body again to call
-`current_user_has_permission(...)` and drops the `is_admin` column.
+(SC-015) is preserved.
+
+## Phase 6 Changes
+
+### `is_admin` Column Removed
+
+Migration `20260515120007_backfill_is_admin_and_drop.sql` drops the interim
+Phase 5 `is_admin` column after backfilling every prior `is_admin = TRUE` user
+into `user_roles` with the `admin` role. The column no longer exists.
+
+### `current_user_is_admin()` Second Body Swap
+
+Phase 6 swaps `current_user_is_admin()` again via
+`20260515120006_swap_admin_predicate_to_role_check.sql`. The new body is a
+role-membership check:
+
+```sql
+SELECT COALESCE((
+  EXISTS (
+    SELECT 1 FROM public.user_roles ur
+    JOIN public.roles r ON r.id = ur.role_id
+    WHERE ur.user_id = auth.uid()
+      AND r.key IN ('admin', 'super_admin')
+  )
+), FALSE);
+```
+
+The same set of users (prior Phase 5 admins, now holding the `admin` role) is
+admitted. **No Phase 4 or Phase 5 policy files are edited** — the
+central-helper invariant (R-05) is preserved a second time.
+
+Contract references: `../../specs/006-roles-permissions/contracts/admin-predicate-v6.md`,
+`../../specs/006-roles-permissions/research.md` (R-12).
+
+### Stacked Cross-User `profiles` Read Policy
+
+Phase 6 stacks a second SELECT policy on `profiles` via the new file
+`supabase/policies/profiles_phase6_users_view.sql` (bundled into migration 6):
+
+| Policy | Operation | Predicate |
+|---|---|---|
+| `profiles_phase6_users_view` | SELECT | `current_user_has_permission('users.view')` |
+
+Moderators and admins (who hold `users.view`) can read other users' profile
+rows. Regular users only see their own row via the Phase 4 self-read policy.
+
+Contract reference: `../../specs/006-roles-permissions/contracts/profiles-users-view-policy.md`.
+
+### `enforce_profile_status_admin_only()` Trigger Rewrite
+
+The Phase 5 extension that also blocked `is_admin` mutations is removed (the
+column is gone). The function now only guards `account_status` and
+`publisher_status`. The trigger (`trg_profiles_enforce_status_admin_only`) is
+unchanged.
 
 ## Phase 5 Vault PII RPCs
 

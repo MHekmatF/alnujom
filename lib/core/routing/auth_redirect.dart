@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
+import '../di/injection.dart';
+import '../security/permission_checker.dart';
+import '../security/permission_keys.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/bloc/auth_state.dart';
 
@@ -39,10 +42,7 @@ FutureOr<String?> authRedirect(
   return switch (authState) {
     Unauthenticated() => _redirectIfProtected(path),
     Authenticating() => null,
-    Authenticated(:final profile) => _redirectAuthenticated(
-      path,
-      isAdmin: profile.isAdmin,
-    ),
+    Authenticated() => _redirectAuthenticated(path),
     PendingApproval() => path == '/pending' ? null : '/pending',
     Rejected() => path == '/rejected' ? null : '/rejected',
     Suspended() => path == '/suspended' ? null : '/suspended',
@@ -58,9 +58,12 @@ String? _redirectIfProtected(String path) {
   return '/login';
 }
 
-String? _redirectAuthenticated(String path, {required bool isAdmin}) {
+String? _redirectAuthenticated(String path) {
   if (_authOnlyPaths.contains(path) || path == '/') return '/home';
-  if ((path == '/admin' || path.startsWith('/admin/')) && !isAdmin) {
+  final hasAdminAccess = getIt<PermissionChecker>().any(
+    PermissionKeys.adminCategoryKeys,
+  );
+  if ((path == '/admin' || path.startsWith('/admin/')) && !hasAdminAccess) {
     return '/home';
   }
   return null;

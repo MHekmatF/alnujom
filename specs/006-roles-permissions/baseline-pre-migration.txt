@@ -1,0 +1,15 @@
+Phase 6 pre-migration baseline — captured 2026-05-15
+
+N_pre_admin (profiles WHERE is_admin = TRUE): 0
+M_profiles  (total profiles rows):             0
+L_admin_pre (admin user_ids):                  []
+
+Note: Empty development project — no users registered yet.
+The backfill migration (T036) will produce 0 admin-role rows and 0 user-role rows,
+which is correct and expected. SC-004 / SC-005 will verify post-backfill counts.
+
+T002 Phase 5 baseline checks:
+  (a) profiles.is_admin column exists: PASS
+  (b) current_user_is_admin() body = "is_admin FROM profiles" shape: PASS
+  (c) account_approval_requests table exists: PASS
+  (d) admin count = 0 (empty dev project, no bootstrap needed)

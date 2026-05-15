@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/localization/locale_cubit.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
@@ -16,8 +17,11 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localeCode = context.read<LocaleCubit>().state.languageCode;
     return BlocProvider<ProfileCubit>(
-      create: (_) => getIt<ProfileCubit>()..load(),
+      create: (_) => getIt<ProfileCubit>()
+        ..load()
+        ..loadRoles(localeCode),
       child: const _ProfileView(),
     );
   }
@@ -66,6 +70,8 @@ class _ProfileView extends StatelessWidget {
           );
         }
 
+        final theme = Theme.of(context);
+
         return Scaffold(
           appBar: AppBar(
             title: Text(l10n.profile_title),
@@ -92,6 +98,31 @@ class _ProfileView extends StatelessWidget {
                 if (profile.email != null && profile.email!.isNotEmpty)
                   _InfoRow(l10n.profile_email_label, profile.email!),
                 const SizedBox(height: 24),
+                if (state.roles.isNotEmpty) ...[
+                  Text(
+                    l10n.profile_section_roles,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: theme.colorScheme.outline,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Wrap(
+                    spacing: AppSpacing.sm,
+                    runSpacing: AppSpacing.sm,
+                    children: [
+                      for (final role in state.roles)
+                        Chip(
+                          label: Text(
+                            role.displayName,
+                            style: theme.textTheme.labelMedium,
+                          ),
+                          backgroundColor: theme.colorScheme.secondaryContainer,
+                          side: BorderSide.none,
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                ],
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.lock_outline),

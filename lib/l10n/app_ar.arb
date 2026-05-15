@@ -151,5 +151,10 @@
       "name": { "type": "String" }
     }
   },
-  "home_tile_profile": "ملفي الشخصي"
+  "home_tile_profile": "ملفي الشخصي",
+
+  "admin_home_title": "الإدارة",
+  "admin_home_empty_title": "لا توجد إجراءات إدارية متاحة",
+  "admin_home_empty_body": "صلاحياتك الحالية لا تمنحك الوصول إلى أي ميزات إدارية في هذا الإصدار.",
+  "profile_section_roles": "الأدوار"
 }

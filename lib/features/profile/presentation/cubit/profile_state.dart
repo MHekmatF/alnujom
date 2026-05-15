@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 import '../../../../shared/domain/entities/profile.dart';
+import '../../domain/entities/assigned_role.dart';
 import '../../domain/repositories/profile_repository.dart';
 
 enum ProfileStatus { initial, loading, loaded, editing, saving, saveFailure }
@@ -22,6 +23,7 @@ class ProfileState extends Equatable {
     this.piiStatus = PiiStatus.idle,
     this.pii,
     this.piiFailure,
+    this.roles = const [],
   });
 
   final ProfileStatus status;
@@ -36,6 +38,9 @@ class ProfileState extends Equatable {
   final PiiBundle? pii;
   final ProfileFailure? piiFailure;
 
+  /// The signed-in user's assigned roles (empty until [ProfileCubit.loadRoles] completes).
+  final List<AssignedRole> roles;
+
   bool get isEditing => draft != null;
 
   // ── convenience transition helpers ──────────────────────────────────────
@@ -44,6 +49,7 @@ class ProfileState extends Equatable {
     status: ProfileStatus.loading,
     piiStatus: piiStatus,
     pii: pii,
+    roles: roles,
   );
 
   ProfileState profileLoaded(Profile p) => ProfileState(
@@ -51,6 +57,7 @@ class ProfileState extends Equatable {
     profile: p,
     piiStatus: piiStatus,
     pii: pii,
+    roles: roles,
   );
 
   ProfileState profileEditing(Profile p) => ProfileState(
@@ -59,6 +66,7 @@ class ProfileState extends Equatable {
     draft: p,
     piiStatus: piiStatus,
     pii: pii,
+    roles: roles,
   );
 
   ProfileState profileSaving() => ProfileState(
@@ -67,6 +75,7 @@ class ProfileState extends Equatable {
     draft: draft,
     piiStatus: piiStatus,
     pii: pii,
+    roles: roles,
   );
 
   ProfileState profileSaveFailure(ProfileFailure f) => ProfileState(
@@ -76,6 +85,7 @@ class ProfileState extends Equatable {
     failure: f,
     piiStatus: piiStatus,
     pii: pii,
+    roles: roles,
   );
 
   ProfileState piiLoading() => ProfileState(
@@ -83,6 +93,7 @@ class ProfileState extends Equatable {
     profile: profile,
     draft: draft,
     piiStatus: PiiStatus.loading,
+    roles: roles,
   );
 
   ProfileState piiLoaded(PiiBundle bundle) => ProfileState(
@@ -91,6 +102,7 @@ class ProfileState extends Equatable {
     draft: draft,
     piiStatus: PiiStatus.loaded,
     pii: bundle,
+    roles: roles,
   );
 
   ProfileState piiSaving() => ProfileState(
@@ -99,6 +111,7 @@ class ProfileState extends Equatable {
     draft: draft,
     piiStatus: PiiStatus.saving,
     pii: pii,
+    roles: roles,
   );
 
   ProfileState piiSaveFailure(ProfileFailure f) => ProfileState(
@@ -108,6 +121,18 @@ class ProfileState extends Equatable {
     piiStatus: PiiStatus.saveFailure,
     pii: pii,
     piiFailure: f,
+    roles: roles,
+  );
+
+  ProfileState withRoles(List<AssignedRole> updatedRoles) => ProfileState(
+    status: status,
+    profile: profile,
+    draft: draft,
+    failure: failure,
+    piiStatus: piiStatus,
+    pii: pii,
+    piiFailure: piiFailure,
+    roles: updatedRoles,
   );
 
   @override
@@ -119,5 +144,6 @@ class ProfileState extends Equatable {
     piiStatus,
     pii,
     piiFailure,
+    roles,
   ];
 }
