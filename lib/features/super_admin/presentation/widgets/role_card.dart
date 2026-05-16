@@ -45,7 +45,10 @@ class RoleCard extends StatelessWidget {
                 style: theme.textTheme.bodyMedium,
               ),
               const Icon(Icons.people_outline, size: 18),
-              Text('${role.userCount}', style: theme.textTheme.bodyMedium),
+              Text(
+                role.userCount.toString(),
+                style: theme.textTheme.bodyMedium,
+              ),
             ],
           ),
         ),
