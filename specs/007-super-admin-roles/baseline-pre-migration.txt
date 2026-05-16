@@ -1,0 +1,100 @@
+Phase 7 baseline before applying migrations
+Captured during T005a on 2026-05-16.
+
+== public schema tables ==
+profiles: rls=true rows=5 columns=user_id uuid pk, full_name text, username text unique, phone text unique, email text, avatar_url text, account_status account_status_enum, publisher_status publisher_status_enum, created_at timestamptz, updated_at timestamptz
+user_preferences: rls=true rows=5 columns=user_id uuid pk, locale text, theme_mode text, display_currency text, notifications_enabled bool, created_at timestamptz, updated_at timestamptz
+audit_logs: rls=true rows=37 columns=id uuid pk, actor_user_id uuid, action text, target_type text, target_id text, before_state jsonb, after_state jsonb, ip inet, user_agent text, created_at timestamptz
+account_approval_requests: rls=true rows=5 columns=id uuid pk, user_id uuid unique, status account_approval_status, rejection_reason text, reviewed_by uuid, reviewed_at timestamptz, created_at timestamptz, updated_at timestamptz
+roles: rls=true rows=7 columns=id uuid pk, key text unique, display_name jsonb, description text, is_system bool, created_at timestamptz, updated_at timestamptz
+permissions: rls=true rows=24 columns=id uuid pk, key text unique, category text, description text, created_at timestamptz
+role_permissions: rls=true rows=46 columns=role_id uuid pk/fk, permission_id uuid pk/fk, created_at timestamptz
+user_roles: rls=true rows=8 columns=id uuid pk, user_id uuid fk, role_id uuid fk, granted_by uuid fk, granted_at timestamptz, created_at timestamptz
+
+== migrations ==
+00000000000000 00000000000000_init_extensions
+20260506215019 20260506120001_init_enums
+20260509031407 20260506120002_create_profiles
+20260509031422 20260506120003_create_user_preferences
+20260509063740 20260506120004_create_audit_logs
+20260509063806 20260506120005_enable_rls_default
+20260509074730 20260506120006_enable_vault
+20260510143208 20260510120001_create_account_approval_requests
+20260510143312 20260510120002_profiles_add_is_admin
+20260510143333 20260510120003_swap_admin_predicate
+20260510143436 20260510120004_profiles_vault_pii_helpers
+20260510143514 20260510120005_attach_audit_trigger_account_approval_requests
+20260510143743 20260510120006_phase5_advisor_hardening
+20260514121226 sync_auth_email_with_profile
+20260514130624 20260514120002_phase8_advisor_hardening
+20260515175338 20260515120001_create_roles
+20260515175414 20260515120002_create_permissions
+20260515175443 20260515120003_create_role_permissions
+20260515175616 20260515120004_create_user_roles
+20260515175640 20260515120005_create_permission_predicate
+20260515175706 20260515120006_swap_admin_predicate_to_role_check
+20260515175736 20260515120008_phase6_advisor_hardening
+20260515184632 20260515120007_backfill_is_admin_and_drop
+20260515184746 20260515120009_fix_enforce_profile_status_search_path
+20260515200706 20260515120001_create_roles
+20260515200715 20260515120002_create_permissions
+20260515200722 20260515120003_create_role_permissions
+20260515200731 20260515120004_create_user_roles
+20260515200807 20260515120005_create_permission_predicate
+20260515200817 20260515120006_swap_admin_predicate_to_role_check
+20260515200833 20260515120008_phase6_advisor_hardening
+
+== current_user_is_admin() ==
+CREATE OR REPLACE FUNCTION public.current_user_is_admin()
+ RETURNS boolean
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public', 'auth'
+AS $function$
+  SELECT COALESCE((
+    EXISTS (
+      SELECT 1
+      FROM public.user_roles ur
+      JOIN public.roles r ON r.id = ur.role_id
+      WHERE ur.user_id = auth.uid()
+        AND r.key IN ('admin', 'super_admin')
+    )
+  ), FALSE);
+$function$
+
+== current_user_has_permission(text) ==
+CREATE OR REPLACE FUNCTION public.current_user_has_permission(perm_key text)
+ RETURNS boolean
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public', 'auth'
+AS $function$
+  SELECT COALESCE((
+    EXISTS (
+      SELECT 1
+      FROM public.user_roles ur
+      JOIN public.role_permissions rp ON rp.role_id = ur.role_id
+      JOIN public.permissions p ON p.id = rp.permission_id
+      WHERE ur.user_id = auth.uid()
+        AND p.key = perm_key
+    )
+  ), FALSE);
+$function$
+
+== triggers on roles, role_permissions, permissions, user_roles ==
+trg_roles_enforce_system_immutability
+trg_roles_set_updated_at
+trg_user_roles_audit_granted
+trg_user_roles_audit_revoked
+
+== policies on roles, permissions, role_permissions, user_roles, profiles ==
+permissions | permissions_read_all_authenticated
+profiles | profiles_phase6_users_view
+profiles | profiles_select_admin
+profiles | profiles_select_self
+profiles | profiles_update_admin
+profiles | profiles_update_self
+role_permissions | role_permissions_read_all_authenticated
+roles | roles_read_all_authenticated
+user_roles | user_roles_admin_cross_read
+user_roles | user_roles_self_read

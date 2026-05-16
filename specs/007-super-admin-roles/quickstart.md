@@ -70,6 +70,8 @@ Per R-03, Phase 6 deliberately left zero `super_admin` `user_roles` rows. Phase 
 
 Pick the project owner's `auth.users.id` (or another trusted UUID). Run via Supabase MCP `execute_sql` as `postgres`:
 
+<!-- Phase 7 first-super_admin UUID resolved during implementation: 6583a883-123c-4c62-a1ad-00e11b124c8b -->
+
 ```sql
 INSERT INTO public.user_roles (user_id, role_id, granted_by, granted_at)
 SELECT '<chosen-uuid>', id, NULL, now()
