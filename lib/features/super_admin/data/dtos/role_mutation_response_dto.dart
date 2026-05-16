@@ -13,13 +13,18 @@ class RoleMutationResponseDto {
 
   factory RoleMutationResponseDto.fromJson(Map<String, dynamic> json) {
     final rawPermissions = (json['permission_keys'] as List?) ?? const [];
+    final rawUpdatedAt = json['updated_at'];
     return RoleMutationResponseDto(
       roleId: json['role_id'] as String,
       key: json['key'] as String,
-      displayName: parseLocalizedMap(json['display_name']),
+      displayName: json['display_name'] == null
+          ? const <String, String>{}
+          : parseLocalizedMap(json['display_name']),
       description: json['description'] as String?,
       permissionKeys: rawPermissions.map((value) => value.toString()).toList(),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      updatedAt: rawUpdatedAt is String
+          ? DateTime.parse(rawUpdatedAt)
+          : DateTime.fromMillisecondsSinceEpoch(0),
     );
   }
 

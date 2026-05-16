@@ -20,7 +20,7 @@ class SupabaseUserSearchDataSource {
         .from('profiles')
         .select('user_id, phone, username, full_name')
         .or('phone.like.$sanitized%,username.ilike.%$sanitized%')
-        .order('username')
+        .order('username', ascending: true)
         .limit(50);
 
     return response.map((row) => UserSearchResultDto.fromJson(row)).toList();
@@ -31,7 +31,7 @@ class SupabaseUserSearchDataSource {
         .from('user_roles')
         .select('role_id, granted_at, role:roles(id, key, display_name)')
         .eq('user_id', userId)
-        .order('role_id');
+        .order('role_id', ascending: true);
 
     return response.map((row) => AssignedRoleDto.fromJson(row)).toList();
   }

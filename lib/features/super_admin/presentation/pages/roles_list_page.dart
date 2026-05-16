@@ -43,13 +43,32 @@ class _RolesListView extends StatelessWidget {
     final canDelete = getIt<PermissionChecker>().has(
       PermissionKeys.rolesDelete,
     );
+    final canManage = getIt<PermissionChecker>().has(
+      PermissionKeys.permissionsManage,
+    );
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.superAdminRolesListTitle)),
+      appBar: AppBar(
+        title: Text(l10n.superAdminRolesListTitle),
+        actions: [
+          if (canManage)
+            IconButton(
+              icon: const Icon(Icons.person_add_outlined),
+              tooltip: l10n.superAdminAssignRoleTitle,
+              onPressed: () => context.go(AppRoutes.superAdminAssign),
+            ),
+        ],
+      ),
       floatingActionButton: canCreate
           ? FloatingActionButton(
-              onPressed: () => context.go(AppRoutes.superAdminRoleCreate),
-              // TODO(US4): Replace placeholder route target with CreateRolePage implementation.
+              onPressed: () async {
+                final created = await context.push<bool>(
+                  AppRoutes.superAdminRoleCreate,
+                );
+                if (created == true && context.mounted) {
+                  context.read<RolesListBloc>().add(const RefreshRoles());
+                }
+              },
               child: const Icon(Icons.add),
             )
           : null,

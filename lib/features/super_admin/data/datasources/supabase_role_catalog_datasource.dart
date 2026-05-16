@@ -18,7 +18,7 @@ class SupabaseRoleCatalogDataSource {
         .select(
           'id, key, display_name, description, is_system, created_at, updated_at, role_permissions(count), user_roles(count)',
         )
-        .order('key');
+        .order('key', ascending: true);
 
     return response.map((row) => RoleWithCountsDto.fromJson(row)).toList();
   }
@@ -39,8 +39,8 @@ class SupabaseRoleCatalogDataSource {
     final response = await _client
         .from('permissions')
         .select('id, key, category, description')
-        .order('category')
-        .order('key');
+        .order('category', ascending: true)
+        .order('key', ascending: true);
 
     return response.map((row) => PermissionDto.fromJson(row)).toList();
   }

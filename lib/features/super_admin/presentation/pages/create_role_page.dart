@@ -143,7 +143,7 @@ class _CreateRolePageState extends State<CreateRolePage> {
           permissionKeys: _selectedKeys.toList()..sort(),
         ),
       );
-      if (mounted) context.pop();
+      if (mounted) context.pop(true);
     } on RoleKeyDuplicateFailure {
       if (mounted) setState(() => _keyError = l10n.errorRoleKeyDuplicate);
     } on SuperAdminFailure catch (failure) {
