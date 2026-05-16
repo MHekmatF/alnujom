@@ -118,6 +118,8 @@
   "profile_private_unknown_channel": "Unknown channel",
 
   "admin_tile_account_approvals": "Account Approvals",
+  "adminTileSuperAdmin": "Super-admin",
+  "@adminTileSuperAdmin": { "description": "Super-admin tile label on AdminHomePage (Phase 7)" },
   "admin_queue_title": "Pending Approvals",
   "admin_queue_empty": "No pending approval requests.",
   "admin_queue_pull_to_refresh": "Pull to refresh",
@@ -156,5 +158,11 @@
   "admin_home_title": "Admin",
   "admin_home_empty_title": "No admin actions available",
   "admin_home_empty_body": "Your role doesn't grant access to any admin features in this version.",
+  "superAdminRolesListTitle": "Roles",
+  "@superAdminRolesListTitle": { "description": "Title of the super-admin roles list page" },
+  "roleBadgeSystem": "System",
+  "@roleBadgeSystem": { "description": "Badge label for is_system=true roles" },
+  "rolePermissionsCount": "{count, plural, =0{No permissions} one{1 permission} other{{count} permissions}}",
+  "@rolePermissionsCount": { "description": "Permission count summary on a role card", "placeholders": { "count": { "type": "int" } } },
   "profile_section_roles": "Roles"
 }

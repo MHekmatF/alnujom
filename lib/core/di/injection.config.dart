@@ -56,6 +56,17 @@ import '../../features/profile/domain/usecases/load_profile.dart' as _i1052;
 import '../../features/profile/domain/usecases/update_pii.dart' as _i281;
 import '../../features/profile/domain/usecases/update_profile.dart' as _i78;
 import '../../features/profile/presentation/cubit/profile_cubit.dart' as _i36;
+import '../../features/super_admin/data/datasources/supabase_role_catalog_datasource.dart'
+    as _i1064;
+import '../../features/super_admin/data/repositories/role_catalog_repository_impl.dart'
+    as _i564;
+import '../../features/super_admin/domain/repositories/role_catalog_repository.dart'
+    as _i681;
+import '../../features/super_admin/domain/usecases/list_roles.dart' as _i1018;
+import '../../features/super_admin/domain/usecases/load_role_detail.dart'
+    as _i176;
+import '../../features/super_admin/presentation/bloc/roles_list_bloc.dart'
+    as _i329;
 import '../config/env_config.dart' as _i373;
 import '../localization/locale_cubit.dart' as _i960;
 import '../logging/app_logger.dart' as _i354;
@@ -86,6 +97,9 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i825.SupabaseProfileDataSource>(
     () => _i825.SupabaseProfileDataSource(),
   );
+  gh.lazySingleton<_i1064.SupabaseRoleCatalogDataSource>(
+    () => _i1064.SupabaseRoleCatalogDataSource(),
+  );
   gh.lazySingleton<_i1015.PermissionCatalogRepository>(
     () => _i753.PermissionCatalogRepositoryImpl(),
   );
@@ -93,6 +107,12 @@ _i174.GetIt $initGetIt(
     () => _i650.PermissionChecker(gh<_i1015.PermissionCatalogRepository>()),
   );
   gh.lazySingleton<_i354.AppLogger>(() => _i1026.ConsoleLogger());
+  gh.lazySingleton<_i681.RoleCatalogRepository>(
+    () => _i564.RoleCatalogRepositoryImpl(
+      gh<_i1064.SupabaseRoleCatalogDataSource>(),
+      gh<_i354.AppLogger>(),
+    ),
+  );
   gh.lazySingleton<_i120.AccountApprovalsRepository>(
     () => _i278.AccountApprovalsRepositoryImpl(
       gh<_i394.SupabaseAccountApprovalsDatasource>(),
@@ -121,6 +141,9 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i430.OnboardingRepository>(
     () => _i452.OnboardingRepositoryImpl(gh<_i144.OnboardingSeenStorage>()),
   );
+  gh.factory<_i941.LoadAssignedRoles>(
+    () => _i941.LoadAssignedRoles(gh<_i894.ProfileRepository>()),
+  );
   gh.factory<_i363.LoadPii>(() => _i363.LoadPii(gh<_i894.ProfileRepository>()));
   gh.factory<_i1052.LoadProfile>(
     () => _i1052.LoadProfile(gh<_i894.ProfileRepository>()),
@@ -130,9 +153,6 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i78.UpdateProfile>(
     () => _i78.UpdateProfile(gh<_i894.ProfileRepository>()),
-  );
-  gh.factory<_i941.LoadAssignedRoles>(
-    () => _i941.LoadAssignedRoles(gh<_i894.ProfileRepository>()),
   );
   gh.lazySingleton<_i787.AuthRepository>(
     () => _i153.AuthRepositoryImpl(
@@ -149,6 +169,12 @@ _i174.GetIt $initGetIt(
       gh<_i650.PermissionChecker>(),
     ),
     dispose: (i) => i.dispose(),
+  );
+  gh.factory<_i1018.ListRoles>(
+    () => _i1018.ListRoles(gh<_i681.RoleCatalogRepository>()),
+  );
+  gh.factory<_i176.LoadRoleDetail>(
+    () => _i176.LoadRoleDetail(gh<_i681.RoleCatalogRepository>()),
   );
   gh.factory<_i858.ApproveAccount>(
     () => _i858.ApproveAccount(gh<_i120.AccountApprovalsRepository>()),
@@ -194,6 +220,9 @@ _i174.GetIt $initGetIt(
   );
   gh.lazySingleton<_i583.GoRouter>(
     () => routerModule.router(gh<_i354.AppLogger>(), gh<_i797.AuthBloc>()),
+  );
+  gh.factory<_i329.RolesListBloc>(
+    () => _i329.RolesListBloc(gh<_i1018.ListRoles>()),
   );
   return getIt;
 }

@@ -655,6 +655,26 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('admin_home_empty_body', (loc) => loc.admin_home_empty_body);
 
   @override
+  String get adminTileSuperAdmin =>
+      _resolve('adminTileSuperAdmin', (loc) => loc.adminTileSuperAdmin);
+
+  @override
+  String get superAdminRolesListTitle => _resolve(
+    'superAdminRolesListTitle',
+    (loc) => loc.superAdminRolesListTitle,
+  );
+
+  @override
+  String get roleBadgeSystem =>
+      _resolve('roleBadgeSystem', (loc) => loc.roleBadgeSystem);
+
+  @override
+  String rolePermissionsCount(int count) => _resolve(
+    'rolePermissionsCount',
+    (loc) => loc.rolePermissionsCount(count),
+  );
+
+  @override
   String get profile_section_roles =>
       _resolve('profile_section_roles', (loc) => loc.profile_section_roles);
 }

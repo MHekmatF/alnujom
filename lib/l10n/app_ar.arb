@@ -118,6 +118,8 @@
   "profile_private_unknown_channel": "قناة غير معروفة",
 
   "admin_tile_account_approvals": "موافقات الحسابات",
+  "adminTileSuperAdmin": "الإدارة الفائقة",
+  "@adminTileSuperAdmin": { "description": "Super-admin tile label on AdminHomePage (Phase 7)" },
   "admin_queue_title": "طلبات الموافقة المعلّقة",
   "admin_queue_empty": "لا توجد طلبات موافقة معلّقة.",
   "admin_queue_pull_to_refresh": "اسحب للتحديث",
@@ -156,5 +158,11 @@
   "admin_home_title": "الإدارة",
   "admin_home_empty_title": "لا توجد إجراءات إدارية متاحة",
   "admin_home_empty_body": "صلاحياتك الحالية لا تمنحك الوصول إلى أي ميزات إدارية في هذا الإصدار.",
+  "superAdminRolesListTitle": "الأدوار",
+  "@superAdminRolesListTitle": { "description": "Title of the super-admin roles list page" },
+  "roleBadgeSystem": "نظامي",
+  "@roleBadgeSystem": { "description": "Badge label for is_system=true roles" },
+  "rolePermissionsCount": "{count, plural, zero{لا صلاحيات} one{صلاحية واحدة} two{صلاحيتان} few{{count} صلاحيات} many{{count} صلاحية} other{{count} صلاحية}}",
+  "@rolePermissionsCount": { "description": "Permission count summary on a role card", "placeholders": { "count": { "type": "int" } } },
   "profile_section_roles": "الأدوار"
 }

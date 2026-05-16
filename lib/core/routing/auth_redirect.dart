@@ -68,3 +68,11 @@ String? _redirectAuthenticated(String path) {
   }
   return null;
 }
+
+String? requireSuperAdminRedirect(BuildContext context, GoRouterState state) {
+  final checker = getIt<PermissionChecker>();
+  if (!checker.any(PermissionKeys.superAdminCategoryKeys)) {
+    return '/admin';
+  }
+  return null;
+}

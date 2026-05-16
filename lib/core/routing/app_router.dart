@@ -18,6 +18,10 @@ import '../../features/onboarding/presentation/pages/splash_page.dart';
 import '../../features/profile/presentation/pages/profile_edit_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/profile/presentation/pages/profile_private_page.dart';
+import '../../features/super_admin/presentation/pages/assign_role_page.dart';
+import '../../features/super_admin/presentation/pages/create_role_page.dart';
+import '../../features/super_admin/presentation/pages/role_editor_page.dart';
+import '../../features/super_admin/presentation/pages/roles_list_page.dart';
 import '../../shell/shell_home_page.dart';
 import '../flags/app_flags.dart';
 import '../logging/app_logger.dart';
@@ -34,6 +38,9 @@ abstract final class AppRoutes {
   static const home = '/home';
   static const admin = '/admin';
   static const adminApprovals = '/admin/approvals';
+  static const superAdminRoles = '/admin/super-admin/roles';
+  static const superAdminRoleCreate = '/admin/super-admin/roles/create';
+  static const superAdminAssign = '/admin/super-admin/assign';
   static const resetPassword = '/reset-password';
   static const profile = '/profile';
   static const profileEdit = '/profile/edit';
@@ -53,6 +60,10 @@ abstract final class AppRouteNames {
   static const home = 'home';
   static const admin = 'admin';
   static const adminApprovals = 'admin-approvals';
+  static const superAdminRoles = 'super-admin-roles';
+  static const superAdminRoleEditor = 'super-admin-role-editor';
+  static const superAdminRoleCreate = 'super-admin-role-create';
+  static const superAdminAssign = 'super-admin-assign';
   static const resetPassword = 'reset-password';
   static const profile = 'profile';
   static const profileEdit = 'profile-edit';
@@ -123,6 +134,33 @@ GoRouter buildAppRouter({
             path: 'approvals',
             name: AppRouteNames.adminApprovals,
             builder: (context, state) => const AccountApprovalsPage(),
+          ),
+          GoRoute(
+            path: 'super-admin/roles',
+            name: AppRouteNames.superAdminRoles,
+            redirect: requireSuperAdminRedirect,
+            builder: (context, state) => const RolesListPage(),
+            routes: [
+              GoRoute(
+                path: 'create',
+                name: AppRouteNames.superAdminRoleCreate,
+                redirect: requireSuperAdminRedirect,
+                builder: (context, state) => const CreateRolePage(),
+              ),
+              GoRoute(
+                path: ':roleId',
+                name: AppRouteNames.superAdminRoleEditor,
+                redirect: requireSuperAdminRedirect,
+                builder: (context, state) =>
+                    RoleEditorPage(roleId: state.pathParameters['roleId']!),
+              ),
+            ],
+          ),
+          GoRoute(
+            path: 'super-admin/assign',
+            name: AppRouteNames.superAdminAssign,
+            redirect: requireSuperAdminRedirect,
+            builder: (context, state) => const AssignRolePage(),
           ),
         ],
       ),
