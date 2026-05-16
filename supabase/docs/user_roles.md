@@ -30,8 +30,12 @@ Records which roles each user holds. A user may hold multiple roles (e.g. `user`
 |-----------|--------|------------------|
 | SELECT (self) | `user_roles_self_read` | `auth.uid() = user_id` |
 | SELECT (cross) | `user_roles_admin_cross_read` | `current_user_has_permission('users.view')` — moderators, admins, super_admins |
-| INSERT/UPDATE/DELETE | — (none in Phase 6) | Phase 7 adds mutation policies. The FR-011 backfill runs as `postgres` and bypasses RLS. |
+| INSERT | `user_roles_phase7_insert` | `current_user_has_permission('permissions.manage')` |
+| UPDATE | — | Rows are immutable post-insert |
+| DELETE | `user_roles_phase7_delete` | `current_user_has_permission('permissions.manage')` |
 | Anon | Blocked by Phase 4 RLS-default-block | |
+
+Phase 7 write policies are documented in [`supabase/policies/user_roles_phase7_write.sql`](../policies/user_roles_phase7_write.sql) and are applied inline by `20260516120002_create_phase7_write_policies.sql`. Phase 6 read policies are preserved unchanged.
 
 ## Triggers
 
@@ -45,6 +49,15 @@ No UPDATE trigger in v1 — rows are immutable post-insert.
 
 - Backfill INSERTs (from `20260515120007`) fire `trg_user_roles_audit_granted` and emit `user_role.granted` rows with `actor_user_id = NULL` (migration runs as `postgres`, no `auth.uid()`).
 - Phase 7+ in-app grants will have `actor_user_id = <super_admin uuid>`.
+
+## Phase 7 Assignment Surface
+
+In-app assignment changes use two SECURITY DEFINER RPCs as the canonical mutation surface:
+
+- `public.assign_role_to_user(target_user_id, target_role_id, confirmation_token)` inserts a row after re-checking `permissions.manage`. When granting `super_admin`, the RPC requires `confirmation_token` to exactly match the target user's phone or username, mirroring the two-step UI confirmation.
+- `public.revoke_role_from_user(target_user_id, target_role_id)` deletes a row after re-checking `permissions.manage`. It rejects attempts by a user to revoke their own `super_admin` role with `42501`.
+
+The Phase 6 audit triggers on `user_roles` are unchanged and continue to emit `user_role.granted` / `user_role.revoked` for these RPC writes.
 
 ## Relationship to `profiles.account_status`
 

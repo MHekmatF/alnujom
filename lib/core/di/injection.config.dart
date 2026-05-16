@@ -93,13 +93,13 @@ import '../../features/super_admin/presentation/bloc/role_editor_bloc.dart'
 import '../../features/super_admin/presentation/bloc/roles_list_bloc.dart'
     as _i329;
 import '../config/env_config.dart' as _i373;
+import '../data/repositories/permission_catalog_repository_impl.dart' as _i739;
 import '../localization/locale_cubit.dart' as _i960;
 import '../logging/app_logger.dart' as _i354;
 import '../logging/console_logger.dart' as _i1026;
 import '../network/supabase_client_wrapper.dart' as _i752;
 import '../network/supabase_client_wrapper_impl.dart' as _i748;
 import '../security/permission_catalog_repository.dart' as _i1015;
-import '../security/permission_catalog_repository_impl.dart' as _i753;
 import '../security/permission_checker.dart' as _i650;
 import '../storage/preferences_store.dart' as _i753;
 import '../storage/secure_preferences_store.dart' as _i190;
@@ -129,7 +129,7 @@ _i174.GetIt $initGetIt(
     () => _i24.SupabaseUserSearchDataSource(),
   );
   gh.lazySingleton<_i1015.PermissionCatalogRepository>(
-    () => _i753.PermissionCatalogRepositoryImpl(),
+    () => _i739.PermissionCatalogRepositoryImpl(),
   );
   gh.lazySingleton<_i650.PermissionChecker>(
     () => _i650.PermissionChecker(gh<_i1015.PermissionCatalogRepository>()),
