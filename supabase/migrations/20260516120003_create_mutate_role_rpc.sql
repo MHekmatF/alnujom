@@ -44,7 +44,7 @@ BEGIN
   IF op IN ('update', 'delete') THEN
     PERFORM 1
     FROM public.roles r
-    WHERE r.id = role_id
+    WHERE r.id = mutate_role.role_id
       AND r.updated_at = expected_updated_at
     FOR UPDATE;
 
@@ -58,13 +58,13 @@ BEGIN
       INTO v_current_perms
     FROM public.role_permissions rp
     JOIN public.permissions p ON p.id = rp.permission_id
-    WHERE rp.role_id = role_id;
+    WHERE rp.role_id = mutate_role.role_id;
 
     SELECT COALESCE(array_agg(k ORDER BY k), ARRAY[]::TEXT[])
       INTO v_requested_perms
     FROM unnest(permission_keys) AS k;
 
-    IF (SELECT r.key FROM public.roles r WHERE r.id = role_id) = 'super_admin'
+    IF (SELECT r.key FROM public.roles r WHERE r.id = mutate_role.role_id) = 'super_admin'
        AND v_current_perms IS DISTINCT FROM v_requested_perms THEN
       RAISE EXCEPTION 'super_admin permission set is immutable' USING ERRCODE = '42501';
     END IF;
@@ -98,18 +98,18 @@ BEGIN
     UPDATE public.roles r
     SET display_name = COALESCE(mutate_role.display_name, r.display_name),
         description = COALESCE(mutate_role.description, r.description)
-    WHERE r.id = role_id
+    WHERE r.id = mutate_role.role_id
     RETURNING r.id INTO v_role_id;
 
     IF permission_keys IS NOT NULL THEN
       DELETE FROM public.role_permissions rp
-      WHERE rp.role_id = role_id
+      WHERE rp.role_id = mutate_role.role_id
         AND rp.permission_id NOT IN (
           SELECT p.id FROM public.permissions p WHERE p.key = ANY(permission_keys)
         );
 
       INSERT INTO public.role_permissions (role_id, permission_id)
-      SELECT role_id, p.id
+      SELECT mutate_role.role_id, p.id
       FROM public.permissions p
       WHERE p.key = ANY(permission_keys)
         AND NOT EXISTS (
@@ -122,9 +122,9 @@ BEGIN
     END IF;
 
   ELSIF op = 'delete' THEN
-    SELECT r.key INTO v_role_key FROM public.roles r WHERE r.id = role_id;
-    DELETE FROM public.roles r WHERE r.id = role_id;
-    RETURN jsonb_build_object('role_id', role_id, 'key', v_role_key, 'deleted', TRUE);
+    SELECT r.key INTO v_role_key FROM public.roles r WHERE r.id = mutate_role.role_id;
+    DELETE FROM public.roles r WHERE r.id = mutate_role.role_id;
+    RETURN jsonb_build_object('role_id', mutate_role.role_id, 'key', v_role_key, 'deleted', TRUE);
   END IF;
 
   SELECT jsonb_build_object(

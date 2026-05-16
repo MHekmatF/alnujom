@@ -5,10 +5,16 @@ import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/role_with_counts.dart';
 
 class RoleCard extends StatelessWidget {
-  const RoleCard({required this.role, required this.onTap, super.key});
+  const RoleCard({
+    required this.role,
+    required this.onTap,
+    this.onLongPress,
+    super.key,
+  });
 
   final RoleWithCounts role;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +32,7 @@ class RoleCard extends StatelessWidget {
     return Card(
       child: ListTile(
         onTap: onTap,
+        onLongPress: onLongPress,
         title: Text(title, style: theme.textTheme.titleMedium),
         subtitle: Padding(
           padding: const EdgeInsets.only(top: AppSpacing.xs),

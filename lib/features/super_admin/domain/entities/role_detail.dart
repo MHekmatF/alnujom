@@ -19,6 +19,22 @@ class RoleDetail extends Equatable {
   final List<String> permissionKeys;
   final DateTime updatedAt;
 
+  RoleDetail copyWith({
+    Map<String, String>? displayName,
+    String? description,
+    List<String>? permissionKeys,
+  }) {
+    return RoleDetail(
+      roleId: roleId,
+      roleKey: roleKey,
+      displayName: displayName ?? this.displayName,
+      description: description ?? this.description,
+      isSystem: isSystem,
+      permissionKeys: permissionKeys ?? this.permissionKeys,
+      updatedAt: updatedAt,
+    );
+  }
+
   @override
   List<Object?> get props => [
     roleId,

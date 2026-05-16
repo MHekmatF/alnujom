@@ -8,7 +8,15 @@ import '../../../../core/security/permission_checker.dart';
 import '../../../../core/security/permission_keys.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../domain/entities/role_with_counts.dart';
+import '../../domain/failures.dart';
+import '../../domain/usecases/delete_role.dart';
+import '../../domain/usecases/load_affected_user_count.dart';
+import '../../domain/usecases/load_role_detail.dart';
+import '../../domain/usecases/load_role_user_ids.dart';
+import '../../domain/usecases/revoke_role_from_user.dart';
 import '../bloc/roles_list_bloc.dart';
+import '../widgets/confirmation_dialog.dart';
 import '../widgets/role_card.dart';
 
 class RolesListPage extends StatelessWidget {
@@ -31,6 +39,9 @@ class _RolesListView extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final canCreate = getIt<PermissionChecker>().has(
       PermissionKeys.rolesCreate,
+    );
+    final canDelete = getIt<PermissionChecker>().has(
+      PermissionKeys.rolesDelete,
     );
 
     return Scaffold(
@@ -66,6 +77,9 @@ class _RolesListView extends StatelessWidget {
                     onTap: () => context.go(
                       '${AppRoutes.superAdminRoles}/${role.roleId}',
                     ),
+                    onLongPress: canDelete && !role.isSystem
+                        ? () => _deleteRole(context, role)
+                        : null,
                   );
                 },
               ),
@@ -74,5 +88,52 @@ class _RolesListView extends StatelessWidget {
         },
       ),
     );
+  }
+
+  Future<void> _deleteRole(BuildContext context, RoleWithCounts role) async {
+    final l10n = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final count = await getIt<LoadAffectedUserCount>()(role.roleId);
+      if (!context.mounted) return;
+      final confirmed = await showConfirmationDialog(
+        context,
+        title: l10n.confirmDeleteRoleTitle,
+        body: count == 0
+            ? l10n.confirmDeleteRoleBody
+            : l10n.confirmDeleteRoleBodyWithUsers(count),
+        confirmButtonLabel: l10n.actionDelete,
+        cancelButtonLabel: l10n.actionCancel,
+        destructive: true,
+      );
+      if (confirmed != true || !context.mounted) return;
+
+      var expectedUpdatedAt = role.updatedAt;
+      if (count > 0) {
+        final userIds = await getIt<LoadRoleUserIds>()(role.roleId);
+        for (final userId in userIds) {
+          await getIt<RevokeRoleFromUser>()(
+            targetUserId: userId,
+            targetRoleId: role.roleId,
+          );
+        }
+        expectedUpdatedAt = (await getIt<LoadRoleDetail>()(
+          role.roleId,
+        )).updatedAt;
+      }
+
+      await getIt<DeleteRole>()(
+        roleId: role.roleId,
+        expectedUpdatedAt: expectedUpdatedAt,
+      );
+      if (!context.mounted) return;
+      context.read<RolesListBloc>().add(const RefreshRoles());
+    } on RoleHasUsersFailure {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.errorRoleHasUsers(1))),
+      );
+    } on SuperAdminFailure catch (failure) {
+      messenger.showSnackBar(SnackBar(content: Text(failure.message)));
+    }
   }
 }
