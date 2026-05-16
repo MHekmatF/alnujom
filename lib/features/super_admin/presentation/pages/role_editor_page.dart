@@ -58,9 +58,7 @@ class _RoleEditorView extends StatelessWidget {
         } else if (state is RoleEditorSaveError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(
-                l10n.errorRoleSaveFailed(state.failure.message),
-              ),
+              content: Text(l10n.errorRoleSaveFailed(state.failure.message)),
             ),
           );
         }

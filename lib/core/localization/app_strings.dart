@@ -950,10 +950,8 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
-  String errorRoleSaveFailed(String reason) => _resolve(
-    'errorRoleSaveFailed',
-    (loc) => loc.errorRoleSaveFailed(reason),
-  );
+  String errorRoleSaveFailed(String reason) =>
+      _resolve('errorRoleSaveFailed', (loc) => loc.errorRoleSaveFailed(reason));
 
   @override
   String get assignRoleSucceeded =>
