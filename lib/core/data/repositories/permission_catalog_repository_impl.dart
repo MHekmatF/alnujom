@@ -1,11 +1,11 @@
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
-import 'permission_catalog_repository.dart';
+import '../../security/permission_catalog_repository.dart';
 
 /// Supabase implementation of [PermissionCatalogRepository].
-/// The only Phase 6 file in lib/core/security/ that imports supabase_flutter.
-/// Constitution IX boundary: all other security/ files are Supabase-free.
+///
+/// Kept outside `core/security` so security-domain files remain Supabase-free.
 @LazySingleton(as: PermissionCatalogRepository)
 class PermissionCatalogRepositoryImpl implements PermissionCatalogRepository {
   PermissionCatalogRepositoryImpl();

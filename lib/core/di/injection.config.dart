@@ -56,14 +56,50 @@ import '../../features/profile/domain/usecases/load_profile.dart' as _i1052;
 import '../../features/profile/domain/usecases/update_pii.dart' as _i281;
 import '../../features/profile/domain/usecases/update_profile.dart' as _i78;
 import '../../features/profile/presentation/cubit/profile_cubit.dart' as _i36;
+import '../../features/super_admin/data/datasources/supabase_role_catalog_datasource.dart'
+    as _i1064;
+import '../../features/super_admin/data/datasources/supabase_user_search_datasource.dart'
+    as _i24;
+import '../../features/super_admin/data/repositories/role_catalog_repository_impl.dart'
+    as _i564;
+import '../../features/super_admin/data/repositories/user_search_repository_impl.dart'
+    as _i884;
+import '../../features/super_admin/domain/repositories/role_catalog_repository.dart'
+    as _i681;
+import '../../features/super_admin/domain/repositories/user_search_repository.dart'
+    as _i765;
+import '../../features/super_admin/domain/usecases/assign_role_to_user.dart'
+    as _i650;
+import '../../features/super_admin/domain/usecases/delete_role.dart' as _i1036;
+import '../../features/super_admin/domain/usecases/list_roles.dart' as _i1018;
+import '../../features/super_admin/domain/usecases/load_affected_user_count.dart'
+    as _i702;
+import '../../features/super_admin/domain/usecases/load_permission_catalog.dart'
+    as _i518;
+import '../../features/super_admin/domain/usecases/load_role_detail.dart'
+    as _i176;
+import '../../features/super_admin/domain/usecases/load_role_user_ids.dart'
+    as _i144;
+import '../../features/super_admin/domain/usecases/load_user_assignments.dart'
+    as _i646;
+import '../../features/super_admin/domain/usecases/mutate_role.dart' as _i315;
+import '../../features/super_admin/domain/usecases/revoke_role_from_user.dart'
+    as _i950;
+import '../../features/super_admin/domain/usecases/search_users.dart' as _i143;
+import '../../features/super_admin/presentation/bloc/assign_role_bloc.dart'
+    as _i669;
+import '../../features/super_admin/presentation/bloc/role_editor_bloc.dart'
+    as _i885;
+import '../../features/super_admin/presentation/bloc/roles_list_bloc.dart'
+    as _i329;
 import '../config/env_config.dart' as _i373;
+import '../data/repositories/permission_catalog_repository_impl.dart' as _i739;
 import '../localization/locale_cubit.dart' as _i960;
 import '../logging/app_logger.dart' as _i354;
 import '../logging/console_logger.dart' as _i1026;
 import '../network/supabase_client_wrapper.dart' as _i752;
 import '../network/supabase_client_wrapper_impl.dart' as _i748;
 import '../security/permission_catalog_repository.dart' as _i1015;
-import '../security/permission_catalog_repository_impl.dart' as _i753;
 import '../security/permission_checker.dart' as _i650;
 import '../storage/preferences_store.dart' as _i753;
 import '../storage/secure_preferences_store.dart' as _i190;
@@ -86,13 +122,25 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i825.SupabaseProfileDataSource>(
     () => _i825.SupabaseProfileDataSource(),
   );
+  gh.lazySingleton<_i1064.SupabaseRoleCatalogDataSource>(
+    () => _i1064.SupabaseRoleCatalogDataSource(),
+  );
+  gh.lazySingleton<_i24.SupabaseUserSearchDataSource>(
+    () => _i24.SupabaseUserSearchDataSource(),
+  );
   gh.lazySingleton<_i1015.PermissionCatalogRepository>(
-    () => _i753.PermissionCatalogRepositoryImpl(),
+    () => _i739.PermissionCatalogRepositoryImpl(),
   );
   gh.lazySingleton<_i650.PermissionChecker>(
     () => _i650.PermissionChecker(gh<_i1015.PermissionCatalogRepository>()),
   );
   gh.lazySingleton<_i354.AppLogger>(() => _i1026.ConsoleLogger());
+  gh.lazySingleton<_i681.RoleCatalogRepository>(
+    () => _i564.RoleCatalogRepositoryImpl(
+      gh<_i1064.SupabaseRoleCatalogDataSource>(),
+      gh<_i354.AppLogger>(),
+    ),
+  );
   gh.lazySingleton<_i120.AccountApprovalsRepository>(
     () => _i278.AccountApprovalsRepositoryImpl(
       gh<_i394.SupabaseAccountApprovalsDatasource>(),
@@ -121,6 +169,9 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i430.OnboardingRepository>(
     () => _i452.OnboardingRepositoryImpl(gh<_i144.OnboardingSeenStorage>()),
   );
+  gh.factory<_i941.LoadAssignedRoles>(
+    () => _i941.LoadAssignedRoles(gh<_i894.ProfileRepository>()),
+  );
   gh.factory<_i363.LoadPii>(() => _i363.LoadPii(gh<_i894.ProfileRepository>()));
   gh.factory<_i1052.LoadProfile>(
     () => _i1052.LoadProfile(gh<_i894.ProfileRepository>()),
@@ -131,8 +182,11 @@ _i174.GetIt $initGetIt(
   gh.factory<_i78.UpdateProfile>(
     () => _i78.UpdateProfile(gh<_i894.ProfileRepository>()),
   );
-  gh.factory<_i941.LoadAssignedRoles>(
-    () => _i941.LoadAssignedRoles(gh<_i894.ProfileRepository>()),
+  gh.lazySingleton<_i765.UserSearchRepository>(
+    () => _i884.UserSearchRepositoryImpl(
+      gh<_i24.SupabaseUserSearchDataSource>(),
+      gh<_i354.AppLogger>(),
+    ),
   );
   gh.lazySingleton<_i787.AuthRepository>(
     () => _i153.AuthRepositoryImpl(
@@ -150,6 +204,27 @@ _i174.GetIt $initGetIt(
     ),
     dispose: (i) => i.dispose(),
   );
+  gh.factory<_i1018.ListRoles>(
+    () => _i1018.ListRoles(gh<_i681.RoleCatalogRepository>()),
+  );
+  gh.factory<_i176.LoadRoleDetail>(
+    () => _i176.LoadRoleDetail(gh<_i681.RoleCatalogRepository>()),
+  );
+  gh.factory<_i1036.DeleteRole>(
+    () => _i1036.DeleteRole(gh<_i681.RoleCatalogRepository>()),
+  );
+  gh.factory<_i702.LoadAffectedUserCount>(
+    () => _i702.LoadAffectedUserCount(gh<_i681.RoleCatalogRepository>()),
+  );
+  gh.factory<_i518.LoadPermissionCatalog>(
+    () => _i518.LoadPermissionCatalog(gh<_i681.RoleCatalogRepository>()),
+  );
+  gh.factory<_i144.LoadRoleUserIds>(
+    () => _i144.LoadRoleUserIds(gh<_i681.RoleCatalogRepository>()),
+  );
+  gh.factory<_i315.MutateRole>(
+    () => _i315.MutateRole(gh<_i681.RoleCatalogRepository>()),
+  );
   gh.factory<_i858.ApproveAccount>(
     () => _i858.ApproveAccount(gh<_i120.AccountApprovalsRepository>()),
   );
@@ -158,6 +233,18 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i431.RejectAccount>(
     () => _i431.RejectAccount(gh<_i120.AccountApprovalsRepository>()),
+  );
+  gh.factory<_i650.AssignRoleToUser>(
+    () => _i650.AssignRoleToUser(gh<_i765.UserSearchRepository>()),
+  );
+  gh.factory<_i646.LoadUserAssignments>(
+    () => _i646.LoadUserAssignments(gh<_i765.UserSearchRepository>()),
+  );
+  gh.factory<_i950.RevokeRoleFromUser>(
+    () => _i950.RevokeRoleFromUser(gh<_i765.UserSearchRepository>()),
+  );
+  gh.factory<_i143.SearchUsers>(
+    () => _i143.SearchUsers(gh<_i765.UserSearchRepository>()),
   );
   gh.factoryParam<_i960.LocaleCubit, _i264.Locale?, dynamic>(
     (initialLocale, _) => _i960.LocaleCubit(
@@ -189,11 +276,30 @@ _i174.GetIt $initGetIt(
       gh<_i941.LoadAssignedRoles>(),
     ),
   );
+  gh.factory<_i669.AssignRoleBloc>(
+    () => _i669.AssignRoleBloc(
+      gh<_i143.SearchUsers>(),
+      gh<_i646.LoadUserAssignments>(),
+      gh<_i650.AssignRoleToUser>(),
+      gh<_i950.RevokeRoleFromUser>(),
+      gh<_i1018.ListRoles>(),
+    ),
+  );
   gh.factory<_i807.OnboardingCubit>(
     () => _i807.OnboardingCubit(gh<_i430.OnboardingRepository>()),
   );
   gh.lazySingleton<_i583.GoRouter>(
     () => routerModule.router(gh<_i354.AppLogger>(), gh<_i797.AuthBloc>()),
+  );
+  gh.factory<_i885.RoleEditorBloc>(
+    () => _i885.RoleEditorBloc(
+      gh<_i176.LoadRoleDetail>(),
+      gh<_i518.LoadPermissionCatalog>(),
+      gh<_i315.MutateRole>(),
+    ),
+  );
+  gh.factory<_i329.RolesListBloc>(
+    () => _i329.RolesListBloc(gh<_i1018.ListRoles>()),
   );
   return getIt;
 }

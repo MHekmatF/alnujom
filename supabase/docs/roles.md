@@ -23,10 +23,12 @@ Stores the catalog of roles that can be assigned to users. Roles are named sets 
 | Operation | Policy | Gating condition |
 |-----------|--------|------------------|
 | SELECT    | `roles_read_all_authenticated` | Every authenticated user |
-| INSERT    | — (none in Phase 6) | Seed is the only inserter; Phase 7 adds mutation policies |
-| UPDATE    | — (none in Phase 6) | `display_name` / `description` editable via Phase 7 super-admin UI |
-| DELETE    | — (none in Phase 6) | |
+| INSERT    | `roles_phase7_insert` | `current_user_has_permission('roles.create')` |
+| UPDATE    | `roles_phase7_update` | `current_user_has_permission('roles.update')` |
+| DELETE    | `roles_phase7_delete` | `current_user_has_permission('roles.delete')` |
 | Anon      | Blocked by Phase 4 RLS-default-block | |
+
+Phase 7 write policies are documented in [`supabase/policies/roles_phase7_write.sql`](../policies/roles_phase7_write.sql) and are applied inline by `20260516120002_create_phase7_write_policies.sql`.
 
 ## Triggers
 
@@ -35,6 +37,13 @@ Stores the catalog of roles that can be assigned to users. Roles are named sets 
   - `TG_OP = 'DELETE'` and `OLD.is_system = TRUE`
   - `TG_OP = 'UPDATE'` and `OLD.is_system = TRUE` and `NEW.key IS DISTINCT FROM OLD.key`
   - Updates to `display_name` or `description` on system rows are **allowed**.
+- `trg_roles_audit_created` — AFTER INSERT, emits `audit_logs.action = 'role.created'`.
+- `trg_roles_audit_updated` — AFTER UPDATE, emits `audit_logs.action = 'role.updated'`.
+- `trg_roles_audit_deleted` — AFTER DELETE, emits `audit_logs.action = 'role.deleted'`.
+
+## Phase 7 Mutation Surface
+
+In-app role mutations use `public.mutate_role(...)` as the canonical surface. The RPC wraps role row changes and role-permission deltas in one database transaction, re-checks the required permission keys server-side, uses `roles.updated_at` for optimistic locking, and enforces `super_admin` permission-set immutability. Direct table writes remain RLS-gated and trigger-audited as defense-in-depth.
 
 ## Seeded System Roles (7 rows)
 

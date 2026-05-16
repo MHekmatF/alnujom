@@ -655,6 +655,313 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('admin_home_empty_body', (loc) => loc.admin_home_empty_body);
 
   @override
+  String get adminTileSuperAdmin =>
+      _resolve('adminTileSuperAdmin', (loc) => loc.adminTileSuperAdmin);
+
+  @override
+  String get superAdminRolesListTitle => _resolve(
+    'superAdminRolesListTitle',
+    (loc) => loc.superAdminRolesListTitle,
+  );
+
+  @override
+  String get roleBadgeSystem =>
+      _resolve('roleBadgeSystem', (loc) => loc.roleBadgeSystem);
+
+  @override
+  String rolePermissionsCount(int count) => _resolve(
+    'rolePermissionsCount',
+    (loc) => loc.rolePermissionsCount(count),
+  );
+
+  @override
+  String get permissionCategoryUsers =>
+      _resolve('permissionCategoryUsers', (loc) => loc.permissionCategoryUsers);
+
+  @override
+  String get permissionCategoryListings => _resolve(
+    'permissionCategoryListings',
+    (loc) => loc.permissionCategoryListings,
+  );
+
+  @override
+  String get permissionCategoryRoles =>
+      _resolve('permissionCategoryRoles', (loc) => loc.permissionCategoryRoles);
+
+  @override
+  String get permissionCategoryLocations => _resolve(
+    'permissionCategoryLocations',
+    (loc) => loc.permissionCategoryLocations,
+  );
+
+  @override
+  String get permissionCategoryCurrencies => _resolve(
+    'permissionCategoryCurrencies',
+    (loc) => loc.permissionCategoryCurrencies,
+  );
+
+  @override
+  String get permissionCategoryAds =>
+      _resolve('permissionCategoryAds', (loc) => loc.permissionCategoryAds);
+
+  @override
+  String get permissionCategoryReports => _resolve(
+    'permissionCategoryReports',
+    (loc) => loc.permissionCategoryReports,
+  );
+
+  @override
+  String get permissionCategoryAgencies => _resolve(
+    'permissionCategoryAgencies',
+    (loc) => loc.permissionCategoryAgencies,
+  );
+
+  @override
+  String get permissionCategorySettings => _resolve(
+    'permissionCategorySettings',
+    (loc) => loc.permissionCategorySettings,
+  );
+
+  @override
+  String get permissionCategoryAudit =>
+      _resolve('permissionCategoryAudit', (loc) => loc.permissionCategoryAudit);
+
+  @override
+  String get permissionCategoryInquiries => _resolve(
+    'permissionCategoryInquiries',
+    (loc) => loc.permissionCategoryInquiries,
+  );
+
+  @override
+  String get permissionCategoryPermissions => _resolve(
+    'permissionCategoryPermissions',
+    (loc) => loc.permissionCategoryPermissions,
+  );
+
+  @override
+  String get superAdminPermissionsLocked => _resolve(
+    'superAdminPermissionsLocked',
+    (loc) => loc.superAdminPermissionsLocked,
+  );
+
+  @override
+  String get superAdminRoleEditorTitle => _resolve(
+    'superAdminRoleEditorTitle',
+    (loc) => loc.superAdminRoleEditorTitle,
+  );
+
+  @override
+  String get superAdminCreateRoleTitle => _resolve(
+    'superAdminCreateRoleTitle',
+    (loc) => loc.superAdminCreateRoleTitle,
+  );
+
+  @override
+  String get superAdminAssignRoleTitle => _resolve(
+    'superAdminAssignRoleTitle',
+    (loc) => loc.superAdminAssignRoleTitle,
+  );
+
+  @override
+  String get roleKeyLabel =>
+      _resolve('roleKeyLabel', (loc) => loc.roleKeyLabel);
+
+  @override
+  String get roleDisplayNameLabelAr =>
+      _resolve('roleDisplayNameLabelAr', (loc) => loc.roleDisplayNameLabelAr);
+
+  @override
+  String get roleDisplayNameLabelEn =>
+      _resolve('roleDisplayNameLabelEn', (loc) => loc.roleDisplayNameLabelEn);
+
+  @override
+  String get roleDescriptionLabel =>
+      _resolve('roleDescriptionLabel', (loc) => loc.roleDescriptionLabel);
+
+  @override
+  String get actionCreate =>
+      _resolve('actionCreate', (loc) => loc.actionCreate);
+
+  @override
+  String get actionDelete =>
+      _resolve('actionDelete', (loc) => loc.actionDelete);
+
+  @override
+  String get actionCancel =>
+      _resolve('actionCancel', (loc) => loc.actionCancel);
+
+  @override
+  String get actionReload =>
+      _resolve('actionReload', (loc) => loc.actionReload);
+
+  @override
+  String get actionGrant => _resolve('actionGrant', (loc) => loc.actionGrant);
+
+  @override
+  String get actionRevoke =>
+      _resolve('actionRevoke', (loc) => loc.actionRevoke);
+
+  @override
+  String get confirmDeleteRoleTitle =>
+      _resolve('confirmDeleteRoleTitle', (loc) => loc.confirmDeleteRoleTitle);
+
+  @override
+  String get confirmDeleteRoleBody =>
+      _resolve('confirmDeleteRoleBody', (loc) => loc.confirmDeleteRoleBody);
+
+  @override
+  String confirmDeleteRoleBodyWithUsers(int count) => _resolve(
+    'confirmDeleteRoleBodyWithUsers',
+    (loc) => loc.confirmDeleteRoleBodyWithUsers(count),
+  );
+
+  @override
+  String get confirmGrantRoleTitle =>
+      _resolve('confirmGrantRoleTitle', (loc) => loc.confirmGrantRoleTitle);
+
+  @override
+  String get confirmGrantRoleBody =>
+      _resolve('confirmGrantRoleBody', (loc) => loc.confirmGrantRoleBody);
+
+  @override
+  String get confirmRevokeRoleTitle =>
+      _resolve('confirmRevokeRoleTitle', (loc) => loc.confirmRevokeRoleTitle);
+
+  @override
+  String get confirmRevokeRoleBody =>
+      _resolve('confirmRevokeRoleBody', (loc) => loc.confirmRevokeRoleBody);
+
+  @override
+  String get confirmSuperAdminGrantTitle => _resolve(
+    'confirmSuperAdminGrantTitle',
+    (loc) => loc.confirmSuperAdminGrantTitle,
+  );
+
+  @override
+  String get confirmSuperAdminGrantBody => _resolve(
+    'confirmSuperAdminGrantBody',
+    (loc) => loc.confirmSuperAdminGrantBody,
+  );
+
+  @override
+  String get confirmSuperAdminGrantAckButton => _resolve(
+    'confirmSuperAdminGrantAckButton',
+    (loc) => loc.confirmSuperAdminGrantAckButton,
+  );
+
+  @override
+  String get confirmSuperAdminGrantTypedMatchLabel => _resolve(
+    'confirmSuperAdminGrantTypedMatchLabel',
+    (loc) => loc.confirmSuperAdminGrantTypedMatchLabel,
+  );
+
+  @override
+  String get confirmSuperAdminGrantConfirmButton => _resolve(
+    'confirmSuperAdminGrantConfirmButton',
+    (loc) => loc.confirmSuperAdminGrantConfirmButton,
+  );
+
+  @override
+  String get userSearchPlaceholder =>
+      _resolve('userSearchPlaceholder', (loc) => loc.userSearchPlaceholder);
+
+  @override
+  String get userSearchEmptyResults =>
+      _resolve('userSearchEmptyResults', (loc) => loc.userSearchEmptyResults);
+
+  @override
+  String get errorRoleEditConflict =>
+      _resolve('errorRoleEditConflict', (loc) => loc.errorRoleEditConflict);
+
+  @override
+  String get errorSuperAdminPermissionsImmutable => _resolve(
+    'errorSuperAdminPermissionsImmutable',
+    (loc) => loc.errorSuperAdminPermissionsImmutable,
+  );
+
+  @override
+  String get errorSystemRoleImmutable => _resolve(
+    'errorSystemRoleImmutable',
+    (loc) => loc.errorSystemRoleImmutable,
+  );
+
+  @override
+  String get errorRolePermissionDenied => _resolve(
+    'errorRolePermissionDenied',
+    (loc) => loc.errorRolePermissionDenied,
+  );
+
+  @override
+  String get errorGenericBackend =>
+      _resolve('errorGenericBackend', (loc) => loc.errorGenericBackend);
+
+  @override
+  String get errorRoleKeyDuplicate =>
+      _resolve('errorRoleKeyDuplicate', (loc) => loc.errorRoleKeyDuplicate);
+
+  @override
+  String get errorRoleKeyInvalid =>
+      _resolve('errorRoleKeyInvalid', (loc) => loc.errorRoleKeyInvalid);
+
+  @override
+  String get errorRoleDisplayNameRequired => _resolve(
+    'errorRoleDisplayNameRequired',
+    (loc) => loc.errorRoleDisplayNameRequired,
+  );
+
+  @override
+  String errorRoleHasUsers(int count) =>
+      _resolve('errorRoleHasUsers', (loc) => loc.errorRoleHasUsers(count));
+
+  @override
+  String get errorSuperAdminGrantConfirmationFailed => _resolve(
+    'errorSuperAdminGrantConfirmationFailed',
+    (loc) => loc.errorSuperAdminGrantConfirmationFailed,
+  );
+
+  @override
+  String get errorAssignPermissionDenied => _resolve(
+    'errorAssignPermissionDenied',
+    (loc) => loc.errorAssignPermissionDenied,
+  );
+
+  @override
+  String get errorRevokePermissionDenied => _resolve(
+    'errorRevokePermissionDenied',
+    (loc) => loc.errorRevokePermissionDenied,
+  );
+
+  @override
+  String get errorSuperAdminSelfRevokeForbidden => _resolve(
+    'errorSuperAdminSelfRevokeForbidden',
+    (loc) => loc.errorSuperAdminSelfRevokeForbidden,
+  );
+
+  @override
+  String get errorUserAlreadyHoldsRole => _resolve(
+    'errorUserAlreadyHoldsRole',
+    (loc) => loc.errorUserAlreadyHoldsRole,
+  );
+
+  @override
+  String get errorUserDoesNotHoldRole => _resolve(
+    'errorUserDoesNotHoldRole',
+    (loc) => loc.errorUserDoesNotHoldRole,
+  );
+
+  @override
+  String errorRoleSaveFailed(String reason) =>
+      _resolve('errorRoleSaveFailed', (loc) => loc.errorRoleSaveFailed(reason));
+
+  @override
+  String get assignRoleSucceeded =>
+      _resolve('assignRoleSucceeded', (loc) => loc.assignRoleSucceeded);
+
+  @override
+  String get revokeRoleSucceeded =>
+      _resolve('revokeRoleSucceeded', (loc) => loc.revokeRoleSucceeded);
+
+  @override
   String get profile_section_roles =>
       _resolve('profile_section_roles', (loc) => loc.profile_section_roles);
 }

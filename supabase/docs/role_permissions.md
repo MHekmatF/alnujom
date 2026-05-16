@@ -25,8 +25,23 @@ Junction table mapping roles to their permitted actions. The Flutter `Permission
 | Operation | Policy | Gating condition |
 |-----------|--------|------------------|
 | SELECT    | `role_permissions_read_all_authenticated` | Every authenticated user (needed by PermissionChecker join) |
-| INSERT/UPDATE/DELETE | — (none in Phase 6) | Phase 7 super-admin UI adds mutation policies |
+| INSERT   | `role_permissions_phase7_insert` | `current_user_has_permission('permissions.manage')` |
+| UPDATE   | — | Rows are immutable post-insert |
+| DELETE   | `role_permissions_phase7_delete` | `current_user_has_permission('permissions.manage')` |
 | Anon      | Blocked by Phase 4 RLS-default-block | |
+
+Phase 7 write policies are documented in [`supabase/policies/role_permissions_phase7_write.sql`](../policies/role_permissions_phase7_write.sql) and are applied inline by `20260516120002_create_phase7_write_policies.sql`.
+
+## Phase 7 Mutation Surface
+
+Role-permission changes are computed server-side by `public.mutate_role(...)`. Clients pass the full target permission-key set; the RPC compares it with the current mapping, inserts newly-added permissions, and deletes removed permissions. This avoids client-side TOCTOU delta bugs and keeps audit rows at row-level granularity.
+
+## Phase 7 Audit Coverage
+
+- `trg_role_permissions_audit_granted` — AFTER INSERT, emits `audit_logs.action = 'role_permission.granted'` with `target_id = role_id`.
+- `trg_role_permissions_audit_revoked` — AFTER DELETE, emits `audit_logs.action = 'role_permission.revoked'` with `target_id = role_id`.
+
+Deleting a custom role cascades to this table and emits one `role_permission.revoked` row for each removed mapping.
 
 ## Seeded Default Mappings
 

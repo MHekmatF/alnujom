@@ -26,6 +26,18 @@ No `updated_at` — rows are immutable.
 | INSERT/UPDATE/DELETE | — (none in Phase 6) | Immutable in v1; future specs add keys via new migrations |
 | Anon      | Blocked by Phase 4 RLS-default-block | |
 
+Phase 7 keeps `permissions` immutable in the in-app v1 surface. No client INSERT/UPDATE/DELETE policies are added, and the super-admin UI does not mutate permission catalog rows.
+
+## Phase 7 Defensive Audit Coverage
+
+Phase 7 adds defensive audit triggers for future catalog-maintenance migrations or privileged maintenance scripts:
+
+- `trg_permissions_audit_created` — AFTER INSERT, emits `audit_logs.action = 'permission.created'`.
+- `trg_permissions_audit_updated` — AFTER UPDATE, emits `audit_logs.action = 'permission.updated'`.
+- `trg_permissions_audit_deleted` — AFTER DELETE, emits `audit_logs.action = 'permission.deleted'`.
+
+These triggers do not change the v1 immutability rule; they ensure any future mutation is captured automatically.
+
 ## Seeded Catalog (24 rows)
 
 | `key`                | `category`   |

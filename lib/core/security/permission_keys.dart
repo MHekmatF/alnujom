@@ -69,4 +69,14 @@ abstract class PermissionKeys {
     auditLogsView,
     inquiriesViewAll,
   };
+
+  /// Phase 7: keys that gate the super-admin tile on AdminHomePage.
+  /// Currently { rolesView, rolesCreate, rolesUpdate, rolesDelete, permissionsManage }.
+  static const Set<String> superAdminCategoryKeys = <String>{
+    rolesView,
+    rolesCreate,
+    rolesUpdate,
+    rolesDelete,
+    permissionsManage,
+  };
 }
