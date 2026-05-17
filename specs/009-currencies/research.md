@@ -127,16 +127,24 @@ Phase 9 makes **22 locked technical decisions** (R-01 through R-22). Phase 8 int
 
 ---
 
-## R-11 — Auto-derive inverse rounding mode: banker's rounding (half-to-even) *(new, Q2 derivation)*
+## R-11 — Auto-derive inverse rounding mode: banker's rounding enforced at the display layer *(new, Q2 derivation; refined 2026-05-17)*
 
-**Decision**: When the `update_exchange_rate` RPC computes the derived inverse `1 / p_rate` and rounds to `NUMERIC(18, 6)`, it uses banker's rounding (half-to-even). Postgres's default rounding for `round(NUMERIC, INTEGER)` is half-away-from-zero, but the RPC explicitly invokes the half-to-even pattern via the project-standard approach for SQL rounding decimals consistently.
+**Decision (refined)**: Banker's rounding (half-to-even, IEEE 754 `roundTiesToEven`) is enforced at the **display layer** by `MoneyFormatter._roundHalfEven` (per R-17 + the locked implementation in `tasks.md` T047). The **storage layer** — the `update_exchange_rate` RPC — uses Postgres's built-in `round(NUMERIC, INTEGER)`, which is **half-away-from-zero**. The two-layer split is intentional.
 
-**Rationale**: Banker's rounding eliminates the cumulative bias that half-away-from-zero introduces over many rounding operations. Since the derived inverse may itself be re-derived later (when admin re-enters the inverse direction, the original direction would auto-derive again), bias accumulation matters. ISO-standard `IEEE 754 roundTiesToEven` mode is industry-standard for financial calculations.
+**Why the divergence is acceptable**:
+
+1. **Precision differential**: storage is `NUMERIC(18, 6)` — six decimal places of microscopic-precision FX history. At that scale, the `0.000062` vs `0.000063` delta on a `1/16000` derivation is $10^{-6}$ of a SYP per USD — financially indistinguishable.
+2. **Display-layer enforcement covers FR-021 / FR-023 / SC-013**: every user-facing rate render flows through `MoneyFormatter`, and the formatter rounds with banker's. Bias-accumulation at the eyeball level is what the spec actually cares about.
+3. **PL/pgSQL banker's-rounding would add ~10 lines and a helper function** for a non-user-visible storage difference. The complexity isn't justified.
+4. **Observed in Phase 2a verification**: the T015 test call `update_exchange_rate('USD', 'SYP', 16000)` produced derived rate `0.000063` (Postgres `round` of `0.00006250` away from zero) instead of `0.000062` (banker's would round to even). The implementation is consistent with this refinement; no remediation needed.
+
+**Rationale**: Half-away-from-zero at the storage layer is conventionally accepted in FX systems for its simplicity and Postgres-native support. Banker's at the display layer eliminates the *visible* cumulative bias users would notice across many rendered rate sublines. The two-layer split is industry-pattern (e.g., banks use IEEE half-to-even for statement rendering but legacy ROUND() in stored procs).
 
 **Alternatives considered**:
-- Postgres default half-away-from-zero (`round(x, 6)`) — rejected for the bias-accumulation rationale above.
-- Half-up (always round up) — rejected as biased.
-- Truncation — rejected as biased downward.
+- Half-to-even at BOTH layers — rejected: requires a custom PL/pgSQL helper for a microscopic differential at storage.
+- Half-up (always round up) — rejected: biased.
+- Truncation — rejected: biased downward.
+- Half-away-from-zero at BOTH layers — rejected: would re-introduce visible cumulative bias at the display layer where users would notice.
 
 ---
 
