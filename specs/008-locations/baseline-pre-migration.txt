@@ -1,0 +1,204 @@
+Phase 8 — Locations Catalog
+Pre-Migration Baseline Snapshot
+Captured: 2026-05-17 (Session start, before T006–T018 migrations applied)
+Reference: specs/008-locations/tasks.md T005
+
+This file is the rollback reference for Phase 8 AND the analyzer-comparison baseline for T106.
+Do NOT edit after capture.
+
+================================================================================
+Section A — Supabase MCP list_tables (public schema)
+================================================================================
+
+Tables in public schema (8 total, pre-Phase-8):
+  public.profiles                   — RLS enabled, 5 rows
+  public.user_preferences           — RLS enabled, 5 rows
+  public.audit_logs                 — RLS enabled, 77 rows
+  public.account_approval_requests  — RLS enabled, 5 rows (comment: Phase 5 approval lifecycle)
+  public.roles                      — RLS enabled, 7 rows
+  public.permissions                — RLS enabled, 24 rows
+  public.role_permissions           — RLS enabled, 46 rows
+  public.user_roles                 — RLS enabled, 8 rows
+
+Absent (expected — Phase 8 not yet applied):
+  governorates, cities, areas — NOT present
+
+================================================================================
+Section B — Supabase MCP list_migrations (ordered)
+================================================================================
+
+version               | name
+----------------------|----------------------------------------------------------
+00000000000000        | 00000000000000_init_extensions
+20260506215019        | 20260506120001_init_enums
+20260509031407        | 20260506120002_create_profiles
+20260509031422        | 20260506120003_create_user_preferences
+20260509063740        | 20260506120004_create_audit_logs
+20260509063806        | 20260506120005_enable_rls_default
+20260509074730        | 20260506120006_enable_vault
+20260510143208        | 20260510120001_create_account_approval_requests
+20260510143312        | 20260510120002_profiles_add_is_admin
+20260510143333        | 20260510120003_swap_admin_predicate
+20260510143436        | 20260510120004_profiles_vault_pii_helpers
+20260510143514        | 20260510120005_attach_audit_trigger_account_approval_requests
+20260510143743        | 20260510120006_phase5_advisor_hardening
+20260514121226        | sync_auth_email_with_profile
+20260514130624        | 20260514120002_phase8_advisor_hardening
+20260515175338        | 20260515120001_create_roles
+20260515175414        | 20260515120002_create_permissions
+20260515175443        | 20260515120003_create_role_permissions
+20260515175616        | 20260515120004_create_user_roles
+20260515175640        | 20260515120005_create_permission_predicate
+20260515175706        | 20260515120006_swap_admin_predicate_to_role_check
+20260515175736        | 20260515120008_phase6_advisor_hardening
+20260515184632        | 20260515120007_backfill_is_admin_and_drop
+20260515184746        | 20260515120009_fix_enforce_profile_status_search_path
+20260515200706        | 20260515120001_create_roles              [duplicate tracker row — known]
+20260515200715        | 20260515120002_create_permissions         [duplicate tracker row — known]
+20260515200722        | 20260515120003_create_role_permissions    [duplicate tracker row — known]
+20260515200731        | 20260515120004_create_user_roles          [duplicate tracker row — known]
+20260515200807        | 20260515120005_create_permission_predicate [duplicate tracker row — known]
+20260515200817        | 20260515120006_swap_admin_predicate_to_role_check [duplicate — known]
+20260515200833        | 20260515120008_phase6_advisor_hardening   [duplicate tracker row — known]
+20260516092321        | 20260516120001_create_phase7_audit_triggers
+20260516092528        | 20260516120002_create_phase7_write_policies
+20260516092838        | 20260516120003_create_mutate_role_rpc
+20260516093022        | 20260516120004_create_user_role_assignment_rpcs
+20260516093147        | 20260516120005_phase7_advisor_hardening
+20260516094201        | 20260516120001_create_phase7_audit_triggers [duplicate — known]
+20260516094237        | 20260516120002_create_phase7_write_policies [duplicate — known]
+20260516094338        | 20260516120003_create_mutate_role_rpc       [duplicate — known]
+20260516094433        | 20260516120004_create_user_role_assignment_rpcs [duplicate — known]
+20260516094518        | 20260516120005_phase7_advisor_hardening     [duplicate — known]
+20260516115904        | 20260516120003_create_mutate_role_rpc       [duplicate — known]
+20260516120235        | 20260516120003_create_mutate_role_rpc       [duplicate — known]
+
+Note: The list_migrations output shows several duplicate tracker rows for Phase 6 and Phase 7
+migrations. This is the known behavior documented in project memory
+`project_supabase_mcp_apply_migration.md`: re-applying an existing migration name adds a
+duplicate tracker row. The LAST entry by sort order is a duplicate of
+`20260516120003_create_mutate_role_rpc`. However, `20260516120005_phase7_advisor_hardening`
+IS present (at version 20260516093147 and 20260516094518), and Phase 8 migrations
+(`20260517120001` through `20260517120005`) are ALL absent — confirming pre-Phase-8 state.
+
+================================================================================
+Section C — Pre-Phase-8 absence check: public.governorates
+================================================================================
+
+SQL executed: SELECT count(*) FROM public.governorates
+Result: ERROR 42P01: relation "public.governorates" does not exist
+
+This confirms Phase 8 tables (governorates, cities, areas) are NOT yet present.
+This is the expected pre-migration state. Phase 8 may proceed.
+
+================================================================================
+Section D — locations.manage permission row
+================================================================================
+
+SQL executed: SELECT key FROM public.permissions WHERE key='locations.manage'
+Result: [{"key":"locations.manage"}]
+
+One row confirmed. The Phase 6 §9.1 permission key exists; Phase 8 write policies
+can reference it. Phase 8 does NOT add any new permission rows (SC-018: total remains 24).
+
+================================================================================
+Section E — Flutter analyzer baseline (pre-Phase-8 code)
+================================================================================
+
+Command: flutter analyze --no-fatal-infos --no-fatal-warnings
+Working directory: H:\alnujom-project
+Flutter version: (current project version)
+
+Output:
+  Resolving dependencies...
+  Analyzing alnujom-project...
+  No issues found! (ran in 12.8s)
+
+Baseline: ZERO analyzer warnings/errors.
+T106 (post-implementation analyzer pass) MUST also report zero issues.
+Any warning that appears during Phase 8 implementation that is absent from this baseline
+is a Phase 8 regression and MUST be fixed before Phase 8 is considered complete.
+
+================================================================================
+End of baseline snapshot
+================================================================================
+
+
+================================================================================
+ADDENDUM — Post-Phase-2 state (captured 2026-05-17 after T006–T022)
+================================================================================
+
+This addendum is appended (not part of the frozen pre-migration baseline) per
+T013 ("record the actual count in baseline-pre-migration.txt's post-Phase-8
+addendum"). The Section A–E baseline above is unchanged.
+
+Section F — Post-Phase-2 row counts and migration tracker
+--------------------------------------------------------------------------------
+
+Tables added to public schema (3):
+  public.governorates  — RLS enabled, 14 rows, all is_system=true
+  public.cities        — RLS enabled, 32 rows, all is_system=true
+  public.areas         — RLS enabled,  9 rows, NO is_system column
+
+Audit rows produced by seed (trigger-before-seed, R-08):
+  governorate.created  — 14 rows, actor_user_id IS NULL
+  city.created         — 32 rows, actor_user_id IS NULL
+  area.created         —  9 rows, actor_user_id IS NULL
+  Total                = 55 new audit rows from Phase 8 seed
+
+Permission count unchanged: 24 rows (SC-018 preserved — Phase 8 added zero
+permission rows; the existing `locations.manage` key from Phase 6 §9.1 is the
+sole gate for write access).
+
+Phase 8 migrations recorded in supabase_migrations.schema_migrations:
+  20260517085020  20260517120001_create_governorates
+  20260517085244  20260517120002_create_cities
+  20260517085439  20260517120003_create_areas
+  20260517085529  20260517120004_create_locations_indexes
+  20260517085614  20260517120005_phase8_advisor_hardening
+
+Trigger inventory:
+  governorates  — 5 (3 audit + set_updated_at + enforce_immutability)
+  cities        — 5 (3 audit + set_updated_at + enforce_immutability)
+  areas         — 4 (3 audit + set_updated_at; NO immutability per Q3)
+
+RLS policy inventory: 12 total (4 per table — SELECT + INSERT + UPDATE + DELETE).
+
+Index inventory: 8 (idx_governorates_position_key, idx_governorates_is_active,
+idx_cities_governorate_id, idx_cities_is_active, idx_cities_position_key,
+idx_areas_city_id, idx_areas_is_active, idx_areas_position_key).
+
+Section G — Phase 2 advisor delta
+--------------------------------------------------------------------------------
+
+Supabase MCP get_advisors type='security' delta vs. pre-Phase-8 baseline: ZERO
+new entries. Specifically:
+  - enforce_governorate_system_immutability — NOT in advisor (function lacks
+    SECURITY DEFINER per Phase 6 precedent; deviates from data-model.md § 3.2
+    documented body but matches the actual shipped final state).
+  - enforce_city_system_immutability — NOT in advisor (same).
+  - governorates / cities / areas — NO rls_disabled,
+    policy_exists_rls_disabled, or function_search_path_mutable entries.
+
+All advisor entries present are pre-existing from Phases 4–7 (set_updated_at,
+handle_new_auth_user, the vault function suite, current_user_*, the Phase 7
+RPCs, plus auth_leaked_password_protection).
+
+Section H — Implementation deviation from documented data-model.md § 3.2
+--------------------------------------------------------------------------------
+
+The shipped immutability functions enforce_governorate_system_immutability and
+enforce_city_system_immutability do NOT carry SECURITY DEFINER, contradicting
+the original data-model.md § 3.2 body. Reason: SECURITY DEFINER triggered
+Supabase advisor warnings during T018, and Phase 6's actual shipped
+enforce_role_system_immutability does NOT use SECURITY DEFINER either. Trigger
+functions only read OLD.* and RAISE EXCEPTION — they do not need owner
+privileges. The data-model.md spec has been updated in the same Phase 2
+session to add a note above the § 3.2 code block explaining the deviation,
+and the canonical body shown there now omits SECURITY DEFINER. Live state
+verified: pg_proc.prosecdef=false for both functions; proconfig contains
+search_path=public,auth.
+
+================================================================================
+End of post-Phase-2 addendum
+================================================================================
