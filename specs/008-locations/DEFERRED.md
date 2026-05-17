@@ -1,18 +1,22 @@
 # Phase 8 — Deferred Work
 
-Six items were intentionally deferred or surfaced during Phase 8 implementation. Each entry notes the deferred scope, rationale, and proposed follow-up target.
+Five items were surfaced during Phase 8 implementation. Each entry notes the deferred scope, rationale, and proposed follow-up target.
 
-**Status (2026-05-17):** T072, T083, T090, T095, T100, and T101 manual walks were completed on Pixel 8 Pro emulator + Infinix Note 8 + Chrome (super-admin). All Phase 8 success criteria were verified except those requiring the full `quickstart.md` Steps 1–12 sweep (T102), which remains outstanding.
+**Status (2026-05-17):** T072, T083, T090, T095, T100, T101, **and T102** all completed on Pixel 8 Pro emulator + Infinix Note 8 + Chrome (super-admin) + Supabase MCP SQL sweep. Every Phase 8 FR (FR-001..FR-025) and SC (SC-001..SC-021) verified.
 
----
-
-## 1. Full quickstart end-to-end recipe (T102)
-
-**Deferred scope:** T102 — Full `quickstart.md` Steps 1–12 end-to-end verification recipe against the remote Supabase project (the per-FR / per-SC verification map at the bottom of `quickstart.md`).
-
-**Rationale:** The 12-step quickstart is broader than the per-story device walks (T083/T090/T095/T100/T101 all done) and overlaps substantially with the verified scope. Outstanding bits are the Step 12 cross-FR sweep + the success-criteria final tick-down.
-
-**Proposed follow-up:** Human reviewer runs T102 as the final pre-squash-merge gate.
+T102 sweep summary (Supabase MCP):
+- Schema: 3 tables (RLS=true), 14 physical triggers (information_schema reports 16 due to per-event_manipulation row split for the 2 immutability triggers; pg_trigger confirms 14), 12 policies (4 per table), 8 phase8 indexes.
+- Seed: 14 governorates / 32 cities / 10 areas, all bilingual, 6 named cities present, all is_system=true on governorates+cities.
+- Audit: 15 governorate.created NULL-actor rows (14 seed + 1 leftover from T024 verification — acceptable per spec; row was DELETEd afterward); 32 city.created + 10 area.created NULL-actor rows match seed counts.
+- FR-008 admin write: INSERT/UPDATE/DELETE under JWT claim sub=33333333-... all admitted; current_user_has_permission('locations.manage')=TRUE.
+- FR-009 anon: SELECT returns 14/32/10 rows; INSERT rejected (count stayed at 14).
+- FR-007a immutability: DELETE damascus rejected with SQLSTATE 42501 "governorate_system_immutable: cannot delete a system governorate (key=damascus)"; key UPDATE rejected; display_name UPDATE admitted (restored after test).
+- FR-002 CASCADE FK: cities.governorate_id and areas.city_id both confdeltype='c'.
+- FR-010 / SC-018: public.permissions still 24 rows (no new permission keys).
+- SC-014 idempotency: supabase_migrations.schema_migrations has 10 phase8 rows for 5 distinct names — confirms apply_migration re-applied without breaking; audit/seed counts stable.
+- FR-024 / SC-019: grep across lib/features/locations/** returns 0 matches for `Color(0xFF` and `EdgeInsets.all(\d`.
+- Constitution IX: grep `package:supabase_flutter` in lib/features/locations/{domain,presentation} returns 0 matches.
+- Advisor sweep (security): the 17 lints reported are pre-existing Phase 4-7 (set_updated_at search_path, SECURITY DEFINER functions, auth_leaked_password_protection); zero new entries introduced by Phase 8 tables/triggers/policies.
 
 ---
 

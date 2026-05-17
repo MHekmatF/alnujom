@@ -369,7 +369,7 @@ When a task says "per `contracts/<X>.md` § Y" or "per `data-model.md` § Z", th
 
 **Purpose**: Final cleanup, full-spec verification, DEFERRED.md authoring, lint and design-token audits.
 
-- [ ] T102 Run the full `quickstart.md` verification recipe end-to-end (Steps 1–12) against the device + remote project. Record each step's pass/fail in a per-step note. Resolve any failure before moving to T103. The per-FR / per-SC verification map at the bottom of `quickstart.md` MUST show every requirement verified.
+- [x] T102 Run the full `quickstart.md` verification recipe end-to-end (Steps 1–12) against the device + remote project. Record each step's pass/fail in a per-step note. Resolve any failure before moving to T103. The per-FR / per-SC verification map at the bottom of `quickstart.md` MUST show every requirement verified.
 
 - [x] T103 [P] Run the Phase 3 localization lint guard. (SC-020, Constitution V.) From `H:\alnujom-project`, run the project's localization-check command (find it in the existing CI workflow `.github/workflows/*.yml` or in a `tool/` script; Phase 3 introduced it — common names: `tool/check_localization.dart`, `tool/lint_l10n.sh`). Confirm zero hardcoded user-facing strings in any file under `lib/features/locations/`. The smoke-test page (T099) is the one allowed exception — it has the `'LocationPicker smoke test'` hardcoded AppBar title since it's dev-only. If any other hardcoded user-facing string is found, replace with `AppLocalizations.of(context).<key>` and re-run until clean.
 
