@@ -120,25 +120,25 @@ When a task says "per `contracts/<X>.md` § Y" or "per `data-model.md` § Z", th
 
 **⚠️ CRITICAL**: No user story task may begin until Phase 2b is complete.
 
-- [ ] T021 [P] Create the empty directory structure under `H:\alnujom-project\lib\features\currencies\`: `data\datasources\`, `data\dtos\`, `data\repositories\`, `domain\entities\`, `domain\repositories\`, `domain\usecases\`, `presentation\bloc\`, `presentation\pages\`, `presentation\widgets\`. Use 9 `mkdir -p` calls (or PowerShell equivalent: `New-Item -ItemType Directory -Force -Path <path>` for each).
+- [X] T021 [P] Create the empty directory structure under `H:\alnujom-project\lib\features\currencies\`: `data\datasources\`, `data\dtos\`, `data\repositories\`, `domain\entities\`, `domain\repositories\`, `domain\usecases\`, `presentation\bloc\`, `presentation\pages\`, `presentation\widgets\`. Use 9 `mkdir -p` calls (or PowerShell equivalent: `New-Item -ItemType Directory -Force -Path <path>` for each).
 
-- [ ] T022 [P] Create the empty shared-folder directories: `H:\alnujom-project\lib\shared\domain\value_objects\` (likely already exists from Phase 8); `H:\alnujom-project\lib\shared\presentation\` (create if missing). Verify each exists before proceeding.
+- [X] T022 [P] Create the empty shared-folder directories: `H:\alnujom-project\lib\shared\domain\value_objects\` (likely already exists from Phase 8); `H:\alnujom-project\lib\shared\presentation\` (create if missing). Verify each exists before proceeding.
 
 ### Domain entities and value objects (parallel)
 
-- [ ] T023 [P] Create `H:\alnujom-project\lib\shared\domain\value_objects\money.dart` per `contracts\money-value-object.md` § Class shape. The file MUST contain only the imports `package:decimal/decimal.dart` and `package:equatable/equatable.dart`. The class has fields `final Decimal amount;` and `final String currencyCode;`. Constructor `const Money({required this.amount, required this.currencyCode});`. `Equatable.props => [amount, currencyCode];`. NO `rate` field. NO `displayCurrency` field. NO conversion methods. (FR-020, SC-023.)
+- [X] T023 [P] Create `H:\alnujom-project\lib\shared\domain\value_objects\money.dart` per `contracts\money-value-object.md` § Class shape. The file MUST contain only the imports `package:decimal/decimal.dart` and `package:equatable/equatable.dart`. The class has fields `final Decimal amount;` and `final String currencyCode;`. Constructor `const Money({required this.amount, required this.currencyCode});`. `Equatable.props => [amount, currencyCode];`. NO `rate` field. NO `displayCurrency` field. NO conversion methods. (FR-020, SC-023.)
 
-- [ ] T024 [P] Create `H:\alnujom-project\lib\features\currencies\domain\entities\currency.dart` per `data-model.md § Flutter feature folder shapes § currency.dart`. Pure-Dart class, extends `Equatable`. Fields: `code, nameAr, nameEn, symbol, isActive, sortOrder, isSystem, displayDecimals, createdAt, updatedAt` — exact types per data-model.md. Add a `String localizedName(Locale locale)` method implementing the R-18 fallback chain (active locale → other locale → code). Imports: `package:equatable/equatable.dart`, `package:flutter/widgets.dart` (for `Locale`). NO Supabase imports.
+- [X] T024 [P] Create `H:\alnujom-project\lib\features\currencies\domain\entities\currency.dart` per `data-model.md § Flutter feature folder shapes § currency.dart`. Pure-Dart class, extends `Equatable`. Fields: `code, nameAr, nameEn, symbol, isActive, sortOrder, isSystem, displayDecimals, createdAt, updatedAt` — exact types per data-model.md. Add a `String localizedName(Locale locale)` method implementing the R-18 fallback chain (active locale → other locale → code). Imports: `package:equatable/equatable.dart`, `package:flutter/widgets.dart` (for `Locale`). NO Supabase imports.
 
-- [ ] T025 [P] Create `H:\alnujom-project\lib\features\currencies\domain\entities\exchange_rate.dart` per `data-model.md § Flutter feature folder shapes § exchange_rate.dart`. Fields: `id, baseCurrency, targetCurrency, rate (Decimal), effectiveAt, setBy (nullable), source (nullable), createdAt`. Add a computed getter `bool get isDerived => source?.startsWith('auto-derived from ') ?? false;`. Imports: `package:decimal/decimal.dart`, `package:equatable/equatable.dart`. NO Supabase imports.
+- [X] T025 [P] Create `H:\alnujom-project\lib\features\currencies\domain\entities\exchange_rate.dart` per `data-model.md § Flutter feature folder shapes § exchange_rate.dart`. Fields: `id, baseCurrency, targetCurrency, rate (Decimal), effectiveAt, setBy (nullable), source (nullable), createdAt`. Add a computed getter `bool get isDerived => source?.startsWith('auto-derived from ') ?? false;`. Imports: `package:decimal/decimal.dart`, `package:equatable/equatable.dart`. NO Supabase imports.
 
-- [ ] T026 [P] Create `H:\alnujom-project\lib\features\currencies\domain\entities\currency_with_latest_rates.dart`. Fields: `final Currency currency;`, `final Map<String, Decimal> latestRates;` (keyed by target currency code). Imports: `package:decimal/decimal.dart`, `package:equatable/equatable.dart`, the new `currency.dart` from T024. `Equatable.props => [currency, latestRates];`.
+- [X] T026 [P] Create `H:\alnujom-project\lib\features\currencies\domain\entities\currency_with_latest_rates.dart`. Fields: `final Currency currency;`, `final Map<String, Decimal> latestRates;` (keyed by target currency code). Imports: `package:decimal/decimal.dart`, `package:equatable/equatable.dart`, the new `currency.dart` from T024. `Equatable.props => [currency, latestRates];`.
 
-- [ ] T027 [P] Create `H:\alnujom-project\lib\features\currencies\domain\entities\update_exchange_rate_result.dart` per `data-model.md § Flutter feature folder shapes § update_exchange_rate_result.dart`. Two fields: `final ExchangeRate adminRow;`, `final ExchangeRate derivedRow;`. Imports: the new `exchange_rate.dart` from T025, `package:equatable/equatable.dart`.
+- [X] T027 [P] Create `H:\alnujom-project\lib\features\currencies\domain\entities\update_exchange_rate_result.dart` per `data-model.md § Flutter feature folder shapes § update_exchange_rate_result.dart`. Two fields: `final ExchangeRate adminRow;`, `final ExchangeRate derivedRow;`. Imports: the new `exchange_rate.dart` from T025, `package:equatable/equatable.dart`.
 
 ### Domain repository interface
 
-- [ ] T028 Create `H:\alnujom-project\lib\features\currencies\domain\repositories\currencies_repository.dart` per `data-model.md § Flutter feature folder shapes § Repository interface`. Abstract class `CurrenciesRepository` with **12 methods** (the 12th is `countDependentExchangeRates` per A3 fix for the delete-confirmation dialog):
+- [X] T028 Create `H:\alnujom-project\lib\features\currencies\domain\repositories\currencies_repository.dart` per `data-model.md § Flutter feature folder shapes § Repository interface`. Abstract class `CurrenciesRepository` with **12 methods** (the 12th is `countDependentExchangeRates` per A3 fix for the delete-confirmation dialog):
 
   1. `Future<List<Currency>> listCurrencies({bool activeOnly = false});`
   2. `Future<Currency> loadCurrency(String code);`
@@ -156,25 +156,25 @@ When a task says "per `contracts/<X>.md` § Y" or "per `data-model.md` § Z", th
 
 ### Domain use cases (all parallel — different files)
 
-- [ ] T029 [P] Create `H:\alnujom-project\lib\features\currencies\domain\usecases\list_currencies.dart`. Class `ListCurrencies` annotated `@lazySingleton` (lock-in per A15 fix — all 9 Phase 9 use cases use `@lazySingleton`; this matches the Phase 6/7/8 convention. If a quick check via `grep -l "@lazySingleton" lib/features/locations/domain/usecases/*.dart` returns zero matches, fall back to `@injectable` — but the locked default is `@lazySingleton`). Constructor takes a `CurrenciesRepository`. Method `Future<List<Currency>> call({bool activeOnly = false})` delegates to `_repository.listCurrencies(activeOnly: activeOnly)`.
+- [X] T029 [P] Create `H:\alnujom-project\lib\features\currencies\domain\usecases\list_currencies.dart`. Class `ListCurrencies` annotated `@lazySingleton` (lock-in per A15 fix — all 9 Phase 9 use cases use `@lazySingleton`; this matches the Phase 6/7/8 convention. If a quick check via `grep -l "@lazySingleton" lib/features/locations/domain/usecases/*.dart` returns zero matches, fall back to `@injectable` — but the locked default is `@lazySingleton`). Constructor takes a `CurrenciesRepository`. Method `Future<List<Currency>> call({bool activeOnly = false})` delegates to `_repository.listCurrencies(activeOnly: activeOnly)`.
 
   **Convention applies to all use cases T030-T036 + T035a**: same annotation, same constructor-injected repository field, same `call(...)` method shape. The repository impl (T044) is `@LazySingleton(as: CurrenciesRepository)`. The data source (T043) is `@injectable`. BLoCs (T060, T061, T062, T079) are `@injectable` (not lazySingleton — they hold per-screen state).
 
-- [ ] T030 [P] Create `H:\alnujom-project\lib\features\currencies\domain\usecases\load_currency_detail.dart`. Class `LoadCurrencyDetail` with `call(String code)` returning `Future<Currency>`.
+- [X] T030 [P] Create `H:\alnujom-project\lib\features\currencies\domain\usecases\load_currency_detail.dart`. Class `LoadCurrencyDetail` with `call(String code)` returning `Future<Currency>`.
 
-- [ ] T031 [P] Create `H:\alnujom-project\lib\features\currencies\domain\usecases\create_currency.dart`. Class `CreateCurrency` with `call({required String code, required String nameAr, required String nameEn, required String symbol, int sortOrder = 100, int displayDecimals = 2, bool isActive = true})` returning `Future<Currency>`.
+- [X] T031 [P] Create `H:\alnujom-project\lib\features\currencies\domain\usecases\create_currency.dart`. Class `CreateCurrency` with `call({required String code, required String nameAr, required String nameEn, required String symbol, int sortOrder = 100, int displayDecimals = 2, bool isActive = true})` returning `Future<Currency>`.
 
-- [ ] T032 [P] Create `H:\alnujom-project\lib\features\currencies\domain\usecases\update_currency.dart`. Class `UpdateCurrency` with `call(Currency updated)` returning `Future<Currency>`.
+- [X] T032 [P] Create `H:\alnujom-project\lib\features\currencies\domain\usecases\update_currency.dart`. Class `UpdateCurrency` with `call(Currency updated)` returning `Future<Currency>`.
 
-- [ ] T033 [P] Create `H:\alnujom-project\lib\features\currencies\domain\usecases\delete_currency.dart`. Class `DeleteCurrency` with `call(String code)` returning `Future<void>`.
+- [X] T033 [P] Create `H:\alnujom-project\lib\features\currencies\domain\usecases\delete_currency.dart`. Class `DeleteCurrency` with `call(String code)` returning `Future<void>`.
 
-- [ ] T034 [P] Create `H:\alnujom-project\lib\features\currencies\domain\usecases\list_exchange_rate_history.dart`. Class `ListExchangeRateHistory` with `call({required String baseCurrency, String? targetCurrencyFilter, int limit = 50, DateTime? cursorBefore})` returning `Future<List<ExchangeRate>>`.
+- [X] T034 [P] Create `H:\alnujom-project\lib\features\currencies\domain\usecases\list_exchange_rate_history.dart`. Class `ListExchangeRateHistory` with `call({required String baseCurrency, String? targetCurrencyFilter, int limit = 50, DateTime? cursorBefore})` returning `Future<List<ExchangeRate>>`.
 
-- [ ] T035 [P] Create `H:\alnujom-project\lib\features\currencies\domain\usecases\set_exchange_rate.dart`. Class `SetExchangeRate` with `call({required String baseCurrency, required String targetCurrency, required Decimal rate, required DateTime effectiveAt, String? source})` returning `Future<UpdateExchangeRateResult>`.
+- [X] T035 [P] Create `H:\alnujom-project\lib\features\currencies\domain\usecases\set_exchange_rate.dart`. Class `SetExchangeRate` with `call({required String baseCurrency, required String targetCurrency, required Decimal rate, required DateTime effectiveAt, String? source})` returning `Future<UpdateExchangeRateResult>`.
 
-- [ ] T035a [P] Create `H:\alnujom-project\lib\features\currencies\domain\usecases\count_dependent_exchange_rates.dart`. Class `CountDependentExchangeRates` annotated `@lazySingleton` (or matching project convention from T029). Method `Future<int> call(String code)` delegates to `_repository.countDependentExchangeRates(code)`. Consumed by the `delete_currency_confirmation_dialog.dart` caller in T068 (the caller pre-fetches the count before showing the dialog).
+- [X] T035a [P] Create `H:\alnujom-project\lib\features\currencies\domain\usecases\count_dependent_exchange_rates.dart`. Class `CountDependentExchangeRates` annotated `@lazySingleton` (or matching project convention from T029). Method `Future<int> call(String code)` delegates to `_repository.countDependentExchangeRates(code)`. Consumed by the `delete_currency_confirmation_dialog.dart` caller in T068 (the caller pre-fetches the count before showing the dialog).
 
-- [ ] T036 [P] Create `H:\alnujom-project\lib\features\currencies\domain\usecases\select_listing_price_row.dart` per `contracts\listing-price-row-selection.md`. Copy the file body **verbatim**:
+- [X] T036 [P] Create `H:\alnujom-project\lib\features\currencies\domain\usecases\select_listing_price_row.dart` per `contracts\listing-price-row-selection.md`. Copy the file body **verbatim**:
 
   ```dart
   /// FR-019a row-selection rule. Q1 / Q4-aware.
@@ -208,15 +208,15 @@ When a task says "per `contracts/<X>.md` § Y" or "per `data-model.md` § Z", th
 
 ### DTOs (all parallel — different files)
 
-- [ ] T037 [P] Create `H:\alnujom-project\lib\features\currencies\data\dtos\currency_dto.dart`. Mirrors `public.currencies` columns. Has `Currency toDomain()` mapper and `factory CurrencyDto.fromJson(Map<String, dynamic> json)` constructor. Use `Decimal.parse()` to convert numeric strings from Postgres if needed (but `currencies` has no Decimal column; `display_decimals` is `int`).
+- [X] T037 [P] Create `H:\alnujom-project\lib\features\currencies\data\dtos\currency_dto.dart`. Mirrors `public.currencies` columns. Has `Currency toDomain()` mapper and `factory CurrencyDto.fromJson(Map<String, dynamic> json)` constructor. Use `Decimal.parse()` to convert numeric strings from Postgres if needed (but `currencies` has no Decimal column; `display_decimals` is `int`).
 
-- [ ] T038 [P] Create `H:\alnujom-project\lib\features\currencies\data\dtos\exchange_rate_dto.dart`. Mirrors `public.exchange_rates` columns. The `rate` field maps to `Decimal` via `Decimal.parse(json['rate'] is String ? json['rate'] as String : json['rate'].toString())` (Postgrest may return `NUMERIC` as String, int, or double depending on value magnitude — always-coerce-to-String-first is safe). Has `ExchangeRate toDomain()` mapper.
+- [X] T038 [P] Create `H:\alnujom-project\lib\features\currencies\data\dtos\exchange_rate_dto.dart`. Mirrors `public.exchange_rates` columns. The `rate` field maps to `Decimal` via `Decimal.parse(json['rate'] is String ? json['rate'] as String : json['rate'].toString())` (Postgrest may return `NUMERIC` as String, int, or double depending on value magnitude — always-coerce-to-String-first is safe). Has `ExchangeRate toDomain()` mapper.
 
   **Additional optional field for history rendering (per T080 / A2 fix)**: when the DTO is constructed from the history-query response (which includes a joined `profiles(display_name, username)` sub-object — see T043 `listExchangeRateHistory` for the exact PostgREST select string), expose a `String? setByDisplayName` field. Resolution rule: `profiles?.display_name ?? profiles?.username` (first non-null), else `null`. The base `ExchangeRate` domain entity does NOT gain a new field; instead, `exchange_rate_row.dart` (T080) consumes `dto.setByDisplayName` directly OR you may add a parallel `ExchangeRateHistoryView` projection class — simplest path: add `setByDisplayName` to `ExchangeRate` as a nullable transient field set only on history reads.
 
-- [ ] T039 [P] Create `H:\alnujom-project\lib\features\currencies\data\dtos\currency_with_latest_rates_dto.dart`. Carries the currency row + a `Map<String, Decimal>` of latest outbound rates. Has `CurrencyWithLatestRates toDomain()`.
+- [X] T039 [P] Create `H:\alnujom-project\lib\features\currencies\data\dtos\currency_with_latest_rates_dto.dart`. Carries the currency row + a `Map<String, Decimal>` of latest outbound rates. Has `CurrencyWithLatestRates toDomain()`.
 
-- [ ] T040 [P] Create `H:\alnujom-project\lib\features\currencies\data\dtos\update_exchange_rate_request_dto.dart`. Carries the inputs to the RPC: `baseCurrency`, `targetCurrency`, `rate (Decimal)`, `effectiveAt (DateTime)`, `sourceText (String?)`.
+- [X] T040 [P] Create `H:\alnujom-project\lib\features\currencies\data\dtos\update_exchange_rate_request_dto.dart`. Carries the inputs to the RPC: `baseCurrency`, `targetCurrency`, `rate (Decimal)`, `effectiveAt (DateTime)`, `sourceText (String?)`.
 
   `Map<String, dynamic> toRpcParams()` MUST return **exactly** the following shape (keys are `p_*` prefixed because Postgres function signature uses `p_*` parameter names — non-prefixed keys will silently bind to function defaults and the call will misbehave):
 
@@ -232,13 +232,13 @@ When a task says "per `contracts/<X>.md` § Y" or "per `data-model.md` § Z", th
 
   Conditional `if (sourceText != null)` lets Postgres use the DEFAULT NULL when source is omitted.
 
-- [ ] T041 [P] Create `H:\alnujom-project\lib\features\currencies\data\dtos\update_exchange_rate_response_dto.dart`. Matches the RPC's `{admin_row, derived_row}` JSONB shape. Has `UpdateExchangeRateResult toDomain()` that constructs two `ExchangeRate` instances from the nested objects.
+- [X] T041 [P] Create `H:\alnujom-project\lib\features\currencies\data\dtos\update_exchange_rate_response_dto.dart`. Matches the RPC's `{admin_row, derived_row}` JSONB shape. Has `UpdateExchangeRateResult toDomain()` that constructs two `ExchangeRate` instances from the nested objects.
 
-- [ ] T042 [P] Create `H:\alnujom-project\lib\features\currencies\data\dtos\currency_mutation_request_dto.dart`. Carries the inputs to a currencies INSERT/UPDATE: `code`, `nameAr`, `nameEn`, `symbol`, `sortOrder`, `displayDecimals`, `isActive`. Has `Map<String, dynamic> toRow()` for the Postgrest INSERT/UPDATE call.
+- [X] T042 [P] Create `H:\alnujom-project\lib\features\currencies\data\dtos\currency_mutation_request_dto.dart`. Carries the inputs to a currencies INSERT/UPDATE: `code`, `nameAr`, `nameEn`, `symbol`, `sortOrder`, `displayDecimals`, `isActive`. Has `Map<String, dynamic> toRow()` for the Postgrest INSERT/UPDATE call.
 
 ### Data layer (sequential — same files imported by each other)
 
-- [ ] T043 Create `H:\alnujom-project\lib\features\currencies\data\datasources\supabase_currencies_datasource.dart`. Annotated `@injectable`. Constructor takes a `SupabaseClient` (resolved via DI). Methods correspond 1:1 to the repository methods T028 lists; each performs the Postgrest query or RPC call. DO NOT cache anything (R-20). Map all SQLSTATE errors to the localized exception types defined in T044 (`CurrenciesFailure`). Locked method bodies follow — copy the PostgREST / SQL snippets verbatim:
+- [X] T043 Create `H:\alnujom-project\lib\features\currencies\data\datasources\supabase_currencies_datasource.dart`. Annotated `@injectable`. Constructor takes a `SupabaseClient` (resolved via DI). Methods correspond 1:1 to the repository methods T028 lists; each performs the Postgrest query or RPC call. DO NOT cache anything (R-20). Map all SQLSTATE errors to the localized exception types defined in T044 (`CurrenciesFailure`). Locked method bodies follow — copy the PostgREST / SQL snippets verbatim:
 
   **listCurrencies({activeOnly})**:
   ```dart
@@ -322,7 +322,7 @@ When a task says "per `contracts/<X>.md` § Y" or "per `data-model.md` § Z", th
   // pattern documented at https://supabase.com/docs/reference/dart/select.
   ```
 
-- [ ] T043a Author the supporting Postgres RPC for `loadLatestRatesForBase`. Add a new migration file `H:\alnujom-project\supabase\migrations\20260518120006_create_latest_rates_for_base_rpc.sql`. Body:
+- [X] T043a Author the supporting Postgres RPC for `loadLatestRatesForBase`. Add a new migration file `H:\alnujom-project\supabase\migrations\20260518120006_create_latest_rates_for_base_rpc.sql`. Body:
 
   ```sql
   -- Phase 9 helper: latest rate per (base, target) pair for a given base currency.
@@ -353,7 +353,7 @@ When a task says "per `contracts/<X>.md` § Y" or "per `data-model.md` § Z", th
 
   Apply via Supabase MCP `apply_migration` with name `20260518120006_create_latest_rates_for_base_rpc`. Verify: `SELECT * FROM public.latest_rates_for_base('USD')` returns one row per distinct `target_currency`, ordered DESC by `effective_at`. Verify anonymous role can EXECUTE: `SET ROLE anon; SELECT * FROM public.latest_rates_for_base('USD'); RESET ROLE;` succeeds with the same rows.
 
-- [ ] T044 Create `H:\alnujom-project\lib\features\currencies\data\repositories\currencies_repository_impl.dart`. Annotated `@LazySingleton(as: CurrenciesRepository)`. Constructor takes the datasource from T043. Each method delegates to the datasource with DTO ↔ domain mapping. **REQUIRED** (not optional per A16 fix): define a sealed class `CurrenciesFailure` at the bottom of the same file with these variants:
+- [X] T044 Create `H:\alnujom-project\lib\features\currencies\data\repositories\currencies_repository_impl.dart`. Annotated `@LazySingleton(as: CurrenciesRepository)`. Constructor takes the datasource from T043. Each method delegates to the datasource with DTO ↔ domain mapping. **REQUIRED** (not optional per A16 fix): define a sealed class `CurrenciesFailure` at the bottom of the same file with these variants:
 
   ```dart
   sealed class CurrenciesFailure implements Exception {
@@ -391,9 +391,9 @@ When a task says "per `contracts/<X>.md` § Y" or "per `data-model.md` § Z", th
 
   BLoCs and pages map each `CurrenciesFailure` variant to a localized error string from the ARB inventory (FR-024).
 
-- [ ] T045 Run DI codegen: from `H:\alnujom-project`, run `dart run build_runner build --delete-conflicting-outputs`. Confirm `injection.config.dart` now contains entries for `CurrenciesRepositoryImpl`, `SupabaseCurrenciesDatasource`, and all 8 use cases (T029-T036). If codegen fails, fix annotations and re-run.
+- [X] T045 Run DI codegen: from `H:\alnujom-project`, run `dart run build_runner build --delete-conflicting-outputs`. Confirm `injection.config.dart` now contains entries for `CurrenciesRepositoryImpl`, `SupabaseCurrenciesDatasource`, and all 8 use cases (T029-T036). If codegen fails, fix annotations and re-run.
 
-- [ ] T046 [P] Add a permission-key constant check. Open `H:\alnujom-project\lib\core\security\permission_keys.dart`. Confirm a constant like `currenciesManage = 'currencies.manage'` already exists from Phase 6. If named differently (e.g., `currenciesManageKey`), use the existing name throughout the new Phase 9 code. Record the exact name as a note in the file or at the top of `lib/features/currencies/domain/repositories/currencies_repository.dart` so downstream tasks reference the same string.
+- [X] T046 [P] Add a permission-key constant check. Open `H:\alnujom-project\lib\core\security\permission_keys.dart`. Confirm a constant like `currenciesManage = 'currencies.manage'` already exists from Phase 6. If named differently (e.g., `currenciesManageKey`), use the existing name throughout the new Phase 9 code. Record the exact name as a note in the file or at the top of `lib/features/currencies/domain/repositories/currencies_repository.dart` so downstream tasks reference the same string.
 
 **⚠️ Checkpoint C — Flutter foundation complete**: All domain entities, repository interface + impl, data source, DTOs, use cases, and DI codegen in place. Run `flutter analyze --no-fatal-infos --no-fatal-warnings` and confirm zero NEW warnings vs the baseline captured in T005 § E. Commit: `git add lib/shared/domain/value_objects/money.dart lib/features/currencies/ && git commit -m "feat(009): Flutter foundation — Money value object + domain entities + data layer + use cases + DI codegen" && git push`.
 

@@ -14,6 +14,7 @@ import 'dart:ui' as _i264;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:go_router/go_router.dart' as _i583;
 import 'package:injectable/injectable.dart' as _i526;
+import 'package:supabase_flutter/supabase_flutter.dart' as _i454;
 
 import '../../features/admin/account_approvals/data/datasources/supabase_account_approvals_datasource.dart'
     as _i394;
@@ -35,6 +36,27 @@ import '../../features/auth/data/repositories/auth_repository_impl.dart'
     as _i153;
 import '../../features/auth/domain/repositories/auth_repository.dart' as _i787;
 import '../../features/auth/presentation/bloc/auth_bloc.dart' as _i797;
+import '../../features/currencies/data/datasources/supabase_currencies_datasource.dart'
+    as _i311;
+import '../../features/currencies/data/repositories/currencies_repository_impl.dart'
+    as _i148;
+import '../../features/currencies/domain/repositories/currencies_repository.dart'
+    as _i505;
+import '../../features/currencies/domain/usecases/count_dependent_exchange_rates.dart'
+    as _i905;
+import '../../features/currencies/domain/usecases/create_currency.dart'
+    as _i1003;
+import '../../features/currencies/domain/usecases/delete_currency.dart' as _i43;
+import '../../features/currencies/domain/usecases/list_currencies.dart'
+    as _i996;
+import '../../features/currencies/domain/usecases/list_exchange_rate_history.dart'
+    as _i776;
+import '../../features/currencies/domain/usecases/load_currency_detail.dart'
+    as _i510;
+import '../../features/currencies/domain/usecases/set_exchange_rate.dart'
+    as _i488;
+import '../../features/currencies/domain/usecases/update_currency.dart'
+    as _i540;
 import '../../features/locations/data/datasources/supabase_locations_datasource.dart'
     as _i665;
 import '../../features/locations/data/repositories/locations_repository_impl.dart'
@@ -158,11 +180,13 @@ _i174.GetIt $initGetIt(
   _i526.EnvironmentFilter? environmentFilter,
 }) {
   final gh = _i526.GetItHelper(getIt, environment, environmentFilter);
+  final supabaseModule = _$SupabaseModule();
   final routerModule = _$RouterModule();
   gh.factory<_i665.SupabaseLocationsDatasource>(
     () => _i665.SupabaseLocationsDatasource(),
   );
   gh.singleton<_i373.EnvConfig>(() => const _i373.EnvConfig());
+  gh.lazySingleton<_i454.SupabaseClient>(() => supabaseModule.supabaseClient());
   gh.lazySingleton<_i394.SupabaseAccountApprovalsDatasource>(
     () => _i394.SupabaseAccountApprovalsDatasource(),
   );
@@ -182,6 +206,9 @@ _i174.GetIt $initGetIt(
     () => _i650.PermissionChecker(gh<_i1015.PermissionCatalogRepository>()),
   );
   gh.lazySingleton<_i354.AppLogger>(() => _i1026.ConsoleLogger());
+  gh.factory<_i311.SupabaseCurrenciesDatasource>(
+    () => _i311.SupabaseCurrenciesDatasource(gh<_i454.SupabaseClient>()),
+  );
   gh.lazySingleton<_i681.RoleCatalogRepository>(
     () => _i564.RoleCatalogRepositoryImpl(
       gh<_i1064.SupabaseRoleCatalogDataSource>(),
@@ -234,6 +261,12 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i78.UpdateProfile>(
     () => _i78.UpdateProfile(gh<_i894.ProfileRepository>()),
+  );
+  gh.lazySingleton<_i505.CurrenciesRepository>(
+    () => _i148.CurrenciesRepositoryImpl(
+      gh<_i311.SupabaseCurrenciesDatasource>(),
+      gh<_i354.AppLogger>(),
+    ),
   );
   gh.lazySingleton<_i765.UserSearchRepository>(
     () => _i884.UserSearchRepositoryImpl(
@@ -311,6 +344,9 @@ _i174.GetIt $initGetIt(
   gh.factory<_i533.ListGovernorates>(
     () => _i533.ListGovernorates(gh<_i704.LocationsRepository>()),
   );
+  gh.factory<_i292.LoadAreaDetail>(
+    () => _i292.LoadAreaDetail(gh<_i704.LocationsRepository>()),
+  );
   gh.factory<_i645.LoadCityDetail>(
     () => _i645.LoadCityDetail(gh<_i704.LocationsRepository>()),
   );
@@ -326,8 +362,29 @@ _i174.GetIt $initGetIt(
   gh.factory<_i1054.UpdateGovernorate>(
     () => _i1054.UpdateGovernorate(gh<_i704.LocationsRepository>()),
   );
-  gh.factory<_i292.LoadAreaDetail>(
-    () => _i292.LoadAreaDetail(gh<_i704.LocationsRepository>()),
+  gh.factory<_i905.CountDependentExchangeRates>(
+    () => _i905.CountDependentExchangeRates(gh<_i505.CurrenciesRepository>()),
+  );
+  gh.factory<_i1003.CreateCurrency>(
+    () => _i1003.CreateCurrency(gh<_i505.CurrenciesRepository>()),
+  );
+  gh.factory<_i43.DeleteCurrency>(
+    () => _i43.DeleteCurrency(gh<_i505.CurrenciesRepository>()),
+  );
+  gh.factory<_i996.ListCurrencies>(
+    () => _i996.ListCurrencies(gh<_i505.CurrenciesRepository>()),
+  );
+  gh.factory<_i776.ListExchangeRateHistory>(
+    () => _i776.ListExchangeRateHistory(gh<_i505.CurrenciesRepository>()),
+  );
+  gh.factory<_i510.LoadCurrencyDetail>(
+    () => _i510.LoadCurrencyDetail(gh<_i505.CurrenciesRepository>()),
+  );
+  gh.factory<_i488.SetExchangeRate>(
+    () => _i488.SetExchangeRate(gh<_i505.CurrenciesRepository>()),
+  );
+  gh.factory<_i540.UpdateCurrency>(
+    () => _i540.UpdateCurrency(gh<_i505.CurrenciesRepository>()),
   );
   gh.factory<_i858.ApproveAccount>(
     () => _i858.ApproveAccount(gh<_i120.AccountApprovalsRepository>()),
@@ -443,5 +500,7 @@ _i174.GetIt $initGetIt(
   );
   return getIt;
 }
+
+class _$SupabaseModule extends _i464.SupabaseModule {}
 
 class _$RouterModule extends _i464.RouterModule {}
