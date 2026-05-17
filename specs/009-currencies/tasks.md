@@ -74,7 +74,7 @@ When a task says "per `contracts/<X>.md` § Y" or "per `data-model.md` § Z", th
 
 - [ ] T006 Author migration 1 file at `H:\alnujom-project\supabase\migrations\20260518120001_create_currencies.sql`. (FR-001, FR-002, FR-004, FR-007, FR-007a, FR-008, FR-009.) Body MUST contain, in exactly this order: (1) leading SQL `-- COMMENT` block citing FR-001/002/004/007/007a/008/009 and noting "anonymous SELECT carve-out — see research.md R-04 and R-16"; (2) `CREATE TABLE IF NOT EXISTS public.currencies (...)` from `data-model.md § Tables § public.currencies` (full body, all 10 columns, all CHECK constraints); (3) `ALTER TABLE public.currencies ENABLE ROW LEVEL SECURITY;`; (4) `set_updated_at` trigger attach (`DROP TRIGGER IF EXISTS set_currencies_updated_at ON public.currencies; CREATE TRIGGER set_currencies_updated_at BEFORE UPDATE ON public.currencies FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();`); (5) `enforce_currency_system_immutability` trigger function + trigger from `data-model.md § Triggers § Immutability trigger` (use the full function body verbatim); (6) the 3 audit triggers from `data-model.md § Triggers § Audit triggers` (currencies section — `audit_currencies_insert/update/delete` calling `log_audit('currency.created'/.updated/.deleted', 'currencies', 'code')`); (7) the 4 RLS policies from `data-model.md § RLS policies § public.currencies` (`currencies_select` admitting anon+authenticated USING true; `currencies_insert`/`_update`/`_delete` gated by `current_user_has_permission('currencies.manage')`); (8) seed INSERT of 2 currencies (SYP, USD) from `data-model.md § Seed inventory § public.currencies` using `ON CONFLICT (code) DO NOTHING`. The order matters per R-08 (triggers BEFORE seed). The audit triggers MUST be attached BEFORE step 8 runs so the seed produces 2 audit rows.
 
-- [ ] T007 Apply migration 1 via Supabase MCP `apply_migration` with name `20260518120001_create_currencies` and body from T006. Then verify via Supabase MCP `execute_sql`: (a) `SELECT count(*) FROM public.currencies` returns `2`; (b) `SELECT count(*) FROM public.currencies WHERE is_system` returns `2`; (c) `SELECT code, name_ar, name_en, symbol, display_decimals, sort_order FROM public.currencies ORDER BY sort_order` returns SYP row first (sort_order=10, display_decimals=0) then USD (sort_order=20, display_decimals=2); (d) `SELECT count(*) FROM pg_trigger WHERE tgrelid='public.currencies'::regclass AND NOT tgisinternal` returns `5` (3 audit + set_updated_at + enforce_immutability — note enforce_immutability fires on UPDATE OR DELETE so may count as 1 or 2 depending on pg_trigger row layout; accept either 5 or 6); (e) `SELECT count(*) FROM pg_policies WHERE tablename='currencies'` returns `4`; (f) `SELECT count(*) FROM public.audit_logs WHERE action='currency.created' AND actor_user_id IS NULL` returns `2` (the seed produced audit rows per R-08).
+- [ ] T007 Apply migration 1 via Supabase MCP `apply_migration` with name `20260518120001_create_currencies` and body from T006. Then verify via Supabase MCP `execute_sql`: (a) `SELECT count(*) FROM public.currencies` returns `2`; (b) `SELECT count(*) FROM public.currencies WHERE is_system` returns `2`; (c) `SELECT code, name_ar, name_en, symbol, display_decimals, sort_order FROM public.currencies ORDER BY sort_order` returns SYP row first (sort_order=10, display_decimals=0) then USD (sort_order=20, display_decimals=2); (d) `SELECT count(*) FROM pg_trigger WHERE tgrelid='public.currencies'::regclass AND NOT tgisinternal` returns `5` (3 audit + set_updated_at + enforce_immutability — `pg_trigger` stores one row per `CREATE TRIGGER` statement regardless of how many event verbs that trigger fires on, so `BEFORE UPDATE OR DELETE` counts as exactly 1 row); (e) `SELECT count(*) FROM pg_policies WHERE tablename='currencies'` returns `4`; (f) `SELECT count(*) FROM public.audit_logs WHERE action='currency.created' AND actor_user_id IS NULL` returns `2` (the seed produced audit rows per R-08).
 
 - [ ] T008 [P] Author parallel policy file `H:\alnujom-project\supabase\policies\currencies_phase9.sql`. Body MUST be a verbatim copy of the 4 `DROP POLICY IF EXISTS ... CREATE POLICY ...` blocks from migration 1 step (7). Add a leading comment: `-- Mirror of the inline RLS policies in supabase/migrations/20260518120001_create_currencies.sql. R-02 dual-storage invariant — both files MUST be kept in sync at PR review.`
 
@@ -138,11 +138,27 @@ When a task says "per `contracts/<X>.md` § Y" or "per `data-model.md` § Z", th
 
 ### Domain repository interface
 
-- [ ] T028 Create `H:\alnujom-project\lib\features\currencies\domain\repositories\currencies_repository.dart` per `data-model.md § Flutter feature folder shapes § Repository interface`. Abstract class `CurrenciesRepository` with 11 methods: `listCurrencies({bool activeOnly = false})`, `loadCurrency(String code)`, `createCurrency({...})`, `updateCurrency(Currency updated)`, `deleteCurrency(String code)`, `listExchangeRateHistory({required String baseCurrency, String? targetCurrencyFilter, int limit = 50, DateTime? cursorBefore})`, `loadLatestRatesForBase(String baseCurrency)` returning `Future<Map<String, Decimal>>`, `setExchangeRate({required String baseCurrency, required String targetCurrency, required Decimal rate, required DateTime effectiveAt, String? source})` returning `Future<UpdateExchangeRateResult>`, `readUserDisplayCurrency()` returning `Future<String?>`, `writeUserDisplayCurrency(String code)`. Imports: only the new domain entities + `package:decimal/decimal.dart`. NO Supabase imports.
+- [ ] T028 Create `H:\alnujom-project\lib\features\currencies\domain\repositories\currencies_repository.dart` per `data-model.md § Flutter feature folder shapes § Repository interface`. Abstract class `CurrenciesRepository` with **12 methods** (the 12th is `countDependentExchangeRates` per A3 fix for the delete-confirmation dialog):
+
+  1. `Future<List<Currency>> listCurrencies({bool activeOnly = false});`
+  2. `Future<Currency> loadCurrency(String code);`
+  3. `Future<Currency> createCurrency({required String code, required String nameAr, required String nameEn, required String symbol, int sortOrder = 100, int displayDecimals = 2, bool isActive = true});`
+  4. `Future<Currency> updateCurrency(Currency updated);`
+  5. `Future<void> deleteCurrency(String code);`
+  6. `Future<List<ExchangeRate>> listExchangeRateHistory({required String baseCurrency, String? targetCurrencyFilter, int limit = 50, DateTime? cursorBefore});`
+  7. `Future<Map<String, Decimal>> loadLatestRatesForBase(String baseCurrency);`
+  8. `Future<UpdateExchangeRateResult> setExchangeRate({required String baseCurrency, required String targetCurrency, required Decimal rate, required DateTime effectiveAt, String? source});`
+  9. `Future<String?> readUserDisplayCurrency();`
+  10. `Future<void> writeUserDisplayCurrency(String code);`
+  11. `Future<int> countDependentExchangeRates(String code);` — used by the delete-confirmation dialog (T066). Counts rows where `base_currency = code OR target_currency = code`.
+
+  Imports: only the new domain entities + `package:decimal/decimal.dart`. NO Supabase imports.
 
 ### Domain use cases (all parallel — different files)
 
-- [ ] T029 [P] Create `H:\alnujom-project\lib\features\currencies\domain\usecases\list_currencies.dart`. Class `ListCurrencies` injected with `CurrenciesRepository`. Method `Future<List<Currency>> call({bool activeOnly = false})` delegates to `_repository.listCurrencies(activeOnly: activeOnly)`. Use `@injectable` annotation if Phase 6/7/8 use cases use that pattern (read one Phase 8 use case file like `lib/features/locations/domain/usecases/list_governorates.dart` to confirm the convention).
+- [ ] T029 [P] Create `H:\alnujom-project\lib\features\currencies\domain\usecases\list_currencies.dart`. Class `ListCurrencies` annotated `@lazySingleton` (lock-in per A15 fix — all 9 Phase 9 use cases use `@lazySingleton`; this matches the Phase 6/7/8 convention. If a quick check via `grep -l "@lazySingleton" lib/features/locations/domain/usecases/*.dart` returns zero matches, fall back to `@injectable` — but the locked default is `@lazySingleton`). Constructor takes a `CurrenciesRepository`. Method `Future<List<Currency>> call({bool activeOnly = false})` delegates to `_repository.listCurrencies(activeOnly: activeOnly)`.
+
+  **Convention applies to all use cases T030-T036 + T035a**: same annotation, same constructor-injected repository field, same `call(...)` method shape. The repository impl (T044) is `@LazySingleton(as: CurrenciesRepository)`. The data source (T043) is `@injectable`. BLoCs (T060, T061, T062, T079) are `@injectable` (not lazySingleton — they hold per-screen state).
 
 - [ ] T030 [P] Create `H:\alnujom-project\lib\features\currencies\domain\usecases\load_currency_detail.dart`. Class `LoadCurrencyDetail` with `call(String code)` returning `Future<Currency>`.
 
@@ -156,17 +172,65 @@ When a task says "per `contracts/<X>.md` § Y" or "per `data-model.md` § Z", th
 
 - [ ] T035 [P] Create `H:\alnujom-project\lib\features\currencies\domain\usecases\set_exchange_rate.dart`. Class `SetExchangeRate` with `call({required String baseCurrency, required String targetCurrency, required Decimal rate, required DateTime effectiveAt, String? source})` returning `Future<UpdateExchangeRateResult>`.
 
-- [ ] T036 [P] Create `H:\alnujom-project\lib\features\currencies\domain\usecases\select_listing_price_row.dart` per `contracts\listing-price-row-selection.md`. Define an abstract `ListingPriceRowLike` class with two abstract getters `String get currencyCode;` and `bool get isPrimary;`. Define the top-level (or static) function `T? selectListingPriceRow<T extends ListingPriceRowLike>(Iterable<T> rows, {required String? viewerPreferredCurrencyCode})`. Body: if `viewerPreferredCurrencyCode != null`, iterate `rows` looking for `row.currencyCode == viewerPreferredCurrencyCode` — return the first match; if no match (or null preference), iterate `rows` looking for `row.isPrimary == true` — return the first match; if neither found, return `null`. Pure Dart, no async, no I/O. Doc-comment the function with `/// FR-019a row-selection rule. Q1 / Q4-aware. See contracts/listing-price-row-selection.md.`
+- [ ] T035a [P] Create `H:\alnujom-project\lib\features\currencies\domain\usecases\count_dependent_exchange_rates.dart`. Class `CountDependentExchangeRates` annotated `@lazySingleton` (or matching project convention from T029). Method `Future<int> call(String code)` delegates to `_repository.countDependentExchangeRates(code)`. Consumed by the `delete_currency_confirmation_dialog.dart` caller in T068 (the caller pre-fetches the count before showing the dialog).
+
+- [ ] T036 [P] Create `H:\alnujom-project\lib\features\currencies\domain\usecases\select_listing_price_row.dart` per `contracts\listing-price-row-selection.md`. Copy the file body **verbatim**:
+
+  ```dart
+  /// FR-019a row-selection rule. Q1 / Q4-aware.
+  /// See contracts/listing-price-row-selection.md.
+  ListingPriceRowLike? selectListingPriceRow(
+    Iterable<ListingPriceRowLike> rows, {
+    required String? viewerPreferredCurrencyCode,
+  }) {
+    if (viewerPreferredCurrencyCode != null) {
+      for (final row in rows) {
+        if (row.currencyCode == viewerPreferredCurrencyCode) {
+          return row;
+        }
+      }
+    }
+    for (final row in rows) {
+      if (row.isPrimary) {
+        return row;
+      }
+    }
+    return null;
+  }
+
+  abstract class ListingPriceRowLike {
+    String get currencyCode;
+    bool get isPrimary;
+  }
+  ```
+
+  Pure Dart, no async, no I/O. No generics (the contract examples use plain `ListingPriceRowLike`). No imports beyond `package:meta/meta.dart` if `@immutable` is used (optional). NO Supabase imports.
 
 ### DTOs (all parallel — different files)
 
 - [ ] T037 [P] Create `H:\alnujom-project\lib\features\currencies\data\dtos\currency_dto.dart`. Mirrors `public.currencies` columns. Has `Currency toDomain()` mapper and `factory CurrencyDto.fromJson(Map<String, dynamic> json)` constructor. Use `Decimal.parse()` to convert numeric strings from Postgres if needed (but `currencies` has no Decimal column; `display_decimals` is `int`).
 
-- [ ] T038 [P] Create `H:\alnujom-project\lib\features\currencies\data\dtos\exchange_rate_dto.dart`. Mirrors `public.exchange_rates` columns. The `rate` field maps to `Decimal` via `Decimal.parse(json['rate'].toString())`. Has `ExchangeRate toDomain()` mapper.
+- [ ] T038 [P] Create `H:\alnujom-project\lib\features\currencies\data\dtos\exchange_rate_dto.dart`. Mirrors `public.exchange_rates` columns. The `rate` field maps to `Decimal` via `Decimal.parse(json['rate'] is String ? json['rate'] as String : json['rate'].toString())` (Postgrest may return `NUMERIC` as String, int, or double depending on value magnitude — always-coerce-to-String-first is safe). Has `ExchangeRate toDomain()` mapper.
+
+  **Additional optional field for history rendering (per T080 / A2 fix)**: when the DTO is constructed from the history-query response (which includes a joined `profiles(display_name, username)` sub-object — see T043 `listExchangeRateHistory` for the exact PostgREST select string), expose a `String? setByDisplayName` field. Resolution rule: `profiles?.display_name ?? profiles?.username` (first non-null), else `null`. The base `ExchangeRate` domain entity does NOT gain a new field; instead, `exchange_rate_row.dart` (T080) consumes `dto.setByDisplayName` directly OR you may add a parallel `ExchangeRateHistoryView` projection class — simplest path: add `setByDisplayName` to `ExchangeRate` as a nullable transient field set only on history reads.
 
 - [ ] T039 [P] Create `H:\alnujom-project\lib\features\currencies\data\dtos\currency_with_latest_rates_dto.dart`. Carries the currency row + a `Map<String, Decimal>` of latest outbound rates. Has `CurrencyWithLatestRates toDomain()`.
 
-- [ ] T040 [P] Create `H:\alnujom-project\lib\features\currencies\data\dtos\update_exchange_rate_request_dto.dart`. Carries the inputs to the RPC: `baseCurrency`, `targetCurrency`, `rate (Decimal)`, `effectiveAt (DateTime)`, `sourceText (String?)`. Has `Map<String, dynamic> toRpcParams()` for the Supabase RPC call shape (note Postgres expects `p_*` prefixed keys per the RPC signature).
+- [ ] T040 [P] Create `H:\alnujom-project\lib\features\currencies\data\dtos\update_exchange_rate_request_dto.dart`. Carries the inputs to the RPC: `baseCurrency`, `targetCurrency`, `rate (Decimal)`, `effectiveAt (DateTime)`, `sourceText (String?)`.
+
+  `Map<String, dynamic> toRpcParams()` MUST return **exactly** the following shape (keys are `p_*` prefixed because Postgres function signature uses `p_*` parameter names — non-prefixed keys will silently bind to function defaults and the call will misbehave):
+
+  ```dart
+  Map<String, dynamic> toRpcParams() => {
+        'p_base_currency': baseCurrency,
+        'p_target_currency': targetCurrency,
+        'p_rate': rate.toString(), // Decimal → String for NUMERIC binding
+        'p_effective_at': effectiveAt.toUtc().toIso8601String(),
+        if (sourceText != null) 'p_source': sourceText,
+      };
+  ```
+
+  Conditional `if (sourceText != null)` lets Postgres use the DEFAULT NULL when source is omitted.
 
 - [ ] T041 [P] Create `H:\alnujom-project\lib\features\currencies\data\dtos\update_exchange_rate_response_dto.dart`. Matches the RPC's `{admin_row, derived_row}` JSONB shape. Has `UpdateExchangeRateResult toDomain()` that constructs two `ExchangeRate` instances from the nested objects.
 
@@ -174,9 +238,158 @@ When a task says "per `contracts/<X>.md` § Y" or "per `data-model.md` § Z", th
 
 ### Data layer (sequential — same files imported by each other)
 
-- [ ] T043 Create `H:\alnujom-project\lib\features\currencies\data\datasources\supabase_currencies_datasource.dart`. Annotated `@injectable`. Constructor takes a `SupabaseClient` (resolved via DI). Methods correspond 1:1 to the repository methods T028 lists; each performs the Postgrest query or RPC call. For `setExchangeRate`, call `_supabaseClient.rpc('update_exchange_rate', params: requestDto.toRpcParams()).select().single()`. For `readUserDisplayCurrency`: `SELECT display_currency FROM user_preferences WHERE user_id = auth.uid()`. For `writeUserDisplayCurrency`: `UPDATE user_preferences SET display_currency = $code WHERE user_id = auth.uid()`. For `listExchangeRateHistory`: filter by `base_currency`, optional `target_currency`, paginate with `limit` + `created_at < cursorBefore` cursor. For `loadLatestRatesForBase(baseCode)`: SELECT one row per distinct `target_currency` joined to the latest `effective_at <= now()` per pair (use a SQL fragment via a Supabase `.rpc()` helper OR construct the query with the composite index — implementation choice; preferred: write a small Postgres view or use the index via a window function). DO NOT cache anything (R-20). Map all SQLSTATE errors to localized exceptions for the repository layer to surface.
+- [ ] T043 Create `H:\alnujom-project\lib\features\currencies\data\datasources\supabase_currencies_datasource.dart`. Annotated `@injectable`. Constructor takes a `SupabaseClient` (resolved via DI). Methods correspond 1:1 to the repository methods T028 lists; each performs the Postgrest query or RPC call. DO NOT cache anything (R-20). Map all SQLSTATE errors to the localized exception types defined in T044 (`CurrenciesFailure`). Locked method bodies follow — copy the PostgREST / SQL snippets verbatim:
 
-- [ ] T044 Create `H:\alnujom-project\lib\features\currencies\data\repositories\currencies_repository_impl.dart`. Annotated `@LazySingleton(as: CurrenciesRepository)`. Constructor takes the datasource from T043. Each method delegates to the datasource with DTO ↔ domain mapping; wrap Supabase exceptions in domain-layer error types (define a small `CurrenciesFailure` sealed class if it helps consumers — optional; consumers may also catch the raw error).
+  **listCurrencies({activeOnly})**:
+  ```dart
+  var query = _client.from('currencies').select();
+  if (activeOnly) query = query.eq('is_active', true);
+  final rows = await query.order('sort_order', ascending: true).order('code', ascending: true);
+  ```
+
+  **loadCurrency(code)**: `await _client.from('currencies').select().eq('code', code).single();`
+
+  **createCurrency / updateCurrency / deleteCurrency**: standard PostgREST `.insert(toRow()).select().single()` / `.update(toRow()).eq('code', code).select().single()` / `.delete().eq('code', code)`.
+
+  **setExchangeRate(requestDto)**: `await _client.rpc('update_exchange_rate', params: requestDto.toRpcParams()).select().single();` then `UpdateExchangeRateResponseDto.fromJson(result as Map<String, dynamic>).toDomain()`.
+
+  **readUserDisplayCurrency()**:
+  ```dart
+  final userId = _client.auth.currentUser?.id;
+  if (userId == null) return null;
+  final row = await _client
+      .from('user_preferences')
+      .select('display_currency')
+      .eq('user_id', userId)
+      .maybeSingle();
+  return row?['display_currency'] as String?;
+  ```
+
+  **writeUserDisplayCurrency(code)** — explicit `.eq('user_id', ...)` even though RLS enforces self-only writes:
+  ```dart
+  final userId = _client.auth.currentUser!.id;
+  await _client
+      .from('user_preferences')
+      .update({'display_currency': code})
+      .eq('user_id', userId);
+  ```
+
+  **listExchangeRateHistory** — PostgREST select string includes the joined profile to resolve `set_by` display name in a single round-trip (A2 fix):
+  ```dart
+  var query = _client
+      .from('exchange_rates')
+      .select('*, profiles:set_by(display_name, username)') // PostgREST FK-join syntax
+      .eq('base_currency', baseCurrency);
+  if (targetCurrencyFilter != null) {
+    query = query.eq('target_currency', targetCurrencyFilter);
+  }
+  if (cursorBefore != null) {
+    query = query.lt('created_at', cursorBefore.toUtc().toIso8601String());
+  }
+  final rows = await query.order('effective_at', ascending: false).limit(limit);
+  // Each row carries: every exchange_rates column + a nested
+  // 'profiles' object { display_name, username } or null (if set_by IS NULL).
+  // ExchangeRateDto.fromJson reads json['profiles']?['display_name'] ?? json['profiles']?['username'].
+  ```
+
+  **loadLatestRatesForBase(baseCurrency)** — locked SQL (A1 fix) uses Postgres `DISTINCT ON` over the composite index `idx_exchange_rates_base_target_effective`:
+  ```dart
+  // Postgrest does NOT expose DISTINCT ON directly. Approach: register a small
+  // RPC `latest_rates_for_base(p_base_currency TEXT) RETURNS TABLE(...)` in a
+  // helper migration, OR call execute_sql via a server-side function. Locked
+  // choice: add the RPC. Author it in T043a (below); call via
+  // _client.rpc('latest_rates_for_base', params: {'p_base_currency': baseCurrency}).
+  final rows = await _client.rpc(
+    'latest_rates_for_base',
+    params: {'p_base_currency': baseCurrency},
+  );
+  final list = rows as List<dynamic>;
+  return {
+    for (final r in list)
+      (r as Map<String, dynamic>)['target_currency'] as String:
+          Decimal.parse(r['rate'].toString()),
+  };
+  ```
+
+  **countDependentExchangeRates(code)** — used by the delete-confirmation dialog (A3 fix):
+  ```dart
+  final result = await _client
+      .from('exchange_rates')
+      .select('id', const FetchOptions(count: CountOption.exact, head: true))
+      .or('base_currency.eq.$code,target_currency.eq.$code');
+  return result.count ?? 0;
+  // If the supabase_flutter version differs, use the equivalent count-only
+  // pattern documented at https://supabase.com/docs/reference/dart/select.
+  ```
+
+- [ ] T043a Author the supporting Postgres RPC for `loadLatestRatesForBase`. Add a new migration file `H:\alnujom-project\supabase\migrations\20260518120006_create_latest_rates_for_base_rpc.sql`. Body:
+
+  ```sql
+  -- Phase 9 helper: latest rate per (base, target) pair for a given base currency.
+  -- Read-only; reuses the idx_exchange_rates_base_target_effective composite index
+  -- via DISTINCT ON. Anonymous + authenticated may call (read-only, same posture
+  -- as the SELECT policy on public.exchange_rates).
+
+  CREATE OR REPLACE FUNCTION public.latest_rates_for_base(p_base_currency TEXT)
+  RETURNS TABLE (target_currency TEXT, rate NUMERIC, effective_at TIMESTAMPTZ)
+  LANGUAGE sql
+  STABLE
+  SECURITY DEFINER
+  SET search_path = public
+  AS $$
+    SELECT DISTINCT ON (er.target_currency)
+      er.target_currency,
+      er.rate,
+      er.effective_at
+    FROM public.exchange_rates er
+    WHERE er.base_currency = p_base_currency
+      AND er.effective_at <= now()
+    ORDER BY er.target_currency, er.effective_at DESC, er.created_at DESC;
+  $$;
+
+  REVOKE EXECUTE ON FUNCTION public.latest_rates_for_base(TEXT) FROM PUBLIC;
+  GRANT EXECUTE ON FUNCTION public.latest_rates_for_base(TEXT) TO anon, authenticated;
+  ```
+
+  Apply via Supabase MCP `apply_migration` with name `20260518120006_create_latest_rates_for_base_rpc`. Verify: `SELECT * FROM public.latest_rates_for_base('USD')` returns one row per distinct `target_currency`, ordered DESC by `effective_at`. Verify anonymous role can EXECUTE: `SET ROLE anon; SELECT * FROM public.latest_rates_for_base('USD'); RESET ROLE;` succeeds with the same rows.
+
+- [ ] T044 Create `H:\alnujom-project\lib\features\currencies\data\repositories\currencies_repository_impl.dart`. Annotated `@LazySingleton(as: CurrenciesRepository)`. Constructor takes the datasource from T043. Each method delegates to the datasource with DTO ↔ domain mapping. **REQUIRED** (not optional per A16 fix): define a sealed class `CurrenciesFailure` at the bottom of the same file with these variants:
+
+  ```dart
+  sealed class CurrenciesFailure implements Exception {
+    final String technicalMessage;
+    const CurrenciesFailure(this.technicalMessage);
+  }
+  class CurrenciesPermissionDenied extends CurrenciesFailure {
+    const CurrenciesPermissionDenied(super.technicalMessage);
+  }
+  class CurrenciesValidationFailed extends CurrenciesFailure {
+    final String reason; // 'rate_must_be_positive' | 'base_equals_target' | 'display_decimals_range' | etc.
+    const CurrenciesValidationFailed(this.reason, super.technicalMessage);
+  }
+  class CurrenciesSystemRowImmutable extends CurrenciesFailure {
+    const CurrenciesSystemRowImmutable(super.technicalMessage);
+  }
+  class CurrenciesHasReferences extends CurrenciesFailure {
+    const CurrenciesHasReferences(super.technicalMessage);
+  }
+  class CurrenciesDuplicateCode extends CurrenciesFailure {
+    const CurrenciesDuplicateCode(super.technicalMessage);
+  }
+  class CurrenciesUnknown extends CurrenciesFailure {
+    const CurrenciesUnknown(super.technicalMessage);
+  }
+  ```
+
+  **SQLSTATE mapping** (the repository impl wraps each datasource call in a try/catch on `PostgrestException` and re-throws the appropriate `CurrenciesFailure`):
+  - `42501` → `CurrenciesPermissionDenied`
+  - `22023` → `CurrenciesValidationFailed(reason: parse from message)`
+  - Custom error matching "system" or "immutable" in the message → `CurrenciesSystemRowImmutable`
+  - `23503` (FK violation on delete) → `CurrenciesHasReferences`
+  - `23505` (unique violation on currencies.code) → `CurrenciesDuplicateCode`
+  - Anything else → `CurrenciesUnknown(originalMessage)`
+
+  BLoCs and pages map each `CurrenciesFailure` variant to a localized error string from the ARB inventory (FR-024).
 
 - [ ] T045 Run DI codegen: from `H:\alnujom-project`, run `dart run build_runner build --delete-conflicting-outputs`. Confirm `injection.config.dart` now contains entries for `CurrenciesRepositoryImpl`, `SupabaseCurrenciesDatasource`, and all 8 use cases (T029-T036). If codegen fails, fix annotations and re-run.
 
@@ -194,13 +407,67 @@ When a task says "per `contracts/<X>.md` § Y" or "per `data-model.md` § Z", th
 
 **Independent Test**: Open `/debug/money-formatter` on the device. Confirm each of the 10 golden cases renders the locked expected output in both `ar` and `en` locales. Toggle the device locale; confirm each row re-renders correctly.
 
-- [ ] T047 [P] [US7] Create `H:\alnujom-project\lib\shared\presentation\money_formatter.dart` per `contracts\money-formatter.md`. Public API: `class MoneyFormatter { static String format(Money money, {required Locale locale, required Currency currency}); }`. Imports: `package:flutter/widgets.dart` (for `Locale`), `package:intl/intl.dart` as `intl`, `../domain/value_objects/money.dart`, `../../features/currencies/domain/entities/currency.dart`. The function MUST NOT accept a `rate` parameter (SC-023). Implementation: (a) round `money.amount` to `currency.displayDecimals` using banker's rounding (`amount.round(scale: currency.displayDecimals, rounding: RoundingMode.halfEven)` if `decimal` supports it directly, else implement manually); (b) resolve the symbol via `_resolveSymbol(currency, locale)` — for `locale.languageCode == 'en' && currency.code == 'SYP'` return `'SYP'`, else return `currency.symbol`; (c) construct an `intl.NumberFormat` for the locale with custom symbol + the rounded decimal digits; (d) for `ar` locale, position the symbol AFTER the amount with a space; for `en` locale with `$`, position before; for `en` locale with non-Latin symbol, position after as the suffix code. Return the formatted string. NO global state (R-17).
+- [ ] T047 [P] [US7] Create `H:\alnujom-project\lib\shared\presentation\money_formatter.dart` per `contracts\money-formatter.md`. Public API: `class MoneyFormatter { static String format(Money money, {required Locale locale, required Currency currency}); }`. Imports: `package:flutter/widgets.dart` (for `Locale`), `package:intl/intl.dart` as `intl`, `package:decimal/decimal.dart`, `../domain/value_objects/money.dart`, `../../features/currencies/domain/entities/currency.dart`. The function MUST NOT accept a `rate` parameter (SC-023). NO global state (R-17).
 
-- [ ] T048 [US7] Create `H:\alnujom-project\lib\features\currencies\presentation\pages\money_formatter_showcase_page.dart` per `research.md § R-21`. Page class `MoneyFormatterShowcasePage extends StatelessWidget`. The body renders a `ListView` of 10 `Row` widgets, each row showing: (a) the input `{amount, currency}` as text on the left; (b) the formatter's output on the right rendered in both `ar` and `en` locales. The 10 inputs are exactly the 10 cases in `quickstart.md` Step 8: (1) `{750000000, SYP}`, (2) `{50000, USD}`, (3) `{1234567.89, USD}`, (4) `{0, SYP}`, (5) `{0, USD}`, (6) `{1, SYP}`, (7) `{49999.997, USD}`, (8) `{49999.995, USD}`, (9) `{-50, USD}`, (10) `{15000.5, SYP}`. Each row displays the locked expected output beneath the formatter's actual output for visual comparison. The page reads the `Currency` row for SYP and USD from the `ListCurrencies` use case (mounted via DI) — do NOT hardcode the `Currency` constructor.
+  **Locked rounding implementation** (decimal `^3.0.0` — A5 fix). `decimal: ^3.0.0` exposes `Decimal.round({int scale = 0})` which truncates rather than performing half-even. To achieve banker's rounding (R-11 half-to-even), use the explicit helper below:
 
-- [ ] T049 [US7] Register the debug route `/debug/money-formatter` in `H:\alnujom-project\lib\app.dart`. Wrap the route registration in a `kDebugMode` guard (or equivalent) so production builds skip it. The route renders `MoneyFormatterShowcasePage`. No route guard needed (debug-only; the route is not registered in production).
+  ```dart
+  /// Round [value] to [scale] decimal places using banker's rounding
+  /// (half-to-even). Independent of decimal's built-in round() behavior.
+  Decimal _roundHalfEven(Decimal value, int scale) {
+    if (scale < 0) throw ArgumentError.value(scale, 'scale', 'must be >= 0');
+    final factor = Decimal.fromInt(10).pow(scale).toDecimal();
+    final scaled = value * factor; // shift decimal point right by `scale`
+    final truncated = scaled.truncate(); // integer part
+    final fractional = scaled - truncated; // [0, 1) absolute fractional
+    final absFrac = fractional.abs();
+    final half = Decimal.parse('0.5');
+    Decimal rounded;
+    if (absFrac < half) {
+      rounded = truncated;
+    } else if (absFrac > half) {
+      // Round away from zero
+      rounded = value.signum >= 0 ? truncated + Decimal.one : truncated - Decimal.one;
+    } else {
+      // Exactly 0.5 fractional → round to even
+      final isEven = (truncated.toBigInt() % BigInt.two) == BigInt.zero;
+      if (isEven) {
+        rounded = truncated;
+      } else {
+        rounded = value.signum >= 0 ? truncated + Decimal.one : truncated - Decimal.one;
+      }
+    }
+    return (rounded / factor).toDecimal(scaleOnInfinitePrecision: scale);
+  }
+  ```
+
+  Call from `format`: `final rounded = _roundHalfEven(money.amount, currency.displayDecimals);` then format `rounded` for display.
+
+  **Implementation outline**:
+
+  (a) Compute `rounded` via the helper above.
+
+  (b) Resolve the symbol via `_resolveSymbol(currency, locale)`:
+  - For `locale.languageCode == 'ar' && currency.code == 'SYP'` return `'ل.س'` (R-12 custom override; per R-12 the override is for ar locale only — the `currencies.symbol` column value is the source of truth in other locales).
+  - For `locale.languageCode == 'en' && currency.code == 'SYP'` return `'SYP'` (code, not symbol, in English).
+  - Else return `currency.symbol`.
+
+  (c) Construct an `intl.NumberFormat.decimalPattern(locale.toLanguageTag())` and set `minimumFractionDigits = maximumFractionDigits = currency.displayDecimals`. Format `rounded.toDouble()` ONLY if `displayDecimals <= 6` AND the magnitude is small enough to avoid double-precision loss — for large amounts (>= 10^15), format the rounded `Decimal` directly by splitting on the decimal point and joining digit groups manually. For Phase 9's USD + SYP (and realistic amounts <= 10^12), `rounded.toDouble()` is safe.
+
+  (d) Position the symbol per locale:
+  - `ar` locale → `'{amount} {symbol}'` (amount + NBSP + symbol, RTL bidi resolver handles visual order).
+  - `en` locale + symbol is single Latin char (e.g., `$`) → `'{symbol}{amount}'`.
+  - `en` locale + symbol is multi-char or non-Latin → `'{amount} {symbol}'`.
+
+  Return the formatted string.
+
+- [ ] T048 [US7] Create `H:\alnujom-project\lib\features\currencies\presentation\pages\money_formatter_showcase_page.dart` per `research.md § R-21`. Page class `MoneyFormatterShowcasePage extends StatelessWidget`. The body renders a `ListView` of 10 cards, each card showing: (a) the input `{amount, currency}` as text on top; (b) **two side-by-side columns** rendering the same `MoneyFormatter.format(...)` call output twice — left column labeled "Call 1", right column labeled "Call 2" — both for the Arabic locale; below them, the same two-column layout for the English locale. This enables the SC-013 byte-identical visual diff at the bottom of T050. The 10 inputs are exactly the 10 cases in `quickstart.md` Step 8: (1) `{750000000, SYP}`, (2) `{50000, USD}`, (3) `{1234567.89, USD}`, (4) `{0, SYP}`, (5) `{0, USD}`, (6) `{1, SYP}`, (7) `{49999.997, USD}`, (8) `{49999.995, USD}`, (9) `{-50, USD}`, (10) `{15000.5, SYP}`. Each card also displays the locked expected output text from `quickstart.md` Step 8 beneath the formatter's actual output for visual comparison. The page reads the `Currency` row for SYP and USD from the `ListCurrencies` use case (mounted via DI) — do NOT hardcode the `Currency` constructor.
+
+- [ ] T049 [US7] Register the debug route `/debug/money-formatter` in `H:\alnujom-project\lib\core\routing\app_router.dart` (the same file edited in T057). At the top of the file, add `import 'package:flutter/foundation.dart' show kDebugMode;`. Wrap the route registration in `if (kDebugMode) ...[ GoRoute(path: '/debug/money-formatter', builder: (_, __) => const MoneyFormatterShowcasePage()), ]` so production builds skip it (the spread operator on a const list inside the routes list is the idiomatic way). The route renders `MoneyFormatterShowcasePage`. No route guard needed (debug-only; the route is not registered in production).
 
 - [ ] T050 [US7] **Manual verification** — open `/debug/money-formatter` on the reference Infinix Note 8 with locale set to Arabic. Walk through each of the 10 rows; confirm the rendered output exactly matches the locked expected output column. Switch device locale to English; confirm each row re-renders correctly. If any row mismatches, fix the formatter (do NOT alter the golden expected values) and re-verify. Capture screenshots or note the verification in `H:\alnujom-project\specs\009-currencies\quickstart.md` step 8 as "verified 2026-XX-XX".
+
+  **SC-013 byte-identical determinism sub-step**: the showcase page renders each input twice in a row (left column = "first call", right column = "second call" — both produced by the same `MoneyFormatter.format(...)` invocation). Visually confirm for all 10 cases that the two columns are byte-identical (same digits, same spacing, same symbol position). If any case shows a difference (which would indicate hidden global state per R-17), STOP and investigate.
 
 **⚠️ Checkpoint D — US7 complete**: `MoneyFormatter` + showcase page exist; 10 golden cases verified manually in both locales. Commit: `git add lib/shared/presentation/money_formatter.dart lib/features/currencies/presentation/pages/money_formatter_showcase_page.dart lib/app.dart && git commit -m "feat(009): US7 — MoneyFormatter utility + debug-only showcase page (10 golden cases manually verified)" && git push`.
 
@@ -234,13 +501,20 @@ US1 is **verification-only** — every behavioral output is already produced by 
 
 - [ ] T055 [P] [US2] Add 4 ARB keys for the 4 new page titles to both `app_ar.arb` and `app_en.arb`: `currenciesPageTitle` (`العملات` / `Currencies`), `setExchangeRatePageTitle` (`تعيين سعر صرف` / `Set exchange rate`), `exchangeRateHistoryPageTitle` (`سجل أسعار الصرف` / `Exchange rate history`), `currencyFormPageTitle` (`عملة` / `Currency`). Each with an `@<key>` description.
 
-- [ ] T056 [US2] Update `H:\alnujom-project\lib\features\admin\presentation\pages\admin_home_page.dart` to add the Currencies tile. Find the existing tile list (mirroring Phase 8's Locations tile addition). Insert a new tile widget AFTER the Locations tile, gated by `PermissionChecker.has(PermissionKeys.<currenciesManage-constant-name-from-T046>)`. Tile properties: localized title from `AppLocalizations.of(context).adminHomeCurrenciesTile`, an appropriate icon (e.g., `Icons.currency_exchange` or `Icons.attach_money` — match the project's icon convention), navigation on tap to `'/admin/currencies'`. The tile is HIDDEN (not dimmed) for non-holders — use `if (PermissionChecker.has(...)) ListTile(...)` rather than `enabled: false`.
+- [ ] T056 [US2] Update `H:\alnujom-project\lib\features\admin\presentation\pages\admin_home_page.dart` (confirmed-existing absolute path) to add the Currencies tile. Open the file and search for the existing Locations tile (the Phase 8 pattern — search for `adminHomeLocationsTile` ARB key reference). Insert a new tile widget IMMEDIATELY AFTER the Locations tile in the same column/grid container, gated by `PermissionChecker.has(PermissionKeys.<currenciesManage-constant-name-from-T046>)`. Tile properties: localized title from `AppLocalizations.of(context).adminHomeCurrenciesTile`, icon `Icons.currency_exchange` (Material Icons standard for FX-related screens — match the project's icon convention if it differs, but the symbol is universally recognized), navigation on tap to `context.go('/admin/currencies')`. The tile is HIDDEN (not dimmed) for non-holders — wrap with `if (PermissionChecker.has(...)) AdminTile(...)` rather than passing `enabled: false`.
 
-- [ ] T057 [US2] Update the router config in `H:\alnujom-project\lib\app.dart` (or wherever `GoRouter` is configured — confirm by inspection). Add four route entries: `/admin/currencies` → `CurrenciesListPage`, `/admin/currencies/set-rate` → `SetExchangeRatePage`, `/admin/currencies/:code/history` → `ExchangeRateHistoryPage`, `/admin/currencies/form` → `CurrencyFormPage` (with query params `mode` and optional `code` for edit). The pages themselves are stubbed in this task — create thin placeholder widgets that just render `Scaffold(appBar: AppBar(title: Text(...)))`; full implementations land in US3/US6.
+- [ ] T057 [US2] Update the router config at `H:\alnujom-project\lib\core\routing\app_router.dart` (confirmed-existing path). Add four route entries: `/admin/currencies` → `CurrenciesListPage`, `/admin/currencies/set-rate` → `SetExchangeRatePage`, `/admin/currencies/:code/history` → `ExchangeRateHistoryPage`, `/admin/currencies/form` → `CurrencyFormPage` (with query params `mode` and optional `code` for edit). The pages themselves are stubbed in this task — create thin placeholder widgets in `H:\alnujom-project\lib\features\currencies\presentation\pages\` that just render `Scaffold(appBar: AppBar(title: Text(<localizedTitle>)))`; full implementations land in US3/US6.
 
-- [ ] T058 [US2] Update `H:\alnujom-project\lib\core\routing\auth_redirect.dart` (or the equivalent route-guard helper — match the Phase 8 pattern; inspect the existing file to find the `/admin/locations/*` guard and add a parallel block). Add a redirect guard for routes matching the regex `^/admin/currencies(/.*)?$`. The guard reads `PermissionChecker.has(<currenciesManage>)`; if false, redirects to the project's established admin-route-unauthorized destination (mirror Phase 8's destination).
+- [ ] T058 [US2] Update `H:\alnujom-project\lib\core\routing\auth_redirect.dart` (confirmed-existing path). Open the file; locate the existing `/admin/locations/*` guard block (added by Phase 8). Add an immediately parallel block for routes matching the regex `^/admin/currencies(/.*)?$`. The guard reads `PermissionChecker.has(PermissionKeys.<currenciesManage-from-T046>)`; if false, returns the same admin-route-unauthorized destination Phase 8's guard returns (copy that destination value verbatim from the Phase 8 block to preserve consistency).
 
 - [ ] T059 [US2] **Manual verification on the reference Infinix Note 8**: (a) sign in as Phase 5 admin — confirm Currencies tile renders; tap it — confirm `CurrenciesListPage` (placeholder) opens; (b) sign out, sign in as moderator — confirm Currencies tile is absent; (c) hand-type `/admin/currencies` as a deep-link — confirm redirect to unauthorized destination; (d) hand-type `/admin/currencies/set-rate` and `/admin/currencies/USD/history` and `/admin/currencies/form` — confirm each is refused; (e) sign back in as admin — confirm `/admin/currencies/USD/history` deep-link navigates correctly (placeholder page).
+
+  **(f) SC-011 RLS deny verification (third-layer gate)**: while signed in as the moderator account on the desktop browser (Supabase Studio's SQL editor with the moderator's JWT), run three direct SQL probes — these BYPASS the UI gate (a) and the route guard (b) entirely and exercise the third-layer RLS deny:
+  - `INSERT INTO public.currencies (code, name_ar, name_en, symbol, sort_order) VALUES ('EUR', 'يورو', 'Euro', '€', 30);` → expected: `ERROR: new row violates row-level security policy for table "currencies"` (or rowsAffected=0 depending on the Postgrest path).
+  - `SELECT public.update_exchange_rate('USD', 'SYP', 16000);` → expected: `ERROR 42501: insufficient_privilege` raised by the RPC's first permission re-check.
+  - `INSERT INTO public.exchange_rates (base_currency, target_currency, rate) VALUES ('USD', 'SYP', 99999);` → expected: RLS violation.
+
+  All three must fail. If any succeeds, an RLS policy is misconfigured — STOP and re-verify migrations 1 and 2 before continuing.
 
 **⚠️ Checkpoint F — US2 complete**: Admin tile gated, four routes registered + guarded. Commit: `git add lib/features/admin/presentation/pages/admin_home_page.dart lib/app.dart lib/core/routing/auth_redirect.dart lib/l10n/*.arb lib/features/currencies/presentation/pages/ && git commit -m "feat(009): US2 — Currencies admin tile + 4 routes + three-layer permission gate" && git push`.
 
@@ -256,29 +530,103 @@ US1 is **verification-only** — every behavioral output is already produced by 
 
 - [ ] T060 [P] [US3] Create `H:\alnujom-project\lib\features\currencies\presentation\bloc\currencies_list_bloc.dart` per `data-model.md § BLoC shapes`. States: `Initial / Loading / Loaded(List<CurrencyWithLatestRates>) / Error(message)`. Events: `LoadCurrencies`, `RefreshCurrencies`, `CurrencyMutated(code)` (re-fetches the row). Constructor injects `ListCurrencies` use case + a `loadLatestRatesForBase` (or expose via a dedicated use case if needed) — match the Phase 8 BLoC pattern.
 
-- [ ] T061 [P] [US3] Create `H:\alnujom-project\lib\features\currencies\presentation\bloc\currency_form_bloc.dart`. States: `Idle / Validating / Saving / SaveSuccess(Currency) / SaveFailure(reason)`. Events: `EditFieldChanged(name, value)`, `SubmitPressed`, `LoadForEdit(code)`. Constructor injects `CreateCurrency` + `UpdateCurrency` + `LoadCurrencyDetail` use cases.
+- [ ] T061 [P] [US3] Create `H:\alnujom-project\lib\features\currencies\presentation\bloc\currency_form_bloc.dart`. Annotated `@injectable`. Define an enum at the top of the file: `enum FormMode { create, edit }`. States: `Idle(FormMode mode, Map<String, dynamic> fieldValues) / Validating(FormMode mode, Map<String, dynamic> fieldValues) / Saving(FormMode mode, Map<String, dynamic> fieldValues) / SaveSuccess(Currency saved) / SaveFailure(String reason, FormMode mode, Map<String, dynamic> fieldValues)`. Events: `Initialize(FormMode mode, {String? code})` (dispatched by the page on mount — when `mode==edit`, the BLoC also calls `LoadCurrencyDetail(code)` and pre-fills `fieldValues` from the loaded `Currency`), `EditFieldChanged(name, value)` (updates `fieldValues[name]` in the current state), `SubmitPressed`. Constructor injects `CreateCurrency` + `UpdateCurrency` + `LoadCurrencyDetail` use cases.
 
-- [ ] T062 [P] [US3] Create `H:\alnujom-project\lib\features\currencies\presentation\bloc\set_exchange_rate_bloc.dart` per `data-model.md § BLoC shapes`. States: `Idle / DerivedRatePreview(Decimal previewInverse) / Saving / SaveSuccess(UpdateExchangeRateResult) / SaveFailure(reason) / UnusualTimingPending(action)`. Events: `BaseChanged(code)`, `TargetChanged(code)`, `RateChanged(Decimal)`, `EffectiveAtChanged(DateTime)`, `SourceChanged(String?)`, `SubmitPressed`, `UnusualTimingConfirmed`, `UnusualTimingCancelled`. Logic: on `RateChanged`, compute `1/rate` rounded to 6 decimals and emit `DerivedRatePreview` for the form to display (FR-016 transparency). On `SubmitPressed`, check if `effectiveAt > now() + 24h` OR `effectiveAt < now() - 24h` per Q5 — if either, emit `UnusualTimingPending(action: pendingSubmit)`; otherwise immediately call `SetExchangeRate` use case. The `UnusualTimingConfirmed` event proceeds with the queued submit; `UnusualTimingCancelled` returns to `Idle`.
+  **Branching on SubmitPressed** (A12 fix): the handler reads `state.mode`:
+  - `FormMode.create` → call `CreateCurrency(...)` with all field values from `state.fieldValues`. On success, emit `SaveSuccess(newCurrency)`.
+  - `FormMode.edit` → call `UpdateCurrency(Currency.fromForm(state.fieldValues))`. On success, emit `SaveSuccess(updated)`.
+  - On exception, emit `SaveFailure(reasonFromSqlState, mode, fieldValues)` so the form re-renders with the user's edits preserved.
 
-- [ ] T063 [P] [US3] Create `H:\alnujom-project\lib\features\currencies\presentation\widgets\currency_card.dart`. Stateless widget that takes a `CurrencyWithLatestRates` + `Locale` and renders a `Card` with: code + `currency.localizedName(locale)` + `currency.symbol`; the `system_currency_badge` if `currency.isSystem` (built in T064); per-target-currency `latest_rate_subline` rows (built in T065); per-row action buttons (Edit, View history, Delete-conditional). The Delete button is rendered ONLY if `!currency.isSystem` AND the user has `currencies.manage` (per FR-015a / SC-017). All copy via `AppLocalizations`; all spacing/colors via Phase 2 design tokens.
+  No transient mode state — `mode` lives in the state object from `Initialize` onward.
+
+- [ ] T062 [P] [US3] Create `H:\alnujom-project\lib\features\currencies\presentation\bloc\set_exchange_rate_bloc.dart` per `data-model.md § BLoC shapes`. Annotated `@injectable`.
+
+  **State carries the full form values throughout** (so `UnusualTimingConfirmed` can replay the submit without re-reading the page):
+
+  ```dart
+  class SetExchangeRateState extends Equatable {
+    final String? baseCurrency;
+    final String? targetCurrency;
+    final Decimal? rate;
+    final DateTime effectiveAt;
+    final String? sourceText;
+    final Decimal? derivedRatePreview; // computed from rate
+    final SetRateStatus status; // enum: idle, saving, saveSuccess, saveFailure, unusualTimingPending
+    final String? failureReason;
+    final UpdateExchangeRateResult? saveResult;
+    // copyWith(...) + props
+  }
+  enum SetRateStatus { idle, saving, saveSuccess, saveFailure, unusualTimingPending }
+  ```
+
+  **Events**: `BaseChanged(code)`, `TargetChanged(code)`, `RateChanged(Decimal)`, `EffectiveAtChanged(DateTime)`, `SourceChanged(String?)`, `SubmitPressed`, `UnusualTimingConfirmed`, `UnusualTimingCancelled`.
+
+  **Logic**:
+  - On `RateChanged`, compute `1/rate` rounded to 6 decimals using the same `_roundHalfEven` helper from T047 (or inline the math: `Decimal.one / rate` then round to 6 places) and emit `state.copyWith(derivedRatePreview: ...)` for the form to display (FR-016 transparency).
+  - On `SubmitPressed`, validate fields are all set + rate > 0 + base != target. Then check Q5 24-hour gate: if `effectiveAt > DateTime.now().add(Duration(hours: 24))` OR `effectiveAt < DateTime.now().subtract(Duration(hours: 24))`, emit `state.copyWith(status: unusualTimingPending)`. Otherwise immediately call `SetExchangeRate(...)`.
+  - On `UnusualTimingConfirmed`, replay the submit using the **state's** baseCurrency / targetCurrency / rate / effectiveAt / sourceText fields (A13 fix — no separate `action` payload; the state IS the payload). Emit `saving`, then call the use case, then `saveSuccess(result)` or `saveFailure(reason)`.
+  - On `UnusualTimingCancelled`, emit `state.copyWith(status: idle)` (form values retained for user to edit).
+
+- [ ] T063 [P] [US3] Create `H:\alnujom-project\lib\features\currencies\presentation\widgets\currency_card.dart`. Stateless widget that takes a `CurrencyWithLatestRates` + `Locale` and renders a `Card` with: code + `currency.localizedName(locale)` + `currency.symbol`; the `system_currency_badge` if `currency.isSystem` (built in T064); per-target-currency `latest_rate_subline` rows (built in T065); per-row action buttons (Edit, View history, Delete-conditional). The Delete button is rendered **iff `!currency.isSystem`** (per FR-015a / SC-017). Do NOT add a redundant `PermissionChecker.has('currencies.manage')` AND clause — the entire `CurrenciesListPage` is already permission-gated by the route guard from T058, so the card only renders when the viewer has the permission. All copy via `AppLocalizations`; all spacing/colors via Phase 2 design tokens.
 
 - [ ] T064 [P] [US3] Create `H:\alnujom-project\lib\features\currencies\presentation\widgets\system_currency_badge.dart`. Small `Chip`-style widget rendering a localized "System" label (add ARB key `systemCurrencyBadge` to both ARB files in this task). Consumes Phase 2 design tokens.
 
 - [ ] T065 [P] [US3] Create `H:\alnujom-project\lib\features\currencies\presentation\widgets\latest_rate_subline.dart`. Stateless widget taking a `baseCurrency`, `targetCurrencyCode`, `Decimal latestRate`, `Currency targetCurrency`, `Locale locale`. Renders the compact line "1 {base} = {amount} {target}" using `AppLocalizations` `latestRateLineTemplate` (add ARB key in this task: `"1 {base} = {amount} {target}"` with placeholders `{base}`, `{amount}`, `{target}`). The `{amount}` value is formatted by calling `MoneyFormatter.format(Money(amount: latestRate, currencyCode: targetCurrencyCode), locale: locale, currency: targetCurrency)`. If `latestRate` is `null` (no rate set for the pair), render the localized `rateNotSetHint` ARB key (add: `'لم يتم تعيين السعر بعد'` / `'rate not set yet'`).
 
-- [ ] T066 [P] [US3] Create `H:\alnujom-project\lib\features\currencies\presentation\widgets\delete_currency_confirmation_dialog.dart` per `research.md § R-19`. Stateful or stateless dialog that takes a `Currency` and shows: localized title "Delete {code}?"; localized body listing the count of dependent `exchange_rates` rows (queried via a small datasource call — pass the count as a parameter from the caller to avoid coupling) and the count of future `listing_prices` rows referencing the code (zero in Phase 9; the dialog still mentions "Phase 10+ listing prices" generically); Confirm + Cancel buttons. Add ARB keys: `deleteCurrencyConfirmTitle`, `deleteCurrencyConfirmBody` (parameterized for `{exchangeRatesCount}` and `{listingPricesCount}`), `deleteButton`, `cancelButton`. The dialog returns `true` on Confirm, `false` on Cancel.
+- [ ] T066 [P] [US3] Create `H:\alnujom-project\lib\features\currencies\presentation\widgets\delete_currency_confirmation_dialog.dart` per `research.md § R-19`. **Stateless** dialog that takes a `Currency currency`, `int exchangeRatesCount`, and `int listingPricesCount` (the caller — T068 — pre-fetches `exchangeRatesCount` via the `CountDependentExchangeRates` use case from T035a and passes `0` for `listingPricesCount` in Phase 9 since Phase 10 has not shipped). Renders: localized title "Delete {code}?" using `deleteCurrencyConfirmTitle`; localized body using `deleteCurrencyConfirmBody` parameterized for `{exchangeRatesCount}` and `{listingPricesCount}` (the copy mentions "Phase 10+ listing prices" generically); Confirm + Cancel buttons. Add ARB keys to both `app_ar.arb` and `app_en.arb`: `deleteCurrencyConfirmTitle`, `deleteCurrencyConfirmBody` (parameterized for `{exchangeRatesCount}` and `{listingPricesCount}`), `deleteButton`, `cancelButton`. The dialog returns `true` on Confirm, `false` on Cancel via `Navigator.pop(context, true/false)`. **No I/O inside the widget**; all data flows in through the constructor.
 
-- [ ] T067 [P] [US3] Create `H:\alnujom-project\lib\features\currencies\presentation\widgets\unusual_timing_confirmation_dialog.dart` per FR-017 / Q5. Takes a `direction` enum (`future` / `backdate`) and the magnitude (e.g., "48 hours from now" / "48 hours ago"). Renders one of two title variants and one of two body variants depending on direction. Add ARB keys: `unusualTimingFutureTitle` (`تعيين سعر بتاريخ مستقبلي؟`/`Set rate for a future date?`), `unusualTimingBackdateTitle` (`تعيين سعر بتاريخ سابق؟`/`Set rate for a past date?`), `unusualTimingFutureBody` (parameterized for `{magnitude}`), `unusualTimingBackdateBody` (parameterized).
+- [ ] T067 [P] [US3] Create `H:\alnujom-project\lib\features\currencies\presentation\widgets\unusual_timing_confirmation_dialog.dart` per FR-017 / Q5. Takes a `direction` enum (`future` / `backdate`) and the magnitude (a pre-computed localized string like `"48 ساعة من الآن"` / `"48 hours from now"` / `"يومان مضى"` / `"2 days ago"`). Renders one of two title variants and one of two body variants depending on direction. Add ARB keys: `unusualTimingFutureTitle` (`تعيين سعر بتاريخ مستقبلي؟`/`Set rate for a future date?`), `unusualTimingBackdateTitle` (`تعيين سعر بتاريخ سابق؟`/`Set rate for a past date?`), `unusualTimingFutureBody` (parameterized for `{magnitude}`), `unusualTimingBackdateBody` (parameterized).
+
+  **Magnitude-format helper** (A14 fix). The caller (page T070 OR the BLoC T062) computes the `magnitude` string before opening the dialog using this helper in the same file or a sibling utility file (`lib/features/currencies/presentation/widgets/_unusual_timing_format.dart`):
+
+  ```dart
+  /// Returns a localized "X hours from now" / "X hours ago" / "X days from now" / etc.
+  /// Uses `intl.DateFormat` for the absolute timestamp suffix is NOT done here —
+  /// the dialog body shows just the relative magnitude.
+  String formatUnusualTimingMagnitude(
+    Duration delta, // positive => future, negative => past
+    AppLocalizations l10n,
+  ) {
+    final absDelta = delta.abs();
+    final isFuture = !delta.isNegative;
+    if (absDelta.inDays >= 1) {
+      final days = absDelta.inDays;
+      return isFuture
+          ? l10n.unusualTimingFutureMagnitudeDays(days)
+          : l10n.unusualTimingBackdateMagnitudeDays(days);
+    }
+    final hours = absDelta.inHours;
+    return isFuture
+        ? l10n.unusualTimingFutureMagnitudeHours(hours)
+        : l10n.unusualTimingBackdateMagnitudeHours(hours);
+  }
+  ```
+
+  Add the four parameterized ARB keys to both `app_ar.arb` and `app_en.arb`:
+  - `unusualTimingFutureMagnitudeHours` → `'{hours} ساعة من الآن'` / `'{hours} hours from now'` (placeholder `hours: int`)
+  - `unusualTimingBackdateMagnitudeHours` → `'{hours} ساعة مضت'` / `'{hours} hours ago'`
+  - `unusualTimingFutureMagnitudeDays` → `'{days} يوم من الآن'` / `'{days} days from now'`
+  - `unusualTimingBackdateMagnitudeDays` → `'{days} يوم مضى'` / `'{days} days ago'`
+
+  (Arabic plural forms are simplified — refine with `Intl.plural` if needed during T091's ARB completeness pass.)
+
+### Re-run DI codegen before mounting BLoCs in pages
+
+- [ ] T067a [US3] **Re-run DI codegen** after Phase 6 BLoCs + use cases are authored. Phase 6 introduces three new `@injectable` classes (`CurrenciesListBloc` T060, `CurrencyFormBloc` T061, `SetExchangeRateBloc` T062) plus the `CountDependentExchangeRates` use case (T035a). From `H:\alnujom-project`, run `dart run build_runner build --delete-conflicting-outputs`. Confirm `lib/core/di/injection.config.dart` (or whichever filename Phase 1 uses) now contains factory registrations for all three new BLoCs and the new use case. If codegen reports duplicate keys, delete the conflicting registrations and re-run. **CRITICAL**: without this re-run, the pages (T068-T070) will mount BLoCs that are not in the DI graph and runtime navigation will throw `Bad state: GetIt: Object/factory with type CurrenciesListBloc is not registered inside GetIt`.
 
 ### Pages — replace placeholders from T057 with real implementations
 
-- [ ] T068 [US3] Replace the `CurrenciesListPage` stub at `H:\alnujom-project\lib\features\currencies\presentation\pages\currencies_list_page.dart` with the full implementation per `contracts\currencies-admin-pages.md § CurrenciesListPage`. Mounts `CurrenciesListBloc`; on `Loaded` state, renders a `ListView` of `currency_card.dart` widgets (one per row, each carrying its latest-rates map). App-bar has "Set new rate" CTA navigating to `/admin/currencies/set-rate`. Each card's Edit button navigates to `/admin/currencies/form?mode=edit&code=<code>`. Each card's View history button navigates to `/admin/currencies/<code>/history`. The Delete button (only on non-system rows) shows the `delete_currency_confirmation_dialog.dart`; on Confirm, dispatches `DeleteCurrency` use case and on success, re-emits `RefreshCurrencies` on the BLoC.
+- [ ] T068 [US3] Replace the `CurrenciesListPage` stub at `H:\alnujom-project\lib\features\currencies\presentation\pages\currencies_list_page.dart` with the full implementation per `contracts\currencies-admin-pages.md § CurrenciesListPage`. Mounts `CurrenciesListBloc`; on `Loaded` state, renders a `ListView` of `currency_card.dart` widgets (one per row, each carrying its latest-rates map). App-bar has "Set new rate" CTA navigating to `/admin/currencies/set-rate`. Each card's Edit button navigates to `/admin/currencies/form?mode=edit&code=<code>`. Each card's View history button navigates to `/admin/currencies/<code>/history`.
+
+  **Delete flow (only on non-system rows)** — A3 wiring: on tap, the page (1) resolves the `CountDependentExchangeRates` use case via DI (`getIt<CountDependentExchangeRates>()`), (2) awaits `final count = await countDeps(code)`, (3) opens `delete_currency_confirmation_dialog.dart` passing `exchangeRatesCount: count, listingPricesCount: 0` (Phase 10 not yet shipped), (4) if the dialog returns `true`, dispatches `DeleteCurrency` use case and on success, re-emits `RefreshCurrencies` on the BLoC. Show a brief loading indicator (spinner overlay) during step 2 — the count query is fast (≤ 100 ms typically) but should not be silent.
 
 - [ ] T069 [US3] Replace the `CurrencyFormPage` stub at `H:\alnujom-project\lib\features\currencies\presentation\pages\currency_form_page.dart` with the full implementation per `contracts\currencies-admin-pages.md § CurrencyFormPage`. Reads URL query params `mode` (`create` | `edit`) and `code` (for edit). Mounts `CurrencyFormBloc`. Form fields: `code` (disabled when editing a `isSystem=true` row), `nameAr`, `nameEn`, `symbol`, `sortOrder`, `displayDecimals`, `isActive` (toggle). Add ARB keys for each field label: `currencyCodeLabel`, `currencyNameArLabel`, `currencyNameEnLabel`, `currencySymbolLabel`, `currencySortOrderLabel`, `currencyDisplayDecimalsLabel`, `currencyIsActiveLabel` + validation messages `currencyCodeFormatError`, `requiredField`, `displayDecimalsRangeError`. On Submit, dispatches `CreateCurrency` or `UpdateCurrency`. On `SaveFailure(SQLSTATE 42501)`, show `errorSystemCurrencyImmutable` localized message; on `23505`, show `errorDuplicateCode`; on `23514`, show the per-field validation error.
 
 - [ ] T070 [US3] Replace the `SetExchangeRatePage` stub at `H:\alnujom-project\lib\features\currencies\presentation\pages\set_exchange_rate_page.dart` with the full implementation per `contracts\currencies-admin-pages.md § SetExchangeRatePage`. Mounts `SetExchangeRateBloc`. Form fields: `baseCurrency` dropdown (active currencies only, sorted by `sortOrder`), `targetCurrency` dropdown (same), `rate` text input (`Decimal`-aware), `effectiveAt` date+time picker (defaults to `now()`), `sourceText` optional input (≤ 500 chars). Live derived-rate preview: when `rate` is valid, render the line "1 {target} = {derivedAmount} {base}" using the formatter with the inverse. On Submit, the BLoC's `UnusualTimingPending` state shows the `unusual_timing_confirmation_dialog.dart` (T067); on Confirm, the submit proceeds. On `SaveSuccess`, navigate back with `Navigator.pop(context, result)` — the caller (CurrenciesListPage) re-emits `RefreshCurrencies`. Add ARB keys: `rateAmountLabel`, `effectiveAtLabel`, `sourceLabel`, `rateMustBePositiveError`, `baseEqualsTargetError`, `submitButton`.
 
 - [ ] T071 [US3] **Manual verification on the device**: walk `quickstart.md` Step 5 verbatim. (a) Open admin home → Currencies — confirm `CurrenciesListPage` renders with USD + SYP rows; (b) confirm "1 USD = 15,000 SYP" subline visible on USD card (from the seeded starter rate); (c) tap "Set new rate" — confirm `SetExchangeRatePage` opens; (d) pick base=USD target=SYP, rate=16000; confirm the live derived-rate preview "1 SYP = 0.0000625 USD" appears; (e) Submit; confirm the page navigates back; (f) confirm the USD card's subline now displays "1 USD = 16,000 SYP"; (g) total elapsed time ≤ 60 seconds (SC-005); (h) from a desktop, query `SELECT count(*) FROM public.exchange_rates WHERE created_at > now() - interval '5 minutes'` — expected: `2` rows (admin + derived) per Q2 / SC-008a; (i) query `SELECT count(*) FROM public.audit_logs WHERE action='exchange_rate.updated' AND created_at > now() - interval '5 minutes'` — expected: `2`. Then walk `quickstart.md` Step 6 verbatim — verify the symmetric 24-hour gate for both future-date and backdate (FR-017 / SC-025).
+
+  **(j) SC-014 locale-toggle preservation sub-step**: re-open `SetExchangeRatePage`. Fill in base=USD, target=SYP, rate=14000, and add a non-empty `source` text. WITHOUT submitting, toggle the device locale ar→en using the existing Phase 3 locale toggle (typically on profile/settings page — keep the form page mounted in a separate navigator if needed, OR simply observe that toggling re-routes; the test passes if after returning to `SetExchangeRatePage`, the four field values are still present AND every visible label has flipped language). Toggle en→ar and confirm the same. If any field value clears on toggle, the BLoC is not preserving state across rebuilds — fix before merging.
 
 **⚠️ Checkpoint G — US3 complete**: Admin can set new rates via the RPC; two-row INSERT per Q2 verified; symmetric timing gate confirmed. Commit: `git add lib/features/currencies/presentation/ lib/l10n/*.arb && git commit -m "feat(009): US3 — admin sets exchange rate via update_exchange_rate RPC + Q2 auto-derived inverse + Q5 symmetric timing gate" && git push`.
 
@@ -294,7 +642,7 @@ US1 is **verification-only** — every behavioral output is already produced by 
 
 - [ ] T073 [US4] Create `H:\alnujom-project\lib\features\currencies\presentation\widgets\preferred_currency_toggle.dart` per `contracts\preferred-currency-toggle.md`. Stateful widget that on mount: (a) calls `ListCurrencies(activeOnly: true)` and `readUserDisplayCurrency` from the repository; (b) renders a segmented control (or dropdown if more than 3 options) with one entry per active currency, labeled by `currency.localizedName(locale) + ' (' + currency.symbol + ')'`; (c) pre-selects the option matching the user's current preference; if the preference references a deactivated or NULL currency, falls back to the first active currency by sort_order and writes that fallback via `writeUserDisplayCurrency`. On selection change, calls `writeUserDisplayCurrency(newCode)`. The widget is small and stateless beyond the loading + current-selection state; no heavy BLoC needed (use `StatefulWidget` per Constitution IV "MAY use simpler local state ... when its spec explicitly approves it" — record approval here in the file's doc-comment).
 
-- [ ] T074 [US4] Update the existing Phase 5 profile/settings page. **First, locate the page file** — likely `H:\alnujom-project\lib\features\profile\presentation\pages\profile_page.dart` or `settings_page.dart`; confirm by running `grep -l "profile" lib/features/profile/presentation/pages/` if the exact filename is uncertain. Open the file and find a stable location for the toggle (typically below the locale toggle / above the sign-out button). Add a section with the `preferred_currency_toggle.dart` widget. If the page uses a section-header pattern, add a localized section title `preferredCurrencyLabel`.
+- [ ] T074 [US4] Update `H:\alnujom-project\lib\features\profile\presentation\pages\profile_page.dart` (confirmed-existing absolute path — the Phase 5 user-facing profile/settings page). Open the file; find the existing locale toggle widget (Phase 3 added it). Add a new section IMMEDIATELY BELOW the locale toggle and ABOVE the sign-out button with the `preferred_currency_toggle.dart` widget. If the page uses a section-header pattern, add a localized section title using the `preferredCurrencyLabel` ARB key from T072. NOTE: do NOT edit `profile_edit_page.dart` (that's the public-profile edit surface) or `profile_private_page.dart` (the public viewer surface) — only `profile_page.dart`.
 
 - [ ] T075 [US4] **Manual verification on the device**: walk `quickstart.md` Step 7. (a) Open profile/settings as any signed-in user; (b) confirm "Preferred currency" toggle renders with two options ("ليرة سورية" / "دولار أمريكي"); (c) tap USD; (d) from desktop, `SELECT display_currency FROM public.user_preferences WHERE user_id = <this user>` — expected: `'USD'`; (e) tap SYP — re-query — expected: `'SYP'`.
 
@@ -331,6 +679,8 @@ US5 is **largely verification-only** since the use case was authored in T036. Th
 - [ ] T080 [P] [US6] Create `H:\alnujom-project\lib\features\currencies\presentation\widgets\exchange_rate_row.dart` per `contracts\currencies-admin-pages.md § ExchangeRateHistoryPage`. Renders a Material `ListTile`-like row with: target_currency code; formatted rate (using a digit-grouping helper — for pure numbers without a currency symbol, you can use `intl.NumberFormat.decimalPattern(locale)` directly); localized `effective_at` (via `intl.DateFormat`); `set_by` rendered as the joined display name (the data source must resolve this — add it to the SELECT in T043); source text or `—`; if `exchangeRate.isDerived`, render the `derived_badge.dart` (built in T081).
 
 - [ ] T081 [P] [US6] Create `H:\alnujom-project\lib\features\currencies\presentation\widgets\derived_badge.dart`. Small `Chip`-style widget rendering the localized `derivedBadgeLabel` with a subtle color (e.g., the secondary accent token from Phase 2). Consumes design tokens.
+
+- [ ] T081a [US6] **Re-run DI codegen** after the Phase 9 (US6) BLoC is authored. T079 introduces one new `@injectable` class — `ExchangeRateHistoryBloc`. From `H:\alnujom-project`, run `dart run build_runner build --delete-conflicting-outputs`. Confirm `lib/core/di/injection.config.dart` now contains a factory registration for `ExchangeRateHistoryBloc`. **CRITICAL**: without this re-run, T082's page mount will throw a `GetIt` registration error.
 
 - [ ] T082 [US6] Replace the `ExchangeRateHistoryPage` stub at `H:\alnujom-project\lib\features\currencies\presentation\pages\exchange_rate_history_page.dart` with the full implementation per `contracts\currencies-admin-pages.md § ExchangeRateHistoryPage`. Reads URL param `:code` → base currency. Mounts `ExchangeRateHistoryBloc`. App-bar has "Set new rate" CTA pre-filling base=code. Filter chip for "target currency = (any / specific code)" — chip taps dispatch `TargetFilterChanged`. The body is a `ListView` of `exchange_rate_row` widgets; pagination on scroll bottom dispatches `LoadMore`. Empty state when `Loaded` with empty list shows `noRatesYet` ARB key.
 
@@ -371,6 +721,8 @@ US8 is **verification-only**. The triggers were authored in T006 + T010 + T014.
 - [ ] T091 Verify ARB completeness: from `H:\alnujom-project`, run a small script (or PowerShell one-liner) that diffs the key set of `lib/l10n/app_ar.arb` against `lib/l10n/app_en.arb` (excluding `@<key>` metadata entries). Expected: zero diff. If any key is missing from one file, add it.
 
 - [ ] T092 Verify design-token compliance: `grep -E "Color\(0x" lib/features/currencies/ -r` — expected: zero matches. `grep -E "EdgeInsets\(\s*[0-9]+" lib/features/currencies/ -r` — expected: zero matches (no inline magic padding numbers; should use design-token constants).
+
+- [ ] T092a **Verify migration idempotency (SC-016)**. Re-apply migration 1 via Supabase MCP `apply_migration` with the SAME name (`20260518120001_create_currencies`) and the EXACT same body as T006. Per project memory `project_supabase_mcp_apply_migration.md`, this WILL re-run the SQL and add a duplicate tracker row in `supabase_migrations.schema_migrations` (acknowledged side-effect — record this in the verification log). Then verify: (a) `SELECT count(*) FROM public.currencies` STILL returns `2` (the `ON CONFLICT (code) DO NOTHING` clause prevents new inserts); (b) `SELECT count(*) FROM public.audit_logs WHERE action='currency.created' AND actor_user_id IS NULL` STILL returns `2` (no new audit rows because no new INSERTs fired); (c) `SELECT count(*) FROM pg_trigger WHERE tgrelid='public.currencies'::regclass AND NOT tgisinternal` STILL returns `5` (triggers `CREATE OR REPLACE`'d in place). Repeat the same exercise for migration 2 (`20260518120002_create_exchange_rates`) — `SELECT count(*) FROM public.exchange_rates` STILL returns `2`; no new audit rows. If any count rises, the migration body has a non-idempotent statement and needs the appropriate `IF NOT EXISTS` / `ON CONFLICT` / `DO $$ ... END $$` guard. NOTE: this task is verification-only when migration 1 + 2 are correct. The duplicate `schema_migrations` tracker rows can be cleaned up manually OR left as-is (Supabase handles re-tracking gracefully on next deploy).
 
 - [ ] T093 Walk the full `H:\alnujom-project\specs\009-currencies\quickstart.md` from Step 1 through Step 12 on the reference Infinix Note 8 + desktop. Record verification timestamps in the file (e.g., "Step 5 verified 2026-05-XX by <implementer>"). Step 12 (cross-device propagation) requires two devices or one device plus a desktop emulator; if unavailable, skip Step 12 sub-tasks and note in `DEFERRED.md`.
 
@@ -448,7 +800,7 @@ After MVP, add US5 (Phase 8), US6 (Phase 9), US8 (Phase 10) in any order. Each i
 
 ### Solo-Dev Sequential
 
-For solo development (the project's reality), execute phases strictly in the order numbered. Total task count: 98. Estimated calendar effort: 2-3 working days for a Claude Code session with this tasks.md as input.
+For solo development (the project's reality), execute phases strictly in the order numbered. Total task count: 103 (98 original + 5 remediation tasks T035a, T043a, T067a, T081a, T092a added per the gap-analysis remediation pass). Estimated calendar effort: 2-3 working days for a Claude Code session with this tasks.md as input.
 
 ---
 
@@ -465,5 +817,17 @@ For solo development (the project's reality), execute phases strictly in the ord
 - **Q2 atomicity**: every successful `update_exchange_rate` RPC call produces exactly 2 rows in `public.exchange_rates`. T015 (f) verifies it; T071 (h) re-verifies on the device.
 - **Q4 forward-statement**: Phase 10 MUST add `UNIQUE(listing_id, currency_code)` to `listing_prices`. This is documented in plan.md but not implemented in Phase 9.
 - **Q5 symmetric gate**: the timing confirmation dialog uses the SAME widget for future-dating and backdating; only the copy variant differs. T067 builds it; T070 wires it.
+
+## Remediation pass (Session 2026-05-17)
+
+Following the `/speckit-analyze` gap-analysis report, this tasks.md was tightened to close 25 specific gaps that a cheaper LLM implementer would have stumbled on. Summary of the 5 HIGH-severity fixes applied here:
+
+- **A1** Locked `loadLatestRatesForBase` SQL: the function now calls a new `latest_rates_for_base` Postgres RPC (added migration 6 — T043a) that uses `DISTINCT ON (target_currency)` over the composite index — eliminates the "three approaches, no winner" ambiguity.
+- **A2** Locked the `set_by → profiles` PostgREST join: the history-query select string now explicitly includes `profiles:set_by(display_name, username)`; `ExchangeRateDto` carries the resolved `setByDisplayName` on history reads.
+- **A3** Added `countDependentExchangeRates` to the repository interface (T028), data source (T043), and a new use case (T035a). The delete-confirmation dialog (T066) now takes the count as a constructor parameter, and T068 wires the pre-fetch.
+- **A4** Added two `dart run build_runner build` re-runs (T067a after Phase 6 BLoCs, T081a after Phase 9 BLoC) so the DI graph picks up the new `@injectable` classes — without these, the page mounts would throw `GetIt: Object/factory ... is not registered`.
+- **A5** Pinned the `decimal: ^3.0.0` banker's-rounding implementation in T047 with a complete `_roundHalfEven` helper body — the package's built-in `round({scale})` truncates rather than half-evens.
+
+10 MEDIUM-severity fixes (A6-A19) tightened DTO param keys, file paths, BLoC state shapes, and verification coverage for SC-011 / SC-013 / SC-014 / SC-016. 5 LOW-severity fixes (A18-A21, A24-A25) polished imports, parsing safety, and styling. The full audit list is in the analysis report.
 
 The end.
