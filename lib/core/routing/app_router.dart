@@ -18,6 +18,7 @@ import '../../features/onboarding/presentation/pages/splash_page.dart';
 import '../../features/profile/presentation/pages/profile_edit_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/profile/presentation/pages/profile_private_page.dart';
+import '../../features/currencies/presentation/pages/money_formatter_showcase_page.dart';
 import '../../features/locations/presentation/pages/city_detail_page.dart';
 import '../../features/locations/presentation/pages/governorate_detail_page.dart';
 import '../../features/locations/presentation/pages/location_form_page.dart';
@@ -54,6 +55,7 @@ abstract final class AppRoutes {
   static const profilePrivate = '/profile/private';
   static const shellHome = '/';
   static const themeGallery = '/_debug/theme-gallery';
+  static const debugMoneyFormatter = '/debug/money-formatter';
 }
 
 abstract final class AppRouteNames {
@@ -247,6 +249,10 @@ GoRouter buildAppRouter({
               GoRoute(
                 path: '/dev/locations-picker',
                 builder: (_, __) => const LocationPickerSmokeTestPage(),
+              ),
+              GoRoute(
+                path: '/debug/money-formatter',
+                builder: (_, __) => const MoneyFormatterShowcasePage(),
               ),
             ]
           : <RouteBase>[]),
