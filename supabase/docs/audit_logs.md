@@ -77,6 +77,17 @@ new triggers and appropriate `TG_ARGV` values (action key, column list, PK colum
   - `permission.updated` — `permissions` AFTER UPDATE.
   - `permission.deleted` — `permissions` AFTER DELETE.
   - The `permissions` triggers are defensive coverage for future catalog maintenance; the Phase 7 app does not mutate permission rows.
+- Phase 8: governorates, cities, and areas ✅ **Shipped** in migrations `20260517120001`/`20260517120002`/`20260517120003` (FR-007):
+  - `governorate.created` — `governorates` AFTER INSERT.
+  - `governorate.updated` — `governorates` AFTER UPDATE.
+  - `governorate.deleted` — `governorates` AFTER DELETE.
+  - `city.created` — `cities` AFTER INSERT.
+  - `city.updated` — `cities` AFTER UPDATE.
+  - `city.deleted` — `cities` AFTER DELETE.
+  - `area.created` — `areas` AFTER INSERT.
+  - `area.updated` — `areas` AFTER UPDATE.
+  - `area.deleted` — `areas` AFTER DELETE.
+  - All seed rows (14 governorates + 32 cities + 9 areas) produce `*.created` audit rows with `actor_user_id=NULL` (trigger attached BEFORE seed per R-08 / Clarifications Q5). This is the **fifth** reuse of `log_audit()` across Phases 4/5/6/7/8 (R-13 reusability invariant).
 - Phase 12: listings workflow
 - Phase 18: reports/moderation
 - Phase 19: agency flows

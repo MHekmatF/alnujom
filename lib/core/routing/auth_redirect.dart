@@ -76,3 +76,14 @@ String? requireSuperAdminRedirect(BuildContext context, GoRouterState state) {
   }
   return null;
 }
+
+String? requireLocationsManageRedirect(
+  BuildContext context,
+  GoRouterState state,
+) {
+  final checker = getIt<PermissionChecker>();
+  if (!checker.has(PermissionKeys.locationsManage)) {
+    return '/admin';
+  }
+  return null;
+}
