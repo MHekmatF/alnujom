@@ -1,0 +1,469 @@
+---
+
+description: "Task list for Phase 9 — Currencies & Exchange Rates. Each task is self-contained with exact absolute file paths and contract pointers so a cheaper LLM can implement without context-switching. Tasks are dependency-ordered: Setup → Foundational backend → Foundational Flutter data layer → US7 MoneyFormatter → US1 public-read verification → US2 admin tile + routes → US3 admin-set-rate → US4 preferred-currency toggle → US5 listing-render rule → US6 history page → US8 audit verification → Polish."
+
+---
+
+# Tasks: Currencies & Exchange Rates
+
+**Input**: Design documents from `/specs/009-currencies/`
+**Prerequisites**: `plan.md`, `spec.md`, `research.md`, `data-model.md`, `contracts/*.md`, `quickstart.md` — all complete and locked at Session 2026-05-17.
+
+**Tests**: **NONE.** Per durable session feedback (`feedback_no_new_tests.md`), Phase 9 introduces ZERO new automated tests. Verification is manual SQL via Supabase MCP `execute_sql` + manual UI walks on the reference Infinix Note 8 device. The 10 `MoneyFormatter` golden cases from `quickstart.md` Step 8 are manually exercised on the debug-only `MoneyFormatterShowcasePage`, not automated. Existing Phase 1–8 tests remain unchanged.
+
+**Organization**: Tasks are grouped by user story. Each story's checkpoint is a self-contained increment that can be demo'd without subsequent stories. Phase 9's plan-time ordering prioritizes shared infrastructure (Money value object, MoneyFormatter) in Foundational + US7 to unblock the admin-UI stories (US3, US6) that consume the formatter.
+
+## Format: `[ID] [P?] [Story?] Description`
+
+- **[P]**: Can run in parallel with other [P]-marked tasks in the same phase (different files, no dependency on incomplete tasks).
+- **[Story]**: User story label (US1..US8). Setup / Foundational / Polish tasks have NO story label.
+- Every task includes the exact absolute file path and a pointer to the relevant contract / data-model section.
+
+## Path Conventions
+
+- Repository root: `H:\alnujom-project\`
+- Supabase artifacts: `H:\alnujom-project\supabase\`
+- Flutter sources: `H:\alnujom-project\lib\`
+- ARB files: `H:\alnujom-project\lib\l10n\`
+
+## Implementer briefing (read once before T001)
+
+Before starting, read:
+
+1. `H:\alnujom-project\specs\009-currencies\spec.md` — entire file (especially the Clarifications section's five Q&A, the eight user stories, and the 25 Success Criteria).
+2. `H:\alnujom-project\specs\009-currencies\plan.md` — entire file (especially the Project Structure tree which lists every file you will touch, and Constitution Check which justifies every plan-time choice).
+3. `H:\alnujom-project\specs\009-currencies\data-model.md` — entire file (full CREATE TABLE bodies, trigger function bodies, RLS policy bodies, RPC body, seed inventory, BLoC + entity shapes, ARB key inventory, per-FR / per-SC verification map).
+4. `H:\alnujom-project\specs\009-currencies\quickstart.md` — Steps 1 through 4 first; you'll re-read individual steps when verification tasks reference them.
+5. Skim the 13 contract files in `H:\alnujom-project\specs\009-currencies\contracts\` — these are the binding interface definitions. The most critical ones are `update-exchange-rate-rpc.md`, `money-value-object.md`, `money-formatter.md`, and `listing-price-row-selection.md`.
+6. `H:\alnujom-project\specs\008-locations\tasks.md` — skim for format reference. Phase 9 follows the same pattern.
+
+When a task says "per `contracts/<X>.md` § Y" or "per `data-model.md` § Z", that section is your source of truth for the exact code/SQL — copy it verbatim and adjust only the table/column names called out in the task.
+
+**Two carry-forward project memories matter most**:
+
+- `feedback_no_new_tests.md` — **do not write any new automated test files**. Manual verification only.
+- `feedback_git_workflow.md` — commit + push immediately after each phase / each checkpoint marker (`⚠️ Checkpoint:` lines below). One PR per spec, opened only at end-of-spec.
+
+---
+
+## Phase 1: Setup
+
+**Purpose**: Confirm environment + warm the toolchain. Add the one new package. No production code authored yet.
+
+- [ ] T001 Verify current git state. Run `git status` and `git branch --show-current` from `H:\alnujom-project`. Expected: branch `009-currencies`, working tree clean apart from the already-committed `specs/009-currencies/*` files. If branch is different, STOP and ask. If tree has unrelated dirty files, commit or stash before proceeding.
+
+- [ ] T002 [P] Verify Phase 8 is shipped on the remote Supabase project. Run via Supabase MCP `execute_sql` four checks: (a) `SELECT count(*) FROM public.governorates` returns `14`; (b) `SELECT count(*) FROM public.cities` returns between 30 and 40; (c) `SELECT count(*) FROM pg_proc WHERE proname='current_user_has_permission'` returns `1`; (d) `SELECT count(*) FROM public.permissions WHERE key='currencies.manage'` returns `1`. If any check fails, STOP — Phase 9 cannot proceed without Phase 8 + the existing `currencies.manage` permission row from Phase 6.
+
+- [ ] T003 [P] Verify `H:\alnujom-project\.env.json` exists and contains valid Supabase credentials (URL + anon key + service_role key per project memory `project_dart_defines.md`). If missing, STOP and ask the user to provide the file. Do NOT commit `.env.json` (it is in `.gitignore`).
+
+- [ ] T004 [P] Add the `decimal` package to `H:\alnujom-project\pubspec.yaml`. Edit the file's `dependencies:` block (NOT `dev_dependencies:`) and add the line `  decimal: ^3.0.0` in alphabetical order with the existing dependency list. Then run from `H:\alnujom-project`: `flutter pub get`. Confirm the command exits 0 and produces no version-resolution errors. The lockfile (`pubspec.lock`) will update with the resolved `decimal` version. (R-03 partial deviation; R-09.)
+
+- [ ] T005 Capture pre-migration baseline to `H:\alnujom-project\specs\009-currencies\baseline-pre-migration.txt` (mirror of Phase 8's `specs/008-locations/baseline-pre-migration.txt`). Concatenate the following sections (use the section headers shown verbatim) into the file: (A) Supabase MCP `list_tables` output for the `public` schema; (B) Supabase MCP `list_migrations` output (full ordered list — the last entry MUST be `20260517120005_phase8_advisor_hardening`); (C) `SELECT count(*) FROM public.currencies` — expected: error `relation "public.currencies" does not exist`; record the error text in the section body; (D) `SELECT key FROM public.permissions WHERE key='currencies.manage'` — expected: one row; record the row verbatim; (E) **Analyzer baseline**: from `H:\alnujom-project`, run `flutter analyze --no-fatal-infos --no-fatal-warnings` and paste the full stdout/stderr verbatim under this section header. This snapshot is the rollback reference if Phase 9 needs to be reverted AND the analyzer-comparison reference for the final polish phase.
+
+**⚠️ Checkpoint A — Setup complete**: Environment confirmed, Phase 8 verified shipped, `.env.json` present, `decimal` package added, baseline snapshot captured. Commit: `git add pubspec.yaml pubspec.lock specs/009-currencies/baseline-pre-migration.txt && git commit -m "chore(009): add decimal dependency + capture pre-migration baseline" && git push`.
+
+---
+
+## Phase 2: Foundational — Backend Migrations (Blocking Prerequisites)
+
+**Purpose**: Apply the 5 Phase 9 migrations + 2 new policy files + 3 new/updated doc files. The 2 new tables, 4 audit triggers, 1 immutability trigger, 6 RLS policies, the `update_exchange_rate` RPC, the FK on `user_preferences.display_currency`, and the full seed inventory all land here. EVERY downstream user story depends on this phase.
+
+**⚠️ CRITICAL**: No user story task may begin until Phase 2 is complete and verified.
+
+### Migration 1 — currencies table
+
+- [ ] T006 Author migration 1 file at `H:\alnujom-project\supabase\migrations\20260518120001_create_currencies.sql`. (FR-001, FR-002, FR-004, FR-007, FR-007a, FR-008, FR-009.) Body MUST contain, in exactly this order: (1) leading SQL `-- COMMENT` block citing FR-001/002/004/007/007a/008/009 and noting "anonymous SELECT carve-out — see research.md R-04 and R-16"; (2) `CREATE TABLE IF NOT EXISTS public.currencies (...)` from `data-model.md § Tables § public.currencies` (full body, all 10 columns, all CHECK constraints); (3) `ALTER TABLE public.currencies ENABLE ROW LEVEL SECURITY;`; (4) `set_updated_at` trigger attach (`DROP TRIGGER IF EXISTS set_currencies_updated_at ON public.currencies; CREATE TRIGGER set_currencies_updated_at BEFORE UPDATE ON public.currencies FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();`); (5) `enforce_currency_system_immutability` trigger function + trigger from `data-model.md § Triggers § Immutability trigger` (use the full function body verbatim); (6) the 3 audit triggers from `data-model.md § Triggers § Audit triggers` (currencies section — `audit_currencies_insert/update/delete` calling `log_audit('currency.created'/.updated/.deleted', 'currencies', 'code')`); (7) the 4 RLS policies from `data-model.md § RLS policies § public.currencies` (`currencies_select` admitting anon+authenticated USING true; `currencies_insert`/`_update`/`_delete` gated by `current_user_has_permission('currencies.manage')`); (8) seed INSERT of 2 currencies (SYP, USD) from `data-model.md § Seed inventory § public.currencies` using `ON CONFLICT (code) DO NOTHING`. The order matters per R-08 (triggers BEFORE seed). The audit triggers MUST be attached BEFORE step 8 runs so the seed produces 2 audit rows.
+
+- [ ] T007 Apply migration 1 via Supabase MCP `apply_migration` with name `20260518120001_create_currencies` and body from T006. Then verify via Supabase MCP `execute_sql`: (a) `SELECT count(*) FROM public.currencies` returns `2`; (b) `SELECT count(*) FROM public.currencies WHERE is_system` returns `2`; (c) `SELECT code, name_ar, name_en, symbol, display_decimals, sort_order FROM public.currencies ORDER BY sort_order` returns SYP row first (sort_order=10, display_decimals=0) then USD (sort_order=20, display_decimals=2); (d) `SELECT count(*) FROM pg_trigger WHERE tgrelid='public.currencies'::regclass AND NOT tgisinternal` returns `5` (3 audit + set_updated_at + enforce_immutability — note enforce_immutability fires on UPDATE OR DELETE so may count as 1 or 2 depending on pg_trigger row layout; accept either 5 or 6); (e) `SELECT count(*) FROM pg_policies WHERE tablename='currencies'` returns `4`; (f) `SELECT count(*) FROM public.audit_logs WHERE action='currency.created' AND actor_user_id IS NULL` returns `2` (the seed produced audit rows per R-08).
+
+- [ ] T008 [P] Author parallel policy file `H:\alnujom-project\supabase\policies\currencies_phase9.sql`. Body MUST be a verbatim copy of the 4 `DROP POLICY IF EXISTS ... CREATE POLICY ...` blocks from migration 1 step (7). Add a leading comment: `-- Mirror of the inline RLS policies in supabase/migrations/20260518120001_create_currencies.sql. R-02 dual-storage invariant — both files MUST be kept in sync at PR review.`
+
+- [ ] T009 [P] Author `H:\alnujom-project\supabase\docs\currencies.md`. Body sections (use these exact headings): `# currencies`, `## Purpose`, `## Columns` (table mirroring data-model.md), `## RLS posture` (SELECT anon+authenticated, write gated by currencies.manage), `## Immutability trigger` (refuses DELETE / code-rename on is_system=true), `## Audit triggers` (3 action keys: currency.created/.updated/.deleted), `## Seed inventory` (USD, SYP both is_system=true), `## Notes` (reference R-07, R-08 for the immutability + trigger-before-seed invariants).
+
+### Migration 2 — exchange_rates table
+
+- [ ] T010 Author migration 2 file at `H:\alnujom-project\supabase\migrations\20260518120002_create_exchange_rates.sql`. (FR-001, FR-003, FR-005, FR-007, FR-008, FR-009; R-08, R-10.) Body order: (1) leading `-- COMMENT` citing FR-001/003/005/007/008/009 + noting "append-only by RLS — see FR-008 + R-08; anonymous SELECT carve-out — see R-04"; (2) `CREATE TABLE IF NOT EXISTS public.exchange_rates (...)` from `data-model.md § Tables § public.exchange_rates` (full body, all 8 columns, the CHECK `(base_currency <> target_currency)` constraint, the CHECK `(rate > 0)` constraint, the CHECK `(source IS NULL OR length(source) <= 500)` constraint); (3) `ALTER TABLE public.exchange_rates ENABLE ROW LEVEL SECURITY;`; (4) `CREATE INDEX IF NOT EXISTS idx_exchange_rates_base_target_effective ON public.exchange_rates (base_currency, target_currency, effective_at DESC);`; (5) the 1 audit trigger `audit_exchange_rates_insert` calling `log_audit('exchange_rate.updated', 'exchange_rates', 'id')` (INSERT only — NO UPDATE / DELETE triggers because UPDATE/DELETE are blocked by RLS); (6) the 4 RLS policies from `data-model.md § RLS policies § public.exchange_rates` (`exchange_rates_select` anon+authenticated USING true; `exchange_rates_insert` gated by `current_user_has_permission('currencies.manage')`; `exchange_rates_deny_update` USING false; `exchange_rates_deny_delete` USING false); (7) the optional FR-005 starter rate seed from `data-model.md § Seed inventory § public.exchange_rates` using the `DO $$ BEGIN IF NOT EXISTS ... END $$` idempotency wrapper. The audit trigger MUST be attached BEFORE step 7 runs so the 2 seeded rows produce 2 audit rows. Plan-time decision per `data-model.md`: **enact the starter seed** (USD→SYP 15000 + auto-derived inverse).
+
+- [ ] T011 Apply migration 2 via Supabase MCP `apply_migration` name `20260518120002_create_exchange_rates` body from T010. Then verify: (a) `SELECT count(*) FROM public.exchange_rates` returns `2`; (b) `SELECT base_currency, target_currency, rate, source FROM public.exchange_rates ORDER BY base_currency` returns two rows — `(SYP, USD, 0.000067, 'auto-derived from seed (USD→SYP)')` and `(USD, SYP, 15000.000000, 'seed')`; (c) `SELECT count(*) FROM pg_trigger WHERE tgrelid='public.exchange_rates'::regclass AND NOT tgisinternal` returns `1` (audit only — NO immutability trigger); (d) `SELECT count(*) FROM pg_policies WHERE tablename='exchange_rates'` returns `4` (select, insert, deny_update, deny_delete); (e) `SELECT count(*) FROM public.audit_logs WHERE action='exchange_rate.updated' AND actor_user_id IS NULL` returns `2`; (f) verify append-only invariant: `UPDATE public.exchange_rates SET rate=99999 WHERE base_currency='USD' AND target_currency='SYP'` — expected: 0 rows affected (RLS deny via `exchange_rates_deny_update USING (false)`).
+
+- [ ] T012 [P] Author parallel policy file `H:\alnujom-project\supabase\policies\exchange_rates_phase9.sql`. Body MUST be a verbatim copy of the 4 policy blocks from migration 2 step (6). Add a leading comment: `-- Mirror of the inline RLS policies in supabase/migrations/20260518120002_create_exchange_rates.sql. R-02 dual-storage invariant. The deny_update + deny_delete policies make the append-only invariant explicit even though Postgres RLS defaults to deny when no policy matches.`
+
+- [ ] T013 [P] Author `H:\alnujom-project\supabase\docs\exchange_rates.md`. Body sections: `# exchange_rates`, `## Purpose`, `## Columns` (mirroring data-model.md), `## Append-only invariant` (FR-008 — UPDATE and DELETE policies are explicit `USING (false)`; the table is INSERT-only via the `update_exchange_rate` RPC), `## RLS posture` (SELECT anon+authenticated, INSERT gated by currencies.manage), `## Composite index` (base, target, effective_at DESC — for the latest-rate-per-pair lookup), `## Audit trigger` (action key `exchange_rate.updated`), `## Q2 auto-derive contract` (every admin call produces 2 rows: admin + auto-derived inverse with source='auto-derived from <uuid>'), `## Seed inventory` (optional starter USD→SYP=15000 + auto-derived inverse, both set_by=NULL), `## Notes` (reference R-08 trigger-before-seed; R-10 NUMERIC(18,6) precision; R-11 banker's rounding).
+
+### Migration 3 — `update_exchange_rate` RPC
+
+- [ ] T014 Author migration 3 file at `H:\alnujom-project\supabase\migrations\20260518120003_create_update_exchange_rate_rpc.sql`. (FR-012, Q2, R-06, R-11.) Body order: (1) leading `-- COMMENT` citing FR-012 + R-06 + R-11 (deviation from implementation plan's Edge Function wording; PL/pgSQL RPC chosen per Phase 7 precedent); (2) `CREATE OR REPLACE FUNCTION public.update_exchange_rate(p_base_currency TEXT, p_target_currency TEXT, p_rate NUMERIC, p_effective_at TIMESTAMPTZ DEFAULT now(), p_source TEXT DEFAULT NULL) RETURNS JSONB LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path = public, auth AS $$ ... $$;` with the full function body verbatim from `data-model.md § update_exchange_rate RPC`. The body MUST: (a) re-check `current_user_has_permission('currencies.manage')` and `RAISE EXCEPTION USING ERRCODE='42501'` on fail; (b) validate `p_base_currency <> p_target_currency` (raise `22023` on fail); (c) validate `p_rate > 0` (raise `22023` on fail); (d) compute `v_derived_rate := round(1.0 / p_rate, 6)`; (e) INSERT admin row into `public.exchange_rates` with `set_by = auth.uid()` and `source = p_source`, capture into `v_admin_row` row-type; (f) INSERT derived row with swapped base/target, `rate = v_derived_rate`, same `set_by`, and `source = format('auto-derived from %s', v_admin_row.id)`; (g) `RETURN jsonb_build_object('admin_row', to_jsonb(v_admin_row), 'derived_row', to_jsonb(v_derived_row));`.
+
+- [ ] T015 Apply migration 3 via Supabase MCP `apply_migration` name `20260518120003_create_update_exchange_rate_rpc` body from T014. Then verify: (a) `SELECT proname, prosecdef FROM pg_proc WHERE proname='update_exchange_rate' AND pronamespace='public'::regnamespace` returns 1 row with `prosecdef=t` (SECURITY DEFINER); (b) `SELECT pg_get_function_identity_arguments(oid) FROM pg_proc WHERE proname='update_exchange_rate'` returns `p_base_currency text, p_target_currency text, p_rate numeric, p_effective_at timestamp with time zone, p_source text`; (c) test the function as a `currencies.manage` holder: `SELECT public.update_exchange_rate('USD', 'SYP', 16000)` returns a JSONB with `admin_row` and `derived_row` keys; (d) verify two rows were added: `SELECT count(*) FROM public.exchange_rates WHERE created_at > now() - interval '1 minute'` returns `2`; (e) verify the derived row: `SELECT rate, source FROM public.exchange_rates WHERE base_currency='SYP' AND target_currency='USD' ORDER BY created_at DESC LIMIT 1` — rate should be approximately `0.0000625` (= 1/16000 rounded to 6 decimals), source should start with `'auto-derived from '`; (f) two audit rows: `SELECT count(*) FROM public.audit_logs WHERE action='exchange_rate.updated' AND created_at > now() - interval '1 minute'` returns `2`.
+
+### Migration 4 — `user_preferences.display_currency` FK
+
+- [ ] T016 Author migration 4 file at `H:\alnujom-project\supabase\migrations\20260518120004_alter_user_preferences_fk.sql`. (FR-019, SC-022, R-14.) Body: leading `-- COMMENT` citing FR-019 + R-14 (runs after currencies seed so existing 'SYP' default satisfies the FK); then the `DO $$ BEGIN IF NOT EXISTS (...) THEN ALTER TABLE ... ADD CONSTRAINT ...; END IF; END $$;` block verbatim from `data-model.md § Existing tables altered`. The constraint name is `user_preferences_display_currency_fkey`; FK references `public.currencies(code) ON DELETE SET NULL`. **Do NOT** modify any existing `user_preferences` row's value.
+
+- [ ] T017 Apply migration 4 via Supabase MCP `apply_migration` name `20260518120004_alter_user_preferences_fk` body from T016. Then verify: (a) `SELECT conname FROM pg_constraint WHERE conname='user_preferences_display_currency_fkey'` returns `1` row; (b) `SELECT confdeltype FROM pg_constraint WHERE conname='user_preferences_display_currency_fkey'` returns `n` (SET NULL); (c) attempt to insert a bogus value: `UPDATE public.user_preferences SET display_currency='ZZZ' WHERE user_id=(SELECT user_id FROM public.user_preferences LIMIT 1)` — expected: `ERROR 23503: insert or update on table "user_preferences" violates foreign key constraint`; (d) verify all existing rows still satisfy the FK: `SELECT count(*) FROM public.user_preferences WHERE display_currency IS NOT NULL AND display_currency NOT IN (SELECT code FROM public.currencies)` returns `0`.
+
+### Migration 5 — advisor hardening
+
+- [ ] T018 Author migration 5 file at `H:\alnujom-project\supabase\migrations\20260518120005_phase9_advisor_hardening.sql`. (Constitution III defense-in-depth; R-04, R-16.) Body MUST contain exactly these statements, in this order: (1) leading `-- COMMENT` block: `-- Phase 9: Advisor hardening for currencies + exchange_rates + update_exchange_rate RPC. -- Source: specs/009-currencies/research.md R-04 (anon SELECT carve-out) + R-16 (documented in migration comments). -- Pattern: codify anon GRANTs explicitly + REVOKE write surfaces from anon as defense-in-depth on top of RLS; tighten RPC EXECUTE grants.`; (2) two `GRANT SELECT ON public.<table> TO anon, authenticated;` statements (one each for `currencies`, `exchange_rates`); (3) two `REVOKE INSERT, UPDATE, DELETE ON public.<table> FROM anon;` statements (one each); (4) one `REVOKE EXECUTE ON FUNCTION public.update_exchange_rate(TEXT, TEXT, NUMERIC, TIMESTAMPTZ, TEXT) FROM PUBLIC, anon;`; (5) one `GRANT EXECUTE ON FUNCTION public.update_exchange_rate(TEXT, TEXT, NUMERIC, TIMESTAMPTZ, TEXT) TO authenticated;`. **Do NOT** add `ALTER TABLE ... FORCE ROW LEVEL SECURITY` or re-enable RLS (Phase 8 R-17 confirms this pattern).
+
+- [ ] T019 Apply migration 5 via Supabase MCP `apply_migration` name `20260518120005_phase9_advisor_hardening` body from T018. Then run Supabase MCP `get_advisors` type=`security` and confirm there are NO new advisor entries beyond what Phase 8 already accepts. Specifically, the new tables and RPC should NOT introduce any of: `function_search_path_mutable` (the RPC sets `search_path` explicitly), `rls_disabled`, `policy_exists_rls_disabled`. If any new lint appears, STOP and investigate — likely indicates a missing `SET search_path` on the RPC or a missing GRANT.
+
+- [ ] T020 [P] Update `H:\alnujom-project\supabase\docs\audit_logs.md` to enumerate the 4 new action keys introduced by Phase 9: `currency.created`, `currency.updated`, `currency.deleted`, `exchange_rate.updated`. Use the exact wording pattern Phase 8 used for `governorate.*` / `city.*` / `area.*` keys in the same file. Note the special behavior: `update_exchange_rate` RPC produces TWO `exchange_rate.updated` audit rows per call (admin + auto-derived inverse per Q2), with the second row's `after_state.source` starting with `'auto-derived from '`.
+
+**⚠️ Checkpoint B — Backend foundation complete**: 5 migrations applied, 2 policy mirror files committed, 3 doc files updated, `get_advisors` clean. Commit: `git add supabase/migrations/20260518* supabase/policies/*phase9*.sql supabase/docs/currencies.md supabase/docs/exchange_rates.md supabase/docs/audit_logs.md && git commit -m "feat(009): backend foundation — currencies + exchange_rates tables, update_exchange_rate RPC, FK, advisor hardening" && git push`.
+
+---
+
+## Phase 2b: Foundational — Flutter Shared Types + Data Layer
+
+**Purpose**: Author every file that downstream user stories will consume — domain entities, repository interface, use cases, DTOs, data source, repository impl, the `Money` value object. The `MoneyFormatter` is **deferred to Phase 3 (US7)** because it owns the formatting story; everything else lives here.
+
+**⚠️ CRITICAL**: No user story task may begin until Phase 2b is complete.
+
+- [ ] T021 [P] Create the empty directory structure under `H:\alnujom-project\lib\features\currencies\`: `data\datasources\`, `data\dtos\`, `data\repositories\`, `domain\entities\`, `domain\repositories\`, `domain\usecases\`, `presentation\bloc\`, `presentation\pages\`, `presentation\widgets\`. Use 9 `mkdir -p` calls (or PowerShell equivalent: `New-Item -ItemType Directory -Force -Path <path>` for each).
+
+- [ ] T022 [P] Create the empty shared-folder directories: `H:\alnujom-project\lib\shared\domain\value_objects\` (likely already exists from Phase 8); `H:\alnujom-project\lib\shared\presentation\` (create if missing). Verify each exists before proceeding.
+
+### Domain entities and value objects (parallel)
+
+- [ ] T023 [P] Create `H:\alnujom-project\lib\shared\domain\value_objects\money.dart` per `contracts\money-value-object.md` § Class shape. The file MUST contain only the imports `package:decimal/decimal.dart` and `package:equatable/equatable.dart`. The class has fields `final Decimal amount;` and `final String currencyCode;`. Constructor `const Money({required this.amount, required this.currencyCode});`. `Equatable.props => [amount, currencyCode];`. NO `rate` field. NO `displayCurrency` field. NO conversion methods. (FR-020, SC-023.)
+
+- [ ] T024 [P] Create `H:\alnujom-project\lib\features\currencies\domain\entities\currency.dart` per `data-model.md § Flutter feature folder shapes § currency.dart`. Pure-Dart class, extends `Equatable`. Fields: `code, nameAr, nameEn, symbol, isActive, sortOrder, isSystem, displayDecimals, createdAt, updatedAt` — exact types per data-model.md. Add a `String localizedName(Locale locale)` method implementing the R-18 fallback chain (active locale → other locale → code). Imports: `package:equatable/equatable.dart`, `package:flutter/widgets.dart` (for `Locale`). NO Supabase imports.
+
+- [ ] T025 [P] Create `H:\alnujom-project\lib\features\currencies\domain\entities\exchange_rate.dart` per `data-model.md § Flutter feature folder shapes § exchange_rate.dart`. Fields: `id, baseCurrency, targetCurrency, rate (Decimal), effectiveAt, setBy (nullable), source (nullable), createdAt`. Add a computed getter `bool get isDerived => source?.startsWith('auto-derived from ') ?? false;`. Imports: `package:decimal/decimal.dart`, `package:equatable/equatable.dart`. NO Supabase imports.
+
+- [ ] T026 [P] Create `H:\alnujom-project\lib\features\currencies\domain\entities\currency_with_latest_rates.dart`. Fields: `final Currency currency;`, `final Map<String, Decimal> latestRates;` (keyed by target currency code). Imports: `package:decimal/decimal.dart`, `package:equatable/equatable.dart`, the new `currency.dart` from T024. `Equatable.props => [currency, latestRates];`.
+
+- [ ] T027 [P] Create `H:\alnujom-project\lib\features\currencies\domain\entities\update_exchange_rate_result.dart` per `data-model.md § Flutter feature folder shapes § update_exchange_rate_result.dart`. Two fields: `final ExchangeRate adminRow;`, `final ExchangeRate derivedRow;`. Imports: the new `exchange_rate.dart` from T025, `package:equatable/equatable.dart`.
+
+### Domain repository interface
+
+- [ ] T028 Create `H:\alnujom-project\lib\features\currencies\domain\repositories\currencies_repository.dart` per `data-model.md § Flutter feature folder shapes § Repository interface`. Abstract class `CurrenciesRepository` with 11 methods: `listCurrencies({bool activeOnly = false})`, `loadCurrency(String code)`, `createCurrency({...})`, `updateCurrency(Currency updated)`, `deleteCurrency(String code)`, `listExchangeRateHistory({required String baseCurrency, String? targetCurrencyFilter, int limit = 50, DateTime? cursorBefore})`, `loadLatestRatesForBase(String baseCurrency)` returning `Future<Map<String, Decimal>>`, `setExchangeRate({required String baseCurrency, required String targetCurrency, required Decimal rate, required DateTime effectiveAt, String? source})` returning `Future<UpdateExchangeRateResult>`, `readUserDisplayCurrency()` returning `Future<String?>`, `writeUserDisplayCurrency(String code)`. Imports: only the new domain entities + `package:decimal/decimal.dart`. NO Supabase imports.
+
+### Domain use cases (all parallel — different files)
+
+- [ ] T029 [P] Create `H:\alnujom-project\lib\features\currencies\domain\usecases\list_currencies.dart`. Class `ListCurrencies` injected with `CurrenciesRepository`. Method `Future<List<Currency>> call({bool activeOnly = false})` delegates to `_repository.listCurrencies(activeOnly: activeOnly)`. Use `@injectable` annotation if Phase 6/7/8 use cases use that pattern (read one Phase 8 use case file like `lib/features/locations/domain/usecases/list_governorates.dart` to confirm the convention).
+
+- [ ] T030 [P] Create `H:\alnujom-project\lib\features\currencies\domain\usecases\load_currency_detail.dart`. Class `LoadCurrencyDetail` with `call(String code)` returning `Future<Currency>`.
+
+- [ ] T031 [P] Create `H:\alnujom-project\lib\features\currencies\domain\usecases\create_currency.dart`. Class `CreateCurrency` with `call({required String code, required String nameAr, required String nameEn, required String symbol, int sortOrder = 100, int displayDecimals = 2, bool isActive = true})` returning `Future<Currency>`.
+
+- [ ] T032 [P] Create `H:\alnujom-project\lib\features\currencies\domain\usecases\update_currency.dart`. Class `UpdateCurrency` with `call(Currency updated)` returning `Future<Currency>`.
+
+- [ ] T033 [P] Create `H:\alnujom-project\lib\features\currencies\domain\usecases\delete_currency.dart`. Class `DeleteCurrency` with `call(String code)` returning `Future<void>`.
+
+- [ ] T034 [P] Create `H:\alnujom-project\lib\features\currencies\domain\usecases\list_exchange_rate_history.dart`. Class `ListExchangeRateHistory` with `call({required String baseCurrency, String? targetCurrencyFilter, int limit = 50, DateTime? cursorBefore})` returning `Future<List<ExchangeRate>>`.
+
+- [ ] T035 [P] Create `H:\alnujom-project\lib\features\currencies\domain\usecases\set_exchange_rate.dart`. Class `SetExchangeRate` with `call({required String baseCurrency, required String targetCurrency, required Decimal rate, required DateTime effectiveAt, String? source})` returning `Future<UpdateExchangeRateResult>`.
+
+- [ ] T036 [P] Create `H:\alnujom-project\lib\features\currencies\domain\usecases\select_listing_price_row.dart` per `contracts\listing-price-row-selection.md`. Define an abstract `ListingPriceRowLike` class with two abstract getters `String get currencyCode;` and `bool get isPrimary;`. Define the top-level (or static) function `T? selectListingPriceRow<T extends ListingPriceRowLike>(Iterable<T> rows, {required String? viewerPreferredCurrencyCode})`. Body: if `viewerPreferredCurrencyCode != null`, iterate `rows` looking for `row.currencyCode == viewerPreferredCurrencyCode` — return the first match; if no match (or null preference), iterate `rows` looking for `row.isPrimary == true` — return the first match; if neither found, return `null`. Pure Dart, no async, no I/O. Doc-comment the function with `/// FR-019a row-selection rule. Q1 / Q4-aware. See contracts/listing-price-row-selection.md.`
+
+### DTOs (all parallel — different files)
+
+- [ ] T037 [P] Create `H:\alnujom-project\lib\features\currencies\data\dtos\currency_dto.dart`. Mirrors `public.currencies` columns. Has `Currency toDomain()` mapper and `factory CurrencyDto.fromJson(Map<String, dynamic> json)` constructor. Use `Decimal.parse()` to convert numeric strings from Postgres if needed (but `currencies` has no Decimal column; `display_decimals` is `int`).
+
+- [ ] T038 [P] Create `H:\alnujom-project\lib\features\currencies\data\dtos\exchange_rate_dto.dart`. Mirrors `public.exchange_rates` columns. The `rate` field maps to `Decimal` via `Decimal.parse(json['rate'].toString())`. Has `ExchangeRate toDomain()` mapper.
+
+- [ ] T039 [P] Create `H:\alnujom-project\lib\features\currencies\data\dtos\currency_with_latest_rates_dto.dart`. Carries the currency row + a `Map<String, Decimal>` of latest outbound rates. Has `CurrencyWithLatestRates toDomain()`.
+
+- [ ] T040 [P] Create `H:\alnujom-project\lib\features\currencies\data\dtos\update_exchange_rate_request_dto.dart`. Carries the inputs to the RPC: `baseCurrency`, `targetCurrency`, `rate (Decimal)`, `effectiveAt (DateTime)`, `sourceText (String?)`. Has `Map<String, dynamic> toRpcParams()` for the Supabase RPC call shape (note Postgres expects `p_*` prefixed keys per the RPC signature).
+
+- [ ] T041 [P] Create `H:\alnujom-project\lib\features\currencies\data\dtos\update_exchange_rate_response_dto.dart`. Matches the RPC's `{admin_row, derived_row}` JSONB shape. Has `UpdateExchangeRateResult toDomain()` that constructs two `ExchangeRate` instances from the nested objects.
+
+- [ ] T042 [P] Create `H:\alnujom-project\lib\features\currencies\data\dtos\currency_mutation_request_dto.dart`. Carries the inputs to a currencies INSERT/UPDATE: `code`, `nameAr`, `nameEn`, `symbol`, `sortOrder`, `displayDecimals`, `isActive`. Has `Map<String, dynamic> toRow()` for the Postgrest INSERT/UPDATE call.
+
+### Data layer (sequential — same files imported by each other)
+
+- [ ] T043 Create `H:\alnujom-project\lib\features\currencies\data\datasources\supabase_currencies_datasource.dart`. Annotated `@injectable`. Constructor takes a `SupabaseClient` (resolved via DI). Methods correspond 1:1 to the repository methods T028 lists; each performs the Postgrest query or RPC call. For `setExchangeRate`, call `_supabaseClient.rpc('update_exchange_rate', params: requestDto.toRpcParams()).select().single()`. For `readUserDisplayCurrency`: `SELECT display_currency FROM user_preferences WHERE user_id = auth.uid()`. For `writeUserDisplayCurrency`: `UPDATE user_preferences SET display_currency = $code WHERE user_id = auth.uid()`. For `listExchangeRateHistory`: filter by `base_currency`, optional `target_currency`, paginate with `limit` + `created_at < cursorBefore` cursor. For `loadLatestRatesForBase(baseCode)`: SELECT one row per distinct `target_currency` joined to the latest `effective_at <= now()` per pair (use a SQL fragment via a Supabase `.rpc()` helper OR construct the query with the composite index — implementation choice; preferred: write a small Postgres view or use the index via a window function). DO NOT cache anything (R-20). Map all SQLSTATE errors to localized exceptions for the repository layer to surface.
+
+- [ ] T044 Create `H:\alnujom-project\lib\features\currencies\data\repositories\currencies_repository_impl.dart`. Annotated `@LazySingleton(as: CurrenciesRepository)`. Constructor takes the datasource from T043. Each method delegates to the datasource with DTO ↔ domain mapping; wrap Supabase exceptions in domain-layer error types (define a small `CurrenciesFailure` sealed class if it helps consumers — optional; consumers may also catch the raw error).
+
+- [ ] T045 Run DI codegen: from `H:\alnujom-project`, run `dart run build_runner build --delete-conflicting-outputs`. Confirm `injection.config.dart` now contains entries for `CurrenciesRepositoryImpl`, `SupabaseCurrenciesDatasource`, and all 8 use cases (T029-T036). If codegen fails, fix annotations and re-run.
+
+- [ ] T046 [P] Add a permission-key constant check. Open `H:\alnujom-project\lib\core\security\permission_keys.dart`. Confirm a constant like `currenciesManage = 'currencies.manage'` already exists from Phase 6. If named differently (e.g., `currenciesManageKey`), use the existing name throughout the new Phase 9 code. Record the exact name as a note in the file or at the top of `lib/features/currencies/domain/repositories/currencies_repository.dart` so downstream tasks reference the same string.
+
+**⚠️ Checkpoint C — Flutter foundation complete**: All domain entities, repository interface + impl, data source, DTOs, use cases, and DI codegen in place. Run `flutter analyze --no-fatal-infos --no-fatal-warnings` and confirm zero NEW warnings vs the baseline captured in T005 § E. Commit: `git add lib/shared/domain/value_objects/money.dart lib/features/currencies/ && git commit -m "feat(009): Flutter foundation — Money value object + domain entities + data layer + use cases + DI codegen" && git push`.
+
+---
+
+## Phase 3: User Story 7 — MoneyFormatter (Priority: P1)
+
+**Why first among user stories**: US3 (admin sets rate) and US6 (history page) both render formatted rate values via `MoneyFormatter` — particularly the derived-rate preview in `SetExchangeRatePage` (FR-016). Implementing the formatter before US3/US6 unblocks them. US1 (public read) and US2 (admin tile) do not depend on the formatter.
+
+**Goal**: Ship `MoneyFormatter.format(money, locale, currency)` + a debug-only `MoneyFormatterShowcasePage` rendering the 10 plan-time-locked golden cases (per `quickstart.md` Step 8).
+
+**Independent Test**: Open `/debug/money-formatter` on the device. Confirm each of the 10 golden cases renders the locked expected output in both `ar` and `en` locales. Toggle the device locale; confirm each row re-renders correctly.
+
+- [ ] T047 [P] [US7] Create `H:\alnujom-project\lib\shared\presentation\money_formatter.dart` per `contracts\money-formatter.md`. Public API: `class MoneyFormatter { static String format(Money money, {required Locale locale, required Currency currency}); }`. Imports: `package:flutter/widgets.dart` (for `Locale`), `package:intl/intl.dart` as `intl`, `../domain/value_objects/money.dart`, `../../features/currencies/domain/entities/currency.dart`. The function MUST NOT accept a `rate` parameter (SC-023). Implementation: (a) round `money.amount` to `currency.displayDecimals` using banker's rounding (`amount.round(scale: currency.displayDecimals, rounding: RoundingMode.halfEven)` if `decimal` supports it directly, else implement manually); (b) resolve the symbol via `_resolveSymbol(currency, locale)` — for `locale.languageCode == 'en' && currency.code == 'SYP'` return `'SYP'`, else return `currency.symbol`; (c) construct an `intl.NumberFormat` for the locale with custom symbol + the rounded decimal digits; (d) for `ar` locale, position the symbol AFTER the amount with a space; for `en` locale with `$`, position before; for `en` locale with non-Latin symbol, position after as the suffix code. Return the formatted string. NO global state (R-17).
+
+- [ ] T048 [US7] Create `H:\alnujom-project\lib\features\currencies\presentation\pages\money_formatter_showcase_page.dart` per `research.md § R-21`. Page class `MoneyFormatterShowcasePage extends StatelessWidget`. The body renders a `ListView` of 10 `Row` widgets, each row showing: (a) the input `{amount, currency}` as text on the left; (b) the formatter's output on the right rendered in both `ar` and `en` locales. The 10 inputs are exactly the 10 cases in `quickstart.md` Step 8: (1) `{750000000, SYP}`, (2) `{50000, USD}`, (3) `{1234567.89, USD}`, (4) `{0, SYP}`, (5) `{0, USD}`, (6) `{1, SYP}`, (7) `{49999.997, USD}`, (8) `{49999.995, USD}`, (9) `{-50, USD}`, (10) `{15000.5, SYP}`. Each row displays the locked expected output beneath the formatter's actual output for visual comparison. The page reads the `Currency` row for SYP and USD from the `ListCurrencies` use case (mounted via DI) — do NOT hardcode the `Currency` constructor.
+
+- [ ] T049 [US7] Register the debug route `/debug/money-formatter` in `H:\alnujom-project\lib\app.dart`. Wrap the route registration in a `kDebugMode` guard (or equivalent) so production builds skip it. The route renders `MoneyFormatterShowcasePage`. No route guard needed (debug-only; the route is not registered in production).
+
+- [ ] T050 [US7] **Manual verification** — open `/debug/money-formatter` on the reference Infinix Note 8 with locale set to Arabic. Walk through each of the 10 rows; confirm the rendered output exactly matches the locked expected output column. Switch device locale to English; confirm each row re-renders correctly. If any row mismatches, fix the formatter (do NOT alter the golden expected values) and re-verify. Capture screenshots or note the verification in `H:\alnujom-project\specs\009-currencies\quickstart.md` step 8 as "verified 2026-XX-XX".
+
+**⚠️ Checkpoint D — US7 complete**: `MoneyFormatter` + showcase page exist; 10 golden cases verified manually in both locales. Commit: `git add lib/shared/presentation/money_formatter.dart lib/features/currencies/presentation/pages/money_formatter_showcase_page.dart lib/app.dart && git commit -m "feat(009): US7 — MoneyFormatter utility + debug-only showcase page (10 golden cases manually verified)" && git push`.
+
+---
+
+## Phase 4: User Story 1 — Public Read of Currencies Catalog (Priority: P1)
+
+**Goal**: Verify the seeded `USD` and `SYP` currency rows + any seeded exchange rate are readable by anonymous + authenticated clients via the RLS policies authored in T006/T010.
+
+**Independent Test**: From an anonymous Supabase client, `SELECT * FROM public.currencies` returns 2 rows. From the Flutter device, the catalog reads succeed without sign-in (smoke-tested implicitly via T048's showcase page which calls `ListCurrencies`).
+
+US1 is **verification-only** — every behavioral output is already produced by Phase 2 + Phase 2b. The tasks below are SQL probes confirming the behavior matches the spec.
+
+- [ ] T051 [US1] Run `quickstart.md` Step 2 verbatim. Capture each query's actual output to a session log. Expected: 2 currency rows from anon SELECT; 2 (or 0) exchange_rates rows from anon SELECT; INSERT attempt as anon refused with RLS violation.
+
+- [ ] T052 [US1] Verify the R-18 locale-fallback rendering of currency names. Open the showcase page from T048 with locale `ar` — confirm USD displays as "دولار أمريكي" and SYP as "ليرة سورية". Toggle to `en` — confirm USD displays as "US Dollar" and SYP as "Syrian Pound". (FR-024 / R-18.)
+
+- [ ] T053 [US1] Verify a regular `user`-role session (Phase 5 default role) sees the same 2 currency rows as the anonymous client. Sign in as a non-admin test account; mount the showcase page; confirm USD + SYP both appear.
+
+**⚠️ Checkpoint E — US1 verified**: Public reads work for anonymous + authenticated clients. No code changes. No commit needed.
+
+---
+
+## Phase 5: User Story 2 — Admin Tile + Route Guard (Priority: P1)
+
+**Goal**: A `currencies.manage` holder sees a "Currencies" tile on the admin home page; non-holders do not. The four currencies admin routes are guarded by the same permission predicate.
+
+**Independent Test**: Sign in as Phase 5 admin — confirm the Currencies tile renders. Sign in as moderator — confirm the tile is hidden and `/admin/currencies` deep-link redirects to unauthorized.
+
+- [ ] T054 [P] [US2] Add the ARB key `adminHomeCurrenciesTile` to `H:\alnujom-project\lib\l10n\app_ar.arb` with value `'العملات'` and to `H:\alnujom-project\lib\l10n\app_en.arb` with value `'Currencies'`. Add `@adminHomeCurrenciesTile` description metadata in both files: `"Currencies admin-home tile label"`. Run `flutter gen-l10n` if the project uses generated localizations (otherwise the Phase 3 ARB pipeline handles it on next analyzer run).
+
+- [ ] T055 [P] [US2] Add 4 ARB keys for the 4 new page titles to both `app_ar.arb` and `app_en.arb`: `currenciesPageTitle` (`العملات` / `Currencies`), `setExchangeRatePageTitle` (`تعيين سعر صرف` / `Set exchange rate`), `exchangeRateHistoryPageTitle` (`سجل أسعار الصرف` / `Exchange rate history`), `currencyFormPageTitle` (`عملة` / `Currency`). Each with an `@<key>` description.
+
+- [ ] T056 [US2] Update `H:\alnujom-project\lib\features\admin\presentation\pages\admin_home_page.dart` to add the Currencies tile. Find the existing tile list (mirroring Phase 8's Locations tile addition). Insert a new tile widget AFTER the Locations tile, gated by `PermissionChecker.has(PermissionKeys.<currenciesManage-constant-name-from-T046>)`. Tile properties: localized title from `AppLocalizations.of(context).adminHomeCurrenciesTile`, an appropriate icon (e.g., `Icons.currency_exchange` or `Icons.attach_money` — match the project's icon convention), navigation on tap to `'/admin/currencies'`. The tile is HIDDEN (not dimmed) for non-holders — use `if (PermissionChecker.has(...)) ListTile(...)` rather than `enabled: false`.
+
+- [ ] T057 [US2] Update the router config in `H:\alnujom-project\lib\app.dart` (or wherever `GoRouter` is configured — confirm by inspection). Add four route entries: `/admin/currencies` → `CurrenciesListPage`, `/admin/currencies/set-rate` → `SetExchangeRatePage`, `/admin/currencies/:code/history` → `ExchangeRateHistoryPage`, `/admin/currencies/form` → `CurrencyFormPage` (with query params `mode` and optional `code` for edit). The pages themselves are stubbed in this task — create thin placeholder widgets that just render `Scaffold(appBar: AppBar(title: Text(...)))`; full implementations land in US3/US6.
+
+- [ ] T058 [US2] Update `H:\alnujom-project\lib\core\routing\auth_redirect.dart` (or the equivalent route-guard helper — match the Phase 8 pattern; inspect the existing file to find the `/admin/locations/*` guard and add a parallel block). Add a redirect guard for routes matching the regex `^/admin/currencies(/.*)?$`. The guard reads `PermissionChecker.has(<currenciesManage>)`; if false, redirects to the project's established admin-route-unauthorized destination (mirror Phase 8's destination).
+
+- [ ] T059 [US2] **Manual verification on the reference Infinix Note 8**: (a) sign in as Phase 5 admin — confirm Currencies tile renders; tap it — confirm `CurrenciesListPage` (placeholder) opens; (b) sign out, sign in as moderator — confirm Currencies tile is absent; (c) hand-type `/admin/currencies` as a deep-link — confirm redirect to unauthorized destination; (d) hand-type `/admin/currencies/set-rate` and `/admin/currencies/USD/history` and `/admin/currencies/form` — confirm each is refused; (e) sign back in as admin — confirm `/admin/currencies/USD/history` deep-link navigates correctly (placeholder page).
+
+**⚠️ Checkpoint F — US2 complete**: Admin tile gated, four routes registered + guarded. Commit: `git add lib/features/admin/presentation/pages/admin_home_page.dart lib/app.dart lib/core/routing/auth_redirect.dart lib/l10n/*.arb lib/features/currencies/presentation/pages/ && git commit -m "feat(009): US2 — Currencies admin tile + 4 routes + three-layer permission gate" && git push`.
+
+---
+
+## Phase 6: User Story 3 — Admin Sets a New Rate via RPC (Priority: P1)
+
+**Goal**: A `currencies.manage` holder opens `CurrenciesListPage`, sees existing currencies + their latest rates, navigates to `SetExchangeRatePage`, submits a new rate, and observes the atomic two-row INSERT (admin + auto-derived inverse) per Q2.
+
+**Independent Test**: Per `quickstart.md` Step 5 — set USD → SYP = 16000 from the device; verify 2 rows + 2 audit rows landed in under 60 seconds.
+
+### BLoCs and helper widgets (parallel — different files)
+
+- [ ] T060 [P] [US3] Create `H:\alnujom-project\lib\features\currencies\presentation\bloc\currencies_list_bloc.dart` per `data-model.md § BLoC shapes`. States: `Initial / Loading / Loaded(List<CurrencyWithLatestRates>) / Error(message)`. Events: `LoadCurrencies`, `RefreshCurrencies`, `CurrencyMutated(code)` (re-fetches the row). Constructor injects `ListCurrencies` use case + a `loadLatestRatesForBase` (or expose via a dedicated use case if needed) — match the Phase 8 BLoC pattern.
+
+- [ ] T061 [P] [US3] Create `H:\alnujom-project\lib\features\currencies\presentation\bloc\currency_form_bloc.dart`. States: `Idle / Validating / Saving / SaveSuccess(Currency) / SaveFailure(reason)`. Events: `EditFieldChanged(name, value)`, `SubmitPressed`, `LoadForEdit(code)`. Constructor injects `CreateCurrency` + `UpdateCurrency` + `LoadCurrencyDetail` use cases.
+
+- [ ] T062 [P] [US3] Create `H:\alnujom-project\lib\features\currencies\presentation\bloc\set_exchange_rate_bloc.dart` per `data-model.md § BLoC shapes`. States: `Idle / DerivedRatePreview(Decimal previewInverse) / Saving / SaveSuccess(UpdateExchangeRateResult) / SaveFailure(reason) / UnusualTimingPending(action)`. Events: `BaseChanged(code)`, `TargetChanged(code)`, `RateChanged(Decimal)`, `EffectiveAtChanged(DateTime)`, `SourceChanged(String?)`, `SubmitPressed`, `UnusualTimingConfirmed`, `UnusualTimingCancelled`. Logic: on `RateChanged`, compute `1/rate` rounded to 6 decimals and emit `DerivedRatePreview` for the form to display (FR-016 transparency). On `SubmitPressed`, check if `effectiveAt > now() + 24h` OR `effectiveAt < now() - 24h` per Q5 — if either, emit `UnusualTimingPending(action: pendingSubmit)`; otherwise immediately call `SetExchangeRate` use case. The `UnusualTimingConfirmed` event proceeds with the queued submit; `UnusualTimingCancelled` returns to `Idle`.
+
+- [ ] T063 [P] [US3] Create `H:\alnujom-project\lib\features\currencies\presentation\widgets\currency_card.dart`. Stateless widget that takes a `CurrencyWithLatestRates` + `Locale` and renders a `Card` with: code + `currency.localizedName(locale)` + `currency.symbol`; the `system_currency_badge` if `currency.isSystem` (built in T064); per-target-currency `latest_rate_subline` rows (built in T065); per-row action buttons (Edit, View history, Delete-conditional). The Delete button is rendered ONLY if `!currency.isSystem` AND the user has `currencies.manage` (per FR-015a / SC-017). All copy via `AppLocalizations`; all spacing/colors via Phase 2 design tokens.
+
+- [ ] T064 [P] [US3] Create `H:\alnujom-project\lib\features\currencies\presentation\widgets\system_currency_badge.dart`. Small `Chip`-style widget rendering a localized "System" label (add ARB key `systemCurrencyBadge` to both ARB files in this task). Consumes Phase 2 design tokens.
+
+- [ ] T065 [P] [US3] Create `H:\alnujom-project\lib\features\currencies\presentation\widgets\latest_rate_subline.dart`. Stateless widget taking a `baseCurrency`, `targetCurrencyCode`, `Decimal latestRate`, `Currency targetCurrency`, `Locale locale`. Renders the compact line "1 {base} = {amount} {target}" using `AppLocalizations` `latestRateLineTemplate` (add ARB key in this task: `"1 {base} = {amount} {target}"` with placeholders `{base}`, `{amount}`, `{target}`). The `{amount}` value is formatted by calling `MoneyFormatter.format(Money(amount: latestRate, currencyCode: targetCurrencyCode), locale: locale, currency: targetCurrency)`. If `latestRate` is `null` (no rate set for the pair), render the localized `rateNotSetHint` ARB key (add: `'لم يتم تعيين السعر بعد'` / `'rate not set yet'`).
+
+- [ ] T066 [P] [US3] Create `H:\alnujom-project\lib\features\currencies\presentation\widgets\delete_currency_confirmation_dialog.dart` per `research.md § R-19`. Stateful or stateless dialog that takes a `Currency` and shows: localized title "Delete {code}?"; localized body listing the count of dependent `exchange_rates` rows (queried via a small datasource call — pass the count as a parameter from the caller to avoid coupling) and the count of future `listing_prices` rows referencing the code (zero in Phase 9; the dialog still mentions "Phase 10+ listing prices" generically); Confirm + Cancel buttons. Add ARB keys: `deleteCurrencyConfirmTitle`, `deleteCurrencyConfirmBody` (parameterized for `{exchangeRatesCount}` and `{listingPricesCount}`), `deleteButton`, `cancelButton`. The dialog returns `true` on Confirm, `false` on Cancel.
+
+- [ ] T067 [P] [US3] Create `H:\alnujom-project\lib\features\currencies\presentation\widgets\unusual_timing_confirmation_dialog.dart` per FR-017 / Q5. Takes a `direction` enum (`future` / `backdate`) and the magnitude (e.g., "48 hours from now" / "48 hours ago"). Renders one of two title variants and one of two body variants depending on direction. Add ARB keys: `unusualTimingFutureTitle` (`تعيين سعر بتاريخ مستقبلي؟`/`Set rate for a future date?`), `unusualTimingBackdateTitle` (`تعيين سعر بتاريخ سابق؟`/`Set rate for a past date?`), `unusualTimingFutureBody` (parameterized for `{magnitude}`), `unusualTimingBackdateBody` (parameterized).
+
+### Pages — replace placeholders from T057 with real implementations
+
+- [ ] T068 [US3] Replace the `CurrenciesListPage` stub at `H:\alnujom-project\lib\features\currencies\presentation\pages\currencies_list_page.dart` with the full implementation per `contracts\currencies-admin-pages.md § CurrenciesListPage`. Mounts `CurrenciesListBloc`; on `Loaded` state, renders a `ListView` of `currency_card.dart` widgets (one per row, each carrying its latest-rates map). App-bar has "Set new rate" CTA navigating to `/admin/currencies/set-rate`. Each card's Edit button navigates to `/admin/currencies/form?mode=edit&code=<code>`. Each card's View history button navigates to `/admin/currencies/<code>/history`. The Delete button (only on non-system rows) shows the `delete_currency_confirmation_dialog.dart`; on Confirm, dispatches `DeleteCurrency` use case and on success, re-emits `RefreshCurrencies` on the BLoC.
+
+- [ ] T069 [US3] Replace the `CurrencyFormPage` stub at `H:\alnujom-project\lib\features\currencies\presentation\pages\currency_form_page.dart` with the full implementation per `contracts\currencies-admin-pages.md § CurrencyFormPage`. Reads URL query params `mode` (`create` | `edit`) and `code` (for edit). Mounts `CurrencyFormBloc`. Form fields: `code` (disabled when editing a `isSystem=true` row), `nameAr`, `nameEn`, `symbol`, `sortOrder`, `displayDecimals`, `isActive` (toggle). Add ARB keys for each field label: `currencyCodeLabel`, `currencyNameArLabel`, `currencyNameEnLabel`, `currencySymbolLabel`, `currencySortOrderLabel`, `currencyDisplayDecimalsLabel`, `currencyIsActiveLabel` + validation messages `currencyCodeFormatError`, `requiredField`, `displayDecimalsRangeError`. On Submit, dispatches `CreateCurrency` or `UpdateCurrency`. On `SaveFailure(SQLSTATE 42501)`, show `errorSystemCurrencyImmutable` localized message; on `23505`, show `errorDuplicateCode`; on `23514`, show the per-field validation error.
+
+- [ ] T070 [US3] Replace the `SetExchangeRatePage` stub at `H:\alnujom-project\lib\features\currencies\presentation\pages\set_exchange_rate_page.dart` with the full implementation per `contracts\currencies-admin-pages.md § SetExchangeRatePage`. Mounts `SetExchangeRateBloc`. Form fields: `baseCurrency` dropdown (active currencies only, sorted by `sortOrder`), `targetCurrency` dropdown (same), `rate` text input (`Decimal`-aware), `effectiveAt` date+time picker (defaults to `now()`), `sourceText` optional input (≤ 500 chars). Live derived-rate preview: when `rate` is valid, render the line "1 {target} = {derivedAmount} {base}" using the formatter with the inverse. On Submit, the BLoC's `UnusualTimingPending` state shows the `unusual_timing_confirmation_dialog.dart` (T067); on Confirm, the submit proceeds. On `SaveSuccess`, navigate back with `Navigator.pop(context, result)` — the caller (CurrenciesListPage) re-emits `RefreshCurrencies`. Add ARB keys: `rateAmountLabel`, `effectiveAtLabel`, `sourceLabel`, `rateMustBePositiveError`, `baseEqualsTargetError`, `submitButton`.
+
+- [ ] T071 [US3] **Manual verification on the device**: walk `quickstart.md` Step 5 verbatim. (a) Open admin home → Currencies — confirm `CurrenciesListPage` renders with USD + SYP rows; (b) confirm "1 USD = 15,000 SYP" subline visible on USD card (from the seeded starter rate); (c) tap "Set new rate" — confirm `SetExchangeRatePage` opens; (d) pick base=USD target=SYP, rate=16000; confirm the live derived-rate preview "1 SYP = 0.0000625 USD" appears; (e) Submit; confirm the page navigates back; (f) confirm the USD card's subline now displays "1 USD = 16,000 SYP"; (g) total elapsed time ≤ 60 seconds (SC-005); (h) from a desktop, query `SELECT count(*) FROM public.exchange_rates WHERE created_at > now() - interval '5 minutes'` — expected: `2` rows (admin + derived) per Q2 / SC-008a; (i) query `SELECT count(*) FROM public.audit_logs WHERE action='exchange_rate.updated' AND created_at > now() - interval '5 minutes'` — expected: `2`. Then walk `quickstart.md` Step 6 verbatim — verify the symmetric 24-hour gate for both future-date and backdate (FR-017 / SC-025).
+
+**⚠️ Checkpoint G — US3 complete**: Admin can set new rates via the RPC; two-row INSERT per Q2 verified; symmetric timing gate confirmed. Commit: `git add lib/features/currencies/presentation/ lib/l10n/*.arb && git commit -m "feat(009): US3 — admin sets exchange rate via update_exchange_rate RPC + Q2 auto-derived inverse + Q5 symmetric timing gate" && git push`.
+
+---
+
+## Phase 7: User Story 4 — Preferred Currency Toggle (Priority: P1)
+
+**Goal**: A signed-in user sees a "Preferred currency" toggle on the profile/settings page; selecting a different option updates `user_preferences.display_currency`.
+
+**Independent Test**: Sign in as any user; open profile/settings; tap a different currency; verify DB row updates per `quickstart.md` Step 7.
+
+- [ ] T072 [P] [US4] Add ARB keys for the toggle to both `app_ar.arb` and `app_en.arb`: `preferredCurrencyLabel` (`العملة المفضلة` / `Preferred currency`), `preferredCurrencyHelp` (optional helper text — short).
+
+- [ ] T073 [US4] Create `H:\alnujom-project\lib\features\currencies\presentation\widgets\preferred_currency_toggle.dart` per `contracts\preferred-currency-toggle.md`. Stateful widget that on mount: (a) calls `ListCurrencies(activeOnly: true)` and `readUserDisplayCurrency` from the repository; (b) renders a segmented control (or dropdown if more than 3 options) with one entry per active currency, labeled by `currency.localizedName(locale) + ' (' + currency.symbol + ')'`; (c) pre-selects the option matching the user's current preference; if the preference references a deactivated or NULL currency, falls back to the first active currency by sort_order and writes that fallback via `writeUserDisplayCurrency`. On selection change, calls `writeUserDisplayCurrency(newCode)`. The widget is small and stateless beyond the loading + current-selection state; no heavy BLoC needed (use `StatefulWidget` per Constitution IV "MAY use simpler local state ... when its spec explicitly approves it" — record approval here in the file's doc-comment).
+
+- [ ] T074 [US4] Update the existing Phase 5 profile/settings page. **First, locate the page file** — likely `H:\alnujom-project\lib\features\profile\presentation\pages\profile_page.dart` or `settings_page.dart`; confirm by running `grep -l "profile" lib/features/profile/presentation/pages/` if the exact filename is uncertain. Open the file and find a stable location for the toggle (typically below the locale toggle / above the sign-out button). Add a section with the `preferred_currency_toggle.dart` widget. If the page uses a section-header pattern, add a localized section title `preferredCurrencyLabel`.
+
+- [ ] T075 [US4] **Manual verification on the device**: walk `quickstart.md` Step 7. (a) Open profile/settings as any signed-in user; (b) confirm "Preferred currency" toggle renders with two options ("ليرة سورية" / "دولار أمريكي"); (c) tap USD; (d) from desktop, `SELECT display_currency FROM public.user_preferences WHERE user_id = <this user>` — expected: `'USD'`; (e) tap SYP — re-query — expected: `'SYP'`.
+
+**⚠️ Checkpoint H — US4 complete**: Preferred-currency toggle works; preference persists to DB. Commit: `git add lib/features/currencies/presentation/widgets/preferred_currency_toggle.dart lib/features/profile/ lib/l10n/*.arb && git commit -m "feat(009): US4 — preferred-currency toggle on profile/settings page" && git push`.
+
+---
+
+## Phase 8: User Story 5 — Listing-Price Row Selection Rule (Priority: P1)
+
+**Goal**: The pure-Dart `selectListingPriceRow` use case (already created in T036) correctly picks among multi-currency listing rows per FR-019a / Q1 / Q4.
+
+**Independent Test**: Manually walk the four cases in `contracts\listing-price-row-selection.md § Verification`. Phase 10 (when it ships) will exercise this via real `listing_prices` rows; Phase 9 verifies the function in isolation.
+
+US5 is **largely verification-only** since the use case was authored in T036. The page-level listing render is owned by Phase 10 / Phase 13 (forward-stated). This phase ensures the use case behaves correctly.
+
+- [ ] T076 [US5] Add a "Listing-price row-selection rule" section to the showcase page (T048's `money_formatter_showcase_page.dart`). Render the four cases from `contracts\listing-price-row-selection.md § Verification` as four `ListTile` rows: each row shows the input rows, the viewer preference, and the function's actual output. Hardcode the inputs as small in-line `TestRow extends ListingPriceRowLike` objects with `currencyCode` and `isPrimary` getters.
+
+- [ ] T077 [US5] **Manual verification on the device**: open the showcase page (`/debug/money-formatter`). Scroll to the row-selection section. Confirm: (1) USD-only listing + viewer prefers SYP → returns USD row (fallback); (2) USD+SYP listing + viewer prefers SYP → returns SYP row; (3) empty listing → returns `null`; (4) anonymous viewer (null preference) → returns primary row.
+
+**⚠️ Checkpoint I — US5 verified**: Row-selection rule behaves per contract. The selection rule is ready to consume in Phase 10. Commit: `git add lib/features/currencies/presentation/pages/money_formatter_showcase_page.dart && git commit -m "feat(009): US5 — listing-price row-selection rule (FR-019a) verified via showcase" && git push`.
+
+---
+
+## Phase 9: User Story 6 — Exchange-Rate History Page (Priority: P2)
+
+**Goal**: A `currencies.manage` holder views the paginated history of rates for a given base currency, with derived rows visually badged.
+
+**Independent Test**: Set 2-3 rates over time via US3; open `/admin/currencies/USD/history` — confirm 4-6 rows (admin + auto-derived per set) ordered `effective_at DESC`, with the SYP→USD rows tagged with the derived badge.
+
+- [ ] T078 [P] [US6] Add ARB keys: `targetCurrencyFilterLabel`, `derivedBadgeLabel` (`مشتق` / `Auto-derived`), `setByLabel` (`بواسطة` / `Set by`), `effectiveAtLabel` (already added in T070; reuse), `noRatesYet` (`لا توجد أسعار بعد` / `No rates yet`).
+
+- [ ] T079 [P] [US6] Create `H:\alnujom-project\lib\features\currencies\presentation\bloc\exchange_rate_history_bloc.dart`. States: `Initial / Loading / Loaded(List<ExchangeRate>, bool hasMore) / LoadingMore / Error(message)`. Events: `LoadHistory(baseCurrency, targetFilter)`, `LoadMore`, `TargetFilterChanged(target?)`. Constructor injects `ListExchangeRateHistory` use case. On `LoadMore`, fetches the next page using the last row's `created_at` as the cursor.
+
+- [ ] T080 [P] [US6] Create `H:\alnujom-project\lib\features\currencies\presentation\widgets\exchange_rate_row.dart` per `contracts\currencies-admin-pages.md § ExchangeRateHistoryPage`. Renders a Material `ListTile`-like row with: target_currency code; formatted rate (using a digit-grouping helper — for pure numbers without a currency symbol, you can use `intl.NumberFormat.decimalPattern(locale)` directly); localized `effective_at` (via `intl.DateFormat`); `set_by` rendered as the joined display name (the data source must resolve this — add it to the SELECT in T043); source text or `—`; if `exchangeRate.isDerived`, render the `derived_badge.dart` (built in T081).
+
+- [ ] T081 [P] [US6] Create `H:\alnujom-project\lib\features\currencies\presentation\widgets\derived_badge.dart`. Small `Chip`-style widget rendering the localized `derivedBadgeLabel` with a subtle color (e.g., the secondary accent token from Phase 2). Consumes design tokens.
+
+- [ ] T082 [US6] Replace the `ExchangeRateHistoryPage` stub at `H:\alnujom-project\lib\features\currencies\presentation\pages\exchange_rate_history_page.dart` with the full implementation per `contracts\currencies-admin-pages.md § ExchangeRateHistoryPage`. Reads URL param `:code` → base currency. Mounts `ExchangeRateHistoryBloc`. App-bar has "Set new rate" CTA pre-filling base=code. Filter chip for "target currency = (any / specific code)" — chip taps dispatch `TargetFilterChanged`. The body is a `ListView` of `exchange_rate_row` widgets; pagination on scroll bottom dispatches `LoadMore`. Empty state when `Loaded` with empty list shows `noRatesYet` ARB key.
+
+- [ ] T083 [US6] **Manual verification on the device**: walk `quickstart.md` Step 11. (a) Sign in as admin; set 2-3 USD→SYP rates over time via US3 (each call produces 2 rows: admin + derived); (b) tap a USD card → "View history"; (c) confirm 4-6 rows listed `effective_at DESC`; (d) confirm SYP→USD rows show the derived badge; (e) apply "target = SYP" filter — confirm only admin-direction USD→SYP rows remain; (f) tap header "Set new rate" CTA — confirm `SetExchangeRatePage` opens pre-filled with `base_currency = USD`.
+
+**⚠️ Checkpoint J — US6 complete**: Exchange-rate history page renders correctly with derived badges + filter. Commit: `git add lib/features/currencies/presentation/ lib/l10n/*.arb && git commit -m "feat(009): US6 — exchange-rate history page with derived badge + target filter + pagination" && git push`.
+
+---
+
+## Phase 10: User Story 8 — Audit Trigger Verification (Priority: P2)
+
+**Goal**: Confirm every Phase 9 mutation produces the correct count of `audit_logs` rows.
+
+US8 is **verification-only**. The triggers were authored in T006 + T010 + T014.
+
+- [ ] T084 [US8] Walk `quickstart.md` Step 4 — verify the 4 seed audit rows (2 `currency.created` + 2 `exchange_rate.updated`, all `actor_user_id IS NULL`).
+
+- [ ] T085 [US8] Walk `quickstart.md` Step 5 (b) — verify each admin `update_exchange_rate` RPC call produces exactly 2 audit rows (the Q2 atomic two-INSERT). Run from device: set USD→SYP=17000 → confirm 2 audit rows added with this admin's `actor_user_id`.
+
+- [ ] T086 [US8] Verify the Phase 8 existing audit triggers on `governorates/cities/areas/roles/role_permissions/permissions/user_roles` remain present and functional: `SELECT count(*) FROM information_schema.triggers WHERE event_object_schema='public' AND trigger_name LIKE 'audit_%'` — expected: ≥ 13 (3 per Phase 8 table = 9 + 4 per Phase 6-7 table on roles/permissions/user_roles/role_permissions ≈ 4-12; the exact total is the pre-Phase-9 baseline + 4 new from Phase 9). Confirm the count rose by exactly 4 vs the pre-Phase-9 baseline from T005.
+
+**⚠️ Checkpoint K — US8 verified**: Audit coverage complete. No commit needed (verification only).
+
+---
+
+## Phase 11: Polish & Cross-Cutting Concerns
+
+**Purpose**: Final cleanup, design-token audit, ARB completeness, advisor pass, full quickstart walk.
+
+- [ ] T087 [P] Run `flutter analyze --no-fatal-infos --no-fatal-warnings` from `H:\alnujom-project`. Compare against the baseline in `specs/009-currencies/baseline-pre-migration.txt § E`. Confirm zero NEW warnings introduced by Phase 9 code. If any new warning appears, fix it (typical causes: missing `const` on widget constructors, unused imports left over from refactoring).
+
+- [ ] T088 [P] Run a grep to confirm Constitution IX cleanliness: from `H:\alnujom-project`, `grep -R "package:supabase_flutter" lib/features/currencies/domain` — expected: zero matches. `grep -R "package:supabase_flutter" lib/shared/domain` — expected: zero matches.
+
+- [ ] T089 [P] Run a grep to confirm SC-023 enforcement: `grep -E "(rate|convert|exchange)" lib/shared/presentation/money_formatter.dart | grep -v "//"` — confirm no `rate` parameter or `convert`/`exchange` method name appears in any public signature. (Comments allowed.) Similarly grep `lib/shared/domain/value_objects/money.dart` for the same patterns — confirm none in field names.
+
+- [ ] T090 [P] Run Supabase MCP `get_advisors` type=`security` AND type=`performance`. Confirm zero new advisor entries beyond what Phase 8 already accepted. If any new advisor fires (e.g., `function_search_path_mutable` for the RPC, or `unused_index` for the composite index), investigate and fix.
+
+- [ ] T091 Verify ARB completeness: from `H:\alnujom-project`, run a small script (or PowerShell one-liner) that diffs the key set of `lib/l10n/app_ar.arb` against `lib/l10n/app_en.arb` (excluding `@<key>` metadata entries). Expected: zero diff. If any key is missing from one file, add it.
+
+- [ ] T092 Verify design-token compliance: `grep -E "Color\(0x" lib/features/currencies/ -r` — expected: zero matches. `grep -E "EdgeInsets\(\s*[0-9]+" lib/features/currencies/ -r` — expected: zero matches (no inline magic padding numbers; should use design-token constants).
+
+- [ ] T093 Walk the full `H:\alnujom-project\specs\009-currencies\quickstart.md` from Step 1 through Step 12 on the reference Infinix Note 8 + desktop. Record verification timestamps in the file (e.g., "Step 5 verified 2026-05-XX by <implementer>"). Step 12 (cross-device propagation) requires two devices or one device plus a desktop emulator; if unavailable, skip Step 12 sub-tasks and note in `DEFERRED.md`.
+
+- [ ] T094 Author `H:\alnujom-project\specs\009-currencies\DEFERRED.md` per project memory `project_deferred_work.md`. Capture any in-flight scope decisions discovered during implementation. At minimum, list: (a) empty-state copy on rate sublines (deferred to plan; implemented as `rateNotSetHint` in T065 — note resolution); (b) Edge Function rate limiting (Supabase platform handles; no action needed in Phase 9); (c) ICU symbol fallback for future custom currencies (deferred until first non-USD/SYP currency is added by an admin); (d) `source` text sanitization rules (relying on Postgres `CHECK length<=500` + admin-only write); (e) loading-state UX details (deferred to implementation; use Phase 2 design tokens' standard loading widget). For each, mark status as "Resolved" / "Deferred to <phase>" / "Accepted as-is".
+
+- [ ] T095 Final commit + push for the polish phase. Commit: `git add specs/009-currencies/DEFERRED.md specs/009-currencies/quickstart.md lib/ && git commit -m "polish(009): final verifications, DEFERRED.md, quickstart timestamps" && git push`.
+
+**⚠️ Checkpoint L — Phase 9 implementation complete**: Every FR, SC, edge case verified. Branch `009-currencies` is ready to open as a PR to `main` per the AI_AGENT_WORKFLOW.md spec-PR pattern.
+
+---
+
+## Phase 12: PR + merge
+
+- [ ] T096 Open the Phase 9 PR. From `H:\alnujom-project`, run `gh pr create --title "feat(009-currencies): Phase 9 — Currencies & Exchange Rates" --body "$(cat <<'EOF'`. The body MUST include: (1) one-paragraph summary citing the 5 Session 2026-05-17 clarifications + the R-06 deviation; (2) a Test plan section with a bulleted checklist matching the `quickstart.md` 12 steps; (3) explicit note: "No new automated tests per `feedback_no_new_tests.md`. Verification is manual SQL + device walk per `quickstart.md`."
+
+- [ ] T097 Wait for CI to complete (per `AI_AGENT_WORKFLOW.md`). If green, squash-merge. If red, debug and push fixes.
+
+- [ ] T098 After merge, tag the milestone: `git tag v0.0.9-009-currencies && git push --tags`.
+
+---
+
+## Dependencies & Execution Order
+
+### Phase Dependencies
+
+- **Phase 1 (Setup, T001-T005)**: No dependencies — can start immediately.
+- **Phase 2 (Backend Foundation, T006-T020)**: Depends on Phase 1.
+- **Phase 2b (Flutter Foundation, T021-T046)**: Depends on Phase 2 — the data layer references the live Supabase schema for type validation.
+- **Phase 3 (US7 MoneyFormatter, T047-T050)**: Depends on Phase 2b — needs the `Currency` entity + `Money` value object.
+- **Phase 4 (US1 verification, T051-T053)**: Depends on Phase 2b — needs the showcase page from T048.
+- **Phase 5 (US2 tile+routes, T054-T059)**: Depends on Phase 2b — needs the placeholder pages registered. Stub-only at this phase.
+- **Phase 6 (US3 set-rate, T060-T071)**: Depends on Phase 3 (US7 formatter renders the derived-rate preview) + Phase 5 (the route is registered + guarded).
+- **Phase 7 (US4 toggle, T072-T075)**: Depends on Phase 2b — uses the `ListCurrencies` + `readUserDisplayCurrency` use cases.
+- **Phase 8 (US5 row-selection, T076-T077)**: Depends on Phase 2b (use case already authored in T036) + Phase 3 (uses the showcase page).
+- **Phase 9 (US6 history, T078-T083)**: Depends on Phase 6 (US3 writes rates; US6 reads them).
+- **Phase 10 (US8 audit verification, T084-T086)**: Depends on Phase 6 (US3 generates audit rows to verify).
+- **Phase 11 (Polish, T087-T095)**: Depends on Phases 3-10.
+- **Phase 12 (PR + merge, T096-T098)**: Depends on Phase 11.
+
+### Within Each Phase
+
+- All Phase 2b tasks marked [P] can run in parallel after T021/T022 complete the directory structure.
+- All Phase 2 doc-file tasks marked [P] can run in parallel with migration application tasks (T008, T009, T012, T013, T020 are documentation; T007, T011, T015, T017, T019 are SQL probes).
+- Phase 3 has only one [P] task (T047) — T048/T049 depend on T047, T050 is manual verification.
+
+### Parallel Opportunities
+
+- **Phase 2b**: 6 entities + 8 use cases + 6 DTOs = 20 parallel tasks (T023-T042 minus T028 which is the interface).
+- **Phase 6**: 6 widget tasks parallelize (T063-T067 + helper widgets).
+- **Phase 9**: 4 widget/BLoC tasks parallelize (T078-T081).
+- **Phase 11**: 6 polish checks parallelize (T087-T092).
+
+---
+
+## Implementation Strategy
+
+### MVP First (User Stories US7 + US1 + US2 + US3 + US4)
+
+1. Complete Phase 1: Setup
+2. Complete Phase 2: Backend Foundation (CRITICAL)
+3. Complete Phase 2b: Flutter Foundation (CRITICAL)
+4. Complete Phase 3: US7 MoneyFormatter
+5. Complete Phase 4: US1 verification (no code)
+6. Complete Phase 5: US2 tile + routes
+7. Complete Phase 6: US3 admin sets rate
+8. Complete Phase 7: US4 preferred toggle
+9. **STOP and VALIDATE**: full quickstart walk for these 5 stories
+10. Deploy/demo if ready
+
+The above 5 stories cover the headline plan acceptance criteria: admin can set rates, history is captured, user has a display-currency preference, prices use the formatter.
+
+### Incremental Delivery
+
+After MVP, add US5 (Phase 8), US6 (Phase 9), US8 (Phase 10) in any order. Each is independently testable.
+
+### Solo-Dev Sequential
+
+For solo development (the project's reality), execute phases strictly in the order numbered. Total task count: 98. Estimated calendar effort: 2-3 working days for a Claude Code session with this tasks.md as input.
+
+---
+
+## Notes for the Implementer
+
+- **[P] tasks**: same phase, different files, no dependency on incomplete tasks. Safe to run in parallel.
+- **Commit at every Checkpoint marker (⚠️)**: per `feedback_git_workflow.md`, push immediately after every commit.
+- **No automated tests**: per `feedback_no_new_tests.md`, manual UI walks + Supabase MCP `execute_sql` are the verification surface.
+- **When in doubt about an SQL body**: look it up in `data-model.md` and copy verbatim. The data model is the source of truth for every SQL block.
+- **When in doubt about a Flutter API**: look up the contract in `contracts/<X>.md`. The contracts are normative.
+- **When stuck**: re-read the relevant spec User Story (US1-US8) to understand the user value being delivered. The Acceptance Scenarios are testable assertions.
+- **R-06 deviation**: the spec mentions "Edge Function" but the implementation is a SECURITY DEFINER PL/pgSQL RPC. The Flutter call site uses `supabase.rpc('update_exchange_rate', ...)` — NOT `supabase.functions.invoke(...)`.
+- **Q1 enforcement**: `MoneyFormatter.format` has NO `rate` parameter. SC-023 enforces this; T089 verifies it.
+- **Q2 atomicity**: every successful `update_exchange_rate` RPC call produces exactly 2 rows in `public.exchange_rates`. T015 (f) verifies it; T071 (h) re-verifies on the device.
+- **Q4 forward-statement**: Phase 10 MUST add `UNIQUE(listing_id, currency_code)` to `listing_prices`. This is documented in plan.md but not implemented in Phase 9.
+- **Q5 symmetric gate**: the timing confirmation dialog uses the SAME widget for future-dating and backdating; only the copy variant differs. T067 builds it; T070 wires it.
+
+The end.
