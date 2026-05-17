@@ -8,6 +8,7 @@ import '../../../../core/security/permission_checker.dart';
 import '../../../../core/security/permission_keys.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/locale_toggle_action.dart';
+import '../../../../debug/locations_smoke_test_tile.dart';
 import '../../../../l10n/app_localizations.dart';
 
 class AdminHomePage extends StatelessWidget {
@@ -40,13 +41,7 @@ class AdminHomePage extends StatelessWidget {
           trailing: const Icon(Icons.chevron_right),
           onTap: () => context.go(AppRoutes.locationsAdmin),
         ),
-      if (kDebugMode)
-        ListTile(
-          leading: const Icon(Icons.bug_report_outlined),
-          title: const Text('[debug] LocationPicker smoke test'),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: () => context.push('/dev/locations-picker'),
-        ),
+      if (kDebugMode) const LocationsSmokeTestTile(),
     ];
 
     return Scaffold(
