@@ -52,7 +52,9 @@ class GovernorateCard extends StatelessWidget {
                 ),
                 PopupMenuItem(
                   value: _CardAction.toggleActive,
-                  child: Text(l10n.isActiveToggleLabel),
+                  child: Text(
+                    gov.isActive ? l10n.actionDeactivate : l10n.actionActivate,
+                  ),
                 ),
                 if (onDelete != null)
                   PopupMenuItem(

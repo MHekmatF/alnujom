@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/locale_toggle_action.dart';
 import '../../domain/entities/location_picker_selection.dart';
 import '../widgets/location_picker.dart';
 
@@ -19,7 +20,10 @@ class _LocationPickerSmokeTestPageState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('LocationPicker smoke test')),
+      appBar: AppBar(
+        title: const Text('LocationPicker smoke test'),
+        actions: const [LocaleToggleAction()],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(

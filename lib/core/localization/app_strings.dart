@@ -1111,4 +1111,12 @@ final class _DebugAppLocalizations extends AppLocalizations {
         'cityDetailBreadcrumb',
         (loc) => loc.cityDetailBreadcrumb(governorateName, cityName),
       );
+
+  @override
+  String get actionActivate =>
+      _resolve('actionActivate', (loc) => loc.actionActivate);
+
+  @override
+  String get actionDeactivate =>
+      _resolve('actionDeactivate', (loc) => loc.actionDeactivate);
 }

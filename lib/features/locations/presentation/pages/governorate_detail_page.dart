@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/locale_toggle_action.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/city_with_area_count.dart';
 import '../../domain/usecases/count_city_dependents.dart';
@@ -48,7 +49,10 @@ class _GovernorateDetailView extends StatelessWidget {
             : l10n.governorateDetailPageTitle;
 
         return Scaffold(
-          appBar: AppBar(title: Text(title)),
+          appBar: AppBar(
+            title: Text(title),
+            actions: const [LocaleToggleAction()],
+          ),
           floatingActionButton: FloatingActionButton(
             onPressed: () async {
               final result = await context.push<bool>(

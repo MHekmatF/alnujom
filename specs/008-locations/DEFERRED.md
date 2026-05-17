@@ -1,20 +1,18 @@
 # Phase 8 — Deferred Work
 
-Four items were intentionally deferred during Phase 8 implementation. Each entry notes the deferred scope, rationale, and proposed follow-up target.
+Six items were intentionally deferred or surfaced during Phase 8 implementation. Each entry notes the deferred scope, rationale, and proposed follow-up target.
+
+**Status (2026-05-17):** T072, T083, T090, T095, T100, and T101 manual walks were completed on Pixel 8 Pro emulator + Infinix Note 8 + Chrome (super-admin). All Phase 8 success criteria were verified except those requiring the full `quickstart.md` Steps 1–12 sweep (T102), which remains outstanding.
 
 ---
 
-## 1. Manual device verification walks (T095, T100, T101, T102)
+## 1. Full quickstart end-to-end recipe (T102)
 
-**Deferred scope:**
-- T095 — US5 Area CRUD UI walk on Infinix Note 8 (add/edit/delete area; confirm seeded Mezzeh exposes Delete; audit SQL).
-- T100 — US6 LocationPicker smoke-test walk (cascade 14 governorates; SC-015 deactivation test; locale toggle).
-- T101 — Cross-device rename propagation (SC-007, SC-021, mid-session permission revoke). Requires a second physical device.
-- T102 — Full `quickstart.md` Steps 1–12 end-to-end verification recipe against the remote Supabase project.
+**Deferred scope:** T102 — Full `quickstart.md` Steps 1–12 end-to-end verification recipe against the remote Supabase project (the per-FR / per-SC verification map at the bottom of `quickstart.md`).
 
-**Rationale:** Device walks require physical hardware and cannot be performed by an LLM agent. T101 additionally requires two simultaneous devices. All four tasks are explicitly marked `[HUMAN-ONLY]` or equivalent in tasks.md and the spec.
+**Rationale:** The 12-step quickstart is broader than the per-story device walks (T083/T090/T095/T100/T101 all done) and overlaps substantially with the verified scope. Outstanding bits are the Step 12 cross-FR sweep + the success-criteria final tick-down.
 
-**Proposed follow-up:** Human reviewer runs T095 + T100 + T102 as part of PR review (before squash-merge). T101 can be run if a second device is available; it is optional for merge but MUST be verified before Phase 13 ships the LocationPicker as a production component.
+**Proposed follow-up:** Human reviewer runs T102 as the final pre-squash-merge gate.
 
 ---
 
@@ -52,3 +50,23 @@ Four items were intentionally deferred during Phase 8 implementation. Each entry
 **Rationale:** Closed as a deliberate Phase 8 non-goal. Clarifications Q1 + R-10 record this decision: Phase 8 ships the hierarchical catalog only; Phase 15 (Map view) MAY add `latitude`/`longitude` via a non-breaking `ALTER TABLE ... ADD COLUMN` migration if real demand emerges.
 
 **Proposed follow-up:** Phase 15 spec. If map coordinates are needed earlier (e.g., Phase 13 listing geo-tagging), a follow-up migration can be authored independently without touching Phase 8 artifacts.
+
+---
+
+## 5. ProfileCubit "emit after close" warning (Phase 5 pre-existing)
+
+**Deferred scope:** Surfaced during Phase 8 device walk on the emulator: `ProfileCubit.load()` at `lib/features/profile/presentation/cubit/profile_cubit.dart:37` emits a new state after the cubit has been closed by navigation away from `/profile`. Logged as an unhandled exception (`Bad state: Cannot emit new states after calling close`) but does not crash the app — navigation continues normally.
+
+**Rationale:** Pre-existing Phase 5 bug, unrelated to Phase 8 scope. The fix is a single guard: `if (isClosed) return;` after each `await` in `ProfileCubit.load()` before the subsequent `emit(...)`. Out of scope for Phase 8.
+
+**Proposed follow-up:** Track as a Phase 5 polish item (or fold into Phase 11's broader cubit/bloc hygiene pass). Not blocking for Phase 8 squash-merge.
+
+---
+
+## 6. PermissionChecker app-resume refresh (Phase 22 forward-stated)
+
+**Deferred scope:** During Walk 5 SC-021 verification, the admin's Locations tile did not disappear on pure background → foreground resume; the user had to back-navigate and re-open admin home for the rebuild to recheck `PermissionChecker.has(...)`. The spec ("no sign-out required") was met — navigation suffices — but pure app-lifecycle resume does not currently force a PermissionChecker cache refresh.
+
+**Rationale:** Phase 6 established the three-point cache-refresh strategy (sign-in, route push to `/admin`, etc.). App-lifecycle resume isn't one of those points. Phase 22 (Push + Realtime, per project memory `project_phase22_perm_cache_revisit.md`) is the planned home for adding a Realtime subscription on `user_roles` that propagates permission deltas to every device instantly — at which point the resume-refresh question becomes moot.
+
+**Proposed follow-up:** Phase 22 spec. Add a Realtime subscription on `user_roles` (or extend the cache-refresh trigger set to include `WidgetsBinding.lifecycleState == AppLifecycleState.resumed`). Document the decision in Phase 22's research.md alongside the existing three-point strategy.

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -6,6 +7,7 @@ import '../../../../core/routing/app_router.dart';
 import '../../../../core/security/permission_checker.dart';
 import '../../../../core/security/permission_keys.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/locale_toggle_action.dart';
 import '../../../../l10n/app_localizations.dart';
 
 class AdminHomePage extends StatelessWidget {
@@ -38,10 +40,20 @@ class AdminHomePage extends StatelessWidget {
           trailing: const Icon(Icons.chevron_right),
           onTap: () => context.go(AppRoutes.locationsAdmin),
         ),
+      if (kDebugMode)
+        ListTile(
+          leading: const Icon(Icons.bug_report_outlined),
+          title: const Text('[debug] LocationPicker smoke test'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => context.push('/dev/locations-picker'),
+        ),
     ];
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.admin_home_title)),
+      appBar: AppBar(
+        title: Text(l10n.admin_home_title),
+        actions: const [LocaleToggleAction()],
+      ),
       body: tiles.isEmpty ? _EmptyState(l10n: l10n) : ListView(children: tiles),
     );
   }

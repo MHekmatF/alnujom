@@ -298,5 +298,7 @@
       "governorateName": { "type": "String" },
       "cityName": { "type": "String" }
     }
-  }
+  },
+  "actionActivate": "Activate",
+  "actionDeactivate": "Deactivate"
 }

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/locale_toggle_action.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/failures.dart';
 import '../bloc/location_form_bloc.dart';
@@ -61,7 +62,10 @@ class _LocationFormView extends StatelessWidget {
         builder: (context, state) {
           final title = _appBarTitle(l10n, state);
           return Scaffold(
-            appBar: AppBar(title: Text(title)),
+            appBar: AppBar(
+              title: Text(title),
+              actions: const [LocaleToggleAction()],
+            ),
             body: switch (state) {
               LocationFormIdle() || LocationFormLoading() => const Center(
                 child: CircularProgressIndicator(),

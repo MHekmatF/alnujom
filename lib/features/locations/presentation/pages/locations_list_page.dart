@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/locale_toggle_action.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/governorate_with_city_count.dart';
 import '../../domain/usecases/count_governorate_dependents.dart';
@@ -34,7 +35,10 @@ class _LocationsListView extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.locationsListPageTitle)),
+      appBar: AppBar(
+        title: Text(l10n.locationsListPageTitle),
+        actions: const [LocaleToggleAction()],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final result = await context.push<bool>(
