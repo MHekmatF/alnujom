@@ -21,6 +21,7 @@ import '../../features/profile/presentation/pages/profile_private_page.dart';
 import '../../features/locations/presentation/pages/city_detail_page.dart';
 import '../../features/locations/presentation/pages/governorate_detail_page.dart';
 import '../../features/locations/presentation/pages/location_form_page.dart';
+import '../../features/locations/presentation/pages/location_picker_smoke_test_page.dart';
 import '../../features/locations/presentation/pages/locations_list_page.dart';
 import '../../features/super_admin/presentation/pages/assign_role_page.dart';
 import '../../features/super_admin/presentation/pages/create_role_page.dart';
@@ -240,6 +241,14 @@ GoRouter buildAppRouter({
           name: AppRouteNames.themeGallery,
           builder: (context, state) => const ThemeGalleryPage(),
         ),
+      ...( kDebugMode
+          ? [
+              GoRoute(
+                path: '/dev/locations-picker',
+                builder: (_, __) => const LocationPickerSmokeTestPage(),
+              ),
+            ]
+          : <RouteBase>[]),
     ],
     errorBuilder: (context, state) {
       logger.warning(

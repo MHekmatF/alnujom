@@ -213,6 +213,17 @@ class LocationsRepositoryImpl implements LocationsRepository {
   }
 
   @override
+  Future<Area> loadArea(String id) async {
+    try {
+      return (await _ds.loadArea(id)).toEntity();
+    } on PostgrestException catch (e, st) {
+      throw _mapPostgrest(e, st);
+    } on Object catch (e, st) {
+      throw _mapUnknown(e, st);
+    }
+  }
+
+  @override
   Future<Area> createArea({
     required String cityId,
     required String key,

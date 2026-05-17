@@ -1,6 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/di/injection.dart';
+import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../domain/entities/area.dart';
+import '../../domain/usecases/delete_area.dart';
+import '../../domain/usecases/update_area.dart';
+import '../bloc/city_detail_bloc.dart';
+import '../widgets/area_card.dart';
+import '../widgets/delete_confirmation_dialog.dart';
+import '../widgets/hidden_badge.dart';
 
 class CityDetailPage extends StatelessWidget {
   const CityDetailPage({
@@ -14,14 +26,173 @@ class CityDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.cityDetailPageTitle)),
-      body: Center(
-        child: Text(
-          'US5 lands here — governorateId=$governorateId cityId=$cityId',
-        ),
-      ),
+    return BlocProvider<CityDetailBloc>(
+      create: (_) => getIt<CityDetailBloc>()
+        ..add(CityDetailLoadRequested(cityId)),
+      child: _CityDetailView(cityId: cityId),
     );
+  }
+}
+
+class _CityDetailView extends StatelessWidget {
+  const _CityDetailView({required this.cityId});
+
+  final String cityId;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context);
+
+    return BlocBuilder<CityDetailBloc, CityDetailState>(
+      builder: (context, state) {
+        final title = state is CityDetailLoaded
+            ? state.city.localizedName(locale)
+            : l10n.cityDetailPageTitle;
+
+        return Scaffold(
+          appBar: AppBar(title: Text(title)),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () async {
+              final result = await context.push<bool>(
+                '${AppRoutes.locationsAdminForm}'
+                '?mode=add&level=area&parentId=$cityId',
+              );
+              if (result == true && context.mounted) {
+                context
+                    .read<CityDetailBloc>()
+                    .add(const CityDetailRefreshRequested());
+              }
+            },
+            child: const Icon(Icons.add),
+          ),
+          body: switch (state) {
+            CityDetailLoading() => const Center(
+              child: CircularProgressIndicator(),
+            ),
+            CityDetailError(:final message) => Center(
+              child: Text(message, textAlign: TextAlign.center),
+            ),
+            CityDetailLoaded(:final city, :final governorate, :final areas) =>
+              RefreshIndicator(
+                onRefresh: () async => context
+                    .read<CityDetailBloc>()
+                    .add(const CityDetailRefreshRequested()),
+                child: ListView(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  children: [
+                    Row(
+                      children: [
+                        if (!city.isActive) ...[
+                          const HiddenBadge(),
+                          const SizedBox(width: AppSpacing.sm),
+                        ],
+                        Expanded(
+                          child: Text(
+                            '${governorate.localizedName(locale)} → '
+                            '${city.localizedName(locale)}',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                        ),
+                        TextButton.icon(
+                          onPressed: () async {
+                            final result = await context.push<bool>(
+                              '${AppRoutes.locationsAdminForm}'
+                              '?mode=edit&level=city&id=$cityId',
+                            );
+                            if (result == true && context.mounted) {
+                              context
+                                  .read<CityDetailBloc>()
+                                  .add(const CityDetailRefreshRequested());
+                            }
+                          },
+                          icon: const Icon(Icons.edit_outlined),
+                          label: Text(l10n.editAffordance),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    if (areas.isEmpty)
+                      Center(child: Text(l10n.addAreaButton))
+                    else
+                      ...areas.map(
+                        (area) => Padding(
+                          padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                          child: AreaCard(
+                            area: area,
+                            onEdit: () => _openAreaForm(
+                              context,
+                              mode: 'edit',
+                              id: area.id,
+                            ),
+                            onToggleActive: () =>
+                                _toggleAreaActive(context, area),
+                            onDelete: () => _confirmDeleteArea(context, area),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _openAreaForm(
+    BuildContext context, {
+    required String mode,
+    String? id,
+  }) async {
+    final params = StringBuffer('?mode=$mode&level=area');
+    if (id != null) params.write('&id=$id');
+    params.write('&parentId=$cityId');
+
+    final result = await context.push<bool>(
+      '${AppRoutes.locationsAdminForm}$params',
+    );
+    if (result == true && context.mounted) {
+      context
+          .read<CityDetailBloc>()
+          .add(const CityDetailRefreshRequested());
+    }
+  }
+
+  Future<void> _toggleAreaActive(BuildContext context, Area area) async {
+    try {
+      await getIt<UpdateArea>()(area.id, isActive: !area.isActive);
+      if (context.mounted) {
+        context
+            .read<CityDetailBloc>()
+            .add(const CityDetailRefreshRequested());
+      }
+    } on Object {
+      // Refresh will reflect unchanged state if toggle failed
+    }
+  }
+
+  Future<void> _confirmDeleteArea(BuildContext context, Area area) async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDeleteConfirmationDialog(
+      context,
+      title: l10n.deleteConfirmTitle,
+    );
+    if (!confirmed || !context.mounted) return;
+
+    try {
+      await getIt<DeleteArea>()(area.id);
+      if (context.mounted) {
+        context
+            .read<CityDetailBloc>()
+            .add(const CityDetailRefreshRequested());
+      }
+    } on Object catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error.toString())),
+        );
+      }
+    }
   }
 }

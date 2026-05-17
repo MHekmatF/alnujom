@@ -180,6 +180,15 @@ class SupabaseLocationsDatasource {
         .toList();
   }
 
+  Future<AreaDto> loadArea(String id) async {
+    final response = await _client
+        .from('areas')
+        .select()
+        .eq('id', id)
+        .single();
+    return AreaDto.fromJson(response);
+  }
+
   Future<AreaDto> createArea({
     required String cityId,
     required String key,

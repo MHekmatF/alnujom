@@ -6,6 +6,7 @@ import '../../domain/failures.dart';
 import '../../domain/usecases/create_area.dart';
 import '../../domain/usecases/create_city.dart';
 import '../../domain/usecases/create_governorate.dart';
+import '../../domain/usecases/load_area_detail.dart';
 import '../../domain/usecases/load_city_detail.dart';
 import '../../domain/usecases/load_governorate_detail.dart';
 import '../../domain/usecases/update_area.dart';
@@ -203,6 +204,7 @@ class LocationFormBloc extends Bloc<LocationFormEvent, LocationFormState> {
   LocationFormBloc(
     this._loadGovernorateDetail,
     this._loadCityDetail,
+    this._loadAreaDetail,
     this._createGovernorate,
     this._updateGovernorate,
     this._createCity,
@@ -221,6 +223,7 @@ class LocationFormBloc extends Bloc<LocationFormEvent, LocationFormState> {
 
   final LoadGovernorateDetail _loadGovernorateDetail;
   final LoadCityDetail _loadCityDetail;
+  final LoadAreaDetail _loadAreaDetail;
   final CreateGovernorate _createGovernorate;
   final UpdateGovernorate _updateGovernorate;
   final CreateCity _createCity;
@@ -284,16 +287,17 @@ class LocationFormBloc extends Bloc<LocationFormEvent, LocationFormState> {
           ));
 
         case LocationLevel.area:
-          // Area pre-fill deferred to Phase 9 (T094 adds loadArea use case).
-          // For now, open empty form with id for edit — UpdateArea only needs id
-          // and field values which the user re-enters.
+          final area = await _loadAreaDetail(id);
           emit(LocationFormEditing(
             mode: event.mode,
             level: event.level,
             id: id,
-            key: '',
-            arabicName: '',
-            isActive: true,
+            parentId: area.cityId,
+            key: area.key,
+            arabicName: area.displayName['ar'] ?? '',
+            englishName: area.displayName['en'],
+            position: area.position,
+            isActive: area.isActive,
           ));
       }
     } on LocationsFailure catch (failure) {

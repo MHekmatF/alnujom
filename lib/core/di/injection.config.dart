@@ -59,6 +59,8 @@ import '../../features/locations/domain/usecases/list_cities_for_governorate.dar
     as _i53;
 import '../../features/locations/domain/usecases/list_governorates.dart'
     as _i533;
+import '../../features/locations/domain/usecases/load_area_detail.dart'
+    as _i292;
 import '../../features/locations/domain/usecases/load_city_detail.dart'
     as _i645;
 import '../../features/locations/domain/usecases/load_governorate_detail.dart'
@@ -67,10 +69,14 @@ import '../../features/locations/domain/usecases/update_area.dart' as _i188;
 import '../../features/locations/domain/usecases/update_city.dart' as _i1058;
 import '../../features/locations/domain/usecases/update_governorate.dart'
     as _i1054;
+import '../../features/locations/presentation/bloc/city_detail_bloc.dart'
+    as _i1073;
 import '../../features/locations/presentation/bloc/governorate_detail_bloc.dart'
     as _i796;
 import '../../features/locations/presentation/bloc/location_form_bloc.dart'
     as _i419;
+import '../../features/locations/presentation/bloc/location_picker_bloc.dart'
+    as _i610;
 import '../../features/locations/presentation/bloc/locations_list_bloc.dart'
     as _i669;
 import '../../features/onboarding/data/datasources/onboarding_seen_storage.dart'
@@ -320,6 +326,9 @@ _i174.GetIt $initGetIt(
   gh.factory<_i1054.UpdateGovernorate>(
     () => _i1054.UpdateGovernorate(gh<_i704.LocationsRepository>()),
   );
+  gh.factory<_i292.LoadAreaDetail>(
+    () => _i292.LoadAreaDetail(gh<_i704.LocationsRepository>()),
+  );
   gh.factory<_i858.ApproveAccount>(
     () => _i858.ApproveAccount(gh<_i120.AccountApprovalsRepository>()),
   );
@@ -371,6 +380,13 @@ _i174.GetIt $initGetIt(
       gh<_i941.LoadAssignedRoles>(),
     ),
   );
+  gh.factory<_i1073.CityDetailBloc>(
+    () => _i1073.CityDetailBloc(
+      gh<_i645.LoadCityDetail>(),
+      gh<_i441.LoadGovernorateDetail>(),
+      gh<_i358.ListAreasForCity>(),
+    ),
+  );
   gh.factory<_i669.AssignRoleBloc>(
     () => _i669.AssignRoleBloc(
       gh<_i143.SearchUsers>(),
@@ -378,6 +394,19 @@ _i174.GetIt $initGetIt(
       gh<_i650.AssignRoleToUser>(),
       gh<_i950.RevokeRoleFromUser>(),
       gh<_i1018.ListRoles>(),
+    ),
+  );
+  gh.factory<_i419.LocationFormBloc>(
+    () => _i419.LocationFormBloc(
+      gh<_i441.LoadGovernorateDetail>(),
+      gh<_i645.LoadCityDetail>(),
+      gh<_i292.LoadAreaDetail>(),
+      gh<_i1027.CreateGovernorate>(),
+      gh<_i1054.UpdateGovernorate>(),
+      gh<_i206.CreateCity>(),
+      gh<_i1058.UpdateCity>(),
+      gh<_i880.CreateArea>(),
+      gh<_i188.UpdateArea>(),
     ),
   );
   gh.factory<_i807.OnboardingCubit>(
@@ -396,22 +425,17 @@ _i174.GetIt $initGetIt(
   gh.factory<_i329.RolesListBloc>(
     () => _i329.RolesListBloc(gh<_i1018.ListRoles>()),
   );
-  gh.factory<_i419.LocationFormBloc>(
-    () => _i419.LocationFormBloc(
-      gh<_i441.LoadGovernorateDetail>(),
-      gh<_i645.LoadCityDetail>(),
-      gh<_i1027.CreateGovernorate>(),
-      gh<_i1054.UpdateGovernorate>(),
-      gh<_i206.CreateCity>(),
-      gh<_i1058.UpdateCity>(),
-      gh<_i880.CreateArea>(),
-      gh<_i188.UpdateArea>(),
-    ),
-  );
   gh.factory<_i796.GovernorateDetailBloc>(
     () => _i796.GovernorateDetailBloc(
       gh<_i441.LoadGovernorateDetail>(),
       gh<_i53.ListCitiesForGovernorate>(),
+    ),
+  );
+  gh.factory<_i610.LocationPickerBloc>(
+    () => _i610.LocationPickerBloc(
+      gh<_i533.ListGovernorates>(),
+      gh<_i53.ListCitiesForGovernorate>(),
+      gh<_i358.ListAreasForCity>(),
     ),
   );
   gh.factory<_i669.LocationsListBloc>(

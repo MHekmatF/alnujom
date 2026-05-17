@@ -23,6 +23,7 @@ abstract class LocationsRepository {
     String cityId, {
     required bool includeInactive,
   });
+  Future<Area> loadArea(String id);
 
   // Write — governorates
   Future<Governorate> createGovernorate({
