@@ -964,4 +964,143 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String get profile_section_roles =>
       _resolve('profile_section_roles', (loc) => loc.profile_section_roles);
+
+  @override
+  String get locationsTileTitle =>
+      _resolve('locationsTileTitle', (loc) => loc.locationsTileTitle);
+
+  @override
+  String get locationsListPageTitle =>
+      _resolve('locationsListPageTitle', (loc) => loc.locationsListPageTitle);
+
+  @override
+  String get governorateDetailPageTitle => _resolve(
+    'governorateDetailPageTitle',
+    (loc) => loc.governorateDetailPageTitle,
+  );
+
+  @override
+  String get cityDetailPageTitle =>
+      _resolve('cityDetailPageTitle', (loc) => loc.cityDetailPageTitle);
+
+  @override
+  String get addGovernorateButton =>
+      _resolve('addGovernorateButton', (loc) => loc.addGovernorateButton);
+
+  @override
+  String get addCityButton =>
+      _resolve('addCityButton', (loc) => loc.addCityButton);
+
+  @override
+  String get addAreaButton =>
+      _resolve('addAreaButton', (loc) => loc.addAreaButton);
+
+  @override
+  String get editAffordance =>
+      _resolve('editAffordance', (loc) => loc.editAffordance);
+
+  @override
+  String get deleteAffordance =>
+      _resolve('deleteAffordance', (loc) => loc.deleteAffordance);
+
+  @override
+  String get keyFieldLabel =>
+      _resolve('keyFieldLabel', (loc) => loc.keyFieldLabel);
+
+  @override
+  String get displayNameArabicLabel =>
+      _resolve('displayNameArabicLabel', (loc) => loc.displayNameArabicLabel);
+
+  @override
+  String get displayNameEnglishLabel =>
+      _resolve('displayNameEnglishLabel', (loc) => loc.displayNameEnglishLabel);
+
+  @override
+  String get descriptionLabel =>
+      _resolve('descriptionLabel', (loc) => loc.descriptionLabel);
+
+  @override
+  String get positionLabel =>
+      _resolve('positionLabel', (loc) => loc.positionLabel);
+
+  @override
+  String get isActiveToggleLabel =>
+      _resolve('isActiveToggleLabel', (loc) => loc.isActiveToggleLabel);
+
+  @override
+  String get hiddenBadge =>
+      _resolve('hiddenBadge', (loc) => loc.hiddenBadge);
+
+  @override
+  String get systemBadge =>
+      _resolve('systemBadge', (loc) => loc.systemBadge);
+
+  @override
+  String get arabicNameRequired =>
+      _resolve('arabicNameRequired', (loc) => loc.arabicNameRequired);
+
+  @override
+  String get keyRequired =>
+      _resolve('keyRequired', (loc) => loc.keyRequired);
+
+  @override
+  String get keyAlreadyUsed =>
+      _resolve('keyAlreadyUsed', (loc) => loc.keyAlreadyUsed);
+
+  @override
+  String get deleteConfirmTitle =>
+      _resolve('deleteConfirmTitle', (loc) => loc.deleteConfirmTitle);
+
+  @override
+  String deleteConfirmGovernorateWithDeps(int cityCount, int areaCount) =>
+      _resolve(
+        'deleteConfirmGovernorateWithDeps',
+        (loc) => loc.deleteConfirmGovernorateWithDeps(cityCount, areaCount),
+      );
+
+  @override
+  String deleteConfirmCityWithDeps(int areaCount) => _resolve(
+    'deleteConfirmCityWithDeps',
+    (loc) => loc.deleteConfirmCityWithDeps(areaCount),
+  );
+
+  @override
+  String get cannotDeleteSystemRow =>
+      _resolve('cannotDeleteSystemRow', (loc) => loc.cannotDeleteSystemRow);
+
+  @override
+  String get locationPickerSelectGovernorate => _resolve(
+    'locationPickerSelectGovernorate',
+    (loc) => loc.locationPickerSelectGovernorate,
+  );
+
+  @override
+  String get locationPickerSelectCity =>
+      _resolve('locationPickerSelectCity', (loc) => loc.locationPickerSelectCity);
+
+  @override
+  String get locationPickerSelectArea =>
+      _resolve('locationPickerSelectArea', (loc) => loc.locationPickerSelectArea);
+
+  @override
+  String get locationPickerNoAreasYet => _resolve(
+    'locationPickerNoAreasYet',
+    (loc) => loc.locationPickerNoAreasYet,
+  );
+
+  @override
+  String get locationsLoadFailed =>
+      _resolve('locationsLoadFailed', (loc) => loc.locationsLoadFailed);
+
+  @override
+  String get locationSaveFailed =>
+      _resolve('locationSaveFailed', (loc) => loc.locationSaveFailed);
+
+  @override
+  String subtitleCityCount(int cityCount) =>
+      _resolve('subtitleCityCount', (loc) => loc.subtitleCityCount(cityCount));
+
+  @override
+  String subtitleAreaCount(int areaCount) =>
+      _resolve('subtitleAreaCount', (loc) => loc.subtitleAreaCount(areaCount));
 }

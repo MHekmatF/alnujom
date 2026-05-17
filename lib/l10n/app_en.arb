@@ -237,5 +237,59 @@
   "@errorRoleSaveFailed": { "placeholders": { "reason": { "type": "String" } } },
   "assignRoleSucceeded": "Role assigned.",
   "revokeRoleSucceeded": "Role revoked.",
-  "profile_section_roles": "Roles"
+  "profile_section_roles": "Roles",
+
+  "locationsTileTitle": "Locations",
+  "locationsListPageTitle": "Governorates",
+  "governorateDetailPageTitle": "Governorate Details",
+  "cityDetailPageTitle": "City Details",
+  "addGovernorateButton": "Add governorate",
+  "addCityButton": "Add city",
+  "addAreaButton": "Add area",
+  "editAffordance": "Edit",
+  "deleteAffordance": "Delete",
+  "keyFieldLabel": "Slug",
+  "displayNameArabicLabel": "Arabic name",
+  "displayNameEnglishLabel": "English name",
+  "descriptionLabel": "Description",
+  "positionLabel": "Order",
+  "isActiveToggleLabel": "Active",
+  "hiddenBadge": "Hidden",
+  "systemBadge": "System",
+  "arabicNameRequired": "Arabic name is required",
+  "keyRequired": "Slug is required",
+  "keyAlreadyUsed": "This slug is already used",
+  "deleteConfirmTitle": "Confirm deletion",
+  "deleteConfirmGovernorateWithDeps": "{cityCount} cities and {areaCount} areas will also be deleted",
+  "@deleteConfirmGovernorateWithDeps": {
+    "placeholders": {
+      "cityCount": { "type": "int" },
+      "areaCount": { "type": "int" }
+    }
+  },
+  "deleteConfirmCityWithDeps": "{areaCount} areas will also be deleted",
+  "@deleteConfirmCityWithDeps": {
+    "placeholders": {
+      "areaCount": { "type": "int" }
+    }
+  },
+  "cannotDeleteSystemRow": "System rows cannot be deleted",
+  "locationPickerSelectGovernorate": "Select a governorate",
+  "locationPickerSelectCity": "Select a city",
+  "locationPickerSelectArea": "Select an area (optional)",
+  "locationPickerNoAreasYet": "No areas yet — leave blank",
+  "locationsLoadFailed": "Failed to load locations",
+  "locationSaveFailed": "Save failed",
+  "subtitleCityCount": "{cityCount} cities",
+  "@subtitleCityCount": {
+    "placeholders": {
+      "cityCount": { "type": "int" }
+    }
+  },
+  "subtitleAreaCount": "{areaCount} areas",
+  "@subtitleAreaCount": {
+    "placeholders": {
+      "areaCount": { "type": "int" }
+    }
+  }
 }

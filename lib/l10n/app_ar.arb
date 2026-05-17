@@ -237,5 +237,59 @@
   "@errorRoleSaveFailed": { "placeholders": { "reason": { "type": "String" } } },
   "assignRoleSucceeded": "تمّ منح الدور.",
   "revokeRoleSucceeded": "تمّ سحب الدور.",
-  "profile_section_roles": "الأدوار"
+  "profile_section_roles": "الأدوار",
+
+  "locationsTileTitle": "المواقع",
+  "locationsListPageTitle": "المحافظات",
+  "governorateDetailPageTitle": "تفاصيل المحافظة",
+  "cityDetailPageTitle": "تفاصيل المدينة",
+  "addGovernorateButton": "إضافة محافظة",
+  "addCityButton": "إضافة مدينة",
+  "addAreaButton": "إضافة منطقة",
+  "editAffordance": "تعديل",
+  "deleteAffordance": "حذف",
+  "keyFieldLabel": "المعرّف",
+  "displayNameArabicLabel": "الاسم بالعربية",
+  "displayNameEnglishLabel": "الاسم بالإنجليزية",
+  "descriptionLabel": "الوصف",
+  "positionLabel": "الترتيب",
+  "isActiveToggleLabel": "نشط",
+  "hiddenBadge": "مخفي",
+  "systemBadge": "نظامي",
+  "arabicNameRequired": "الاسم بالعربية مطلوب",
+  "keyRequired": "المعرّف مطلوب",
+  "keyAlreadyUsed": "هذا المعرّف مستخدم بالفعل",
+  "deleteConfirmTitle": "تأكيد الحذف",
+  "deleteConfirmGovernorateWithDeps": "ستُحذف {cityCount} مدن و{areaCount} منطقة",
+  "@deleteConfirmGovernorateWithDeps": {
+    "placeholders": {
+      "cityCount": { "type": "int" },
+      "areaCount": { "type": "int" }
+    }
+  },
+  "deleteConfirmCityWithDeps": "ستُحذف {areaCount} منطقة",
+  "@deleteConfirmCityWithDeps": {
+    "placeholders": {
+      "areaCount": { "type": "int" }
+    }
+  },
+  "cannotDeleteSystemRow": "لا يمكن حذف صف نظامي",
+  "locationPickerSelectGovernorate": "اختر المحافظة",
+  "locationPickerSelectCity": "اختر المدينة",
+  "locationPickerSelectArea": "اختر المنطقة (اختياري)",
+  "locationPickerNoAreasYet": "لا توجد مناطق بعد — اتركها فارغة",
+  "locationsLoadFailed": "تعذّر تحميل المواقع",
+  "locationSaveFailed": "تعذّر الحفظ",
+  "subtitleCityCount": "{cityCount} مدينة",
+  "@subtitleCityCount": {
+    "placeholders": {
+      "cityCount": { "type": "int" }
+    }
+  },
+  "subtitleAreaCount": "{areaCount} منطقة",
+  "@subtitleAreaCount": {
+    "placeholders": {
+      "areaCount": { "type": "int" }
+    }
+  }
 }
