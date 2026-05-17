@@ -52,7 +52,8 @@ final class LocationsListError extends LocationsListState {
 
 @injectable
 class LocationsListBloc extends Bloc<LocationsListEvent, LocationsListState> {
-  LocationsListBloc(this._listGovernorates) : super(const LocationsListLoading()) {
+  LocationsListBloc(this._listGovernorates)
+    : super(const LocationsListLoading()) {
     on<LoadRequested>(_load);
     on<RefreshRequested>(_load);
   }

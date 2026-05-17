@@ -25,8 +25,9 @@ class LocationPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<LocationPickerBloc>(
-      create: (_) => getIt<LocationPickerBloc>()
-        ..add(const LocationPickerMountRequested()),
+      create: (_) =>
+          getIt<LocationPickerBloc>()
+            ..add(const LocationPickerMountRequested()),
       child: _LocationPickerBody(
         onChanged: onChanged,
         required: required,
@@ -54,10 +55,12 @@ class _LocationPickerBody extends StatelessWidget {
 
     return BlocConsumer<LocationPickerBloc, LocationPickerState>(
       listenWhen: (prev, curr) {
-        final prevSel =
-            prev is LocationPickerReady ? prev.currentSelection : null;
-        final currSel =
-            curr is LocationPickerReady ? curr.currentSelection : null;
+        final prevSel = prev is LocationPickerReady
+            ? prev.currentSelection
+            : null;
+        final currSel = curr is LocationPickerReady
+            ? curr.currentSelection
+            : null;
         // Also fire when selection is cleared (e.g. gov reset)
         return prevSel != currSel;
       },
@@ -119,9 +122,9 @@ class _LocationPickerBody extends StatelessWidget {
               value: state.selectedGovernorateId,
               onChanged: (id) {
                 if (id != null) {
-                  context
-                      .read<LocationPickerBloc>()
-                      .add(LocationPickerGovernoratePicked(id));
+                  context.read<LocationPickerBloc>().add(
+                    LocationPickerGovernoratePicked(id),
+                  );
                 }
               },
               enabled: true,
@@ -133,9 +136,9 @@ class _LocationPickerBody extends StatelessWidget {
               value: state.selectedCityId,
               onChanged: (id) {
                 if (id != null) {
-                  context
-                      .read<LocationPickerBloc>()
-                      .add(LocationPickerCityPicked(id));
+                  context.read<LocationPickerBloc>().add(
+                    LocationPickerCityPicked(id),
+                  );
                 }
               },
               enabled: state.selectedGovernorateId != null,
@@ -158,9 +161,9 @@ class _LocationPickerBody extends StatelessWidget {
                 items: areaItems,
                 value: state.selectedAreaId,
                 onChanged: (id) {
-                  context
-                      .read<LocationPickerBloc>()
-                      .add(LocationPickerAreaPicked(id));
+                  context.read<LocationPickerBloc>().add(
+                    LocationPickerAreaPicked(id),
+                  );
                 },
                 enabled: citySelected,
                 isLoading: state.areasLoading,

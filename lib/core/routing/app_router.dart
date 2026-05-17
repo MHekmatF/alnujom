@@ -72,7 +72,8 @@ abstract final class AppRouteNames {
   static const superAdminRoleCreate = 'super-admin-role-create';
   static const superAdminAssign = 'super-admin-assign';
   static const locationsAdmin = 'locations-admin';
-  static const locationsAdminGovernorateDetail = 'locations-admin-governorate-detail';
+  static const locationsAdminGovernorateDetail =
+      'locations-admin-governorate-detail';
   static const locationsAdminCityDetail = 'locations-admin-city-detail';
   static const locationsAdminForm = 'locations-admin-form';
   static const resetPassword = 'reset-password';
@@ -241,7 +242,7 @@ GoRouter buildAppRouter({
           name: AppRouteNames.themeGallery,
           builder: (context, state) => const ThemeGalleryPage(),
         ),
-      ...( kDebugMode
+      ...(kDebugMode
           ? [
               GoRoute(
                 path: '/dev/locations-picker',

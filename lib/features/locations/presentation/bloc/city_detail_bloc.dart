@@ -109,7 +109,9 @@ class CityDetailBloc extends Bloc<CityDetailEvent, CityDetailState> {
       ]);
       final governorate = results[0] as Governorate;
       final areas = results[1] as List<Area>;
-      emit(CityDetailLoaded(city: city, governorate: governorate, areas: areas));
+      emit(
+        CityDetailLoaded(city: city, governorate: governorate, areas: areas),
+      );
     } on LocationsFailure catch (failure) {
       emit(CityDetailError(failure.message));
     } on Object catch (error) {

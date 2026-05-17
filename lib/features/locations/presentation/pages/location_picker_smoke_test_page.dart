@@ -25,16 +25,14 @@ class _LocationPickerSmokeTestPageState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            LocationPicker(
-              onChanged: (sel) => setState(() => _latest = sel),
-            ),
+            LocationPicker(onChanged: (sel) => setState(() => _latest = sel)),
             const SizedBox(height: AppSpacing.xl),
             Text(
               _latest == null
                   ? 'no selection'
                   : 'gov=${_latest!.governorateId} '
-                      'city=${_latest!.cityId} '
-                      'area=${_latest!.areaId ?? "null"}',
+                        'city=${_latest!.cityId} '
+                        'area=${_latest!.areaId ?? "null"}',
             ),
           ],
         ),

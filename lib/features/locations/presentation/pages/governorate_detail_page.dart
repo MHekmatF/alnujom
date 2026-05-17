@@ -24,8 +24,9 @@ class GovernorateDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<GovernorateDetailBloc>(
-      create: (_) => getIt<GovernorateDetailBloc>()
-        ..add(GovernorateDetailLoadRequested(governorateId)),
+      create: (_) =>
+          getIt<GovernorateDetailBloc>()
+            ..add(GovernorateDetailLoadRequested(governorateId)),
       child: _GovernorateDetailView(governorateId: governorateId),
     );
   }
@@ -55,9 +56,9 @@ class _GovernorateDetailView extends StatelessWidget {
                 '?mode=add&level=city&parentId=$governorateId',
               );
               if (result == true && context.mounted) {
-                context
-                    .read<GovernorateDetailBloc>()
-                    .add(const GovernorateDetailRefreshRequested());
+                context.read<GovernorateDetailBloc>().add(
+                  const GovernorateDetailRefreshRequested(),
+                );
               }
             },
             child: const Icon(Icons.add),
@@ -93,9 +94,9 @@ class _GovernorateDetailView extends StatelessWidget {
                               '?mode=edit&level=governorate&id=$governorateId',
                             );
                             if (result == true && context.mounted) {
-                              context
-                                  .read<GovernorateDetailBloc>()
-                                  .add(const GovernorateDetailRefreshRequested());
+                              context.read<GovernorateDetailBloc>().add(
+                                const GovernorateDetailRefreshRequested(),
+                              );
                             }
                           },
                           icon: const Icon(Icons.edit_outlined),
@@ -152,9 +153,9 @@ class _GovernorateDetailView extends StatelessWidget {
       '${AppRoutes.locationsAdminForm}$params',
     );
     if (result == true && context.mounted) {
-      context
-          .read<GovernorateDetailBloc>()
-          .add(const GovernorateDetailRefreshRequested());
+      context.read<GovernorateDetailBloc>().add(
+        const GovernorateDetailRefreshRequested(),
+      );
     }
   }
 
@@ -168,9 +169,9 @@ class _GovernorateDetailView extends StatelessWidget {
         isActive: !summary.city.isActive,
       );
       if (context.mounted) {
-        context
-            .read<GovernorateDetailBloc>()
-            .add(const GovernorateDetailRefreshRequested());
+        context.read<GovernorateDetailBloc>().add(
+          const GovernorateDetailRefreshRequested(),
+        );
       }
     } on Object {
       // Refresh will reflect unchanged state if toggle failed
@@ -192,15 +193,15 @@ class _GovernorateDetailView extends StatelessWidget {
     try {
       await getIt<DeleteCity>()(summary.city.id);
       if (context.mounted) {
-        context
-            .read<GovernorateDetailBloc>()
-            .add(const GovernorateDetailRefreshRequested());
+        context.read<GovernorateDetailBloc>().add(
+          const GovernorateDetailRefreshRequested(),
+        );
       }
     } on Object catch (error) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error.toString())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error.toString())));
       }
     }
   }

@@ -27,8 +27,8 @@ class CityDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<CityDetailBloc>(
-      create: (_) => getIt<CityDetailBloc>()
-        ..add(CityDetailLoadRequested(cityId)),
+      create: (_) =>
+          getIt<CityDetailBloc>()..add(CityDetailLoadRequested(cityId)),
       child: _CityDetailView(cityId: cityId),
     );
   }
@@ -59,9 +59,9 @@ class _CityDetailView extends StatelessWidget {
                 '?mode=add&level=area&parentId=$cityId',
               );
               if (result == true && context.mounted) {
-                context
-                    .read<CityDetailBloc>()
-                    .add(const CityDetailRefreshRequested());
+                context.read<CityDetailBloc>().add(
+                  const CityDetailRefreshRequested(),
+                );
               }
             },
             child: const Icon(Icons.add),
@@ -75,9 +75,9 @@ class _CityDetailView extends StatelessWidget {
             ),
             CityDetailLoaded(:final city, :final governorate, :final areas) =>
               RefreshIndicator(
-                onRefresh: () async => context
-                    .read<CityDetailBloc>()
-                    .add(const CityDetailRefreshRequested()),
+                onRefresh: () async => context.read<CityDetailBloc>().add(
+                  const CityDetailRefreshRequested(),
+                ),
                 child: ListView(
                   padding: const EdgeInsets.all(AppSpacing.lg),
                   children: [
@@ -103,9 +103,9 @@ class _CityDetailView extends StatelessWidget {
                               '?mode=edit&level=city&id=$cityId',
                             );
                             if (result == true && context.mounted) {
-                              context
-                                  .read<CityDetailBloc>()
-                                  .add(const CityDetailRefreshRequested());
+                              context.read<CityDetailBloc>().add(
+                                const CityDetailRefreshRequested(),
+                              );
                             }
                           },
                           icon: const Icon(Icons.edit_outlined),
@@ -155,9 +155,7 @@ class _CityDetailView extends StatelessWidget {
       '${AppRoutes.locationsAdminForm}$params',
     );
     if (result == true && context.mounted) {
-      context
-          .read<CityDetailBloc>()
-          .add(const CityDetailRefreshRequested());
+      context.read<CityDetailBloc>().add(const CityDetailRefreshRequested());
     }
   }
 
@@ -165,9 +163,7 @@ class _CityDetailView extends StatelessWidget {
     try {
       await getIt<UpdateArea>()(area.id, isActive: !area.isActive);
       if (context.mounted) {
-        context
-            .read<CityDetailBloc>()
-            .add(const CityDetailRefreshRequested());
+        context.read<CityDetailBloc>().add(const CityDetailRefreshRequested());
       }
     } on Object {
       // Refresh will reflect unchanged state if toggle failed
@@ -185,15 +181,13 @@ class _CityDetailView extends StatelessWidget {
     try {
       await getIt<DeleteArea>()(area.id);
       if (context.mounted) {
-        context
-            .read<CityDetailBloc>()
-            .add(const CityDetailRefreshRequested());
+        context.read<CityDetailBloc>().add(const CityDetailRefreshRequested());
       }
     } on Object catch (error) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error.toString())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error.toString())));
       }
     }
   }

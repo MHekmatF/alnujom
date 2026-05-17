@@ -34,10 +34,7 @@ class LocationPickerDropdown extends StatelessWidget {
             vertical: AppSpacing.sm,
           ),
         ),
-        child: const SizedBox(
-          height: 24,
-          child: LinearProgressIndicator(),
-        ),
+        child: const SizedBox(height: 24, child: LinearProgressIndicator()),
       );
     }
 

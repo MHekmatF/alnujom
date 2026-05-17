@@ -9,7 +9,10 @@ class SystemRowBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Chip(
-      label: Text(l10n.systemBadge, style: Theme.of(context).textTheme.labelSmall),
+      label: Text(
+        l10n.systemBadge,
+        style: Theme.of(context).textTheme.labelSmall,
+      ),
       backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
       padding: EdgeInsets.zero,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,

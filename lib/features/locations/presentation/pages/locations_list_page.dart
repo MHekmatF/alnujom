@@ -54,38 +54,39 @@ class _LocationsListView extends StatelessWidget {
           LocationsListError(:final message) => Center(
             child: Text(message, textAlign: TextAlign.center),
           ),
-          LocationsListLoaded(:final governorates) => governorates.isEmpty
-              ? Center(child: Text(l10n.locationsListPageTitle))
-              : RefreshIndicator(
-                  onRefresh: () async => context
-                      .read<LocationsListBloc>()
-                      .add(const RefreshRequested()),
-                  child: ListView.separated(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
-                    itemCount: governorates.length,
-                    separatorBuilder: (_, __) =>
-                        const SizedBox(height: AppSpacing.sm),
-                    itemBuilder: (context, index) {
-                      final summary = governorates[index];
-                      return GovernorateCard(
-                        summary: summary,
-                        onTap: () => context.go(
-                          '${AppRoutes.locationsAdmin}/${summary.governorate.id}',
-                        ),
-                        onEdit: () => _openForm(
-                          context,
-                          mode: 'edit',
-                          level: 'governorate',
-                          id: summary.governorate.id,
-                        ),
-                        onToggleActive: () => _toggleActive(context, summary),
-                        onDelete: summary.governorate.isSystem
-                            ? null
-                            : () => _confirmDelete(context, summary),
-                      );
-                    },
+          LocationsListLoaded(:final governorates) =>
+            governorates.isEmpty
+                ? Center(child: Text(l10n.locationsListPageTitle))
+                : RefreshIndicator(
+                    onRefresh: () async => context
+                        .read<LocationsListBloc>()
+                        .add(const RefreshRequested()),
+                    child: ListView.separated(
+                      padding: const EdgeInsets.all(AppSpacing.lg),
+                      itemCount: governorates.length,
+                      separatorBuilder: (_, __) =>
+                          const SizedBox(height: AppSpacing.sm),
+                      itemBuilder: (context, index) {
+                        final summary = governorates[index];
+                        return GovernorateCard(
+                          summary: summary,
+                          onTap: () => context.go(
+                            '${AppRoutes.locationsAdmin}/${summary.governorate.id}',
+                          ),
+                          onEdit: () => _openForm(
+                            context,
+                            mode: 'edit',
+                            level: 'governorate',
+                            id: summary.governorate.id,
+                          ),
+                          onToggleActive: () => _toggleActive(context, summary),
+                          onDelete: summary.governorate.isSystem
+                              ? null
+                              : () => _confirmDelete(context, summary),
+                        );
+                      },
+                    ),
                   ),
-                ),
         },
       ),
     );
@@ -148,9 +149,9 @@ class _LocationsListView extends StatelessWidget {
       }
     } on Object catch (error) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error.toString())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error.toString())));
       }
     }
   }

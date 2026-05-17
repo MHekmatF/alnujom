@@ -19,12 +19,11 @@ class SupabaseLocationsDatasource {
     required bool includeInactive,
   }) async {
     var query = _client.from('governorates').select('*, cities(count)');
-    final response = await (includeInactive ? query : query.eq('is_active', true))
-        .order('position', ascending: true, nullsFirst: false)
-        .order('key', ascending: true);
-    return response
-        .map(GovernorateWithCityCountDto.fromJson)
-        .toList();
+    final response =
+        await (includeInactive ? query : query.eq('is_active', true))
+            .order('position', ascending: true, nullsFirst: false)
+            .order('key', ascending: true);
+    return response.map(GovernorateWithCityCountDto.fromJson).toList();
   }
 
   Future<GovernorateDto> loadGovernorate(String id) async {
@@ -99,9 +98,7 @@ class SupabaseLocationsDatasource {
         await (includeInactive ? query : query.eq('is_active', true))
             .order('position', ascending: true, nullsFirst: false)
             .order('key', ascending: true);
-    return response
-        .map(CityWithAreaCountDto.fromJson)
-        .toList();
+    return response.map(CityWithAreaCountDto.fromJson).toList();
   }
 
   Future<CityDto> loadCity(String id) async {
@@ -175,17 +172,11 @@ class SupabaseLocationsDatasource {
         await (includeInactive ? query : query.eq('is_active', true))
             .order('position', ascending: true, nullsFirst: false)
             .order('key', ascending: true);
-    return response
-        .map(AreaDto.fromJson)
-        .toList();
+    return response.map(AreaDto.fromJson).toList();
   }
 
   Future<AreaDto> loadArea(String id) async {
-    final response = await _client
-        .from('areas')
-        .select()
-        .eq('id', id)
-        .single();
+    final response = await _client.from('areas').select().eq('id', id).single();
     return AreaDto.fromJson(response);
   }
 

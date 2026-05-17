@@ -1028,20 +1028,17 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('isActiveToggleLabel', (loc) => loc.isActiveToggleLabel);
 
   @override
-  String get hiddenBadge =>
-      _resolve('hiddenBadge', (loc) => loc.hiddenBadge);
+  String get hiddenBadge => _resolve('hiddenBadge', (loc) => loc.hiddenBadge);
 
   @override
-  String get systemBadge =>
-      _resolve('systemBadge', (loc) => loc.systemBadge);
+  String get systemBadge => _resolve('systemBadge', (loc) => loc.systemBadge);
 
   @override
   String get arabicNameRequired =>
       _resolve('arabicNameRequired', (loc) => loc.arabicNameRequired);
 
   @override
-  String get keyRequired =>
-      _resolve('keyRequired', (loc) => loc.keyRequired);
+  String get keyRequired => _resolve('keyRequired', (loc) => loc.keyRequired);
 
   @override
   String get keyAlreadyUsed =>
@@ -1075,12 +1072,16 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
-  String get locationPickerSelectCity =>
-      _resolve('locationPickerSelectCity', (loc) => loc.locationPickerSelectCity);
+  String get locationPickerSelectCity => _resolve(
+    'locationPickerSelectCity',
+    (loc) => loc.locationPickerSelectCity,
+  );
 
   @override
-  String get locationPickerSelectArea =>
-      _resolve('locationPickerSelectArea', (loc) => loc.locationPickerSelectArea);
+  String get locationPickerSelectArea => _resolve(
+    'locationPickerSelectArea',
+    (loc) => loc.locationPickerSelectArea,
+  );
 
   @override
   String get locationPickerNoAreasYet => _resolve(

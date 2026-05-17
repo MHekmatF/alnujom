@@ -25,9 +25,5 @@ final class LocationsNetworkFailure extends LocationsFailure {
 }
 
 final class LocationsUnknownFailure extends LocationsFailure {
-  const LocationsUnknownFailure(
-    super.message, {
-    super.cause,
-    super.stackTrace,
-  });
+  const LocationsUnknownFailure(super.message, {super.cause, super.stackTrace});
 }

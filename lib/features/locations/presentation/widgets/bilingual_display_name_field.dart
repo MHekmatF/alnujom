@@ -20,8 +20,7 @@ class BilingualDisplayNameField extends StatefulWidget {
       _BilingualDisplayNameFieldState();
 }
 
-class _BilingualDisplayNameFieldState
-    extends State<BilingualDisplayNameField> {
+class _BilingualDisplayNameFieldState extends State<BilingualDisplayNameField> {
   late final TextEditingController _arController;
   late final TextEditingController _enController;
 
@@ -71,7 +70,9 @@ class _BilingualDisplayNameFieldState
           textDirection: TextDirection.ltr,
           child: TextFormField(
             controller: _enController,
-            decoration: InputDecoration(labelText: l10n.displayNameEnglishLabel),
+            decoration: InputDecoration(
+              labelText: l10n.displayNameEnglishLabel,
+            ),
             onChanged: (_) => _notify(),
           ),
         ),

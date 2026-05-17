@@ -180,11 +180,9 @@ class LocationPickerBloc
   ) async {
     emit(const LocationPickerGovernoratesLoading());
     try {
-      final govWithCounts =
-          await _listGovernorates(includeInactive: false);
+      final govWithCounts = await _listGovernorates(includeInactive: false);
       // Extract plain Governorate entities from the with-count wrappers
-      final governorates =
-          govWithCounts.map((g) => g.governorate).toList();
+      final governorates = govWithCounts.map((g) => g.governorate).toList();
       emit(LocationPickerReady(governorates: governorates));
     } on LocationsFailure catch (failure) {
       emit(LocationPickerLoadFailed(failure.message));
@@ -220,12 +218,7 @@ class LocationPickerBloc
       final current = state;
       if (current is LocationPickerReady &&
           current.selectedGovernorateId == event.governorateId) {
-        emit(
-          current.copyWith(
-            cities: cities,
-            citiesLoading: false,
-          ),
-        );
+        emit(current.copyWith(cities: cities, citiesLoading: false));
       }
     } on LocationsFailure catch (failure) {
       emit(LocationPickerLoadFailed(failure.message));
@@ -258,12 +251,7 @@ class LocationPickerBloc
       final current = state;
       if (current is LocationPickerReady &&
           current.selectedCityId == event.cityId) {
-        emit(
-          current.copyWith(
-            areas: areas,
-            areasLoading: false,
-          ),
-        );
+        emit(current.copyWith(areas: areas, areasLoading: false));
       }
     } on LocationsFailure catch (failure) {
       emit(LocationPickerLoadFailed(failure.message));
@@ -284,10 +272,6 @@ class LocationPickerBloc
   void _onReset(LocationPickerReset event, Emitter<LocationPickerState> emit) {
     final ready = state;
     if (ready is! LocationPickerReady) return;
-    emit(
-      LocationPickerReady(
-        governorates: ready.governorates,
-      ),
-    );
+    emit(LocationPickerReady(governorates: ready.governorates));
   }
 }

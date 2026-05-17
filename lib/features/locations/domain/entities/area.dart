@@ -29,8 +29,9 @@ class Area extends Equatable {
   String localizedName(Locale locale) {
     final active = displayName[locale.languageCode]?.trim();
     if (active != null && active.isNotEmpty) return active;
-    final fallback =
-        locale.languageCode == 'ar' ? displayName['en'] : displayName['ar'];
+    final fallback = locale.languageCode == 'ar'
+        ? displayName['en']
+        : displayName['ar'];
     if (fallback != null && fallback.trim().isNotEmpty) return fallback.trim();
     return key;
   }

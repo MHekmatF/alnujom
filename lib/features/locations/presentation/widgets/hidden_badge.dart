@@ -9,8 +9,13 @@ class HiddenBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Chip(
-      label: Text(l10n.hiddenBadge, style: Theme.of(context).textTheme.labelSmall),
-      backgroundColor: Theme.of(context).colorScheme.outline.withValues(alpha: 0.15),
+      label: Text(
+        l10n.hiddenBadge,
+        style: Theme.of(context).textTheme.labelSmall,
+      ),
+      backgroundColor: Theme.of(
+        context,
+      ).colorScheme.outline.withValues(alpha: 0.15),
       padding: EdgeInsets.zero,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );

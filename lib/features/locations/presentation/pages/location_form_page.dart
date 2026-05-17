@@ -52,9 +52,9 @@ class _LocationFormView extends StatelessWidget {
             NotAuthorizedFailure() => l10n.locationsLoadFailed,
             _ => l10n.locationSaveFailed,
           };
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(message)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(message)));
         }
       },
       child: BlocBuilder<LocationFormBloc, LocationFormState>(
@@ -166,12 +166,12 @@ class _LocationFormBodyState extends State<_LocationFormBody> {
             initialArabic: state.arabicName.isEmpty ? null : state.arabicName,
             initialEnglish: state.englishName,
             onChanged: (value) {
-              context
-                  .read<LocationFormBloc>()
-                  .add(ArabicNameChanged(value.arabic ?? ''));
-              context
-                  .read<LocationFormBloc>()
-                  .add(EnglishNameChanged(value.english ?? ''));
+              context.read<LocationFormBloc>().add(
+                ArabicNameChanged(value.arabic ?? ''),
+              );
+              context.read<LocationFormBloc>().add(
+                EnglishNameChanged(value.english ?? ''),
+              );
             },
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -181,18 +181,16 @@ class _LocationFormBodyState extends State<_LocationFormBody> {
             keyboardType: TextInputType.number,
             onChanged: (value) {
               final parsed = int.tryParse(value.trim());
-              context
-                  .read<LocationFormBloc>()
-                  .add(PositionChanged(parsed));
+              context.read<LocationFormBloc>().add(PositionChanged(parsed));
             },
           ),
           const SizedBox(height: AppSpacing.lg),
           SwitchListTile(
             title: Text(l10n.isActiveToggleLabel),
             value: state.isActive,
-            onChanged: (value) => context
-                .read<LocationFormBloc>()
-                .add(IsActiveToggled(value: value)),
+            onChanged: (value) => context.read<LocationFormBloc>().add(
+              IsActiveToggled(value: value),
+            ),
           ),
           const SizedBox(height: AppSpacing.xl),
           FilledButton(
@@ -200,9 +198,7 @@ class _LocationFormBodyState extends State<_LocationFormBody> {
                 ? null
                 : () {
                     if (_formKey.currentState?.validate() != true) return;
-                    context
-                        .read<LocationFormBloc>()
-                        .add(const SaveRequested());
+                    context.read<LocationFormBloc>().add(const SaveRequested());
                   },
             child: state.isSaving
                 ? const SizedBox(

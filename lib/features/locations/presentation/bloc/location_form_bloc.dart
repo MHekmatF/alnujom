@@ -236,14 +236,16 @@ class LocationFormBloc extends Bloc<LocationFormEvent, LocationFormState> {
     Emitter<LocationFormState> emit,
   ) async {
     if (event.mode == LocationFormMode.add) {
-      emit(LocationFormEditing(
-        mode: event.mode,
-        level: event.level,
-        parentId: event.parentId,
-        key: '',
-        arabicName: '',
-        isActive: true,
-      ));
+      emit(
+        LocationFormEditing(
+          mode: event.mode,
+          level: event.level,
+          parentId: event.parentId,
+          key: '',
+          arabicName: '',
+          isActive: true,
+        ),
+      );
       return;
     }
 
@@ -259,46 +261,52 @@ class LocationFormBloc extends Bloc<LocationFormEvent, LocationFormState> {
       switch (event.level) {
         case LocationLevel.governorate:
           final gov = await _loadGovernorateDetail(id);
-          emit(LocationFormEditing(
-            mode: event.mode,
-            level: event.level,
-            id: id,
-            key: gov.key,
-            arabicName: gov.displayName['ar'] ?? '',
-            englishName: gov.displayName['en'],
-            position: gov.position,
-            isActive: gov.isActive,
-            isLoadedSystemRow: gov.isSystem,
-          ));
+          emit(
+            LocationFormEditing(
+              mode: event.mode,
+              level: event.level,
+              id: id,
+              key: gov.key,
+              arabicName: gov.displayName['ar'] ?? '',
+              englishName: gov.displayName['en'],
+              position: gov.position,
+              isActive: gov.isActive,
+              isLoadedSystemRow: gov.isSystem,
+            ),
+          );
 
         case LocationLevel.city:
           final city = await _loadCityDetail(id);
-          emit(LocationFormEditing(
-            mode: event.mode,
-            level: event.level,
-            id: id,
-            parentId: city.governorateId,
-            key: city.key,
-            arabicName: city.displayName['ar'] ?? '',
-            englishName: city.displayName['en'],
-            position: city.position,
-            isActive: city.isActive,
-            isLoadedSystemRow: city.isSystem,
-          ));
+          emit(
+            LocationFormEditing(
+              mode: event.mode,
+              level: event.level,
+              id: id,
+              parentId: city.governorateId,
+              key: city.key,
+              arabicName: city.displayName['ar'] ?? '',
+              englishName: city.displayName['en'],
+              position: city.position,
+              isActive: city.isActive,
+              isLoadedSystemRow: city.isSystem,
+            ),
+          );
 
         case LocationLevel.area:
           final area = await _loadAreaDetail(id);
-          emit(LocationFormEditing(
-            mode: event.mode,
-            level: event.level,
-            id: id,
-            parentId: area.cityId,
-            key: area.key,
-            arabicName: area.displayName['ar'] ?? '',
-            englishName: area.displayName['en'],
-            position: area.position,
-            isActive: area.isActive,
-          ));
+          emit(
+            LocationFormEditing(
+              mode: event.mode,
+              level: event.level,
+              id: id,
+              parentId: area.cityId,
+              key: area.key,
+              arabicName: area.displayName['ar'] ?? '',
+              englishName: area.displayName['en'],
+              position: area.position,
+              isActive: area.isActive,
+            ),
+          );
       }
     } on LocationsFailure catch (failure) {
       emit(LocationFormLoadFailed(failure.message));
@@ -361,8 +369,14 @@ class LocationFormBloc extends Bloc<LocationFormEvent, LocationFormState> {
 
     // Defensive slug validation (primary validation is on the Form widget)
     final slugRegex = RegExp(r'^[a-z0-9][a-z0-9-]*$');
-    if (trimmedKey.isEmpty || arabicName.isEmpty || !slugRegex.hasMatch(trimmedKey)) {
-      emit(const LocationFormSaveFailure(LocationsUnknownFailure('validation failed')));
+    if (trimmedKey.isEmpty ||
+        arabicName.isEmpty ||
+        !slugRegex.hasMatch(trimmedKey)) {
+      emit(
+        const LocationFormSaveFailure(
+          LocationsUnknownFailure('validation failed'),
+        ),
+      );
       emit(editing);
       return;
     }
@@ -399,9 +413,11 @@ class LocationFormBloc extends Bloc<LocationFormEvent, LocationFormState> {
           if (editing.mode == LocationFormMode.add) {
             final parentId = editing.parentId;
             if (parentId == null) {
-              emit(const LocationFormSaveFailure(
-                LocationsUnknownFailure('parentId required for city add'),
-              ));
+              emit(
+                const LocationFormSaveFailure(
+                  LocationsUnknownFailure('parentId required for city add'),
+                ),
+              );
               emit(editing.copyWith(isSaving: false));
               return;
             }
@@ -426,9 +442,11 @@ class LocationFormBloc extends Bloc<LocationFormEvent, LocationFormState> {
           if (editing.mode == LocationFormMode.add) {
             final parentId = editing.parentId;
             if (parentId == null) {
-              emit(const LocationFormSaveFailure(
-                LocationsUnknownFailure('parentId required for area add'),
-              ));
+              emit(
+                const LocationFormSaveFailure(
+                  LocationsUnknownFailure('parentId required for area add'),
+                ),
+              );
               emit(editing.copyWith(isSaving: false));
               return;
             }
@@ -464,9 +482,7 @@ class LocationFormBloc extends Bloc<LocationFormEvent, LocationFormState> {
       emit(LocationFormSaveFailure(failure));
       emit(editing.copyWith(isSaving: false));
     } on Object catch (error) {
-      emit(LocationFormSaveFailure(
-        LocationsUnknownFailure(error.toString()),
-      ));
+      emit(LocationFormSaveFailure(LocationsUnknownFailure(error.toString())));
       emit(editing.copyWith(isSaving: false));
     }
   }
