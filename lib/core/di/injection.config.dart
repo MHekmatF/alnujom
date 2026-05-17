@@ -67,6 +67,12 @@ import '../../features/locations/domain/usecases/update_area.dart' as _i188;
 import '../../features/locations/domain/usecases/update_city.dart' as _i1058;
 import '../../features/locations/domain/usecases/update_governorate.dart'
     as _i1054;
+import '../../features/locations/presentation/bloc/governorate_detail_bloc.dart'
+    as _i796;
+import '../../features/locations/presentation/bloc/location_form_bloc.dart'
+    as _i419;
+import '../../features/locations/presentation/bloc/locations_list_bloc.dart'
+    as _i669;
 import '../../features/onboarding/data/datasources/onboarding_seen_storage.dart'
     as _i144;
 import '../../features/onboarding/data/repositories/onboarding_repository_impl.dart'
@@ -389,6 +395,27 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i329.RolesListBloc>(
     () => _i329.RolesListBloc(gh<_i1018.ListRoles>()),
+  );
+  gh.factory<_i419.LocationFormBloc>(
+    () => _i419.LocationFormBloc(
+      gh<_i441.LoadGovernorateDetail>(),
+      gh<_i645.LoadCityDetail>(),
+      gh<_i1027.CreateGovernorate>(),
+      gh<_i1054.UpdateGovernorate>(),
+      gh<_i206.CreateCity>(),
+      gh<_i1058.UpdateCity>(),
+      gh<_i880.CreateArea>(),
+      gh<_i188.UpdateArea>(),
+    ),
+  );
+  gh.factory<_i796.GovernorateDetailBloc>(
+    () => _i796.GovernorateDetailBloc(
+      gh<_i441.LoadGovernorateDetail>(),
+      gh<_i53.ListCitiesForGovernorate>(),
+    ),
+  );
+  gh.factory<_i669.LocationsListBloc>(
+    () => _i669.LocationsListBloc(gh<_i533.ListGovernorates>()),
   );
   return getIt;
 }
