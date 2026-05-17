@@ -291,5 +291,12 @@
     "placeholders": {
       "areaCount": { "type": "int" }
     }
+  },
+  "cityDetailBreadcrumb": "{governorateName} → {cityName}",
+  "@cityDetailBreadcrumb": {
+    "placeholders": {
+      "governorateName": { "type": "String" },
+      "cityName": { "type": "String" }
+    }
   }
 }

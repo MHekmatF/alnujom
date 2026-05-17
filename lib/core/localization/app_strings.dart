@@ -1103,4 +1103,11 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String subtitleAreaCount(int areaCount) =>
       _resolve('subtitleAreaCount', (loc) => loc.subtitleAreaCount(areaCount));
+
+  @override
+  String cityDetailBreadcrumb(String governorateName, String cityName) =>
+      _resolve(
+        'cityDetailBreadcrumb',
+        (loc) => loc.cityDetailBreadcrumb(governorateName, cityName),
+      );
 }

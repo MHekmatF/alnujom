@@ -5,6 +5,7 @@ l10n_lint_exempt:
   - lib/l10n/app_localizations*.dart
   - lib/debug/**
   - test/goldens/**
+  - lib/features/locations/presentation/pages/location_picker_smoke_test_page.dart
 
 analyzer:
   errors:

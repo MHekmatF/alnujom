@@ -89,8 +89,10 @@ class _CityDetailView extends StatelessWidget {
                         ],
                         Expanded(
                           child: Text(
-                            '${governorate.localizedName(locale)} → '
-                            '${city.localizedName(locale)}',
+                            l10n.cityDetailBreadcrumb(
+                              governorate.localizedName(locale),
+                              city.localizedName(locale),
+                            ),
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                         ),

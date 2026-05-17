@@ -83,7 +83,7 @@ class _LocationPickerBody extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
             child: Text(
               l10n.locationsLoadFailed,
-              style: TextStyle(
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.error,
               ),
             ),
