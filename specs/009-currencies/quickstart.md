@@ -11,7 +11,7 @@ This recipe walks the **12 steps** that exercise every FR and SC. It uses Supaba
 
 ---
 
-## Step 1 — Apply the five Phase 9 migrations
+## Step 1 — Apply the eight Phase 9 migrations
 
 Apply each migration via Supabase MCP `apply_migration` in order:
 
@@ -20,6 +20,9 @@ Apply each migration via Supabase MCP `apply_migration` in order:
 3. `20260518120003_create_update_exchange_rate_rpc.sql`
 4. `20260518120004_alter_user_preferences_fk.sql`
 5. `20260518120005_phase9_advisor_hardening.sql`
+6. `20260518120006_create_latest_rates_for_base_rpc.sql`
+7. `20260518120007_relax_latest_rates_for_base_to_security_invoker.sql`
+8. `20260518120008_phase9_fk_index_hardening.sql`
 
 After each migration, run `list_migrations` and confirm the new entry appears. The migrations are idempotent — re-applying is safe per the project memory `project_supabase_mcp_apply_migration.md`, but produces a duplicate tracker row (verify SQL idempotency by reading the file).
 
