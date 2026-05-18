@@ -1,0 +1,30 @@
+# Phase 9 Deferred Work
+
+Captured: 2026-05-18
+
+## Resolved During Implementation
+
+- Empty-state copy on latest-rate sublines: Resolved. Implemented `rateNotSetHint` and wired it through `latest_rate_subline.dart` and empty history states.
+- Loading-state UX details: Resolved. Currency pages use standard Flutter progress indicators and existing Phase 2 spacing tokens.
+- Supabase advisor performance follow-up: Resolved. Added migration `20260518120008_phase9_fk_index_hardening.sql` with covering indexes for `exchange_rates.set_by`, `exchange_rates.target_currency`, and `user_preferences.display_currency`. Confirmed no `unindexed_foreign_keys` advisor for these columns in the post-fix run.
+- Arabic-Indic digit rendering in `ar` locale: Resolved. intl's bundled `ar` locale uses `ZERO_DIGIT: '0'` (Western), so `NumberFormat.decimalPattern('ar')` produced Western digits. Added `lib/shared/util/arabic_digits.dart` post-processor wired into `MoneyFormatter`, `RateFormatter`, and `ExchangeRateRow` (rates + date). Discovered during T077 device walk on 2026-05-18.
+- Exchange-rate history AppBar title truncation: Resolved. "Set new rate" CTA switched from `TextButton.icon` to `IconButton + tooltip` to reclaim AppBar width. Discovered during T083 device walk on 2026-05-18.
+- Empty `setByDisplayName` rendering empty "Set by:" line: Resolved. `_loadProfileNames` no longer falls back to `''` for profiles with both `full_name` and `username` null; `ExchangeRateRow` defensively treats empty string as missing so the `unknownActorLabel` / `systemActorLabel` fallback fires. Discovered during T083 device walk on 2026-05-18.
+- Story-level device walks (T075, T077, T083, T085): Resolved. Verified on Android emulator (Pixel 8 Pro AVD) 2026-05-18 against the remote Supabase project. See per-task notes in `tasks.md` for evidence. Note that the four short walks substitute partially for T093 — the full 12-step quickstart walk on Infinix Note 8 is still deferred.
+- Quickstart Step 6 (symmetric 24-hour timing gate, FR-017 / SC-025 / Q5): Resolved. Verified on Android emulator 2026-05-18: future-dated (+48h) and back-dated (-48h) submissions both render `unusual_timing_confirmation_dialog.dart` with direction-appropriate wording. T071 covers this sub-step.
+- Quickstart Step 9 (route guard, FR-014 / SC-010 / T059 sub-step a+b): Resolved. Verified on Android emulator 2026-05-18 via own-role revoke approach (instead of the moderator-account approach, which was blocked by Supabase Auth requiring the Admin API for password resets). Temporarily revoked `currencies.manage` from the `super_admin` role via SQL bookend; user backgrounded then foregrounded the app; the **Currencies tile disappeared** from `admin_home_page.dart` (line 44 gate on `PermissionKeys.currenciesManage`). Sub-steps c/d (hand-typed deep-link refusals to the four `/admin/currencies*` routes) remain code-review-verified — `requireCurrenciesManageRedirect` is wired to all four routes at `app_router.dart:226,232,240,248`; the third-layer RLS deny is verified in Step 10.
+- Quickstart Step 12 single-device propagation (FR-015 / SC-021): Resolved. Verified on Android emulator 2026-05-18 in BOTH directions: (i) revoke direction — backgrounding+foregrounding the app after the SQL revoke caused the Currencies tile to disappear without a sign-out cycle (proving the three-point cache refresh on foreground resume); (ii) grant direction — after restoring the role-permission row, backgrounding+foregrounding the app brought the tile back. Both directions exercise the same Phase 6 cache refresh code path on `AppLifecycleState.resumed`.
+
+## Accepted As-Is For Phase 9
+
+- Edge Function rate limiting: Accepted as-is. Phase 9 implements `update_exchange_rate` as a permission-checked Postgres RPC per R-06, not an Edge Function. Server-side permission checks and RLS remain the security boundary.
+- `source` text sanitization: Accepted as-is. Phase 9 relies on admin-only write access plus the Postgres `CHECK (source IS NULL OR length(source) <= 500)` constraint.
+- `update_exchange_rate` SECURITY DEFINER advisor warning: Accepted as-is for Phase 9. The RPC must be executable by `authenticated` so the Flutter client can call it, and it re-checks `currencies.manage` internally before writing.
+
+## Deferred
+
+- ICU symbol fallback for future custom currencies: Deferred until the first non-USD/SYP custom currency is added by an admin. Current formatter behavior uses the stored `currencies.symbol` value plus explicit SYP locale handling.
+- Phase 9 full quickstart device walk (T093): Deferred to reviewer/manual QA. Steps requiring the reference Infinix Note 8, multiple users, or two-device propagation were not executed in this session. When walked, also update `quickstart.md` Step 1 to list the now-eight Phase 9 migrations (originally documented as five).
+- Quickstart Step 9 sub-steps c/d (deep-link refusal to four `/admin/currencies*` routes): Code-review-verified rather than emulator-walked — `adb shell am start` deep-link intent on a Flutter+go_router app would require declaring an `android:scheme` intent filter in `AndroidManifest.xml`, which is out of scope for Phase 9. Code evidence: `requireCurrenciesManageRedirect` (`auth_redirect.dart:91-99`) is wired to all four routes (`app_router.dart:226,232,240,248`); the third-layer RLS deny is verified at the database level in Step 10.
+- Quickstart Step 12 cross-device half (SYP-deactivation fallback in device A vs device B, US4 acceptance scenario 4): Deferred to reviewer/manual QA — requires two physical devices or one device plus a desktop browser session, both signed in concurrently. The single-device propagation half (revoke + foreground refresh) was walked on the Android emulator 2026-05-18 in both directions (revoke → tile gone, grant → tile back).
+- Supabase advisor SECURITY DEFINER follow-up: Accepted as-is for `update_exchange_rate`. The advisor still flags it because it is callable by `authenticated`, but the Phase 9 design intentionally uses a permission-checked RPC and revokes `PUBLIC`/`anon` execution in `20260518120005_phase9_advisor_hardening.sql`.

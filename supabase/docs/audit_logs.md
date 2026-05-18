@@ -88,6 +88,13 @@ new triggers and appropriate `TG_ARGV` values (action key, column list, PK colum
   - `area.updated` — `areas` AFTER UPDATE.
   - `area.deleted` — `areas` AFTER DELETE.
   - All seed rows (14 governorates + 32 cities + 9 areas) produce `*.created` audit rows with `actor_user_id=NULL` (trigger attached BEFORE seed per R-08 / Clarifications Q5). This is the **fifth** reuse of `log_audit()` across Phases 4/5/6/7/8 (R-13 reusability invariant).
+- Phase 9: currencies and exchange rates ✅ **Shipped** in migrations `20260518120001`/`20260518120002`/`20260518120003` (FR-007, FR-026):
+  - `currency.created` — `currencies` AFTER INSERT.
+  - `currency.updated` — `currencies` AFTER UPDATE.
+  - `currency.deleted` — `currencies` AFTER DELETE.
+  - `exchange_rate.updated` — `exchange_rates` AFTER INSERT.
+  - Seed rows (SYP + USD currencies, plus the starter USD/SYP rate pair) produce audit rows with `actor_user_id=NULL` because triggers attach BEFORE seed per R-08.
+  - The `update_exchange_rate` RPC produces TWO `exchange_rate.updated` audit rows per call: one for the admin-authored row and one for the auto-derived inverse row. The derived row's `after_state.source` starts with `auto-derived from ` followed by the admin row UUID.
 - Phase 12: listings workflow
 - Phase 18: reports/moderation
 - Phase 19: agency flows

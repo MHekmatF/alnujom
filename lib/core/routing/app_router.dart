@@ -12,12 +12,17 @@ import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/auth/presentation/pages/rejected_page.dart';
 import '../../features/auth/presentation/pages/reset_password_page.dart';
 import '../../features/auth/presentation/pages/suspended_page.dart';
+import '../../features/currencies/presentation/pages/currencies_list_page.dart';
+import '../../features/currencies/presentation/pages/currency_form_page.dart';
+import '../../features/currencies/presentation/pages/exchange_rate_history_page.dart';
+import '../../features/currencies/presentation/pages/set_exchange_rate_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/onboarding/presentation/pages/onboarding_page.dart';
 import '../../features/onboarding/presentation/pages/splash_page.dart';
 import '../../features/profile/presentation/pages/profile_edit_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/profile/presentation/pages/profile_private_page.dart';
+import '../../features/currencies/presentation/pages/money_formatter_showcase_page.dart';
 import '../../features/locations/presentation/pages/city_detail_page.dart';
 import '../../features/locations/presentation/pages/governorate_detail_page.dart';
 import '../../features/locations/presentation/pages/location_form_page.dart';
@@ -48,12 +53,16 @@ abstract final class AppRoutes {
   static const superAdminAssign = '/admin/super-admin/assign';
   static const locationsAdmin = '/admin/locations';
   static const locationsAdminForm = '/admin/locations/form';
+  static const currenciesAdmin = '/admin/currencies';
+  static const currenciesAdminSetRate = '/admin/currencies/set-rate';
+  static const currenciesAdminForm = '/admin/currencies/form';
   static const resetPassword = '/reset-password';
   static const profile = '/profile';
   static const profileEdit = '/profile/edit';
   static const profilePrivate = '/profile/private';
   static const shellHome = '/';
   static const themeGallery = '/_debug/theme-gallery';
+  static const debugMoneyFormatter = '/debug/money-formatter';
 }
 
 abstract final class AppRouteNames {
@@ -76,6 +85,10 @@ abstract final class AppRouteNames {
       'locations-admin-governorate-detail';
   static const locationsAdminCityDetail = 'locations-admin-city-detail';
   static const locationsAdminForm = 'locations-admin-form';
+  static const currenciesAdmin = 'currencies-admin';
+  static const currenciesAdminSetRate = 'currencies-admin-set-rate';
+  static const currenciesAdminHistory = 'currencies-admin-history';
+  static const currenciesAdminForm = 'currencies-admin-form';
   static const resetPassword = 'reset-password';
   static const profile = 'profile';
   static const profileEdit = 'profile-edit';
@@ -207,6 +220,39 @@ GoRouter buildAppRouter({
               ),
             ],
           ),
+          GoRoute(
+            path: 'currencies',
+            name: AppRouteNames.currenciesAdmin,
+            redirect: requireCurrenciesManageRedirect,
+            builder: (context, state) => const CurrenciesListPage(),
+            routes: [
+              GoRoute(
+                path: 'set-rate',
+                name: AppRouteNames.currenciesAdminSetRate,
+                redirect: requireCurrenciesManageRedirect,
+                builder: (context, state) => SetExchangeRatePage(
+                  initialBaseCurrencyCode: state.uri.queryParameters['base'],
+                ),
+              ),
+              GoRoute(
+                path: ':code/history',
+                name: AppRouteNames.currenciesAdminHistory,
+                redirect: requireCurrenciesManageRedirect,
+                builder: (context, state) => ExchangeRateHistoryPage(
+                  baseCurrencyCode: state.pathParameters['code']!,
+                ),
+              ),
+              GoRoute(
+                path: 'form',
+                name: AppRouteNames.currenciesAdminForm,
+                redirect: requireCurrenciesManageRedirect,
+                builder: (context, state) => CurrencyFormPage(
+                  mode: state.uri.queryParameters['mode'] ?? 'create',
+                  code: state.uri.queryParameters['code'],
+                ),
+              ),
+            ],
+          ),
         ],
       ),
       GoRoute(
@@ -247,6 +293,10 @@ GoRouter buildAppRouter({
               GoRoute(
                 path: '/dev/locations-picker',
                 builder: (_, __) => const LocationPickerSmokeTestPage(),
+              ),
+              GoRoute(
+                path: '/debug/money-formatter',
+                builder: (_, __) => const MoneyFormatterShowcasePage(),
               ),
             ]
           : <RouteBase>[]),

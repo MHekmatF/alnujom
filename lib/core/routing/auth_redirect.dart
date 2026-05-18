@@ -87,3 +87,14 @@ String? requireLocationsManageRedirect(
   }
   return null;
 }
+
+String? requireCurrenciesManageRedirect(
+  BuildContext context,
+  GoRouterState state,
+) {
+  final checker = getIt<PermissionChecker>();
+  if (!checker.has(PermissionKeys.currenciesManage)) {
+    return '/admin';
+  }
+  return null;
+}
