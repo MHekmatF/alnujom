@@ -85,7 +85,9 @@ class _PreferredCurrencyToggleState extends State<PreferredCurrencyToggle> {
         if (_errorCode != null)
           Text(
             _errorText(l10n, _errorCode!),
-            style: TextStyle(color: theme.colorScheme.error),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.error,
+            ),
           )
         else if (currencies == null)
           const LinearProgressIndicator()

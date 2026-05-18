@@ -2,6 +2,8 @@ import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/theme/radii.dart';
+import '../../../../core/theme/spacing.dart';
 import '../../../../shared/domain/value_objects/money.dart';
 import '../../../../shared/presentation/money_formatter.dart';
 import '../../domain/entities/currency.dart';
@@ -64,7 +66,7 @@ class _MoneyFormatterShowcasePageState
     return Scaffold(
       appBar: AppBar(title: const Text('MoneyFormatter Showcase')),
       body: ListView(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(AppSpacing.md),
         children: [
           // T052 / R-18: locale-fallback currency name verification
           const _SectionHeader('Currency Names — R-18 locale fallback'),
@@ -216,10 +218,12 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: 8),
+    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
     child: Text(
       text,
-      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+      style: Theme.of(
+        context,
+      ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
     ),
   );
 }
@@ -277,14 +281,19 @@ class _CaseCard extends StatelessWidget {
     final enMatch = enCall1 == c.expectedEn;
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: Padding(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(c.label, style: const TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 6),
+            Text(
+              c.label,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: AppSpacing.xs),
             _LocaleRow(
               localeName: 'ar',
               call1: arCall1,
@@ -338,7 +347,9 @@ class _LocaleRow extends StatelessWidget {
           width: 24,
           child: Text(
             localeName,
-            style: const TextStyle(fontSize: 11, color: Colors.grey),
+            style: Theme.of(
+              context,
+            ).textTheme.labelSmall?.copyWith(color: Colors.grey),
           ),
         ),
         Expanded(
@@ -359,11 +370,10 @@ class _LocaleRow extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: AppSpacing.xs),
               Text(
                 'Expected: $expected',
-                style: TextStyle(
-                  fontSize: 11,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   color: valMatch ? passColor : failColor,
                 ),
               ),
@@ -387,13 +397,19 @@ class _Badge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+    padding: const EdgeInsets.symmetric(
+      horizontal: AppSpacing.xs,
+      vertical: AppSpacing.xs,
+    ),
     decoration: BoxDecoration(
       color: color.withValues(alpha: 0.1),
-      borderRadius: BorderRadius.circular(4),
+      borderRadius: BorderRadius.circular(AppRadii.sm),
       border: Border.all(color: color.withValues(alpha: 0.3)),
     ),
-    child: Text(text, style: TextStyle(fontSize: 11, color: color)),
+    child: Text(
+      text,
+      style: Theme.of(context).textTheme.labelSmall?.copyWith(color: color),
+    ),
   );
 }
 
@@ -426,7 +442,9 @@ class _RowSelectionTile extends StatelessWidget {
       dense: true,
       title: Text(
         label,
-        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+        style: Theme.of(
+          context,
+        ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
       ),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -436,7 +454,7 @@ class _RowSelectionTile extends StatelessWidget {
           Text('Expected: $expected'),
           Text(
             'Got: $resultStr',
-            style: TextStyle(
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: match ? Colors.green[700] : Colors.red[700],
               fontWeight: FontWeight.w500,
             ),
@@ -487,12 +505,14 @@ class _CurrencyNameRow extends StatelessWidget {
       dense: true,
       leading: Text(
         label,
-        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+        style: Theme.of(
+          context,
+        ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
       ),
       title: Text(name),
       subtitle: Text(
         'ar: ${currency.nameAr}  |  en: ${currency.nameEn}  |  symbol: ${currency.symbol}',
-        style: const TextStyle(fontSize: 11),
+        style: Theme.of(context).textTheme.labelSmall,
       ),
     );
   }

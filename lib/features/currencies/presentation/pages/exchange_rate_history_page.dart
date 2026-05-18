@@ -221,11 +221,10 @@ class _HistoryLoadedView extends StatelessWidget {
               ? Center(child: Text(l10n.noRatesYet))
               : ListView.separated(
                   controller: scrollController,
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.lg,
-                    0,
-                    AppSpacing.lg,
-                    AppSpacing.lg,
+                  padding: const EdgeInsets.only(
+                    left: AppSpacing.lg,
+                    right: AppSpacing.lg,
+                    bottom: AppSpacing.lg,
                   ),
                   itemCount: state.rates.length + (loadingMore ? 1 : 0),
                   separatorBuilder: (_, __) =>
