@@ -184,12 +184,8 @@ class SetExchangeRateBloc
     on<SetRateSubmitPressed>(_submit);
     on<UnusualTimingConfirmed>(_confirmed);
     on<UnusualTimingCancelled>(
-      (event, emit) => emit(
-        state.copyWith(
-          status: SetRateStatus.idle,
-          failureReason: null,
-        ),
-      ),
+      (event, emit) =>
+          emit(state.copyWith(status: SetRateStatus.idle, failureReason: null)),
     );
   }
 

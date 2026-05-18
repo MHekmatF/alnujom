@@ -142,9 +142,9 @@ class _CurrenciesListView extends StatelessWidget {
     } on Object catch (_) {
       if (context.mounted) {
         final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.errorCurrencyUnknown)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.errorCurrencyUnknown)));
       }
     }
   }

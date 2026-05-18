@@ -27,7 +27,9 @@ class MoneyFormatter {
       // Arabic: amount then symbol, RTL bidi resolver handles visual order.
       // intl's bundled 'ar' data uses Western digits, so post-process to
       // Arabic-Indic per R-12 / FR-022.
-      final numStr = toArabicIndicNumerals(numFormat.format(rounded.toDouble()));
+      final numStr = toArabicIndicNumerals(
+        numFormat.format(rounded.toDouble()),
+      );
       return '$numStr $symbol';
     } else {
       // en (and fallback): handle sign separately for correct prefix placement.
@@ -36,7 +38,9 @@ class MoneyFormatter {
       final absStr = numFormat.format(absRounded.toDouble());
 
       // Single ASCII printable character (e.g. '$') → prefix position.
-      if (symbol.length == 1 && symbol.codeUnitAt(0) >= 0x21 && symbol.codeUnitAt(0) <= 0x7E) {
+      if (symbol.length == 1 &&
+          symbol.codeUnitAt(0) >= 0x21 &&
+          symbol.codeUnitAt(0) <= 0x7E) {
         return isNegative ? '-$symbol$absStr' : '$symbol$absStr';
       } else {
         return isNegative ? '-$absStr $symbol' : '$absStr $symbol';

@@ -1206,13 +1206,12 @@ final class _DebugAppLocalizations extends AppLocalizations {
 
   @override
   String exchangeRateHistoryPageTitleFor(String code) => _resolve(
-        'exchangeRateHistoryPageTitleFor',
-        (loc) => loc.exchangeRateHistoryPageTitleFor(code),
-      );
+    'exchangeRateHistoryPageTitleFor',
+    (loc) => loc.exchangeRateHistoryPageTitleFor(code),
+  );
 
   @override
-  String get retryButton =>
-      _resolve('retryButton', (loc) => loc.retryButton);
+  String get retryButton => _resolve('retryButton', (loc) => loc.retryButton);
 
   @override
   String get errorCurrencyHasReferences => _resolve(

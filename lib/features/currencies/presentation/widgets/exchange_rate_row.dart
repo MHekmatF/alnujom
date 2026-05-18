@@ -44,7 +44,9 @@ class ExchangeRateRow extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(RateFormatter.format(exchangeRate.rate, locale)),
-            Text(_localizeDate(locale, dateFormat, exchangeRate.effectiveAt, l10n)),
+            Text(
+              _localizeDate(locale, dateFormat, exchangeRate.effectiveAt, l10n),
+            ),
             Text('${l10n.setByLabel}: $setBy'),
             Text('${l10n.sourceLabel}: $source'),
           ],

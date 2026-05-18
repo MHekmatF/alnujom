@@ -166,7 +166,9 @@ class CurrencyFormBloc extends Bloc<CurrencyFormEvent, CurrencyFormState> {
     // Distinct loading status (F): separate from `saving` so the page can show
     // a "loading existing data" indicator without disabling the (yet-empty)
     // form fields the way Saving does.
-    emit(state.copyWith(mode: FormMode.edit, status: CurrencyFormStatus.loading));
+    emit(
+      state.copyWith(mode: FormMode.edit, status: CurrencyFormStatus.loading),
+    );
     try {
       final currency = await _loadCurrencyDetail(code);
       emit(

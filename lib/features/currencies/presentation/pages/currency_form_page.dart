@@ -92,112 +92,118 @@ class _CurrencyFormViewState extends State<_CurrencyFormView> {
                   ),
                 )
               : AbsorbPointer(
-            absorbing: isSaving,
-            child: Form(
-              key: _formKey,
-              child: ListView(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                children: [
-                  TextFormField(
-                    controller: _code,
-                    enabled:
-                        state.mode == FormMode.create ||
-                        !state.isLoadedSystemRow,
-                    decoration: InputDecoration(
-                      labelText: l10n.currencyCodeLabel,
+                  absorbing: isSaving,
+                  child: Form(
+                    key: _formKey,
+                    child: ListView(
+                      padding: const EdgeInsets.all(AppSpacing.lg),
+                      children: [
+                        TextFormField(
+                          controller: _code,
+                          enabled:
+                              state.mode == FormMode.create ||
+                              !state.isLoadedSystemRow,
+                          decoration: InputDecoration(
+                            labelText: l10n.currencyCodeLabel,
+                          ),
+                          textCapitalization: TextCapitalization.characters,
+                          validator: (value) =>
+                              RegExp(
+                                r'^[A-Z]{3}$',
+                              ).hasMatch((value ?? '').trim().toUpperCase())
+                              ? null
+                              : l10n.currencyCodeFormatError,
+                          onChanged: (value) =>
+                              _changed(context, 'code', value.toUpperCase()),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        TextFormField(
+                          controller: _nameAr,
+                          decoration: InputDecoration(
+                            labelText: l10n.currencyNameArLabel,
+                          ),
+                          validator: (value) => (value ?? '').trim().isEmpty
+                              ? l10n.requiredField
+                              : null,
+                          onChanged: (value) =>
+                              _changed(context, 'nameAr', value),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        TextFormField(
+                          controller: _nameEn,
+                          decoration: InputDecoration(
+                            labelText: l10n.currencyNameEnLabel,
+                          ),
+                          validator: (value) => (value ?? '').trim().isEmpty
+                              ? l10n.requiredField
+                              : null,
+                          onChanged: (value) =>
+                              _changed(context, 'nameEn', value),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        TextFormField(
+                          controller: _symbol,
+                          decoration: InputDecoration(
+                            labelText: l10n.currencySymbolLabel,
+                          ),
+                          validator: (value) => (value ?? '').trim().isEmpty
+                              ? l10n.requiredField
+                              : null,
+                          onChanged: (value) =>
+                              _changed(context, 'symbol', value),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        TextFormField(
+                          controller: _sortOrder,
+                          decoration: InputDecoration(
+                            labelText: l10n.currencySortOrderLabel,
+                          ),
+                          keyboardType: TextInputType.number,
+                          onChanged: (value) => _changed(
+                            context,
+                            'sortOrder',
+                            int.tryParse(value),
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        TextFormField(
+                          controller: _displayDecimals,
+                          decoration: InputDecoration(
+                            labelText: l10n.currencyDisplayDecimalsLabel,
+                          ),
+                          keyboardType: TextInputType.number,
+                          validator: (value) {
+                            final parsed = int.tryParse(value ?? '');
+                            return parsed != null && parsed >= 0 && parsed <= 8
+                                ? null
+                                : l10n.displayDecimalsRangeError;
+                          },
+                          onChanged: (value) => _changed(
+                            context,
+                            'displayDecimals',
+                            int.tryParse(value),
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        SwitchListTile(
+                          title: Text(l10n.currencyIsActiveLabel),
+                          value: _isActive,
+                          onChanged: (value) {
+                            setState(() => _isActive = value);
+                            _changed(context, 'isActive', value);
+                          },
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        FilledButton(
+                          onPressed: isSaving ? null : () => _submit(context),
+                          child: isSaving
+                              ? const CircularProgressIndicator()
+                              : Text(l10n.submitButton),
+                        ),
+                      ],
                     ),
-                    textCapitalization: TextCapitalization.characters,
-                    validator: (value) =>
-                        RegExp(
-                          r'^[A-Z]{3}$',
-                        ).hasMatch((value ?? '').trim().toUpperCase())
-                        ? null
-                        : l10n.currencyCodeFormatError,
-                    onChanged: (value) =>
-                        _changed(context, 'code', value.toUpperCase()),
                   ),
-                  const SizedBox(height: AppSpacing.md),
-                  TextFormField(
-                    controller: _nameAr,
-                    decoration: InputDecoration(
-                      labelText: l10n.currencyNameArLabel,
-                    ),
-                    validator: (value) => (value ?? '').trim().isEmpty
-                        ? l10n.requiredField
-                        : null,
-                    onChanged: (value) => _changed(context, 'nameAr', value),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  TextFormField(
-                    controller: _nameEn,
-                    decoration: InputDecoration(
-                      labelText: l10n.currencyNameEnLabel,
-                    ),
-                    validator: (value) => (value ?? '').trim().isEmpty
-                        ? l10n.requiredField
-                        : null,
-                    onChanged: (value) => _changed(context, 'nameEn', value),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  TextFormField(
-                    controller: _symbol,
-                    decoration: InputDecoration(
-                      labelText: l10n.currencySymbolLabel,
-                    ),
-                    validator: (value) => (value ?? '').trim().isEmpty
-                        ? l10n.requiredField
-                        : null,
-                    onChanged: (value) => _changed(context, 'symbol', value),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  TextFormField(
-                    controller: _sortOrder,
-                    decoration: InputDecoration(
-                      labelText: l10n.currencySortOrderLabel,
-                    ),
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) =>
-                        _changed(context, 'sortOrder', int.tryParse(value)),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  TextFormField(
-                    controller: _displayDecimals,
-                    decoration: InputDecoration(
-                      labelText: l10n.currencyDisplayDecimalsLabel,
-                    ),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      final parsed = int.tryParse(value ?? '');
-                      return parsed != null && parsed >= 0 && parsed <= 8
-                          ? null
-                          : l10n.displayDecimalsRangeError;
-                    },
-                    onChanged: (value) => _changed(
-                      context,
-                      'displayDecimals',
-                      int.tryParse(value),
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  SwitchListTile(
-                    title: Text(l10n.currencyIsActiveLabel),
-                    value: _isActive,
-                    onChanged: (value) {
-                      setState(() => _isActive = value);
-                      _changed(context, 'isActive', value);
-                    },
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  FilledButton(
-                    onPressed: isSaving ? null : () => _submit(context),
-                    child: isSaving
-                        ? const CircularProgressIndicator()
-                        : Text(l10n.submitButton),
-                  ),
-                ],
-              ),
-            ),
-          ),
+                ),
         );
       },
     );
@@ -247,5 +253,4 @@ class _CurrencyFormViewState extends State<_CurrencyFormView> {
     _changed(context, 'isActive', _isActive);
     context.read<CurrencyFormBloc>().add(const SubmitPressed());
   }
-
 }
