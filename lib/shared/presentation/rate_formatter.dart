@@ -2,6 +2,8 @@ import 'package:decimal/decimal.dart';
 import 'package:flutter/widgets.dart' show Locale;
 import 'package:intl/intl.dart' as intl;
 
+import '../util/arabic_digits.dart';
+
 /// Formats an exchange-rate value for display. Unlike `MoneyFormatter` — which
 /// rounds to `currency.displayDecimals` and is appropriate for money amounts —
 /// this formatter preserves the storage layer's NUMERIC(18,6) precision.
@@ -15,6 +17,7 @@ class RateFormatter {
     final fmt = intl.NumberFormat.decimalPattern(locale.toLanguageTag())
       ..minimumFractionDigits = 0
       ..maximumFractionDigits = _maxFractionDigits;
-    return fmt.format(rate.toDouble());
+    final out = fmt.format(rate.toDouble());
+    return locale.languageCode == 'ar' ? toArabicIndicNumerals(out) : out;
   }
 }

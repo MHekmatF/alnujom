@@ -146,9 +146,10 @@ class _MoneyFormatterShowcasePageState
       money: Money(amount: Decimal.parse('-50'), currencyCode: 'USD'),
       currency: usd,
       // USD display_decimals=2 → trailing .00 always rendered.
-      // ar: intl may add a U+200E LRM bidi mark before the minus; visual
-      // is identical either way.
-      expectedAr: '-٥٠٫٠٠ \$',
+      // ar: intl emits U+200E (LRM) before the minus sign to keep bidi
+      // rendering stable in RTL contexts. Visual is identical to a plain
+      // minus, but the byte sequence differs — expected must include it.
+      expectedAr: '‎-٥٠٫٠٠ \$',
       expectedEn: '-\$50.00',
     ),
     _ShowcaseCase(

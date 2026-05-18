@@ -153,10 +153,17 @@ class SupabaseCurrenciesDatasource {
         .from('profiles')
         .select('user_id, full_name, username')
         .inFilter('user_id', userIds);
-    return {
-      for (final row in profiles)
-        row['user_id'] as String:
-            (row['full_name'] as String?) ?? (row['username'] as String?) ?? '',
-    };
+    final result = <String, String>{};
+    for (final row in profiles) {
+      final fullName = (row['full_name'] as String?)?.trim();
+      final username = (row['username'] as String?)?.trim();
+      final name = (fullName != null && fullName.isNotEmpty)
+          ? fullName
+          : (username != null && username.isNotEmpty ? username : null);
+      if (name != null) {
+        result[row['user_id'] as String] = name;
+      }
+    }
+    return result;
   }
 }

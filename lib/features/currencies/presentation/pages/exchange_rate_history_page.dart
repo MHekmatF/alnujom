@@ -64,14 +64,15 @@ class _ExchangeRateHistoryViewState extends State<_ExchangeRateHistoryView> {
       appBar: AppBar(
         title: Text(
           l10n.exchangeRateHistoryPageTitleFor(widget.baseCurrencyCode),
+          overflow: TextOverflow.ellipsis,
         ),
         actions: [
-          TextButton.icon(
+          IconButton(
             onPressed: () => context.push(
               '${AppRoutes.currenciesAdminSetRate}?base=${widget.baseCurrencyCode}',
             ),
             icon: const Icon(Icons.add_chart),
-            label: Text(l10n.setNewRateButton),
+            tooltip: l10n.setNewRateButton,
           ),
           const LocaleToggleAction(),
         ],

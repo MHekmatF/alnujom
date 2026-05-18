@@ -3,6 +3,8 @@ import 'package:intl/intl.dart' as intl;
 
 import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/presentation/rate_formatter.dart';
+import '../../../../shared/util/arabic_digits.dart';
 import '../../domain/entities/exchange_rate.dart';
 import 'derived_badge.dart';
 
@@ -14,18 +16,17 @@ class ExchangeRateRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final locale = Localizations.localeOf(context).toLanguageTag();
-    final rateFormat = intl.NumberFormat.decimalPattern(locale)
-      ..minimumFractionDigits = 0
-      ..maximumFractionDigits = 6;
-    final dateFormat = intl.DateFormat.yMMMd(locale).add_Hm();
+    final locale = Localizations.localeOf(context);
+    final dateFormat = intl.DateFormat.yMMMd(locale.toLanguageTag()).add_Hm();
     final source = exchangeRate.source?.trim().isEmpty == false
         ? exchangeRate.source!
         : l10n.unknownActorLabel;
-    final setBy = exchangeRate.setByDisplayName ??
-        (exchangeRate.setBy == null
-            ? l10n.systemActorLabel
-            : l10n.unknownActorLabel);
+    final displayName = exchangeRate.setByDisplayName?.trim();
+    final setBy = (displayName != null && displayName.isNotEmpty)
+        ? displayName
+        : (exchangeRate.setBy == null
+              ? l10n.systemActorLabel
+              : l10n.unknownActorLabel);
 
     return Card(
       child: ListTile(
@@ -42,15 +43,26 @@ class ExchangeRateRow extends StatelessWidget {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(rateFormat.format(exchangeRate.rate.toDouble())),
-            Text(
-              '${l10n.effectiveAtLabel}: ${dateFormat.format(exchangeRate.effectiveAt.toLocal())}',
-            ),
+            Text(RateFormatter.format(exchangeRate.rate, locale)),
+            Text(_localizeDate(locale, dateFormat, exchangeRate.effectiveAt, l10n)),
             Text('${l10n.setByLabel}: $setBy'),
             Text('${l10n.sourceLabel}: $source'),
           ],
         ),
       ),
     );
+  }
+
+  String _localizeDate(
+    Locale locale,
+    intl.DateFormat dateFormat,
+    DateTime ts,
+    AppLocalizations l10n,
+  ) {
+    final raw = dateFormat.format(ts.toLocal());
+    final localized = locale.languageCode == 'ar'
+        ? toArabicIndicNumerals(raw)
+        : raw;
+    return '${l10n.effectiveAtLabel}: $localized';
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart' show Locale;
 import 'package:intl/intl.dart' as intl;
 
 import '../domain/value_objects/money.dart';
+import '../util/arabic_digits.dart';
 import '../util/decimal_round.dart';
 import '../../features/currencies/domain/entities/currency.dart';
 
@@ -24,8 +25,9 @@ class MoneyFormatter {
 
     if (locale.languageCode == 'ar') {
       // Arabic: amount then symbol, RTL bidi resolver handles visual order.
-      // Sign is included by NumberFormat; negative produces e.g. '-٥٠'.
-      final numStr = numFormat.format(rounded.toDouble());
+      // intl's bundled 'ar' data uses Western digits, so post-process to
+      // Arabic-Indic per R-12 / FR-022.
+      final numStr = toArabicIndicNumerals(numFormat.format(rounded.toDouble()));
       return '$numStr $symbol';
     } else {
       // en (and fallback): handle sign separately for correct prefix placement.
