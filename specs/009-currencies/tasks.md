@@ -742,7 +742,7 @@ US8 is **verification-only**. The triggers were authored in T006 + T010 + T014.
 
 ## Phase 12: PR + merge
 
-- [ ] T096 Open the Phase 9 PR. From `H:\alnujom-project`, run `gh pr create --title "feat(009-currencies): Phase 9 — Currencies & Exchange Rates" --body "$(cat <<'EOF'`. The body MUST include: (1) one-paragraph summary citing the 5 Session 2026-05-17 clarifications + the R-06 deviation; (2) a Test plan section with a bulleted checklist matching the `quickstart.md` 12 steps; (3) explicit note: "No new automated tests per `feedback_no_new_tests.md`. Verification is manual SQL + device walk per `quickstart.md`."
+- [X] T096 Open the Phase 9 PR. From `H:\alnujom-project`, run `gh pr create --title "feat(009-currencies): Phase 9 — Currencies & Exchange Rates" --body "$(cat <<'EOF'`. The body MUST include: (1) one-paragraph summary citing the 5 Session 2026-05-17 clarifications + the R-06 deviation; (2) a Test plan section with a bulleted checklist matching the `quickstart.md` 12 steps; (3) explicit note: "No new automated tests per `feedback_no_new_tests.md`. Verification is manual SQL + device walk per `quickstart.md`."
 
 - [ ] T097 Wait for CI to complete (per `AI_AGENT_WORKFLOW.md`). If green, squash-merge. If red, debug and push fixes.
 
