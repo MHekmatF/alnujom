@@ -35,7 +35,10 @@ class ExchangeRateRow extends StatelessWidget {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             Text(
-              '${exchangeRate.baseCurrency} → ${exchangeRate.targetCurrency}',
+              l10n.exchangeRatePairLabel(
+                exchangeRate.baseCurrency,
+                exchangeRate.targetCurrency,
+              ),
             ),
             if (exchangeRate.isDerived) const DerivedBadge(),
           ],
@@ -47,8 +50,8 @@ class ExchangeRateRow extends StatelessWidget {
             Text(
               _localizeDate(locale, dateFormat, exchangeRate.effectiveAt, l10n),
             ),
-            Text('${l10n.setByLabel}: $setBy'),
-            Text('${l10n.sourceLabel}: $source'),
+            Text(l10n.setByLineFormat(setBy)),
+            Text(l10n.sourceLineFormat(source)),
           ],
         ),
       ),

@@ -6,6 +6,7 @@ l10n_lint_exempt:
   - lib/debug/**
   - test/goldens/**
   - lib/features/locations/presentation/pages/location_picker_smoke_test_page.dart
+  - lib/features/currencies/presentation/pages/money_formatter_showcase_page.dart
 
 analyzer:
   errors:

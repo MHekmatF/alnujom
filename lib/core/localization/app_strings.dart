@@ -1211,6 +1211,26 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String setByLineFormat(String value) =>
+      _resolve('setByLineFormat', (loc) => loc.setByLineFormat(value));
+
+  @override
+  String sourceLineFormat(String value) =>
+      _resolve('sourceLineFormat', (loc) => loc.sourceLineFormat(value));
+
+  @override
+  String currencyOptionLabel(String code, String name) => _resolve(
+    'currencyOptionLabel',
+    (loc) => loc.currencyOptionLabel(code, name),
+  );
+
+  @override
+  String exchangeRatePairLabel(String base, String target) => _resolve(
+    'exchangeRatePairLabel',
+    (loc) => loc.exchangeRatePairLabel(base, target),
+  );
+
+  @override
   String get retryButton => _resolve('retryButton', (loc) => loc.retryButton);
 
   @override

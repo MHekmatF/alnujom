@@ -37,7 +37,12 @@ class CurrencyCard extends StatelessWidget {
           spacing: 8,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            Text('${currency.code} · ${currency.localizedName(locale)}'),
+            Text(
+              l10n.currencyOptionLabel(
+                currency.code,
+                currency.localizedName(locale),
+              ),
+            ),
             Text(currency.symbol),
             if (currency.isSystem) const SystemCurrencyBadge(),
             if (!currency.isActive) Chip(label: Text(l10n.hiddenBadge)),

@@ -114,7 +114,10 @@ class _SetExchangeRateViewState extends State<_SetExchangeRateView> {
                               DropdownMenuItem(
                                 value: currency.code,
                                 child: Text(
-                                  '${currency.code} · ${currency.localizedName(locale)}',
+                                  l10n.currencyOptionLabel(
+                                    currency.code,
+                                    currency.localizedName(locale),
+                                  ),
                                 ),
                               ),
                           ],
@@ -135,7 +138,10 @@ class _SetExchangeRateViewState extends State<_SetExchangeRateView> {
                               DropdownMenuItem(
                                 value: currency.code,
                                 child: Text(
-                                  '${currency.code} · ${currency.localizedName(locale)}',
+                                  l10n.currencyOptionLabel(
+                                    currency.code,
+                                    currency.localizedName(locale),
+                                  ),
                                 ),
                               ),
                           ],
