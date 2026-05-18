@@ -45,9 +45,7 @@ class _MoneyFormatterShowcasePageState
       );
     }
     if (_currencies == null) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     final byCode = {for (final c in _currencies!) c.code: c};
@@ -84,130 +82,118 @@ class _MoneyFormatterShowcasePageState
   }
 
   List<_ShowcaseCase> _buildFormatterCases(Currency syp, Currency usd) => [
-        _ShowcaseCase(
-          label: '1 · {750 000 000, SYP}',
-          money: Money(amount: Decimal.parse('750000000'), currencyCode: 'SYP'),
-          currency: syp,
-          expectedAr: '٧٥٠٬٠٠٠٬٠٠٠ ل.س',
-          expectedEn: '750,000,000 SYP',
-        ),
-        _ShowcaseCase(
-          label: '2 · {50 000, USD}',
-          money: Money(amount: Decimal.parse('50000'), currencyCode: 'USD'),
-          currency: usd,
-          // USD display_decimals=2 → trailing .00 always rendered.
-          expectedAr: '٥٠٬٠٠٠٫٠٠ \$',
-          expectedEn: '\$50,000.00',
-        ),
-        _ShowcaseCase(
-          label: '3 · {1 234 567.89, USD}',
-          money: Money(
-            amount: Decimal.parse('1234567.89'),
-            currencyCode: 'USD',
-          ),
-          currency: usd,
-          expectedAr: '١٬٢٣٤٬٥٦٧٫٨٩ \$',
-          expectedEn: '\$1,234,567.89',
-        ),
-        _ShowcaseCase(
-          label: '4 · {0, SYP}',
-          money: Money(amount: Decimal.zero, currencyCode: 'SYP'),
-          currency: syp,
-          expectedAr: '٠ ل.س',
-          expectedEn: '0 SYP',
-        ),
-        _ShowcaseCase(
-          label: '5 · {0, USD}',
-          money: Money(amount: Decimal.zero, currencyCode: 'USD'),
-          currency: usd,
-          expectedAr: '٠٫٠٠ \$',
-          expectedEn: '\$0.00',
-        ),
-        _ShowcaseCase(
-          label: '6 · {1, SYP}',
-          money: Money(amount: Decimal.one, currencyCode: 'SYP'),
-          currency: syp,
-          expectedAr: '١ ل.س',
-          expectedEn: '1 SYP',
-        ),
-        _ShowcaseCase(
-          label: '7 · {49 999.997, USD} — rounds up',
-          money: Money(
-            amount: Decimal.parse('49999.997'),
-            currencyCode: 'USD',
-          ),
-          currency: usd,
-          expectedAr: '٥٠٬٠٠٠٫٠٠ \$',
-          expectedEn: '\$50,000.00',
-        ),
-        _ShowcaseCase(
-          label: '8 · {49 999.995, USD} — half-to-even',
-          money: Money(
-            amount: Decimal.parse('49999.995'),
-            currencyCode: 'USD',
-          ),
-          currency: usd,
-          // Banker's: candidates are 49999.99 (last digit 9, odd) vs 50000.00
-          // (last digit 0, even). Picks the even one → 50000.00.
-          expectedAr: '٥٠٬٠٠٠٫٠٠ \$',
-          expectedEn: '\$50,000.00',
-        ),
-        _ShowcaseCase(
-          label: '9 · {-50, USD} — negative',
-          money: Money(amount: Decimal.parse('-50'), currencyCode: 'USD'),
-          currency: usd,
-          // USD display_decimals=2 → trailing .00 always rendered.
-          // ar: intl may add a U+200E LRM bidi mark before the minus; visual
-          // is identical either way.
-          expectedAr: '-٥٠٫٠٠ \$',
-          expectedEn: '-\$50.00',
-        ),
-        _ShowcaseCase(
-          label: '10 · {15 000.5, SYP} — SYP display_decimals=0',
-          money: Money(
-            amount: Decimal.parse('15000.5'),
-            currencyCode: 'SYP',
-          ),
-          currency: syp,
-          // Banker's: candidates are 15000 (even) and 15001 (odd). Picks the
-          // even one → 15000.
-          expectedAr: '١٥٬٠٠٠ ل.س',
-          expectedEn: '15,000 SYP',
-        ),
-      ];
+    _ShowcaseCase(
+      label: '1 · {750 000 000, SYP}',
+      money: Money(amount: Decimal.parse('750000000'), currencyCode: 'SYP'),
+      currency: syp,
+      expectedAr: '٧٥٠٬٠٠٠٬٠٠٠ ل.س',
+      expectedEn: '750,000,000 SYP',
+    ),
+    _ShowcaseCase(
+      label: '2 · {50 000, USD}',
+      money: Money(amount: Decimal.parse('50000'), currencyCode: 'USD'),
+      currency: usd,
+      // USD display_decimals=2 → trailing .00 always rendered.
+      expectedAr: '٥٠٬٠٠٠٫٠٠ \$',
+      expectedEn: '\$50,000.00',
+    ),
+    _ShowcaseCase(
+      label: '3 · {1 234 567.89, USD}',
+      money: Money(amount: Decimal.parse('1234567.89'), currencyCode: 'USD'),
+      currency: usd,
+      expectedAr: '١٬٢٣٤٬٥٦٧٫٨٩ \$',
+      expectedEn: '\$1,234,567.89',
+    ),
+    _ShowcaseCase(
+      label: '4 · {0, SYP}',
+      money: Money(amount: Decimal.zero, currencyCode: 'SYP'),
+      currency: syp,
+      expectedAr: '٠ ل.س',
+      expectedEn: '0 SYP',
+    ),
+    _ShowcaseCase(
+      label: '5 · {0, USD}',
+      money: Money(amount: Decimal.zero, currencyCode: 'USD'),
+      currency: usd,
+      expectedAr: '٠٫٠٠ \$',
+      expectedEn: '\$0.00',
+    ),
+    _ShowcaseCase(
+      label: '6 · {1, SYP}',
+      money: Money(amount: Decimal.one, currencyCode: 'SYP'),
+      currency: syp,
+      expectedAr: '١ ل.س',
+      expectedEn: '1 SYP',
+    ),
+    _ShowcaseCase(
+      label: '7 · {49 999.997, USD} — rounds up',
+      money: Money(amount: Decimal.parse('49999.997'), currencyCode: 'USD'),
+      currency: usd,
+      expectedAr: '٥٠٬٠٠٠٫٠٠ \$',
+      expectedEn: '\$50,000.00',
+    ),
+    _ShowcaseCase(
+      label: '8 · {49 999.995, USD} — half-to-even',
+      money: Money(amount: Decimal.parse('49999.995'), currencyCode: 'USD'),
+      currency: usd,
+      // Banker's: candidates are 49999.99 (last digit 9, odd) vs 50000.00
+      // (last digit 0, even). Picks the even one → 50000.00.
+      expectedAr: '٥٠٬٠٠٠٫٠٠ \$',
+      expectedEn: '\$50,000.00',
+    ),
+    _ShowcaseCase(
+      label: '9 · {-50, USD} — negative',
+      money: Money(amount: Decimal.parse('-50'), currencyCode: 'USD'),
+      currency: usd,
+      // USD display_decimals=2 → trailing .00 always rendered.
+      // ar: intl may add a U+200E LRM bidi mark before the minus; visual
+      // is identical either way.
+      expectedAr: '-٥٠٫٠٠ \$',
+      expectedEn: '-\$50.00',
+    ),
+    _ShowcaseCase(
+      label: '10 · {15 000.5, SYP} — SYP display_decimals=0',
+      money: Money(amount: Decimal.parse('15000.5'), currencyCode: 'SYP'),
+      currency: syp,
+      // Banker's: candidates are 15000 (even) and 15001 (odd). Picks the
+      // even one → 15000.
+      expectedAr: '١٥٬٠٠٠ ل.س',
+      expectedEn: '15,000 SYP',
+    ),
+  ];
 
   List<Widget> _buildRowSelectionCases() => [
-        const _RowSelectionTile(
-          label: 'Case 1: USD-only + viewer prefers SYP',
-          expected: 'USD (fallback)',
-          rows: [_TestRow('USD', isPrimary: true)],
-          preference: 'SYP',
-        ),
-        const _RowSelectionTile(
-          label: 'Case 2: USD+SYP + viewer prefers SYP',
-          expected: 'SYP (preference match)',
-          rows: [
-            _TestRow('USD', isPrimary: true),
-            _TestRow('SYP', isPrimary: false),
-          ],
-          preference: 'SYP',
-        ),
-        const _RowSelectionTile(
-          label: 'Case 3: empty listing',
-          expected: 'null',
-          rows: [],
-          preference: 'SYP',
-        ),
-        const _RowSelectionTile(
-          label: 'Case 4: anonymous viewer (null pref)',
-          expected: 'SYP (primary)',
-          rows: [
-            _TestRow('USD', isPrimary: false),
-            _TestRow('SYP', isPrimary: true),
-          ],
-          preference: null,
-        ),
-      ];
+    const _RowSelectionTile(
+      label: 'Case 1: USD-only + viewer prefers SYP',
+      expected: 'USD (fallback)',
+      rows: [_TestRow('USD', isPrimary: true)],
+      preference: 'SYP',
+    ),
+    const _RowSelectionTile(
+      label: 'Case 2: USD+SYP + viewer prefers SYP',
+      expected: 'SYP (preference match)',
+      rows: [
+        _TestRow('USD', isPrimary: true),
+        _TestRow('SYP', isPrimary: false),
+      ],
+      preference: 'SYP',
+    ),
+    const _RowSelectionTile(
+      label: 'Case 3: empty listing',
+      expected: 'null',
+      rows: [],
+      preference: 'SYP',
+    ),
+    const _RowSelectionTile(
+      label: 'Case 4: anonymous viewer (null pref)',
+      expected: 'USD (primary)',
+      rows: [
+        _TestRow('USD', isPrimary: true),
+        _TestRow('SYP', isPrimary: false),
+      ],
+      preference: null,
+    ),
+  ];
 }
 
 // ── Domain helpers ───────────────────────────────────────────────────────────
@@ -229,12 +215,12 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 8),
-        child: Text(
-          text,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-        ),
-      );
+    padding: const EdgeInsets.only(bottom: 8),
+    child: Text(
+      text,
+      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+    ),
+  );
 }
 
 class _ShowcaseCase {
@@ -263,14 +249,26 @@ class _CaseCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // SC-013: render each call twice; both must be byte-identical.
-    final arCall1 =
-        MoneyFormatter.format(c.money, locale: _arLocale, currency: c.currency);
-    final arCall2 =
-        MoneyFormatter.format(c.money, locale: _arLocale, currency: c.currency);
-    final enCall1 =
-        MoneyFormatter.format(c.money, locale: _enLocale, currency: c.currency);
-    final enCall2 =
-        MoneyFormatter.format(c.money, locale: _enLocale, currency: c.currency);
+    final arCall1 = MoneyFormatter.format(
+      c.money,
+      locale: _arLocale,
+      currency: c.currency,
+    );
+    final arCall2 = MoneyFormatter.format(
+      c.money,
+      locale: _arLocale,
+      currency: c.currency,
+    );
+    final enCall1 = MoneyFormatter.format(
+      c.money,
+      locale: _enLocale,
+      currency: c.currency,
+    );
+    final enCall2 = MoneyFormatter.format(
+      c.money,
+      locale: _enLocale,
+      currency: c.currency,
+    );
 
     final arDet = arCall1 == arCall2;
     final enDet = enCall1 == enCall2;
@@ -284,8 +282,7 @@ class _CaseCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(c.label,
-                style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(c.label, style: const TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 6),
             _LocaleRow(
               localeName: 'ar',
@@ -373,9 +370,7 @@ class _LocaleRow extends StatelessWidget {
           ),
         ),
         Icon(
-          valMatch
-              ? Icons.check_circle_outline
-              : Icons.error_outline,
+          valMatch ? Icons.check_circle_outline : Icons.error_outline,
           color: valMatch ? Colors.green : Colors.red,
           size: 18,
         ),
@@ -391,14 +386,14 @@ class _Badge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(4),
-          border: Border.all(color: color.withValues(alpha: 0.3)),
-        ),
-        child: Text(text, style: TextStyle(fontSize: 11, color: color)),
-      );
+    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+    decoration: BoxDecoration(
+      color: color.withValues(alpha: 0.1),
+      borderRadius: BorderRadius.circular(4),
+      border: Border.all(color: color.withValues(alpha: 0.3)),
+    ),
+    child: Text(text, style: TextStyle(fontSize: 11, color: color)),
+  );
 }
 
 class _RowSelectionTile extends StatelessWidget {
@@ -428,11 +423,15 @@ class _RowSelectionTile extends StatelessWidget {
 
     return ListTile(
       dense: true,
-      title: Text(label,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+      title: Text(
+        label,
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+      ),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text('Rows: ${_rowsLabel()}'),
+          Text('Viewer preference: ${preference ?? 'null'}'),
           Text('Expected: $expected'),
           Text(
             'Got: $resultStr',
@@ -455,10 +454,14 @@ class _RowSelectionTile extends StatelessWidget {
     if (label.startsWith('Case 2')) return result?.currencyCode == 'SYP';
     if (label.startsWith('Case 3')) return result == null;
     if (label.startsWith('Case 4')) {
-      return result?.currencyCode == 'SYP' && result?.isPrimary == true;
+      return result?.currencyCode == 'USD' && result?.isPrimary == true;
     }
     return false;
   }
+
+  String _rowsLabel() => rows
+      .map((row) => '${row.currencyCode}(primary=${row.isPrimary})')
+      .join(', ');
 }
 
 /// T052 / R-18: locale-fallback name rendering.

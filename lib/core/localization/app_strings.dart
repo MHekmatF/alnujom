@@ -1169,6 +1169,52 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('errorPermissionDenied', (loc) => loc.errorPermissionDenied);
 
   @override
+  String get preferredCurrencyLabel =>
+      _resolve('preferredCurrencyLabel', (loc) => loc.preferredCurrencyLabel);
+
+  @override
+  String get preferredCurrencyHelp =>
+      _resolve('preferredCurrencyHelp', (loc) => loc.preferredCurrencyHelp);
+
+  @override
+  String get targetCurrencyFilterLabel => _resolve(
+    'targetCurrencyFilterLabel',
+    (loc) => loc.targetCurrencyFilterLabel,
+  );
+
+  @override
+  String get targetCurrencyAnyLabel =>
+      _resolve('targetCurrencyAnyLabel', (loc) => loc.targetCurrencyAnyLabel);
+
+  @override
+  String get derivedBadgeLabel =>
+      _resolve('derivedBadgeLabel', (loc) => loc.derivedBadgeLabel);
+
+  @override
+  String get setByLabel => _resolve('setByLabel', (loc) => loc.setByLabel);
+
+  @override
+  String get noRatesYet => _resolve('noRatesYet', (loc) => loc.noRatesYet);
+
+  @override
+  String get systemActorLabel =>
+      _resolve('systemActorLabel', (loc) => loc.systemActorLabel);
+
+  @override
+  String get unknownActorLabel =>
+      _resolve('unknownActorLabel', (loc) => loc.unknownActorLabel);
+
+  @override
+  String exchangeRateHistoryPageTitleFor(String code) => _resolve(
+        'exchangeRateHistoryPageTitleFor',
+        (loc) => loc.exchangeRateHistoryPageTitleFor(code),
+      );
+
+  @override
+  String get retryButton =>
+      _resolve('retryButton', (loc) => loc.retryButton);
+
+  @override
   String get errorCurrencyHasReferences => _resolve(
     'errorCurrencyHasReferences',
     (loc) => loc.errorCurrencyHasReferences,

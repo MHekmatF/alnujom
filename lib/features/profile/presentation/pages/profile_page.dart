@@ -9,6 +9,7 @@ import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/account_status.dart';
+import '../../../currencies/presentation/widgets/preferred_currency_toggle.dart';
 import '../cubit/profile_cubit.dart';
 import '../cubit/profile_state.dart';
 
@@ -123,6 +124,8 @@ class _ProfileView extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.lg),
                 ],
+                const PreferredCurrencyToggle(),
+                const SizedBox(height: AppSpacing.lg),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.lock_outline),

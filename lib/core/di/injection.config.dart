@@ -63,6 +63,8 @@ import '../../features/currencies/presentation/bloc/currencies_list_bloc.dart'
     as _i176;
 import '../../features/currencies/presentation/bloc/currency_form_bloc.dart'
     as _i657;
+import '../../features/currencies/presentation/bloc/exchange_rate_history_bloc.dart'
+    as _i949;
 import '../../features/currencies/presentation/bloc/set_exchange_rate_bloc.dart'
     as _i293;
 import '../../features/locations/data/datasources/supabase_locations_datasource.dart'
@@ -501,6 +503,9 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i329.RolesListBloc>(
     () => _i329.RolesListBloc(gh<_i1018.ListRoles>()),
+  );
+  gh.factory<_i949.ExchangeRateHistoryBloc>(
+    () => _i949.ExchangeRateHistoryBloc(gh<_i776.ListExchangeRateHistory>()),
   );
   gh.factory<_i796.GovernorateDetailBloc>(
     () => _i796.GovernorateDetailBloc(
