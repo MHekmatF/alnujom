@@ -53,10 +53,18 @@ import '../../features/currencies/domain/usecases/list_exchange_rate_history.dar
     as _i776;
 import '../../features/currencies/domain/usecases/load_currency_detail.dart'
     as _i510;
+import '../../features/currencies/domain/usecases/load_latest_rates_for_base.dart'
+    as _i957;
 import '../../features/currencies/domain/usecases/set_exchange_rate.dart'
     as _i488;
 import '../../features/currencies/domain/usecases/update_currency.dart'
     as _i540;
+import '../../features/currencies/presentation/bloc/currencies_list_bloc.dart'
+    as _i176;
+import '../../features/currencies/presentation/bloc/currency_form_bloc.dart'
+    as _i657;
+import '../../features/currencies/presentation/bloc/set_exchange_rate_bloc.dart'
+    as _i293;
 import '../../features/locations/data/datasources/supabase_locations_datasource.dart'
     as _i665;
 import '../../features/locations/data/repositories/locations_repository_impl.dart'
@@ -386,6 +394,9 @@ _i174.GetIt $initGetIt(
   gh.factory<_i540.UpdateCurrency>(
     () => _i540.UpdateCurrency(gh<_i505.CurrenciesRepository>()),
   );
+  gh.lazySingleton<_i957.LoadLatestRatesForBase>(
+    () => _i957.LoadLatestRatesForBase(gh<_i505.CurrenciesRepository>()),
+  );
   gh.factory<_i858.ApproveAccount>(
     () => _i858.ApproveAccount(gh<_i120.AccountApprovalsRepository>()),
   );
@@ -469,8 +480,17 @@ _i174.GetIt $initGetIt(
   gh.factory<_i807.OnboardingCubit>(
     () => _i807.OnboardingCubit(gh<_i430.OnboardingRepository>()),
   );
+  gh.factory<_i176.CurrenciesListBloc>(
+    () => _i176.CurrenciesListBloc(
+      gh<_i996.ListCurrencies>(),
+      gh<_i957.LoadLatestRatesForBase>(),
+    ),
+  );
   gh.lazySingleton<_i583.GoRouter>(
     () => routerModule.router(gh<_i354.AppLogger>(), gh<_i797.AuthBloc>()),
+  );
+  gh.factory<_i293.SetExchangeRateBloc>(
+    () => _i293.SetExchangeRateBloc(gh<_i488.SetExchangeRate>()),
   );
   gh.factory<_i885.RoleEditorBloc>(
     () => _i885.RoleEditorBloc(
@@ -497,6 +517,13 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i669.LocationsListBloc>(
     () => _i669.LocationsListBloc(gh<_i533.ListGovernorates>()),
+  );
+  gh.factory<_i657.CurrencyFormBloc>(
+    () => _i657.CurrencyFormBloc(
+      gh<_i1003.CreateCurrency>(),
+      gh<_i540.UpdateCurrency>(),
+      gh<_i510.LoadCurrencyDetail>(),
+    ),
   );
   return getIt;
 }

@@ -41,6 +41,13 @@ class AdminHomePage extends StatelessWidget {
           trailing: const Icon(Icons.chevron_right),
           onTap: () => context.go(AppRoutes.locationsAdmin),
         ),
+      if (checker.has(PermissionKeys.currenciesManage))
+        ListTile(
+          leading: const Icon(Icons.currency_exchange),
+          title: Text(l10n.adminHomeCurrenciesTile),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => context.go(AppRoutes.currenciesAdmin),
+        ),
       if (kDebugMode) const LocationsSmokeTestTile(),
     ];
 

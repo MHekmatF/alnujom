@@ -247,30 +247,56 @@ sealed class CurrenciesFailure implements Exception {
   final String technicalMessage;
 
   const CurrenciesFailure(this.technicalMessage);
+
+  /// Stable identifier for UI mapping to ARB keys. Pages match on this value
+  /// instead of `error.toString()` substrings (which depend on the default
+  /// `Object.toString()` format and break the moment anyone overrides it).
+  String get code;
 }
 
 class CurrenciesPermissionDenied extends CurrenciesFailure {
   const CurrenciesPermissionDenied(super.technicalMessage);
+
+  @override
+  String get code => 'permission_denied';
 }
 
 class CurrenciesValidationFailed extends CurrenciesFailure {
   final String reason;
 
   const CurrenciesValidationFailed(this.reason, super.technicalMessage);
+
+  /// Surfaces the specific validation reason (e.g. `'rate_must_be_positive'`,
+  /// `'base_equals_target'`, `'display_decimals_range'`, `'validation_failed'`)
+  /// so the UI can map to the appropriate per-field error message.
+  @override
+  String get code => reason;
 }
 
 class CurrenciesSystemRowImmutable extends CurrenciesFailure {
   const CurrenciesSystemRowImmutable(super.technicalMessage);
+
+  @override
+  String get code => 'system_immutable';
 }
 
 class CurrenciesHasReferences extends CurrenciesFailure {
   const CurrenciesHasReferences(super.technicalMessage);
+
+  @override
+  String get code => 'has_references';
 }
 
 class CurrenciesDuplicateCode extends CurrenciesFailure {
   const CurrenciesDuplicateCode(super.technicalMessage);
+
+  @override
+  String get code => 'duplicate_code';
 }
 
 class CurrenciesUnknown extends CurrenciesFailure {
   const CurrenciesUnknown(super.technicalMessage);
+
+  @override
+  String get code => 'unknown';
 }

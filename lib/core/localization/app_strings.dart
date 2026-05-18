@@ -966,6 +966,234 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('profile_section_roles', (loc) => loc.profile_section_roles);
 
   @override
+  String get adminHomeCurrenciesTile =>
+      _resolve('adminHomeCurrenciesTile', (loc) => loc.adminHomeCurrenciesTile);
+
+  @override
+  String get currenciesPageTitle =>
+      _resolve('currenciesPageTitle', (loc) => loc.currenciesPageTitle);
+
+  @override
+  String get setExchangeRatePageTitle => _resolve(
+    'setExchangeRatePageTitle',
+    (loc) => loc.setExchangeRatePageTitle,
+  );
+
+  @override
+  String get exchangeRateHistoryPageTitle => _resolve(
+    'exchangeRateHistoryPageTitle',
+    (loc) => loc.exchangeRateHistoryPageTitle,
+  );
+
+  @override
+  String get currencyFormPageTitle =>
+      _resolve('currencyFormPageTitle', (loc) => loc.currencyFormPageTitle);
+
+  @override
+  String get setNewRateButton =>
+      _resolve('setNewRateButton', (loc) => loc.setNewRateButton);
+
+  @override
+  String get viewHistoryButton =>
+      _resolve('viewHistoryButton', (loc) => loc.viewHistoryButton);
+
+  @override
+  String get addCurrencyButton =>
+      _resolve('addCurrencyButton', (loc) => loc.addCurrencyButton);
+
+  @override
+  String get systemCurrencyBadge =>
+      _resolve('systemCurrencyBadge', (loc) => loc.systemCurrencyBadge);
+
+  @override
+  String latestRateLineTemplate(String base, String amount) => _resolve(
+    'latestRateLineTemplate',
+    (loc) => loc.latestRateLineTemplate(base, amount),
+  );
+
+  @override
+  String get rateNotSetHint =>
+      _resolve('rateNotSetHint', (loc) => loc.rateNotSetHint);
+
+  @override
+  String deleteCurrencyConfirmTitle(String code) => _resolve(
+    'deleteCurrencyConfirmTitle',
+    (loc) => loc.deleteCurrencyConfirmTitle(code),
+  );
+
+  @override
+  String deleteCurrencyConfirmBody(
+    int exchangeRatesCount,
+    int listingPricesCount,
+  ) => _resolve(
+    'deleteCurrencyConfirmBody',
+    (loc) =>
+        loc.deleteCurrencyConfirmBody(exchangeRatesCount, listingPricesCount),
+  );
+
+  @override
+  String get deleteButton =>
+      _resolve('deleteButton', (loc) => loc.deleteButton);
+
+  @override
+  String get cancelButton =>
+      _resolve('cancelButton', (loc) => loc.cancelButton);
+
+  @override
+  String get unusualTimingFutureTitle => _resolve(
+    'unusualTimingFutureTitle',
+    (loc) => loc.unusualTimingFutureTitle,
+  );
+
+  @override
+  String get unusualTimingBackdateTitle => _resolve(
+    'unusualTimingBackdateTitle',
+    (loc) => loc.unusualTimingBackdateTitle,
+  );
+
+  @override
+  String unusualTimingFutureBody(String magnitude) => _resolve(
+    'unusualTimingFutureBody',
+    (loc) => loc.unusualTimingFutureBody(magnitude),
+  );
+
+  @override
+  String unusualTimingBackdateBody(String magnitude) => _resolve(
+    'unusualTimingBackdateBody',
+    (loc) => loc.unusualTimingBackdateBody(magnitude),
+  );
+
+  @override
+  String unusualTimingFutureMagnitudeHours(int hours) => _resolve(
+    'unusualTimingFutureMagnitudeHours',
+    (loc) => loc.unusualTimingFutureMagnitudeHours(hours),
+  );
+
+  @override
+  String unusualTimingBackdateMagnitudeHours(int hours) => _resolve(
+    'unusualTimingBackdateMagnitudeHours',
+    (loc) => loc.unusualTimingBackdateMagnitudeHours(hours),
+  );
+
+  @override
+  String unusualTimingFutureMagnitudeDays(int days) => _resolve(
+    'unusualTimingFutureMagnitudeDays',
+    (loc) => loc.unusualTimingFutureMagnitudeDays(days),
+  );
+
+  @override
+  String unusualTimingBackdateMagnitudeDays(int days) => _resolve(
+    'unusualTimingBackdateMagnitudeDays',
+    (loc) => loc.unusualTimingBackdateMagnitudeDays(days),
+  );
+
+  @override
+  String get currencyCodeLabel =>
+      _resolve('currencyCodeLabel', (loc) => loc.currencyCodeLabel);
+
+  @override
+  String get currencyNameArLabel =>
+      _resolve('currencyNameArLabel', (loc) => loc.currencyNameArLabel);
+
+  @override
+  String get currencyNameEnLabel =>
+      _resolve('currencyNameEnLabel', (loc) => loc.currencyNameEnLabel);
+
+  @override
+  String get currencySymbolLabel =>
+      _resolve('currencySymbolLabel', (loc) => loc.currencySymbolLabel);
+
+  @override
+  String get currencySortOrderLabel =>
+      _resolve('currencySortOrderLabel', (loc) => loc.currencySortOrderLabel);
+
+  @override
+  String get currencyDisplayDecimalsLabel => _resolve(
+    'currencyDisplayDecimalsLabel',
+    (loc) => loc.currencyDisplayDecimalsLabel,
+  );
+
+  @override
+  String get currencyIsActiveLabel =>
+      _resolve('currencyIsActiveLabel', (loc) => loc.currencyIsActiveLabel);
+
+  @override
+  String get currencyCodeFormatError =>
+      _resolve('currencyCodeFormatError', (loc) => loc.currencyCodeFormatError);
+
+  @override
+  String get requiredField =>
+      _resolve('requiredField', (loc) => loc.requiredField);
+
+  @override
+  String get displayDecimalsRangeError => _resolve(
+    'displayDecimalsRangeError',
+    (loc) => loc.displayDecimalsRangeError,
+  );
+
+  @override
+  String get rateAmountLabel =>
+      _resolve('rateAmountLabel', (loc) => loc.rateAmountLabel);
+
+  @override
+  String get effectiveAtLabel =>
+      _resolve('effectiveAtLabel', (loc) => loc.effectiveAtLabel);
+
+  @override
+  String get sourceLabel => _resolve('sourceLabel', (loc) => loc.sourceLabel);
+
+  @override
+  String get rateMustBePositiveError =>
+      _resolve('rateMustBePositiveError', (loc) => loc.rateMustBePositiveError);
+
+  @override
+  String get baseEqualsTargetError =>
+      _resolve('baseEqualsTargetError', (loc) => loc.baseEqualsTargetError);
+
+  @override
+  String get submitButton =>
+      _resolve('submitButton', (loc) => loc.submitButton);
+
+  @override
+  String get errorSystemCurrencyImmutable => _resolve(
+    'errorSystemCurrencyImmutable',
+    (loc) => loc.errorSystemCurrencyImmutable,
+  );
+
+  @override
+  String get errorDuplicateCode =>
+      _resolve('errorDuplicateCode', (loc) => loc.errorDuplicateCode);
+
+  @override
+  String get errorPermissionDenied =>
+      _resolve('errorPermissionDenied', (loc) => loc.errorPermissionDenied);
+
+  @override
+  String get errorCurrencyHasReferences => _resolve(
+    'errorCurrencyHasReferences',
+    (loc) => loc.errorCurrencyHasReferences,
+  );
+
+  @override
+  String get errorCurrencyUnknown =>
+      _resolve('errorCurrencyUnknown', (loc) => loc.errorCurrencyUnknown);
+
+  @override
+  String get errorValidationFailed =>
+      _resolve('errorValidationFailed', (loc) => loc.errorValidationFailed);
+
+  @override
+  String get baseCurrencyLabel =>
+      _resolve('baseCurrencyLabel', (loc) => loc.baseCurrencyLabel);
+
+  @override
+  String get targetCurrencyLabel =>
+      _resolve('targetCurrencyLabel', (loc) => loc.targetCurrencyLabel);
+
+  @override
+  String get loadingHint => _resolve('loadingHint', (loc) => loc.loadingHint);
+
+  @override
   String get locationsTileTitle =>
       _resolve('locationsTileTitle', (loc) => loc.locationsTileTitle);
 
