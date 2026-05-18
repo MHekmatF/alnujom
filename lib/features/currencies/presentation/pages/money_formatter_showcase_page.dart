@@ -95,8 +95,9 @@ class _MoneyFormatterShowcasePageState
           label: '2 · {50 000, USD}',
           money: Money(amount: Decimal.parse('50000'), currencyCode: 'USD'),
           currency: usd,
-          expectedAr: '٥٠٬٠٠٠ \$',
-          expectedEn: '\$50,000',
+          // USD display_decimals=2 → trailing .00 always rendered.
+          expectedAr: '٥٠٬٠٠٠٫٠٠ \$',
+          expectedEn: '\$50,000.00',
         ),
         _ShowcaseCase(
           label: '3 · {1 234 567.89, USD}',
@@ -146,18 +147,18 @@ class _MoneyFormatterShowcasePageState
             currencyCode: 'USD',
           ),
           currency: usd,
-          // Footnote *: spec target is 49999.99 (half-to-even).
-          // With Decimal.parse('49999.995') the truncated integer 4999999 is
-          // ODD so banker's rounds UP → 50000.00. The spec expects 49999.99.
-          // Discrepancy visible here; see quickstart.md Step 8 footnote *.
-          expectedAr: '٤٩٬٩٩٩٫٩٩ \$',
-          expectedEn: '\$49,999.99',
+          // Banker's: candidates are 49999.99 (last digit 9, odd) vs 50000.00
+          // (last digit 0, even). Picks the even one → 50000.00.
+          expectedAr: '٥٠٬٠٠٠٫٠٠ \$',
+          expectedEn: '\$50,000.00',
         ),
         _ShowcaseCase(
           label: '9 · {-50, USD} — negative',
           money: Money(amount: Decimal.parse('-50'), currencyCode: 'USD'),
           currency: usd,
-          // ar: intl may add bidi marks; visual is '-٥٠٫٠٠ $'.
+          // USD display_decimals=2 → trailing .00 always rendered.
+          // ar: intl may add a U+200E LRM bidi mark before the minus; visual
+          // is identical either way.
           expectedAr: '-٥٠٫٠٠ \$',
           expectedEn: '-\$50.00',
         ),
@@ -168,11 +169,10 @@ class _MoneyFormatterShowcasePageState
             currencyCode: 'SYP',
           ),
           currency: syp,
-          // Footnote ‡: spec target is 16000. With Decimal.parse('15000.5')
-          // truncated=15000 (even) → banker's stays → 15000.
-          // Spec expects 16000. Discrepancy visible here; see quickstart.md ‡.
-          expectedAr: '١٦٬٠٠٠ ل.س',
-          expectedEn: '16,000 SYP',
+          // Banker's: candidates are 15000 (even) and 15001 (odd). Picks the
+          // even one → 15000.
+          expectedAr: '١٥٬٠٠٠ ل.س',
+          expectedEn: '15,000 SYP',
         ),
       ];
 

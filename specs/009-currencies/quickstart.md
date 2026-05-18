@@ -168,19 +168,19 @@ Each row of the showcase renders a `{amount, currency}` input plus the expected 
 | # | Input | Expected `ar` | Expected `en` |
 |---|---|---|---|
 | 1 | `{amount: 750000000, currency: SYP}` | `٧٥٠٬٠٠٠٬٠٠٠ ل.س` | `750,000,000 SYP` |
-| 2 | `{amount: 50000, currency: USD}` | `٥٠٬٠٠٠ $` | `$50,000` |
+| 2 | `{amount: 50000, currency: USD}` | `٥٠٬٠٠٠٫٠٠ $` | `$50,000.00` |
 | 3 | `{amount: 1234567.89, currency: USD}` | `١٬٢٣٤٬٥٦٧٫٨٩ $` | `$1,234,567.89` |
 | 4 | `{amount: 0, currency: SYP}` | `٠ ل.س` | `0 SYP` |
 | 5 | `{amount: 0, currency: USD}` | `٠٫٠٠ $` | `$0.00` |
 | 6 | `{amount: 1, currency: SYP}` | `١ ل.س` | `1 SYP` |
 | 7 | `{amount: 49999.997, currency: USD}` (banker's rounding to 2 decimals) | `٥٠٬٠٠٠٫٠٠ $` | `$50,000.00` |
-| 8 | `{amount: 49999.995, currency: USD}` (half-to-even → .00) | `٤٩٬٩٩٩٫٩٩ $`* | `$49,999.99`* |
-| 9 | `{amount: -50, currency: USD}` (admin context) | `‎-٥٠ $`† | `-$50` |
-| 10 | `{amount: 15000.5, currency: SYP}` (display_decimals=0 truncates `.5` to `16000` via banker's round to even integer) | `١٦٬٠٠٠ ل.س`‡ | `16,000 SYP`‡ |
+| 8 | `{amount: 49999.995, currency: USD}` (half-to-even → .00) | `٥٠٬٠٠٠٫٠٠ $`* | `$50,000.00`* |
+| 9 | `{amount: -50, currency: USD}` (admin context) | `-٥٠٫٠٠ $`† | `-$50.00` |
+| 10 | `{amount: 15000.5, currency: SYP}` (display_decimals=0; banker's stays at 15000) | `١٥٬٠٠٠ ل.س`‡ | `15,000 SYP`‡ |
 
-\* Cases 8 + 10 verify banker's rounding behavior (half-to-even). For 49999.995 → 49999.99 (the .99 is even) instead of 50000.00. For 15000.5 → 16000 (16 is even) instead of 15001 (odd).
-† Arabic minus-sign placement: implementation may bidi-mark the minus; the rendered visual is "‎-50 $" with the minus immediately before the digits.
-‡ SYP `display_decimals=0` discards fractional digits at format time.
+\* Cases 8 + 10 verify banker's rounding (half-to-even) on exact `0.5` fractions. For `49999.995` rounded to 2 decimals: candidates are `49999.99` (last digit `9`, odd) and `50000.00` (last digit `0`, even after carry) — banker's picks `50000.00`. For `15000.5` rounded to 0 decimals: candidates are `15000` (`0` is even) and `15001` (`1` is odd) — banker's picks `15000`. Note: USD `display_decimals=2` means trailing `.00` is always rendered for whole USD amounts, including cases 2 and 9.
+† Arabic minus-sign placement: implementation may insert a U+200E LRM bidi mark before the minus; the rendered visual is `-٥٠٫٠٠ $` with the minus immediately before the digits regardless of bidi marker presence.
+‡ SYP `display_decimals=0` discards fractional digits at format time per banker's rounding (the integer part is unchanged when the fraction is exactly `.5` and the integer is even).
 
 If any cell renders differently, file a bug — the formatter is deterministic, so a mismatch is reproducible.
 
