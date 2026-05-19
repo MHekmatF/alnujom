@@ -382,5 +382,13 @@
     }
   },
   "actionActivate": "تفعيل",
-  "actionDeactivate": "تعطيل"
+  "actionDeactivate": "تعطيل",
+  "validatorAreaSizePositive": "مساحة العقار يجب أن تكون أكبر من الصفر.",
+  "validatorAreaSizeTooLarge": "مساحة العقار كبيرة جداً.",
+  "validatorPricePositive": "السعر يجب أن يكون أكبر من الصفر.",
+  "validatorPriceTooPrecise": "السعر يجب أن يكون ضمن ١٢ خانة ورقمين عشريين.",
+  "validatorPhoneInvalid": "أدخل رقم هاتف صحيحاً.",
+  "validatorPhoneTooShort": "رقم الهاتف قصير جداً.",
+  "publisherApprovalPendingTitle": "موافقة الناشر قيد المراجعة",
+  "publisherApprovalPendingMessage": "حسابك مقبول، لكن صلاحية النشر ما زالت بانتظار المراجعة. ستتمكن من إنشاء العقارات بعد الموافقة على الناشر."
 }

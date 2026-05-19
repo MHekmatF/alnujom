@@ -382,5 +382,13 @@
     }
   },
   "actionActivate": "Activate",
-  "actionDeactivate": "Deactivate"
+  "actionDeactivate": "Deactivate",
+  "validatorAreaSizePositive": "Area size must be greater than zero.",
+  "validatorAreaSizeTooLarge": "Area size is too large.",
+  "validatorPricePositive": "Price must be greater than zero.",
+  "validatorPriceTooPrecise": "Price must fit 12 digits and 2 decimals.",
+  "validatorPhoneInvalid": "Enter a valid phone number.",
+  "validatorPhoneTooShort": "Phone number is too short.",
+  "publisherApprovalPendingTitle": "Publisher Approval Pending",
+  "publisherApprovalPendingMessage": "Your account is approved, but publisher access is still pending review. You will be able to create listings after publisher approval."
 }

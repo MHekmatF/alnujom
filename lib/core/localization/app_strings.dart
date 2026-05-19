@@ -1412,4 +1412,46 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String get actionDeactivate =>
       _resolve('actionDeactivate', (loc) => loc.actionDeactivate);
+
+  @override
+  String get validatorAreaSizePositive => _resolve(
+    'validatorAreaSizePositive',
+    (loc) => loc.validatorAreaSizePositive,
+  );
+
+  @override
+  String get validatorAreaSizeTooLarge => _resolve(
+    'validatorAreaSizeTooLarge',
+    (loc) => loc.validatorAreaSizeTooLarge,
+  );
+
+  @override
+  String get validatorPricePositive =>
+      _resolve('validatorPricePositive', (loc) => loc.validatorPricePositive);
+
+  @override
+  String get validatorPriceTooPrecise => _resolve(
+    'validatorPriceTooPrecise',
+    (loc) => loc.validatorPriceTooPrecise,
+  );
+
+  @override
+  String get validatorPhoneInvalid =>
+      _resolve('validatorPhoneInvalid', (loc) => loc.validatorPhoneInvalid);
+
+  @override
+  String get validatorPhoneTooShort =>
+      _resolve('validatorPhoneTooShort', (loc) => loc.validatorPhoneTooShort);
+
+  @override
+  String get publisherApprovalPendingTitle => _resolve(
+    'publisherApprovalPendingTitle',
+    (loc) => loc.publisherApprovalPendingTitle,
+  );
+
+  @override
+  String get publisherApprovalPendingMessage => _resolve(
+    'publisherApprovalPendingMessage',
+    (loc) => loc.publisherApprovalPendingMessage,
+  );
 }
