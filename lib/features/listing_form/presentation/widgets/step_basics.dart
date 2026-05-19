@@ -7,6 +7,7 @@ import '../../domain/entities/listing.dart';
 import '../../domain/entities/listing_form_state.dart';
 import '../bloc/listing_form_bloc.dart';
 import '../bloc/listing_form_event.dart';
+import '../util/listing_enum_labels.dart';
 import 'required_field_chip.dart';
 
 class StepBasics extends StatefulWidget {
@@ -80,7 +81,7 @@ class _StepBasicsState extends State<StepBasics> {
               items: ListingPurpose.values
                   .map((p) => DropdownMenuItem(
                         value: p,
-                        child: Text(_purposeLabel(p, l10n)),
+                        child: Text(listingPurposeLabel(p, l10n)),
                       ))
                   .toList(),
               onChanged: (v) {
@@ -110,7 +111,7 @@ class _StepBasicsState extends State<StepBasics> {
               items: PropertyType.values
                   .map((p) => DropdownMenuItem(
                         value: p,
-                        child: Text(_propertyTypeLabel(p, l10n)),
+                        child: Text(propertyTypeLabel(p, l10n)),
                       ))
                   .toList(),
               onChanged: (v) {
@@ -127,37 +128,4 @@ class _StepBasicsState extends State<StepBasics> {
     );
   }
 
-  String _purposeLabel(ListingPurpose p, AppLocalizations l10n) {
-    switch (p) {
-      case ListingPurpose.sale:
-        return l10n.listingPurposeSale;
-      case ListingPurpose.rent:
-        return l10n.listingPurposeRent;
-      case ListingPurpose.dailyRent:
-        return l10n.listingPurposeDailyRent;
-      case ListingPurpose.investment:
-        return l10n.listingPurposeInvestment;
-    }
-  }
-
-  String _propertyTypeLabel(PropertyType p, AppLocalizations l10n) {
-    switch (p) {
-      case PropertyType.apartment:
-        return l10n.propertyTypeApartment;
-      case PropertyType.villa:
-        return l10n.propertyTypeVilla;
-      case PropertyType.land:
-        return l10n.propertyTypeLand;
-      case PropertyType.shop:
-        return l10n.propertyTypeShop;
-      case PropertyType.office:
-        return l10n.propertyTypeOffice;
-      case PropertyType.farm:
-        return l10n.propertyTypeFarm;
-      case PropertyType.warehouse:
-        return l10n.propertyTypeWarehouse;
-      case PropertyType.other:
-        return l10n.propertyTypeOther;
-    }
-  }
 }

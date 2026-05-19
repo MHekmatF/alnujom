@@ -5,6 +5,7 @@ import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../listing_form/domain/entities/listing.dart';
+import '../../../listing_form/presentation/util/listing_enum_labels.dart';
 import '../../../locations/domain/entities/area.dart';
 import '../../../locations/domain/entities/governorate.dart';
 import '../../../locations/domain/repositories/locations_repository.dart';
@@ -88,11 +89,11 @@ class _ReadOnlyListingPreviewState extends State<ReadOnlyListingPreview> {
           const SizedBox(height: AppSpacing.lg),
           _Row(
             label: l10n.fieldLabelPurpose,
-            value: listing.purpose.toDbValue(),
+            value: listingPurposeLabel(listing.purpose, l10n),
           ),
           _Row(
             label: l10n.fieldLabelPropertyType,
-            value: listing.propertyType.toDbValue(),
+            value: propertyTypeLabel(listing.propertyType, l10n),
           ),
           if (_governorate != null)
             _Row(

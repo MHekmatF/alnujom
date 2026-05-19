@@ -112,7 +112,7 @@ class _Section extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Card(
-      margin: const EdgeInsets.only(bottom: AppSpacing.md),
+      margin: const EdgeInsetsDirectional.only(bottom: AppSpacing.md),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
@@ -134,7 +134,8 @@ class _Section extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.sm),
             ...rows.map((row) => Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+                  padding:
+                      const EdgeInsetsDirectional.only(bottom: AppSpacing.xs),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
