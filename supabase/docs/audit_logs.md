@@ -95,7 +95,18 @@ new triggers and appropriate `TG_ARGV` values (action key, column list, PK colum
   - `exchange_rate.updated` — `exchange_rates` AFTER INSERT.
   - Seed rows (SYP + USD currencies, plus the starter USD/SYP rate pair) produce audit rows with `actor_user_id=NULL` because triggers attach BEFORE seed per R-08.
   - The `update_exchange_rate` RPC produces TWO `exchange_rate.updated` audit rows per call: one for the admin-authored row and one for the auto-derived inverse row. The derived row's `after_state.source` starts with `auto-derived from ` followed by the admin row UUID.
-- Phase 12: listings workflow
+- Phase 10: listings ✅ **Shipped** in `20260519120006_create_listing_status_history.sql`:
+  - `listing.created` — `listings` AFTER INSERT.
+  - `listing.updated` — `listings` AFTER UPDATE.
+  - `listing.deleted` — `listings` AFTER DELETE and status change to `deleted`.
+  - `listing.submitted` — status changes to `pending_review`.
+  - `listing.approved` — status changes to `approved`.
+  - `listing.rejected` — status changes to `rejected`.
+  - `listing.paused` — status changes to `paused`.
+  - `listing.expired` — status changes to `expired`.
+  - `listing.sold` — status changes to `sold`.
+  - `listing.rented` — status changes to `rented`.
+- Phase 12: listings workflow approval/rejection RPCs reuse the Phase 10 listing action keys.
 - Phase 18: reports/moderation
 - Phase 19: agency flows
 - Phase 21: ads

@@ -194,3 +194,39 @@ PASS* = task succeeded after a spec-defect patch to tasks.md.
 **Phase 1 is COMPLETE — ready to proceed to Phase 2 Migration 1 (T006 OSM
 centroid inventory + T007 ALTER public.areas migration body). T006 now needs
 only 10 OSM area-centroid lookups (one per row in public.areas), not 30–100.**
+
+================================================================================
+## Section F — Advisor Delta After Phase 10 Migrations
+## Source: Supabase Management API advisors/security + advisors/performance
+================================================================================
+
+Captured during Phase 2 T026 after applying migrations `20260519120001` through
+`20260519120009`.
+
+The initial advisor run found one new ERROR on `v_publisher_listings` because
+Postgres views default to security-definer behavior. This was fixed by
+`20260519120009_phase10_advisor_hardening.sql`, which sets:
+
+```sql
+ALTER VIEW public.v_publisher_listings SET (security_invoker = true);
+```
+
+The same hardening migration also revoked direct EXECUTE on
+`listings_audit_trigger_fn`, set search paths for the new trigger helper
+functions, and added FK helper indexes for the new Phase 10 tables.
+
+Remaining Phase-10-related advisor findings after hardening:
+
+- `authenticated_security_definer_function_executable: submit_listing` —
+  expected and intentional. `submit_listing` is the Phase 10 public authenticated
+  RPC surface by design (R-06 / FR-010). It re-checks owner, approved-pair,
+  editable status, and full required-field validation before flipping status.
+- `auth_rls_initplan` on Phase 10 policies — accepted for Phase 10 because the
+  policies mirror the locked contract from `data-model.md` and predecessor phases.
+- `multiple_permissive_policies` on Phase 10 tables — expected because Phase 10
+  deliberately separates public, owner, and admin policy branches for reviewability
+  and mirrors the project policy style.
+- `unused_index` on new Phase 10 indexes — expected immediately after migration;
+  no production listing traffic exists yet.
+
+Checkpoint B hardening result: no remaining Phase-10 security ERROR findings.
