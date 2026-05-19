@@ -62,8 +62,12 @@ class ListingDto {
       id: row['id'] as String,
       publisherUserId: row['publisher_user_id'] as String,
       agencyId: row['agency_id'] as String?,
-      purpose: row['purpose'] as String,
-      propertyType: row['property_type'] as String,
+      // purpose, property_type, title are nullable in the DB for drafts (the
+      // submit_listing RPC enforces non-null at submit time per Q1). For the
+      // in-memory Listing entity we default purpose='sale', property_type=
+      // 'apartment', title='' — the basics step overwrites them.
+      purpose: (row['purpose'] as String?) ?? 'sale',
+      propertyType: (row['property_type'] as String?) ?? 'apartment',
       status: row['status'] as String,
       title: row['title'] as String? ?? '',
       governorateId: row['governorate_id'] as String?,

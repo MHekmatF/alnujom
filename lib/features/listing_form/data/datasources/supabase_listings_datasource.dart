@@ -37,13 +37,16 @@ class SupabaseListingsDatasource {
   }
 
   Future<ListingDto> insertDraft(String publisherUserId) async {
+    // Drafts are partial-by-design: purpose/property_type/title are NULL on
+    // INSERT (DB schema allows it per migration 20260519120011) and the
+    // submit_listing RPC's Q1 validation catches missing fields at submit
+    // time. The other NOT-NULL columns DO have DEFAULTs: status='draft',
+    // location_visibility='approximate', contact_name_visibility='public',
+    // created_at=now(), updated_at=now().
     final row = await _client
         .from('listings')
         .insert(<String, dynamic>{
           'publisher_user_id': publisherUserId,
-          // The remaining columns default per schema: status='draft',
-          // purpose='sale', property_type='apartment',
-          // location_visibility='approximate', contact_name_visibility='public'.
         })
         .select()
         .single();
