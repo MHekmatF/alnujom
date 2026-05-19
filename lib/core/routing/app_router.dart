@@ -31,6 +31,7 @@ import '../../features/locations/presentation/pages/location_picker_smoke_test_p
 import '../../features/locations/presentation/pages/locations_list_page.dart';
 import '../../features/listing_form/domain/entities/listing_form_state.dart';
 import '../../features/listing_form/presentation/pages/listing_form_page.dart';
+import '../../features/publisher_dashboard/presentation/pages/my_listings_page.dart';
 import '../../features/super_admin/presentation/pages/assign_role_page.dart';
 import '../../features/super_admin/presentation/pages/create_role_page.dart';
 import '../../features/super_admin/presentation/pages/role_editor_page.dart';
@@ -306,8 +307,7 @@ GoRouter buildAppRouter({
         path: AppRoutes.publisherMyListings,
         name: AppRouteNames.publisherMyListings,
         redirect: requirePublisherStatusRedirect,
-        builder: (context, state) =>
-            const _TodoPhase10Placeholder('my listings'),
+        builder: (context, state) => const MyListingsPage(),
       ),
       GoRoute(
         path: AppRoutes.publisherApprovalPending,
@@ -353,12 +353,3 @@ GoRouter buildAppRouter({
   );
 }
 
-class _TodoPhase10Placeholder extends StatelessWidget {
-  const _TodoPhase10Placeholder(this.label);
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) =>
-      Scaffold(body: Center(child: Text('TODO Phase 10 page: $label')));
-}

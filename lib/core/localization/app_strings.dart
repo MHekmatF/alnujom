@@ -1890,4 +1890,82 @@ final class _DebugAppLocalizations extends AppLocalizations {
     'missingFieldListingPricesPrimary',
     (loc) => loc.missingFieldListingPricesPrimary,
   );
+
+  @override
+  String get myListingsPageTitle =>
+      _resolve('myListingsPageTitle', (loc) => loc.myListingsPageTitle);
+
+  @override
+  String get myListingsEmptyTitle =>
+      _resolve('myListingsEmptyTitle', (loc) => loc.myListingsEmptyTitle);
+
+  @override
+  String get myListingsEmptyCtaCreateFirst => _resolve(
+        'myListingsEmptyCtaCreateFirst',
+        (loc) => loc.myListingsEmptyCtaCreateFirst,
+      );
+
+  @override
+  String get myListingsErrorPrefix =>
+      _resolve('myListingsErrorPrefix', (loc) => loc.myListingsErrorPrefix);
+
+  @override
+  String get filterChipAll =>
+      _resolve('filterChipAll', (loc) => loc.filterChipAll);
+
+  @override
+  String get statusBadgeDraft =>
+      _resolve('statusBadgeDraft', (loc) => loc.statusBadgeDraft);
+
+  @override
+  String get statusBadgePendingReview => _resolve(
+        'statusBadgePendingReview',
+        (loc) => loc.statusBadgePendingReview,
+      );
+
+  @override
+  String get statusBadgeApproved =>
+      _resolve('statusBadgeApproved', (loc) => loc.statusBadgeApproved);
+
+  @override
+  String get statusBadgeRejected =>
+      _resolve('statusBadgeRejected', (loc) => loc.statusBadgeRejected);
+
+  @override
+  String get statusBadgePaused =>
+      _resolve('statusBadgePaused', (loc) => loc.statusBadgePaused);
+
+  @override
+  String get statusBadgeSold =>
+      _resolve('statusBadgeSold', (loc) => loc.statusBadgeSold);
+
+  @override
+  String get statusBadgeRented =>
+      _resolve('statusBadgeRented', (loc) => loc.statusBadgeRented);
+
+  @override
+  String get statusBadgeExpired =>
+      _resolve('statusBadgeExpired', (loc) => loc.statusBadgeExpired);
+
+  @override
+  String get statusBadgeDeleted =>
+      _resolve('statusBadgeDeleted', (loc) => loc.statusBadgeDeleted);
+
+  @override
+  String get rejectionReasonLabel =>
+      _resolve('rejectionReasonLabel', (loc) => loc.rejectionReasonLabel);
+
+  @override
+  String get resubmitButton =>
+      _resolve('resubmitButton', (loc) => loc.resubmitButton);
+
+  @override
+  String get approvedNotEditableMessage => _resolve(
+        'approvedNotEditableMessage',
+        (loc) => loc.approvedNotEditableMessage,
+      );
+
+  @override
+  String get readOnlyPreviewTitle =>
+      _resolve('readOnlyPreviewTitle', (loc) => loc.readOnlyPreviewTitle);
 }

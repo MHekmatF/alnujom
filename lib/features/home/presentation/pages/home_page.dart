@@ -67,7 +67,7 @@ class HomePage extends StatelessWidget {
                 // nothing (FR-011 / R-19 three-layer enforcement).
                 if (profile != null &&
                     profile.accountStatus == AccountStatus.approved &&
-                    profile.publisherStatus == PublisherStatus.approved)
+                    profile.publisherStatus == PublisherStatus.approved) ...[
                   ListTile(
                     leading: const Icon(Icons.add_home_outlined),
                     title: Text(l10n.tileCreateListing),
@@ -75,6 +75,16 @@ class HomePage extends StatelessWidget {
                     onTap: () =>
                         context.goNamed(AppRouteNames.publisherListingsCreate),
                   ),
+                  // Phase 10 US4 (T100): "My listings" tile, same gate as
+                  // the Create tile.
+                  ListTile(
+                    leading: const Icon(Icons.list_alt_outlined),
+                    title: Text(l10n.tileMyListings),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () =>
+                        context.goNamed(AppRouteNames.publisherMyListings),
+                  ),
+                ],
                 if (getIt<PermissionChecker>().any(
                   PermissionKeys.adminCategoryKeys,
                 ))
