@@ -30,7 +30,7 @@ Run via Supabase MCP `apply_migration` in order:
 
 Total apply time: under 90 seconds.
 
-Verify via Supabase MCP `list_migrations` — confirm all seven entries are present, ordered after Phase 9's `20260518120005_phase9_advisor_hardening.sql`.
+Verify via Supabase MCP `list_migrations` — confirm all seven entries are present, ordered after Phase 9 (final Phase 9 migration on remote per T005 baseline: `20260518120007_phase9_fk_index_hardening`).
 
 Run `get_advisors` — expect zero new warnings (the RPC EXECUTE grants are REVOKEd from `PUBLIC, anon` and GRANTed to `authenticated` per FR-010).
 

@@ -1,0 +1,196 @@
+# Phase 10 — Pre-Migration Baseline
+
+Captured: 2026-05-19 by Claude Opus 4.7 (per T005)
+Branch: 010-listing-creation
+Supabase project ref: hczsgceagommznjaohyk (verified via opencode MCP stdio config)
+Reference device for later UI verification: Infinix Note 8 (Helio G80, 6 GB RAM, Android 10/11)
+
+This file is the rollback reference if Phase 10 needs to be reverted AND the
+analyzer-comparison reference for the final polish phase (T122).
+
+================================================================================
+## Section A — `public` schema tables BEFORE Phase 10 migrations
+## Source: Supabase MCP list_tables(schemas=['public'])
+================================================================================
+
+13 tables present (all RLS-enabled), all from Phases 4–9:
+
+| Table                              | Rows | Phase | RLS |
+|------------------------------------|------|-------|-----|
+| public.profiles                    | 5    | 5     | ON  |
+| public.user_preferences            | 5    | 4     | ON  |
+| public.audit_logs                  | 176  | 4     | ON  |
+| public.account_approval_requests   | 5    | 5     | ON  |
+| public.roles                       | 7    | 6     | ON  |
+| public.permissions                 | 24   | 6     | ON  |
+| public.role_permissions            | 46   | 6     | ON  |
+| public.user_roles                  | 9    | 6     | ON  |
+| public.governorates                | 14   | 8     | ON  |
+| public.cities                      | 32   | 8     | ON  |
+| public.areas                       | 10   | 8     | ON  |
+| public.currencies                  | 2    | 9     | ON  |
+| public.exchange_rates              | 10   | 9     | ON  |
+
+**Notable**: zero tables matching `listing*` or `listing_*` — Phase 10 starts
+from a clean slate.
+
+================================================================================
+## Section B — Migrations BEFORE Phase 10
+## Source: Supabase MCP list_migrations()
+================================================================================
+
+The remote project shows a long list with **duplicate version rows** for several
+Phase 6/7/8/9 migration names. This is consistent with project memory
+`project_supabase_mcp_apply_migration.md`: re-applying the same migration name
+re-runs the SQL idempotently AND inserts an additional tracker row. The
+underlying schema state is correct; only the migration_tracker has visual
+duplication. The Phase 10 migrations will all use fresh names (`20260519120001`
+through `20260519120007`) so they cannot accidentally collide with prior names.
+
+**Last migration before Phase 10**: `20260518120007_phase9_fk_index_hardening`
+
+(NOTE: my Phase 10 tasks.md T005 was authored expecting the last entry to be
+`20260518120005_phase9_advisor_hardening`. Phase 9 actually shipped 3 additional
+migrations after that — `20260518120005_phase9_advisor_hardening_revoke_trigger_execute`,
+`20260518120006_create_latest_rates_for_base_rpc`,
+`20260518120007_relax_latest_rates_for_base_to_security_invoker`, and
+`20260518120007_phase9_fk_index_hardening` — between the time the spec was
+written and execution. T005's expected value was patched to reflect reality
+when the checkbox was flipped.)
+
+Full ordered list (with duplicates preserved verbatim):
+
+```
+00000000000000 00000000000000_init_extensions
+20260506215019 20260506120001_init_enums
+20260509031407 20260506120002_create_profiles
+20260509031422 20260506120003_create_user_preferences
+20260509063740 20260506120004_create_audit_logs
+20260509063806 20260506120005_enable_rls_default
+20260509074730 20260506120006_enable_vault
+20260510143208 20260510120001_create_account_approval_requests
+20260510143312 20260510120002_profiles_add_is_admin
+20260510143333 20260510120003_swap_admin_predicate
+20260510143436 20260510120004_profiles_vault_pii_helpers
+20260510143514 20260510120005_attach_audit_trigger_account_approval_requests
+20260510143743 20260510120006_phase5_advisor_hardening
+20260514121226 sync_auth_email_with_profile
+20260514130624 20260514120002_phase8_advisor_hardening
+20260515175338 20260515120001_create_roles
+20260515175414 20260515120002_create_permissions
+20260515175443 20260515120003_create_role_permissions
+20260515175616 20260515120004_create_user_roles
+20260515175640 20260515120005_create_permission_predicate
+20260515175706 20260515120006_swap_admin_predicate_to_role_check
+20260515175736 20260515120008_phase6_advisor_hardening
+20260515184632 20260515120007_backfill_is_admin_and_drop
+20260515184746 20260515120009_fix_enforce_profile_status_search_path
+20260515200706 20260515120001_create_roles                     (DUP)
+20260515200715 20260515120002_create_permissions               (DUP)
+20260515200722 20260515120003_create_role_permissions          (DUP)
+20260515200731 20260515120004_create_user_roles                (DUP)
+20260515200807 20260515120005_create_permission_predicate      (DUP)
+20260515200817 20260515120006_swap_admin_predicate_to_role_check (DUP)
+20260515200833 20260515120008_phase6_advisor_hardening         (DUP)
+20260516092321 20260516120001_create_phase7_audit_triggers
+20260516092528 20260516120002_create_phase7_write_policies
+20260516092838 20260516120003_create_mutate_role_rpc
+20260516093022 20260516120004_create_user_role_assignment_rpcs
+20260516093147 20260516120005_phase7_advisor_hardening
+20260516094201 20260516120001_create_phase7_audit_triggers     (DUP)
+20260516094237 20260516120002_create_phase7_write_policies     (DUP)
+20260516094338 20260516120003_create_mutate_role_rpc           (DUP)
+20260516094433 20260516120004_create_user_role_assignment_rpcs (DUP)
+20260516094518 20260516120005_phase7_advisor_hardening         (DUP)
+20260516115904 20260516120003_create_mutate_role_rpc           (DUP)
+20260516120235 20260516120003_create_mutate_role_rpc           (DUP)
+20260517085020 20260517120001_create_governorates
+20260517085244 20260517120002_create_cities
+20260517085439 20260517120003_create_areas
+20260517085529 20260517120004_create_locations_indexes
+20260517085614 20260517120005_phase8_advisor_hardening
+20260517092432 20260517120001_create_governorates              (DUP)
+20260517092435 20260517120004_create_locations_indexes         (DUP)
+20260517092438 20260517120005_phase8_advisor_hardening         (DUP)
+20260517092521 20260517120002_create_cities                    (DUP)
+20260517092531 20260517120003_create_areas                     (DUP)
+20260517205317 20260518120001_create_currencies
+20260517205538 20260518120002_create_exchange_rates
+20260517205853 20260518120003_create_update_exchange_rate_rpc
+20260517210049 20260518120004_alter_user_preferences_fk
+20260517210216 20260518120005_phase9_advisor_hardening
+20260517210317 20260518120005_phase9_advisor_hardening_revoke_trigger_execute
+20260517212229 20260518120006_create_latest_rates_for_base_rpc
+20260517213748 20260518120007_relax_latest_rates_for_base_to_security_invoker
+20260518074055 20260518120001_create_currencies                (DUP)
+20260518074131 20260518120002_create_exchange_rates            (DUP)
+20260518074601 20260518120007_phase9_fk_index_hardening
+```
+
+================================================================================
+## Section C — `SELECT count(*) FROM public.listings;` (expected to error)
+## Source: Supabase MCP execute_sql
+================================================================================
+
+Verbatim error returned:
+
+```
+ERROR:  42P01: relation "public.listings" does not exist
+LINE 1: SELECT count(*) FROM public.listings;
+                             ^
+```
+
+Confirms: no Phase 10 tables yet exist. Migration apply order in Phase 2
+(T007–T030) will introduce `listings`, `listing_details`, `listing_prices`,
+`listing_visibility`, `listing_status_history`.
+
+================================================================================
+## Section D — Existing `listings.*` permission keys
+## Source: SELECT key FROM public.permissions WHERE key LIKE 'listings.%' ORDER BY key
+================================================================================
+
+5 rows (the Phase 6 inventory; Phase 10 reuses these unchanged per FR-008 / R-15):
+
+```
+listings.approve
+listings.delete_any
+listings.edit_any
+listings.reject
+listings.view_all
+```
+
+Note absent (intentionally): `listings.create`, `listings.edit_own`, `listings.delete_own`.
+Per FR-008 + R-15, write permissions for the publisher's own listing are gated
+by the `publisher_status='approved'` profile column + the listing's
+`publisher_id = auth.uid()`, NOT by a permission key. This is the three-layer
+enforcement model (UX tile, router guard, RLS).
+
+================================================================================
+## Section E — `flutter analyze` baseline
+## Source: `flutter analyze --no-fatal-infos --no-fatal-warnings` from H:\alnujom-project
+================================================================================
+
+```
+Analyzing alnujom-project...
+No issues found! (ran in 32.0s)
+```
+
+Clean. Phase 10's polish task T122 should match or improve this.
+
+================================================================================
+## Phase 1 verification results (T001–T005)
+================================================================================
+
+| Task | Status | Notes |
+|------|--------|-------|
+| T001 | PASS   | Branch `010-listing-creation`; working tree clean after the two prior commits (553b355, 91361b5). |
+| T002 | PASS   | All 5 sub-checks green: currencies=2 (SYP,USD); current_user_has_permission, log_audit, set_updated_at all present. |
+| T003 | PASS*  | `public.areas` has **10 rows** (not 30–100 as the task originally read — Phase 8 sealed at 10); centroid columns correctly absent (count=0). Spec defect patched in tasks.md. |
+| T004 | PASS   | `.env.json` present with SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY (gitignored). |
+| T005 | PASS*  | Baseline captured (this file). Spec defect patched: last-migration expected value updated from `20260518120005_phase9_advisor_hardening` to `20260518120007_phase9_fk_index_hardening`. |
+
+PASS* = task succeeded after a spec-defect patch to tasks.md.
+
+**Phase 1 is COMPLETE — ready to proceed to Phase 2 Migration 1 (T006 OSM
+centroid inventory + T007 ALTER public.areas migration body). T006 now needs
+only 10 OSM area-centroid lookups (one per row in public.areas), not 30–100.**
