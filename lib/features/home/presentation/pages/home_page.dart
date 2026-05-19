@@ -8,6 +8,8 @@ import '../../../../core/security/permission_checker.dart';
 import '../../../../core/security/permission_keys.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/domain/value_objects/account_status.dart';
+import '../../../../shared/domain/value_objects/publisher_status.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
@@ -59,6 +61,20 @@ class HomePage extends StatelessWidget {
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push(AppRoutes.profile),
                 ),
+                // Phase 10 US1 (T080): "Create listing" tile, gated by the
+                // approved-pair (account_status='approved' AND
+                // publisher_status='approved'). Non-approved publishers see
+                // nothing (FR-011 / R-19 three-layer enforcement).
+                if (profile != null &&
+                    profile.accountStatus == AccountStatus.approved &&
+                    profile.publisherStatus == PublisherStatus.approved)
+                  ListTile(
+                    leading: const Icon(Icons.add_home_outlined),
+                    title: Text(l10n.tileCreateListing),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () =>
+                        context.goNamed(AppRouteNames.publisherListingsCreate),
+                  ),
                 if (getIt<PermissionChecker>().any(
                   PermissionKeys.adminCategoryKeys,
                 ))

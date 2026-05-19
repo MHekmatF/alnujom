@@ -27,3 +27,9 @@ final class LocationsNetworkFailure extends LocationsFailure {
 final class LocationsUnknownFailure extends LocationsFailure {
   const LocationsUnknownFailure(super.message, {super.cause, super.stackTrace});
 }
+
+/// Phase 10 — raised when `getAreaCentroid` finds the row but its centroid
+/// columns are NULL. Should never happen post-T008 seed; defensive only.
+final class CentroidMissingFailure extends LocationsFailure {
+  const CentroidMissingFailure() : super('centroid missing for area');
+}

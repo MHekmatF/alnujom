@@ -85,4 +85,9 @@ abstract class LocationsRepository {
   Future<int> countCitiesInGovernorate(String governorateId);
   Future<int> countAreasInCity(String cityId);
   Future<int> countAreasInGovernorate(String governorateId);
+
+  // Phase 10 — area-centroid lookup for FR-013a (Q2 auto-fill).
+  // Returns (lat, lng) for the given area_id. Throws if the row is missing,
+  // throws CentroidMissingFailure if the seed has not been applied to that row.
+  Future<({double lat, double lng})> getAreaCentroid(String areaId);
 }

@@ -1454,4 +1454,440 @@ final class _DebugAppLocalizations extends AppLocalizations {
     'publisherApprovalPendingMessage',
     (loc) => loc.publisherApprovalPendingMessage,
   );
+
+  @override
+  String get tileCreateListing =>
+      _resolve('tileCreateListing', (loc) => loc.tileCreateListing);
+
+  @override
+  String get tileMyListings =>
+      _resolve('tileMyListings', (loc) => loc.tileMyListings);
+
+  @override
+  String get listingFormStepBasicsTitle => _resolve(
+    'listingFormStepBasicsTitle',
+    (loc) => loc.listingFormStepBasicsTitle,
+  );
+
+  @override
+  String get listingFormStepLocationTitle => _resolve(
+    'listingFormStepLocationTitle',
+    (loc) => loc.listingFormStepLocationTitle,
+  );
+
+  @override
+  String get listingFormStepDetailsTitle => _resolve(
+    'listingFormStepDetailsTitle',
+    (loc) => loc.listingFormStepDetailsTitle,
+  );
+
+  @override
+  String get listingFormStepPricesTitle => _resolve(
+    'listingFormStepPricesTitle',
+    (loc) => loc.listingFormStepPricesTitle,
+  );
+
+  @override
+  String get listingFormStepVisibilityTitle => _resolve(
+    'listingFormStepVisibilityTitle',
+    (loc) => loc.listingFormStepVisibilityTitle,
+  );
+
+  @override
+  String get listingFormStepMediaTitle => _resolve(
+    'listingFormStepMediaTitle',
+    (loc) => loc.listingFormStepMediaTitle,
+  );
+
+  @override
+  String get listingFormStepReviewTitle => _resolve(
+    'listingFormStepReviewTitle',
+    (loc) => loc.listingFormStepReviewTitle,
+  );
+
+  @override
+  String get listingFormBackButton =>
+      _resolve('listingFormBackButton', (loc) => loc.listingFormBackButton);
+
+  @override
+  String get listingFormContinueButton => _resolve(
+    'listingFormContinueButton',
+    (loc) => loc.listingFormContinueButton,
+  );
+
+  @override
+  String get listingFormSubmitButton =>
+      _resolve('listingFormSubmitButton', (loc) => loc.listingFormSubmitButton);
+
+  @override
+  String get listingFormJumpToStepButton => _resolve(
+    'listingFormJumpToStepButton',
+    (loc) => loc.listingFormJumpToStepButton,
+  );
+
+  @override
+  String get listingFormSaveAndExitButton => _resolve(
+    'listingFormSaveAndExitButton',
+    (loc) => loc.listingFormSaveAndExitButton,
+  );
+
+  @override
+  String get listingFormMediaPlaceholderBanner => _resolve(
+    'listingFormMediaPlaceholderBanner',
+    (loc) => loc.listingFormMediaPlaceholderBanner,
+  );
+
+  @override
+  String get listingFormSubmitSuccess => _resolve(
+    'listingFormSubmitSuccess',
+    (loc) => loc.listingFormSubmitSuccess,
+  );
+
+  @override
+  String get listingFormLoadingMessage => _resolve(
+    'listingFormLoadingMessage',
+    (loc) => loc.listingFormLoadingMessage,
+  );
+
+  @override
+  String get fieldLabelTitle =>
+      _resolve('fieldLabelTitle', (loc) => loc.fieldLabelTitle);
+
+  @override
+  String get fieldLabelPurpose =>
+      _resolve('fieldLabelPurpose', (loc) => loc.fieldLabelPurpose);
+
+  @override
+  String get fieldLabelPropertyType => _resolve(
+    'fieldLabelPropertyType',
+    (loc) => loc.fieldLabelPropertyType,
+  );
+
+  @override
+  String get fieldLabelGovernorate =>
+      _resolve('fieldLabelGovernorate', (loc) => loc.fieldLabelGovernorate);
+
+  @override
+  String get fieldLabelCity =>
+      _resolve('fieldLabelCity', (loc) => loc.fieldLabelCity);
+
+  @override
+  String get fieldLabelArea =>
+      _resolve('fieldLabelArea', (loc) => loc.fieldLabelArea);
+
+  @override
+  String get fieldLabelAddressText =>
+      _resolve('fieldLabelAddressText', (loc) => loc.fieldLabelAddressText);
+
+  @override
+  String get fieldLabelAreaSize =>
+      _resolve('fieldLabelAreaSize', (loc) => loc.fieldLabelAreaSize);
+
+  @override
+  String get fieldLabelRooms =>
+      _resolve('fieldLabelRooms', (loc) => loc.fieldLabelRooms);
+
+  @override
+  String get fieldLabelBathrooms =>
+      _resolve('fieldLabelBathrooms', (loc) => loc.fieldLabelBathrooms);
+
+  @override
+  String get fieldLabelFloor =>
+      _resolve('fieldLabelFloor', (loc) => loc.fieldLabelFloor);
+
+  @override
+  String get fieldLabelYearBuilt =>
+      _resolve('fieldLabelYearBuilt', (loc) => loc.fieldLabelYearBuilt);
+
+  @override
+  String get fieldLabelDescription =>
+      _resolve('fieldLabelDescription', (loc) => loc.fieldLabelDescription);
+
+  @override
+  String get fieldLabelFurnished =>
+      _resolve('fieldLabelFurnished', (loc) => loc.fieldLabelFurnished);
+
+  @override
+  String get fieldLabelParking =>
+      _resolve('fieldLabelParking', (loc) => loc.fieldLabelParking);
+
+  @override
+  String get fieldLabelAmenities =>
+      _resolve('fieldLabelAmenities', (loc) => loc.fieldLabelAmenities);
+
+  @override
+  String get fieldLabelPhone =>
+      _resolve('fieldLabelPhone', (loc) => loc.fieldLabelPhone);
+
+  @override
+  String get fieldLabelWhatsapp =>
+      _resolve('fieldLabelWhatsapp', (loc) => loc.fieldLabelWhatsapp);
+
+  @override
+  String get fieldLabelPhoneOrWhatsappHint => _resolve(
+    'fieldLabelPhoneOrWhatsappHint',
+    (loc) => loc.fieldLabelPhoneOrWhatsappHint,
+  );
+
+  @override
+  String get fieldLabelHideUntil =>
+      _resolve('fieldLabelHideUntil', (loc) => loc.fieldLabelHideUntil);
+
+  @override
+  String get fieldLabelHideUntilPick => _resolve(
+    'fieldLabelHideUntilPick',
+    (loc) => loc.fieldLabelHideUntilPick,
+  );
+
+  @override
+  String get fieldLabelLocationVisibility => _resolve(
+    'fieldLabelLocationVisibility',
+    (loc) => loc.fieldLabelLocationVisibility,
+  );
+
+  @override
+  String get fieldLabelContactNameVisibility => _resolve(
+    'fieldLabelContactNameVisibility',
+    (loc) => loc.fieldLabelContactNameVisibility,
+  );
+
+  @override
+  String get fieldLabelCurrency =>
+      _resolve('fieldLabelCurrency', (loc) => loc.fieldLabelCurrency);
+
+  @override
+  String get fieldLabelPrice =>
+      _resolve('fieldLabelPrice', (loc) => loc.fieldLabelPrice);
+
+  @override
+  String get listingPurposeSale =>
+      _resolve('listingPurposeSale', (loc) => loc.listingPurposeSale);
+
+  @override
+  String get listingPurposeRent =>
+      _resolve('listingPurposeRent', (loc) => loc.listingPurposeRent);
+
+  @override
+  String get listingPurposeDailyRent =>
+      _resolve('listingPurposeDailyRent', (loc) => loc.listingPurposeDailyRent);
+
+  @override
+  String get listingPurposeInvestment => _resolve(
+    'listingPurposeInvestment',
+    (loc) => loc.listingPurposeInvestment,
+  );
+
+  @override
+  String get propertyTypeApartment =>
+      _resolve('propertyTypeApartment', (loc) => loc.propertyTypeApartment);
+
+  @override
+  String get propertyTypeVilla =>
+      _resolve('propertyTypeVilla', (loc) => loc.propertyTypeVilla);
+
+  @override
+  String get propertyTypeLand =>
+      _resolve('propertyTypeLand', (loc) => loc.propertyTypeLand);
+
+  @override
+  String get propertyTypeShop =>
+      _resolve('propertyTypeShop', (loc) => loc.propertyTypeShop);
+
+  @override
+  String get propertyTypeOffice =>
+      _resolve('propertyTypeOffice', (loc) => loc.propertyTypeOffice);
+
+  @override
+  String get propertyTypeFarm =>
+      _resolve('propertyTypeFarm', (loc) => loc.propertyTypeFarm);
+
+  @override
+  String get propertyTypeWarehouse =>
+      _resolve('propertyTypeWarehouse', (loc) => loc.propertyTypeWarehouse);
+
+  @override
+  String get propertyTypeOther =>
+      _resolve('propertyTypeOther', (loc) => loc.propertyTypeOther);
+
+  @override
+  String get locationVisibilityHidden => _resolve(
+    'locationVisibilityHidden',
+    (loc) => loc.locationVisibilityHidden,
+  );
+
+  @override
+  String get locationVisibilityApproximate => _resolve(
+    'locationVisibilityApproximate',
+    (loc) => loc.locationVisibilityApproximate,
+  );
+
+  @override
+  String get locationVisibilityExact => _resolve(
+    'locationVisibilityExact',
+    (loc) => loc.locationVisibilityExact,
+  );
+
+  @override
+  String get locationVisibilityAdminOnly => _resolve(
+    'locationVisibilityAdminOnly',
+    (loc) => loc.locationVisibilityAdminOnly,
+  );
+
+  @override
+  String get contactNameVisibilityPublic => _resolve(
+    'contactNameVisibilityPublic',
+    (loc) => loc.contactNameVisibilityPublic,
+  );
+
+  @override
+  String get contactNameVisibilityAdminOnly => _resolve(
+    'contactNameVisibilityAdminOnly',
+    (loc) => loc.contactNameVisibilityAdminOnly,
+  );
+
+  @override
+  String get amenityElevator =>
+      _resolve('amenityElevator', (loc) => loc.amenityElevator);
+
+  @override
+  String get amenityBalcony =>
+      _resolve('amenityBalcony', (loc) => loc.amenityBalcony);
+
+  @override
+  String get amenitySwimmingPool =>
+      _resolve('amenitySwimmingPool', (loc) => loc.amenitySwimmingPool);
+
+  @override
+  String get amenityGarden =>
+      _resolve('amenityGarden', (loc) => loc.amenityGarden);
+
+  @override
+  String get amenitySecurity =>
+      _resolve('amenitySecurity', (loc) => loc.amenitySecurity);
+
+  @override
+  String get amenityGenerator =>
+      _resolve('amenityGenerator', (loc) => loc.amenityGenerator);
+
+  @override
+  String get amenitySolarPanels =>
+      _resolve('amenitySolarPanels', (loc) => loc.amenitySolarPanels);
+
+  @override
+  String get amenityCentralHeating =>
+      _resolve('amenityCentralHeating', (loc) => loc.amenityCentralHeating);
+
+  @override
+  String get amenityAirConditioning =>
+      _resolve('amenityAirConditioning', (loc) => loc.amenityAirConditioning);
+
+  @override
+  String get amenityFurnishedKitchen =>
+      _resolve('amenityFurnishedKitchen', (loc) => loc.amenityFurnishedKitchen);
+
+  @override
+  String get requiredFieldChipLabel => _resolve(
+    'requiredFieldChipLabel',
+    (loc) => loc.requiredFieldChipLabel,
+  );
+
+  @override
+  String get pricePreviewLabel =>
+      _resolve('pricePreviewLabel', (loc) => loc.pricePreviewLabel);
+
+  @override
+  String get validatorAreaMissingCentroid => _resolve(
+    'validatorAreaMissingCentroid',
+    (loc) => loc.validatorAreaMissingCentroid,
+  );
+
+  @override
+  String get submitFailureTitle =>
+      _resolve('submitFailureTitle', (loc) => loc.submitFailureTitle);
+
+  @override
+  String get submitFailureMissingFieldsHeader => _resolve(
+    'submitFailureMissingFieldsHeader',
+    (loc) => loc.submitFailureMissingFieldsHeader,
+  );
+
+  @override
+  String get submitErrorUnknown =>
+      _resolve('submitErrorUnknown', (loc) => loc.submitErrorUnknown);
+
+  @override
+  String get actionDismiss =>
+      _resolve('actionDismiss', (loc) => loc.actionDismiss);
+
+  @override
+  String get missingFieldListingsTitle => _resolve(
+    'missingFieldListingsTitle',
+    (loc) => loc.missingFieldListingsTitle,
+  );
+
+  @override
+  String get missingFieldListingsPurpose => _resolve(
+    'missingFieldListingsPurpose',
+    (loc) => loc.missingFieldListingsPurpose,
+  );
+
+  @override
+  String get missingFieldListingsPropertyType => _resolve(
+    'missingFieldListingsPropertyType',
+    (loc) => loc.missingFieldListingsPropertyType,
+  );
+
+  @override
+  String get missingFieldListingsGovernorateId => _resolve(
+    'missingFieldListingsGovernorateId',
+    (loc) => loc.missingFieldListingsGovernorateId,
+  );
+
+  @override
+  String get missingFieldListingsCityId => _resolve(
+    'missingFieldListingsCityId',
+    (loc) => loc.missingFieldListingsCityId,
+  );
+
+  @override
+  String get missingFieldListingsAreaId => _resolve(
+    'missingFieldListingsAreaId',
+    (loc) => loc.missingFieldListingsAreaId,
+  );
+
+  @override
+  String get missingFieldListingsAddressText => _resolve(
+    'missingFieldListingsAddressText',
+    (loc) => loc.missingFieldListingsAddressText,
+  );
+
+  @override
+  String get missingFieldListingsAreaSize => _resolve(
+    'missingFieldListingsAreaSize',
+    (loc) => loc.missingFieldListingsAreaSize,
+  );
+
+  @override
+  String get missingFieldListingsRooms => _resolve(
+    'missingFieldListingsRooms',
+    (loc) => loc.missingFieldListingsRooms,
+  );
+
+  @override
+  String get missingFieldListingsBathrooms => _resolve(
+    'missingFieldListingsBathrooms',
+    (loc) => loc.missingFieldListingsBathrooms,
+  );
+
+  @override
+  String get missingFieldListingsPhoneOrWhatsapp => _resolve(
+    'missingFieldListingsPhoneOrWhatsapp',
+    (loc) => loc.missingFieldListingsPhoneOrWhatsapp,
+  );
+
+  @override
+  String get missingFieldListingPricesPrimary => _resolve(
+    'missingFieldListingPricesPrimary',
+    (loc) => loc.missingFieldListingPricesPrimary,
+  );
 }

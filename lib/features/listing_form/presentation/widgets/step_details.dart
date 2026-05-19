@@ -1,0 +1,270 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../../core/theme/spacing.dart';
+import '../../../../core/validators/area_size_validator.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../domain/entities/listing.dart';
+import '../../domain/entities/listing_form_state.dart';
+import '../bloc/listing_form_bloc.dart';
+import '../bloc/listing_form_event.dart';
+import 'required_field_chip.dart';
+
+const List<String> kAmenitiesCatalog = <String>[
+  'elevator',
+  'balcony',
+  'swimming_pool',
+  'garden',
+  'security',
+  'generator',
+  'solar_panels',
+  'central_heating',
+  'air_conditioning',
+  'furnished_kitchen',
+];
+
+class StepDetails extends StatefulWidget {
+  const StepDetails({super.key});
+
+  @override
+  State<StepDetails> createState() => _StepDetailsState();
+}
+
+class _StepDetailsState extends State<StepDetails> {
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _areaSizeController = TextEditingController();
+  final TextEditingController _roomsController = TextEditingController();
+  final TextEditingController _bathroomsController = TextEditingController();
+  final TextEditingController _floorController = TextEditingController();
+  final TextEditingController _yearBuiltController = TextEditingController();
+  bool _seeded = false;
+  String? _areaSizeError;
+
+  @override
+  void dispose() {
+    _descriptionController.dispose();
+    _areaSizeController.dispose();
+    _roomsController.dispose();
+    _bathroomsController.dispose();
+    _floorController.dispose();
+    _yearBuiltController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return BlocBuilder<ListingFormBloc, ListingFormState>(
+      builder: (context, state) {
+        final listing = state.draftListing;
+        final details = state.draftDetails;
+        if (listing == null) return const SizedBox.shrink();
+        if (!_seeded) {
+          _descriptionController.text = details?.description ?? '';
+          _areaSizeController.text =
+              listing.areaSize?.toString().replaceAll(RegExp(r'\.0$'), '') ?? '';
+          _roomsController.text = listing.rooms?.toString() ?? '';
+          _bathroomsController.text = listing.bathrooms?.toString() ?? '';
+          _floorController.text = listing.floor?.toString() ?? '';
+          _yearBuiltController.text = details?.yearBuilt?.toString() ?? '';
+          _seeded = true;
+        }
+        final showRoomsBathrooms = listing.propertyType.isResidential;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(l10n.fieldLabelDescription,
+                style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: AppSpacing.sm),
+            TextField(
+              controller: _descriptionController,
+              maxLines: 4,
+              onChanged: (v) => context
+                  .read<ListingFormBloc>()
+                  .add(FieldChanged.description(v)),
+              decoration: const InputDecoration(border: OutlineInputBorder()),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Row(
+              children: [
+                Text(l10n.fieldLabelAreaSize,
+                    style: Theme.of(context).textTheme.titleSmall),
+                const SizedBox(width: AppSpacing.sm),
+                const RequiredFieldChip(),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            TextField(
+              controller: _areaSizeController,
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              inputFormatters: <TextInputFormatter>[
+                FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+              ],
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                errorText: _areaSizeError,
+              ),
+              onChanged: (v) {
+                final parsed = double.tryParse(v);
+                final error = AreaSizeValidator.validate(parsed, l10n);
+                setState(() => _areaSizeError = error);
+                context
+                    .read<ListingFormBloc>()
+                    .add(FieldChanged.areaSize(parsed));
+              },
+            ),
+            if (showRoomsBathrooms) ...[
+              const SizedBox(height: AppSpacing.lg),
+              Row(
+                children: [
+                  Expanded(child: _numericField(
+                    controller: _roomsController,
+                    label: l10n.fieldLabelRooms,
+                    onParsed: (i) => context
+                        .read<ListingFormBloc>()
+                        .add(FieldChanged.rooms(i)),
+                    required: true,
+                  )),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(child: _numericField(
+                    controller: _bathroomsController,
+                    label: l10n.fieldLabelBathrooms,
+                    onParsed: (i) => context
+                        .read<ListingFormBloc>()
+                        .add(FieldChanged.bathrooms(i)),
+                    required: true,
+                  )),
+                ],
+              ),
+            ],
+            const SizedBox(height: AppSpacing.lg),
+            _numericField(
+              controller: _floorController,
+              label: l10n.fieldLabelFloor,
+              onParsed: (i) => context
+                  .read<ListingFormBloc>()
+                  .add(FieldChanged.floor(i)),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            _numericField(
+              controller: _yearBuiltController,
+              label: l10n.fieldLabelYearBuilt,
+              onParsed: (i) => context
+                  .read<ListingFormBloc>()
+                  .add(FieldChanged.yearBuilt(i)),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            SwitchListTile(
+              title: Text(l10n.fieldLabelFurnished),
+              value: details?.furnished ?? false,
+              onChanged: (v) => context
+                  .read<ListingFormBloc>()
+                  .add(FieldChanged.furnished(v)),
+              contentPadding: EdgeInsets.zero,
+            ),
+            SwitchListTile(
+              title: Text(l10n.fieldLabelParking),
+              value: details?.parking ?? false,
+              onChanged: (v) => context
+                  .read<ListingFormBloc>()
+                  .add(FieldChanged.parking(v)),
+              contentPadding: EdgeInsets.zero,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(l10n.fieldLabelAmenities,
+                style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: AppSpacing.sm),
+            Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              children: kAmenitiesCatalog.map((key) {
+                final selected = details?.amenities.contains(key) ?? false;
+                return FilterChip(
+                  label: Text(_amenityLabel(key, l10n)),
+                  selected: selected,
+                  onSelected: (val) {
+                    final current = List<String>.from(
+                      details?.amenities ?? const <String>[],
+                    );
+                    if (val) {
+                      if (!current.contains(key)) current.add(key);
+                    } else {
+                      current.remove(key);
+                    }
+                    context
+                        .read<ListingFormBloc>()
+                        .add(FieldChanged.amenities(current));
+                  },
+                );
+              }).toList(),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _numericField({
+    required TextEditingController controller,
+    required String label,
+    required ValueChanged<int?> onParsed,
+    bool required = false,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Text(label, style: Theme.of(context).textTheme.titleSmall),
+            if (required) ...[
+              const SizedBox(width: AppSpacing.sm),
+              const RequiredFieldChip(),
+            ],
+          ],
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          inputFormatters: <TextInputFormatter>[
+            FilteringTextInputFormatter.digitsOnly,
+          ],
+          decoration: const InputDecoration(border: OutlineInputBorder()),
+          onChanged: (v) {
+            final parsed = int.tryParse(v);
+            onParsed(parsed);
+          },
+        ),
+      ],
+    );
+  }
+
+  String _amenityLabel(String key, AppLocalizations l10n) {
+    switch (key) {
+      case 'elevator':
+        return l10n.amenityElevator;
+      case 'balcony':
+        return l10n.amenityBalcony;
+      case 'swimming_pool':
+        return l10n.amenitySwimmingPool;
+      case 'garden':
+        return l10n.amenityGarden;
+      case 'security':
+        return l10n.amenitySecurity;
+      case 'generator':
+        return l10n.amenityGenerator;
+      case 'solar_panels':
+        return l10n.amenitySolarPanels;
+      case 'central_heating':
+        return l10n.amenityCentralHeating;
+      case 'air_conditioning':
+        return l10n.amenityAirConditioning;
+      case 'furnished_kitchen':
+        return l10n.amenityFurnishedKitchen;
+      default:
+        return key;
+    }
+  }
+}

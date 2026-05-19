@@ -29,7 +29,8 @@ import '../../features/locations/presentation/pages/governorate_detail_page.dart
 import '../../features/locations/presentation/pages/location_form_page.dart';
 import '../../features/locations/presentation/pages/location_picker_smoke_test_page.dart';
 import '../../features/locations/presentation/pages/locations_list_page.dart';
-import '../../features/listing_form/domain/entities/listing_form_mode.dart';
+import '../../features/listing_form/domain/entities/listing_form_state.dart';
+import '../../features/listing_form/presentation/pages/listing_form_page.dart';
 import '../../features/super_admin/presentation/pages/assign_role_page.dart';
 import '../../features/super_admin/presentation/pages/create_role_page.dart';
 import '../../features/super_admin/presentation/pages/role_editor_page.dart';
@@ -289,16 +290,16 @@ GoRouter buildAppRouter({
         path: AppRoutes.publisherListingsCreate,
         name: AppRouteNames.publisherListingsCreate,
         redirect: requirePublisherStatusRedirect,
-        builder: (context, state) => _TodoPhase10Placeholder(
-          'listing form ${ListingFormMode.create.name}',
-        ),
+        builder: (context, state) =>
+            const ListingFormPage(mode: ListingFormMode.create),
       ),
       GoRoute(
         path: AppRoutes.publisherListingsEdit,
         name: AppRouteNames.publisherListingsEdit,
         redirect: requirePublisherStatusRedirect,
-        builder: (context, state) => _TodoPhase10Placeholder(
-          'listing form ${ListingFormMode.edit.name}: ${state.pathParameters['id']}',
+        builder: (context, state) => ListingFormPage(
+          mode: ListingFormMode.edit,
+          listingId: state.pathParameters['id'],
         ),
       ),
       GoRoute(

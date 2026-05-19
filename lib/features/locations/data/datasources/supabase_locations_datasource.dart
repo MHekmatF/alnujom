@@ -1,6 +1,7 @@
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
+import '../../domain/failures.dart';
 import '../dtos/area_dto.dart';
 import '../dtos/city_dto.dart';
 import '../dtos/city_with_area_count_dto.dart';
@@ -261,6 +262,23 @@ class SupabaseLocationsDatasource {
         .select('id')
         .inFilter('city_id', ids);
     return areas.length;
+  }
+
+  // Phase 10 — area-centroid lookup for FR-013a (Q2 auto-fill).
+  Future<({double lat, double lng})> getAreaCentroid(String areaId) async {
+    final row = await _client
+        .from('areas')
+        .select('centroid_lat, centroid_lng')
+        .eq('id', areaId)
+        .single();
+    final lat = row['centroid_lat'];
+    final lng = row['centroid_lng'];
+    if (lat == null || lng == null) {
+      throw const CentroidMissingFailure();
+    }
+    final latD = lat is num ? lat.toDouble() : double.parse(lat as String);
+    final lngD = lng is num ? lng.toDouble() : double.parse(lng as String);
+    return (lat: latD, lng: lngD);
   }
 
   // ── Error code mapping (consumed by repository impl) ─────────────────────
