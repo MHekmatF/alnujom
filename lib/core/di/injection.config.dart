@@ -544,6 +544,17 @@ _i174.GetIt $initGetIt(
       gh<_i188.UpdateArea>(),
     ),
   );
+  gh.factory<_i315.ListingFormBloc>(
+    () => _i315.ListingFormBloc(
+      gh<_i802.LoadOrCreateDraft>(),
+      gh<_i874.SaveFormStep>(),
+      gh<_i829.SubmitListing>(),
+      gh<_i814.DeleteDraft>(),
+      gh<_i906.DeriveAreaCentroid>(),
+      gh<_i396.ValidateSubmitPayload>(),
+      gh<_i340.ListingsRepository>(),
+    ),
+  );
   gh.factory<_i807.OnboardingCubit>(
     () => _i807.OnboardingCubit(gh<_i430.OnboardingRepository>()),
   );
@@ -586,16 +597,6 @@ _i174.GetIt $initGetIt(
       gh<_i533.ListGovernorates>(),
       gh<_i53.ListCitiesForGovernorate>(),
       gh<_i358.ListAreasForCity>(),
-    ),
-  );
-  gh.factory<_i315.ListingFormBloc>(
-    () => _i315.ListingFormBloc(
-      gh<_i802.LoadOrCreateDraft>(),
-      gh<_i874.SaveFormStep>(),
-      gh<_i829.SubmitListing>(),
-      gh<_i814.DeleteDraft>(),
-      gh<_i906.DeriveAreaCentroid>(),
-      gh<_i396.ValidateSubmitPayload>(),
     ),
   );
   gh.factory<_i669.LocationsListBloc>(

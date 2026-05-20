@@ -8,6 +8,7 @@ import '../../domain/entities/listing_form_state.dart';
 import '../../domain/entities/listing_price.dart';
 import '../../domain/entities/listing_visibility.dart';
 import '../../domain/entities/submit_failure.dart';
+import '../../domain/repositories/listings_repository.dart';
 import '../../domain/usecases/delete_draft.dart';
 import '../../domain/usecases/derive_area_centroid.dart';
 import '../../domain/usecases/load_or_create_draft.dart';
@@ -25,6 +26,7 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
     this._deleteDraft,
     this._deriveAreaCentroid,
     this._validateSubmitPayload,
+    this._repository,
   ) : super(const ListingFormState(
           mode: ListingFormMode.create,
           currentStep: ListingFormStep.basics,
@@ -46,6 +48,7 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
   final DeleteDraft _deleteDraft;
   final DeriveAreaCentroid _deriveAreaCentroid;
   final ValidateSubmitPayload _validateSubmitPayload;
+  final ListingsRepository _repository;
 
   /// Set by the caller via `attachContext` before dispatching
   /// `LoadOrCreateDraftRequested`. Holds the signed-in publisher's
@@ -79,11 +82,34 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
       lastSaveError: null,
     ));
     try {
-      final listing = await _loadOrCreateDraft(publisherUserId);
-      emit(state.copyWith(
-        draftListing: listing,
-        loadInProgress: false,
-      ));
+      // Edit mode (Resubmit CTA from MyListingsPage, or deep-link to a
+      // specific draft/rejected listing): load by id + child rows. Otherwise
+      // fall back to LoadOrCreateDraft which finds the publisher's most-
+      // recent draft or inserts a new blank.
+      if (event.listingId != null) {
+        final listing = await _repository.loadListing(event.listingId!);
+        if (listing == null) {
+          emit(state.copyWith(
+            loadInProgress: false,
+            lastSaveError: 'Listing not found or not accessible',
+          ));
+          return;
+        }
+        final details = await _repository.loadDetails(listing.id);
+        final price = await _repository.loadPrimaryPrice(listing.id);
+        emit(state.copyWith(
+          draftListing: listing,
+          draftDetails: details,
+          draftPrice: price,
+          loadInProgress: false,
+        ));
+      } else {
+        final listing = await _loadOrCreateDraft(publisherUserId);
+        emit(state.copyWith(
+          draftListing: listing,
+          loadInProgress: false,
+        ));
+      }
     } catch (e) {
       emit(state.copyWith(
         loadInProgress: false,

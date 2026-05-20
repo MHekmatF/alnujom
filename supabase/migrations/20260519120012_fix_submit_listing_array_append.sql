@@ -1,5 +1,23 @@
--- Phase 10: Listing Creation - submit_listing RPC.
--- FR-010/010a; R-06 RPC not Edge Function, matching Phase 7/9 precedent.
+-- Phase 10 follow-up — fix submit_listing RPC's Q1 missing-fields accumulator.
+--
+-- Bug uncovered by quickstart.md Step 8 device walk: calling submit_listing
+-- against a partial draft errored with SQLSTATE 22P02 "malformed array
+-- literal: 'listings.purpose'" instead of the expected SQLSTATE 22023 with
+-- a missing_fields[] DETAIL payload.
+--
+-- Root cause: v_missing is declared TEXT[], but every accumulator line did
+--   v_missing := v_missing || 'literal_string';
+-- Postgres parses TEXT[] || TEXT as appending a text-array LITERAL to the
+-- left-hand array. Bare strings like 'listings.purpose' aren't valid array
+-- literals (no '{...}' braces), so the operator raised 22P02 before any
+-- Q1 logic could collect missing fields.
+--
+-- Fix: use array_append(v_missing, 'literal'), which is unambiguous and
+-- appends a scalar TEXT to a TEXT[] without literal parsing.
+--
+-- This bug masks the entire Q1 validation path; until this migration is
+-- applied, partial drafts produce an opaque 22P02 instead of the structured
+-- 22023+missing_fields[] failure the Flutter client knows how to render.
 
 CREATE OR REPLACE FUNCTION public.submit_listing(p_listing_id UUID)
 RETURNS JSONB
@@ -32,9 +50,6 @@ BEGIN
     RAISE EXCEPTION USING ERRCODE = '22023', MESSAGE = 'listing not in editable status';
   END IF;
 
-  -- array_append used instead of `v_missing || 'literal'` — Postgres parses
-  -- TEXT[] || TEXT as appending a text-array literal, which fails for bare
-  -- strings ("Array value must start with '{'"). array_append is unambiguous.
   IF length(trim(coalesce(v_listing.title, ''))) = 0          THEN v_missing := array_append(v_missing, 'listings.title');             END IF;
   IF v_listing.purpose IS NULL                                THEN v_missing := array_append(v_missing, 'listings.purpose');           END IF;
   IF v_listing.property_type IS NULL                          THEN v_missing := array_append(v_missing, 'listings.property_type');     END IF;
