@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../locations/domain/entities/location_picker_selection.dart';
@@ -99,11 +100,11 @@ class _StepLocationState extends State<StepLocation> {
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.errorContainer,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppRadii.sm),
                 ),
                 child: Text(
                   l10n.validatorAreaMissingCentroid,
-                  style: TextStyle(
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onErrorContainer,
                   ),
                 ),

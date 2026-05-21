@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
 
@@ -14,7 +15,7 @@ class StepMediaPlaceholder extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
         color: scheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppRadii.md),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,

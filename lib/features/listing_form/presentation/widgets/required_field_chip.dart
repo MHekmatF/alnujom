@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/radii.dart';
+import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
 
 class RequiredFieldChip extends StatelessWidget {
@@ -10,10 +12,13 @@ class RequiredFieldChip extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: AppSpacing.xs,
+        vertical: AppSpacing.xs,
+      ),
       decoration: BoxDecoration(
         color: scheme.errorContainer,
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(AppRadii.sm),
       ),
       child: Text(
         l10n.requiredFieldChipLabel,

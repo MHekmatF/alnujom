@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/radii.dart';
+import '../../../../core/theme/spacing.dart';
 import '../../domain/entities/listing_form_state.dart';
 
 class StepProgressIndicator extends StatelessWidget {
@@ -23,12 +25,14 @@ class StepProgressIndicator extends StatelessWidget {
         }
         return Expanded(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2),
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: AppSpacing.xs,
+            ),
             child: Container(
-              height: 6,
+              height: AppSpacing.xs,
               decoration: BoxDecoration(
                 color: color,
-                borderRadius: BorderRadius.circular(3),
+                borderRadius: BorderRadius.circular(AppRadii.sm),
               ),
             ),
           ),
