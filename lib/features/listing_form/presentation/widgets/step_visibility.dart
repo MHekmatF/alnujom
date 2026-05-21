@@ -106,7 +106,7 @@ class _StepVisibilityState extends State<StepVisibility> {
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Text(
-                  '— ${l10n.fieldLabelPhoneOrWhatsappHint}',
+                  l10n.fieldLabelPhoneOrWhatsappHint,
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
                 const SizedBox(width: AppSpacing.sm),

@@ -103,7 +103,9 @@ class _StepPricesState extends State<StepPrices> {
                       .map(
                         (c) => DropdownMenuItem(
                           value: c.code,
-                          child: Text('${c.code} · ${c.symbol}'),
+                          child: Text(
+                            l10n.currencyDropdownOption(c.code, c.symbol),
+                          ),
                         ),
                       )
                       .toList(),

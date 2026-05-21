@@ -1788,6 +1788,12 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('pricePreviewLabel', (loc) => loc.pricePreviewLabel);
 
   @override
+  String currencyDropdownOption(String code, String symbol) => _resolve(
+    'currencyDropdownOption',
+    (loc) => loc.currencyDropdownOption(code, symbol),
+  );
+
+  @override
   String get validatorAreaMissingCentroid => _resolve(
     'validatorAreaMissingCentroid',
     (loc) => loc.validatorAreaMissingCentroid,

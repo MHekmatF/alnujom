@@ -30,7 +30,7 @@ class PricePreviewSubline extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
-          '${l10n.pricePreviewLabel}: ',
+          l10n.pricePreviewLabel,
           style: Theme.of(context).textTheme.bodySmall,
         ),
         Text(

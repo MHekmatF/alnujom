@@ -430,7 +430,7 @@
   "fieldLabelAmenities": "المزايا",
   "fieldLabelPhone": "الهاتف",
   "fieldLabelWhatsapp": "واتساب",
-  "fieldLabelPhoneOrWhatsappHint": "هاتف أو واتساب مطلوب",
+  "fieldLabelPhoneOrWhatsappHint": "— هاتف أو واتساب مطلوب",
   "fieldLabelHideUntil": "إخفاء حتى",
   "fieldLabelHideUntilPick": "اختر تاريخاً (اختياري)",
   "fieldLabelLocationVisibility": "ظهور الموقع",
@@ -472,7 +472,9 @@
   "amenityFurnishedKitchen": "مطبخ مجهز",
 
   "requiredFieldChipLabel": "مطلوب",
-  "pricePreviewLabel": "المعاينة",
+  "pricePreviewLabel": "المعاينة: ",
+  "currencyDropdownOption": "{code} · {symbol}",
+  "@currencyDropdownOption": { "placeholders": { "code": { "type": "String" }, "symbol": { "type": "String" } } },
 
   "validatorAreaMissingCentroid": "تعذّر تحميل إحداثيات هذه المنطقة. اختر منطقة أخرى أو حاول لاحقاً.",
 
