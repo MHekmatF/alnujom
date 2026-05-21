@@ -21,7 +21,26 @@ sealed class LocationPickerEvent extends Equatable {
 }
 
 final class LocationPickerMountRequested extends LocationPickerEvent {
-  const LocationPickerMountRequested();
+  const LocationPickerMountRequested({
+    this.initialGovernorateId,
+    this.initialCityId,
+    this.initialAreaId,
+  });
+
+  /// Optional pre-selection — used by edit-mode forms (e.g. Phase 10
+  /// Resubmit on a Rejected listing) to display the previously-saved
+  /// governorate/city/area in the dropdowns. The bloc chains gov → city →
+  /// area loads in order.
+  final String? initialGovernorateId;
+  final String? initialCityId;
+  final String? initialAreaId;
+
+  @override
+  List<Object?> get props => [
+        initialGovernorateId,
+        initialCityId,
+        initialAreaId,
+      ];
 }
 
 final class LocationPickerGovernoratePicked extends LocationPickerEvent {
@@ -181,9 +200,39 @@ class LocationPickerBloc
     emit(const LocationPickerGovernoratesLoading());
     try {
       final govWithCounts = await _listGovernorates(includeInactive: false);
-      // Extract plain Governorate entities from the with-count wrappers
       final governorates = govWithCounts.map((g) => g.governorate).toList();
-      emit(LocationPickerReady(governorates: governorates));
+
+      // Fast-path: no initial selection → done.
+      if (event.initialGovernorateId == null) {
+        emit(LocationPickerReady(governorates: governorates));
+        return;
+      }
+
+      // Edit-mode chain: load gov → cities → maybe areas. We seed state
+      // synchronously rather than dispatching pick events so the
+      // intermediate states don't fire onChanged callbacks that would
+      // overwrite the consumer's pre-loaded BLoC state.
+      final cities = (await _listCitiesForGovernorate(
+        governorateId: event.initialGovernorateId!,
+        includeInactive: false,
+      )).map((c) => c.city).toList();
+
+      List<Area> areas = const [];
+      if (event.initialCityId != null) {
+        areas = await _listAreasForCity(
+          cityId: event.initialCityId!,
+          includeInactive: false,
+        );
+      }
+
+      emit(LocationPickerReady(
+        governorates: governorates,
+        cities: cities,
+        areas: areas,
+        selectedGovernorateId: event.initialGovernorateId,
+        selectedCityId: event.initialCityId,
+        selectedAreaId: event.initialAreaId,
+      ));
     } on LocationsFailure catch (failure) {
       emit(LocationPickerLoadFailed(failure.message));
     } on Object catch (error) {

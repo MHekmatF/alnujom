@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../locations/domain/entities/location_picker_selection.dart';
 import '../../../locations/presentation/widgets/location_picker.dart';
 import '../../domain/entities/listing_form_state.dart';
 import '../bloc/listing_form_bloc.dart';
@@ -45,8 +46,18 @@ class _StepLocationState extends State<StepLocation> {
             // Phase 8 LocationPicker reused verbatim per SC-021.
             // The picker emits a (governorate, city, area) selection; the
             // bloc translates each into a typed FieldChanged event.
+            // initialSelection seeds the dropdowns from the loaded listing
+            // (edit-mode / Resubmit on a rejected listing).
             LocationPicker(
               areaRequired: true,
+              initialSelection:
+                  (listing.governorateId != null && listing.cityId != null)
+                      ? LocationPickerSelection(
+                          governorateId: listing.governorateId!,
+                          cityId: listing.cityId!,
+                          areaId: listing.areaId,
+                        )
+                      : null,
               onChanged: (selection) {
                 final bloc = context.read<ListingFormBloc>();
                 final gov = selection?.governorateId;
