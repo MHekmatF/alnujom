@@ -19,8 +19,7 @@ class StepMediaPlaceholder extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(Icons.image_outlined,
-              size: 48, color: scheme.onSurfaceVariant),
+          Icon(Icons.image_outlined, size: 48, color: scheme.onSurfaceVariant),
           const SizedBox(height: AppSpacing.md),
           Text(
             l10n.listingFormMediaPlaceholderBanner,

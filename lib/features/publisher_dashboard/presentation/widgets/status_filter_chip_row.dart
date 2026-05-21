@@ -42,9 +42,8 @@ class StatusFilterChipRow extends StatelessWidget {
                 ChoiceChip(
                   label: Text(_labelFor(f, l10n)),
                   selected: state.statusFilter == f,
-                  onSelected: (_) => context
-                      .read<MyListingsBloc>()
-                      .add(ChangeStatusFilter(f)),
+                  onSelected: (_) =>
+                      context.read<MyListingsBloc>().add(ChangeStatusFilter(f)),
                 ),
                 const SizedBox(width: AppSpacing.sm),
               ],

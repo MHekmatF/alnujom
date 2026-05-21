@@ -23,9 +23,7 @@ class ListingDetailsDto {
 
   static ListingDetailsDto fromMap(Map<String, dynamic> row) {
     final raw = row['amenities'];
-    final amenities = raw is List
-        ? raw.cast<String>()
-        : <String>[];
+    final amenities = raw is List ? raw.cast<String>() : <String>[];
     return ListingDetailsDto(
       listingId: row['listing_id'] as String,
       description: row['description'] as String?,

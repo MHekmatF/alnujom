@@ -352,4 +352,3 @@ GoRouter buildAppRouter({
     },
   );
 }
-

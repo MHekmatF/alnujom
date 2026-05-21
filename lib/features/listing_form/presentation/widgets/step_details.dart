@@ -63,7 +63,8 @@ class _StepDetailsState extends State<StepDetails> {
         if (!_seeded) {
           _descriptionController.text = details?.description ?? '';
           _areaSizeController.text =
-              listing.areaSize?.toString().replaceAll(RegExp(r'\.0$'), '') ?? '';
+              listing.areaSize?.toString().replaceAll(RegExp(r'\.0$'), '') ??
+              '';
           _roomsController.text = listing.rooms?.toString() ?? '';
           _bathroomsController.text = listing.bathrooms?.toString() ?? '';
           _floorController.text = listing.floor?.toString() ?? '';
@@ -74,22 +75,26 @@ class _StepDetailsState extends State<StepDetails> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(l10n.fieldLabelDescription,
-                style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              l10n.fieldLabelDescription,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             const SizedBox(height: AppSpacing.sm),
             TextField(
               controller: _descriptionController,
               maxLines: 4,
-              onChanged: (v) => context
-                  .read<ListingFormBloc>()
-                  .add(FieldChanged.description(v)),
+              onChanged: (v) => context.read<ListingFormBloc>().add(
+                FieldChanged.description(v),
+              ),
               decoration: const InputDecoration(border: OutlineInputBorder()),
             ),
             const SizedBox(height: AppSpacing.lg),
             Row(
               children: [
-                Text(l10n.fieldLabelAreaSize,
-                    style: Theme.of(context).textTheme.titleSmall),
+                Text(
+                  l10n.fieldLabelAreaSize,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
                 const SizedBox(width: AppSpacing.sm),
                 const RequiredFieldChip(),
               ],
@@ -97,8 +102,9 @@ class _StepDetailsState extends State<StepDetails> {
             const SizedBox(height: AppSpacing.sm),
             TextField(
               controller: _areaSizeController,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               inputFormatters: <TextInputFormatter>[
                 FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
               ],
@@ -110,32 +116,36 @@ class _StepDetailsState extends State<StepDetails> {
                 final parsed = double.tryParse(v);
                 final error = AreaSizeValidator.validate(parsed, l10n);
                 setState(() => _areaSizeError = error);
-                context
-                    .read<ListingFormBloc>()
-                    .add(FieldChanged.areaSize(parsed));
+                context.read<ListingFormBloc>().add(
+                  FieldChanged.areaSize(parsed),
+                );
               },
             ),
             if (showRoomsBathrooms) ...[
               const SizedBox(height: AppSpacing.lg),
               Row(
                 children: [
-                  Expanded(child: _numericField(
-                    controller: _roomsController,
-                    label: l10n.fieldLabelRooms,
-                    onParsed: (i) => context
-                        .read<ListingFormBloc>()
-                        .add(FieldChanged.rooms(i)),
-                    required: true,
-                  )),
+                  Expanded(
+                    child: _numericField(
+                      controller: _roomsController,
+                      label: l10n.fieldLabelRooms,
+                      onParsed: (i) => context.read<ListingFormBloc>().add(
+                        FieldChanged.rooms(i),
+                      ),
+                      required: true,
+                    ),
+                  ),
                   const SizedBox(width: AppSpacing.md),
-                  Expanded(child: _numericField(
-                    controller: _bathroomsController,
-                    label: l10n.fieldLabelBathrooms,
-                    onParsed: (i) => context
-                        .read<ListingFormBloc>()
-                        .add(FieldChanged.bathrooms(i)),
-                    required: true,
-                  )),
+                  Expanded(
+                    child: _numericField(
+                      controller: _bathroomsController,
+                      label: l10n.fieldLabelBathrooms,
+                      onParsed: (i) => context.read<ListingFormBloc>().add(
+                        FieldChanged.bathrooms(i),
+                      ),
+                      required: true,
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -143,38 +153,38 @@ class _StepDetailsState extends State<StepDetails> {
             _numericField(
               controller: _floorController,
               label: l10n.fieldLabelFloor,
-              onParsed: (i) => context
-                  .read<ListingFormBloc>()
-                  .add(FieldChanged.floor(i)),
+              onParsed: (i) =>
+                  context.read<ListingFormBloc>().add(FieldChanged.floor(i)),
             ),
             const SizedBox(height: AppSpacing.lg),
             _numericField(
               controller: _yearBuiltController,
               label: l10n.fieldLabelYearBuilt,
-              onParsed: (i) => context
-                  .read<ListingFormBloc>()
-                  .add(FieldChanged.yearBuilt(i)),
+              onParsed: (i) => context.read<ListingFormBloc>().add(
+                FieldChanged.yearBuilt(i),
+              ),
             ),
             const SizedBox(height: AppSpacing.lg),
             SwitchListTile(
               title: Text(l10n.fieldLabelFurnished),
               value: details?.furnished ?? false,
-              onChanged: (v) => context
-                  .read<ListingFormBloc>()
-                  .add(FieldChanged.furnished(v)),
+              onChanged: (v) => context.read<ListingFormBloc>().add(
+                FieldChanged.furnished(v),
+              ),
               contentPadding: EdgeInsets.zero,
             ),
             SwitchListTile(
               title: Text(l10n.fieldLabelParking),
               value: details?.parking ?? false,
-              onChanged: (v) => context
-                  .read<ListingFormBloc>()
-                  .add(FieldChanged.parking(v)),
+              onChanged: (v) =>
+                  context.read<ListingFormBloc>().add(FieldChanged.parking(v)),
               contentPadding: EdgeInsets.zero,
             ),
             const SizedBox(height: AppSpacing.lg),
-            Text(l10n.fieldLabelAmenities,
-                style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              l10n.fieldLabelAmenities,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             const SizedBox(height: AppSpacing.sm),
             Wrap(
               spacing: AppSpacing.sm,
@@ -193,9 +203,9 @@ class _StepDetailsState extends State<StepDetails> {
                     } else {
                       current.remove(key);
                     }
-                    context
-                        .read<ListingFormBloc>()
-                        .add(FieldChanged.amenities(current));
+                    context.read<ListingFormBloc>().add(
+                      FieldChanged.amenities(current),
+                    );
                   },
                 );
               }).toList(),

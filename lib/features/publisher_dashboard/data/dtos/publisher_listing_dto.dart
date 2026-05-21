@@ -111,8 +111,7 @@ class PublisherListingDto {
       addressText: row['address_text'] as String?,
       latitude: _decimalOrNull(row['latitude']),
       longitude: _decimalOrNull(row['longitude']),
-      locationVisibility:
-          row['location_visibility'] as String? ?? 'hidden',
+      locationVisibility: row['location_visibility'] as String? ?? 'hidden',
       phone: row['phone'] as String?,
       whatsapp: row['whatsapp'] as String?,
       contactNameVisibility:
@@ -159,12 +158,12 @@ class PublisherListingDto {
       addressText: addressText,
       latitude: latitude?.toDouble(),
       longitude: longitude?.toDouble(),
-      locationVisibility:
-          LocationVisibilityDb.fromDbValue(locationVisibility),
+      locationVisibility: LocationVisibilityDb.fromDbValue(locationVisibility),
       phone: phone,
       whatsapp: whatsapp,
-      contactNameVisibility:
-          ContactNameVisibilityDb.fromDbValue(contactNameVisibility),
+      contactNameVisibility: ContactNameVisibilityDb.fromDbValue(
+        contactNameVisibility,
+      ),
       areaSize: areaSize?.toDouble(),
       rooms: rooms,
       bathrooms: bathrooms,
@@ -189,7 +188,8 @@ class PublisherListingDto {
             reason: latestHistoryReason,
           );
 
-    final price = primaryPriceId == null ||
+    final price =
+        primaryPriceId == null ||
             primaryPriceCurrencyCode == null ||
             primaryPriceAmount == null
         ? null

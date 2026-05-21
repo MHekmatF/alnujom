@@ -114,8 +114,9 @@ class ListingDto {
       locationVisibility: LocationVisibilityDb.fromDbValue(locationVisibility),
       phone: phone,
       whatsapp: whatsapp,
-      contactNameVisibility:
-          ContactNameVisibilityDb.fromDbValue(contactNameVisibility),
+      contactNameVisibility: ContactNameVisibilityDb.fromDbValue(
+        contactNameVisibility,
+      ),
       areaSize: areaSize?.toDouble(),
       rooms: rooms,
       bathrooms: bathrooms,

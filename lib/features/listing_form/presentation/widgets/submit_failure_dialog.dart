@@ -27,21 +27,23 @@ class SubmitFailureDialog extends StatelessWidget {
               style: Theme.of(context).textTheme.titleSmall,
             ),
             const SizedBox(height: 8),
-            ...failure.missingFields.map((path) => ListTile(
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.error_outline, size: 18),
-                  title: Text(_labelForPath(path, l10n)),
-                  trailing: TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      context
-                          .read<ListingFormBloc>()
-                          .add(JumpToStep(_stepForPath(path)));
-                    },
-                    child: Text(l10n.listingFormJumpToStepButton),
-                  ),
-                )),
+            ...failure.missingFields.map(
+              (path) => ListTile(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.error_outline, size: 18),
+                title: Text(_labelForPath(path, l10n)),
+                trailing: TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    context.read<ListingFormBloc>().add(
+                      JumpToStep(_stepForPath(path)),
+                    );
+                  },
+                  child: Text(l10n.listingFormJumpToStepButton),
+                ),
+              ),
+            ),
           ] else if (failure.userFacingMessage != null) ...[
             Text(failure.userFacingMessage!),
           ] else ...[

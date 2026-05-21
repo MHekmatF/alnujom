@@ -24,9 +24,9 @@ class StepReview extends StatelessWidget {
           children: [
             _Section(
               title: l10n.listingFormStepBasicsTitle,
-              onEdit: () => context
-                  .read<ListingFormBloc>()
-                  .add(const JumpToStep(ListingFormStep.basics)),
+              onEdit: () => context.read<ListingFormBloc>().add(
+                const JumpToStep(ListingFormStep.basics),
+              ),
               rows: [
                 (l10n.fieldLabelTitle, listing.title),
                 (l10n.fieldLabelPurpose, listing.purpose.name),
@@ -35,9 +35,9 @@ class StepReview extends StatelessWidget {
             ),
             _Section(
               title: l10n.listingFormStepLocationTitle,
-              onEdit: () => context
-                  .read<ListingFormBloc>()
-                  .add(const JumpToStep(ListingFormStep.location)),
+              onEdit: () => context.read<ListingFormBloc>().add(
+                const JumpToStep(ListingFormStep.location),
+              ),
               rows: [
                 (l10n.fieldLabelGovernorate, listing.governorateId ?? '—'),
                 (l10n.fieldLabelCity, listing.cityId ?? '—'),
@@ -47,30 +47,32 @@ class StepReview extends StatelessWidget {
             ),
             _Section(
               title: l10n.listingFormStepDetailsTitle,
-              onEdit: () => context
-                  .read<ListingFormBloc>()
-                  .add(const JumpToStep(ListingFormStep.details)),
+              onEdit: () => context.read<ListingFormBloc>().add(
+                const JumpToStep(ListingFormStep.details),
+              ),
               rows: [
                 (l10n.fieldLabelAreaSize, listing.areaSize?.toString() ?? '—'),
                 if (listing.propertyType.name == 'apartment' ||
                     listing.propertyType.name == 'villa') ...[
                   (l10n.fieldLabelRooms, listing.rooms?.toString() ?? '—'),
-                  (l10n.fieldLabelBathrooms,
-                      listing.bathrooms?.toString() ?? '—'),
+                  (
+                    l10n.fieldLabelBathrooms,
+                    listing.bathrooms?.toString() ?? '—',
+                  ),
                 ],
                 (l10n.fieldLabelFloor, listing.floor?.toString() ?? '—'),
                 (l10n.fieldLabelDescription, details?.description ?? '—'),
                 (
                   l10n.fieldLabelAmenities,
-                  (details?.amenities ?? const <String>[]).join(', ')
+                  (details?.amenities ?? const <String>[]).join(', '),
                 ),
               ],
             ),
             _Section(
               title: l10n.listingFormStepPricesTitle,
-              onEdit: () => context
-                  .read<ListingFormBloc>()
-                  .add(const JumpToStep(ListingFormStep.prices)),
+              onEdit: () => context.read<ListingFormBloc>().add(
+                const JumpToStep(ListingFormStep.prices),
+              ),
               rows: [
                 (l10n.fieldLabelCurrency, price?.currencyCode ?? '—'),
                 (l10n.fieldLabelPrice, price?.amount.toString() ?? '—'),
@@ -78,14 +80,18 @@ class StepReview extends StatelessWidget {
             ),
             _Section(
               title: l10n.listingFormStepVisibilityTitle,
-              onEdit: () => context
-                  .read<ListingFormBloc>()
-                  .add(const JumpToStep(ListingFormStep.visibility)),
+              onEdit: () => context.read<ListingFormBloc>().add(
+                const JumpToStep(ListingFormStep.visibility),
+              ),
               rows: [
-                (l10n.fieldLabelLocationVisibility,
-                    listing.locationVisibility.name),
-                (l10n.fieldLabelContactNameVisibility,
-                    listing.contactNameVisibility.name),
+                (
+                  l10n.fieldLabelLocationVisibility,
+                  listing.locationVisibility.name,
+                ),
+                (
+                  l10n.fieldLabelContactNameVisibility,
+                  listing.contactNameVisibility.name,
+                ),
                 (l10n.fieldLabelPhone, listing.phone ?? '—'),
                 (l10n.fieldLabelWhatsapp, listing.whatsapp ?? '—'),
               ],
@@ -133,28 +139,31 @@ class _Section extends StatelessWidget {
               ],
             ),
             const SizedBox(height: AppSpacing.sm),
-            ...rows.map((row) => Padding(
-                  padding:
-                      const EdgeInsetsDirectional.only(bottom: AppSpacing.xs),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width: 120,
-                        child: Text(
-                          row.$1,
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
+            ...rows.map(
+              (row) => Padding(
+                padding: const EdgeInsetsDirectional.only(
+                  bottom: AppSpacing.xs,
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: 120,
+                      child: Text(
+                        row.$1,
+                        style: Theme.of(context).textTheme.bodySmall,
                       ),
-                      Expanded(
-                        child: Text(
-                          row.$2.isEmpty ? '—' : row.$2,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        row.$2.isEmpty ? '—' : row.$2,
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
-                    ],
-                  ),
-                )),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),

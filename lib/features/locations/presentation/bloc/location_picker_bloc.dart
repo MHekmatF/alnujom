@@ -37,10 +37,10 @@ final class LocationPickerMountRequested extends LocationPickerEvent {
 
   @override
   List<Object?> get props => [
-        initialGovernorateId,
-        initialCityId,
-        initialAreaId,
-      ];
+    initialGovernorateId,
+    initialCityId,
+    initialAreaId,
+  ];
 }
 
 final class LocationPickerGovernoratePicked extends LocationPickerEvent {
@@ -225,14 +225,16 @@ class LocationPickerBloc
         );
       }
 
-      emit(LocationPickerReady(
-        governorates: governorates,
-        cities: cities,
-        areas: areas,
-        selectedGovernorateId: event.initialGovernorateId,
-        selectedCityId: event.initialCityId,
-        selectedAreaId: event.initialAreaId,
-      ));
+      emit(
+        LocationPickerReady(
+          governorates: governorates,
+          cities: cities,
+          areas: areas,
+          selectedGovernorateId: event.initialGovernorateId,
+          selectedCityId: event.initialCityId,
+          selectedAreaId: event.initialAreaId,
+        ),
+      );
     } on LocationsFailure catch (failure) {
       emit(LocationPickerLoadFailed(failure.message));
     } on Object catch (error) {

@@ -1558,10 +1558,8 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('fieldLabelPurpose', (loc) => loc.fieldLabelPurpose);
 
   @override
-  String get fieldLabelPropertyType => _resolve(
-    'fieldLabelPropertyType',
-    (loc) => loc.fieldLabelPropertyType,
-  );
+  String get fieldLabelPropertyType =>
+      _resolve('fieldLabelPropertyType', (loc) => loc.fieldLabelPropertyType);
 
   @override
   String get fieldLabelGovernorate =>
@@ -1634,10 +1632,8 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('fieldLabelHideUntil', (loc) => loc.fieldLabelHideUntil);
 
   @override
-  String get fieldLabelHideUntilPick => _resolve(
-    'fieldLabelHideUntilPick',
-    (loc) => loc.fieldLabelHideUntilPick,
-  );
+  String get fieldLabelHideUntilPick =>
+      _resolve('fieldLabelHideUntilPick', (loc) => loc.fieldLabelHideUntilPick);
 
   @override
   String get fieldLabelLocationVisibility => _resolve(
@@ -1722,10 +1718,8 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
-  String get locationVisibilityExact => _resolve(
-    'locationVisibilityExact',
-    (loc) => loc.locationVisibilityExact,
-  );
+  String get locationVisibilityExact =>
+      _resolve('locationVisibilityExact', (loc) => loc.locationVisibilityExact);
 
   @override
   String get locationVisibilityAdminOnly => _resolve(
@@ -1786,10 +1780,8 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('amenityFurnishedKitchen', (loc) => loc.amenityFurnishedKitchen);
 
   @override
-  String get requiredFieldChipLabel => _resolve(
-    'requiredFieldChipLabel',
-    (loc) => loc.requiredFieldChipLabel,
-  );
+  String get requiredFieldChipLabel =>
+      _resolve('requiredFieldChipLabel', (loc) => loc.requiredFieldChipLabel);
 
   @override
   String get pricePreviewLabel =>
@@ -1901,9 +1893,9 @@ final class _DebugAppLocalizations extends AppLocalizations {
 
   @override
   String get myListingsEmptyCtaCreateFirst => _resolve(
-        'myListingsEmptyCtaCreateFirst',
-        (loc) => loc.myListingsEmptyCtaCreateFirst,
-      );
+    'myListingsEmptyCtaCreateFirst',
+    (loc) => loc.myListingsEmptyCtaCreateFirst,
+  );
 
   @override
   String get myListingsErrorPrefix =>
@@ -1919,9 +1911,9 @@ final class _DebugAppLocalizations extends AppLocalizations {
 
   @override
   String get statusBadgePendingReview => _resolve(
-        'statusBadgePendingReview',
-        (loc) => loc.statusBadgePendingReview,
-      );
+    'statusBadgePendingReview',
+    (loc) => loc.statusBadgePendingReview,
+  );
 
   @override
   String get statusBadgeApproved =>
@@ -1961,9 +1953,9 @@ final class _DebugAppLocalizations extends AppLocalizations {
 
   @override
   String get approvedNotEditableMessage => _resolve(
-        'approvedNotEditableMessage',
-        (loc) => loc.approvedNotEditableMessage,
-      );
+    'approvedNotEditableMessage',
+    (loc) => loc.approvedNotEditableMessage,
+  );
 
   @override
   String get readOnlyPreviewTitle =>

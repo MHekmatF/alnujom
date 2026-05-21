@@ -22,9 +22,7 @@ extension ListingFormStepIndex on ListingFormStep {
 
   ListingFormStep? get next {
     final i = index0 + 1;
-    return i < ListingFormStep.values.length
-        ? ListingFormStep.values[i]
-        : null;
+    return i < ListingFormStep.values.length ? ListingFormStep.values[i] : null;
   }
 
   ListingFormStep? get previous {

@@ -73,31 +73,29 @@ class ListingCard extends StatelessWidget {
               if (price != null)
                 Text(
                   _formatPrice(price.amount, price.currencyCode, locale),
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
                 ),
               const SizedBox(height: AppSpacing.xs),
               if (_locationLabel(locale).isNotEmpty)
                 Text(
                   _locationLabel(locale),
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color:
-                            Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
               const SizedBox(height: AppSpacing.xs),
               Text(
                 _formatDate(listing.createdAt),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
               if (publisherListing.hasRejectionReason) ...[
                 const SizedBox(height: AppSpacing.md),
                 RejectionReasonBlock(
-                  reason: publisherListing
-                      .latestStatusHistoryEntry!.reason!,
+                  reason: publisherListing.latestStatusHistoryEntry!.reason!,
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 ResubmitCta(listingId: listing.id),
@@ -154,9 +152,8 @@ class ListingCard extends StatelessWidget {
     } else {
       Navigator.of(context).push(
         MaterialPageRoute<void>(
-          builder: (_) => ReadOnlyListingPreview(
-            publisherListing: publisherListing,
-          ),
+          builder: (_) =>
+              ReadOnlyListingPreview(publisherListing: publisherListing),
         ),
       );
     }

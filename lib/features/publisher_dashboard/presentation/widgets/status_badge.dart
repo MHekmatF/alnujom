@@ -25,9 +25,10 @@ class StatusBadge extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final palette = AppColors.of(context);
     final (Color bg, Color fg) = switch (status) {
-      ListingStatus.draft ||
-      ListingStatus.paused =>
-        (scheme.surfaceContainerHighest, scheme.onSurface),
+      ListingStatus.draft || ListingStatus.paused => (
+        scheme.surfaceContainerHighest,
+        scheme.onSurface,
+      ),
       ListingStatus.pendingReview => (
         palette.warning.withValues(alpha: 0.15),
         palette.warning,
@@ -36,13 +37,17 @@ class StatusBadge extends StatelessWidget {
         palette.success.withValues(alpha: 0.15),
         palette.success,
       ),
-      ListingStatus.rejected =>
-        (scheme.errorContainer, scheme.onErrorContainer),
+      ListingStatus.rejected => (
+        scheme.errorContainer,
+        scheme.onErrorContainer,
+      ),
       ListingStatus.sold ||
       ListingStatus.rented ||
       ListingStatus.expired ||
-      ListingStatus.deleted =>
-        (scheme.surfaceContainerHigh, scheme.onSurfaceVariant),
+      ListingStatus.deleted => (
+        scheme.surfaceContainerHigh,
+        scheme.onSurfaceVariant,
+      ),
     };
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -56,9 +61,9 @@ class StatusBadge extends StatelessWidget {
       child: Text(
         labelFor(status, l10n),
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: fg,
-              fontWeight: FontWeight.w600,
-            ),
+          color: fg,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

@@ -52,12 +52,12 @@ class _StepLocationState extends State<StepLocation> {
               areaRequired: true,
               initialSelection:
                   (listing.governorateId != null && listing.cityId != null)
-                      ? LocationPickerSelection(
-                          governorateId: listing.governorateId!,
-                          cityId: listing.cityId!,
-                          areaId: listing.areaId,
-                        )
-                      : null,
+                  ? LocationPickerSelection(
+                      governorateId: listing.governorateId!,
+                      cityId: listing.cityId!,
+                      areaId: listing.areaId,
+                    )
+                  : null,
               onChanged: (selection) {
                 final bloc = context.read<ListingFormBloc>();
                 final gov = selection?.governorateId;
@@ -85,9 +85,9 @@ class _StepLocationState extends State<StepLocation> {
             TextField(
               controller: _addressController,
               maxLines: 2,
-              onChanged: (v) => context
-                  .read<ListingFormBloc>()
-                  .add(FieldChanged.addressText(v)),
+              onChanged: (v) => context.read<ListingFormBloc>().add(
+                FieldChanged.addressText(v),
+              ),
               decoration: InputDecoration(
                 hintText: l10n.fieldLabelAddressText,
                 border: const OutlineInputBorder(),
@@ -115,4 +115,3 @@ class _StepLocationState extends State<StepLocation> {
     );
   }
 }
-

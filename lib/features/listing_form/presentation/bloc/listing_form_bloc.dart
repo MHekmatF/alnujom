@@ -27,10 +27,12 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
     this._deriveAreaCentroid,
     this._validateSubmitPayload,
     this._repository,
-  ) : super(const ListingFormState(
+  ) : super(
+        const ListingFormState(
           mode: ListingFormMode.create,
           currentStep: ListingFormStep.basics,
-        )) {
+        ),
+      ) {
     on<LoadOrCreateDraftRequested>(_onLoadOrCreateDraftRequested);
     on<FieldChanged>(_onFieldChanged);
     on<AreaCentroidResolved>(_onAreaCentroidResolved);
@@ -70,17 +72,17 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
   ) async {
     final publisherUserId = _publisherUserId;
     if (publisherUserId == null) {
-      emit(state.copyWith(
-        lastSaveError: 'publisherUserId not attached',
-        loadInProgress: false,
-      ));
+      emit(
+        state.copyWith(
+          lastSaveError: 'publisherUserId not attached',
+          loadInProgress: false,
+        ),
+      );
       return;
     }
-    emit(state.copyWith(
-      mode: _mode,
-      loadInProgress: true,
-      lastSaveError: null,
-    ));
+    emit(
+      state.copyWith(mode: _mode, loadInProgress: true, lastSaveError: null),
+    );
     try {
       // Edit mode (Resubmit CTA from MyListingsPage, or deep-link to a
       // specific draft/rejected listing): load by id + child rows. Otherwise
@@ -89,32 +91,30 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
       if (event.listingId != null) {
         final listing = await _repository.loadListing(event.listingId!);
         if (listing == null) {
-          emit(state.copyWith(
-            loadInProgress: false,
-            lastSaveError: 'Listing not found or not accessible',
-          ));
+          emit(
+            state.copyWith(
+              loadInProgress: false,
+              lastSaveError: 'Listing not found or not accessible',
+            ),
+          );
           return;
         }
         final details = await _repository.loadDetails(listing.id);
         final price = await _repository.loadPrimaryPrice(listing.id);
-        emit(state.copyWith(
-          draftListing: listing,
-          draftDetails: details,
-          draftPrice: price,
-          loadInProgress: false,
-        ));
+        emit(
+          state.copyWith(
+            draftListing: listing,
+            draftDetails: details,
+            draftPrice: price,
+            loadInProgress: false,
+          ),
+        );
       } else {
         final listing = await _loadOrCreateDraft(publisherUserId);
-        emit(state.copyWith(
-          draftListing: listing,
-          loadInProgress: false,
-        ));
+        emit(state.copyWith(draftListing: listing, loadInProgress: false));
       }
     } catch (e) {
-      emit(state.copyWith(
-        loadInProgress: false,
-        lastSaveError: e.toString(),
-      ));
+      emit(state.copyWith(loadInProgress: false, lastSaveError: e.toString()));
     }
   }
 
@@ -155,25 +155,29 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
       case ListingFormField.floor:
         nextListing = listing.copyWith(floor: event.value as int?);
       case ListingFormField.description:
-        nextDetails = _ensureDetails(nextDetails, listing.id).copyWith(
-          description: event.value as String?,
-        );
+        nextDetails = _ensureDetails(
+          nextDetails,
+          listing.id,
+        ).copyWith(description: event.value as String?);
       case ListingFormField.amenities:
         nextDetails = _ensureDetails(nextDetails, listing.id).copyWith(
           amenities: (event.value as List<String>?) ?? const <String>[],
         );
       case ListingFormField.yearBuilt:
-        nextDetails = _ensureDetails(nextDetails, listing.id).copyWith(
-          yearBuilt: event.value as int?,
-        );
+        nextDetails = _ensureDetails(
+          nextDetails,
+          listing.id,
+        ).copyWith(yearBuilt: event.value as int?);
       case ListingFormField.furnished:
-        nextDetails = _ensureDetails(nextDetails, listing.id).copyWith(
-          furnished: event.value as bool?,
-        );
+        nextDetails = _ensureDetails(
+          nextDetails,
+          listing.id,
+        ).copyWith(furnished: event.value as bool?);
       case ListingFormField.parking:
-        nextDetails = _ensureDetails(nextDetails, listing.id).copyWith(
-          parking: event.value as bool?,
-        );
+        nextDetails = _ensureDetails(
+          nextDetails,
+          listing.id,
+        ).copyWith(parking: event.value as bool?);
       case ListingFormField.priceCurrencyCode:
         final code = event.value as String?;
         if (code == null || code.isEmpty) {
@@ -219,13 +223,15 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
         );
     }
 
-    emit(state.copyWith(
-      draftListing: nextListing,
-      draftDetails: nextDetails,
-      draftPrice: nextPrice,
-      draftVisibility: nextVisibility,
-      lastSubmitFailure: null,
-    ));
+    emit(
+      state.copyWith(
+        draftListing: nextListing,
+        draftDetails: nextDetails,
+        draftPrice: nextPrice,
+        draftVisibility: nextVisibility,
+        lastSubmitFailure: null,
+      ),
+    );
 
     // After an area pick on the location step, kick off the centroid lookup.
     if (event.field == ListingFormField.areaId &&
@@ -233,10 +239,12 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
         (event.value as String).isNotEmpty) {
       try {
         final centroid = await _deriveAreaCentroid(event.value as String);
-        add(AreaCentroidResolved(
-          latitude: centroid.latitude,
-          longitude: centroid.longitude,
-        ));
+        add(
+          AreaCentroidResolved(
+            latitude: centroid.latitude,
+            longitude: centroid.longitude,
+          ),
+        );
       } catch (_) {
         add(const AreaCentroidLookupFailed());
       }
@@ -249,28 +257,32 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
   ) {
     final listing = state.draftListing;
     if (listing == null) return;
-    emit(state.copyWith(
-      draftListing: listing.copyWith(
-        latitude: event.latitude,
-        longitude: event.longitude,
+    emit(
+      state.copyWith(
+        draftListing: listing.copyWith(
+          latitude: event.latitude,
+          longitude: event.longitude,
+        ),
+        stepValidationErrors: <String, String?>{
+          ...state.stepValidationErrors,
+          'location.centroid': null,
+        },
       ),
-      stepValidationErrors: <String, String?>{
-        ...state.stepValidationErrors,
-        'location.centroid': null,
-      },
-    ));
+    );
   }
 
   void _onAreaCentroidLookupFailed(
     AreaCentroidLookupFailed event,
     Emitter<ListingFormState> emit,
   ) {
-    emit(state.copyWith(
-      stepValidationErrors: <String, String?>{
-        ...state.stepValidationErrors,
-        'location.centroid': 'centroid_missing',
-      },
-    ));
+    emit(
+      state.copyWith(
+        stepValidationErrors: <String, String?>{
+          ...state.stepValidationErrors,
+          'location.centroid': 'centroid_missing',
+        },
+      ),
+    );
   }
 
   Future<void> _onSaveStepAndContinue(
@@ -282,15 +294,9 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
     try {
       await _saveFormStep(state, state.currentStep);
       final next = state.currentStep.next ?? state.currentStep;
-      emit(state.copyWith(
-        saveInProgress: false,
-        currentStep: next,
-      ));
+      emit(state.copyWith(saveInProgress: false, currentStep: next));
     } catch (e) {
-      emit(state.copyWith(
-        saveInProgress: false,
-        lastSaveError: e.toString(),
-      ));
+      emit(state.copyWith(saveInProgress: false, lastSaveError: e.toString()));
     }
   }
 
@@ -304,10 +310,7 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
       await _saveFormStep(state, state.currentStep);
       emit(state.copyWith(saveInProgress: false, savedAndExited: true));
     } catch (e) {
-      emit(state.copyWith(
-        saveInProgress: false,
-        lastSaveError: e.toString(),
-      ));
+      emit(state.copyWith(saveInProgress: false, lastSaveError: e.toString()));
     }
   }
 
@@ -323,45 +326,55 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
     if (listing == null || state.submitInProgress) return;
     final validation = _validateSubmitPayload(state);
     if (!validation.ok) {
-      emit(state.copyWith(
-        lastSubmitFailure: SubmitFailure(
-          missingFields: validation.missingFields,
-          rawSqlState: null,
-          userFacingMessage: null,
+      emit(
+        state.copyWith(
+          lastSubmitFailure: SubmitFailure(
+            missingFields: validation.missingFields,
+            rawSqlState: null,
+            userFacingMessage: null,
+          ),
         ),
-      ));
+      );
       return;
     }
-    emit(state.copyWith(
-      submitInProgress: true,
-      lastSubmitFailure: null,
-      submitSucceeded: false,
-    ));
+    emit(
+      state.copyWith(
+        submitInProgress: true,
+        lastSubmitFailure: null,
+        submitSucceeded: false,
+      ),
+    );
     try {
       final result = await _submitListing(listing.id);
-      emit(state.copyWith(
-        submitInProgress: false,
-        draftListing: listing.copyWith(status: result.status),
-        submitSucceeded: true,
-      ));
+      emit(
+        state.copyWith(
+          submitInProgress: false,
+          draftListing: listing.copyWith(status: result.status),
+          submitSucceeded: true,
+        ),
+      );
     } on SubmitListingFailureException catch (e) {
-      emit(state.copyWith(
-        submitInProgress: false,
-        lastSubmitFailure: SubmitFailure(
-          missingFields: e.missingFields,
-          rawSqlState: e.sqlState,
-          userFacingMessage: e.message,
+      emit(
+        state.copyWith(
+          submitInProgress: false,
+          lastSubmitFailure: SubmitFailure(
+            missingFields: e.missingFields,
+            rawSqlState: e.sqlState,
+            userFacingMessage: e.message,
+          ),
         ),
-      ));
+      );
     } catch (e) {
-      emit(state.copyWith(
-        submitInProgress: false,
-        lastSubmitFailure: SubmitFailure(
-          missingFields: const <String>[],
-          rawSqlState: null,
-          userFacingMessage: e.toString(),
+      emit(
+        state.copyWith(
+          submitInProgress: false,
+          lastSubmitFailure: SubmitFailure(
+            missingFields: const <String>[],
+            rawSqlState: null,
+            userFacingMessage: e.toString(),
+          ),
         ),
-      ));
+      );
     }
   }
 
@@ -373,16 +386,21 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
     if (listing == null) return;
     try {
       await _deleteDraft(listing.id);
-      emit(const ListingFormState(
-        mode: ListingFormMode.create,
-        currentStep: ListingFormStep.basics,
-      ));
+      emit(
+        const ListingFormState(
+          mode: ListingFormMode.create,
+          currentStep: ListingFormStep.basics,
+        ),
+      );
     } catch (e) {
       emit(state.copyWith(lastSaveError: e.toString()));
     }
   }
 
-  static ListingDetails _ensureDetails(ListingDetails? existing, String listingId) {
+  static ListingDetails _ensureDetails(
+    ListingDetails? existing,
+    String listingId,
+  ) {
     if (existing != null) return existing;
     final now = DateTime.now();
     return ListingDetails(

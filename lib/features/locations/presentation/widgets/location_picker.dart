@@ -25,13 +25,14 @@ class LocationPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<LocationPickerBloc>(
-      create: (_) =>
-          getIt<LocationPickerBloc>()
-            ..add(LocationPickerMountRequested(
-              initialGovernorateId: initialSelection?.governorateId,
-              initialCityId: initialSelection?.cityId,
-              initialAreaId: initialSelection?.areaId,
-            )),
+      create: (_) => getIt<LocationPickerBloc>()
+        ..add(
+          LocationPickerMountRequested(
+            initialGovernorateId: initialSelection?.governorateId,
+            initialCityId: initialSelection?.cityId,
+            initialAreaId: initialSelection?.areaId,
+          ),
+        ),
       child: _LocationPickerBody(
         onChanged: onChanged,
         required: required,

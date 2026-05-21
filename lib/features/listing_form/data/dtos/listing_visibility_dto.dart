@@ -35,8 +35,7 @@ class ListingVisibilityDto {
     return ListingVisibilityEntity(
       listingId: listingId,
       locationVisibility: LocationVisibilityDb.fromDbValue(locationVisibility),
-      contactVisibility:
-          ContactNameVisibilityDb.fromDbValue(contactVisibility),
+      contactVisibility: ContactNameVisibilityDb.fromDbValue(contactVisibility),
       hideUntil: hideUntil,
       lastUpdatedBy: lastUpdatedBy,
       updatedAt: updatedAt,

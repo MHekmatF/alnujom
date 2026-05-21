@@ -73,9 +73,9 @@ class _StepPricesState extends State<StepPrices> {
               _currencyAutoSelected = true;
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (!mounted) return;
-                context
-                    .read<ListingFormBloc>()
-                    .add(FieldChanged.priceCurrencyCode(selected.code));
+                context.read<ListingFormBloc>().add(
+                  FieldChanged.priceCurrencyCode(selected.code),
+                );
               });
             }
             // Q3 single-currency lock — NO "Add another" button, NO multi-row.
@@ -96,19 +96,22 @@ class _StepPricesState extends State<StepPrices> {
                 DropdownButtonFormField<String>(
                   initialValue: price?.currencyCode ?? selected.code,
                   isExpanded: true,
-                  decoration:
-                      const InputDecoration(border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                  ),
                   items: currencies
-                      .map((c) => DropdownMenuItem(
-                            value: c.code,
-                            child: Text('${c.code} · ${c.symbol}'),
-                          ))
+                      .map(
+                        (c) => DropdownMenuItem(
+                          value: c.code,
+                          child: Text('${c.code} · ${c.symbol}'),
+                        ),
+                      )
                       .toList(),
                   onChanged: (v) {
                     if (v != null) {
-                      context
-                          .read<ListingFormBloc>()
-                          .add(FieldChanged.priceCurrencyCode(v));
+                      context.read<ListingFormBloc>().add(
+                        FieldChanged.priceCurrencyCode(v),
+                      );
                     }
                   },
                 ),
@@ -126,8 +129,9 @@ class _StepPricesState extends State<StepPrices> {
                 const SizedBox(height: AppSpacing.sm),
                 TextField(
                   controller: _amountController,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   inputFormatters: <TextInputFormatter>[
                     FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                   ],
@@ -148,9 +152,9 @@ class _StepPricesState extends State<StepPrices> {
                     );
                     setState(() => _amountError = error);
                     if (parsed != null) {
-                      context
-                          .read<ListingFormBloc>()
-                          .add(FieldChanged.priceAmount(parsed));
+                      context.read<ListingFormBloc>().add(
+                        FieldChanged.priceAmount(parsed),
+                      );
                     }
                   },
                 ),

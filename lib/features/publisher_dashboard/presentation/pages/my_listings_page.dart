@@ -79,20 +79,19 @@ class _MyListingsViewState extends State<_MyListingsView> {
                       builder: (context, governorates, areas) {
                         return RefreshIndicator(
                           onRefresh: () async {
-                            context
-                                .read<MyListingsBloc>()
-                                .add(const Refresh());
+                            context.read<MyListingsBloc>().add(const Refresh());
                             await _waitForRefresh(context);
                           },
                           child: ListView.builder(
                             physics: const AlwaysScrollableScrollPhysics(),
-                            itemCount: state.listings.length +
+                            itemCount:
+                                state.listings.length +
                                 (state.endReached ? 0 : 1),
                             itemBuilder: (context, index) {
                               if (index >= state.listings.length) {
-                                context
-                                    .read<MyListingsBloc>()
-                                    .add(const LoadMore());
+                                context.read<MyListingsBloc>().add(
+                                  const LoadMore(),
+                                );
                                 return const Padding(
                                   padding: EdgeInsets.all(AppSpacing.lg),
                                   child: Center(
@@ -133,17 +132,15 @@ class _MyListingsViewState extends State<_MyListingsView> {
 /// governorate is fetched only once per session. The view exposes only IDs;
 /// the card and read-only preview want the locale-specific names.
 class _LocationLabelsHost extends StatefulWidget {
-  const _LocationLabelsHost({
-    required this.listings,
-    required this.builder,
-  });
+  const _LocationLabelsHost({required this.listings, required this.builder});
 
   final List<PublisherListing> listings;
   final Widget Function(
     BuildContext context,
     Map<String, Governorate> governorates,
     Map<String, Area> areas,
-  ) builder;
+  )
+  builder;
 
   @override
   State<_LocationLabelsHost> createState() => _LocationLabelsHostState();
@@ -175,7 +172,9 @@ class _LocationLabelsHostState extends State<_LocationLabelsHost> {
     if (a.length != b.length) return false;
     for (var i = 0; i < a.length; i++) {
       if (a[i].listing.id != b[i].listing.id) return false;
-      if (a[i].listing.governorateId != b[i].listing.governorateId) return false;
+      if (a[i].listing.governorateId != b[i].listing.governorateId) {
+        return false;
+      }
       if (a[i].listing.areaId != b[i].listing.areaId) return false;
     }
     return true;
@@ -192,9 +191,7 @@ class _LocationLabelsHostState extends State<_LocationLabelsHost> {
           !_inflightGovs.contains(g)) {
         neededGovs.add(g);
       }
-      if (a != null &&
-          !_areas.containsKey(a) &&
-          !_inflightAreas.contains(a)) {
+      if (a != null && !_areas.containsKey(a) && !_inflightAreas.contains(a)) {
         neededAreas.add(a);
       }
     }
@@ -264,9 +261,8 @@ class _EmptyBody extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.md),
             FilledButton(
-              onPressed: () => context.goNamed(
-                AppRouteNames.publisherListingsCreate,
-              ),
+              onPressed: () =>
+                  context.goNamed(AppRouteNames.publisherListingsCreate),
               child: Text(l10n.myListingsEmptyCtaCreateFirst),
             ),
           ],
@@ -299,15 +295,14 @@ class _ErrorBody extends StatelessWidget {
             Text(
               message,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.error,
-                  ),
+                color: Theme.of(context).colorScheme.error,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.md),
             FilledButton(
-              onPressed: () => context
-                  .read<MyListingsBloc>()
-                  .add(const LoadMyListings()),
+              onPressed: () =>
+                  context.read<MyListingsBloc>().add(const LoadMyListings()),
               child: const Icon(Icons.refresh),
             ),
           ],

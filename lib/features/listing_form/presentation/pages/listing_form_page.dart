@@ -22,11 +22,7 @@ import '../widgets/step_visibility.dart';
 import '../widgets/submit_failure_dialog.dart';
 
 class ListingFormPage extends StatelessWidget {
-  const ListingFormPage({
-    super.key,
-    required this.mode,
-    this.listingId,
-  });
+  const ListingFormPage({super.key, required this.mode, this.listingId});
 
   final ListingFormMode mode;
   final String? listingId;
@@ -42,10 +38,7 @@ class ListingFormPage extends StatelessWidget {
       create: (_) {
         final bloc = getIt<ListingFormBloc>();
         if (publisherUserId != null) {
-          bloc.attachContext(
-            publisherUserId: publisherUserId,
-            mode: mode,
-          );
+          bloc.attachContext(publisherUserId: publisherUserId, mode: mode);
           bloc.add(LoadOrCreateDraftRequested(listingId: listingId));
         }
         return bloc;
@@ -97,16 +90,16 @@ class _ListingFormBody extends StatelessWidget {
               onPressed: state.currentStep.previous == null
                   ? () => context.go(AppRoutes.shellHome)
                   : () => context.read<ListingFormBloc>().add(
-                        JumpToStep(state.currentStep.previous!),
-                      ),
+                      JumpToStep(state.currentStep.previous!),
+                    ),
             ),
             actions: [
               TextButton(
                 onPressed: state.saveInProgress
                     ? null
-                    : () => context
-                        .read<ListingFormBloc>()
-                        .add(const SaveStepAndExit()),
+                    : () => context.read<ListingFormBloc>().add(
+                        const SaveStepAndExit(),
+                      ),
                 child: Text(l10n.listingFormSaveAndExitButton),
               ),
             ],
@@ -114,42 +107,41 @@ class _ListingFormBody extends StatelessWidget {
           body: state.loadInProgress
               ? const Center(child: CircularProgressIndicator())
               : !state.isReady
-                  ? Padding(
-                      padding: const EdgeInsets.all(AppSpacing.xl),
-                      child: Center(
-                        child: Text(
-                          state.lastSaveError ??
-                              l10n.listingFormLoadingMessage,
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    )
-                  : Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.lg,
-                            vertical: AppSpacing.md,
-                          ),
-                          child: StepProgressIndicator(
-                            currentStep: state.currentStep,
-                          ),
-                        ),
-                        Expanded(
-                          child: SingleChildScrollView(
-                            padding: const EdgeInsets.all(AppSpacing.lg),
-                            child: _renderStep(state.currentStep),
-                          ),
-                        ),
-                        SafeArea(
-                          top: false,
-                          child: Padding(
-                            padding: const EdgeInsets.all(AppSpacing.lg),
-                            child: _BottomNav(state: state),
-                          ),
-                        ),
-                      ],
+              ? Padding(
+                  padding: const EdgeInsets.all(AppSpacing.xl),
+                  child: Center(
+                    child: Text(
+                      state.lastSaveError ?? l10n.listingFormLoadingMessage,
+                      textAlign: TextAlign.center,
                     ),
+                  ),
+                )
+              : Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.lg,
+                        vertical: AppSpacing.md,
+                      ),
+                      child: StepProgressIndicator(
+                        currentStep: state.currentStep,
+                      ),
+                    ),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(AppSpacing.lg),
+                        child: _renderStep(state.currentStep),
+                      ),
+                    ),
+                    SafeArea(
+                      top: false,
+                      child: Padding(
+                        padding: const EdgeInsets.all(AppSpacing.lg),
+                        child: _BottomNav(state: state),
+                      ),
+                    ),
+                  ],
+                ),
         );
       },
     );
@@ -209,9 +201,9 @@ class _BottomNav extends StatelessWidget {
         if (canGoBack)
           Expanded(
             child: OutlinedButton(
-              onPressed: () => context
-                  .read<ListingFormBloc>()
-                  .add(JumpToStep(state.currentStep.previous!)),
+              onPressed: () => context.read<ListingFormBloc>().add(
+                JumpToStep(state.currentStep.previous!),
+              ),
               child: Text(l10n.listingFormBackButton),
             ),
           ),
@@ -223,13 +215,13 @@ class _BottomNav extends StatelessWidget {
                 ? null
                 : () {
                     if (isLastStep) {
-                      context
-                          .read<ListingFormBloc>()
-                          .add(const SubmitRequested());
+                      context.read<ListingFormBloc>().add(
+                        const SubmitRequested(),
+                      );
                     } else {
-                      context
-                          .read<ListingFormBloc>()
-                          .add(const SaveStepAndContinue());
+                      context.read<ListingFormBloc>().add(
+                        const SaveStepAndContinue(),
+                      );
                     }
                   },
             child: state.saveInProgress || state.submitInProgress

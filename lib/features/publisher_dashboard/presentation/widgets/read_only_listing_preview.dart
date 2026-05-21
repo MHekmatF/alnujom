@@ -116,20 +116,14 @@ class _ReadOnlyListingPreviewState extends State<ReadOnlyListingPreview> {
               value: listing.areaSize!.toString(),
             ),
           if (listing.rooms != null)
-            _Row(
-              label: l10n.fieldLabelRooms,
-              value: listing.rooms!.toString(),
-            ),
+            _Row(label: l10n.fieldLabelRooms, value: listing.rooms!.toString()),
           if (listing.bathrooms != null)
             _Row(
               label: l10n.fieldLabelBathrooms,
               value: listing.bathrooms!.toString(),
             ),
           if (listing.floor != null)
-            _Row(
-              label: l10n.fieldLabelFloor,
-              value: listing.floor!.toString(),
-            ),
+            _Row(label: l10n.fieldLabelFloor, value: listing.floor!.toString()),
           if (pl.primaryPrice != null)
             _Row(
               label: l10n.fieldLabelPrice,
@@ -164,15 +158,12 @@ class _Row extends StatelessWidget {
             child: Text(
               label,
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
           Expanded(
-            child: Text(
-              value,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
+            child: Text(value, style: Theme.of(context).textTheme.bodyMedium),
           ),
         ],
       ),
@@ -194,10 +185,7 @@ class _ApprovedBanner extends StatelessWidget {
         color: scheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(AppRadii.md),
       ),
-      child: Text(
-        message,
-        style: Theme.of(context).textTheme.bodyMedium,
-      ),
+      child: Text(message, style: Theme.of(context).textTheme.bodyMedium),
     );
   }
 }

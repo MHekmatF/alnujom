@@ -45,9 +45,7 @@ class SupabaseListingsDatasource {
     // created_at=now(), updated_at=now().
     final row = await _client
         .from('listings')
-        .insert(<String, dynamic>{
-          'publisher_user_id': publisherUserId,
-        })
+        .insert(<String, dynamic>{'publisher_user_id': publisherUserId})
         .select()
         .single();
     return ListingDto.fromMap(Map<String, dynamic>.from(row));
@@ -90,17 +88,14 @@ class SupabaseListingsDatasource {
     bool? furnished,
     bool? parking,
   }) async {
-    await _client.from('listing_details').upsert(
-      <String, dynamic>{
-        'listing_id': listingId,
-        if (description != null) 'description': description,
-        'amenities': amenities,
-        if (yearBuilt != null) 'year_built': yearBuilt,
-        if (furnished != null) 'furnished': furnished,
-        if (parking != null) 'parking': parking,
-      },
-      onConflict: 'listing_id',
-    );
+    await _client.from('listing_details').upsert(<String, dynamic>{
+      'listing_id': listingId,
+      if (description != null) 'description': description,
+      'amenities': amenities,
+      if (yearBuilt != null) 'year_built': yearBuilt,
+      if (furnished != null) 'furnished': furnished,
+      if (parking != null) 'parking': parking,
+    }, onConflict: 'listing_id');
   }
 
   /// Q3 single-currency invariant. If a row for this listing already exists
@@ -119,20 +114,14 @@ class SupabaseListingsDatasource {
         .limit(1);
     if (existing.isNotEmpty &&
         existing.first['currency_code'] != currencyCode) {
-      await _client
-          .from('listing_prices')
-          .delete()
-          .eq('listing_id', listingId);
+      await _client.from('listing_prices').delete().eq('listing_id', listingId);
     }
-    await _client.from('listing_prices').upsert(
-      <String, dynamic>{
-        'listing_id': listingId,
-        'currency_code': currencyCode,
-        'amount': amount.toString(),
-        'is_primary': true,
-      },
-      onConflict: 'listing_id,currency_code',
-    );
+    await _client.from('listing_prices').upsert(<String, dynamic>{
+      'listing_id': listingId,
+      'currency_code': currencyCode,
+      'amount': amount.toString(),
+      'is_primary': true,
+    }, onConflict: 'listing_id,currency_code');
   }
 
   /// Calls the SECURITY DEFINER RPC. Per `contracts/submit-listing-rpc.md`,

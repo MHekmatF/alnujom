@@ -25,16 +25,16 @@ class RejectionReasonBlock extends StatelessWidget {
           Text(
             l10n.rejectionReasonLabel,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: scheme.onErrorContainer,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: scheme.onErrorContainer,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
             reason,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: scheme.onErrorContainer,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: scheme.onErrorContainer),
           ),
         ],
       ),

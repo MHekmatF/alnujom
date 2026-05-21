@@ -54,9 +54,8 @@ class _StepBasicsState extends State<StepBasics> {
             const SizedBox(height: AppSpacing.sm),
             TextField(
               controller: _titleController,
-              onChanged: (v) => context
-                  .read<ListingFormBloc>()
-                  .add(FieldChanged.title(v)),
+              onChanged: (v) =>
+                  context.read<ListingFormBloc>().add(FieldChanged.title(v)),
               decoration: InputDecoration(
                 hintText: l10n.fieldLabelTitle,
                 border: const OutlineInputBorder(),
@@ -79,16 +78,16 @@ class _StepBasicsState extends State<StepBasics> {
               isExpanded: true,
               decoration: const InputDecoration(border: OutlineInputBorder()),
               items: ListingPurpose.values
-                  .map((p) => DropdownMenuItem(
-                        value: p,
-                        child: Text(listingPurposeLabel(p, l10n)),
-                      ))
+                  .map(
+                    (p) => DropdownMenuItem(
+                      value: p,
+                      child: Text(listingPurposeLabel(p, l10n)),
+                    ),
+                  )
                   .toList(),
               onChanged: (v) {
                 if (v != null) {
-                  context
-                      .read<ListingFormBloc>()
-                      .add(FieldChanged.purpose(v));
+                  context.read<ListingFormBloc>().add(FieldChanged.purpose(v));
                 }
               },
             ),
@@ -109,16 +108,18 @@ class _StepBasicsState extends State<StepBasics> {
               isExpanded: true,
               decoration: const InputDecoration(border: OutlineInputBorder()),
               items: PropertyType.values
-                  .map((p) => DropdownMenuItem(
-                        value: p,
-                        child: Text(propertyTypeLabel(p, l10n)),
-                      ))
+                  .map(
+                    (p) => DropdownMenuItem(
+                      value: p,
+                      child: Text(propertyTypeLabel(p, l10n)),
+                    ),
+                  )
                   .toList(),
               onChanged: (v) {
                 if (v != null) {
-                  context
-                      .read<ListingFormBloc>()
-                      .add(FieldChanged.propertyType(v));
+                  context.read<ListingFormBloc>().add(
+                    FieldChanged.propertyType(v),
+                  );
                 }
               },
             ),
@@ -127,5 +128,4 @@ class _StepBasicsState extends State<StepBasics> {
       },
     );
   }
-
 }

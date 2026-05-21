@@ -305,12 +305,8 @@ class Listing extends Equatable {
       governorateId: identical(governorateId, _sentinel)
           ? this.governorateId
           : governorateId as String?,
-      cityId: identical(cityId, _sentinel)
-          ? this.cityId
-          : cityId as String?,
-      areaId: identical(areaId, _sentinel)
-          ? this.areaId
-          : areaId as String?,
+      cityId: identical(cityId, _sentinel) ? this.cityId : cityId as String?,
+      areaId: identical(areaId, _sentinel) ? this.areaId : areaId as String?,
       addressText: identical(addressText, _sentinel)
           ? this.addressText
           : addressText as String?,

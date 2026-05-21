@@ -29,11 +29,13 @@ class MyListingsBloc extends Bloc<MyListingsEvent, MyListingsState> {
         offset: 0,
         limit: _pageSize,
       );
-      emit(state.copyWith(
-        loading: false,
-        listings: rows,
-        endReached: rows.length < _pageSize,
-      ));
+      emit(
+        state.copyWith(
+          loading: false,
+          listings: rows,
+          endReached: rows.length < _pageSize,
+        ),
+      );
     } catch (e) {
       emit(state.copyWith(loading: false, errorMessage: e.toString()));
     }
@@ -43,24 +45,28 @@ class MyListingsBloc extends Bloc<MyListingsEvent, MyListingsState> {
     ChangeStatusFilter event,
     Emitter<MyListingsState> emit,
   ) async {
-    emit(state.copyWith(
-      statusFilter: event.statusFilter,
-      loading: true,
-      listings: const [],
-      endReached: false,
-      errorMessage: null,
-    ));
+    emit(
+      state.copyWith(
+        statusFilter: event.statusFilter,
+        loading: true,
+        listings: const [],
+        endReached: false,
+        errorMessage: null,
+      ),
+    );
     try {
       final rows = await _listMyListings(
         statusFilter: event.statusFilter,
         offset: 0,
         limit: _pageSize,
       );
-      emit(state.copyWith(
-        loading: false,
-        listings: rows,
-        endReached: rows.length < _pageSize,
-      ));
+      emit(
+        state.copyWith(
+          loading: false,
+          listings: rows,
+          endReached: rows.length < _pageSize,
+        ),
+      );
     } catch (e) {
       emit(state.copyWith(loading: false, errorMessage: e.toString()));
     }
@@ -78,20 +84,19 @@ class MyListingsBloc extends Bloc<MyListingsEvent, MyListingsState> {
         offset: state.listings.length,
         limit: _pageSize,
       );
-      emit(state.copyWith(
-        loadingMore: false,
-        listings: [...state.listings, ...rows],
-        endReached: rows.length < _pageSize,
-      ));
+      emit(
+        state.copyWith(
+          loadingMore: false,
+          listings: [...state.listings, ...rows],
+          endReached: rows.length < _pageSize,
+        ),
+      );
     } catch (e) {
       emit(state.copyWith(loadingMore: false, errorMessage: e.toString()));
     }
   }
 
-  Future<void> _onRefresh(
-    Refresh event,
-    Emitter<MyListingsState> emit,
-  ) async {
+  Future<void> _onRefresh(Refresh event, Emitter<MyListingsState> emit) async {
     emit(state.copyWith(refreshing: true, errorMessage: null));
     try {
       final rows = await _listMyListings(
@@ -99,11 +104,13 @@ class MyListingsBloc extends Bloc<MyListingsEvent, MyListingsState> {
         offset: 0,
         limit: _pageSize,
       );
-      emit(state.copyWith(
-        refreshing: false,
-        listings: rows,
-        endReached: rows.length < _pageSize,
-      ));
+      emit(
+        state.copyWith(
+          refreshing: false,
+          listings: rows,
+          endReached: rows.length < _pageSize,
+        ),
+      );
     } catch (e) {
       emit(state.copyWith(refreshing: false, errorMessage: e.toString()));
     }

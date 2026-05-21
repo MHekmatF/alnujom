@@ -18,9 +18,9 @@ class RequiredFieldChip extends StatelessWidget {
       child: Text(
         l10n.requiredFieldChipLabel,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: scheme.onErrorContainer,
-              fontWeight: FontWeight.w600,
-            ),
+          color: scheme.onErrorContainer,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

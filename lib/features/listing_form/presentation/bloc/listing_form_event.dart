@@ -29,52 +29,37 @@ class LoadOrCreateDraftRequested extends ListingFormEvent {
 /// in-memory state without persisting. Per R-13, persistence happens at
 /// step transitions, not on every keystroke.
 class FieldChanged extends ListingFormEvent {
-  const FieldChanged.title(this.value)
-      : field = ListingFormField.title;
-  const FieldChanged.purpose(this.value)
-      : field = ListingFormField.purpose;
+  const FieldChanged.title(this.value) : field = ListingFormField.title;
+  const FieldChanged.purpose(this.value) : field = ListingFormField.purpose;
   const FieldChanged.propertyType(this.value)
-      : field = ListingFormField.propertyType;
+    : field = ListingFormField.propertyType;
   const FieldChanged.governorateId(this.value)
-      : field = ListingFormField.governorateId;
-  const FieldChanged.cityId(this.value)
-      : field = ListingFormField.cityId;
-  const FieldChanged.areaId(this.value)
-      : field = ListingFormField.areaId;
+    : field = ListingFormField.governorateId;
+  const FieldChanged.cityId(this.value) : field = ListingFormField.cityId;
+  const FieldChanged.areaId(this.value) : field = ListingFormField.areaId;
   const FieldChanged.addressText(this.value)
-      : field = ListingFormField.addressText;
-  const FieldChanged.areaSize(this.value)
-      : field = ListingFormField.areaSize;
-  const FieldChanged.rooms(this.value)
-      : field = ListingFormField.rooms;
-  const FieldChanged.bathrooms(this.value)
-      : field = ListingFormField.bathrooms;
-  const FieldChanged.floor(this.value)
-      : field = ListingFormField.floor;
+    : field = ListingFormField.addressText;
+  const FieldChanged.areaSize(this.value) : field = ListingFormField.areaSize;
+  const FieldChanged.rooms(this.value) : field = ListingFormField.rooms;
+  const FieldChanged.bathrooms(this.value) : field = ListingFormField.bathrooms;
+  const FieldChanged.floor(this.value) : field = ListingFormField.floor;
   const FieldChanged.description(this.value)
-      : field = ListingFormField.description;
-  const FieldChanged.amenities(this.value)
-      : field = ListingFormField.amenities;
-  const FieldChanged.yearBuilt(this.value)
-      : field = ListingFormField.yearBuilt;
-  const FieldChanged.furnished(this.value)
-      : field = ListingFormField.furnished;
-  const FieldChanged.parking(this.value)
-      : field = ListingFormField.parking;
+    : field = ListingFormField.description;
+  const FieldChanged.amenities(this.value) : field = ListingFormField.amenities;
+  const FieldChanged.yearBuilt(this.value) : field = ListingFormField.yearBuilt;
+  const FieldChanged.furnished(this.value) : field = ListingFormField.furnished;
+  const FieldChanged.parking(this.value) : field = ListingFormField.parking;
   const FieldChanged.priceCurrencyCode(this.value)
-      : field = ListingFormField.priceCurrencyCode;
+    : field = ListingFormField.priceCurrencyCode;
   const FieldChanged.priceAmount(this.value)
-      : field = ListingFormField.priceAmount;
+    : field = ListingFormField.priceAmount;
   const FieldChanged.locationVisibility(this.value)
-      : field = ListingFormField.locationVisibility;
+    : field = ListingFormField.locationVisibility;
   const FieldChanged.contactNameVisibility(this.value)
-      : field = ListingFormField.contactNameVisibility;
-  const FieldChanged.phone(this.value)
-      : field = ListingFormField.phone;
-  const FieldChanged.whatsapp(this.value)
-      : field = ListingFormField.whatsapp;
-  const FieldChanged.hideUntil(this.value)
-      : field = ListingFormField.hideUntil;
+    : field = ListingFormField.contactNameVisibility;
+  const FieldChanged.phone(this.value) : field = ListingFormField.phone;
+  const FieldChanged.whatsapp(this.value) : field = ListingFormField.whatsapp;
+  const FieldChanged.hideUntil(this.value) : field = ListingFormField.hideUntil;
 
   final ListingFormField field;
   final Object? value;

@@ -43,9 +43,7 @@ class ListingDetails extends Equatable {
       furnished: identical(furnished, _sentinel)
           ? this.furnished
           : furnished as bool?,
-      parking: identical(parking, _sentinel)
-          ? this.parking
-          : parking as bool?,
+      parking: identical(parking, _sentinel) ? this.parking : parking as bool?,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
