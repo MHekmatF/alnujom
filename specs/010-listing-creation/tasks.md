@@ -579,9 +579,9 @@ The go_router config lives at `H:\alnujom-project\lib\core\routing\app_router.da
 
 ### Final commit and PR
 
-- [ ] T122 Final commit. Run from `H:\alnujom-project`: `git status`, review changes, confirm only expected files. `git add -A`. `git commit -m "chore(010): polish — l10n, design tokens, analyzer parity, quickstart pass"`. `git push`.
+- [X] T122 Final commit. Run from `H:\alnujom-project`: `git status`, review changes, confirm only expected files. `git add -A`. `git commit -m "chore(010): polish — l10n, design tokens, analyzer parity, quickstart pass"`. `git push`.
 
-- [ ] T123 Open the PR. Run: `gh pr create --title "Phase 10 — Listing Creation & Submit-for-Review" --base main --head 010-listing-creation --body "$(cat <<'EOF'
+- [X] T123 Open the PR. Run: `gh pr create --title "Phase 10 — Listing Creation & Submit-for-Review" --base main --head 010-listing-creation --body "$(cat <<'EOF'
 ## Summary
 
 Phase 10 — publisher-side listing creation pipeline.
