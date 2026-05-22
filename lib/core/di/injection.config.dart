@@ -67,6 +67,25 @@ import '../../features/currencies/presentation/bloc/exchange_rate_history_bloc.d
     as _i949;
 import '../../features/currencies/presentation/bloc/set_exchange_rate_bloc.dart'
     as _i293;
+import '../../features/listing_form/data/datasources/supabase_listings_datasource.dart'
+    as _i207;
+import '../../features/listing_form/data/repositories/listings_repository_impl.dart'
+    as _i946;
+import '../../features/listing_form/domain/repositories/listings_repository.dart'
+    as _i340;
+import '../../features/listing_form/domain/usecases/delete_draft.dart' as _i814;
+import '../../features/listing_form/domain/usecases/derive_area_centroid.dart'
+    as _i906;
+import '../../features/listing_form/domain/usecases/load_or_create_draft.dart'
+    as _i802;
+import '../../features/listing_form/domain/usecases/save_form_step.dart'
+    as _i874;
+import '../../features/listing_form/domain/usecases/submit_listing.dart'
+    as _i829;
+import '../../features/listing_form/domain/usecases/validate_submit_payload.dart'
+    as _i396;
+import '../../features/listing_form/presentation/bloc/listing_form_bloc.dart'
+    as _i315;
 import '../../features/locations/data/datasources/supabase_locations_datasource.dart'
     as _i665;
 import '../../features/locations/data/repositories/locations_repository_impl.dart'
@@ -132,6 +151,16 @@ import '../../features/profile/domain/usecases/load_profile.dart' as _i1052;
 import '../../features/profile/domain/usecases/update_pii.dart' as _i281;
 import '../../features/profile/domain/usecases/update_profile.dart' as _i78;
 import '../../features/profile/presentation/cubit/profile_cubit.dart' as _i36;
+import '../../features/publisher_dashboard/data/datasources/supabase_publisher_dashboard_datasource.dart'
+    as _i333;
+import '../../features/publisher_dashboard/data/repositories/publisher_dashboard_repository_impl.dart'
+    as _i240;
+import '../../features/publisher_dashboard/domain/repositories/publisher_dashboard_repository.dart'
+    as _i754;
+import '../../features/publisher_dashboard/domain/usecases/list_my_listings.dart'
+    as _i891;
+import '../../features/publisher_dashboard/presentation/bloc/my_listings_bloc.dart'
+    as _i417;
 import '../../features/super_admin/data/datasources/supabase_role_catalog_datasource.dart'
     as _i1064;
 import '../../features/super_admin/data/datasources/supabase_user_search_datasource.dart'
@@ -195,6 +224,12 @@ _i174.GetIt $initGetIt(
   gh.factory<_i665.SupabaseLocationsDatasource>(
     () => _i665.SupabaseLocationsDatasource(),
   );
+  gh.factory<_i207.SupabaseListingsDatasource>(
+    () => _i207.SupabaseListingsDatasource(),
+  );
+  gh.factory<_i396.ValidateSubmitPayload>(
+    () => const _i396.ValidateSubmitPayload(),
+  );
   gh.singleton<_i373.EnvConfig>(() => const _i373.EnvConfig());
   gh.lazySingleton<_i454.SupabaseClient>(() => supabaseModule.supabaseClient());
   gh.lazySingleton<_i394.SupabaseAccountApprovalsDatasource>(
@@ -216,8 +251,27 @@ _i174.GetIt $initGetIt(
     () => _i650.PermissionChecker(gh<_i1015.PermissionCatalogRepository>()),
   );
   gh.lazySingleton<_i354.AppLogger>(() => _i1026.ConsoleLogger());
+  gh.lazySingleton<_i340.ListingsRepository>(
+    () => _i946.ListingsRepositoryImpl(gh<_i207.SupabaseListingsDatasource>()),
+  );
   gh.factory<_i311.SupabaseCurrenciesDatasource>(
     () => _i311.SupabaseCurrenciesDatasource(gh<_i454.SupabaseClient>()),
+  );
+  gh.factory<_i333.SupabasePublisherDashboardDatasource>(
+    () =>
+        _i333.SupabasePublisherDashboardDatasource(gh<_i454.SupabaseClient>()),
+  );
+  gh.factory<_i814.DeleteDraft>(
+    () => _i814.DeleteDraft(gh<_i340.ListingsRepository>()),
+  );
+  gh.factory<_i802.LoadOrCreateDraft>(
+    () => _i802.LoadOrCreateDraft(gh<_i340.ListingsRepository>()),
+  );
+  gh.factory<_i874.SaveFormStep>(
+    () => _i874.SaveFormStep(gh<_i340.ListingsRepository>()),
+  );
+  gh.factory<_i829.SubmitListing>(
+    () => _i829.SubmitListing(gh<_i340.ListingsRepository>()),
   );
   gh.lazySingleton<_i681.RoleCatalogRepository>(
     () => _i564.RoleCatalogRepositoryImpl(
@@ -292,6 +346,11 @@ _i174.GetIt $initGetIt(
     ),
     dispose: (i) => i.dispose(),
   );
+  gh.lazySingleton<_i754.PublisherDashboardRepository>(
+    () => _i240.PublisherDashboardRepositoryImpl(
+      gh<_i333.SupabasePublisherDashboardDatasource>(),
+    ),
+  );
   gh.lazySingleton<_i797.AuthBloc>(
     () => _i797.AuthBloc(
       gh<_i787.AuthRepository>(),
@@ -299,6 +358,9 @@ _i174.GetIt $initGetIt(
       gh<_i650.PermissionChecker>(),
     ),
     dispose: (i) => i.dispose(),
+  );
+  gh.factory<_i891.ListMyListings>(
+    () => _i891.ListMyListings(gh<_i754.PublisherDashboardRepository>()),
   );
   gh.factory<_i1036.DeleteRole>(
     () => _i1036.DeleteRole(gh<_i681.RoleCatalogRepository>()),
@@ -441,6 +503,9 @@ _i174.GetIt $initGetIt(
       gh<_i431.RejectAccount>(),
     ),
   );
+  gh.factory<_i906.DeriveAreaCentroid>(
+    () => _i906.DeriveAreaCentroid(gh<_i704.LocationsRepository>()),
+  );
   gh.factory<_i36.ProfileCubit>(
     () => _i36.ProfileCubit(
       gh<_i1052.LoadProfile>(),
@@ -479,6 +544,17 @@ _i174.GetIt $initGetIt(
       gh<_i188.UpdateArea>(),
     ),
   );
+  gh.factory<_i315.ListingFormBloc>(
+    () => _i315.ListingFormBloc(
+      gh<_i802.LoadOrCreateDraft>(),
+      gh<_i874.SaveFormStep>(),
+      gh<_i829.SubmitListing>(),
+      gh<_i814.DeleteDraft>(),
+      gh<_i906.DeriveAreaCentroid>(),
+      gh<_i396.ValidateSubmitPayload>(),
+      gh<_i340.ListingsRepository>(),
+    ),
+  );
   gh.factory<_i807.OnboardingCubit>(
     () => _i807.OnboardingCubit(gh<_i430.OnboardingRepository>()),
   );
@@ -503,6 +579,9 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i329.RolesListBloc>(
     () => _i329.RolesListBloc(gh<_i1018.ListRoles>()),
+  );
+  gh.factory<_i417.MyListingsBloc>(
+    () => _i417.MyListingsBloc(gh<_i891.ListMyListings>()),
   );
   gh.factory<_i949.ExchangeRateHistoryBloc>(
     () => _i949.ExchangeRateHistoryBloc(gh<_i776.ListExchangeRateHistory>()),

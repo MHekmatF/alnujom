@@ -8,6 +8,9 @@ import '../security/permission_checker.dart';
 import '../security/permission_keys.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/bloc/auth_state.dart';
+import '../../shared/domain/value_objects/account_status.dart';
+import '../../shared/domain/value_objects/publisher_status.dart';
+import 'app_router.dart';
 
 /// A [ChangeNotifier] that fires whenever [AuthBloc] emits a new state.
 ///
@@ -96,5 +99,30 @@ String? requireCurrenciesManageRedirect(
   if (!checker.has(PermissionKeys.currenciesManage)) {
     return '/admin';
   }
+  return null;
+}
+
+String? requirePublisherStatusRedirect(
+  BuildContext context,
+  GoRouterState state,
+) {
+  final authState = getIt<AuthBloc>().state;
+  if (authState is! Authenticated) {
+    return AppRoutes.login;
+  }
+
+  if (authState.profile.accountStatus != AccountStatus.approved) {
+    return switch (authState.profile.accountStatus) {
+      AccountStatus.pending => AppRoutes.pending,
+      AccountStatus.rejected => AppRoutes.rejected,
+      AccountStatus.suspended => AppRoutes.suspended,
+      _ => AppRoutes.home,
+    };
+  }
+
+  if (authState.profile.publisherStatus != PublisherStatus.approved) {
+    return AppRoutes.publisherApprovalPending;
+  }
+
   return null;
 }

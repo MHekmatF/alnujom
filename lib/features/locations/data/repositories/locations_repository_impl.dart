@@ -317,6 +317,19 @@ class LocationsRepositoryImpl implements LocationsRepository {
     }
   }
 
+  @override
+  Future<({double lat, double lng})> getAreaCentroid(String areaId) async {
+    try {
+      return await _ds.getAreaCentroid(areaId);
+    } on CentroidMissingFailure {
+      rethrow;
+    } on PostgrestException catch (e, st) {
+      throw _mapPostgrest(e, st);
+    } on Object catch (e, st) {
+      throw _mapUnknown(e, st);
+    }
+  }
+
   LocationsFailure _mapPostgrest(PostgrestException e, StackTrace st) {
     _logger.warning(
       'Locations data error.',

@@ -8,6 +8,7 @@ import '../../features/admin/presentation/pages/admin_home_page.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/pending_approval_page.dart';
+import '../../features/auth/presentation/pages/publisher_approval_pending_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/auth/presentation/pages/rejected_page.dart';
 import '../../features/auth/presentation/pages/reset_password_page.dart';
@@ -28,6 +29,9 @@ import '../../features/locations/presentation/pages/governorate_detail_page.dart
 import '../../features/locations/presentation/pages/location_form_page.dart';
 import '../../features/locations/presentation/pages/location_picker_smoke_test_page.dart';
 import '../../features/locations/presentation/pages/locations_list_page.dart';
+import '../../features/listing_form/domain/entities/listing_form_state.dart';
+import '../../features/listing_form/presentation/pages/listing_form_page.dart';
+import '../../features/publisher_dashboard/presentation/pages/my_listings_page.dart';
 import '../../features/super_admin/presentation/pages/assign_role_page.dart';
 import '../../features/super_admin/presentation/pages/create_role_page.dart';
 import '../../features/super_admin/presentation/pages/role_editor_page.dart';
@@ -60,6 +64,10 @@ abstract final class AppRoutes {
   static const profile = '/profile';
   static const profileEdit = '/profile/edit';
   static const profilePrivate = '/profile/private';
+  static const publisherListingsCreate = '/publisher/listings/create';
+  static const publisherListingsEdit = '/publisher/listings/:id/edit';
+  static const publisherMyListings = '/publisher/dashboard/my-listings';
+  static const publisherApprovalPending = '/publisher/pending-approval';
   static const shellHome = '/';
   static const themeGallery = '/_debug/theme-gallery';
   static const debugMoneyFormatter = '/debug/money-formatter';
@@ -93,6 +101,10 @@ abstract final class AppRouteNames {
   static const profile = 'profile';
   static const profileEdit = 'profile-edit';
   static const profilePrivate = 'profile-private';
+  static const publisherListingsCreate = 'publisher-listings-create';
+  static const publisherListingsEdit = 'publisher-listings-edit';
+  static const publisherMyListings = 'publisher-my-listings';
+  static const publisherApprovalPending = 'publisher-pending-approval';
   static const shellHome = 'shell-home';
   static const themeGallery = 'theme-gallery';
 }
@@ -274,6 +286,33 @@ GoRouter buildAppRouter({
         path: AppRoutes.profilePrivate,
         name: AppRouteNames.profilePrivate,
         builder: (context, state) => const ProfilePrivatePage(),
+      ),
+      GoRoute(
+        path: AppRoutes.publisherListingsCreate,
+        name: AppRouteNames.publisherListingsCreate,
+        redirect: requirePublisherStatusRedirect,
+        builder: (context, state) =>
+            const ListingFormPage(mode: ListingFormMode.create),
+      ),
+      GoRoute(
+        path: AppRoutes.publisherListingsEdit,
+        name: AppRouteNames.publisherListingsEdit,
+        redirect: requirePublisherStatusRedirect,
+        builder: (context, state) => ListingFormPage(
+          mode: ListingFormMode.edit,
+          listingId: state.pathParameters['id'],
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.publisherMyListings,
+        name: AppRouteNames.publisherMyListings,
+        redirect: requirePublisherStatusRedirect,
+        builder: (context, state) => const MyListingsPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.publisherApprovalPending,
+        name: AppRouteNames.publisherApprovalPending,
+        builder: (context, state) => const PublisherApprovalPendingPage(),
       ),
 
       // ─── Phase 1–4 legacy routes (kept for design tools) ───
