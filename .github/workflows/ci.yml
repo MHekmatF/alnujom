@@ -1,13 +1,22 @@
+# CI auto-triggers PAUSED on 2026-05-22 to preserve GitHub Actions
+# minutes (account-wide pool — see almaeda-system-project for the other half).
+# Only manual runs allowed.
+#
+# To resume: uncomment the `push:` and `pull_request:` blocks below.
+# Side effect: branch protection's required-status-checks gate will block
+# PRs to main from merging until CI is re-enabled.
+
 name: verify
 
 on:
-  pull_request:
-  push:
-    branches:
-      - main
-      - '001-*'
-      - '002-*'
-      - '003-*'
+  workflow_dispatch:
+  # pull_request:
+  # push:
+  #   branches:
+  #     - main
+  #     - '001-*'
+  #     - '002-*'
+  #     - '003-*'
 
 jobs:
   verify:
