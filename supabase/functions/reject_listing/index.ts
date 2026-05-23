@@ -174,63 +174,30 @@ Deno.serve(async (req: Request) => {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  // 7. Set the FR-024 user-id session variable so the amended triggers
-  //    source changed_by + actor_user_id from the admin's UID.
-  const { error: setUserErr } = await adminClient.rpc(
-    "set_app_user_id_for_session",
-    { user_id: jwtSub },
-  );
-  if (setUserErr) {
-    log("set_user_var_error", {
-      code: setUserErr.code,
-      msg: setUserErr.message,
-    });
-    return json(
-      { code: "internal_error", message: "session_var_setup_failed" },
-      500,
-    );
-  }
-
-  // 8. Build Q4=A JSON-encoded reason payload AND set the rejection-reason
-  //    session variable. The amended listing_status_transition_trigger_fn
-  //    reads current_setting('app.current_rejection_reason', true) and
-  //    writes that value verbatim into listing_status_history.reason.
+  // 7. Build Q4=A JSON-encoded reason payload. The atomic wrapper RPC will
+  //    set both FR-024 GUCs + do the UPDATE in ONE transaction (separate
+  //    set_config + UPDATE calls hit PostgREST's per-request-transaction
+  //    boundary; see migration 20260523120005 for the bug history).
   const reasonJson = JSON.stringify({
     preset: reasonPreset,
     detail: reasonDetail,
   });
-  const { error: setReasonErr } = await adminClient.rpc(
-    "set_app_rejection_reason_for_session",
-    { reason_json: reasonJson },
+  const { data: rows, error: rpcErr } = await adminClient.rpc(
+    "reject_listing_internal",
+    {
+      p_listing_id: listingId,
+      p_actor_user_id: jwtSub,
+      p_reason_json: reasonJson,
+    },
   );
-  if (setReasonErr) {
-    log("set_reason_var_error", {
-      code: setReasonErr.code,
-      msg: setReasonErr.message,
-    });
+  if (rpcErr) {
+    log("reject_rpc_error", { code: rpcErr.code, msg: rpcErr.message });
     return json(
-      { code: "internal_error", message: "session_var_setup_failed" },
+      { code: "internal_error", message: rpcErr.message },
       500,
     );
   }
-
-  // 9. Privileged UPDATE under the status-guard (status='pending_review').
-  //    The amended triggers fire automatically inside this transaction.
-  const { data, error: updateErr } = await adminClient
-    .from("listings")
-    .update({ status: "rejected" })
-    .eq("id", listingId)
-    .eq("status", "pending_review")
-    .select("id, status")
-    .maybeSingle();
-
-  if (updateErr) {
-    log("update_error", { code: updateErr.code, msg: updateErr.message });
-    return json(
-      { code: "internal_error", message: updateErr.message },
-      500,
-    );
-  }
+  const data = Array.isArray(rows) && rows.length > 0 ? rows[0] : null;
 
   // 10. Zero-rows path — either the listing doesn't exist (404) or it is
   //     in a non-pending_review status (already_acted_on / invalid).

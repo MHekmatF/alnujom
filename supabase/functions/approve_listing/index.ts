@@ -7,16 +7,13 @@
 //   Headers: Authorization: Bearer <user JWT>, Content-Type: application/json
 //   Body in:  { listing_id: "<UUID>" }
 //   Body out (200): { status: "approved", published_at: "<ISO>", expires_at: null }
-//   Error envelopes (Content-Type: application/json):
-//     400 { code: "invalid_listing_id" | "invalid_request" }
-//     403 { code: "permission_denied" }
-//     404 { code: "listing_not_found" }
-//     409 { code: "invalid_status_transition", current_status: "<status>" }
-//     409 { code: "already_acted_on", current_status: "approved" }
-//     500 { code: "internal_error", message: "<text>" }
 //
-// SC-018 + T097a — the JWT-bound permission check via current_user_has_permission
-// MUST appear BEFORE the service-role client is constructed AND BEFORE any UPDATE.
+// SC-018 + T097a — JWT-bound permission check via current_user_has_permission
+// runs BEFORE the service-role client is constructed AND BEFORE any UPDATE.
+//
+// FR-024 bugfix (migration 20260523120005): the set-then-update split was
+// broken by PostgREST's per-request-transaction boundary; now uses one
+// atomic RPC `approve_listing_internal(p_listing_id, p_actor_user_id)`.
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "@supabase/supabase-js";
@@ -41,7 +38,6 @@ function parseJwtSub(authHeader: string | null): string | null {
   const parts = token.split(".");
   if (parts.length !== 3) return null;
   try {
-    // base64url decode the payload
     const payload = parts[1].replace(/-/g, "+").replace(/_/g, "/");
     const padded = payload + "=".repeat((4 - (payload.length % 4)) % 4);
     const decoded = atob(padded);
@@ -59,7 +55,6 @@ Deno.serve(async (req: Request) => {
     return json({ code: "invalid_request" }, 405);
   }
 
-  // 1. Parse body and validate listing_id is a UUID.
   let body: unknown;
   try {
     body = await req.json();
@@ -77,7 +72,6 @@ Deno.serve(async (req: Request) => {
   }
   const listingId = (body as { listing_id: string }).listing_id;
 
-  // 2. Extract Authorization header → JWT.sub.
   const authHeader = req.headers.get("Authorization");
   const jwtSub = parseJwtSub(authHeader);
   if (jwtSub === null) {
@@ -92,14 +86,11 @@ Deno.serve(async (req: Request) => {
     return json({ code: "internal_error", message: "env_missing" }, 500);
   }
 
-  // 3. JWT-bound Supabase client (RLS still applies; used only for the
-  //    permission check, NOT for the UPDATE).
   const jwtClient = createClient(supabaseUrl, anonKey, {
     global: { headers: { Authorization: authHeader! } },
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  // 4. Permission check via Phase 6 RPC — MUST run before service-role client.
   const { data: hasPerm, error: permErr } = await jwtClient.rpc(
     "current_user_has_permission",
     { perm_key: "listings.approve" },
@@ -112,50 +103,23 @@ Deno.serve(async (req: Request) => {
     return json({ code: "permission_denied" }, 403);
   }
 
-  // 5. Service-role client (bypasses RLS) — created ONLY after permission check.
   const adminClient = createClient(supabaseUrl, serviceRoleKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  // 6. Set the FR-024 session variable so the amended triggers source
-  //    changed_by + actor_user_id from the admin's UID instead of NULL.
-  const { error: setVarErr } = await adminClient.rpc(
-    "set_app_user_id_for_session",
-    { user_id: jwtSub },
+  const { data: rows, error: rpcErr } = await adminClient.rpc(
+    "approve_listing_internal",
+    { p_listing_id: listingId, p_actor_user_id: jwtSub },
   );
-  if (setVarErr) {
-    log("set_session_var_error", {
-      code: setVarErr.code,
-      msg: setVarErr.message,
-    });
+  if (rpcErr) {
+    log("approve_rpc_error", { code: rpcErr.code, msg: rpcErr.message });
     return json(
-      { code: "internal_error", message: "session_var_setup_failed" },
+      { code: "internal_error", message: rpcErr.message },
       500,
     );
   }
+  const data = Array.isArray(rows) && rows.length > 0 ? rows[0] : null;
 
-  // 7. Privileged UPDATE under the status-guard (status='pending_review').
-  const { data, error: updateErr } = await adminClient
-    .from("listings")
-    .update({
-      status: "approved",
-      published_at: new Date().toISOString(),
-    })
-    .eq("id", listingId)
-    .eq("status", "pending_review")
-    .select("id, status, published_at, expires_at")
-    .maybeSingle();
-
-  if (updateErr) {
-    log("update_error", { code: updateErr.code, msg: updateErr.message });
-    return json(
-      { code: "internal_error", message: updateErr.message },
-      500,
-    );
-  }
-
-  // 8. Zero-rows path — either the listing doesn't exist (404) or it is
-  //    in a non-pending_review status (already_acted_on / invalid_status_transition).
   if (data === null) {
     const { data: current, error: lookupErr } = await adminClient
       .from("listings")
@@ -182,9 +146,6 @@ Deno.serve(async (req: Request) => {
     return json({ code, current_status: currentStatus }, 409);
   }
 
-  // 9. Success. The amended triggers fired automatically inside the UPDATE's
-  //    transaction; listing_status_history + audit_logs rows now exist with
-  //    changed_by / actor_user_id = admin's UID.
   log("approve_success", { listing_id: listingId });
   return json(
     {
