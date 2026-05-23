@@ -2,9 +2,41 @@ import 'package:equatable/equatable.dart';
 
 import 'listing.dart';
 import 'listing_details.dart';
+import 'listing_media.dart';
 import 'listing_price.dart';
 import 'listing_visibility.dart';
 import 'submit_failure.dart';
+
+/// Phase 11 — per-thumbnail upload progress state surfaced on the picker grid.
+///
+/// Sealed type with five variants covering the FR-014 pipeline + upload
+/// lifecycle: idle → processing → uploading → completed (or error).
+sealed class MediaUploadProgress {
+  const MediaUploadProgress();
+}
+
+class MediaUploadProgressIdle extends MediaUploadProgress {
+  const MediaUploadProgressIdle();
+}
+
+class MediaUploadProgressProcessing extends MediaUploadProgress {
+  const MediaUploadProgressProcessing();
+}
+
+class MediaUploadProgressUploading extends MediaUploadProgress {
+  const MediaUploadProgressUploading();
+}
+
+class MediaUploadProgressError extends MediaUploadProgress {
+  const MediaUploadProgressError(this.errorKey);
+
+  /// ARB key (e.g. `media.error.uploadFailed`) — resolved at render time.
+  final String errorKey;
+}
+
+class MediaUploadProgressCompleted extends MediaUploadProgress {
+  const MediaUploadProgressCompleted();
+}
 
 /// Seven-step form progression per `contracts/listing-form-pages.md`.
 enum ListingFormStep {
@@ -51,6 +83,8 @@ class ListingFormState extends Equatable {
     this.lastSaveError,
     this.submitSucceeded = false,
     this.savedAndExited = false,
+    this.media = const <ListingMedia>[],
+    this.uploadInFlight = const <String, MediaUploadProgress>{},
   });
 
   final ListingFormMode mode;
@@ -67,6 +101,15 @@ class ListingFormState extends Equatable {
   final String? lastSaveError;
   final bool submitSucceeded;
   final bool savedAndExited;
+
+  /// Phase 11 — committed `listing_media` rows for the current draft (R-40).
+  final List<ListingMedia> media;
+
+  /// Phase 11 — keyed by an opaque transient localId per upload attempt
+  /// (NOT the `listing_media.id`, which only exists after the row INSERT
+  /// commits). Surfaces processing / uploading / error states on the
+  /// picker grid before the row lands in [media].
+  final Map<String, MediaUploadProgress> uploadInFlight;
 
   bool get isReady => draftListing != null && !loadInProgress;
 
@@ -85,6 +128,8 @@ class ListingFormState extends Equatable {
     Object? lastSaveError = _sentinel,
     bool? submitSucceeded,
     bool? savedAndExited,
+    List<ListingMedia>? media,
+    Map<String, MediaUploadProgress>? uploadInFlight,
   }) {
     return ListingFormState(
       mode: mode ?? this.mode,
@@ -111,6 +156,8 @@ class ListingFormState extends Equatable {
           : lastSaveError as String?,
       submitSucceeded: submitSucceeded ?? this.submitSucceeded,
       savedAndExited: savedAndExited ?? this.savedAndExited,
+      media: media ?? this.media,
+      uploadInFlight: uploadInFlight ?? this.uploadInFlight,
     );
   }
 
@@ -130,6 +177,8 @@ class ListingFormState extends Equatable {
     lastSaveError,
     submitSucceeded,
     savedAndExited,
+    media,
+    uploadInFlight,
   ];
 }
 

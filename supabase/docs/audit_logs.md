@@ -106,6 +106,11 @@ new triggers and appropriate `TG_ARGV` values (action key, column list, PK colum
   - `listing.expired` — status changes to `expired`.
   - `listing.sold` — status changes to `sold`.
   - `listing.rented` — status changes to `rented`.
+- Phase 11: listing_media ✅ **Shipped** in `20260522120001_create_listing_media.sql` (FR-005). This is the **eighth** reuse of `log_audit()` across Phases 4/5/6/7/8/9/10/11 (R-05 invariant preserved):
+  - `listing_media.created` — `listing_media` AFTER INSERT. Emitted when a publisher uploads an image or video (or when an admin directly inserts a row). The `after_state` JSONB includes `{listing_id, kind, ordering, is_main, watermarked, storage_path, external_url}`.
+  - `listing_media.updated` — `listing_media` AFTER UPDATE. Emitted on set-as-main, reorder, and watermark-flag flips. The set-as-main operation fires this trigger **twice per logical action** — once for the row gaining `is_main=true` and once for the row losing it (per FR-021). The `before_state` / `after_state` snapshots capture the full row both times.
+  - `listing_media.deleted` — `listing_media` AFTER DELETE. Emitted when a publisher (or admin) deletes a media row. The `before_state` captures the full row before deletion; `after_state` is NULL. The corresponding bucket object deletion is client-side and does NOT emit an audit row (storage events are not routed through `log_audit()`).
+  - Phase 11 seeds ZERO `listing_media` rows, so no `listing_media.created` audit rows with `actor_user_id=NULL` are produced at migration time (unlike Phase 8/9 seed rows).
 - Phase 12: listings workflow approval/rejection RPCs reuse the Phase 10 listing action keys.
 - Phase 18: reports/moderation
 - Phase 19: agency flows

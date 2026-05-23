@@ -1966,4 +1966,100 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String get readOnlyPreviewTitle =>
       _resolve('readOnlyPreviewTitle', (loc) => loc.readOnlyPreviewTitle);
+
+  // ── Phase 11 MediaPicker strings ─────────────────────────────────────────
+
+  @override
+  String get mediaAddImages =>
+      _resolve('mediaAddImages', (loc) => loc.mediaAddImages);
+
+  @override
+  String get mediaAddVideo =>
+      _resolve('mediaAddVideo', (loc) => loc.mediaAddVideo);
+
+  @override
+  String get mediaActionSetMain =>
+      _resolve('mediaActionSetMain', (loc) => loc.mediaActionSetMain);
+
+  @override
+  String get mediaActionDelete =>
+      _resolve('mediaActionDelete', (loc) => loc.mediaActionDelete);
+
+  @override
+  String get mediaActionReorderHint =>
+      _resolve('mediaActionReorderHint', (loc) => loc.mediaActionReorderHint);
+
+  @override
+  String get mediaThumbnailMainBadge =>
+      _resolve('mediaThumbnailMainBadge', (loc) => loc.mediaThumbnailMainBadge);
+
+  @override
+  String get mediaErrorGalleryPermissionDenied => _resolve(
+    'mediaErrorGalleryPermissionDenied',
+    (loc) => loc.mediaErrorGalleryPermissionDenied,
+  );
+
+  @override
+  String get mediaActionOpenSettings =>
+      _resolve('mediaActionOpenSettings', (loc) => loc.mediaActionOpenSettings);
+
+  @override
+  String get mediaErrorUploadFailed =>
+      _resolve('mediaErrorUploadFailed', (loc) => loc.mediaErrorUploadFailed);
+
+  @override
+  String get mediaReadOnlyPendingOrApproved => _resolve(
+    'mediaReadOnlyPendingOrApproved',
+    (loc) => loc.mediaReadOnlyPendingOrApproved,
+  );
+
+  @override
+  String get mediaErrorFormatNotSupported => _resolve(
+    'mediaErrorFormatNotSupported',
+    (loc) => loc.mediaErrorFormatNotSupported,
+  );
+
+  @override
+  String get mediaErrorImageTooLarge =>
+      _resolve('mediaErrorImageTooLarge', (loc) => loc.mediaErrorImageTooLarge);
+
+  @override
+  String get mediaErrorTimeout =>
+      _resolve('mediaErrorTimeout', (loc) => loc.mediaErrorTimeout);
+
+  @override
+  String get mediaErrorWatermarkAssetMissing => _resolve(
+    'mediaErrorWatermarkAssetMissing',
+    (loc) => loc.mediaErrorWatermarkAssetMissing,
+  );
+
+  @override
+  String get mediaErrorVideoFormatMustBeMp4 => _resolve(
+    'mediaErrorVideoFormatMustBeMp4',
+    (loc) => loc.mediaErrorVideoFormatMustBeMp4,
+  );
+
+  @override
+  String get mediaErrorVideoSizeExceeded => _resolve(
+    'mediaErrorVideoSizeExceeded',
+    (loc) => loc.mediaErrorVideoSizeExceeded,
+  );
+
+  @override
+  String get mediaCapImages10 =>
+      _resolve('mediaCapImages10', (loc) => loc.mediaCapImages10);
+
+  @override
+  String get mediaCapVideos2 =>
+      _resolve('mediaCapVideos2', (loc) => loc.mediaCapVideos2);
+
+  @override
+  String get mediaReviewCarouselLabel =>
+      _resolve('mediaReviewCarouselLabel', (loc) => loc.mediaReviewCarouselLabel);
+
+  @override
+  String get submitErrorImagesBelowMinimum => _resolve(
+    'submitErrorImagesBelowMinimum',
+    (loc) => loc.submitErrorImagesBelowMinimum,
+  );
 }

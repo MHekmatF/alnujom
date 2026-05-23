@@ -1,5 +1,6 @@
 import 'package:decimal/decimal.dart';
 import 'package:equatable/equatable.dart';
+import 'package:image_picker/image_picker.dart' show XFile;
 
 import '../../domain/entities/listing.dart';
 import '../../domain/entities/listing_form_state.dart';
@@ -156,3 +157,80 @@ typedef PropertyTypeValue = PropertyType;
 typedef LocationVisibilityValue = LocationVisibility;
 typedef ContactNameVisibilityValue = ContactNameVisibility;
 typedef PriceAmountValue = Decimal;
+
+// ---------------------------------------------------------------------------
+// Phase 11 — Five new MediaPicker events (R-40 extension of Phase 10 BLoC).
+// ---------------------------------------------------------------------------
+
+/// Publisher picked one or more images via the gallery. The BLoC iterates
+/// each file through the FR-014 watermark + downscale pipeline on the
+/// shared R-25 isolate worker, then uploads + inserts the `listing_media`
+/// row. Q7=B 60-second per-image timeout applies per R-39.
+class MediaPicked extends ListingFormEvent {
+  const MediaPicked(this.files, {this.isRtl = false});
+
+  final List<XFile> files;
+  final bool isRtl;
+
+  @override
+  List<Object?> get props => [files, isRtl];
+}
+
+/// Publisher picked a single MP4 video via the gallery. The BLoC validates
+/// via [VideoFileValidator] (MP4 + ≤ 30 MB) then delegates upload to the
+/// `listing-videos` bucket.
+class VideoPicked extends ListingFormEvent {
+  const VideoPicked(this.file);
+
+  final XFile file;
+
+  @override
+  List<Object?> get props => [file];
+}
+
+/// Publisher dragged a thumbnail to a new position; `newOrder` is the list
+/// of `listing_media.id` values in the new sequence (1-indexed via list order).
+class MediaReordered extends ListingFormEvent {
+  const MediaReordered(this.newOrder);
+
+  final List<String> newOrder;
+
+  @override
+  List<Object?> get props => [newOrder];
+}
+
+/// Publisher long-pressed a thumbnail and tapped "Set as main". Image-only
+/// per FR-013 — the widget hides the action on video rows; the CHECK
+/// constraint enforces server-side.
+class MediaSetMain extends ListingFormEvent {
+  const MediaSetMain(this.mediaId);
+
+  final String mediaId;
+
+  @override
+  List<Object?> get props => [mediaId];
+}
+
+/// Publisher long-pressed a thumbnail and confirmed Delete. Per R-38, the
+/// datasource removes the bucket object first then DELETEs the row.
+class MediaDeleted extends ListingFormEvent {
+  const MediaDeleted(this.mediaId);
+
+  final String mediaId;
+
+  @override
+  List<Object?> get props => [mediaId];
+}
+
+/// Dismiss an in-flight upload entry from `state.uploadInFlight`. Used by
+/// the error tile's X button to clear an orphaned upload-fail after the
+/// publisher acknowledges it. The original file reference is lost — true
+/// retry requires re-picking from the gallery (per task #30 follow-up).
+class MediaUploadDismissed extends ListingFormEvent {
+  const MediaUploadDismissed(this.localId);
+
+  final String localId;
+
+  @override
+  List<Object?> get props => [localId];
+}
