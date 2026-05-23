@@ -102,6 +102,23 @@ String? requireCurrenciesManageRedirect(
   return null;
 }
 
+/// Phase 12 — gate for `/admin/listing-review/...` routes. Requires either
+/// `listings.approve` OR `listings.reject` (one is enough to view + act on
+/// the queue; the Edge Function re-checks the specific permission on call).
+String? requireListingReviewRedirect(
+  BuildContext context,
+  GoRouterState state,
+) {
+  final checker = getIt<PermissionChecker>();
+  if (!checker.any(const <String>[
+    PermissionKeys.listingsApprove,
+    PermissionKeys.listingsReject,
+  ])) {
+    return '/admin?denied=listing_review';
+  }
+  return null;
+}
+
 String? requirePublisherStatusRedirect(
   BuildContext context,
   GoRouterState state,

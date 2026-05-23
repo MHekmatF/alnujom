@@ -2062,4 +2062,120 @@ final class _DebugAppLocalizations extends AppLocalizations {
     'submitErrorImagesBelowMinimum',
     (loc) => loc.submitErrorImagesBelowMinimum,
   );
+
+  // ── Phase 12 — Listing Approval Workflow (admin) ──────────────────────────
+
+  @override
+  String get adminTilePendingReview =>
+      _resolve('adminTilePendingReview', (loc) => loc.adminTilePendingReview);
+
+  @override
+  String get adminQueueTitle =>
+      _resolve('adminQueueTitle', (loc) => loc.adminQueueTitle);
+
+  @override
+  String get adminQueueEmpty =>
+      _resolve('adminQueueEmpty', (loc) => loc.adminQueueEmpty);
+
+  @override
+  String get adminQueueSubmittedAtJustNow => _resolve(
+    'adminQueueSubmittedAtJustNow',
+    (loc) => loc.adminQueueSubmittedAtJustNow,
+  );
+
+  @override
+  String adminQueueSubmittedAtMinutes(int n) =>
+      _active.adminQueueSubmittedAtMinutes(n);
+
+  @override
+  String adminQueueSubmittedAtHours(int n) =>
+      _active.adminQueueSubmittedAtHours(n);
+
+  @override
+  String adminQueueSubmittedAtDays(int n) =>
+      _active.adminQueueSubmittedAtDays(n);
+
+  @override
+  String get adminQueuePublisherPrefix => _resolve(
+    'adminQueuePublisherPrefix',
+    (loc) => loc.adminQueuePublisherPrefix,
+  );
+
+  @override
+  String get adminPreviewTitle =>
+      _resolve('adminPreviewTitle', (loc) => loc.adminPreviewTitle);
+
+  @override
+  String get adminPreviewCtaApprove =>
+      _resolve('adminPreviewCtaApprove', (loc) => loc.adminPreviewCtaApprove);
+
+  @override
+  String get adminPreviewCtaReject =>
+      _resolve('adminPreviewCtaReject', (loc) => loc.adminPreviewCtaReject);
+
+  @override
+  String get adminApproveDialogTitle => _resolve(
+    'adminApproveDialogTitle',
+    (loc) => loc.adminApproveDialogTitle,
+  );
+
+  @override
+  String get adminApproveDialogBody =>
+      _resolve('adminApproveDialogBody', (loc) => loc.adminApproveDialogBody);
+
+  @override
+  String get adminApproveDialogConfirm => _resolve(
+    'adminApproveDialogConfirm',
+    (loc) => loc.adminApproveDialogConfirm,
+  );
+
+  @override
+  String get adminApproveDialogCancel => _resolve(
+    'adminApproveDialogCancel',
+    (loc) => loc.adminApproveDialogCancel,
+  );
+
+  @override
+  String get adminErrorPermissionDenied => _resolve(
+    'adminErrorPermissionDenied',
+    (loc) => loc.adminErrorPermissionDenied,
+  );
+
+  @override
+  String get adminErrorInvalidStatusTransition => _resolve(
+    'adminErrorInvalidStatusTransition',
+    (loc) => loc.adminErrorInvalidStatusTransition,
+  );
+
+  @override
+  String get adminErrorAlreadyActedOn => _resolve(
+    'adminErrorAlreadyActedOn',
+    (loc) => loc.adminErrorAlreadyActedOn,
+  );
+
+  @override
+  String get adminErrorUnknown =>
+      _resolve('adminErrorUnknown', (loc) => loc.adminErrorUnknown);
+
+  @override
+  String get adminToastApproveSuccess => _resolve(
+    'adminToastApproveSuccess',
+    (loc) => loc.adminToastApproveSuccess,
+  );
+
+  @override
+  String get mediaGalleryEmpty =>
+      _resolve('mediaGalleryEmpty', (loc) => loc.mediaGalleryEmpty);
+
+  @override
+  String get mediaGalleryVideoPlay =>
+      _resolve('mediaGalleryVideoPlay', (loc) => loc.mediaGalleryVideoPlay);
+
+  @override
+  String get descriptionReadMore =>
+      _resolve('descriptionReadMore', (loc) => loc.descriptionReadMore);
+
+  @override
+  String priceOriginallyWas(String price) =>
+      _active.priceOriginallyWas(price);
 }

@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../debug/theme_gallery_page.dart';
 import '../../features/admin/account_approvals/presentation/pages/account_approvals_page.dart';
+import '../../features/admin/listing_review/presentation/pages/listing_preview_page.dart';
+import '../../features/admin/listing_review/presentation/pages/pending_queue_page.dart';
 import '../../features/admin/presentation/pages/admin_home_page.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
@@ -55,6 +57,8 @@ abstract final class AppRoutes {
   static const superAdminRoles = '/admin/super-admin/roles';
   static const superAdminRoleCreate = '/admin/super-admin/roles/create';
   static const superAdminAssign = '/admin/super-admin/assign';
+  static const adminListingReviewPending = '/admin/listing-review/pending';
+  static const adminListingReviewPreview = '/admin/listing-review/preview/:id';
   static const locationsAdmin = '/admin/locations';
   static const locationsAdminForm = '/admin/locations/form';
   static const currenciesAdmin = '/admin/currencies';
@@ -88,6 +92,8 @@ abstract final class AppRouteNames {
   static const superAdminRoleEditor = 'super-admin-role-editor';
   static const superAdminRoleCreate = 'super-admin-role-create';
   static const superAdminAssign = 'super-admin-assign';
+  static const adminListingReviewPending = 'admin-listing-review-pending';
+  static const adminListingReviewPreview = 'admin-listing-review-preview';
   static const locationsAdmin = 'locations-admin';
   static const locationsAdminGovernorateDetail =
       'locations-admin-governorate-detail';
@@ -171,6 +177,20 @@ GoRouter buildAppRouter({
             path: 'approvals',
             name: AppRouteNames.adminApprovals,
             builder: (context, state) => const AccountApprovalsPage(),
+          ),
+          GoRoute(
+            path: 'listing-review/pending',
+            name: AppRouteNames.adminListingReviewPending,
+            redirect: requireListingReviewRedirect,
+            builder: (context, state) => const PendingQueuePage(),
+          ),
+          GoRoute(
+            path: 'listing-review/preview/:id',
+            name: AppRouteNames.adminListingReviewPreview,
+            redirect: requireListingReviewRedirect,
+            builder: (context, state) => ListingPreviewPage(
+              listingId: state.pathParameters['id']!,
+            ),
           ),
           GoRoute(
             path: 'super-admin/roles',

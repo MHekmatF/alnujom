@@ -27,6 +27,16 @@ class AdminHomePage extends StatelessWidget {
           trailing: const Icon(Icons.chevron_right),
           onTap: () => context.push(AppRoutes.adminApprovals),
         ),
+      if (checker.any(const <String>[
+        PermissionKeys.listingsApprove,
+        PermissionKeys.listingsReject,
+      ]))
+        ListTile(
+          leading: const Icon(Icons.fact_check_outlined),
+          title: Text(l10n.adminTilePendingReview),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => context.push(AppRoutes.adminListingReviewPending),
+        ),
       if (checker.any(PermissionKeys.superAdminCategoryKeys))
         ListTile(
           leading: const Icon(Icons.shield_outlined),

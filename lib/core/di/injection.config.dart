@@ -30,6 +30,22 @@ import '../../features/admin/account_approvals/domain/usecases/reject_account.da
     as _i431;
 import '../../features/admin/account_approvals/presentation/cubit/account_approvals_cubit.dart'
     as _i295;
+import '../../features/admin/listing_review/data/datasources/supabase_listing_review_datasource.dart'
+    as _i530;
+import '../../features/admin/listing_review/data/repositories/listing_review_repository_impl.dart'
+    as _i1072;
+import '../../features/admin/listing_review/domain/repositories/listing_review_repository.dart'
+    as _i155;
+import '../../features/admin/listing_review/domain/usecases/approve_listing.dart'
+    as _i404;
+import '../../features/admin/listing_review/domain/usecases/load_listing_preview.dart'
+    as _i96;
+import '../../features/admin/listing_review/domain/usecases/load_pending_queue.dart'
+    as _i207;
+import '../../features/admin/listing_review/presentation/bloc/listing_preview_bloc.dart'
+    as _i778;
+import '../../features/admin/listing_review/presentation/bloc/pending_queue_bloc.dart'
+    as _i554;
 import '../../features/auth/data/datasources/supabase_auth_datasource.dart'
     as _i76;
 import '../../features/auth/data/repositories/auth_repository_impl.dart'
@@ -272,12 +288,21 @@ _i174.GetIt $initGetIt(
     () => _i650.PermissionChecker(gh<_i1015.PermissionCatalogRepository>()),
   );
   gh.lazySingleton<_i354.AppLogger>(() => _i1026.ConsoleLogger());
+  gh.factory<_i530.SupabaseListingReviewDatasource>(
+    () => _i530.SupabaseListingReviewDatasource(gh<_i454.SupabaseClient>()),
+  );
   gh.factory<_i311.SupabaseCurrenciesDatasource>(
     () => _i311.SupabaseCurrenciesDatasource(gh<_i454.SupabaseClient>()),
   );
   gh.factory<_i333.SupabasePublisherDashboardDatasource>(
     () =>
         _i333.SupabasePublisherDashboardDatasource(gh<_i454.SupabaseClient>()),
+  );
+  gh.lazySingleton<_i155.ListingReviewRepository>(
+    () => _i1072.ListingReviewRepositoryImpl(
+      gh<_i530.SupabaseListingReviewDatasource>(),
+      gh<_i354.AppLogger>(),
+    ),
   );
   gh.factory<_i814.DeleteDraft>(
     () => _i814.DeleteDraft(gh<_i340.ListingsRepository>()),
@@ -381,6 +406,21 @@ _i174.GetIt $initGetIt(
       gh<_i354.AppLogger>(),
     ),
     dispose: (i) => i.dispose(),
+  );
+  gh.factory<_i404.ApproveListingUseCase>(
+    () => _i404.ApproveListingUseCase(gh<_i155.ListingReviewRepository>()),
+  );
+  gh.factory<_i96.LoadListingPreviewUseCase>(
+    () => _i96.LoadListingPreviewUseCase(gh<_i155.ListingReviewRepository>()),
+  );
+  gh.factory<_i207.LoadPendingQueueUseCase>(
+    () => _i207.LoadPendingQueueUseCase(gh<_i155.ListingReviewRepository>()),
+  );
+  gh.factory<_i778.ListingPreviewBloc>(
+    () => _i778.ListingPreviewBloc(
+      gh<_i96.LoadListingPreviewUseCase>(),
+      gh<_i404.ApproveListingUseCase>(),
+    ),
   );
   gh.lazySingleton<_i754.PublisherDashboardRepository>(
     () => _i240.PublisherDashboardRepositoryImpl(
@@ -582,6 +622,9 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i807.OnboardingCubit>(
     () => _i807.OnboardingCubit(gh<_i430.OnboardingRepository>()),
+  );
+  gh.factory<_i554.PendingQueueBloc>(
+    () => _i554.PendingQueueBloc(gh<_i207.LoadPendingQueueUseCase>()),
   );
   gh.factory<_i176.CurrenciesListBloc>(
     () => _i176.CurrenciesListBloc(
