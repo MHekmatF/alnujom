@@ -412,3 +412,76 @@ SELECT count(*) FROM public.listings WHERE status='pending_review';
       5. No crash, no flicker, no list reset.
 
       **Closes**: SC-010 scroll-position retention.
+
+---
+
+## Verification Results (Phase 6 — US4 Audit + Status-History Completeness)
+
+Executed 2026-05-23 via Supabase MCP `execute_sql` against project `hczsgceagommznjaohyk`.
+
+### IDs Used
+
+| Role | Value |
+|---|---|
+| Listing ID (approve test, T070/T071) | `ce1c32c8-e817-46c1-97f4-b33164021247` (seed 25, was `pending_review`, became `approved`) |
+| Listing ID (reject test, T072/T073/T077) | `727326d1-9bbf-46d9-8a8f-0daafbeda869` (seed 24, was `pending_review`, became `rejected`) |
+| Admin UUID | `33333333-3333-3333-3333-333333333333` |
+
+### Verification Method
+
+T070–T073 and T077 simulate the Edge Function call sequence exactly: a `BEGIN` block calls `public.set_app_user_id_for_session(...)` (and for reject, `set_app_rejection_reason_for_session(...)`), then the privileged `UPDATE`, then `COMMIT` — all within the same transaction so the session variables remain in scope for the trigger execution.
+
+### Results Table
+
+| Task | SC | Expected | Actual | Status |
+|---|---|---|---|---|
+| T070 — Approve audit row | SC-003 | 1 row: `action='listing.approved'`, `actor_user_id='33333333-...'`, `target_type='listings'`, `before_state.status='pending_review'`, `after_state.status='approved'`, `after_state.published_at` non-null, `after_state.expires_at=null` | Exactly 1 row returned. `actor_user_id='33333333-3333-3333-3333-333333333333'` confirmed. `target_type='listings'`. `before_state.status="pending_review"`. `after_state.status="approved"`, `after_state.published_at="2026-05-23T19:30:13.048173+00:00"`, `after_state.expires_at=null`. | **PASS** |
+| T071 — Approve status-history row | SC-030 | `previous_status='pending_review'`, `new_status='approved'`, `changed_by='33333333-...'`, `reason IS NULL` | `previous_status='pending_review'`, `new_status='approved'`, `changed_by='33333333-3333-3333-3333-333333333333'`, `reason=null`. | **PASS** |
+| T072 — Reject audit row | SC-004 | 1 row: `action='listing.rejected'`, `actor_user_id='33333333-...'`, `before_state.status='pending_review'`, `after_state.status='rejected'` | Exactly 1 row returned. `actor_user_id='33333333-3333-3333-3333-333333333333'`. `before_state.status="pending_review"`, `after_state.status="rejected"`. Note: `after_state` is the full `listings` row (no `reason` field — reason lives in `listing_status_history`). | **PASS** |
+| T073 — Reject status-history row | SC-004, SC-027, SC-030 | `new_status='rejected'`, `changed_by='33333333-...'`, `reason` parses as JSON with `preset='unrealistic_price'`, `detail='Price exceeds neighborhood comps by 3x.'` | `previous_status='pending_review'`, `new_status='rejected'`, `changed_by='33333333-3333-3333-3333-333333333333'`, `reason='{"preset":"unrealistic_price","detail":"Price exceeds neighborhood comps by 3x."}`. `(reason::jsonb)->>'preset'='unrealistic_price'`, `(reason::jsonb)->>'detail'='Price exceeds neighborhood comps by 3x.'`. | **PASS** |
+| T074 — Phase 5–11 caller regression | SC-005 | `log_audit()` does NOT error when session var is unset; `actor_user_id` is NULL (COALESCE falls back to `auth.uid()` which is NULL under postgres-role MCP calls) | Triggered via `UPDATE public.currencies SET name_en='Syrian Pound (test)' WHERE code='SYP'` (rolled back) with session var explicitly unset. `audit_logs` row written with `action='currency.updated'`, `actor_user_id=NULL`. No ERROR thrown. Function completed gracefully. COALESCE fallback path confirmed. | **PASS** |
+| T075 — log_audit byte-identical-except-COALESCE | SC-005 | Only the INSERT `VALUES` clause changes (single-line COALESCE wrapping `auth.uid()`); all other lines byte-identical | `pg_get_functiondef` output matches Phase 4 body line-by-line except: (1) `pg_get_functiondef` adds `CREATE OR REPLACE FUNCTION public.log_audit()` header with `SET search_path TO 'public'` (vs original `SET search_path = public` — equivalent, pg normalization); (2) the INSERT line: Phase 4 has `VALUES (auth.uid(), ...)`, live DB has `VALUES (coalesce(nullif(current_setting('app.current_user_id', true), '')::uuid, auth.uid()), ...)`. The COALESCE comment line in the migration is not present in the stored function body (comments stripped by Postgres at CREATE time). All logic lines are byte-identical. | **PASS** |
+| T076 — Phase 4/10 file immutability | SC-031 | Zero COALESCE/session-var lines in `20260506120004_create_audit_logs.sql` AND `20260519120006_create_listing_status_history.sql` | `grep` for `COALESCE.*current_setting.*app\.current_user_id` returns 0 matches in both files. Both original migrations are unedited. Amendment lives exclusively in `20260523120004_amend_phase10_phase4_triggers_for_session_var.sql`. | **PASS** |
+| T077 — Failed-action rollback (no audit on no-op) | SC-007 | `count(audit_logs WHERE action='listing.approved' AND target_id=rejected-listing-id)` unchanged before and after the failed UPDATE (which matches 0 rows) | count_before=0; UPDATE matched 0 rows (status guard `AND status='pending_review'` blocked it on `status='rejected'` listing); count_after=0. No trigger fired, no audit row written. | **PASS** |
+
+### T074 auth.uid() NULL Behavior Under MCP
+
+Under the Supabase MCP `execute_sql` tool, SQL runs as the `postgres` superrole (not as an authenticated user). In this execution context `auth.uid()` returns NULL. The amended `log_audit()` COALESCE expression is:
+
+```sql
+coalesce(nullif(current_setting('app.current_user_id', true), '')::uuid, auth.uid())
+```
+
+When the session variable is unset (returns `''` or NULL) AND `auth.uid()` is NULL, the COALESCE resolves to NULL. The function writes the audit row with `actor_user_id=NULL` rather than erroring — confirming graceful handling. This matches the expected behavior per the task instructions: "if `auth.uid()` is NULL under MCP (most likely), this verifies the function doesn't ERROR on a NULL actor — that's still a valid regression test."
+
+For real direct-JWT callers (Phase 5–11 flows), `auth.uid()` returns the authenticated user's UUID, so `actor_user_id` will be correctly populated via the COALESCE fallback. The existing `listing_media.created` audit rows with `actor_user_id='6583a883-123c-4c62-a1ad-00e11b124c8b'` (non-NULL) confirm the COALESCE fallback works correctly for authenticated-user callers.
+
+### T075 Diff Detail
+
+Phase 4 original INSERT (from `.phase4-log-audit-body.sql`):
+```sql
+INSERT INTO audit_logs (actor_user_id, action, target_type, target_id, before_state, after_state)
+    VALUES (auth.uid(), v_action, TG_TABLE_NAME, v_target_id, v_before, v_after);
+```
+
+Live DB INSERT (from `pg_get_functiondef`):
+```sql
+INSERT INTO audit_logs (actor_user_id, action, target_type, target_id, before_state, after_state)
+    VALUES (
+      coalesce(nullif(current_setting('app.current_user_id', true), '')::uuid, auth.uid()),
+      v_action, TG_TABLE_NAME, v_target_id, v_before, v_after
+    );
+```
+
+All `DECLARE` variables, all control-flow blocks (DELETE path, INSERT path, UPDATE path, column-filter logic, audit-noise filter) are byte-identical. Only the `actor_user_id` source expression changed. R-05 narrow relaxation confirmed.
+
+### SC Coverage (Phase 6)
+
+| SC | Status |
+|---|---|
+| SC-003 (approve writes correct audit row) | PASS via T070 |
+| SC-004 (reject writes correct audit + history rows) | PASS via T072 + T073 |
+| SC-005 (log_audit byte-identical-except-COALESCE) | PASS via T075 |
+| SC-027 (Q4=A JSON-encoded reason persisted) | PASS via T073 — `(reason::jsonb)->>'preset'` + `->>'detail'` both parse correctly |
+| SC-030 (correct admin UID in changed_by + actor_user_id) | PASS via T070 + T071 + T072 + T073 — all show `33333333-...` |
+| SC-031 (Phase 4/10 migration files unedited) | PASS via T076 |
