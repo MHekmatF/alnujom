@@ -169,13 +169,13 @@ description: "Task list for Phase 12 — Listing Approval Workflow"
 
 **Independent Test**: Per spec.md US3 — seed 1 listing per status; anonymous SELECT returns only the approved one; flip approved → paused → anonymous SELECT no longer returns it; flip back to approved → it reappears.
 
-- [ ] T063 [US3] Seed test dataset via Supabase MCP `execute_sql` — create 9 listings (or repurpose existing ones via direct UPDATE), one in each of the 9 statuses: draft, pending_review, approved, rejected, paused, sold, rented, expired, deleted. Capture each listing's `id` for the verification queries.
-- [ ] T064 [US3] Anonymous SELECT verification (SC-002) — run `SELECT id, status FROM public.listings ORDER BY created_at ASC` from an anonymous (no-auth) Supabase client. Confirm exactly one row returned (the `approved` one).
-- [ ] T065 [US3] Owner SELECT verification — sign in as the publisher of the `draft` listing; confirm their own draft is visible to them AND no other publisher's drafts are visible (Phase 10 owner-RLS).
-- [ ] T066 [US3] Admin SELECT verification — sign in as an admin holding `listings.view_all`; confirm all 9 statuses are visible (Phase 6 + Phase 10 admin-RLS).
-- [ ] T067 [US3] Storage RLS on approve (SC-009) — for an approved listing's media, run anonymous `supabase.storage.from('listing-images').getPublicUrl(<path>)` AND `curl` the URL; expect HTTP 200 + image bytes.
-- [ ] T068 [US3] Storage RLS on status revert (SC-008) — `UPDATE public.listings SET status='paused' WHERE id='<approved id>'` via Supabase MCP; re-issue both the anonymous SELECT AND the anonymous storage download. Expect zero rows from SELECT AND HTTP 403 from storage. Then `UPDATE ... SET status='approved'`; re-verify both queries return the listing AND its media again.
-- [ ] T069 [US3] Expired listing verification (SC-002 corner) — `UPDATE public.listings SET expires_at = now() - interval '1 hour' WHERE id='<approved id>'`; re-issue anonymous SELECT; confirm the listing is no longer returned (Phase 10 RLS `expires_at IS NULL OR expires_at > now()` clause). Reset `expires_at = NULL` after the test to restore Q2=A invariant.
+- [X] T063 [US3] Seed test dataset via Supabase MCP `execute_sql` — create 9 listings (or repurpose existing ones via direct UPDATE), one in each of the 9 statuses: draft, pending_review, approved, rejected, paused, sold, rented, expired, deleted. Capture each listing's `id` for the verification queries.
+- [X] T064 [US3] Anonymous SELECT verification (SC-002) — run `SELECT id, status FROM public.listings ORDER BY created_at ASC` from an anonymous (no-auth) Supabase client. Confirm exactly one row returned (the `approved` one).
+- [X] T065 [US3] Owner SELECT verification — sign in as the publisher of the `draft` listing; confirm their own draft is visible to them AND no other publisher's drafts are visible (Phase 10 owner-RLS).
+- [X] T066 [US3] Admin SELECT verification — sign in as an admin holding `listings.view_all`; confirm all 9 statuses are visible (Phase 6 + Phase 10 admin-RLS).
+- [X] T067 [US3] Storage RLS on approve (SC-009) — for an approved listing's media, run anonymous `supabase.storage.from('listing-images').getPublicUrl(<path>)` AND `curl` the URL; expect HTTP 200 + image bytes.
+- [X] T068 [US3] Storage RLS on status revert (SC-008) — `UPDATE public.listings SET status='paused' WHERE id='<approved id>'` via Supabase MCP; re-issue both the anonymous SELECT AND the anonymous storage download. Expect zero rows from SELECT AND HTTP 403 from storage. Then `UPDATE ... SET status='approved'`; re-verify both queries return the listing AND its media again.
+- [X] T069 [US3] Expired listing verification (SC-002 corner) — `UPDATE public.listings SET expires_at = now() - interval '1 hour' WHERE id='<approved id>'`; re-issue anonymous SELECT; confirm the listing is no longer returned (Phase 10 RLS `expires_at IS NULL OR expires_at > now()` clause). Reset `expires_at = NULL` after the test to restore Q2=A invariant.
 
 **Checkpoint**: US3 verified. RLS posture is correct end-to-end against real approved data.
 
