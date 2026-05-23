@@ -26,12 +26,21 @@ class ListingCard extends StatelessWidget {
     required this.currenciesByCode,
     required this.governoratesById,
     required this.areasById,
+    this.hideLegacyRejectionBlock = false,
   });
 
   final PublisherListing publisherListing;
   final Map<String, Currency> currenciesByCode;
   final Map<String, Governorate> governoratesById;
   final Map<String, Area> areasById;
+
+  /// When true (Phase 12 / US2 — `_ListingRow` sets this for rejected
+  /// listings), the legacy Phase 10 `RejectionReasonBlock` + `ResubmitCta`
+  /// in-card section is suppressed. The Phase 12 `RejectionReasonBanner`
+  /// rendered above the card already exposes the preset + detail + Resubmit
+  /// + View moderation history in a localised, JSON-aware form. Showing
+  /// both leaks the raw JSON-encoded reason text to the publisher.
+  final bool hideLegacyRejectionBlock;
 
   @override
   Widget build(BuildContext context) {
@@ -92,7 +101,8 @@ class ListingCard extends StatelessWidget {
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
-              if (publisherListing.hasRejectionReason) ...[
+              if (publisherListing.hasRejectionReason &&
+                  !hideLegacyRejectionBlock) ...[
                 const SizedBox(height: AppSpacing.md),
                 RejectionReasonBlock(
                   reason: publisherListing.latestStatusHistoryEntry!.reason!,

@@ -2062,4 +2062,298 @@ final class _DebugAppLocalizations extends AppLocalizations {
     'submitErrorImagesBelowMinimum',
     (loc) => loc.submitErrorImagesBelowMinimum,
   );
+
+  // ── Phase 12 — Listing Approval Workflow (admin) ──────────────────────────
+
+  @override
+  String get adminTilePendingReview =>
+      _resolve('adminTilePendingReview', (loc) => loc.adminTilePendingReview);
+
+  @override
+  String get adminQueueTitle =>
+      _resolve('adminQueueTitle', (loc) => loc.adminQueueTitle);
+
+  @override
+  String get adminQueueEmpty =>
+      _resolve('adminQueueEmpty', (loc) => loc.adminQueueEmpty);
+
+  @override
+  String get adminQueueSubmittedAtJustNow => _resolve(
+    'adminQueueSubmittedAtJustNow',
+    (loc) => loc.adminQueueSubmittedAtJustNow,
+  );
+
+  @override
+  String adminQueueSubmittedAtMinutes(int n) =>
+      _active.adminQueueSubmittedAtMinutes(n);
+
+  @override
+  String adminQueueSubmittedAtHours(int n) =>
+      _active.adminQueueSubmittedAtHours(n);
+
+  @override
+  String adminQueueSubmittedAtDays(int n) =>
+      _active.adminQueueSubmittedAtDays(n);
+
+  @override
+  String get adminQueuePublisherPrefix => _resolve(
+    'adminQueuePublisherPrefix',
+    (loc) => loc.adminQueuePublisherPrefix,
+  );
+
+  @override
+  String get adminPreviewTitle =>
+      _resolve('adminPreviewTitle', (loc) => loc.adminPreviewTitle);
+
+  @override
+  String get adminPreviewCtaApprove =>
+      _resolve('adminPreviewCtaApprove', (loc) => loc.adminPreviewCtaApprove);
+
+  @override
+  String get adminPreviewCtaReject =>
+      _resolve('adminPreviewCtaReject', (loc) => loc.adminPreviewCtaReject);
+
+  @override
+  String get adminApproveDialogTitle => _resolve(
+    'adminApproveDialogTitle',
+    (loc) => loc.adminApproveDialogTitle,
+  );
+
+  @override
+  String get adminApproveDialogBody =>
+      _resolve('adminApproveDialogBody', (loc) => loc.adminApproveDialogBody);
+
+  @override
+  String get adminApproveDialogConfirm => _resolve(
+    'adminApproveDialogConfirm',
+    (loc) => loc.adminApproveDialogConfirm,
+  );
+
+  @override
+  String get adminApproveDialogCancel => _resolve(
+    'adminApproveDialogCancel',
+    (loc) => loc.adminApproveDialogCancel,
+  );
+
+  @override
+  String get adminErrorPermissionDenied => _resolve(
+    'adminErrorPermissionDenied',
+    (loc) => loc.adminErrorPermissionDenied,
+  );
+
+  @override
+  String get adminErrorInvalidStatusTransition => _resolve(
+    'adminErrorInvalidStatusTransition',
+    (loc) => loc.adminErrorInvalidStatusTransition,
+  );
+
+  @override
+  String get adminErrorAlreadyActedOn => _resolve(
+    'adminErrorAlreadyActedOn',
+    (loc) => loc.adminErrorAlreadyActedOn,
+  );
+
+  @override
+  String get adminErrorUnknown =>
+      _resolve('adminErrorUnknown', (loc) => loc.adminErrorUnknown);
+
+  @override
+  String get adminToastApproveSuccess => _resolve(
+    'adminToastApproveSuccess',
+    (loc) => loc.adminToastApproveSuccess,
+  );
+
+  @override
+  String get mediaGalleryEmpty =>
+      _resolve('mediaGalleryEmpty', (loc) => loc.mediaGalleryEmpty);
+
+  @override
+  String get mediaGalleryVideoPlay =>
+      _resolve('mediaGalleryVideoPlay', (loc) => loc.mediaGalleryVideoPlay);
+
+  @override
+  String get descriptionReadMore =>
+      _resolve('descriptionReadMore', (loc) => loc.descriptionReadMore);
+
+  @override
+  String priceOriginallyWas(String price) =>
+      _active.priceOriginallyWas(price);
+
+  // ── Phase 12 / US2 — Reject flow + publisher rejection banner ────────────
+
+  @override
+  String get rejectDialogTitle =>
+      _resolve('rejectDialogTitle', (loc) => loc.rejectDialogTitle);
+
+  @override
+  String get rejectDialogDetailLabelOptional => _resolve(
+        'rejectDialogDetailLabelOptional',
+        (loc) => loc.rejectDialogDetailLabelOptional,
+      );
+
+  @override
+  String get rejectDialogDetailLabelRequired => _resolve(
+        'rejectDialogDetailLabelRequired',
+        (loc) => loc.rejectDialogDetailLabelRequired,
+      );
+
+  @override
+  String get rejectDialogDetailHintOther => _resolve(
+        'rejectDialogDetailHintOther',
+        (loc) => loc.rejectDialogDetailHintOther,
+      );
+
+  @override
+  String rejectDialogCounter(int count) =>
+      _active.rejectDialogCounter(count);
+
+  @override
+  String get rejectDialogConfirm =>
+      _resolve('rejectDialogConfirm', (loc) => loc.rejectDialogConfirm);
+
+  @override
+  String get rejectDialogCancel =>
+      _resolve('rejectDialogCancel', (loc) => loc.rejectDialogCancel);
+
+  @override
+  String get rejectPresetMissingOrLowQualityPhotos => _resolve(
+        'rejectPresetMissingOrLowQualityPhotos',
+        (loc) => loc.rejectPresetMissingOrLowQualityPhotos,
+      );
+
+  @override
+  String get rejectPresetIncorrectLocation => _resolve(
+        'rejectPresetIncorrectLocation',
+        (loc) => loc.rejectPresetIncorrectLocation,
+      );
+
+  @override
+  String get rejectPresetUnrealisticPrice => _resolve(
+        'rejectPresetUnrealisticPrice',
+        (loc) => loc.rejectPresetUnrealisticPrice,
+      );
+
+  @override
+  String get rejectPresetIncompleteDescription => _resolve(
+        'rejectPresetIncompleteDescription',
+        (loc) => loc.rejectPresetIncompleteDescription,
+      );
+
+  @override
+  String get rejectPresetDuplicateListing => _resolve(
+        'rejectPresetDuplicateListing',
+        (loc) => loc.rejectPresetDuplicateListing,
+      );
+
+  @override
+  String get rejectPresetOther =>
+      _resolve('rejectPresetOther', (loc) => loc.rejectPresetOther);
+
+  @override
+  String publisherRejectionAttribution(String timeAgo) =>
+      _active.publisherRejectionAttribution(timeAgo);
+
+  @override
+  String get publisherRejectionResubmit => _resolve(
+        'publisherRejectionResubmit',
+        (loc) => loc.publisherRejectionResubmit,
+      );
+
+  @override
+  String get publisherRejectionViewHistory => _resolve(
+        'publisherRejectionViewHistory',
+        (loc) => loc.publisherRejectionViewHistory,
+      );
+
+  @override
+  String get adminErrorInvalidReasonPreset => _resolve(
+        'adminErrorInvalidReasonPreset',
+        (loc) => loc.adminErrorInvalidReasonPreset,
+      );
+
+  @override
+  String get adminErrorReasonDetailTooLong => _resolve(
+        'adminErrorReasonDetailTooLong',
+        (loc) => loc.adminErrorReasonDetailTooLong,
+      );
+
+  @override
+  String get adminToastRejectSuccess => _resolve(
+        'adminToastRejectSuccess',
+        (loc) => loc.adminToastRejectSuccess,
+      );
+
+  // ── Phase 12 / US6 — Publisher moderation history page ───────────────────
+
+  @override
+  String get publisherHistoryTitle =>
+      _resolve('publisherHistoryTitle', (loc) => loc.publisherHistoryTitle);
+
+  @override
+  String get publisherHistoryAdminTeam => _resolve(
+        'publisherHistoryAdminTeam',
+        (loc) => loc.publisherHistoryAdminTeam,
+      );
+
+  @override
+  String get publisherHistoryFirstEntry => _resolve(
+        'publisherHistoryFirstEntry',
+        (loc) => loc.publisherHistoryFirstEntry,
+      );
+
+  @override
+  String get publisherHistoryEmpty =>
+      _resolve('publisherHistoryEmpty', (loc) => loc.publisherHistoryEmpty);
+
+  @override
+  String get publisherHistoryStatusDraft => _resolve(
+        'publisherHistoryStatusDraft',
+        (loc) => loc.publisherHistoryStatusDraft,
+      );
+
+  @override
+  String get publisherHistoryStatusPendingReview => _resolve(
+        'publisherHistoryStatusPendingReview',
+        (loc) => loc.publisherHistoryStatusPendingReview,
+      );
+
+  @override
+  String get publisherHistoryStatusApproved => _resolve(
+        'publisherHistoryStatusApproved',
+        (loc) => loc.publisherHistoryStatusApproved,
+      );
+
+  @override
+  String get publisherHistoryStatusRejected => _resolve(
+        'publisherHistoryStatusRejected',
+        (loc) => loc.publisherHistoryStatusRejected,
+      );
+
+  @override
+  String get publisherHistoryStatusPaused => _resolve(
+        'publisherHistoryStatusPaused',
+        (loc) => loc.publisherHistoryStatusPaused,
+      );
+
+  @override
+  String get publisherHistoryStatusSold =>
+      _resolve('publisherHistoryStatusSold', (loc) => loc.publisherHistoryStatusSold);
+
+  @override
+  String get publisherHistoryStatusRented => _resolve(
+        'publisherHistoryStatusRented',
+        (loc) => loc.publisherHistoryStatusRented,
+      );
+
+  @override
+  String get publisherHistoryStatusExpired => _resolve(
+        'publisherHistoryStatusExpired',
+        (loc) => loc.publisherHistoryStatusExpired,
+      );
+
+  @override
+  String get publisherHistoryStatusDeleted => _resolve(
+        'publisherHistoryStatusDeleted',
+        (loc) => loc.publisherHistoryStatusDeleted,
+      );
 }

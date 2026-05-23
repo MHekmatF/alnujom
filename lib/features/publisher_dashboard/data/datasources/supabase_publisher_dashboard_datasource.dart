@@ -1,6 +1,11 @@
+import 'dart:convert';
+
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/listing/rejection_reason.dart';
+import '../../../listing_form/domain/entities/listing.dart';
+import '../../domain/entities/moderation_history_entry.dart';
 import '../dtos/publisher_listing_dto.dart';
 
 /// Sole importer of `package:supabase_flutter` in
@@ -30,5 +35,88 @@ class SupabasePublisherDashboardDatasource {
         .order('created_at', ascending: false)
         .range(offset, offset + limit - 1);
     return rows.map((r) => PublisherListingDto.fromMap(r)).toList();
+  }
+
+  // ─── Phase 12 / US2 — moderation history ────────────────────────────────
+
+  /// Loads the full chronological moderation history for one listing.
+  /// Contract: `contracts/phase12-moderation-history-page.md` §Data source.
+  ///
+  /// RLS on `public.listing_status_history` enforces
+  /// `publisher_user_id = auth.uid()` — no extra owner check needed.
+  Future<List<ModerationHistoryEntry>> loadModerationHistory(
+    String listingId,
+  ) async {
+    final rows = await _client
+        .from('listing_status_history')
+        .select('id, previous_status, new_status, changed_at, reason')
+        .eq('listing_id', listingId)
+        .order('changed_at', ascending: true);
+    return (rows as List<dynamic>)
+        .map((r) => _mapRowToEntry(Map<String, dynamic>.from(r as Map)))
+        .toList(growable: false);
+  }
+
+  /// Returns the most recent `rejected` history row for a listing, or null
+  /// when none exist. Indexed lookup per
+  /// `contracts/phase12-publisher-rejection-banner.md`.
+  Future<ModerationHistoryEntry?> loadMostRecentRejection(
+    String listingId,
+  ) async {
+    final rows = await _client
+        .from('listing_status_history')
+        .select('id, previous_status, new_status, changed_at, reason')
+        .eq('listing_id', listingId)
+        .eq('new_status', 'rejected')
+        .order('changed_at', ascending: false)
+        .limit(1);
+    final list = rows as List<dynamic>;
+    if (list.isEmpty) return null;
+    return _mapRowToEntry(Map<String, dynamic>.from(list.first as Map));
+  }
+
+  /// Decodes one history row, parsing Q4=A JSON `reason` defensively:
+  /// only treats the column as JSON when it starts with `{` — guards
+  /// against any pre-Phase-12 plain-text rows (none expected in prod;
+  /// possible in development DBs).
+  ModerationHistoryEntry _mapRowToEntry(Map<String, dynamic> row) {
+    final id = row['id'] as String;
+    final newStatusRaw = row['new_status'] as String;
+    final previousStatusRaw = row['previous_status'] as String?;
+    final changedAtRaw = row['changed_at'] as String;
+    final reasonRaw = row['reason'] as String?;
+
+    RejectionReason? preset;
+    String? detail;
+    if (reasonRaw != null && reasonRaw.startsWith('{')) {
+      try {
+        final parsed = jsonDecode(reasonRaw);
+        if (parsed is Map<String, dynamic>) {
+          final presetKey = parsed['preset']?.toString();
+          if (presetKey != null) {
+            try {
+              preset = RejectionReason.fromKey(presetKey);
+            } on ArgumentError {
+              preset = null;
+            }
+          }
+          final detailRaw = parsed['detail'];
+          detail = detailRaw is String ? detailRaw : null;
+        }
+      } on FormatException {
+        // Legacy non-JSON row — preset/detail stay null.
+      }
+    }
+
+    return ModerationHistoryEntry(
+      id: id,
+      previousStatus: previousStatusRaw == null
+          ? null
+          : ListingStatusDb.fromDbValue(previousStatusRaw),
+      newStatus: ListingStatusDb.fromDbValue(newStatusRaw),
+      changedAt: DateTime.parse(changedAtRaw),
+      rejectionPreset: preset,
+      rejectionDetail: detail,
+    );
   }
 }

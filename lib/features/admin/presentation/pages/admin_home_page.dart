@@ -27,26 +27,36 @@ class AdminHomePage extends StatelessWidget {
           trailing: const Icon(Icons.chevron_right),
           onTap: () => context.push(AppRoutes.adminApprovals),
         ),
+      if (checker.any(const <String>[
+        PermissionKeys.listingsApprove,
+        PermissionKeys.listingsReject,
+      ]))
+        ListTile(
+          leading: const Icon(Icons.fact_check_outlined),
+          title: Text(l10n.adminTilePendingReview),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => context.push(AppRoutes.adminListingReviewPending),
+        ),
       if (checker.any(PermissionKeys.superAdminCategoryKeys))
         ListTile(
           leading: const Icon(Icons.shield_outlined),
           title: Text(l10n.adminTileSuperAdmin),
           trailing: const Icon(Icons.chevron_right),
-          onTap: () => context.go(AppRoutes.superAdminRoles),
+          onTap: () => context.push(AppRoutes.superAdminRoles),
         ),
       if (checker.has(PermissionKeys.locationsManage))
         ListTile(
           leading: const Icon(Icons.location_on_outlined),
           title: Text(l10n.locationsTileTitle),
           trailing: const Icon(Icons.chevron_right),
-          onTap: () => context.go(AppRoutes.locationsAdmin),
+          onTap: () => context.push(AppRoutes.locationsAdmin),
         ),
       if (checker.has(PermissionKeys.currenciesManage))
         ListTile(
           leading: const Icon(Icons.currency_exchange),
           title: Text(l10n.adminHomeCurrenciesTile),
           trailing: const Icon(Icons.chevron_right),
-          onTap: () => context.go(AppRoutes.currenciesAdmin),
+          onTap: () => context.push(AppRoutes.currenciesAdmin),
         ),
       if (kDebugMode) const LocationsSmokeTestTile(),
     ];

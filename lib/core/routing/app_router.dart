@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../debug/theme_gallery_page.dart';
 import '../../features/admin/account_approvals/presentation/pages/account_approvals_page.dart';
+import '../../features/admin/listing_review/presentation/pages/listing_preview_page.dart';
+import '../../features/admin/listing_review/presentation/pages/pending_queue_page.dart';
 import '../../features/admin/presentation/pages/admin_home_page.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
@@ -31,6 +33,7 @@ import '../../features/locations/presentation/pages/location_picker_smoke_test_p
 import '../../features/locations/presentation/pages/locations_list_page.dart';
 import '../../features/listing_form/domain/entities/listing_form_state.dart';
 import '../../features/listing_form/presentation/pages/listing_form_page.dart';
+import '../../features/publisher_dashboard/presentation/pages/listing_moderation_history_page.dart';
 import '../../features/publisher_dashboard/presentation/pages/my_listings_page.dart';
 import '../../features/super_admin/presentation/pages/assign_role_page.dart';
 import '../../features/super_admin/presentation/pages/create_role_page.dart';
@@ -55,6 +58,8 @@ abstract final class AppRoutes {
   static const superAdminRoles = '/admin/super-admin/roles';
   static const superAdminRoleCreate = '/admin/super-admin/roles/create';
   static const superAdminAssign = '/admin/super-admin/assign';
+  static const adminListingReviewPending = '/admin/listing-review/pending';
+  static const adminListingReviewPreview = '/admin/listing-review/preview/:id';
   static const locationsAdmin = '/admin/locations';
   static const locationsAdminForm = '/admin/locations/form';
   static const currenciesAdmin = '/admin/currencies';
@@ -68,6 +73,8 @@ abstract final class AppRoutes {
   static const publisherListingsEdit = '/publisher/listings/:id/edit';
   static const publisherMyListings = '/publisher/dashboard/my-listings';
   static const publisherApprovalPending = '/publisher/pending-approval';
+  static const publisherListingsModerationHistory =
+      '/publisher/listings/:id/moderation-history';
   static const shellHome = '/';
   static const themeGallery = '/_debug/theme-gallery';
   static const debugMoneyFormatter = '/debug/money-formatter';
@@ -88,6 +95,8 @@ abstract final class AppRouteNames {
   static const superAdminRoleEditor = 'super-admin-role-editor';
   static const superAdminRoleCreate = 'super-admin-role-create';
   static const superAdminAssign = 'super-admin-assign';
+  static const adminListingReviewPending = 'admin-listing-review-pending';
+  static const adminListingReviewPreview = 'admin-listing-review-preview';
   static const locationsAdmin = 'locations-admin';
   static const locationsAdminGovernorateDetail =
       'locations-admin-governorate-detail';
@@ -105,6 +114,8 @@ abstract final class AppRouteNames {
   static const publisherListingsEdit = 'publisher-listings-edit';
   static const publisherMyListings = 'publisher-my-listings';
   static const publisherApprovalPending = 'publisher-pending-approval';
+  static const publisherListingsModerationHistory =
+      'publisher-listings-moderation-history';
   static const shellHome = 'shell-home';
   static const themeGallery = 'theme-gallery';
 }
@@ -171,6 +182,20 @@ GoRouter buildAppRouter({
             path: 'approvals',
             name: AppRouteNames.adminApprovals,
             builder: (context, state) => const AccountApprovalsPage(),
+          ),
+          GoRoute(
+            path: 'listing-review/pending',
+            name: AppRouteNames.adminListingReviewPending,
+            redirect: requireListingReviewRedirect,
+            builder: (context, state) => const PendingQueuePage(),
+          ),
+          GoRoute(
+            path: 'listing-review/preview/:id',
+            name: AppRouteNames.adminListingReviewPreview,
+            redirect: requireListingReviewRedirect,
+            builder: (context, state) => ListingPreviewPage(
+              listingId: state.pathParameters['id']!,
+            ),
           ),
           GoRoute(
             path: 'super-admin/roles',
@@ -313,6 +338,17 @@ GoRouter buildAppRouter({
         path: AppRoutes.publisherApprovalPending,
         name: AppRouteNames.publisherApprovalPending,
         builder: (context, state) => const PublisherApprovalPendingPage(),
+      ),
+      // Phase 12 / US6 — publisher moderation history page.
+      // Owner-only access enforced server-side by Phase 10's RLS on
+      // listing_status_history (publisher_user_id = auth.uid()).
+      GoRoute(
+        path: AppRoutes.publisherListingsModerationHistory,
+        name: AppRouteNames.publisherListingsModerationHistory,
+        redirect: requirePublisherLoginRedirect,
+        builder: (context, state) => ListingModerationHistoryPage(
+          listingId: state.pathParameters['id']!,
+        ),
       ),
 
       // ─── Phase 1–4 legacy routes (kept for design tools) ───

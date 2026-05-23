@@ -1,6 +1,9 @@
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/errors/failure.dart';
+import '../../../../core/errors/result.dart';
 import '../../../listing_form/domain/entities/listing.dart';
+import '../../domain/entities/moderation_history_entry.dart';
 import '../../domain/entities/publisher_listing.dart';
 import '../../domain/repositories/publisher_dashboard_repository.dart';
 import '../datasources/supabase_publisher_dashboard_datasource.dart';
@@ -23,5 +26,33 @@ class PublisherDashboardRepositoryImpl implements PublisherDashboardRepository {
       limit: limit,
     );
     return dtos.map((d) => d.toEntity()).toList();
+  }
+
+  @override
+  Future<Result<List<ModerationHistoryEntry>>> loadModerationHistory(
+    String listingId,
+  ) async {
+    try {
+      final entries = await _datasource.loadModerationHistory(listingId);
+      return Success(entries);
+    } on Object catch (error, stackTrace) {
+      return FailureResult(
+        UnknownFailure(error.toString(), cause: error, stackTrace: stackTrace),
+      );
+    }
+  }
+
+  @override
+  Future<Result<ModerationHistoryEntry?>> loadMostRecentRejection(
+    String listingId,
+  ) async {
+    try {
+      final entry = await _datasource.loadMostRecentRejection(listingId);
+      return Success(entry);
+    } on Object catch (error, stackTrace) {
+      return FailureResult(
+        UnknownFailure(error.toString(), cause: error, stackTrace: stackTrace),
+      );
+    }
   }
 }

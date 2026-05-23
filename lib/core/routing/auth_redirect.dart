@@ -102,6 +102,36 @@ String? requireCurrenciesManageRedirect(
   return null;
 }
 
+/// Phase 12 — gate for `/admin/listing-review/...` routes. Requires either
+/// `listings.approve` OR `listings.reject` (one is enough to view + act on
+/// the queue; the Edge Function re-checks the specific permission on call).
+String? requireListingReviewRedirect(
+  BuildContext context,
+  GoRouterState state,
+) {
+  final checker = getIt<PermissionChecker>();
+  if (!checker.any(const <String>[
+    PermissionKeys.listingsApprove,
+    PermissionKeys.listingsReject,
+  ])) {
+    return '/admin?denied=listing_review';
+  }
+  return null;
+}
+
+/// Phase 12 / US6 — login-only gate for the publisher moderation history page.
+/// Owner-only access is enforced server-side; no publisher-status check needed.
+String? requirePublisherLoginRedirect(
+  BuildContext context,
+  GoRouterState state,
+) {
+  final authState = getIt<AuthBloc>().state;
+  if (authState is! Authenticated) {
+    return AppRoutes.login;
+  }
+  return null;
+}
+
 String? requirePublisherStatusRedirect(
   BuildContext context,
   GoRouterState state,
