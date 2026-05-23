@@ -296,14 +296,22 @@ class _ListingRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isRejected =
+        publisherListing.listing.status == ListingStatus.rejected;
+
     final card = ListingCard(
       publisherListing: publisherListing,
       currenciesByCode: currenciesByCode,
       governoratesById: governoratesById,
       areasById: areasById,
+      // For rejected listings the Phase 12 banner above renders the parsed
+      // preset + detail + Resubmit + View moderation history in a localised
+      // form; suppress the legacy raw-JSON in-card block to avoid the
+      // double-display + raw JSON leak.
+      hideLegacyRejectionBlock: isRejected,
     );
 
-    if (publisherListing.listing.status != ListingStatus.rejected) {
+    if (!isRejected) {
       return card;
     }
 
