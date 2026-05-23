@@ -39,5 +39,41 @@ RLS is enabled. Policies are bundled inline in the migration and mirrored in
 - `listing_status_transition_trigger` appends operational status history rows.
 - `listings_audit_trigger` emits listing audit action keys.
 
+## Phase 11 Amendment — Media-Minimum Check in `submit_listing`
+
+**Migration**: `20260522120004_amend_submit_listing_rpc_for_media_minimum.sql`
+**FR**: FR-022 | **Q-resolution**: Q1=A
+
+Phase 11 amends `public.submit_listing(p_listing_id UUID)` via `CREATE OR REPLACE
+FUNCTION` to add a media-minimum check as step 5a between the price-count check
+and the `IF-RAISE` block. The check:
+
+```sql
+SELECT count(*) INTO v_image_count
+  FROM public.listing_media
+  WHERE listing_id = p_listing_id AND kind = 'image' AND watermarked = true;
+IF v_image_count = 0 THEN
+  v_missing := array_append(v_missing, 'listing_media.images_below_minimum');
+END IF;
+```
+
+If no watermarked image rows exist for the listing, `'listing_media.images_below_minimum'`
+is appended to `v_missing[]`. The structured error payload (`SQLSTATE 22023`,
+`missing_fields[]` array) is unchanged — the Phase 10
+`submit_failure_dialog.dart` already iterates this array without source-code
+changes required. Phase 11 adds the ARB key `submit.error.imagesBelowMinimum`
+to both `app_ar.arb` and `app_en.arb`.
+
+**Immutability**: The Phase 10 migration
+`20260519120007_create_submit_listing_rpc.sql` is NOT edited (R-35). Migration 4
+supersedes the function body via `CREATE OR REPLACE`. SECURITY DEFINER,
+`search_path=public,auth`, and the EXECUTE grant to `authenticated` are all
+preserved by `CREATE OR REPLACE`.
+
+**Cross-reference**: `specs/011-media-watermark/contracts/submit-listing-amendment.md`
+
+The `public.listings` table itself is **unchanged** in Phase 11 — no new columns,
+no new constraints, no new indexes.
+
 References: `specs/010-listing-creation/data-model.md`,
 `contracts/phase10-tables.md`, `contracts/phase10-rls-policies.md`.
