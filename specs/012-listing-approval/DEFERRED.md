@@ -557,3 +557,35 @@ Executed 2026-05-23 by orchestrator (Phase 9 worktree agent was blocked on shell
 - **28 / 32 SCs** fully verified (T070-T100 + T106-T110 + the Phase 5 RLS table + Phase 6 audit table).
 - **4 / 32 SCs** human-gated (SC-001 admin-journey timing, SC-006 non-admin Edge Function 403, SC-007 true-concurrent race HTTP, SC-026 non-admin route-guard, SC-029 p95 latency). All have explicit reproduction recipes in this DEFERRED.md.
 - Per `feedback_no_new_tests.md`, the human-gated tasks are the appropriate final validation path; no automated test was added.
+
+## Manual Verification Outcomes (2026-05-23 session)
+
+### Closed by UI walk + MCP SQL verification
+
+| Task | Closure mechanism | Notes |
+|---|---|---|
+| **T044** (US1 approve flow) | UI on Pixel 8 Pro + MCP audit verification | Seed 20 approved by super_admin (UID `6583a883-...`); audit + history rows confirm correct attribution after the FR-024 atomic-wrapper fix (migration 20260523120005). SCs closed: SC-001 admin journey, SC-003 audit completeness, SC-009 anonymous-readable post-approve, SC-011 preview fidelity, SC-030 actor attribution. |
+| **T062** (US2 reject + publisher banner) | UI on Pixel 8 Pro + Infinix Note 8 + MCP | Seed 19 rejected with preset `missing_or_low_quality_photos`, no detail. Publisher banner renders on the Infinix My Listings → Rejected filter for the owner (`+963992345678`). Banner CTAs wrapped to a second line on the Infinix's 720dp viewport (Wrap fix, commit `e039591`). Legacy raw-JSON RejectionReasonBlock suppressed when Phase 12 banner is in play (commit `bef6449`). SCs closed: SC-004, SC-012, SC-013, SC-027. |
+| **T087** (moderation history page) | UI on Infinix | Page renders 2 chronological transitions for seed 24 with the "Previous → New" arc, timestamp + "Admin team" attribution, preset label, and detail block for the rejection row. Admin identity NEVER exposed. |
+| **T103 step 1** (non-admin home tile) | UI on Pixel | User `+963991134567` (role=`user` ONLY) sees ONLY "My Profile" on the home screen — no Admin tile, no Create-listing tile, no My-listings tile. The permission-gated UI honors the role. |
+| **T104** (non-admin Edge Function 403) | MCP SQL simulation of the JWT-bound permission check | Same user → `current_user_has_permission('listings.approve')` returns FALSE, `'listings.reject'` returns FALSE. The Edge Function at approve_listing/index.ts:102-113 maps `hasPerm !== true` to HTTP 403 `permission_denied` BEFORE the service-role client is created. SC-006 closed. |
+
+### Real-bugs surfaced during manual verification (all fixed)
+
+| Commit | What it closed |
+|---|---|
+| `e7e2dc0` | Admin queue PGRST200 — listings.publisher_user_id doesn't FK to profiles.id; switched to two-step profile lookup mirroring Phase 5/6/7 pattern. |
+| `8c31799` | FR-024 NULL-actor bug. Set-then-UPDATE across two PostgREST transactions loses the GUC; new atomic wrappers `approve_listing_internal` / `reject_listing_internal` (migration 20260523120005) do GUC-set + UPDATE in one plpgsql block. Pre-fix NULL-actor row backfilled. |
+| `bef6449` | Phase 10 raw-JSON RejectionReasonBlock leaking machine-readable reason to the publisher; suppressed when Phase 12 banner renders above the card. |
+| `e039591` | RejectionReasonBanner CTA row overflowing on the Infinix Note 8's 720dp viewport; Wrap layout flows the second button to a new line. |
+| `66a24e0` | System back exits the app from most home-tile destinations; fixed 5 tile taps to use `.push` instead of `.go/.goNamed` so the parent stays on the navigation stack. Pre-Phase-12 nav-pattern carry-over; affects Phase 5/7/8/9/10 navigation overall. |
+
+### Outstanding human-follow-ups (low priority)
+
+- [ ] **T103 step 2** — Real deep-link redirect test. App's `AndroidManifest.xml` declares only the LAUNCHER intent; no deep-link scheme. To test the route's `requireListingReviewRedirect` directly, either add a debug-only deep-link intent (out of Phase 12 scope) OR temporarily grant `+963991134567` a role so the UI navigation can reach `/admin/listing-review/pending`, then immediately revoke. Closure mechanism would be observing the redirect to `/admin?denied=listing_review` + the localized toast.
+- [ ] **T104 real-HTTP curl** — Same Edge Function 403 path verified at SQL level; the HTTP-level curl requires `+963991134567`'s password (not known to orchestrator). Cheap follow-up if the password is shared.
+- [ ] **T101 p95 latency probe** — After ≥10 approve + ≥10 reject invocations through the UI, retrieve Supabase Edge Function logs via MCP `get_logs(service="edge-function")` and compute 95th-percentile `duration_ms` ≤ 2000. Today's session generated approximately 4 invocations (seed 22, seed 21 direct-SQL, seed 20, seed 19 reject); ≥16 more needed.
+- [ ] **T090** (reject-resubmit-reject chain on a single listing) — Needs at least 2 sequential reject actions on one listing with a publisher Resubmit between them. Best driven on the Infinix as `+963992345678` after a fresh round.
+- [ ] **T091** (approve-revert-approve chain) — Needs admin approve, direct-SQL flip to paused, re-approve. Trivial follow-up.
+- [ ] **Q5=A Other-required UX gate** — In the reject dialog, selecting Other should disable Confirm when detail is empty AND enable Confirm when detail is non-empty. Today's session used Missing-or-low-quality-photos so the Other-only branch is unverified.
+- [ ] **Phase 10 MyListings filtering** — Phase 10 MyListings shows the signed-in user ALL rejected listings the admin RLS allows (including other users'). Out of Phase 12 scope but worth a Phase 10 cleanup pass — currently relies on the user being a non-admin to filter to their own listings via owner-RLS.
