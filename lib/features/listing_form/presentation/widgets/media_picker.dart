@@ -76,7 +76,14 @@ class MediaPicker extends StatelessWidget {
               );
             }
             final ghost = inFlightEntries[index - media.length];
-            return MediaThumbnail.ghost(progress: ghost.value);
+            return MediaThumbnail.ghost(
+              progress: ghost.value,
+              onDismiss: ghost.value is MediaUploadProgressError
+                  ? () => context
+                        .read<ListingFormBloc>()
+                        .add(MediaUploadDismissed(ghost.key))
+                  : null,
+            );
           },
         );
       },

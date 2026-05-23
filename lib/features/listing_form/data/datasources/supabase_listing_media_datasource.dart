@@ -80,7 +80,10 @@ class SupabaseListingMediaDatasource {
     required int ordering,
     required bool isMain,
   }) async {
-    final path = '$listingId/${ordering}_${_randomSuffix()}.jpg';
+    // Per task #29 follow-up: `ordering` is no longer embedded in the path,
+    // and we send 0 as the sentinel — the listing_media_assign_ordering
+    // BEFORE INSERT trigger computes the actual value server-side.
+    final path = '$listingId/${_randomSuffix()}.jpg';
     await _client.storage.from(_imagesBucket).uploadBinary(
       path,
       watermarkedJpegBytes,
@@ -95,7 +98,7 @@ class SupabaseListingMediaDatasource {
         'kind': 'image',
         'storage_path': path,
         'external_url': null,
-        'ordering': ordering,
+        'ordering': 0, // sentinel — trigger assigns max(ordering)+1
         'is_main': isMain,
         'watermarked': true, // FR-016 — always true for Phase 11 client uploads
       }).select().single();
@@ -119,7 +122,7 @@ class SupabaseListingMediaDatasource {
     required String filePath,
     required int ordering,
   }) async {
-    final path = '$listingId/${ordering}_${_randomSuffix()}.mp4';
+    final path = '$listingId/${_randomSuffix()}.mp4';
     await _client.storage.from(_videosBucket).upload(
       path,
       File(filePath),
@@ -134,7 +137,7 @@ class SupabaseListingMediaDatasource {
         'kind': 'video',
         'storage_path': path,
         'external_url': null,
-        'ordering': ordering,
+        'ordering': 0, // sentinel — trigger assigns
         'is_main': false, // FR-002 CHECK — video rows can never be main
         'watermarked': false,
       }).select().single();
@@ -147,27 +150,26 @@ class SupabaseListingMediaDatasource {
     }
   }
 
-  /// Re-sequences `ordering` for a list of media ids via sequential
-  /// per-row UPDATEs. Each UPDATE touches only the `ordering` column so
-  /// PostgREST does not need to validate the row's NOT NULL columns.
+  /// Re-sequences `ordering` for a list of media ids via the
+  /// `reorder_listing_media` SECURITY DEFINER RPC — single round-trip,
+  /// atomic under one DB transaction (task #31 follow-up).
   ///
-  /// NOTE: an `upsert` with a partial column set (id + listing_id + ordering)
-  /// would round-trip in 1 call but PostgREST validates the INSERT branch
-  /// against NOT NULL constraints on `kind` / `storage_path` / `is_main` /
-  /// `watermarked` and returns 400 — even though the conflict resolution
-  /// would have routed to UPDATE. Sequential UPDATEs are O(N) round-trips
-  /// but reliable, and N is bounded by the 10-image + 2-video cap.
+  /// Caller authorization is enforced inside the function body (per Phase
+  /// 7/9 R-06 precedent): the caller must own the listing OR have
+  /// `listings.edit_any`, the listing must be in draft/rejected status,
+  /// and every id in newOrderIds must belong to that listing.
   Future<void> reorder({
     required String listingId,
     required List<String> newOrderIds,
   }) async {
     if (newOrderIds.isEmpty) return;
-    for (int i = 0; i < newOrderIds.length; i++) {
-      await _client
-          .from('listing_media')
-          .update(<String, dynamic>{'ordering': i + 1})
-          .eq('id', newOrderIds[i]);
-    }
+    await _client.rpc<void>(
+      'reorder_listing_media',
+      params: <String, dynamic>{
+        'p_listing_id': listingId,
+        'p_ordered_ids': newOrderIds,
+      },
+    );
   }
 
   /// Flips `is_main` to `true` on the target row and `false` on the prior

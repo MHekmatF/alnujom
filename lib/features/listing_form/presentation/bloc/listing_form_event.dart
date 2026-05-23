@@ -221,3 +221,16 @@ class MediaDeleted extends ListingFormEvent {
   @override
   List<Object?> get props => [mediaId];
 }
+
+/// Dismiss an in-flight upload entry from `state.uploadInFlight`. Used by
+/// the error tile's X button to clear an orphaned upload-fail after the
+/// publisher acknowledges it. The original file reference is lost — true
+/// retry requires re-picking from the gallery (per task #30 follow-up).
+class MediaUploadDismissed extends ListingFormEvent {
+  const MediaUploadDismissed(this.localId);
+
+  final String localId;
+
+  @override
+  List<Object?> get props => [localId];
+}

@@ -31,18 +31,24 @@ class MediaThumbnail extends StatelessWidget {
     this.onDelete,
     this.onMoveUp,
     this.onMoveDown,
-  }) : _ghostProgress = null;
+  }) : onDismiss = null,
+       _ghostProgress = null;
 
   /// Ghost tile constructor — for in-flight uploads that haven't committed
-  /// a `listing_media` row yet.
-  const MediaThumbnail.ghost({super.key, required MediaUploadProgress progress})
-    : media = null,
-      isEditable = false,
-      onSetMain = null,
-      onDelete = null,
-      onMoveUp = null,
-      onMoveDown = null,
-      _ghostProgress = progress;
+  /// a `listing_media` row yet. `onDismiss` is wired only when the progress
+  /// is `MediaUploadProgressError` — it lets the publisher clear the
+  /// orphaned error tile without having to navigate away.
+  const MediaThumbnail.ghost({
+    super.key,
+    required MediaUploadProgress progress,
+    this.onDismiss,
+  }) : media = null,
+       isEditable = false,
+       onSetMain = null,
+       onDelete = null,
+       onMoveUp = null,
+       onMoveDown = null,
+       _ghostProgress = progress;
 
   final ListingMedia? media;
   final bool isEditable;
@@ -50,6 +56,7 @@ class MediaThumbnail extends StatelessWidget {
   final VoidCallback? onDelete;
   final VoidCallback? onMoveUp;
   final VoidCallback? onMoveDown;
+  final VoidCallback? onDismiss;
   final MediaUploadProgress? _ghostProgress;
 
   bool get _isGhost => _ghostProgress != null;
@@ -78,7 +85,8 @@ class MediaThumbnail extends StatelessWidget {
                 left: AppSpacing.sm,
                 child: _OrderingBadge(ordering: media!.ordering),
               ),
-            if (_isGhost) _GhostOverlay(progress: _ghostProgress!),
+            if (_isGhost)
+              _GhostOverlay(progress: _ghostProgress!, onDismiss: onDismiss),
           ],
         ),
       ),
@@ -239,9 +247,10 @@ class _OrderingBadge extends StatelessWidget {
 }
 
 class _GhostOverlay extends StatelessWidget {
-  const _GhostOverlay({required this.progress});
+  const _GhostOverlay({required this.progress, this.onDismiss});
 
   final MediaUploadProgress progress;
+  final VoidCallback? onDismiss;
 
   @override
   Widget build(BuildContext context) {
@@ -249,33 +258,60 @@ class _GhostOverlay extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Container(
       color: scheme.surfaceContainerHigh.withValues(alpha: 0.85),
-      alignment: Alignment.center,
-      child: switch (progress) {
-        MediaUploadProgressIdle() ||
-        MediaUploadProgressProcessing() ||
-        MediaUploadProgressUploading() => const CircularProgressIndicator(),
-        MediaUploadProgressError(errorKey: final key) => Padding(
-          padding: const EdgeInsets.all(AppSpacing.sm),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.error_outline, color: scheme.error),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                _resolveErrorKey(l10n, key),
-                textAlign: TextAlign.center,
-                style: TextStyle(color: scheme.error, fontSize: 11),
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Center(
+            child: switch (progress) {
+              MediaUploadProgressIdle() ||
+              MediaUploadProgressProcessing() ||
+              MediaUploadProgressUploading() =>
+                const CircularProgressIndicator(),
+              MediaUploadProgressError(errorKey: final key) => Padding(
+                padding: const EdgeInsets.all(AppSpacing.sm),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.error_outline, color: scheme.error),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      _resolveErrorKey(l10n, key),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: scheme.error, fontSize: 11),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
-            ],
+              MediaUploadProgressCompleted() => Icon(
+                Icons.check_circle_outline,
+                color: scheme.primary,
+              ),
+            },
           ),
-        ),
-        MediaUploadProgressCompleted() => Icon(
-          Icons.check_circle_outline,
-          color: scheme.primary,
-        ),
-      },
+          // Dismiss (X) button — shown only on error tiles. Tapping clears
+          // the orphaned uploadInFlight entry so the publisher can retry by
+          // re-picking from the gallery (task #30 follow-up).
+          if (progress is MediaUploadProgressError && onDismiss != null)
+            PositionedDirectional(
+              top: AppSpacing.xs,
+              end: AppSpacing.xs,
+              child: Material(
+                color: scheme.surface,
+                shape: const CircleBorder(),
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: onDismiss,
+                  child: Padding(
+                    padding: const EdgeInsets.all(2),
+                    child: Icon(Icons.close, size: 18, color: scheme.error),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 

@@ -72,6 +72,7 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
     on<MediaReordered>(_onMediaReordered);
     on<MediaSetMain>(_onMediaSetMain);
     on<MediaDeleted>(_onMediaDeleted);
+    on<MediaUploadDismissed>(_onMediaUploadDismissed);
   }
 
   final LoadOrCreateDraft _loadOrCreateDraft;
@@ -526,14 +527,10 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
   }
 
   /// Returns the next available ordering slot (1-indexed; max(existing)+1).
-  int _nextOrdering() {
-    if (state.media.isEmpty) return 1;
-    int maxOrd = 0;
-    for (final m in state.media) {
-      if (m.ordering > maxOrd) maxOrd = m.ordering;
-    }
-    return maxOrd + 1;
-  }
+  // Note: ordering computation moved server-side via the
+  // listing_media_assign_ordering BEFORE INSERT trigger (task #29 fix).
+  // The client now always sends ordering=0 and reads the assigned value
+  // from the INSERT's RETURNING row.
 
   Future<void> _onMediaPicked(
     MediaPicked event,
@@ -562,8 +559,6 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
       );
       return;
     }
-
-    int nextOrdering = _nextOrdering();
 
     for (final file in event.files) {
       final localId = _newLocalId();
@@ -609,7 +604,7 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
         final inserted = await _uploadImage(
           listingId: listingId,
           watermarkedBytes: watermarkedJpeg,
-          ordering: nextOrdering,
+          ordering: 0, // sentinel — trigger assigns per task #29 fix
           isMain: isMain,
         );
 
@@ -622,7 +617,6 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
             uploadInFlight: nextInFlight,
           ),
         );
-        nextOrdering++;
       } catch (e) {
         final errorKey = _mapMediaErrorToArbKey(e);
         emit(
@@ -674,11 +668,10 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
     );
 
     try {
-      final nextOrdering = _nextOrdering();
       final inserted = await _uploadVideo(
         listingId: listingId,
         filePath: event.file.path,
-        ordering: nextOrdering,
+        ordering: 0, // sentinel — trigger assigns per task #29 fix
       ).timeout(const Duration(seconds: 60));
       final nextInFlight = <String, MediaUploadProgress>{
         ...state.uploadInFlight,
@@ -758,6 +751,17 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
         } catch (_) {/* nothing more to do */}
       }
     }
+  }
+
+  Future<void> _onMediaUploadDismissed(
+    MediaUploadDismissed event,
+    Emitter<ListingFormState> emit,
+  ) async {
+    if (!state.uploadInFlight.containsKey(event.localId)) return;
+    final nextInFlight = <String, MediaUploadProgress>{
+      ...state.uploadInFlight,
+    }..remove(event.localId);
+    emit(state.copyWith(uploadInFlight: nextInFlight));
   }
 
   String _newLocalId() {
