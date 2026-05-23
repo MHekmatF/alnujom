@@ -109,15 +109,18 @@ class RejectionReasonBanner extends StatelessWidget {
             ),
           ],
           const SizedBox(height: AppSpacing.md),
-          // CTAs row.
-          Row(
+          // CTAs — `Wrap` (not `Row`) so the second button flows to the next
+          // line on narrow viewports (e.g. Infinix Note 8 720dp width) instead
+          // of overflowing horizontally.
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.xs,
             children: [
               FilledButton.tonal(
                 onPressed: () =>
                     context.push('/publisher/listings/$listingId/edit'),
                 child: Text(l10n.publisherRejectionResubmit),
               ),
-              const SizedBox(width: AppSpacing.sm),
               TextButton(
                 onPressed: () => context.push(
                   '/publisher/listings/$listingId/moderation-history',
