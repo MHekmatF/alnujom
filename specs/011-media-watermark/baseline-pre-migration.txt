@@ -1,0 +1,162 @@
+# Phase 11 — Pre-migration baseline
+# Captured: 2026-05-22 (T005)
+# Branch: 011-media-watermark
+# Purpose: rollback reference + analyzer-comparison reference for Phase 11 polish.
+
+================================================================================
+(A) public schema — table list (current, pre-Phase-11)
+================================================================================
+Phase 10 baseline; `public.listing_media` MUST NOT exist yet.
+
+Tables present (from Phase 10 verification, T002):
+  - public.listings
+  - public.listing_details
+  - public.listing_prices
+  - public.listing_visibility
+  - public.listing_status_history
+  (+ all Phase 4–9 tables: profiles, audit_logs, roles, permissions, role_permissions,
+     user_roles, account_approval_requests, governorates, cities, areas,
+     currencies, exchange_rates, user_preferences)
+  (+ Phase 10 view: v_publisher_listings)
+
+================================================================================
+(B) Supabase migrations — full ordered list
+================================================================================
+Last applied migration (Phase 10 closing): 20260519120012_fix_submit_listing_array_append
+  (applied 2026-05-20T13:22:31)
+
+Phase 10 migration set (in apply order):
+  20260519120001_alter_areas_add_centroids
+  20260519120002_create_listings
+  20260519120003_create_listing_details
+  20260519120004_create_listing_prices
+  20260519120005_create_listing_visibility
+  20260519120006_create_listing_status_history
+  20260519120007_create_submit_listing_rpc           <-- IMMUTABLE per R-35
+  20260519120008_create_v_publisher_listings
+  20260519120009_phase10_advisor_hardening
+  20260519120010_fix_listings_child_anon_select_split
+  20260519120011_relax_listings_draft_columns
+  20260519120012_fix_submit_listing_array_append
+
+================================================================================
+(C) public.listing_media — table existence check
+================================================================================
+Query: SELECT count(*) FROM public.listing_media;
+Expected: ERROR: relation "public.listing_media" does not exist (SQLSTATE 42P01)
+Verified: table does not exist pre-Phase-11.
+
+================================================================================
+(D) storage.buckets — listing-images / listing-videos check
+================================================================================
+Query: SELECT id, public, file_size_limit, allowed_mime_types
+       FROM storage.buckets WHERE id IN ('listing-images','listing-videos');
+Expected: 0 rows
+Result:   0 rows (verified — neither bucket exists yet)
+
+================================================================================
+(E) storage.objects — Phase 11 policy presence
+================================================================================
+Query: SELECT count(*) FROM pg_policies
+       WHERE schemaname='storage' AND tablename='objects' AND policyname LIKE 'listing-%';
+Expected: 0
+Result:   0 (verified — no Phase 11 storage policies installed yet)
+
+================================================================================
+(F) Phase 10 submit_listing — current pg_proc.prosrc body (IMMUTABLE per R-35)
+================================================================================
+This is the Phase 10 body that migration 4 (20260522120004) will supersede via
+CREATE OR REPLACE FUNCTION. The Phase 10 migration file (20260519120007) is
+NOT edited per R-35.
+
+----- BEGIN PHASE 10 submit_listing BODY -----
+DECLARE
+  v_listing       public.listings;
+  v_profile_ok    BOOLEAN;
+  v_price_count   INT;
+  v_missing       TEXT[] := ARRAY[]::TEXT[];
+  v_residential   BOOLEAN;
+BEGIN
+  SELECT * INTO v_listing FROM public.listings WHERE id = p_listing_id;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION USING ERRCODE = '42704', MESSAGE = 'listing not found';
+  END IF;
+
+  IF v_listing.publisher_user_id IS DISTINCT FROM auth.uid() THEN
+    RAISE EXCEPTION USING ERRCODE = '42501', MESSAGE = 'not the owner';
+  END IF;
+
+  SELECT (publisher_status = 'approved' AND account_status = 'approved') INTO v_profile_ok
+    FROM public.profiles WHERE user_id = auth.uid();
+  IF NOT COALESCE(v_profile_ok, false) THEN
+    RAISE EXCEPTION USING ERRCODE = '42501', MESSAGE = 'publisher not approved';
+  END IF;
+
+  IF v_listing.status NOT IN ('draft', 'rejected') THEN
+    RAISE EXCEPTION USING ERRCODE = '22023', MESSAGE = 'listing not in editable status';
+  END IF;
+
+  IF length(trim(coalesce(v_listing.title, ''))) = 0          THEN v_missing := array_append(v_missing, 'listings.title');             END IF;
+  IF v_listing.purpose IS NULL                                THEN v_missing := array_append(v_missing, 'listings.purpose');           END IF;
+  IF v_listing.property_type IS NULL                          THEN v_missing := array_append(v_missing, 'listings.property_type');     END IF;
+  IF v_listing.governorate_id IS NULL                         THEN v_missing := array_append(v_missing, 'listings.governorate_id');    END IF;
+  IF v_listing.city_id IS NULL                                THEN v_missing := array_append(v_missing, 'listings.city_id');           END IF;
+  IF v_listing.area_id IS NULL                                THEN v_missing := array_append(v_missing, 'listings.area_id');           END IF;
+  IF length(trim(coalesce(v_listing.address_text, ''))) = 0   THEN v_missing := array_append(v_missing, 'listings.address_text');      END IF;
+  IF v_listing.area_size IS NULL OR v_listing.area_size <= 0  THEN v_missing := array_append(v_missing, 'listings.area_size');         END IF;
+  IF length(trim(coalesce(v_listing.phone, ''))) = 0
+     AND length(trim(coalesce(v_listing.whatsapp, ''))) = 0   THEN v_missing := array_append(v_missing, 'listings.phone_or_whatsapp'); END IF;
+
+  v_residential := v_listing.property_type IN ('apartment', 'villa');
+  IF v_residential THEN
+    IF v_listing.rooms IS NULL OR v_listing.rooms < 0          THEN v_missing := array_append(v_missing, 'listings.rooms');             END IF;
+    IF v_listing.bathrooms IS NULL OR v_listing.bathrooms < 0  THEN v_missing := array_append(v_missing, 'listings.bathrooms');         END IF;
+  END IF;
+
+  SELECT count(*) INTO v_price_count
+    FROM public.listing_prices WHERE listing_id = p_listing_id AND is_primary = true AND amount > 0;
+  IF v_price_count <> 1 THEN
+    v_missing := array_append(v_missing, 'listing_prices.primary');
+  END IF;
+
+  -- ☝ Phase 11 migration 4 inserts step 5a here:
+  --   SELECT count(*) ... FROM public.listing_media WHERE listing_id=p_listing_id AND kind='image' AND watermarked=true;
+  --   IF count < 1 THEN v_missing := array_append(v_missing, 'listing_media.images_below_minimum'); END IF;
+
+  IF array_length(v_missing, 1) IS NOT NULL THEN
+    RAISE EXCEPTION USING ERRCODE = '22023',
+      MESSAGE = 'missing required fields',
+      DETAIL  = jsonb_build_object('missing_fields', to_jsonb(v_missing))::text;
+  END IF;
+
+  UPDATE public.listings SET status = 'pending_review' WHERE id = p_listing_id;
+
+  RETURN jsonb_build_object(
+    'listing_id',  p_listing_id,
+    'status',      'pending_review',
+    'submitted_at', now()
+  );
+END;
+----- END PHASE 10 submit_listing BODY -----
+
+================================================================================
+(G) Storage schema baseline counts (T003)
+================================================================================
+storage.buckets count (project-defined): 0
+storage.objects RLS policies (total):    0
+storage.objects RLS policies (listing-*): 0
+
+Phase 11 expected delta after migrations 2 + 3:
+  - storage.buckets count: +2 (listing-images + listing-videos)
+  - storage.objects RLS policies (listing-*): +14 (7 per bucket × 2)
+
+================================================================================
+(H) Analyzer baseline — flutter analyze --no-fatal-infos --no-fatal-warnings
+================================================================================
+Command: cd H:\alnujom-project && flutter analyze --no-fatal-infos --no-fatal-warnings
+Output:
+  Analyzing alnujom-project...
+  No issues found! (ran in 29.2s)
+
+Phase 11 polish (T028) MUST also produce "No issues found!" — any new analyzer
+issue introduced by Phase 11 code must be fixed before the polish checkpoint.
