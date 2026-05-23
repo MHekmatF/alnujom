@@ -77,3 +77,33 @@ no new constraints, no new indexes.
 
 References: `specs/010-listing-creation/data-model.md`,
 `contracts/phase10-tables.md`, `contracts/phase10-rls-policies.md`.
+
+## Phase 12 amendments
+
+**Spec**: `specs/012-listing-approval` (Phase 12 — Listing Approval Workflow)
+
+The `public.listings` table itself is **unchanged** in Phase 12 — no new columns,
+no new constraints, no new indexes. Phase 12 ships:
+
+- **`approve_listing` Edge Function** is the ONLY writer that flips `status` to
+  `approved`. The Edge Function sets `published_at = now()` in the same UPDATE
+  and leaves `expires_at` at the column default `NULL` per clarification Q2=A
+  (no auto-expiry; future Phase 23 settings may introduce a default expiry).
+- **`reject_listing` Edge Function** flips `status` to `rejected` and the
+  amended `listing_status_transition_trigger_fn` writes the JSON-encoded
+  rejection reason (Q4=A) into `listing_status_history.reason`.
+- Both Edge Functions guard the UPDATE with `.eq('status', 'pending_review')`
+  so concurrent admin races produce HTTP 409 `already_acted_on` for the loser.
+
+Phase 12 amends three pre-existing functions via a single new migration
+(`20260523120004_amend_phase10_phase4_triggers_for_session_var.sql`) so the
+Edge Function service-role caller's admin UID flows to:
+
+- `listing_status_history.changed_by` via the amended
+  `listing_status_transition_trigger_fn` (sources from session variable
+  `app.current_user_id` set immediately before the UPDATE).
+- `audit_logs.actor_user_id` via the amended `listings_audit_trigger_fn` and
+  `log_audit()` (same session variable, COALESCE fallback to `auth.uid()`).
+
+The Phase 10 migration file `20260519120006_create_listing_status_history.sql`
+remains UNEDITED (R-35 immutability).

@@ -112,6 +112,63 @@ new triggers and appropriate `TG_ARGV` values (action key, column list, PK colum
   - `listing_media.deleted` — `listing_media` AFTER DELETE. Emitted when a publisher (or admin) deletes a media row. The `before_state` captures the full row before deletion; `after_state` is NULL. The corresponding bucket object deletion is client-side and does NOT emit an audit row (storage events are not routed through `log_audit()`).
   - Phase 11 seeds ZERO `listing_media` rows, so no `listing_media.created` audit rows with `actor_user_id=NULL` are produced at migration time (unlike Phase 8/9 seed rows).
 - Phase 12: listings workflow approval/rejection RPCs reuse the Phase 10 listing action keys.
+
+## Phase 12 amendments
+
+**Spec**: `specs/012-listing-approval` (Phase 12 — Listing Approval Workflow)
+**Migration**: `supabase/migrations/20260523120004_amend_phase10_phase4_triggers_for_session_var.sql`
+**Clarification**: Q7=A (session-variable amendment)
+
+### New action keys emitted
+
+The amended `public.listings_audit_trigger_fn()` (Phase 10 trigger, Phase 12
+amendment) emits these action keys when the corresponding listing status flip
+occurs through the Phase 12 Edge Functions:
+
+- `listing.approved` — emitted when `approve_listing` Edge Function flips
+  `status` from `pending_review` to `approved`. `before_state` snapshots the
+  pre-flip row; `after_state` snapshots the post-flip row including the new
+  `published_at` value.
+- `listing.rejected` — emitted when `reject_listing` Edge Function flips
+  `status` from `pending_review` to `rejected`. `before_state` snapshots the
+  pre-flip row; `after_state` snapshots the post-flip row. The rejection reason
+  itself is persisted in `listing_status_history.reason` (NOT in
+  `audit_logs.before_state` / `audit_logs.after_state` — the audit row carries
+  the status flip, the operational history row carries the reason).
+
+Both action keys were already wired into the Phase 10
+`listings_audit_trigger_fn`; Phase 12 changes only the source of the
+`actor_user_id` (see "actor source amendment" below).
+
+### Actor source amendment (R-05 narrow relaxation)
+
+The Phase 4 `log_audit()` trigger function is narrowly amended in Phase 12 to
+COALESCE `actor_user_id` against the transaction-scoped session variable
+`app.current_user_id` (set via `set_app_user_id_for_session(UUID)`), falling
+back to `auth.uid()` when the session variable is unset.
+
+This makes `log_audit()` byte-identical to the Phase 4 original EXCEPT for
+the single INSERT statement's actor-source expression. Every Phase 5–11
+caller continues to attribute correctly because the COALESCE fallback to
+`auth.uid()` is exactly the original behavior:
+
+- Phase 5 `account_approval_requests` ✅ — direct user JWT, `auth.uid()` path.
+- Phase 6 `user_roles` ✅ — direct user JWT (Phase 7 RPCs), `auth.uid()` path.
+- Phase 7 `roles` / `role_permissions` / `permissions` ✅ — direct user JWT
+  (Phase 7 RPCs), `auth.uid()` path.
+- Phase 8 `governorates` / `cities` / `areas` ✅ — direct user JWT (admin
+  CRUD via super-admin role), `auth.uid()` path.
+- Phase 9 `currencies` / `exchange_rates` ✅ — direct user JWT, `auth.uid()`
+  path.
+- Phase 10 `listings` ✅ — direct user JWT (`submit_listing` RPC owns
+  draft → pending_review) AND Phase 12 Edge Function service-role caller
+  (session-variable path) for `pending_review → approved/rejected`.
+- Phase 11 `listing_media` ✅ — direct user JWT, `auth.uid()` path.
+
+The R-05 "byte-identical reuse" invariant is narrowly relaxed from
+"byte-identical" to "byte-identical EXCEPT for the actor-source COALESCE
+amendment on `actor_user_id`". The Phase 4 migration file
+`20260506120004_create_audit_logs.sql` remains UNEDITED.
 - Phase 18: reports/moderation
 - Phase 19: agency flows
 - Phase 21: ads
