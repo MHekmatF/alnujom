@@ -531,5 +531,7 @@
   "mediaErrorVideoFormatMustBeMp4": "صيغة الفيديو لازم MP4",
   "mediaErrorVideoSizeExceeded": "الفيديو لازم يكون أصغر من 30 ميغا",
   "mediaCapImages10": "الحد الأقصى 10 صور",
-  "mediaCapVideos2": "الحد الأقصى فيديوهين"
+  "mediaCapVideos2": "الحد الأقصى فيديوهين",
+  "mediaReviewCarouselLabel": "صور الإعلان",
+  "submitErrorImagesBelowMinimum": "لازم صورة واحدة على الأقل"
 }

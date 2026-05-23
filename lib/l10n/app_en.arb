@@ -549,5 +549,9 @@
   "mediaCapImages10": "10-image limit reached",
   "@mediaCapImages10": { "description": "Phase 11 — Cap-trigger error surface for the 10-image cap (FR-005)." },
   "mediaCapVideos2": "2-video limit reached",
-  "@mediaCapVideos2": { "description": "Phase 11 — Cap-trigger error surface for the 2-video cap (FR-005)." }
+  "@mediaCapVideos2": { "description": "Phase 11 — Cap-trigger error surface for the 2-video cap (FR-005)." },
+  "mediaReviewCarouselLabel": "Listing media",
+  "@mediaReviewCarouselLabel": { "description": "Phase 11 — Label for the media carousel on the review step." },
+  "submitErrorImagesBelowMinimum": "At least one photo is required",
+  "@submitErrorImagesBelowMinimum": { "description": "Phase 11 — FR-022 missing_fields[] message when Q1=A media minimum check fails at submit." }
 }

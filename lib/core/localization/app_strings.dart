@@ -2052,4 +2052,14 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String get mediaCapVideos2 =>
       _resolve('mediaCapVideos2', (loc) => loc.mediaCapVideos2);
+
+  @override
+  String get mediaReviewCarouselLabel =>
+      _resolve('mediaReviewCarouselLabel', (loc) => loc.mediaReviewCarouselLabel);
+
+  @override
+  String get submitErrorImagesBelowMinimum => _resolve(
+    'submitErrorImagesBelowMinimum',
+    (loc) => loc.submitErrorImagesBelowMinimum,
+  );
 }
