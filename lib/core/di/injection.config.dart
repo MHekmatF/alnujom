@@ -42,6 +42,8 @@ import '../../features/admin/listing_review/domain/usecases/load_listing_preview
     as _i96;
 import '../../features/admin/listing_review/domain/usecases/load_pending_queue.dart'
     as _i207;
+import '../../features/admin/listing_review/domain/usecases/reject_listing.dart'
+    as _i880;
 import '../../features/admin/listing_review/presentation/bloc/listing_preview_bloc.dart'
     as _i778;
 import '../../features/admin/listing_review/presentation/bloc/pending_queue_bloc.dart'
@@ -187,6 +189,10 @@ import '../../features/publisher_dashboard/domain/repositories/publisher_dashboa
     as _i754;
 import '../../features/publisher_dashboard/domain/usecases/list_my_listings.dart'
     as _i891;
+import '../../features/publisher_dashboard/domain/usecases/load_moderation_history.dart'
+    as _i919;
+import '../../features/publisher_dashboard/domain/usecases/load_most_recent_rejection.dart'
+    as _i564;
 import '../../features/publisher_dashboard/presentation/bloc/my_listings_bloc.dart'
     as _i417;
 import '../../features/super_admin/data/datasources/supabase_role_catalog_datasource.dart'
@@ -416,11 +422,8 @@ _i174.GetIt $initGetIt(
   gh.factory<_i207.LoadPendingQueueUseCase>(
     () => _i207.LoadPendingQueueUseCase(gh<_i155.ListingReviewRepository>()),
   );
-  gh.factory<_i778.ListingPreviewBloc>(
-    () => _i778.ListingPreviewBloc(
-      gh<_i96.LoadListingPreviewUseCase>(),
-      gh<_i404.ApproveListingUseCase>(),
-    ),
+  gh.factory<_i880.RejectListingUseCase>(
+    () => _i880.RejectListingUseCase(gh<_i155.ListingReviewRepository>()),
   );
   gh.lazySingleton<_i754.PublisherDashboardRepository>(
     () => _i240.PublisherDashboardRepositoryImpl(
@@ -437,6 +440,16 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i891.ListMyListings>(
     () => _i891.ListMyListings(gh<_i754.PublisherDashboardRepository>()),
+  );
+  gh.factory<_i919.LoadModerationHistoryUseCase>(
+    () => _i919.LoadModerationHistoryUseCase(
+      gh<_i754.PublisherDashboardRepository>(),
+    ),
+  );
+  gh.factory<_i564.LoadMostRecentRejectionUseCase>(
+    () => _i564.LoadMostRecentRejectionUseCase(
+      gh<_i754.PublisherDashboardRepository>(),
+    ),
   );
   gh.factory<_i1036.DeleteRole>(
     () => _i1036.DeleteRole(gh<_i681.RoleCatalogRepository>()),
@@ -563,6 +576,13 @@ _i174.GetIt $initGetIt(
       gh<_i753.PreferencesStore>(),
       gh<_i354.AppLogger>(),
       initialLocale,
+    ),
+  );
+  gh.factory<_i778.ListingPreviewBloc>(
+    () => _i778.ListingPreviewBloc(
+      gh<_i96.LoadListingPreviewUseCase>(),
+      gh<_i404.ApproveListingUseCase>(),
+      gh<_i880.RejectListingUseCase>(),
     ),
   );
   gh.factory<_i394.PaletteCubit>(

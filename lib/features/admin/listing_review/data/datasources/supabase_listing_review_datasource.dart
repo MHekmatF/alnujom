@@ -1,6 +1,7 @@
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
+import '../../../../../core/listing/rejection_reason.dart';
 import '../dtos/pending_listing_summary_dto.dart';
 
 /// Phase 12 (spec/012-listing-approval) — sole importer of
@@ -114,6 +115,38 @@ class SupabaseListingReviewDatasource {
     final response = await _client.functions.invoke(
       'approve_listing',
       body: <String, dynamic>{'listing_id': listingId},
+    );
+    return EdgeFunctionResponse(
+      status: response.status,
+      data: response.data,
+    );
+  }
+
+  // ─── rejectListing ─────────────────────────────────────────────────────
+
+  /// Invokes the Phase 12 `reject_listing` Edge Function. The function
+  /// validates the preset key + detail length, then writes the Q4=A
+  /// JSON-encoded reason into `listing_status_history.reason` via the
+  /// FR-024 session-variable handoff.
+  ///
+  /// Detail is sent only when non-null AND non-empty (trimmed). The server
+  /// is permissive on empty detail per FR-002(g) — the UX dialog gates the
+  /// non-empty detail for `RejectionReason.other` (FR-013(d)).
+  Future<EdgeFunctionResponse> rejectListing(
+    String listingId,
+    RejectionReason preset,
+    String? detail,
+  ) async {
+    final body = <String, dynamic>{
+      'listing_id': listingId,
+      'reason_preset': preset.key,
+    };
+    if (detail != null && detail.trim().isNotEmpty) {
+      body['reason_detail'] = detail;
+    }
+    final response = await _client.functions.invoke(
+      'reject_listing',
+      body: body,
     );
     return EdgeFunctionResponse(
       status: response.status,

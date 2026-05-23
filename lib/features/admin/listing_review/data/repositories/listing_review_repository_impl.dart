@@ -208,7 +208,7 @@ class ListingReviewRepositoryImpl implements ListingReviewRepository {
     }
   }
 
-  // ─── rejectListing ─ Phase 4 (US2) wires the body. ───────────────────
+  // ─── rejectListing ─────────────────────────────────────────────────────
 
   @override
   Future<Result<RejectResult>> rejectListing(
@@ -216,9 +216,50 @@ class ListingReviewRepositoryImpl implements ListingReviewRepository {
     RejectionReason preset,
     String? detail,
   ) async {
-    throw UnimplementedError(
-      'rejectListing wired in Phase 4 — Phase 12 US2',
-    );
+    try {
+      final response = await _datasource.rejectListing(
+        listingId,
+        preset,
+        detail,
+      );
+      final status = response.status;
+      final data = response.data;
+
+      if (status == 200 && data is Map) {
+        final presetKey = data['reason_preset']?.toString();
+        if (presetKey == null) {
+          return const FailureResult(
+            UnknownFailure('reject_listing: missing reason_preset'),
+          );
+        }
+        final returnedDetailRaw = data['reason_detail'];
+        final returnedDetail =
+            returnedDetailRaw is String ? returnedDetailRaw : null;
+        final RejectionReason returnedPreset;
+        try {
+          returnedPreset = RejectionReason.fromKey(presetKey);
+        } on ArgumentError {
+          return FailureResult(
+            UnknownFailure('reject_listing: unknown preset $presetKey'),
+          );
+        }
+        return Success(
+          RejectResult(preset: returnedPreset, detail: returnedDetail),
+        );
+      }
+
+      return FailureResult(_mapEdgeFunctionError(status, data));
+    } on Object catch (error, stackTrace) {
+      _logger.warning(
+        'rejectListing failed.',
+        error: error,
+        stackTrace: stackTrace,
+        tag: _tag,
+      );
+      return FailureResult(
+        UnknownFailure(error.toString(), cause: error, stackTrace: stackTrace),
+      );
+    }
   }
 
   // ─── Edge Function error mapping (R-52) ───────────────────────────────

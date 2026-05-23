@@ -5,19 +5,24 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/errors/result.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../currencies/domain/entities/currency.dart';
 import '../../../currencies/domain/usecases/list_currencies.dart';
+import '../../../listing_form/domain/entities/listing.dart';
 import '../../../locations/domain/entities/area.dart';
 import '../../../locations/domain/entities/governorate.dart';
 import '../../../locations/domain/repositories/locations_repository.dart';
+import '../../domain/entities/moderation_history_entry.dart';
 import '../../domain/entities/publisher_listing.dart';
+import '../../domain/usecases/load_most_recent_rejection.dart';
 import '../bloc/my_listings_bloc.dart';
 import '../bloc/my_listings_event.dart';
 import '../bloc/my_listings_state.dart';
 import '../widgets/listing_card.dart';
+import '../widgets/rejection_reason_banner.dart';
 import '../widgets/status_filter_chip_row.dart';
 
 class MyListingsPage extends StatelessWidget {
@@ -99,8 +104,9 @@ class _MyListingsViewState extends State<_MyListingsView> {
                                   ),
                                 );
                               }
-                              return ListingCard(
-                                publisherListing: state.listings[index],
+                              final pl = state.listings[index];
+                              return _ListingRow(
+                                publisherListing: pl,
                                 currenciesByCode: currenciesByCode,
                                 governoratesById: governorates,
                                 areasById: areas,
@@ -267,6 +273,122 @@ class _EmptyBody extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Phase 12 / US2 — wraps the Phase 10 `ListingCard` with the Phase 12
+/// `RejectionReasonBanner` for `status == rejected` rows. Non-rejected
+/// rows render the bare `ListingCard` (Phase 10 behaviour unchanged).
+class _ListingRow extends StatelessWidget {
+  const _ListingRow({
+    required this.publisherListing,
+    required this.currenciesByCode,
+    required this.governoratesById,
+    required this.areasById,
+  });
+
+  final PublisherListing publisherListing;
+  final Map<String, Currency> currenciesByCode;
+  final Map<String, Governorate> governoratesById;
+  final Map<String, Area> areasById;
+
+  @override
+  Widget build(BuildContext context) {
+    final card = ListingCard(
+      publisherListing: publisherListing,
+      currenciesByCode: currenciesByCode,
+      governoratesById: governoratesById,
+      areasById: areasById,
+    );
+
+    if (publisherListing.listing.status != ListingStatus.rejected) {
+      return card;
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _RejectionBannerLoader(listingId: publisherListing.listing.id),
+        card,
+      ],
+    );
+  }
+}
+
+class _RejectionBannerLoader extends StatefulWidget {
+  const _RejectionBannerLoader({required this.listingId});
+
+  final String listingId;
+
+  @override
+  State<_RejectionBannerLoader> createState() => _RejectionBannerLoaderState();
+}
+
+class _RejectionBannerLoaderState extends State<_RejectionBannerLoader> {
+  late Future<Result<ModerationHistoryEntry?>> _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = getIt<LoadMostRecentRejectionUseCase>().call(widget.listingId);
+  }
+
+  @override
+  void didUpdateWidget(_RejectionBannerLoader oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.listingId != widget.listingId) {
+      _future =
+          getIt<LoadMostRecentRejectionUseCase>().call(widget.listingId);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<Result<ModerationHistoryEntry?>>(
+      future: _future,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const _BannerSkeleton();
+        }
+        final result = snapshot.data;
+        if (result is Success<ModerationHistoryEntry?>) {
+          final entry = result.value;
+          if (entry == null || entry.rejectionPreset == null) {
+            return const SizedBox.shrink();
+          }
+          return RejectionReasonBanner(
+            listingId: widget.listingId,
+            preset: entry.rejectionPreset!,
+            detail: entry.rejectionDetail,
+            rejectedAt: entry.changedAt,
+          );
+        }
+        // Failures intentionally suppressed — the rejected card itself
+        // still renders Phase 10's RejectionReasonBlock + ResubmitCta as a
+        // graceful degradation.
+        return const SizedBox.shrink();
+      },
+    );
+  }
+}
+
+class _BannerSkeleton extends StatelessWidget {
+  const _BannerSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      height: 72,
+      margin: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: scheme.errorContainer.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(AppSpacing.sm),
       ),
     );
   }

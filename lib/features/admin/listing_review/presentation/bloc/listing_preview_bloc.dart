@@ -4,10 +4,12 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../../core/errors/failure.dart';
 import '../../../../../core/errors/result.dart';
+import '../../../../../core/listing/rejection_reason.dart';
 import '../../domain/entities/listing_preview.dart';
 import '../../domain/repositories/listing_review_repository.dart';
 import '../../domain/usecases/approve_listing.dart';
 import '../../domain/usecases/load_listing_preview.dart';
+import '../../domain/usecases/reject_listing.dart';
 
 // ─── Events ─────────────────────────────────────────────────────────────
 
@@ -28,8 +30,16 @@ class ListingPreviewApprovePressed extends ListingPreviewEvent {
   const ListingPreviewApprovePressed();
 }
 
-// Phase 4 (US2) adds `ListingPreviewRejectPressed(preset, detail)` as a new
-// event class extending this sealed root.
+/// Phase 12 / US2 — dispatched when the admin confirms the reject dialog.
+class ListingPreviewRejectPressed extends ListingPreviewEvent {
+  const ListingPreviewRejectPressed({required this.preset, this.detail});
+
+  final RejectionReason preset;
+  final String? detail;
+
+  @override
+  List<Object?> get props => [preset, detail];
+}
 
 // ─── Mutator success marker ─────────────────────────────────────────────
 
@@ -46,7 +56,12 @@ class ApproveSuccess extends ListingMutatorSuccess {
   List<Object?> get props => [result];
 }
 
-// Phase 4 (US2) adds `RejectSuccess extends ListingMutatorSuccess`.
+class RejectSuccess extends ListingMutatorSuccess {
+  const RejectSuccess(this.result);
+  final RejectResult result;
+  @override
+  List<Object?> get props => [result];
+}
 
 // ─── State ──────────────────────────────────────────────────────────────
 
@@ -96,13 +111,16 @@ class ListingPreviewBloc extends Bloc<ListingPreviewEvent, ListingPreviewState> 
   ListingPreviewBloc(
     this._loadPreview,
     this._approveListing,
+    this._rejectListing,
   ) : super(const ListingPreviewState()) {
     on<ListingPreviewLoad>(_onLoad);
     on<ListingPreviewApprovePressed>(_onApprove);
+    on<ListingPreviewRejectPressed>(_onReject);
   }
 
   final LoadListingPreviewUseCase _loadPreview;
   final ApproveListingUseCase _approveListing;
+  final RejectListingUseCase _rejectListing;
 
   /// The listingId of the currently-loaded preview. Set on `Load`,
   /// consumed by approve/reject mutators.
@@ -142,6 +160,36 @@ class ListingPreviewBloc extends Bloc<ListingPreviewEvent, ListingPreviewState> 
           ),
         );
       case FailureResult<ApproveResult>(:final failure):
+        emit(
+          state.copyWith(
+            isMutatorInFlight: false,
+            failure: failure,
+          ),
+        );
+    }
+  }
+
+  Future<void> _onReject(
+    ListingPreviewRejectPressed event,
+    Emitter<ListingPreviewState> emit,
+  ) async {
+    final listingId = _currentListingId;
+    if (listingId == null) return;
+    emit(state.copyWith(isMutatorInFlight: true, clearFailure: true));
+    final result = await _rejectListing.call(
+      listingId,
+      event.preset,
+      event.detail,
+    );
+    switch (result) {
+      case Success<RejectResult>(:final value):
+        emit(
+          state.copyWith(
+            isMutatorInFlight: false,
+            lastSuccess: RejectSuccess(value),
+          ),
+        );
+      case FailureResult<RejectResult>(:final failure):
         emit(
           state.copyWith(
             isMutatorInFlight: false,

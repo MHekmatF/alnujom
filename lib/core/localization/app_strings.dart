@@ -2178,4 +2178,108 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String priceOriginallyWas(String price) =>
       _active.priceOriginallyWas(price);
+
+  // ── Phase 12 / US2 — Reject flow + publisher rejection banner ────────────
+
+  @override
+  String get rejectDialogTitle =>
+      _resolve('rejectDialogTitle', (loc) => loc.rejectDialogTitle);
+
+  @override
+  String get rejectDialogDetailLabelOptional => _resolve(
+        'rejectDialogDetailLabelOptional',
+        (loc) => loc.rejectDialogDetailLabelOptional,
+      );
+
+  @override
+  String get rejectDialogDetailLabelRequired => _resolve(
+        'rejectDialogDetailLabelRequired',
+        (loc) => loc.rejectDialogDetailLabelRequired,
+      );
+
+  @override
+  String get rejectDialogDetailHintOther => _resolve(
+        'rejectDialogDetailHintOther',
+        (loc) => loc.rejectDialogDetailHintOther,
+      );
+
+  @override
+  String rejectDialogCounter(int count) =>
+      _active.rejectDialogCounter(count);
+
+  @override
+  String get rejectDialogConfirm =>
+      _resolve('rejectDialogConfirm', (loc) => loc.rejectDialogConfirm);
+
+  @override
+  String get rejectDialogCancel =>
+      _resolve('rejectDialogCancel', (loc) => loc.rejectDialogCancel);
+
+  @override
+  String get rejectPresetMissingOrLowQualityPhotos => _resolve(
+        'rejectPresetMissingOrLowQualityPhotos',
+        (loc) => loc.rejectPresetMissingOrLowQualityPhotos,
+      );
+
+  @override
+  String get rejectPresetIncorrectLocation => _resolve(
+        'rejectPresetIncorrectLocation',
+        (loc) => loc.rejectPresetIncorrectLocation,
+      );
+
+  @override
+  String get rejectPresetUnrealisticPrice => _resolve(
+        'rejectPresetUnrealisticPrice',
+        (loc) => loc.rejectPresetUnrealisticPrice,
+      );
+
+  @override
+  String get rejectPresetIncompleteDescription => _resolve(
+        'rejectPresetIncompleteDescription',
+        (loc) => loc.rejectPresetIncompleteDescription,
+      );
+
+  @override
+  String get rejectPresetDuplicateListing => _resolve(
+        'rejectPresetDuplicateListing',
+        (loc) => loc.rejectPresetDuplicateListing,
+      );
+
+  @override
+  String get rejectPresetOther =>
+      _resolve('rejectPresetOther', (loc) => loc.rejectPresetOther);
+
+  @override
+  String publisherRejectionAttribution(String timeAgo) =>
+      _active.publisherRejectionAttribution(timeAgo);
+
+  @override
+  String get publisherRejectionResubmit => _resolve(
+        'publisherRejectionResubmit',
+        (loc) => loc.publisherRejectionResubmit,
+      );
+
+  @override
+  String get publisherRejectionViewHistory => _resolve(
+        'publisherRejectionViewHistory',
+        (loc) => loc.publisherRejectionViewHistory,
+      );
+
+  @override
+  String get adminErrorInvalidReasonPreset => _resolve(
+        'adminErrorInvalidReasonPreset',
+        (loc) => loc.adminErrorInvalidReasonPreset,
+      );
+
+  @override
+  String get adminErrorReasonDetailTooLong => _resolve(
+        'adminErrorReasonDetailTooLong',
+        (loc) => loc.adminErrorReasonDetailTooLong,
+      );
+
+  @override
+  String get adminToastRejectSuccess => _resolve(
+        'adminToastRejectSuccess',
+        (loc) => loc.adminToastRejectSuccess,
+      );
 }

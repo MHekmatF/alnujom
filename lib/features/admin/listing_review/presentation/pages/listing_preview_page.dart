@@ -14,6 +14,7 @@ import '../../../../../shared/presentation/widgets/listing_display/listing_price
 import '../../../../currencies/domain/entities/currency.dart';
 import '../bloc/listing_preview_bloc.dart';
 import '../widgets/approve_confirmation_dialog.dart';
+import '../widgets/reject_reason_dialog.dart';
 
 /// Phase 12 — admin listing preview page.
 /// Route: `/admin/listing-review/preview/:id`.
@@ -75,9 +76,9 @@ class _ListingPreviewView extends StatelessWidget {
   ) {
     final l10n = AppLocalizations.of(ctx)!;
     if (state.lastSuccess != null) {
-      final msg = state.lastSuccess is ApproveSuccess
-          ? l10n.adminToastApproveSuccess
-          : l10n.adminToastApproveSuccess; // Phase 4 adds adminToastRejectSuccess
+      final msg = state.lastSuccess is RejectSuccess
+          ? l10n.adminToastRejectSuccess
+          : l10n.adminToastApproveSuccess;
       ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text(msg)));
       // Pop back to the queue page (the queue will refresh on-pop via the
       // RefreshIndicator pattern when the admin pulls).
@@ -101,6 +102,12 @@ class _ListingPreviewView extends StatelessWidget {
       return l10n.adminErrorInvalidStatusTransition;
     }
     if (f is AlreadyActedOnFailure) return l10n.adminErrorAlreadyActedOn;
+    if (f is InvalidReasonPresetFailure) {
+      return l10n.adminErrorInvalidReasonPreset;
+    }
+    if (f is ReasonDetailTooLongFailure) {
+      return l10n.adminErrorReasonDetailTooLong;
+    }
     return l10n.adminErrorUnknown;
   }
 }
@@ -226,9 +233,9 @@ class _StickyBottomBar extends StatelessWidget {
           children: [
             Expanded(
               child: OutlinedButton(
-                // Phase 4 (US2) wires the reject path. Phase 3 keeps the
-                // button rendered but disabled per the contract.
-                onPressed: null,
+                onPressed: disabled
+                    ? null
+                    : () => _onRejectPressed(context),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: theme.colorScheme.error,
                 ),
@@ -255,6 +262,18 @@ class _StickyBottomBar extends StatelessWidget {
     if (confirmed == true && context.mounted) {
       context.read<ListingPreviewBloc>().add(
             const ListingPreviewApprovePressed(),
+          );
+    }
+  }
+
+  Future<void> _onRejectPressed(BuildContext context) async {
+    final result = await RejectReasonDialog.show(context);
+    if (result != null && context.mounted) {
+      context.read<ListingPreviewBloc>().add(
+            ListingPreviewRejectPressed(
+              preset: result.preset,
+              detail: result.detail,
+            ),
           );
     }
   }

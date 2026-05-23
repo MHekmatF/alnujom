@@ -558,5 +558,25 @@
   "mediaGalleryEmpty": "لا توجد وسائط متاحة",
   "mediaGalleryVideoPlay": "تشغيل الفيديو",
   "descriptionReadMore": "قراءة المزيد",
-  "priceOriginallyWas": "بالأصل {price}"
+  "priceOriginallyWas": "بالأصل {price}",
+
+  "rejectDialogTitle": "رفض هذا الإعلان — يُرجى إعلام الناشر بالسبب",
+  "rejectDialogDetailLabelOptional": "تفاصيل إضافية (اختياري)",
+  "rejectDialogDetailLabelRequired": "تفاصيل إضافية (مطلوب)",
+  "rejectDialogDetailHintOther": "يُرجى توضيح المشكلة حتى يتمكن الناشر من معالجتها.",
+  "rejectDialogCounter": "{count}/500",
+  "rejectDialogConfirm": "تأكيد",
+  "rejectDialogCancel": "إلغاء",
+  "rejectPresetMissingOrLowQualityPhotos": "الصور مفقودة أو رديئة الجودة",
+  "rejectPresetIncorrectLocation": "الموقع غير صحيح أو غير دقيق",
+  "rejectPresetUnrealisticPrice": "السعر يبدو غير واقعي",
+  "rejectPresetIncompleteDescription": "الوصف غير مكتمل أو غير واضح",
+  "rejectPresetDuplicateListing": "نسخة مكررة من إعلان قائم",
+  "rejectPresetOther": "أخرى — يُرجى تقديم التفاصيل",
+  "publisherRejectionAttribution": "تمت المراجعة من قِبَل فريق الإشراف • {timeAgo}",
+  "publisherRejectionResubmit": "إعادة الإرسال",
+  "publisherRejectionViewHistory": "عرض سجل الإشراف",
+  "adminErrorInvalidReasonPreset": "سبب الرفض غير صالح. يُرجى اختيار سبب من القائمة والمحاولة مرة أخرى.",
+  "adminErrorReasonDetailTooLong": "تفاصيل الرفض طويلة جداً. الحد الأقصى 500 حرف.",
+  "adminToastRejectSuccess": "تم رفض الإعلان"
 }
