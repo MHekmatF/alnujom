@@ -26,3 +26,33 @@ final class ConfigFailure extends Failure {
 final class UnknownFailure extends Failure {
   const UnknownFailure(super.message, {super.cause, super.stackTrace});
 }
+
+// Phase 12 (spec/012-listing-approval) — 5 typed Failure subtypes for the
+// approve_listing / reject_listing Edge Function error codes (R-52).
+// Each maps to a specific HTTP error code returned by the Edge Functions.
+
+final class PermissionDeniedFailure extends Failure {
+  const PermissionDeniedFailure() : super('Permission denied.');
+}
+
+final class InvalidStatusTransitionFailure extends Failure {
+  const InvalidStatusTransitionFailure({required this.currentStatus})
+      : super('Invalid status transition.');
+  final String currentStatus;
+}
+
+final class AlreadyActedOnFailure extends Failure {
+  const AlreadyActedOnFailure({required this.currentStatus})
+      : super('Listing has already been acted on.');
+  final String currentStatus;
+}
+
+final class InvalidReasonPresetFailure extends Failure {
+  const InvalidReasonPresetFailure() : super('Invalid rejection reason preset.');
+}
+
+final class ReasonDetailTooLongFailure extends Failure {
+  const ReasonDetailTooLongFailure({required this.max})
+      : super('Rejection reason detail exceeds maximum length.');
+  final int max;
+}
