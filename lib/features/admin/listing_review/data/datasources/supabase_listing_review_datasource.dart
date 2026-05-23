@@ -37,8 +37,7 @@ class SupabaseListingReviewDatasource {
     final query = _client
         .from('listings')
         .select(
-          'id, title, property_type, purpose, created_at, '
-          'publisher:profiles!publisher_user_id(full_name,phone), '
+          'id, title, property_type, purpose, created_at, publisher_user_id, '
           'governorate:governorates(display_name), '
           'city:cities(display_name), '
           'area:areas(display_name), '
@@ -47,8 +46,6 @@ class SupabaseListingReviewDatasource {
         )
         .eq('status', 'pending_review');
 
-    // Cursor: created_at strictly greater than the cursor's value, OR equal
-    // with id strictly greater. PostgREST .or filter expresses this pattern.
     final filtered = cursorCreatedAt != null && cursorId != null
         ? query.or(
             'created_at.gt.${cursorCreatedAt.toIso8601String()},'
@@ -62,13 +59,27 @@ class SupabaseListingReviewDatasource {
         .order('id', ascending: true)
         .limit(limit);
 
-    return (rows as List<dynamic>).map((r) {
-      final dto = PendingListingSummaryDto.fromMap(
-        Map<String, dynamic>.from(r as Map),
-      );
-      // Resolve the public URL for the main image inside the datasource so
-      // the queue card widget stays Constitution IX-clean (no Supabase
-      // imports in presentation/).
+    final rowMaps = (rows as List<dynamic>)
+        .map((r) => Map<String, dynamic>.from(r as Map))
+        .toList();
+
+    // Phase 5+ pattern: listings.publisher_user_id FKs to auth.users.id, not
+    // profiles.id, so PostgREST nested-resource syntax cannot pivot to
+    // profiles. Batch-fetch profiles in a second query and merge in Dart.
+    final publisherIds = rowMaps
+        .map((r) => r['publisher_user_id'] as String?)
+        .whereType<String>()
+        .toSet()
+        .toList();
+    final profilesByUserId = await _loadProfiles(publisherIds);
+
+    for (final row in rowMaps) {
+      final uid = row['publisher_user_id'] as String?;
+      row['publisher'] = uid != null ? profilesByUserId[uid] : null;
+    }
+
+    return rowMaps.map((row) {
+      final dto = PendingListingSummaryDto.fromMap(row);
       if (dto.mainImageStoragePath != null) {
         final url = _client.storage
             .from('listing-images')
@@ -77,6 +88,25 @@ class SupabaseListingReviewDatasource {
       }
       return dto;
     }).toList();
+  }
+
+  /// Batch-loads profile snippets for the given publisher user-ids.
+  /// Returns a map keyed by `user_id`; missing ids resolve to null at call-site.
+  Future<Map<String, Map<String, dynamic>>> _loadProfiles(
+    List<String> userIds,
+  ) async {
+    if (userIds.isEmpty) return const {};
+    final rows = await _client
+        .from('profiles')
+        .select('user_id, full_name, phone')
+        .inFilter('user_id', userIds);
+    final map = <String, Map<String, dynamic>>{};
+    for (final r in rows as List<dynamic>) {
+      final m = Map<String, dynamic>.from(r as Map);
+      final uid = m['user_id'] as String?;
+      if (uid != null) map[uid] = m;
+    }
+    return map;
   }
 
   // ─── loadListingPreview ────────────────────────────────────────────────
@@ -89,7 +119,6 @@ class SupabaseListingReviewDatasource {
         .from('listings')
         .select(
           '*, '
-          'publisher:profiles!publisher_user_id(full_name,phone), '
           'governorate:governorates(*), '
           'city:cities(*), '
           'area:areas(*), '
@@ -100,7 +129,17 @@ class SupabaseListingReviewDatasource {
         .eq('id', listingId)
         .limit(1);
     if (rows.isEmpty) return null;
-    return Map<String, dynamic>.from(rows.first);
+    final row = Map<String, dynamic>.from(rows.first);
+
+    // Same two-step join as loadPendingQueue — see _loadProfiles dartdoc.
+    final uid = row['publisher_user_id'] as String?;
+    if (uid != null) {
+      final profiles = await _loadProfiles([uid]);
+      row['publisher'] = profiles[uid];
+    } else {
+      row['publisher'] = null;
+    }
+    return row;
   }
 
   // ─── approveListing ────────────────────────────────────────────────────
