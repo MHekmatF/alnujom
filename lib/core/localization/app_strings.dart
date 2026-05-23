@@ -2282,4 +2282,78 @@ final class _DebugAppLocalizations extends AppLocalizations {
         'adminToastRejectSuccess',
         (loc) => loc.adminToastRejectSuccess,
       );
+
+  // ── Phase 12 / US6 — Publisher moderation history page ───────────────────
+
+  @override
+  String get publisherHistoryTitle =>
+      _resolve('publisherHistoryTitle', (loc) => loc.publisherHistoryTitle);
+
+  @override
+  String get publisherHistoryAdminTeam => _resolve(
+        'publisherHistoryAdminTeam',
+        (loc) => loc.publisherHistoryAdminTeam,
+      );
+
+  @override
+  String get publisherHistoryFirstEntry => _resolve(
+        'publisherHistoryFirstEntry',
+        (loc) => loc.publisherHistoryFirstEntry,
+      );
+
+  @override
+  String get publisherHistoryEmpty =>
+      _resolve('publisherHistoryEmpty', (loc) => loc.publisherHistoryEmpty);
+
+  @override
+  String get publisherHistoryStatusDraft => _resolve(
+        'publisherHistoryStatusDraft',
+        (loc) => loc.publisherHistoryStatusDraft,
+      );
+
+  @override
+  String get publisherHistoryStatusPendingReview => _resolve(
+        'publisherHistoryStatusPendingReview',
+        (loc) => loc.publisherHistoryStatusPendingReview,
+      );
+
+  @override
+  String get publisherHistoryStatusApproved => _resolve(
+        'publisherHistoryStatusApproved',
+        (loc) => loc.publisherHistoryStatusApproved,
+      );
+
+  @override
+  String get publisherHistoryStatusRejected => _resolve(
+        'publisherHistoryStatusRejected',
+        (loc) => loc.publisherHistoryStatusRejected,
+      );
+
+  @override
+  String get publisherHistoryStatusPaused => _resolve(
+        'publisherHistoryStatusPaused',
+        (loc) => loc.publisherHistoryStatusPaused,
+      );
+
+  @override
+  String get publisherHistoryStatusSold =>
+      _resolve('publisherHistoryStatusSold', (loc) => loc.publisherHistoryStatusSold);
+
+  @override
+  String get publisherHistoryStatusRented => _resolve(
+        'publisherHistoryStatusRented',
+        (loc) => loc.publisherHistoryStatusRented,
+      );
+
+  @override
+  String get publisherHistoryStatusExpired => _resolve(
+        'publisherHistoryStatusExpired',
+        (loc) => loc.publisherHistoryStatusExpired,
+      );
+
+  @override
+  String get publisherHistoryStatusDeleted => _resolve(
+        'publisherHistoryStatusDeleted',
+        (loc) => loc.publisherHistoryStatusDeleted,
+      );
 }

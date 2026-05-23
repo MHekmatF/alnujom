@@ -578,5 +578,19 @@
   "publisherRejectionViewHistory": "عرض سجل الإشراف",
   "adminErrorInvalidReasonPreset": "سبب الرفض غير صالح. يُرجى اختيار سبب من القائمة والمحاولة مرة أخرى.",
   "adminErrorReasonDetailTooLong": "تفاصيل الرفض طويلة جداً. الحد الأقصى 500 حرف.",
-  "adminToastRejectSuccess": "تم رفض الإعلان"
+  "adminToastRejectSuccess": "تم رفض الإعلان",
+
+  "publisherHistoryTitle": "سجل المراجعة",
+  "publisherHistoryAdminTeam": "فريق الإدارة",
+  "publisherHistoryFirstEntry": "تم الإنشاء",
+  "publisherHistoryEmpty": "لا يوجد سجل بعد",
+  "publisherHistoryStatusDraft": "مسودة",
+  "publisherHistoryStatusPendingReview": "قيد المراجعة",
+  "publisherHistoryStatusApproved": "معتمد",
+  "publisherHistoryStatusRejected": "مرفوض",
+  "publisherHistoryStatusPaused": "متوقف",
+  "publisherHistoryStatusSold": "تم البيع",
+  "publisherHistoryStatusRented": "تم التأجير",
+  "publisherHistoryStatusExpired": "منتهي الصلاحية",
+  "publisherHistoryStatusDeleted": "محذوف"
 }

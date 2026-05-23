@@ -401,6 +401,35 @@ SELECT count(*) FROM public.listings WHERE status='pending_review';
 
       **Closes**: SC-010 missing-main-image placeholder rendering.
 
+## Human-Gated Verifications (Phase 8)
+
+- [ ] **T090** — Reject-resubmit-reject chain on a single listing (SC-020).
+  Manual recipe on Pixel 8 Pro emulator (admin) + Infinix Note 8 (publisher):
+  1. Identify a pending_review listing.
+  2. As admin: open preview → Reject with preset=missing_or_low_quality_photos, detail="First reject".
+  3. As publisher: My Listings → Rejected → tap Resubmit → makes a trivial edit → submit again.
+  4. As admin: re-open the now-pending listing → Reject with preset=other, detail="Second reject reason".
+  5. As publisher: tap "View moderation history" on the banner.
+  6. Confirm exactly 4 chronological entries: created → pending_review (submit) → rejected (1st preset+detail) → pending_review (resubmit) → rejected (2nd preset+detail).
+  7. Both rejection entries show preset label + detail.
+  8. Admin identity NEVER displayed (only "Admin team").
+  9. Run via MCP: `SELECT count(*) FROM public.audit_logs WHERE target_id='<id>' AND action='listing.rejected'` — expect exactly 2.
+  Closes: SC-020 reject-resubmit-reject chain audit completeness.
+
+- [ ] **T091** — Approve-revert-approve chain on a single listing (SC-021).
+  Manual recipe on Pixel 8 Pro emulator (admin):
+  1. Identify a pending_review listing.
+  2. As admin: open preview → Approve via UI. Note the `published_at` timestamp.
+  3. Via Supabase MCP `execute_sql`: `UPDATE public.listings SET status='paused' WHERE id='<id>'` (simulates future-spec moderation revert).
+  4. Resubmit/re-queue the listing as publisher (My Listings → tap resubmit or direct SQL `UPDATE ... SET status='pending_review'`).
+  5. As admin: re-open the now-pending listing → Approve via UI again.
+  6. Run via MCP: `SELECT count(*) FROM public.audit_logs WHERE target_id='<id>' AND action='listing.approved'` — expect exactly 2.
+  7. Confirm both audit rows have `published_at` non-NULL AND the second's `published_at` is later than the first's.
+  8. Open the publisher moderation history page — confirm the approve entries appear chronologically.
+  Closes: SC-021 approve-revert-approve chain audit completeness.
+
+---
+
 - [ ] **T084** — Scroll-position retention verification.
 
       A worktree agent cannot operate the Pixel 8 Pro emulator. Manual on Pixel 8 Pro emulator:

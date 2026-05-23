@@ -193,6 +193,8 @@ import '../../features/publisher_dashboard/domain/usecases/load_moderation_histo
     as _i919;
 import '../../features/publisher_dashboard/domain/usecases/load_most_recent_rejection.dart'
     as _i564;
+import '../../features/publisher_dashboard/presentation/bloc/moderation_history_cubit.dart'
+    as _i711;
 import '../../features/publisher_dashboard/presentation/bloc/my_listings_bloc.dart'
     as _i417;
 import '../../features/super_admin/data/datasources/supabase_role_catalog_datasource.dart'
@@ -522,6 +524,10 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i1054.UpdateGovernorate>(
     () => _i1054.UpdateGovernorate(gh<_i704.LocationsRepository>()),
+  );
+  gh.factory<_i711.ModerationHistoryCubit>(
+    () =>
+        _i711.ModerationHistoryCubit(gh<_i919.LoadModerationHistoryUseCase>()),
   );
   gh.factory<_i905.CountDependentExchangeRates>(
     () => _i905.CountDependentExchangeRates(gh<_i505.CurrenciesRepository>()),
