@@ -147,22 +147,27 @@ class SupabaseListingMediaDatasource {
     }
   }
 
-  /// Re-sequences `ordering` for a list of media ids. Uses a single
-  /// `upsert` so PostgREST applies all updates in one round-trip.
+  /// Re-sequences `ordering` for a list of media ids via sequential
+  /// per-row UPDATEs. Each UPDATE touches only the `ordering` column so
+  /// PostgREST does not need to validate the row's NOT NULL columns.
+  ///
+  /// NOTE: an `upsert` with a partial column set (id + listing_id + ordering)
+  /// would round-trip in 1 call but PostgREST validates the INSERT branch
+  /// against NOT NULL constraints on `kind` / `storage_path` / `is_main` /
+  /// `watermarked` and returns 400 — even though the conflict resolution
+  /// would have routed to UPDATE. Sequential UPDATEs are O(N) round-trips
+  /// but reliable, and N is bounded by the 10-image + 2-video cap.
   Future<void> reorder({
     required String listingId,
     required List<String> newOrderIds,
   }) async {
     if (newOrderIds.isEmpty) return;
-    final updates = <Map<String, dynamic>>[];
     for (int i = 0; i < newOrderIds.length; i++) {
-      updates.add(<String, dynamic>{
-        'id': newOrderIds[i],
-        'listing_id': listingId,
-        'ordering': i + 1,
-      });
+      await _client
+          .from('listing_media')
+          .update(<String, dynamic>{'ordering': i + 1})
+          .eq('id', newOrderIds[i]);
     }
-    await _client.from('listing_media').upsert(updates);
   }
 
   /// Flips `is_main` to `true` on the target row and `false` on the prior
