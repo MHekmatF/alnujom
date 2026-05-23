@@ -206,7 +206,7 @@ description: "Task list for Phase 12 — Listing Approval Workflow"
 
 **Independent Test**: Per spec.md US5 — seed 25 pending_review listings with staggered timestamps; confirm first page = 20 oldest-first; scroll to bottom; confirm next 5 load; pull-to-refresh; confirm re-fetch.
 
-- [ ] T078 [US5] Seed 25 `pending_review` listings via Supabase MCP `execute_sql` with staggered timestamps using `submit_listing` calls OR direct INSERTs. Record the 25 listing IDs.
+- [X] T078 [US5] Seed 25 `pending_review` listings via Supabase MCP `execute_sql` with staggered timestamps using `submit_listing` calls OR direct INSERTs. Record the 25 listing IDs.
 - [ ] T079 [US5] First-page load verification (SC-010) — open the queue on the Pixel 8 Pro emulator. Confirm exactly 20 cards render. Confirm the order matches `SELECT id FROM public.listings WHERE status='pending_review' ORDER BY created_at ASC LIMIT 20` (or `submitted_at ASC` per the use-case dartdoc choice in T026).
 - [ ] T080 [US5] Infinite-scroll verification — scroll to the bottom of the 20-card list. Confirm the remaining 5 cards load AND the order continues from the first page's last card chronologically.
 - [ ] T081 [US5] Pull-to-refresh verification — pull down from the top of the list. Confirm the spinner appears AND the page re-fetches from the first cursor (oldest 20).
