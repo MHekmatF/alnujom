@@ -39,7 +39,7 @@ Via `mcp__supabase__apply_migration` (or `mcp__plugin_supabase_supabase__apply_m
 | 1 | (same) | `SELECT relrowsecurity FROM pg_class WHERE relname='listing_media'` | `true` (SC-007) |
 | 1 | (same) | `SELECT count(*) FROM pg_policies WHERE schemaname='public' AND tablename='listing_media'` | 7 (FR-006) |
 | 2 | `20260522120002_create_listing_media_storage_buckets` | `SELECT id, public, file_size_limit, allowed_mime_types FROM storage.buckets WHERE id IN ('listing-images','listing-videos')` | 2 rows: both `public=true`; image=10485760+['image/jpeg']; video=31457280+['video/mp4'] (FR-008, SC-029 part 1) |
-| 3 | `20260522120003_create_listing_media_storage_policies` | `SELECT count(*) FROM pg_policies WHERE schemaname='storage' AND tablename='objects' AND policyname LIKE '%listing-%'` | 14 (FR-007, SC-029 part 2) |
+| 3 | `20260522120003_create_listing_media_storage_policies` | `SELECT count(*) FROM pg_policies WHERE schemaname='storage' AND tablename='objects' AND (policyname LIKE 'listing_images_%' OR policyname LIKE 'listing_videos_%')` | 14 (FR-007, SC-029 part 2). NOTE: bucket IDs use hyphens (`listing-images`); policy names use underscores (`listing_images_*`) |
 | 4 | `20260522120004_amend_submit_listing_rpc_for_media_minimum` | `SELECT prosrc FROM pg_proc WHERE proname='submit_listing'` | includes the substring `listing_media.images_below_minimum` (FR-022) |
 
 After all four apply, run `mcp__supabase__get_advisors` (mode `security` then `performance`) and capture any new warnings — annotate in DEFERRED.md if any are introduced.

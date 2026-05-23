@@ -49,9 +49,11 @@ Identical predicate across INSERT (in `WITH CHECK`), UPDATE (in `USING` + `WITH 
 SELECT count(*) FROM pg_policies
 WHERE schemaname = 'storage'
   AND tablename = 'objects'
-  AND policyname LIKE 'listing-%';
+  AND (policyname LIKE 'listing_images_%' OR policyname LIKE 'listing_videos_%');
 ```
 Expected: ≥ 14 rows after Phase 11 apply. SC-029 references this count.
+
+> **Naming note**: bucket IDs are hyphenated (`listing-images`, `listing-videos`) but the policy names use underscores (`listing_images_*`, `listing_videos_*`). Unquoted SQL identifiers cannot contain hyphens; the LIKE pattern must match the underscored policy name, not the bucket id.
 
 ## Manual smoke tests (carried in quickstart.md)
 
