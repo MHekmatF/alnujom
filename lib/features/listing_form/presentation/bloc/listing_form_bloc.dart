@@ -1,20 +1,38 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:decimal/decimal.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show PostgrestException;
 
+import '../../../../core/validators/video_file_validator.dart';
+import '../../data/datasources/supabase_listing_media_datasource.dart'
+    show MediaDeleteException;
 import '../../domain/entities/listing.dart';
 import '../../domain/entities/listing_details.dart';
 import '../../domain/entities/listing_form_state.dart';
+import '../../domain/entities/listing_media.dart';
 import '../../domain/entities/listing_price.dart';
 import '../../domain/entities/listing_visibility.dart';
 import '../../domain/entities/submit_failure.dart';
 import '../../domain/repositories/listings_repository.dart';
 import '../../domain/usecases/delete_draft.dart';
+import '../../domain/usecases/delete_media.dart';
 import '../../domain/usecases/derive_area_centroid.dart';
+import '../../domain/usecases/load_media_for_listing.dart';
 import '../../domain/usecases/load_or_create_draft.dart';
+import '../../domain/usecases/reorder_media.dart';
 import '../../domain/usecases/save_form_step.dart';
+import '../../domain/usecases/set_main_image.dart';
 import '../../domain/usecases/submit_listing.dart';
+import '../../domain/usecases/upload_image.dart';
+import '../../domain/usecases/upload_video.dart';
 import '../../domain/usecases/validate_submit_payload.dart';
+import '../util/image_isolate_worker.dart';
+import '../util/watermark_pipeline.dart';
 import 'listing_form_event.dart';
 
 @injectable
@@ -27,6 +45,12 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
     this._deriveAreaCentroid,
     this._validateSubmitPayload,
     this._repository,
+    this._uploadImage,
+    this._uploadVideo,
+    this._reorderMedia,
+    this._setMainImage,
+    this._deleteMedia,
+    this._loadMediaForListing,
   ) : super(
         const ListingFormState(
           mode: ListingFormMode.create,
@@ -42,6 +66,12 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
     on<JumpToStep>(_onJumpToStep);
     on<SubmitRequested>(_onSubmitRequested);
     on<DeleteDraftRequested>(_onDeleteDraftRequested);
+    // Phase 11 — five new MediaPicker handlers (R-40).
+    on<MediaPicked>(_onMediaPicked);
+    on<VideoPicked>(_onVideoPicked);
+    on<MediaReordered>(_onMediaReordered);
+    on<MediaSetMain>(_onMediaSetMain);
+    on<MediaDeleted>(_onMediaDeleted);
   }
 
   final LoadOrCreateDraft _loadOrCreateDraft;
@@ -51,6 +81,20 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
   final DeriveAreaCentroid _deriveAreaCentroid;
   final ValidateSubmitPayload _validateSubmitPayload;
   final ListingsRepository _repository;
+  final UploadImage _uploadImage;
+  final UploadVideo _uploadVideo;
+  final ReorderMedia _reorderMedia;
+  final SetMainImage _setMainImage;
+  final DeleteMedia _deleteMedia;
+  final LoadMediaForListing _loadMediaForListing;
+
+  // Phase 11 — lazily-instantiated isolate worker per R-25 (one per BLoC
+  // lifecycle, processes images sequentially).
+  ImageIsolateWorker? _imageWorker;
+  Uint8List? _watermarkAssetBytes;
+
+  static const String _watermarkAssetPath =
+      'assets/images/watermark/logo_watermark.png';
 
   /// Set by the caller via `attachContext` before dispatching
   /// `LoadOrCreateDraftRequested`. Holds the signed-in publisher's
@@ -101,17 +145,42 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
         }
         final details = await _repository.loadDetails(listing.id);
         final price = await _repository.loadPrimaryPrice(listing.id);
+        // Phase 11 — populate `state.media` from listing_media rows so the
+        // Q3=A edit-in-place picker surfaces existing thumbnails on resubmit.
+        List<ListingMedia> media = const <ListingMedia>[];
+        try {
+          media = await _loadMediaForListing(listingId: listing.id);
+        } catch (_) {
+          media = const <ListingMedia>[];
+        }
         emit(
           state.copyWith(
             draftListing: listing,
             draftDetails: details,
             draftPrice: price,
             loadInProgress: false,
+            media: media,
+            uploadInFlight: const <String, MediaUploadProgress>{},
           ),
         );
       } else {
         final listing = await _loadOrCreateDraft(publisherUserId);
-        emit(state.copyWith(draftListing: listing, loadInProgress: false));
+        // Fresh-create path — also load any existing media (empty for new
+        // drafts; non-empty when LoadOrCreateDraft returned an existing draft).
+        List<ListingMedia> media = const <ListingMedia>[];
+        try {
+          media = await _loadMediaForListing(listingId: listing.id);
+        } catch (_) {
+          media = const <ListingMedia>[];
+        }
+        emit(
+          state.copyWith(
+            draftListing: listing,
+            loadInProgress: false,
+            media: media,
+            uploadInFlight: const <String, MediaUploadProgress>{},
+          ),
+        );
       }
     } catch (e) {
       emit(state.copyWith(loadInProgress: false, lastSaveError: e.toString()));
@@ -395,6 +464,314 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
     } catch (e) {
       emit(state.copyWith(lastSaveError: e.toString()));
     }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Phase 11 — MediaPicker handlers (R-40) + isolate-worker lifecycle.
+  // ---------------------------------------------------------------------------
+
+  /// Lazily spawns the R-25 shared sequential isolate worker on the first
+  /// `MediaPicked` event and lazily loads the watermark PNG bytes from
+  /// rootBundle. Caller is responsible for `isRtl` resolution (the widget
+  /// reads `Directionality.of(context)` and folds it into the event payload).
+  Future<void> _ensureImageWorker() async {
+    if (_imageWorker == null) {
+      final worker = ImageIsolateWorker();
+      await worker.start();
+      _imageWorker = worker;
+    }
+    if (_watermarkAssetBytes == null) {
+      final data = await rootBundle.load(_watermarkAssetPath);
+      _watermarkAssetBytes = data.buffer.asUint8List();
+    }
+  }
+
+  /// Central error mapper — every PostgrestException, isolate exception, and
+  /// timeout surfaces here. Returns the ARB key to render at the widget layer.
+  /// Per R-30, parses the cap-trigger DETAIL JSONB to distinguish image-cap
+  /// vs video-cap errors. Handles both Map and String shapes for `details`
+  /// (depends on supabase_flutter version).
+  String _mapMediaErrorToArbKey(Object error) {
+    if (error is UnsupportedFormatException) {
+      return 'media.error.formatNotSupported';
+    }
+    if (error is ImageTooLargeException) return 'media.error.imageTooLarge';
+    if (error is WatermarkAssetMissingException) {
+      return 'media.error.watermarkAssetMissing';
+    }
+    if (error is TimeoutException) return 'media.error.timeout';
+    if (error is MediaDeleteException) return 'media.error.uploadFailed';
+
+    if (error is PostgrestException) {
+      if (error.message == 'listing_media.cap_exceeded') {
+        try {
+          final detail = error.details;
+          Map<String, dynamic>? detailMap;
+          if (detail is String) {
+            detailMap = jsonDecode(detail) as Map<String, dynamic>;
+          } else if (detail is Map) {
+            detailMap = Map<String, dynamic>.from(detail);
+          }
+          final kind = detailMap?['kind'] as String?;
+          if (kind == 'image') return 'media.cap.images10';
+          if (kind == 'video') return 'media.cap.videos2';
+        } catch (_) {
+          // Fall through to generic upload-failed if DETAIL is unparseable.
+        }
+        return 'media.error.uploadFailed';
+      }
+      return 'media.error.uploadFailed';
+    }
+    return 'media.error.uploadFailed';
+  }
+
+  /// Returns the next available ordering slot (1-indexed; max(existing)+1).
+  int _nextOrdering() {
+    if (state.media.isEmpty) return 1;
+    int maxOrd = 0;
+    for (final m in state.media) {
+      if (m.ordering > maxOrd) maxOrd = m.ordering;
+    }
+    return maxOrd + 1;
+  }
+
+  Future<void> _onMediaPicked(
+    MediaPicked event,
+    Emitter<ListingFormState> emit,
+  ) async {
+    final listing = state.draftListing;
+    if (listing == null) return;
+    final listingId = listing.id;
+    if (event.files.isEmpty) return;
+
+    try {
+      await _ensureImageWorker();
+    } catch (e) {
+      // Bundle load failed (watermark asset missing). Surface fail-closed
+      // error per FR-014 — refuse to upload an un-watermarked image.
+      final localId = _newLocalId();
+      emit(
+        state.copyWith(
+          uploadInFlight: <String, MediaUploadProgress>{
+            ...state.uploadInFlight,
+            localId: const MediaUploadProgressError(
+              'media.error.watermarkAssetMissing',
+            ),
+          },
+        ),
+      );
+      return;
+    }
+
+    int nextOrdering = _nextOrdering();
+
+    for (final file in event.files) {
+      final localId = _newLocalId();
+      emit(
+        state.copyWith(
+          uploadInFlight: <String, MediaUploadProgress>{
+            ...state.uploadInFlight,
+            localId: const MediaUploadProgressProcessing(),
+          },
+        ),
+      );
+
+      try {
+        final sourceBytes = await file.readAsBytes();
+
+        // FR-014 pipeline on the R-25 isolate worker, wrapped in Q7=B / R-39
+        // 60-second per-image timeout.
+        final watermarkedJpeg = await _imageWorker!
+            .processImage(
+              sourceBytes: sourceBytes,
+              watermarkAssetBytes: _watermarkAssetBytes!,
+              isRtl: event.isRtl,
+            )
+            .timeout(const Duration(seconds: 60));
+
+        // Mark uploading on the picker (between watermark and bucket commit).
+        emit(
+          state.copyWith(
+            uploadInFlight: <String, MediaUploadProgress>{
+              ...state.uploadInFlight,
+              localId: const MediaUploadProgressUploading(),
+            },
+          ),
+        );
+
+        // First image auto-main per spec US1 / FR-013 (the partial unique
+        // index enforces at-most-one main server-side).
+        final hasImage = state.media.any(
+          (m) => m.kind == ListingMediaKind.image,
+        );
+        final isMain = !hasImage;
+
+        final inserted = await _uploadImage(
+          listingId: listingId,
+          watermarkedBytes: watermarkedJpeg,
+          ordering: nextOrdering,
+          isMain: isMain,
+        );
+
+        final nextInFlight = <String, MediaUploadProgress>{
+          ...state.uploadInFlight,
+        }..remove(localId);
+        emit(
+          state.copyWith(
+            media: <ListingMedia>[...state.media, inserted],
+            uploadInFlight: nextInFlight,
+          ),
+        );
+        nextOrdering++;
+      } catch (e) {
+        final errorKey = _mapMediaErrorToArbKey(e);
+        emit(
+          state.copyWith(
+            uploadInFlight: <String, MediaUploadProgress>{
+              ...state.uploadInFlight,
+              localId: MediaUploadProgressError(errorKey),
+            },
+          ),
+        );
+        // Continue the batch — one failure does not abort sibling images.
+      }
+    }
+  }
+
+  Future<void> _onVideoPicked(
+    VideoPicked event,
+    Emitter<ListingFormState> emit,
+  ) async {
+    final listing = state.draftListing;
+    if (listing == null) return;
+    final listingId = listing.id;
+
+    final sizeBytes = await event.file.length();
+    final localId = _newLocalId();
+    final validationError = VideoFileValidator.validate(
+      event.file,
+      sizeBytes: sizeBytes,
+    );
+    if (validationError != null) {
+      emit(
+        state.copyWith(
+          uploadInFlight: <String, MediaUploadProgress>{
+            ...state.uploadInFlight,
+            localId: MediaUploadProgressError(validationError),
+          },
+        ),
+      );
+      return;
+    }
+
+    emit(
+      state.copyWith(
+        uploadInFlight: <String, MediaUploadProgress>{
+          ...state.uploadInFlight,
+          localId: const MediaUploadProgressUploading(),
+        },
+      ),
+    );
+
+    try {
+      final nextOrdering = _nextOrdering();
+      final inserted = await _uploadVideo(
+        listingId: listingId,
+        filePath: event.file.path,
+        ordering: nextOrdering,
+      ).timeout(const Duration(seconds: 60));
+      final nextInFlight = <String, MediaUploadProgress>{
+        ...state.uploadInFlight,
+      }..remove(localId);
+      emit(
+        state.copyWith(
+          media: <ListingMedia>[...state.media, inserted],
+          uploadInFlight: nextInFlight,
+        ),
+      );
+    } catch (e) {
+      final errorKey = _mapMediaErrorToArbKey(e);
+      emit(
+        state.copyWith(
+          uploadInFlight: <String, MediaUploadProgress>{
+            ...state.uploadInFlight,
+            localId: MediaUploadProgressError(errorKey),
+          },
+        ),
+      );
+    }
+  }
+
+  Future<void> _onMediaReordered(
+    MediaReordered event,
+    Emitter<ListingFormState> emit,
+  ) async {
+    final listing = state.draftListing;
+    if (listing == null) return;
+    try {
+      await _reorderMedia(
+        listingId: listing.id,
+        newOrderIds: event.newOrder,
+      );
+      final reloaded = await _loadMediaForListing(listingId: listing.id);
+      emit(state.copyWith(media: reloaded));
+    } catch (_) {
+      // On failure, leave state.media as-is. The widget surface can show a
+      // generic toast via the existing `lastSaveError` channel if needed.
+    }
+  }
+
+  Future<void> _onMediaSetMain(
+    MediaSetMain event,
+    Emitter<ListingFormState> emit,
+  ) async {
+    final listing = state.draftListing;
+    if (listing == null) return;
+    try {
+      await _setMainImage(listingId: listing.id, mediaId: event.mediaId);
+      final reloaded = await _loadMediaForListing(listingId: listing.id);
+      emit(state.copyWith(media: reloaded));
+    } catch (_) {
+      // No-op on failure — widget can re-trigger.
+    }
+  }
+
+  Future<void> _onMediaDeleted(
+    MediaDeleted event,
+    Emitter<ListingFormState> emit,
+  ) async {
+    try {
+      await _deleteMedia(mediaId: event.mediaId);
+      emit(
+        state.copyWith(
+          media: state.media.where((m) => m.id != event.mediaId).toList(),
+        ),
+      );
+    } catch (_) {
+      // Reload from server to reflect the actual state per R-38 semantics
+      // (storage gone but row remains, or vice versa).
+      final listing = state.draftListing;
+      if (listing != null) {
+        try {
+          final reloaded = await _loadMediaForListing(listingId: listing.id);
+          emit(state.copyWith(media: reloaded));
+        } catch (_) {/* nothing more to do */}
+      }
+    }
+  }
+
+  String _newLocalId() {
+    // Cheap opaque identifier — does NOT need to be a real UUID, only
+    // unique within the uploadInFlight map for the BLoC's lifetime.
+    return 'upload_${DateTime.now().microsecondsSinceEpoch}_'
+        '${state.uploadInFlight.length}';
+  }
+
+  @override
+  Future<void> close() {
+    _imageWorker?.stop();
+    _imageWorker = null;
+    return super.close();
   }
 
   static ListingDetails _ensureDetails(

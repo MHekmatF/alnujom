@@ -14,7 +14,7 @@ import '../bloc/listing_form_event.dart';
 import '../widgets/step_basics.dart';
 import '../widgets/step_details.dart';
 import '../widgets/step_location.dart';
-import '../widgets/step_media_placeholder.dart';
+import '../widgets/step_media.dart';
 import '../widgets/step_prices.dart';
 import '../widgets/step_progress_indicator.dart';
 import '../widgets/step_review.dart';
@@ -160,7 +160,7 @@ class _ListingFormBody extends StatelessWidget {
       case ListingFormStep.visibility:
         return const StepVisibility();
       case ListingFormStep.media:
-        return const StepMediaPlaceholder();
+        return const StepMedia();
       case ListingFormStep.review:
         return const StepReview();
     }

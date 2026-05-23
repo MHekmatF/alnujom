@@ -512,5 +512,24 @@
   "rejectionReasonLabel": "سبب الرفض",
   "resubmitButton": "إعادة الإرسال",
   "approvedNotEditableMessage": "لا يمكن تعديل الإعلانات المقبولة في هذا الإصدار. للتعديل يرجى التواصل مع الدعم.",
-  "readOnlyPreviewTitle": "تفاصيل الإعلان"
+  "readOnlyPreviewTitle": "تفاصيل الإعلان",
+
+  "mediaAddImages": "أضف صور",
+  "mediaAddVideo": "أضف فيديو",
+  "mediaActionSetMain": "اجعلها الصورة الرئيسية",
+  "mediaActionDelete": "حذف",
+  "mediaActionReorderHint": "اضغط مطولاً لإعادة الترتيب",
+  "mediaThumbnailMainBadge": "الرئيسية",
+  "mediaErrorGalleryPermissionDenied": "بدون الوصول للمعرض ما رح نقدر نرفع الصور",
+  "mediaActionOpenSettings": "افتح الإعدادات",
+  "mediaErrorUploadFailed": "فشل الرفع — جرّب مرة ثانية",
+  "mediaReadOnlyPendingOrApproved": "ما فيك تعدّل الصور بعد إرسال الإعلان للمراجعة",
+  "mediaErrorFormatNotSupported": "الصيغ المدعومة: JPEG, PNG, HEIC, WebP",
+  "mediaErrorImageTooLarge": "هاي الصورة كبيرة كتير — الحد الأقصى 8000×8000 بكسل",
+  "mediaErrorTimeout": "ما تم رفع الصورة — جرّب مرة ثانية",
+  "mediaErrorWatermarkAssetMissing": "ما قدرنا نضيف العلامة المائية — حدّث التطبيق",
+  "mediaErrorVideoFormatMustBeMp4": "صيغة الفيديو لازم MP4",
+  "mediaErrorVideoSizeExceeded": "الفيديو لازم يكون أصغر من 30 ميغا",
+  "mediaCapImages10": "الحد الأقصى 10 صور",
+  "mediaCapVideos2": "الحد الأقصى فيديوهين"
 }

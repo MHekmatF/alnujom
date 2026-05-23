@@ -1,7 +1,10 @@
+import 'dart:typed_data';
+
 import 'package:decimal/decimal.dart';
 
 import '../entities/listing.dart';
 import '../entities/listing_details.dart';
+import '../entities/listing_media.dart';
 import '../entities/listing_price.dart';
 import '../entities/submit_listing_result.dart';
 
@@ -84,4 +87,46 @@ abstract class ListingsRepository {
   /// Deletes the listing row (cascades to children). Throws if status is
   /// not `draft`.
   Future<void> deleteDraft(String listingId);
+
+  // ---------------------------------------------------------------------------
+  // Phase 11 — listing_media surface (R-40 — extends Phase 10 repository).
+  // ---------------------------------------------------------------------------
+
+  /// Loads every `listing_media` row for a listing, sorted by `ordering ASC`.
+  Future<List<ListingMedia>> loadMediaForListing(String listingId);
+
+  /// Uploads watermarked JPEG bytes to `listing-images` then inserts the
+  /// `listing_media` row per FR-014 / FR-015 (atomic-from-publisher-perspective).
+  Future<ListingMedia> uploadImage({
+    required String listingId,
+    required Uint8List watermarkedBytes,
+    required int ordering,
+    required bool isMain,
+  });
+
+  /// Uploads an MP4 file to `listing-videos` then inserts the row. No
+  /// watermark composite for videos in Phase 11.
+  Future<ListingMedia> uploadVideo({
+    required String listingId,
+    required String filePath,
+    required int ordering,
+  });
+
+  /// Re-sequences `ordering` for a list of media ids (drag-reorder commit).
+  Future<void> reorderMedia({
+    required String listingId,
+    required List<String> newOrderIds,
+  });
+
+  /// Flips `is_main` to `true` on the target row and clears any prior main.
+  Future<void> setMainImage({
+    required String listingId,
+    required String mediaId,
+  });
+
+  /// Per-thumbnail delete per R-38 (Storage REMOVE then SQL DELETE).
+  Future<void> deleteMedia({required String mediaId});
+
+  /// Returns a stable public URL for a bucket object (Q8=A consumer hook).
+  String getMediaPublicUrl({required String bucket, required String path});
 }

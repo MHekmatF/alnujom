@@ -1,18 +1,23 @@
+import 'dart:typed_data';
+
 import 'package:decimal/decimal.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/listing.dart';
 import '../../domain/entities/listing_details.dart';
+import '../../domain/entities/listing_media.dart';
 import '../../domain/entities/listing_price.dart';
 import '../../domain/entities/submit_listing_result.dart';
 import '../../domain/repositories/listings_repository.dart';
+import '../datasources/supabase_listing_media_datasource.dart';
 import '../datasources/supabase_listings_datasource.dart';
 
 @LazySingleton(as: ListingsRepository)
 class ListingsRepositoryImpl implements ListingsRepository {
-  ListingsRepositoryImpl(this._ds);
+  ListingsRepositoryImpl(this._ds, this._mediaDs);
 
   final SupabaseListingsDatasource _ds;
+  final SupabaseListingMediaDatasource _mediaDs;
 
   @override
   Future<Listing?> findDraftForPublisher(String publisherUserId) async {
@@ -148,5 +153,71 @@ class ListingsRepositoryImpl implements ListingsRepository {
   @override
   Future<void> deleteDraft(String listingId) async {
     await _ds.deleteListing(listingId);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Phase 11 — listing_media surface (R-40 — extends Phase 10 repository).
+  // ---------------------------------------------------------------------------
+
+  @override
+  Future<List<ListingMedia>> loadMediaForListing(String listingId) async {
+    final dtos = await _mediaDs.loadForListing(listingId);
+    return dtos.map((d) => d.toEntity()).toList();
+  }
+
+  @override
+  Future<ListingMedia> uploadImage({
+    required String listingId,
+    required Uint8List watermarkedBytes,
+    required int ordering,
+    required bool isMain,
+  }) async {
+    final dto = await _mediaDs.uploadImage(
+      listingId: listingId,
+      watermarkedJpegBytes: watermarkedBytes,
+      ordering: ordering,
+      isMain: isMain,
+    );
+    return dto.toEntity();
+  }
+
+  @override
+  Future<ListingMedia> uploadVideo({
+    required String listingId,
+    required String filePath,
+    required int ordering,
+  }) async {
+    final dto = await _mediaDs.uploadVideo(
+      listingId: listingId,
+      filePath: filePath,
+      ordering: ordering,
+    );
+    return dto.toEntity();
+  }
+
+  @override
+  Future<void> reorderMedia({
+    required String listingId,
+    required List<String> newOrderIds,
+  }) {
+    return _mediaDs.reorder(listingId: listingId, newOrderIds: newOrderIds);
+  }
+
+  @override
+  Future<void> setMainImage({
+    required String listingId,
+    required String mediaId,
+  }) {
+    return _mediaDs.setMain(listingId: listingId, mediaId: mediaId);
+  }
+
+  @override
+  Future<void> deleteMedia({required String mediaId}) {
+    return _mediaDs.deleteMedia(mediaId);
+  }
+
+  @override
+  String getMediaPublicUrl({required String bucket, required String path}) {
+    return _mediaDs.getPublicUrl(bucket: bucket, path: path);
   }
 }
