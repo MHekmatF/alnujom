@@ -72,8 +72,9 @@ class HomePage extends StatelessWidget {
                     leading: const Icon(Icons.add_home_outlined),
                     title: Text(l10n.tileCreateListing),
                     trailing: const Icon(Icons.chevron_right),
-                    onTap: () =>
-                        context.goNamed(AppRouteNames.publisherListingsCreate),
+                    onTap: () => context.pushNamed(
+                      AppRouteNames.publisherListingsCreate,
+                    ),
                   ),
                   // Phase 10 US4 (T100): "My listings" tile, same gate as
                   // the Create tile.
@@ -82,7 +83,7 @@ class HomePage extends StatelessWidget {
                     title: Text(l10n.tileMyListings),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () =>
-                        context.goNamed(AppRouteNames.publisherMyListings),
+                        context.pushNamed(AppRouteNames.publisherMyListings),
                   ),
                 ],
                 if (getIt<PermissionChecker>().any(
