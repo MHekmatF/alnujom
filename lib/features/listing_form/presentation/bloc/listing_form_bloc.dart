@@ -572,41 +572,42 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
       );
 
       try {
-        final sourceBytes = await file.readAsBytes();
+        // FR-014 pipeline + upload + INSERT, all wrapped in the Q7=B / R-39
+        // 60-second budget. Earlier the timeout wrapped ONLY processImage —
+        // discovered during T088 walk that uploads on slow networks could
+        // exceed the budget without firing the timeout.
+        final inserted = await () async {
+          final sourceBytes = await file.readAsBytes();
+          final watermarkedJpeg = await _imageWorker!.processImage(
+            sourceBytes: sourceBytes,
+            watermarkAssetBytes: _watermarkAssetBytes!,
+            isRtl: event.isRtl,
+          );
 
-        // FR-014 pipeline on the R-25 isolate worker, wrapped in Q7=B / R-39
-        // 60-second per-image timeout.
-        final watermarkedJpeg = await _imageWorker!
-            .processImage(
-              sourceBytes: sourceBytes,
-              watermarkAssetBytes: _watermarkAssetBytes!,
-              isRtl: event.isRtl,
-            )
-            .timeout(const Duration(seconds: 60));
+          // Mark uploading on the picker (between watermark and bucket commit).
+          emit(
+            state.copyWith(
+              uploadInFlight: <String, MediaUploadProgress>{
+                ...state.uploadInFlight,
+                localId: const MediaUploadProgressUploading(),
+              },
+            ),
+          );
 
-        // Mark uploading on the picker (between watermark and bucket commit).
-        emit(
-          state.copyWith(
-            uploadInFlight: <String, MediaUploadProgress>{
-              ...state.uploadInFlight,
-              localId: const MediaUploadProgressUploading(),
-            },
-          ),
-        );
+          // First image auto-main per spec US1 / FR-013 (the partial unique
+          // index enforces at-most-one main server-side).
+          final hasImage = state.media.any(
+            (m) => m.kind == ListingMediaKind.image,
+          );
+          final isMain = !hasImage;
 
-        // First image auto-main per spec US1 / FR-013 (the partial unique
-        // index enforces at-most-one main server-side).
-        final hasImage = state.media.any(
-          (m) => m.kind == ListingMediaKind.image,
-        );
-        final isMain = !hasImage;
-
-        final inserted = await _uploadImage(
-          listingId: listingId,
-          watermarkedBytes: watermarkedJpeg,
-          ordering: 0, // sentinel — trigger assigns per task #29 fix
-          isMain: isMain,
-        );
+          return await _uploadImage(
+            listingId: listingId,
+            watermarkedBytes: watermarkedJpeg,
+            ordering: 0, // sentinel — trigger assigns per task #29 fix
+            isMain: isMain,
+          );
+        }().timeout(const Duration(seconds: 60));
 
         final nextInFlight = <String, MediaUploadProgress>{
           ...state.uploadInFlight,
