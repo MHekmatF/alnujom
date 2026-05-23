@@ -47,6 +47,32 @@ Commit at every checkpoint, not at every line of code. If using Spec Kit, the `t
 
 **Push immediately after every commit.** The cost of an extra `git push` is zero; the cost of losing uncommitted work to a `git clean -fdx` accident is hours.
 
+## Task-checkbox hygiene (Spec Kit)
+
+**Only flip `- [ ] T<id>` → `- [X] T<id>` when the task was actually executed — never by inference.**
+
+- A task marked CONDITIONAL that evaluated as a NO-OP is still `[ ]` until someone explicitly runs the evaluation step and records the outcome.
+- A hardware/device verification task is still `[ ]` until someone physically runs it on the target device.
+- A curl/SQL smoke test is still `[ ]` until the actual invocation is made and the result observed.
+- "The code is in main so the task must be done" is not sufficient — the implementation and the verification are separate tasks with separate checkboxes.
+
+**When an agent implements a task, it MUST flip the checkbox in the same commit**, not as a follow-up. The diff that ships the code and the diff that checks the box are one atomic unit.
+
+**Orchestrator reconciliation gate** — after merging each sub-agent's branch, run:
+
+```bash
+grep -c "^- \[ \] T" specs/<branch>/tasks.md
+```
+
+Compare against the count before the merge. If the count did not drop by the number of implementation tasks in the merged scope, the agent shipped code without flipping its checkboxes. Fix in a follow-up commit before dispatching the next wave:
+
+```bash
+# example follow-up commit message
+chore: flip tasks.md checkboxes for spec <name> T<id>–T<id> (agent skipped checkbox edits)
+```
+
+Do **not** flip checkboxes for tasks that were genuinely not completed (deferred hardware tests, pre-launch gates, conditional tasks whose condition was not evaluated). Unchecked boxes are a truthful signal — do not sanitize them away.
+
 ## Branch strategy
 
 - **`main`** — protected; only mergeable via PR with linear history. No direct pushes.
