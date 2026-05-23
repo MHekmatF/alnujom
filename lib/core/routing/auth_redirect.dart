@@ -119,6 +119,19 @@ String? requireListingReviewRedirect(
   return null;
 }
 
+/// Phase 12 / US6 — login-only gate for the publisher moderation history page.
+/// Owner-only access is enforced server-side; no publisher-status check needed.
+String? requirePublisherLoginRedirect(
+  BuildContext context,
+  GoRouterState state,
+) {
+  final authState = getIt<AuthBloc>().state;
+  if (authState is! Authenticated) {
+    return AppRoutes.login;
+  }
+  return null;
+}
+
 String? requirePublisherStatusRedirect(
   BuildContext context,
   GoRouterState state,
