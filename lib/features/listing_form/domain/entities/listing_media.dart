@@ -62,6 +62,32 @@ class ListingMedia extends Equatable {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  ListingMedia copyWith({
+    String? id,
+    String? listingId,
+    ListingMediaKind? kind,
+    String? storagePath,
+    String? externalUrl,
+    int? ordering,
+    bool? isMain,
+    bool? watermarked,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return ListingMedia(
+      id: id ?? this.id,
+      listingId: listingId ?? this.listingId,
+      kind: kind ?? this.kind,
+      storagePath: storagePath ?? this.storagePath,
+      externalUrl: externalUrl ?? this.externalUrl,
+      ordering: ordering ?? this.ordering,
+      isMain: isMain ?? this.isMain,
+      watermarked: watermarked ?? this.watermarked,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
   @override
   List<Object?> get props => [
     id,

@@ -701,16 +701,36 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
   ) async {
     final listing = state.draftListing;
     if (listing == null) return;
+
+    // Optimistic update — reorder state.media locally first so the picker
+    // grid reflects the new order instantly. The RPC call happens in
+    // background; on failure we reload from the server to undo.
+    final idToMedia = <String, ListingMedia>{
+      for (final m in state.media) m.id: m,
+    };
+    final reordered = <ListingMedia>[];
+    for (var i = 0; i < event.newOrder.length; i++) {
+      final m = idToMedia[event.newOrder[i]];
+      if (m != null) reordered.add(m.copyWith(ordering: i + 1));
+    }
+    // Append any media not present in event.newOrder (e.g., videos when
+    // only images were reordered) to preserve them.
+    for (final m in state.media) {
+      if (!event.newOrder.contains(m.id)) reordered.add(m);
+    }
+    emit(state.copyWith(media: reordered));
+
     try {
       await _reorderMedia(
         listingId: listing.id,
         newOrderIds: event.newOrder,
       );
-      final reloaded = await _loadMediaForListing(listingId: listing.id);
-      emit(state.copyWith(media: reloaded));
     } catch (_) {
-      // On failure, leave state.media as-is. The widget surface can show a
-      // generic toast via the existing `lastSaveError` channel if needed.
+      // RPC failed — reload from the server to revert the optimistic UI.
+      try {
+        final reloaded = await _loadMediaForListing(listingId: listing.id);
+        emit(state.copyWith(media: reloaded));
+      } catch (_) {/* nothing more to do */}
     }
   }
 
