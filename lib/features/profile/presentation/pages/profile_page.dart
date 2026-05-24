@@ -9,6 +9,8 @@ import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/account_status.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/bloc/auth_event.dart';
 import '../../../currencies/presentation/widgets/preferred_currency_toggle.dart';
 import '../cubit/profile_cubit.dart';
 import '../cubit/profile_state.dart';
@@ -132,6 +134,29 @@ class _ProfileView extends StatelessWidget {
                   title: Text(l10n.profile_private_section_title),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push(AppRoutes.profilePrivate),
+                ),
+                const Divider(height: AppSpacing.xl),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(
+                    Icons.logout,
+                    color: theme.colorScheme.error,
+                  ),
+                  title: Text(
+                    l10n.sign_out,
+                    style: TextStyle(color: theme.colorScheme.error),
+                  ),
+                  onTap: () {
+                    // Dispatch logout first so the AuthBloc transitions to
+                    // Unauthenticated before we leave the page. Then pop the
+                    // pushed /profile route off the stack manually — relying
+                    // on refreshListenable to re-evaluate the redirect doesn't
+                    // work here because go_router evaluates against the
+                    // underlying `/` (which is now public), not the pushed
+                    // /profile route.
+                    context.read<AuthBloc>().add(const LogoutRequested());
+                    context.go(AppRoutes.home);
+                  },
                 ),
               ],
             ),

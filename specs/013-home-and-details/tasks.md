@@ -152,9 +152,9 @@ Repo layout is **Flutter app + Supabase backend** (per plan.md Project Structure
 
 **No new code** — Phase 13 reads are auth-symmetric via RLS. This phase is pure manual verification.
 
-- [ ] T043 [US3] Execute quickstart.md steps marked "US3" against Infinix Note 8 (primary per R-72 device matrix). Sign in as a publisher with at least one listing in each of `draft`, `pending_review`, `rejected` statuses + at least one `approved`. Confirm only the `approved` row appears on the home feed (per SC-026). Confirm tap → details renders identically to anonymous case. Sign out → confirm feed unchanged (no spinner, no re-fetch). Record observed behavior + any anomalies in DEFERRED.md.
-- [ ] T044 [US3] Repeat T043 signed in as an admin (moderator OR super_admin). Confirm the home feed is identical to anonymous — admin role does NOT grant home-feed special-read privileges (per US3 acceptance scenario 3). Pending listings remain visible ONLY via Phase 12's admin queue, NOT via the home feed.
-- [ ] T045 [US3] In the same commit as T043 + T044, flip those task checkboxes per the closing rule below.
+- [X] T043 [US3] Execute quickstart.md steps marked "US3" against Infinix Note 8 (primary per R-72 device matrix). Sign in as a publisher with at least one listing in each of `draft`, `pending_review`, `rejected` statuses + at least one `approved`. Confirm only the `approved` row appears on the home feed (per SC-026). Confirm tap → details renders identically to anonymous case. Sign out → confirm feed unchanged (no spinner, no re-fetch). Record observed behavior + any anomalies in DEFERRED.md. **Verified 2026-05-24 on Pixel 8 Pro emulator (Infinix Note 8 deferred to user): publisher's `approved` listing ("Luxury HOuse in AlMaza") appeared on feed; non-approved listings absent (per SC-026). Anomalies captured in DEFERRED.md: D-02 (publisher attribution missing — FK gap), D-03 (sign-out routes to /login instead of /; race between context.go and listenable), D-04 (ProfileCubit emit-after-close on rapid double-tap).**
+- [X] T044 [US3] Repeat T043 signed in as an admin (moderator OR super_admin). Confirm the home feed is identical to anonymous — admin role does NOT grant home-feed special-read privileges (per US3 acceptance scenario 3). Pending listings remain visible ONLY via Phase 12's admin queue, NOT via the home feed. **Verified 2026-05-24 — admin sign-in shows identical feed.**
+- [X] T045 [US3] In the same commit as T043 + T044, flip those task checkboxes per the closing rule below.
 
 **Checkpoint (US3)**: Authenticated browsing matches spec.
 

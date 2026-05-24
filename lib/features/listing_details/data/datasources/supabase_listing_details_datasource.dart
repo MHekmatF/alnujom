@@ -33,11 +33,15 @@ class SupabaseListingDetailsDatasource {
       listing_details(listing_id, description, amenities, year_built, furnished, parking, created_at, updated_at),
       listing_prices(id, listing_id, currency_code, amount, is_primary, created_at),
       listing_media(id, listing_id, storage_path, ordering, is_main, kind, external_url, watermarked, created_at, updated_at),
-      governorate:governorates(id, key, name_ar, name_en, is_active, is_system, created_at, updated_at),
-      city:cities(id, key, name_ar, name_en, is_active, is_system, created_at, updated_at),
-      area:areas(id, key, name_ar, name_en, is_active, created_at, updated_at),
-      publisher:profiles!listings_publisher_user_id_fkey(full_name, username)
+      governorate:governorates(id, key, display_name, is_active, is_system, created_at, updated_at),
+      city:cities(id, key, display_name, is_active, is_system, created_at, updated_at),
+      area:areas(id, key, display_name, is_active, created_at, updated_at)
     ''').eq('id', listingId).maybeSingle();
+    // Note: publisher embedded select removed at Phase 13 verification time —
+    // public.listings has no FK from publisher_user_id (the data-model.md §3.1
+    // assumption was wrong; profiles has zero FKs to auth.users either, so
+    // PostgREST can't embed via FK hint). DTO's empty-publisher fallback
+    // handles the missing key. See DEFERRED.md D-02 for the follow-up fix.
     // RLS-only filter — NO application-layer status='approved' per FR-018.
     // .maybeSingle() returns null when RLS hides the row OR row doesn't exist.
     if (row == null) return null;
