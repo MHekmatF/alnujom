@@ -18,6 +18,7 @@ import '../bloc/home_event.dart';
 import '../bloc/home_state.dart';
 import '../widgets/hero_search_bar.dart';
 import '../widgets/home_listing_card.dart';
+import '../widgets/map_entry_tile.dart';
 import '../widgets/property_type_shortcut_row.dart';
 
 /// Phase 13 — public HomePage per FR-013 + contracts/
@@ -162,6 +163,8 @@ class _HomeViewState extends State<_HomeView> {
       slivers: [
         const SliverToBoxAdapter(child: HeroSearchBar()),
         const SliverToBoxAdapter(child: PropertyTypeShortcutRow()),
+        // Phase 15 G1: Map entry tile — R-91 slot (between shortcut row and header).
+        const SliverToBoxAdapter(child: MapEntryTile()),
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsetsDirectional.fromSTEB(

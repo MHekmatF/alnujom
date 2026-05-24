@@ -4,8 +4,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
-import '../../../../core/widgets/deep_link_aware_back_button.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/deep_link_aware_back_button.dart';
+import '../../../../features/listing_form/domain/entities/listing.dart'
+    show Listing, LocationVisibility;
+import '../../../../features/map/domain/entities/map_entry_context.dart';
+import '../../../../features/map/domain/entities/marker_coordinates.dart';
 import '../../../../features/currencies/domain/entities/currency.dart';
 import '../../../../features/listing_form/domain/entities/listing_media.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -166,13 +170,42 @@ class _SuccessBody extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.md),
                 ],
-                // 5. Location block — Phase 12 Q8=A VERBATIM
+                // 5. Location block — Phase 12 Q8=A VERBATIM (widget itself unmodified)
                 ListingLocationBlock(
                   governorate: aggregate.governorate,
                   city: aggregate.city,
                   area: aggregate.area,
                   addressText: aggregate.listing.addressText,
                 ),
+                // 5b. Phase 15 G2: "View on map" affordance — consumer wrap.
+                //     Only rendered when location_visibility permits map presence.
+                //     ListingLocationBlock itself is NOT modified (Phase 12 Q8=A purity).
+                if (_canShowOnMap(aggregate.listing))
+                  Padding(
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                      AppSpacing.lg,
+                      AppSpacing.xs,
+                      AppSpacing.lg,
+                      AppSpacing.md,
+                    ),
+                    child: Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: TextButton.icon(
+                        onPressed: () => context.go(
+                          AppRoutes.map,
+                          extra: MapEntryFromListing(
+                            listingId: aggregate.listing.id,
+                            position: MarkerCoordinates(
+                              latitude: aggregate.listing.latitude!,
+                              longitude: aggregate.listing.longitude!,
+                            ),
+                          ),
+                        ),
+                        icon: const Icon(Icons.map_outlined),
+                        label: Text(l10n.listing_details_view_on_map_action),
+                      ),
+                    ),
+                  ),
                 const SizedBox(height: AppSpacing.md),
                 // 6. Contact block — Phase 13 Q2=A stubs
                 const ContactBlock(),
@@ -218,6 +251,19 @@ class _SuccessBody extends StatelessWidget {
       updatedAt: DateTime.fromMillisecondsSinceEpoch(0),
     );
   }
+}
+
+// ─── Phase 15 G2 helper ───────────────────────────────────────────────────────
+
+/// Returns true when the listing's [LocationVisibility] permits map presence
+/// (i.e. exact or approximate). Hidden and admin_only listings are excluded.
+///
+/// Phase 10 Q2=A guarantees that latitude + longitude are non-null whenever
+/// visibility is exact or approximate (auto-populated from area centroid on
+/// submit), so the null-bang assertions in the caller are safe.
+bool _canShowOnMap(Listing listing) {
+  return listing.locationVisibility == LocationVisibility.exact ||
+      listing.locationVisibility == LocationVisibility.approximate;
 }
 
 // ─── Gallery with video-tap overlay ──────────────────────────────────────────
