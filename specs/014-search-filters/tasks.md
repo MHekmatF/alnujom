@@ -129,10 +129,10 @@
 
 **Goal**: Code quality grep gates + manual two-device UI verification covering all 11 SCs. No new automated tests.
 
-- [ ] T033 [P] Run grep gate 1 per `quickstart.md Step 4`: `grep -r "status.*approved" lib/features/search/ --include="*.dart"` — expected: zero matches (Constitution III: no app-layer approved filter)
-- [ ] T034 [P] Run grep gate 2 per `quickstart.md Step 4`: `grep -rl "package:supabase_flutter" lib/features/search/ --include="*.dart"` — expected: exactly ONE file (`supabase_search_datasource.dart`)
-- [ ] T035 [P] Run grep gate 3 per `quickstart.md Step 4`: `grep -r "#[0-9A-Fa-f]\{6\}" lib/features/search/presentation/ --include="*.dart"` — expected: zero matches (no hardcoded hex colors; design tokens only)
-- [ ] T036 [P] Run grep gate 4 per `quickstart.md Step 4`: `grep -r '"[^"]\{3,\}"' lib/features/search/presentation/ --include="*.dart" | grep -v "//.*\"" | grep -v "l10n\." | grep -v "ARB\|key\|_\|test"` — expected: zero matches for user-visible strings not routed through `AppLocalizations`
+- [X] T033 [P] Run grep gate 1 per `quickstart.md Step 4`: `grep -r "status.*approved" lib/features/search/ --include="*.dart"` — expected: zero matches (Constitution III: no app-layer approved filter)
+- [X] T034 [P] Run grep gate 2 per `quickstart.md Step 4`: `grep -rl "package:supabase_flutter" lib/features/search/ --include="*.dart"` — expected: exactly ONE file (`supabase_search_datasource.dart`)
+- [X] T035 [P] Run grep gate 3 per `quickstart.md Step 4`: `grep -r "#[0-9A-Fa-f]\{6\}" lib/features/search/presentation/ --include="*.dart"` — expected: zero matches (no hardcoded hex colors; design tokens only)
+- [X] T036 [P] Run grep gate 4 per `quickstart.md Step 4`: `grep -r '"[^"]\{3,\}"' lib/features/search/presentation/ --include="*.dart" | grep -v "//.*\"" | grep -v "l10n\." | grep -v "ARB\|key\|_\|test"` — expected: zero matches for user-visible strings not routed through `AppLocalizations`
 - [ ] T037 Run `flutter run --dart-define-from-file=.env.json` on Infinix Note 8; execute `quickstart.md` steps 5–17 in full (SC-001 through SC-011); complete the SC Matrix in `quickstart.md Step 19` — mark each of the 11 SC rows Pass or Fail; all 11 must pass before declaring Phase 14 complete
 
 **Checkpoint**: All 4 grep gates show zero violations AND all 11 SC rows in `quickstart.md Step 19` marked Pass.
