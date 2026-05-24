@@ -95,9 +95,11 @@ class ListingDetailsAggregateDto {
     final List<ListingMedia> media;
     if (mediaRaw is List) {
       media = mediaRaw
-          .map((m) => ListingMediaDto.fromJson(
-                Map<String, dynamic>.from(m as Map),
-              ).toEntity())
+          .map(
+            (m) => ListingMediaDto.fromJson(
+              Map<String, dynamic>.from(m as Map),
+            ).toEntity(),
+          )
           .toList(growable: false);
     } else {
       media = const [];
@@ -254,10 +256,7 @@ class ListingDetailsAggregateDto {
     if (displayName is Map) {
       return Map<String, String>.from(displayName.cast<String, String>());
     }
-    return {
-      if (ar != null) 'ar': ar,
-      if (en != null) 'en': en,
-    };
+    return {if (ar != null) 'ar': ar, if (en != null) 'en': en};
   }
 
   // Fallback sentinels (empty governorate/city/area when FK is null).

@@ -32,8 +32,10 @@ import '../../features/locations/presentation/pages/governorate_detail_page.dart
 import '../../features/locations/presentation/pages/location_form_page.dart';
 import '../../features/locations/presentation/pages/location_picker_smoke_test_page.dart';
 import '../../features/locations/presentation/pages/locations_list_page.dart';
+import '../../features/listing_form/domain/entities/listing.dart';
 import '../../features/listing_form/domain/entities/listing_form_state.dart';
 import '../../features/listing_form/presentation/pages/listing_form_page.dart';
+import '../../features/search/presentation/pages/search_page.dart';
 import '../../features/publisher_dashboard/presentation/pages/listing_moderation_history_page.dart';
 import '../../features/publisher_dashboard/presentation/pages/my_listings_page.dart';
 import '../../features/super_admin/presentation/pages/assign_role_page.dart';
@@ -80,6 +82,8 @@ abstract final class AppRoutes {
       '/publisher/listings/:id/moderation-history';
   // Phase 13 FR-010: listing details deep-link route.
   static const listingDetails = '/listings/:id';
+  // Phase 14 FR-001 / FR-010: public search & filters route.
+  static const search = '/search';
   static const themeGallery = '/_debug/theme-gallery';
   static const debugMoneyFormatter = '/debug/money-formatter';
 
@@ -129,6 +133,8 @@ abstract final class AppRouteNames {
       'publisher-listings-moderation-history';
   // Phase 13 FR-010: listing details deep-link route name.
   static const listingDetails = 'listing-details';
+  // Phase 14 FR-001 / FR-010: public search & filters route name.
+  static const search = 'search';
   static const themeGallery = 'theme-gallery';
 }
 
@@ -205,9 +211,8 @@ GoRouter buildAppRouter({
             path: 'listing-review/preview/:id',
             name: AppRouteNames.adminListingReviewPreview,
             redirect: requireListingReviewRedirect,
-            builder: (context, state) => ListingPreviewPage(
-              listingId: state.pathParameters['id']!,
-            ),
+            builder: (context, state) =>
+                ListingPreviewPage(listingId: state.pathParameters['id']!),
           ),
           GoRoute(
             path: 'super-admin/roles',
@@ -369,6 +374,17 @@ GoRouter buildAppRouter({
         name: AppRouteNames.listingDetails,
         builder: (context, state) =>
             ListingDetailsPage(id: state.pathParameters['id']!),
+      ),
+
+      // ─── Phase 14 — public search & filters ───
+      // Anonymous-accessible per FR-015. `state.extra` carries a
+      // PropertyType when the user enters via a Home property-type chip
+      // (R-80); null when entered via the hero search bar.
+      GoRoute(
+        path: AppRoutes.search,
+        name: AppRouteNames.search,
+        builder: (context, state) =>
+            SearchPage(initialPropertyType: state.extra as PropertyType?),
       ),
       if (kDesignToolsEnabled)
         GoRoute(

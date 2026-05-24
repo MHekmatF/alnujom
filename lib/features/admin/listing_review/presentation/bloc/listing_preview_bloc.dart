@@ -94,20 +94,25 @@ class ListingPreviewState extends Equatable {
       isLoading: isLoading ?? this.isLoading,
       isMutatorInFlight: isMutatorInFlight ?? this.isMutatorInFlight,
       failure: clearFailure ? null : (failure ?? this.failure),
-      lastSuccess:
-          clearLastSuccess ? null : (lastSuccess ?? this.lastSuccess),
+      lastSuccess: clearLastSuccess ? null : (lastSuccess ?? this.lastSuccess),
     );
   }
 
   @override
-  List<Object?> get props =>
-      [preview, isLoading, isMutatorInFlight, failure, lastSuccess];
+  List<Object?> get props => [
+    preview,
+    isLoading,
+    isMutatorInFlight,
+    failure,
+    lastSuccess,
+  ];
 }
 
 // ─── BLoC ───────────────────────────────────────────────────────────────
 
 @injectable
-class ListingPreviewBloc extends Bloc<ListingPreviewEvent, ListingPreviewState> {
+class ListingPreviewBloc
+    extends Bloc<ListingPreviewEvent, ListingPreviewState> {
   ListingPreviewBloc(
     this._loadPreview,
     this._approveListing,
@@ -131,9 +136,7 @@ class ListingPreviewBloc extends Bloc<ListingPreviewEvent, ListingPreviewState> 
     Emitter<ListingPreviewState> emit,
   ) async {
     _currentListingId = event.listingId;
-    emit(
-      const ListingPreviewState(isLoading: true),
-    );
+    emit(const ListingPreviewState(isLoading: true));
     final result = await _loadPreview.call(event.listingId);
     switch (result) {
       case Success<ListingPreview>(:final value):
@@ -160,12 +163,7 @@ class ListingPreviewBloc extends Bloc<ListingPreviewEvent, ListingPreviewState> 
           ),
         );
       case FailureResult<ApproveResult>(:final failure):
-        emit(
-          state.copyWith(
-            isMutatorInFlight: false,
-            failure: failure,
-          ),
-        );
+        emit(state.copyWith(isMutatorInFlight: false, failure: failure));
     }
   }
 
@@ -190,12 +188,7 @@ class ListingPreviewBloc extends Bloc<ListingPreviewEvent, ListingPreviewState> 
           ),
         );
       case FailureResult<RejectResult>(:final failure):
-        emit(
-          state.copyWith(
-            isMutatorInFlight: false,
-            failure: failure,
-          ),
-        );
+        emit(state.copyWith(isMutatorInFlight: false, failure: failure));
     }
   }
 }

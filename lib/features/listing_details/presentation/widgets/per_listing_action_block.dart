@@ -28,30 +28,24 @@ class PerListingActionBlock extends StatelessWidget {
         _ActionButton(
           icon: Icons.favorite_border,
           label: l10n.cta_favorite,
-          onPressed: () => _showComingSoon(
-            context,
-            l10n.action_favorite_coming_soon,
-          ),
+          onPressed: () =>
+              _showComingSoon(context, l10n.action_favorite_coming_soon),
         ),
         const SizedBox(width: AppSpacing.sm),
         // Share CTA
         _ActionButton(
           icon: Icons.share_outlined,
           label: l10n.cta_share,
-          onPressed: () => _showComingSoon(
-            context,
-            l10n.action_share_coming_soon,
-          ),
+          onPressed: () =>
+              _showComingSoon(context, l10n.action_share_coming_soon),
         ),
         const SizedBox(width: AppSpacing.sm),
         // Report CTA
         _ActionButton(
           icon: Icons.flag_outlined,
           label: l10n.cta_report,
-          onPressed: () => _showComingSoon(
-            context,
-            l10n.action_report_coming_soon,
-          ),
+          onPressed: () =>
+              _showComingSoon(context, l10n.action_report_coming_soon),
         ),
       ],
     );

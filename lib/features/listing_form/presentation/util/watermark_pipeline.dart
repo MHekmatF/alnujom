@@ -25,7 +25,8 @@ class UnsupportedFormatException implements Exception {
   const UnsupportedFormatException();
 
   @override
-  String toString() => 'UnsupportedFormatException: format not in Q4=A accept set';
+  String toString() =>
+      'UnsupportedFormatException: format not in Q4=A accept set';
 }
 
 /// Thrown when the source image header indicates dimensions exceeding the
@@ -47,7 +48,8 @@ class WatermarkAssetMissingException implements Exception {
   const WatermarkAssetMissingException();
 
   @override
-  String toString() => 'WatermarkAssetMissingException: watermark asset missing or corrupt';
+  String toString() =>
+      'WatermarkAssetMissingException: watermark asset missing or corrupt';
 }
 
 // ---------------------------------------------------------------------------
@@ -135,8 +137,9 @@ Future<Uint8List> processImageForUpload({
   // -------------------------------------------------------------------------
   // (d) DOWNSCALE — long edge ≤ 1920 px (skip if already within bounds)
   // -------------------------------------------------------------------------
-  final longEdge =
-      decoded.width > decoded.height ? decoded.width : decoded.height;
+  final longEdge = decoded.width > decoded.height
+      ? decoded.width
+      : decoded.height;
   if (longEdge > 1920) {
     final scale = 1920.0 / longEdge;
     decoded = img.copyResize(
@@ -155,15 +158,18 @@ Future<Uint8List> processImageForUpload({
   final watermark = img.decodePng(watermarkAssetBytes);
   if (watermark == null) throw const WatermarkAssetMissingException();
 
-  final finalLong =
-      decoded.width > decoded.height ? decoded.width : decoded.height;
-  final finalShort =
-      decoded.width > decoded.height ? decoded.height : decoded.width;
+  final finalLong = decoded.width > decoded.height
+      ? decoded.width
+      : decoded.height;
+  final finalShort = decoded.width > decoded.height
+      ? decoded.height
+      : decoded.width;
 
   // R-23 aspect-ratio cap: min(18% of long edge, 50% of short edge)
-  final wmTargetWidth = (0.18 * finalLong)
-      .round()
-      .clamp(1, (0.50 * finalShort).round());
+  final wmTargetWidth = (0.18 * finalLong).round().clamp(
+    1,
+    (0.50 * finalShort).round(),
+  );
   final wmScale = wmTargetWidth / watermark.width;
   final scaledWatermark = img.copyResize(
     watermark,

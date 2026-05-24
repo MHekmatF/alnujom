@@ -102,12 +102,7 @@ class PendingQueueBloc extends Bloc<PendingQueueEvent, PendingQueueState> {
     PendingQueueLoadFirstPage event,
     Emitter<PendingQueueState> emit,
   ) async {
-    emit(
-      state.copyWith(
-        isLoadingFirstPage: true,
-        clearFailure: true,
-      ),
-    );
+    emit(state.copyWith(isLoadingFirstPage: true, clearFailure: true));
     final result = await _loadPendingQueue.call(limit: _pageSize);
     _emitFirstPageResult(result, emit);
   }
@@ -116,12 +111,7 @@ class PendingQueueBloc extends Bloc<PendingQueueEvent, PendingQueueState> {
     PendingQueueRefresh event,
     Emitter<PendingQueueState> emit,
   ) async {
-    emit(
-      state.copyWith(
-        isLoadingFirstPage: true,
-        clearFailure: true,
-      ),
-    );
+    emit(state.copyWith(isLoadingFirstPage: true, clearFailure: true));
     final result = await _loadPendingQueue.call(limit: _pageSize);
     _emitFirstPageResult(result, emit);
   }
@@ -147,12 +137,7 @@ class PendingQueueBloc extends Bloc<PendingQueueEvent, PendingQueueState> {
           ),
         );
       case FailureResult<List<PendingListingSummary>>(:final failure):
-        emit(
-          state.copyWith(
-            isLoadingFirstPage: false,
-            failure: failure,
-          ),
-        );
+        emit(state.copyWith(isLoadingFirstPage: false, failure: failure));
     }
   }
 
@@ -189,12 +174,7 @@ class PendingQueueBloc extends Bloc<PendingQueueEvent, PendingQueueState> {
           ),
         );
       case FailureResult<List<PendingListingSummary>>(:final failure):
-        emit(
-          state.copyWith(
-            isLoadingNextPage: false,
-            failure: failure,
-          ),
-        );
+        emit(state.copyWith(isLoadingNextPage: false, failure: failure));
     }
   }
 }

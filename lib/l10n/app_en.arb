@@ -713,5 +713,54 @@
   "image_unavailable": "Image unavailable",
 
   "home_empty_publish_first_listing": "Publish your first listing",
-  "home_empty_sign_in_to_publish": "Sign in to publish"
+  "home_empty_sign_in_to_publish": "Sign in to publish",
+
+  "search_placeholder": "Search for apartments, villas, lands...",
+  "search_filters_button": "Filters",
+  "search_sort_label": "Sort:",
+  "search_results_count": "{count, plural, one{{count} result} other{{count} results}}",
+  "@search_results_count": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "search_sort_newest": "Newest",
+  "search_sort_price_asc": "Price: Low to High",
+  "search_sort_price_desc": "Price: High to Low",
+
+  "search_filter_sheet_title": "Filters",
+  "search_filter_apply": "Apply",
+  "search_filter_reset": "Reset",
+
+  "search_filter_purpose_label": "Purpose",
+  "search_filter_property_type_label": "Property Type",
+  "search_filter_location_label": "Location",
+  "search_filter_governorate_hint": "Select governorate",
+  "search_filter_city_hint": "Select city",
+  "search_filter_area_hint": "Select area",
+  "search_filter_price_range_label": "Price Range",
+  "search_filter_price_min_hint": "Min price",
+  "search_filter_price_max_hint": "Max price",
+  "search_filter_price_currency_label": "Currency",
+  "search_filter_price_min_max_error": "Min price must be less than max",
+  "search_filter_price_no_exchange_rate": "Exchange rate unavailable for this currency",
+  "search_filter_rooms_label": "Bedrooms",
+  "search_filter_rooms_exactly": "Exactly",
+  "search_filter_rooms_at_least": "At least",
+  "search_filter_bathrooms_label": "Bathrooms",
+  "search_filter_area_size_label": "Area size (m²)",
+
+  "search_empty_title": "No results found",
+  "search_empty_subtitle": "Try different keywords or filters",
+  "search_empty_clear_filters": "Clear all filters",
+  "search_arabic_hint": "Arabic search matches exact word forms. Try: {suggestion}",
+  "@search_arabic_hint": {
+    "placeholders": {
+      "suggestion": { "type": "String" }
+    }
+  },
+  "search_loading": "Searching...",
+  "search_error_message": "An error occurred while searching",
+  "search_error_retry": "Retry"
 }

@@ -52,8 +52,7 @@ class _RejectReasonDialogState extends State<RejectReasonDialog> {
     setState(() {});
   }
 
-  bool get _isOtherSelected =>
-      _selectedPreset == RejectionReason.other;
+  bool get _isOtherSelected => _selectedPreset == RejectionReason.other;
 
   bool get _isConfirmEnabled {
     if (_selectedPreset == null) return false;
@@ -133,10 +132,7 @@ class _RejectReasonDialogState extends State<RejectReasonDialog> {
               ),
             ),
             const SizedBox(height: AppSpacing.md),
-            Text(
-              detailLabel,
-              style: theme.textTheme.labelLarge,
-            ),
+            Text(detailLabel, style: theme.textTheme.labelLarge),
             if (detailHint != null) ...[
               const SizedBox(height: AppSpacing.xs),
               Text(
@@ -169,10 +165,7 @@ class _RejectReasonDialogState extends State<RejectReasonDialog> {
         ),
       ),
       actions: [
-        TextButton(
-          onPressed: _onCancel,
-          child: Text(l10n.rejectDialogCancel),
-        ),
+        TextButton(onPressed: _onCancel, child: Text(l10n.rejectDialogCancel)),
         FilledButton(
           onPressed: _isConfirmEnabled ? _onConfirm : null,
           child: Text(l10n.rejectDialogConfirm),

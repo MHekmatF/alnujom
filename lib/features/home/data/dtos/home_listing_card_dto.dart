@@ -113,14 +113,10 @@ class HomeListingCardDto {
       mainImageUrl: null, // resolved by the datasource after fromJson.
       governorate: govMap == null
           ? null
-          : HomeListingLocationNameDto.fromDisplayName(
-              govMap['display_name'],
-            ),
+          : HomeListingLocationNameDto.fromDisplayName(govMap['display_name']),
       city: cityMap == null
           ? null
-          : HomeListingLocationNameDto.fromDisplayName(
-              cityMap['display_name'],
-            ),
+          : HomeListingLocationNameDto.fromDisplayName(cityMap['display_name']),
     );
   }
 
@@ -158,8 +154,9 @@ class HomeListingCardDto {
       title: title,
       propertyType: PropertyTypeDb.fromDbValue(propertyType),
       purpose: ListingPurposeDb.fromDbValue(purpose),
-      governorateNameLocalized:
-          governorate == null ? '—' : governorate!.localizedName(locale),
+      governorateNameLocalized: governorate == null
+          ? '—'
+          : governorate!.localizedName(locale),
       cityNameLocalized: city == null ? '—' : city!.localizedName(locale),
       primaryPrice: ListingPrice(
         id: '$id:primary',
@@ -177,10 +174,7 @@ class HomeListingCardDto {
 }
 
 class HomeListingPriceDto {
-  const HomeListingPriceDto({
-    required this.currencyCode,
-    required this.amount,
-  });
+  const HomeListingPriceDto({required this.currencyCode, required this.amount});
 
   final String currencyCode;
   final Decimal amount;
@@ -197,9 +191,7 @@ class HomeListingMediaDto {
 }
 
 class HomeListingLocationNameDto {
-  const HomeListingLocationNameDto({
-    required this.displayName,
-  });
+  const HomeListingLocationNameDto({required this.displayName});
 
   /// Bilingual `{"ar": "...", "en": "..."}` map per Phase 8 schema.
   final Map<String, String> displayName;

@@ -70,10 +70,7 @@ class _ListingPreviewView extends StatelessWidget {
     );
   }
 
-  void _handleStateSideEffects(
-    BuildContext ctx,
-    ListingPreviewState state,
-  ) {
+  void _handleStateSideEffects(BuildContext ctx, ListingPreviewState state) {
     final l10n = AppLocalizations.of(ctx)!;
     if (state.lastSuccess != null) {
       final msg = state.lastSuccess is RejectSuccess
@@ -141,8 +138,10 @@ class _PreviewBody extends StatelessWidget {
         Builder(
           builder: (ctx) {
             if (preview.prices.isEmpty) return const SizedBox.shrink();
-            final primary =
-                preview.prices.firstWhere((p) => p.isPrimary, orElse: () => preview.prices.first);
+            final primary = preview.prices.firstWhere(
+              (p) => p.isPrimary,
+              orElse: () => preview.prices.first,
+            );
             final currency = _stubCurrency(primary.currencyCode);
             return ListingPriceBlock(
               prices: preview.prices,
@@ -233,9 +232,7 @@ class _StickyBottomBar extends StatelessWidget {
           children: [
             Expanded(
               child: OutlinedButton(
-                onPressed: disabled
-                    ? null
-                    : () => _onRejectPressed(context),
+                onPressed: disabled ? null : () => _onRejectPressed(context),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: theme.colorScheme.error,
                 ),
@@ -245,9 +242,7 @@ class _StickyBottomBar extends StatelessWidget {
             const SizedBox(width: AppSpacing.lg),
             Expanded(
               child: FilledButton(
-                onPressed: disabled
-                    ? null
-                    : () => _onApprovePressed(context),
+                onPressed: disabled ? null : () => _onApprovePressed(context),
                 child: Text(l10n.adminPreviewCtaApprove),
               ),
             ),
@@ -261,8 +256,8 @@ class _StickyBottomBar extends StatelessWidget {
     final confirmed = await ApproveConfirmationDialog.show(context);
     if (confirmed == true && context.mounted) {
       context.read<ListingPreviewBloc>().add(
-            const ListingPreviewApprovePressed(),
-          );
+        const ListingPreviewApprovePressed(),
+      );
     }
   }
 
@@ -270,11 +265,11 @@ class _StickyBottomBar extends StatelessWidget {
     final result = await RejectReasonDialog.show(context);
     if (result != null && context.mounted) {
       context.read<ListingPreviewBloc>().add(
-            ListingPreviewRejectPressed(
-              preset: result.preset,
-              detail: result.detail,
-            ),
-          );
+        ListingPreviewRejectPressed(
+          preset: result.preset,
+          detail: result.detail,
+        ),
+      );
     }
   }
 }

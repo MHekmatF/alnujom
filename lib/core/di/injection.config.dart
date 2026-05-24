@@ -215,6 +215,15 @@ import '../../features/publisher_dashboard/presentation/bloc/moderation_history_
     as _i711;
 import '../../features/publisher_dashboard/presentation/bloc/my_listings_bloc.dart'
     as _i417;
+import '../../features/search/data/datasources/supabase_search_datasource.dart'
+    as _i713;
+import '../../features/search/data/repositories/search_repository_impl.dart'
+    as _i1017;
+import '../../features/search/domain/repositories/search_repository.dart'
+    as _i357;
+import '../../features/search/domain/usecases/search_listings_usecase.dart'
+    as _i190;
+import '../../features/search/presentation/bloc/search_bloc.dart' as _i552;
 import '../../features/super_admin/data/datasources/supabase_role_catalog_datasource.dart'
     as _i1064;
 import '../../features/super_admin/data/datasources/supabase_user_search_datasource.dart'
@@ -330,6 +339,9 @@ _i174.GetIt $initGetIt(
   gh.factory<_i1006.SupabaseListingDetailsDatasource>(
     () => _i1006.SupabaseListingDetailsDatasource(gh<_i454.SupabaseClient>()),
   );
+  gh.factory<_i713.SupabaseSearchDatasource>(
+    () => _i713.SupabaseSearchDatasource(gh<_i454.SupabaseClient>()),
+  );
   gh.lazySingleton<_i155.ListingReviewRepository>(
     () => _i1072.ListingReviewRepositoryImpl(
       gh<_i530.SupabaseListingReviewDatasource>(),
@@ -378,6 +390,9 @@ _i174.GetIt $initGetIt(
       gh<_i354.AppLogger>(),
     ),
   );
+  gh.factory<_i357.SearchRepository>(
+    () => _i1017.SearchRepositoryImpl(gh<_i713.SupabaseSearchDatasource>()),
+  );
   gh.lazySingleton<_i753.PreferencesStore>(
     () => _i190.SecurePreferencesStore(gh<_i354.AppLogger>()),
   );
@@ -402,6 +417,9 @@ _i174.GetIt $initGetIt(
   );
   gh.lazySingleton<_i752.SupabaseClientWrapper>(
     () => _i748.SupabaseClientWrapperImpl(gh<_i354.AppLogger>()),
+  );
+  gh.factory<_i190.SearchListingsUseCase>(
+    () => _i190.SearchListingsUseCase(gh<_i357.SearchRepository>()),
   );
   gh.lazySingleton<_i430.OnboardingRepository>(
     () => _i452.OnboardingRepositoryImpl(gh<_i144.OnboardingSeenStorage>()),
@@ -616,6 +634,9 @@ _i174.GetIt $initGetIt(
       gh<_i354.AppLogger>(),
       initialLocale,
     ),
+  );
+  gh.factory<_i552.SearchBloc>(
+    () => _i552.SearchBloc(gh<_i190.SearchListingsUseCase>()),
   );
   gh.factory<_i778.ListingPreviewBloc>(
     () => _i778.ListingPreviewBloc(

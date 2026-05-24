@@ -83,12 +83,10 @@ class _GalleryItem extends StatelessWidget {
         child: CachedNetworkImage(
           imageUrl: url,
           fit: BoxFit.cover,
-          placeholder: (_, __) => Container(
-            color: theme.colorScheme.surfaceContainerHigh,
-          ),
-          errorWidget: (_, __, ___) => const _MediaPlaceholder(
-            icon: Icons.broken_image_outlined,
-          ),
+          placeholder: (_, __) =>
+              Container(color: theme.colorScheme.surfaceContainerHigh),
+          errorWidget: (_, __, ___) =>
+              const _MediaPlaceholder(icon: Icons.broken_image_outlined),
         ),
       );
     }

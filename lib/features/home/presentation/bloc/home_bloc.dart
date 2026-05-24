@@ -35,26 +35,22 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     HomeFeedLoadRequested event,
     Emitter<HomeState> emit,
   ) async {
-    emit(state.copyWith(
-      status: HomeFeedStatus.loading,
-      failure: null,
-    ));
+    emit(state.copyWith(status: HomeFeedStatus.loading, failure: null));
     final result = await _loadHomeFeed(locale: event.locale);
     switch (result) {
       case Success(:final value):
         final endReached = value.length < _pageSize;
-        emit(state.copyWith(
-          status: HomeFeedStatus.success,
-          listings: value,
-          cursor: value.isEmpty ? null : Cursor.fromLastCard(value.last),
-          endReached: endReached,
-          failure: null,
-        ));
+        emit(
+          state.copyWith(
+            status: HomeFeedStatus.success,
+            listings: value,
+            cursor: value.isEmpty ? null : Cursor.fromLastCard(value.last),
+            endReached: endReached,
+            failure: null,
+          ),
+        );
       case FailureResult(:final failure):
-        emit(state.copyWith(
-          status: HomeFeedStatus.error,
-          failure: failure,
-        ));
+        emit(state.copyWith(status: HomeFeedStatus.error, failure: failure));
     }
   }
 
@@ -79,25 +75,24 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       case Success(:final value):
         final newListings = [...state.listings, ...value];
         final endReached = value.length < _pageSize;
-        emit(state.copyWith(
-          status: HomeFeedStatus.success,
-          listings: newListings,
-          cursor: newListings.isEmpty
-              ? null
-              : Cursor.fromLastCard(newListings.last),
-          endReached: endReached,
-          failure: null,
-        ));
+        emit(
+          state.copyWith(
+            status: HomeFeedStatus.success,
+            listings: newListings,
+            cursor: newListings.isEmpty
+                ? null
+                : Cursor.fromLastCard(newListings.last),
+            endReached: endReached,
+            failure: null,
+          ),
+        );
       case FailureResult(:final failure):
         // Surface the failure but preserve the existing list so the UI can
         // show a non-blocking error banner + retry without losing scroll
         // position. The page renders `loadingMore`-state spinner or the
         // sentinel based on `endReached`; for next-page failures we revert
         // to `success` and expose the failure for an inline toast.
-        emit(state.copyWith(
-          status: HomeFeedStatus.success,
-          failure: failure,
-        ));
+        emit(state.copyWith(status: HomeFeedStatus.success, failure: failure));
     }
   }
 
@@ -111,18 +106,17 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     switch (result) {
       case Success(:final value):
         final endReached = value.length < _pageSize;
-        emit(state.copyWith(
-          status: HomeFeedStatus.success,
-          listings: value,
-          cursor: value.isEmpty ? null : Cursor.fromLastCard(value.last),
-          endReached: endReached,
-          failure: null,
-        ));
+        emit(
+          state.copyWith(
+            status: HomeFeedStatus.success,
+            listings: value,
+            cursor: value.isEmpty ? null : Cursor.fromLastCard(value.last),
+            endReached: endReached,
+            failure: null,
+          ),
+        );
       case FailureResult(:final failure):
-        emit(state.copyWith(
-          status: HomeFeedStatus.success,
-          failure: failure,
-        ));
+        emit(state.copyWith(status: HomeFeedStatus.success, failure: failure));
     }
   }
 }

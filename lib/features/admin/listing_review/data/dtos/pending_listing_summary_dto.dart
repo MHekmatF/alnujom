@@ -95,9 +95,7 @@ class PendingListingSummaryDto {
         }
       }
       // Fallback: if no row flagged is_primary (defensive), pick the first.
-      primaryPriceRow ??= Map<String, dynamic>.from(
-        pricesRaw.first as Map,
-      );
+      primaryPriceRow ??= Map<String, dynamic>.from(pricesRaw.first as Map);
     }
 
     // media: array; pick the row flagged is_main=true. If none flagged,
@@ -132,8 +130,7 @@ class PendingListingSummaryDto {
       cityDisplayName: _parseLocalizedMap(city?['display_name']),
       areaDisplayName: _parseLocalizedMap(area?['display_name']),
       primaryPriceAmount: _decimalOrNull(primaryPriceRow?['amount']),
-      primaryPriceCurrencyCode:
-          primaryPriceRow?['currency_code'] as String?,
+      primaryPriceCurrencyCode: primaryPriceRow?['currency_code'] as String?,
       mainImageStoragePath: mainImagePath,
     );
   }
@@ -154,7 +151,7 @@ class PendingListingSummaryDto {
         (publisherFullName?.trim().isNotEmpty == true
             ? publisherFullName!.trim()
             : publisherPhone?.trim()) ??
-            '—';
+        '—';
 
     Money? money;
     if (primaryPriceAmount != null && primaryPriceCurrencyCode != null) {
@@ -190,7 +187,5 @@ Decimal? _decimalOrNull(Object? raw) {
 
 Map<String, String>? _parseLocalizedMap(Object? raw) {
   if (raw is! Map) return null;
-  return raw.map(
-    (k, v) => MapEntry(k.toString(), v?.toString() ?? ''),
-  );
+  return raw.map((k, v) => MapEntry(k.toString(), v?.toString() ?? ''));
 }

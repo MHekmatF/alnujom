@@ -73,7 +73,9 @@ class MediaThumbnail extends StatelessWidget {
           fit: StackFit.expand,
           children: [
             _buildPreview(context),
-            if (!_isGhost && media!.isMain && media!.kind == ListingMediaKind.image)
+            if (!_isGhost &&
+                media!.isMain &&
+                media!.kind == ListingMediaKind.image)
               Positioned(
                 top: AppSpacing.sm,
                 right: AppSpacing.sm,

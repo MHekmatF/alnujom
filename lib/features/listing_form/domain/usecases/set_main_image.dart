@@ -12,10 +12,7 @@ class SetMainImage {
 
   final ListingsRepository _repository;
 
-  Future<void> call({
-    required String listingId,
-    required String mediaId,
-  }) {
+  Future<void> call({required String listingId, required String mediaId}) {
     return _repository.setMainImage(listingId: listingId, mediaId: mediaId);
   }
 }

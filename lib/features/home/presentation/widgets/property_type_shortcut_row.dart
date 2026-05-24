@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../listing_form/domain/entities/listing.dart';
 
-/// Phase 13 — Q1=A stubbed horizontal row of property-type shortcut chips
-/// per contracts/phase13-home-page-composition.md §3.
-///
-/// Eight chips per Phase 10's `PropertyType` enum: apartment, villa, land,
-/// shop, office, farm, warehouse, other. Each chip tap shows a 3-second
-/// floating snackbar with `home_property_shortcut_coming_soon` parameterized
-/// over the tapped type's localized label. NO navigation — the search +
-/// filter surface ships in Phase 14.
+/// Phase 14 — property-type shortcut chips; each chip navigates to SearchPage
+/// pre-filtered by that type (SC-011 entry point 2, GoRouterState.extra = type).
 class PropertyTypeShortcutRow extends StatelessWidget {
   const PropertyTypeShortcutRow({super.key});
 
@@ -47,20 +43,9 @@ class PropertyTypeShortcutRow extends StatelessWidget {
             avatar: Icon(_icon(type), size: 18),
             label: Text(label),
             backgroundColor: theme.colorScheme.secondaryContainer,
-            onPressed: () => _handleTap(context, l10n, label),
+            onPressed: () => context.go(AppRoutes.search, extra: type),
           );
         },
-      ),
-    );
-  }
-
-  void _handleTap(BuildContext context, AppLocalizations l10n, String typeLabel) {
-    FocusScope.of(context).unfocus();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(l10n.home_property_shortcut_coming_soon(typeLabel)),
-        duration: const Duration(seconds: 3),
-        behavior: SnackBarBehavior.floating,
       ),
     );
   }

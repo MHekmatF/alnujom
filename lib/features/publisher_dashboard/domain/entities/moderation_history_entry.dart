@@ -46,11 +46,11 @@ class ModerationHistoryEntry extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        previousStatus,
-        newStatus,
-        changedAt,
-        rejectionPreset,
-        rejectionDetail,
-      ];
+    id,
+    previousStatus,
+    newStatus,
+    changedAt,
+    rejectionPreset,
+    rejectionDetail,
+  ];
 }

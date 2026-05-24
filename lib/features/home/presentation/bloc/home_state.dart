@@ -59,8 +59,9 @@ class HomeState extends Equatable {
       status: status ?? this.status,
       listings: listings ?? this.listings,
       cursor: identical(cursor, _sentinel) ? this.cursor : cursor as Cursor?,
-      failure:
-          identical(failure, _sentinel) ? this.failure : failure as Failure?,
+      failure: identical(failure, _sentinel)
+          ? this.failure
+          : failure as Failure?,
       endReached: endReached ?? this.endReached,
     );
   }

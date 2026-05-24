@@ -155,10 +155,7 @@ class SupabaseListingReviewDatasource {
       'approve_listing',
       body: <String, dynamic>{'listing_id': listingId},
     );
-    return EdgeFunctionResponse(
-      status: response.status,
-      data: response.data,
-    );
+    return EdgeFunctionResponse(status: response.status, data: response.data);
   }
 
   // ─── rejectListing ─────────────────────────────────────────────────────
@@ -187,10 +184,7 @@ class SupabaseListingReviewDatasource {
       'reject_listing',
       body: body,
     );
-    return EdgeFunctionResponse(
-      status: response.status,
-      data: response.data,
-    );
+    return EdgeFunctionResponse(status: response.status, data: response.data);
   }
 }
 

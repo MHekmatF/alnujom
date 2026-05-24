@@ -57,15 +57,15 @@ class HomeListingCard extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        title,
-        propertyType,
-        purpose,
-        governorateNameLocalized,
-        cityNameLocalized,
-        primaryPrice,
-        mainImageStoragePath,
-        mainImageUrl,
-        publishedAt,
-      ];
+    id,
+    title,
+    propertyType,
+    purpose,
+    governorateNameLocalized,
+    cityNameLocalized,
+    primaryPrice,
+    mainImageStoragePath,
+    mainImageUrl,
+    publishedAt,
+  ];
 }

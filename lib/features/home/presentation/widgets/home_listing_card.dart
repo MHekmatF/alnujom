@@ -71,11 +71,7 @@ class HomeListingCardTile extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _Hero(
-              imageUrl: card.mainImageUrl,
-              l10n: l10n,
-              scheme: scheme,
-            ),
+            _Hero(imageUrl: card.mainImageUrl, l10n: l10n, scheme: scheme),
             Padding(
               padding: const EdgeInsetsDirectional.all(AppSpacing.md),
               child: Column(
@@ -92,7 +88,9 @@ class HomeListingCardTile extends StatelessWidget {
                     spacing: AppSpacing.xs,
                     runSpacing: AppSpacing.xs,
                     children: [
-                      _Badge(label: _propertyTypeLabel(l10n, card.propertyType)),
+                      _Badge(
+                        label: _propertyTypeLabel(l10n, card.propertyType),
+                      ),
                       _Badge(label: _purposeLabel(l10n, card.purpose)),
                     ],
                   ),
@@ -235,9 +233,8 @@ class _Hero extends StatelessWidget {
       child: CachedNetworkImage(
         imageUrl: imageUrl!,
         fit: BoxFit.cover,
-        placeholder: (context, _) => ColoredBox(
-          color: scheme.surfaceContainerHighest,
-        ),
+        placeholder: (context, _) =>
+            ColoredBox(color: scheme.surfaceContainerHighest),
         errorWidget: (context, _, __) => ColoredBox(
           color: scheme.surfaceContainerHighest,
           child: Center(

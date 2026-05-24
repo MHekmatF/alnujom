@@ -37,23 +37,24 @@ final class PermissionDeniedFailure extends Failure {
 
 final class InvalidStatusTransitionFailure extends Failure {
   const InvalidStatusTransitionFailure({required this.currentStatus})
-      : super('Invalid status transition.');
+    : super('Invalid status transition.');
   final String currentStatus;
 }
 
 final class AlreadyActedOnFailure extends Failure {
   const AlreadyActedOnFailure({required this.currentStatus})
-      : super('Listing has already been acted on.');
+    : super('Listing has already been acted on.');
   final String currentStatus;
 }
 
 final class InvalidReasonPresetFailure extends Failure {
-  const InvalidReasonPresetFailure() : super('Invalid rejection reason preset.');
+  const InvalidReasonPresetFailure()
+    : super('Invalid rejection reason preset.');
 }
 
 final class ReasonDetailTooLongFailure extends Failure {
   const ReasonDetailTooLongFailure({required this.max})
-      : super('Rejection reason detail exceeds maximum length.');
+    : super('Rejection reason detail exceeds maximum length.');
   final int max;
 }
 

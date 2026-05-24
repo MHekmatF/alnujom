@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
 
-/// Phase 13 — Q1=A stubbed hero search bar per contracts/
-/// phase13-home-page-composition.md §2 + contracts/phase13-cta-stub-treatment.md.
-///
-/// Tap behavior: dismiss the keyboard if open, then show a 3-second floating
-/// snackbar with the localized `home_search_coming_soon` message. NO
-/// navigation — the search surface ships in Phase 14.
+/// Phase 14 — hero search bar; tapping navigates to SearchPage (SC-011).
 class HeroSearchBar extends StatelessWidget {
   const HeroSearchBar({super.key});
 
@@ -29,7 +26,7 @@ class HeroSearchBar extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadii.md),
         child: InkWell(
           borderRadius: BorderRadius.circular(AppRadii.md),
-          onTap: () => _handleTap(context, l10n),
+          onTap: () => context.go(AppRoutes.search),
           child: Padding(
             padding: const EdgeInsetsDirectional.symmetric(
               horizontal: AppSpacing.md,
@@ -37,10 +34,7 @@ class HeroSearchBar extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(
-                  Icons.search,
-                  color: scheme.onSurfaceVariant,
-                ),
+                Icon(Icons.search, color: scheme.onSurfaceVariant),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
@@ -54,17 +48,6 @@ class HeroSearchBar extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  void _handleTap(BuildContext context, AppLocalizations l10n) {
-    FocusScope.of(context).unfocus();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(l10n.home_search_coming_soon),
-        duration: const Duration(seconds: 3),
-        behavior: SnackBarBehavior.floating,
       ),
     );
   }

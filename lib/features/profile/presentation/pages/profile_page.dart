@@ -138,10 +138,7 @@ class _ProfileView extends StatelessWidget {
                 const Divider(height: AppSpacing.xl),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: Icon(
-                    Icons.logout,
-                    color: theme.colorScheme.error,
-                  ),
+                  leading: Icon(Icons.logout, color: theme.colorScheme.error),
                   title: Text(
                     l10n.sign_out,
                     style: TextStyle(color: theme.colorScheme.error),

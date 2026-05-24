@@ -18,8 +18,8 @@ class Cursor extends Equatable {
   /// currently-loaded page. The next page query asks PostgREST for rows
   /// strictly less than `(publishedAt, id)` in lexicographic order.
   Cursor.fromLastCard(HomeListingCard last)
-      : publishedAt = last.publishedAt,
-        id = last.id;
+    : publishedAt = last.publishedAt,
+      id = last.id;
 
   final DateTime publishedAt;
   final String id;

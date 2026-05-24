@@ -347,8 +347,7 @@ class _RejectionBannerLoaderState extends State<_RejectionBannerLoader> {
   void didUpdateWidget(_RejectionBannerLoader oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.listingId != widget.listingId) {
-      _future =
-          getIt<LoadMostRecentRejectionUseCase>().call(widget.listingId);
+      _future = getIt<LoadMostRecentRejectionUseCase>().call(widget.listingId);
     }
   }
 

@@ -63,9 +63,7 @@ class PendingQueueCard extends StatelessWidget {
                       spacing: AppSpacing.xs,
                       runSpacing: AppSpacing.xs,
                       children: [
-                        _MiniChip(
-                          label: _purposeLabel(l10n, summary.purpose),
-                        ),
+                        _MiniChip(label: _purposeLabel(l10n, summary.purpose)),
                         _MiniChip(
                           label: _propertyTypeLabel(l10n, summary.propertyType),
                         ),
