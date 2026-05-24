@@ -1,11 +1,11 @@
-# Implementation Plan: Search & Filters
+﻿# Implementation Plan: Search & Filters
 
 **Branch**: `014-search-filters` | **Date**: 2026-05-24 | **Spec**: [spec.md](spec.md)
 **Input**: Feature specification from `specs/014-search-filters/spec.md`
 
 ## Summary
 
-Phase 14 introduces the **search and filter surface** — a dedicated `/search` route and `SearchPage` that replaces Phase 13's Coming-soon snackbar stubs on the hero search bar and the eight property-type shortcut chips. The phase ships: **two new SQL migrations** (`_listings_search_vector.sql` adding a `GENERATED ALWAYS AS STORED` `tsvector` column + GIN index on `public.listings`, and `_create_v_listings_public.sql` adding a convenience view); **one new SQL RPC** (`search_listings(...)`) that composes full-text matching, nine facet-filter dimensions, currency-converted price-range filtering, dual-mode room/bathroom counting ("Exactly N" / "At least N"), and three sort orders into a single paginated query; **one new full-featured Flutter feature folder** at `lib/features/search/` with a three-layer Clean Architecture structure (data + domain + presentation) housing `SearchBloc`, `SearchPage`, `SearchFilterSheet` (modal bottom sheet), `InlineSortControl`, and `SearchResultCard`; **updates to two Phase 13 stub widgets** (`hero_search_bar.dart` and `property_type_shortcut_row.dart`) replacing their snackbar-only tap handlers with real navigation; and **an ~30-key ARB delta** across both locale files. Zero new pubspec packages are required — all needed packages (`supabase_flutter`, `flutter_bloc`, `go_router`, `get_it` + `injectable`, `intl`, `flutter_localizations`, `cached_network_image`) are already in `pubspec.yaml`.
+Phase 14 introduces the **search and filter surface** — a dedicated `/search` route and `SearchPage` that replaces Phase 13's Coming-soon snackbar stubs on the hero search bar and the eight property-type shortcut chips. The phase ships: **two new SQL migrations** (`_listings_search_vector.sql` adding a `GENERATED ALWAYS AS STORED` `tsvector` column + GIN index on `public.listings`, and `_create_v_listings_public.sql` adding a convenience view); **one new SQL RPC** (`search_listings(...)`) that composes full-text matching, nine facet-filter dimensions, currency-converted price-range filtering, dual-mode room/bathroom counting ("Exactly N" / "At least N"), and three sort orders into a single paginated query; **one new full-featured Flutter feature folder** at `lib/features/search/` with a three-layer Clean Architecture structure (data + domain + presentation) housing `SearchBloc`, `SearchPage`, `SearchFilterSheet` (modal bottom sheet), `InlineSortControl`, and `SearchResultCard`; **updates to two Phase 13 stub widgets** (`hero_search_bar.dart` and `property_type_shortcut_row.dart`) replacing their snackbar-only tap handlers with real navigation; and **an 34-key ARB delta** across both locale files. Zero new pubspec packages are required — all needed packages (`supabase_flutter`, `flutter_bloc`, `go_router`, `get_it` + `injectable`, `intl`, `flutter_localizations`, `cached_network_image`) are already in `pubspec.yaml`.
 
 **Technical approach**: Phase 14 uses a **SQL RPC** (`search_listings`) rather than raw PostgREST filter chains for the search query, because composing tsvector full-text search, nine optional facet dimensions, price-range currency conversion (client-side rate fetch), and two cursor shapes (timestamp-based for "newest" sort, price-based for price sorts) into a PostgREST URL would be unreadable and fragile. The RPC is `SECURITY DEFINER` with an explicit `status = 'approved'` + publish-window guard mirroring the Phase 10 RLS posture; Constitution III is honored by the RPC's own filter rather than relying solely on RLS, which is acceptable for a read-only function per the constitution's "Edge Functions or RPCs that re-check permissions server-side" provision. **Filter state persistence** is achieved by keeping the `SearchBloc` alive inside the route's widget sub-tree (not disposing it on pop) so back-navigation restores state from the live BLoC instance — no explicit `PageStorageKey` or `RestorableValue` needed for v1. **Price-range currency conversion** is done client-side: the datasource fetches the latest rate via the existing `latest_rates_for_base` RPC (Phase 9 — `supabase/migrations/20260518120006_create_latest_rates_for_base_rpc.sql`), converts filter bounds to per-currency amounts, and passes them directly to the search RPC. Phase 14 introduces zero new Supabase tables, zero new RLS policies, zero new audit-log call sites, and zero new pubspec packages.
 
@@ -18,7 +18,7 @@ Phase 14 introduces the **search and filter surface** — a dedicated `/search` 
 - `flutter_bloc` — one new `SearchBloc` in `lib/features/search/presentation/bloc/`.
 - `go_router` — one new `/search` route added to `lib/core/routing/app_router.dart`; `GoRouterState.extra` used to pass the optional pre-filter map from home chips.
 - `get_it` + `injectable` — DI registrations for new datasource, repository, use case, bloc; `build_runner` regenerates `injection.config.dart`.
-- `flutter_localizations` + `intl` — `AppLocalizations` already generated; Phase 14 adds ~30 ARB keys and regenerates.
+- `flutter_localizations` + `intl` — `AppLocalizations` already generated; Phase 14 adds 34 ARB keys and regenerates.
 - `cached_network_image` — used by `SearchResultCard` (same pattern as Phase 13's `HomeListingCard` widget).
 - `equatable` — `FilterState`, `SearchResultItem`, `SortOrder` all extend `Equatable`.
 
@@ -56,7 +56,7 @@ Phase 14 introduces the **search and filter surface** — a dedicated `/search` 
 - Two updated Phase 13 stub widgets (`hero_search_bar.dart`, `property_type_shortcut_row.dart`).
 - One updated routing file (`app_router.dart`) — one new `/search` route + `AppRoutes.search` constant.
 - Two updated DI files (`injection.dart` annotations + generated `injection.config.dart`).
-- ~30 new ARB keys in `app_ar.arb` + `app_en.arb` + `app_strings.dart` debug subclass.
+- 34 new ARB keys in `app_ar.arb` + `app_en.arb` + `app_strings.dart` debug subclass.
 - Zero new pubspec packages.
 - Zero new RLS policies.
 - Zero new audit-log call sites.
@@ -74,7 +74,7 @@ Phase 14 introduces the **search and filter surface** — a dedicated `/search` 
 | II. Source-Controlled Backend | **Pass** | All three Phase 14 SQL artifacts are checked-in files under `supabase/migrations/`. Applied via Supabase MCP `apply_migration`. No Studio-only changes. |
 | III. Security-First Supabase (NON-NEGOTIABLE) | **Pass** | The `search_listings` RPC is SECURITY DEFINER with an explicit `status = 'approved'` + publish-window guard — read-only function with no mutation surface. Existing Phase 10 RLS on `public.listings` remains enabled and provides defense-in-depth. No new tables with RLS gaps. |
 | IV. Clean Architecture Flutter | **Pass** | `lib/features/search/` carries the three-layer split. Domain entities and repository interface are Supabase-free per Principle IX. `SearchBloc` owns the page boundary. `SearchFilterSheet` is a stateful widget whose only external coupling is `FilterState` (domain type). |
-| V. Arabic-First Localization | **Pass** | All ~30 new user-visible strings flow through `AppLocalizations`. `SearchFilterSheet` and `SearchPage` use `EdgeInsetsDirectional`; the inline sort control and result list scroll in the locale's reading direction. Phase 3 localization lint guard catches any hardcoded string at PR review. |
+| V. Arabic-First Localization | **Pass** | All 34 new user-visible strings flow through `AppLocalizations`. `SearchFilterSheet` and `SearchPage` use `EdgeInsetsDirectional`; the inline sort control and result list scroll in the locale's reading direction. Phase 3 localization lint guard catches any hardcoded string at PR review. |
 | VI. Theme System & Design Tokens | **Pass** | `SearchPage`, `SearchFilterSheet`, `SearchResultCard`, and `InlineSortControl` consume Phase 2 design tokens only. No inline hex / font-size / padding per SC-007. |
 | VII. Dynamic Roles & Permissions | **Pass (N/A)** | Search is anonymous-readable via RLS — zero new permission keys, zero permission checks, zero audit-log call sites. |
 | VIII. Approval Workflow & Publisher Identity | **Pass** | Search results are bounded to `status = 'approved'` listings via the RPC guard. Publisher private fields (legal name, national ID, private contact methods) are NOT projected in the search result shape. |
@@ -174,8 +174,10 @@ lib/
 │       │   ├── entities/
 │       │   │   ├── search_result_item.dart                          # NEW — same projection as HomeListingCard but owned by
 │       │   │   │                                                    #   the search feature domain. Fields: id, title,
-│       │   │   │                                                    #   propertyType, purpose, governorateName, cityName,
-│       │   │   │                                                    #   primaryPrice (Money), mainImagePath, publishedAt.
+│       │   │   │                                                    #   propertyType, purpose, governorateNameAr,
+│       │   │   │                                                    #   governorateNameEn, cityNameAr, cityNameEn,
+│       │   │   │                                                    #   primaryAmount (double), primaryCurrency (String),
+│       │   │   │                                                    #   mainImagePath (String?), publishedAt (DateTime).
 │       │   │   ├── filter_state.dart                                # NEW — immutable value object. Fields: query(String?),
 │       │   │   │                                                    #   purpose(ListingPurpose?), propertyType(PropertyType?),
 │       │   │   │                                                    #   governorateId(String?), cityId(String?), areaId(String?),
@@ -187,10 +189,11 @@ lib/
 │       │   │   └── count_filter_mode.dart                           # NEW — enum: exactly, atLeast.
 │       │   ├── repositories/
 │       │   │   └── search_repository.dart                           # NEW — abstract. Method:
-│       │   │                                                        #   Future<Result<List<SearchResultItem>>> search({
+│       │   │                                                        #   Future<Either<Failure, List<SearchResultItem>>> search({
 │       │   │                                                        #     required FilterState filters,
 │       │   │                                                        #     required SortOrder sort,
-│       │   │                                                        #     Cursor? cursor });
+│       │   │                                                        #     SearchCursor? cursor,
+│       │   │                                                        #     int limit = 20 });
 │       │   └── usecases/
 │       │       └── search_listings_usecase.dart                     # NEW — wraps SearchRepository.search().
 │       └── presentation/
@@ -200,7 +203,7 @@ lib/
 │           │   │                                                    #   SearchRefreshRequested.
 │           │   │                                                    #   State: SearchState(results, filters, sort, cursor?,
 │           │   │                                                    #   status, failure?). BLoC lifetime preserved across
-│           │   │                                                    #   back-navigation per R-85.
+│           │   │                                                    #   back-navigation per R-77.
 │           │   ├── search_event.dart                                # NEW
 │           │   └── search_state.dart                                # NEW
 │           ├── pages/
@@ -220,12 +223,12 @@ lib/
 │               │                                                    #   3 sort options inline on the results page.
 │               ├── search_result_card.dart                          # NEW — wraps Phase 13's _HomeListingCard visual design
 │               │                                                    #   accepting a SearchResultItem; tap routes to
-│               │                                                    #   /listings/:id per R-74.
+│               │                                                    #   AppRoutes.listingDetails/:id (Phase 13 route).
 │               └── price_range_input.dart                           # NEW — two numeric text fields (min, max) + inline
 │                                                                    #   validation rejecting min > max per FR-017.
 └── l10n/
-    ├── app_ar.arb                                                   # UPDATE — ~30 new keys per data-model.md ARB inventory.
-    ├── app_en.arb                                                   # UPDATE — ~30 new keys.
+    ├── app_ar.arb                                                   # UPDATE — 34 new keys per data-model.md ARB inventory.
+    ├── app_en.arb                                                   # UPDATE — 34 new keys.
     └── app_strings.dart                                             # UPDATE — hand-maintained _DebugAppLocalizations extended.
 ```
 
@@ -262,7 +265,7 @@ Phase 14 decomposes into **seven sub-phases (Sub-Phase A through Sub-Phase G)** 
 
 ### Sub-Phase C — ARB key delta
 
-**Scope**: Add all ~30 Phase 14 search/filter ARB keys to `lib/l10n/app_ar.arb` and `lib/l10n/app_en.arb`. Extend `lib/l10n/app_strings.dart` `_DebugAppLocalizations` subclass with concrete getters for each new key. Run `flutter gen-l10n` to regenerate `AppLocalizations`. Full key list in `data-model.md §ARB Key Inventory`.
+**Scope**: Add all 34 Phase 14 search/filter ARB keys to `lib/l10n/app_ar.arb` and `lib/l10n/app_en.arb`. Extend `lib/l10n/app_strings.dart` `_DebugAppLocalizations` subclass with concrete getters for each new key. Run `flutter gen-l10n` to regenerate `AppLocalizations`. Full key list in `data-model.md §ARB Key Inventory`.
 
 **Touch fan**: `lib/l10n/app_ar.arb` (UPDATE), `lib/l10n/app_en.arb` (UPDATE), `lib/l10n/app_strings.dart` (UPDATE).
 
@@ -373,6 +376,6 @@ Every sub-phase dependency line above names a specific file path and/or exported
 | R-79 | Rooms/bathrooms dual-mode control uses a `SegmentedButton<CountFilterMode>` (Flutter Material 3 native) with two segments: "تماماً N / Exactly N" and "على الأقل N / At least N". |
 | R-80 | Pre-filter from home chip: the `PropertyType` value is passed via `GoRouterState.extra` (not as a URL query parameter) to avoid leaking enum values into the URL. `SearchPage` reads `GoRouterState.extra as PropertyType?` in its `GoRoute` builder. |
 | R-81 | `v_listings_public` view is shipped. It pre-joins `listing_prices` (primary) + `listing_media` (main image) + governorate/city name columns. The `search_listings` RPC reads from this view rather than joining the base tables directly, keeping the RPC SQL readable. |
-| R-82 | `app_strings.dart` `_DebugAppLocalizations` subclass is extended with concrete getters for all ~30 new Phase 14 keys (same pattern as Phase 13). |
+| R-82 | `app_strings.dart` `_DebugAppLocalizations` subclass is extended with concrete getters for all 34 new Phase 14 keys (same pattern as Phase 13). |
 | R-83 | Location data (governorates list, cities per governorate, areas per city) is **lazy-loaded on filter sheet open** via Phase 8's existing `LocationRepository` (injected into `SearchFilterSheet`). Governorates are loaded once on sheet open and cached in the sheet's local state; cities/areas are re-fetched when the parent picker changes. |
 | R-84 | Inline sort control uses a `DropdownButton<SortOrder>` (not `SegmentedButton`) — three options with localized labels; rendered compactly next to the Filters button in the search results app bar area. `SegmentedButton` would consume too much horizontal space for three options in RTL/LTR. |

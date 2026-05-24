@@ -86,7 +86,8 @@ BlocProvider<SearchBloc>(
 - `TextField` with `autofocus: initialPropertyType == null` — auto-focuses keyboard when entered from hero search bar; does NOT auto-focus when entered from a property-type chip.
 - Hint text: `search_placeholder` ARB key.
 - Clear button (×) visible when text is non-empty. Tapping clear: dispatches `SearchQueryChanged('')` which triggers a full unfiltered re-fetch (FR-004 / US1 scenario 4).
-- `onSubmitted` + `onChanged` (debounced ~400ms): dispatches `SearchQueryChanged(value)`.
+- `onChanged` (debounced ~400ms via `Timer`): dispatches `SearchQueryChanged(value)` — BLoC resets timer on each keystroke and fires `SearchFiltersApplied` after 400 ms of inactivity.
+- `onSubmitted`: dispatches `SearchFiltersApplied(filters: state.filters.copyWith(query: value))` directly, bypassing the debounce timer for immediate response to explicit user submission. `SearchBloc` cancels `_debounce` on receiving `SearchFiltersApplied` to prevent a double-fetch if the debounce timer is still pending.
 - `textDirection: TextDirection.inherit` — allows Arabic RTL input.
 
 ---
