@@ -43,9 +43,9 @@ Repo layout is **Flutter app + Supabase backend** (per plan.md Project Structure
 
 ### Sub-Phase A — Index migration (per FR-001, FR-002, FR-003, FR-004)
 
-- [ ] T002 [P] Create migration file at `supabase/migrations/20260524120001_create_listings_indexes.sql` with the four `CREATE INDEX IF NOT EXISTS` statements per data-model.md §1 (idx_listings_status_published_at, idx_listings_status_created_at, idx_listings_governorate_status, idx_listings_property_type_status — exact bodies in data-model.md lines 27-44).
-- [ ] T003 [P] Apply the migration via Supabase MCP `apply_migration` with migration name `create_listings_indexes` per R-61 + `project_supabase_mcp_apply_migration.md`. Confirm uniqueness against `mcp__supabase__list_migrations` before applying.
-- [ ] T004 [P] Verify via Supabase MCP `execute_sql` running `EXPLAIN (ANALYZE, BUFFERS) SELECT * FROM public.listings WHERE status='approved' ORDER BY published_at DESC, id DESC LIMIT 20` — assert output contains `Index Scan using idx_listings_status_published_at` (NOT `Seq Scan`) at any row count ≥ 100. Soft requirement below 100 rows per FR-002.
+- [X] T002 [P] Create migration file at `supabase/migrations/20260524120001_create_listings_indexes.sql` with the four `CREATE INDEX IF NOT EXISTS` statements per data-model.md §1 (idx_listings_status_published_at, idx_listings_status_created_at, idx_listings_governorate_status, idx_listings_property_type_status — exact bodies in data-model.md lines 27-44).
+- [X] T003 [P] Apply the migration via Supabase MCP `apply_migration` with migration name `create_listings_indexes` per R-61 + `project_supabase_mcp_apply_migration.md`. Confirm uniqueness against `mcp__supabase__list_migrations` before applying.
+- [X] T004 [P] Verify via Supabase MCP `execute_sql` running `EXPLAIN (ANALYZE, BUFFERS) SELECT * FROM public.listings WHERE status='approved' ORDER BY published_at DESC, id DESC LIMIT 20` — assert output contains `Index Scan using idx_listings_status_published_at` (NOT `Seq Scan`) at any row count ≥ 100. Soft requirement below 100 rows per FR-002.
 
 ### Sub-Phase B — `url_launcher` dependency + AndroidManifest `<queries>` (per FR-032, FR-033)
 
