@@ -84,13 +84,13 @@ description: "Phase 15 — Map View task list"
 
 **Goal**: After Phase 4, `flutter gen-l10n` regenerates `AppLocalizations` with all map-related getters.
 
-- [ ] T027 Add the following keys to `lib/l10n/app_ar.arb` AND `lib/l10n/app_en.arb` in matched pairs. **Map page chrome** (6 keys): `map_page_title`, `map_osm_attribution`, `map_empty_state_no_listings`, `map_error_load_failed`, `map_error_retry_action`, `map_tiles_unavailable`.
-- [ ] T028 Continue adding to both ARB files. **Marker preview popover** (3 keys): `map_marker_view_details_action`, `map_marker_approximate_location_label`, `map_marker_image_unavailable`.
-- [ ] T029 Continue adding to both ARB files. **Center on my location FAB** (5 keys): `map_fab_center_on_me_tooltip`, `map_geolocation_permission_denied_message`, `map_geolocation_permission_permanently_denied_message`, `map_geolocation_open_settings_action`, `map_geolocation_fix_unavailable_message`.
-- [ ] T030 Continue adding to both ARB files. **Filter-active alert dialog** (4 keys): `map_filter_alert_title`, `map_filter_alert_body_prefix`, `map_filter_alert_action_reset`, `map_filter_alert_action_keep`.
-- [ ] T031 Continue adding to both ARB files. **Refresh button + entry-point labels** (5 keys): `map_refresh_button_tooltip`, `home_map_tile_title`, `home_map_tile_subtitle`, `listing_details_view_on_map_action`, `search_results_show_on_map_action`. Use Syrian-friendly Arabic copy (e.g., "تصفح على الخريطة" for `home_map_tile_title`, "اعرض على الخريطة" for `listing_details_view_on_map_action`, "موقع تقريبي" for `map_marker_approximate_location_label`) per Constitution V.
-- [ ] T032 Run `flutter gen-l10n` to regenerate `lib/l10n/app_localizations.dart`, `app_localizations_ar.dart`, `app_localizations_en.dart`. Verify all ~23 new getters exist in the generated file. Run `flutter analyze` — expected: zero new analyzer warnings.
-- [ ] T033 Manual smoke check: launch the app, confirm no runtime localization errors. (The new keys are not yet consumed; Phase 5 and Phase 6 will consume them.) Flip T027–T033 in the same commit.
+- [X] T027 Add the following keys to `lib/l10n/app_ar.arb` AND `lib/l10n/app_en.arb` in matched pairs. **Map page chrome** (6 keys): `map_page_title`, `map_osm_attribution`, `map_empty_state_no_listings`, `map_error_load_failed`, `map_error_retry_action`, `map_tiles_unavailable`.
+- [X] T028 Continue adding to both ARB files. **Marker preview popover** (3 keys): `map_marker_view_details_action`, `map_marker_approximate_location_label`, `map_marker_image_unavailable`.
+- [X] T029 Continue adding to both ARB files. **Center on my location FAB** (5 keys): `map_fab_center_on_me_tooltip`, `map_geolocation_permission_denied_message`, `map_geolocation_permission_permanently_denied_message`, `map_geolocation_open_settings_action`, `map_geolocation_fix_unavailable_message`.
+- [X] T030 Continue adding to both ARB files. **Filter-active alert dialog** (4 keys): `map_filter_alert_title`, `map_filter_alert_body_prefix`, `map_filter_alert_action_reset`, `map_filter_alert_action_keep`.
+- [X] T031 Continue adding to both ARB files. **Refresh button + entry-point labels** (5 keys): `map_refresh_button_tooltip`, `home_map_tile_title`, `home_map_tile_subtitle`, `listing_details_view_on_map_action`, `search_results_show_on_map_action`. Use Syrian-friendly Arabic copy (e.g., "تصفح على الخريطة" for `home_map_tile_title`, "اعرض على الخريطة" for `listing_details_view_on_map_action`, "موقع تقريبي" for `map_marker_approximate_location_label`) per Constitution V.
+- [X] T032 Run `flutter gen-l10n` to regenerate `lib/l10n/app_localizations.dart`, `app_localizations_ar.dart`, `app_localizations_en.dart`. Verify all ~23 new getters exist in the generated file. Run `flutter analyze` — expected: zero new analyzer warnings.
+- [X] T033 Manual smoke check: launch the app, confirm no runtime localization errors. (The new keys are not yet consumed; Phase 5 and Phase 6 will consume them.) Flip T027–T033 in the same commit.
 
 **Checkpoint**: ARB files contain all needed keys; codegen succeeds; the app still builds and runs cleanly.
 
