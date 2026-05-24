@@ -54,6 +54,23 @@ class FilterState extends Equatable {
       areaSizeMin == null &&
       areaSizeMax == null;
 
+  /// Phase 15 G3: true when at least one filter dimension is active.
+  /// Consumed by [MapEntryFromSearch.showFilterAlert] to show the
+  /// filter-active alert dialog when the user taps "Show on map."
+  bool get hasAnyActiveFilter =>
+      purpose != null ||
+      propertyType != null ||
+      governorateId != null ||
+      cityId != null ||
+      areaId != null ||
+      priceMin != null ||
+      priceMax != null ||
+      rooms != null ||
+      bathrooms != null ||
+      areaSizeMin != null ||
+      areaSizeMax != null ||
+      (query != null && query!.isNotEmpty);
+
   FilterState copyWith({
     String? query,
     ListingPurpose? purpose,
