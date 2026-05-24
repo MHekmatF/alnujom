@@ -76,12 +76,12 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
     _bathrooms = widget.initialFilters.bathrooms;
     _bathroomsMode = widget.initialFilters.bathroomsMode;
     if (widget.initialFilters.areaSizeMin != null) {
-      _areaSizeMinController.text =
-          widget.initialFilters.areaSizeMin!.toString();
+      _areaSizeMinController.text = widget.initialFilters.areaSizeMin!
+          .toString();
     }
     if (widget.initialFilters.areaSizeMax != null) {
-      _areaSizeMaxController.text =
-          widget.initialFilters.areaSizeMax!.toString();
+      _areaSizeMaxController.text = widget.initialFilters.areaSizeMax!
+          .toString();
     }
 
     _loadGovernorates();
@@ -100,8 +100,9 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
   Future<void> _loadGovernorates() async {
     setState(() => _loadingGovernorates = true);
     try {
-      final result = await getIt<LocationsRepository>()
-          .listGovernorates(includeInactive: false);
+      final result = await getIt<LocationsRepository>().listGovernorates(
+        includeInactive: false,
+      );
       if (mounted) {
         setState(() {
           _governorates = result;
@@ -117,8 +118,9 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
 
   Future<void> _loadCurrencies() async {
     try {
-      final result =
-          await getIt<CurrenciesRepository>().listCurrencies(activeOnly: true);
+      final result = await getIt<CurrenciesRepository>().listCurrencies(
+        activeOnly: true,
+      );
       if (mounted) {
         setState(() => _currencies = result);
       }
@@ -156,8 +158,10 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
     });
     if (id != null) {
       try {
-        final areas = await getIt<LocationsRepository>()
-            .listAreasForCity(id, includeInactive: false);
+        final areas = await getIt<LocationsRepository>().listAreasForCity(
+          id,
+          includeInactive: false,
+        );
         if (mounted) {
           setState(() => _areas = areas);
         }
@@ -276,8 +280,7 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
             return ChoiceChip(
               label: Text(_localizedPropertyType(t, l10n)),
               selected: _propertyType == t,
-              onSelected: (v) =>
-                  setState(() => _propertyType = v ? t : null),
+              onSelected: (v) => setState(() => _propertyType = v ? t : null),
             );
           }).toList(),
         ),
@@ -358,9 +361,7 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
               (a) => DropdownMenuItem<String?>(
                 value: a.id,
                 child: Text(
-                  a.displayName['ar'] ??
-                      a.displayName['en'] ??
-                      a.key,
+                  a.displayName['ar'] ?? a.displayName['en'] ?? a.key,
                 ),
               ),
             ),
@@ -368,8 +369,8 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
           onChanged: _cityId == null
               ? null
               : (id) => setState(() {
-                    _areaId = id;
-                  }),
+                  _areaId = id;
+                }),
         ),
       ],
     );
@@ -438,8 +439,7 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
             ),
           ],
           selected: {_roomsMode},
-          onSelectionChanged: (s) =>
-              setState(() => _roomsMode = s.first),
+          onSelectionChanged: (s) => setState(() => _roomsMode = s.first),
         ),
         const SizedBox(height: 8),
         Row(
@@ -449,12 +449,12 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
               icon: const Icon(Icons.remove),
               onPressed: _rooms != null && _rooms! > 0
                   ? () => setState(() {
-                        if (_rooms! <= 1) {
-                          _rooms = null;
-                        } else {
-                          _rooms = _rooms! - 1;
-                        }
-                      })
+                      if (_rooms! <= 1) {
+                        _rooms = null;
+                      } else {
+                        _rooms = _rooms! - 1;
+                      }
+                    })
                   : null,
             ),
             Padding(
@@ -497,8 +497,7 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
             ),
           ],
           selected: {_bathroomsMode},
-          onSelectionChanged: (s) =>
-              setState(() => _bathroomsMode = s.first),
+          onSelectionChanged: (s) => setState(() => _bathroomsMode = s.first),
         ),
         const SizedBox(height: 8),
         Row(
@@ -508,12 +507,12 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
               icon: const Icon(Icons.remove),
               onPressed: _bathrooms != null && _bathrooms! > 0
                   ? () => setState(() {
-                        if (_bathrooms! <= 1) {
-                          _bathrooms = null;
-                        } else {
-                          _bathrooms = _bathrooms! - 1;
-                        }
-                      })
+                      if (_bathrooms! <= 1) {
+                        _bathrooms = null;
+                      } else {
+                        _bathrooms = _bathrooms! - 1;
+                      }
+                    })
                   : null,
             ),
             Padding(
@@ -553,8 +552,9 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                 padding: const EdgeInsetsDirectional.only(end: 8),
                 child: TextFormField(
                   controller: _areaSizeMinController,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   decoration: InputDecoration(
                     hintText: l10n.search_filter_price_min_hint,
                   ),
@@ -566,8 +566,9 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                 padding: const EdgeInsetsDirectional.only(start: 8),
                 child: TextFormField(
                   controller: _areaSizeMaxController,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   decoration: InputDecoration(
                     hintText: l10n.search_filter_price_max_hint,
                   ),

@@ -40,11 +40,7 @@ class ListingDetailsRepositoryImpl implements ListingDetailsRepository {
         tag: _tag,
       );
       return FailureResult(
-        NetworkFailure(
-          error.toString(),
-          cause: error,
-          stackTrace: stackTrace,
-        ),
+        NetworkFailure(error.toString(), cause: error, stackTrace: stackTrace),
       );
     }
   }

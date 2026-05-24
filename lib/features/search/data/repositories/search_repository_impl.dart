@@ -44,9 +44,7 @@ class SearchRepositoryImpl implements SearchRepository {
       );
       return Success(items);
     } on SocketException catch (e, st) {
-      return FailureResult(
-        NetworkFailure(e.message, cause: e, stackTrace: st),
-      );
+      return FailureResult(NetworkFailure(e.message, cause: e, stackTrace: st));
     } on TimeoutException catch (e, st) {
       return FailureResult(
         NetworkFailure(

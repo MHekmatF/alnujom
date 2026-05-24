@@ -23,10 +23,7 @@ import '../bloc/moderation_history_state.dart';
 /// `public.listing_status_history` (`publisher_user_id = auth.uid()`).
 /// No extra frontend gate is needed beyond the login redirect in the route.
 class ListingModerationHistoryPage extends StatelessWidget {
-  const ListingModerationHistoryPage({
-    super.key,
-    required this.listingId,
-  });
+  const ListingModerationHistoryPage({super.key, required this.listingId});
 
   final String listingId;
 
@@ -49,14 +46,11 @@ class _ModerationHistoryView extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.publisherHistoryTitle),
-      ),
+      appBar: AppBar(title: Text(l10n.publisherHistoryTitle)),
       body: BlocBuilder<ModerationHistoryCubit, ModerationHistoryState>(
         builder: (context, state) {
           return switch (state) {
-            ModerationHistoryInitial() ||
-            ModerationHistoryLoading() =>
+            ModerationHistoryInitial() || ModerationHistoryLoading() =>
               const Center(child: CircularProgressIndicator()),
             ModerationHistoryLoaded(:final entries) when entries.isEmpty =>
               Center(
@@ -70,37 +64,36 @@ class _ModerationHistoryView extends StatelessWidget {
                 ),
               ),
             ModerationHistoryLoaded(:final entries) => ListView.builder(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.lg,
-                  vertical: AppSpacing.md,
-                ),
-                itemCount: entries.length,
-                itemBuilder: (context, index) => _HistoryEntryCard(
-                  entry: entries[index],
-                  l10n: l10n,
-                ),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.md,
               ),
+              itemCount: entries.length,
+              itemBuilder: (context, index) =>
+                  _HistoryEntryCard(entry: entries[index], l10n: l10n),
+            ),
             ModerationHistoryError() => Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.xl),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        l10n.adminErrorUnknown,
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      FilledButton(
-                        onPressed: () =>
-                            context.read<ModerationHistoryCubit>().load(listingId),
-                        child: Text(l10n.errorRetryAction),
-                      ),
-                    ],
-                  ),
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.xl),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      l10n.adminErrorUnknown,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    FilledButton(
+                      onPressed: () => context
+                          .read<ModerationHistoryCubit>()
+                          .load(listingId),
+                      child: Text(l10n.errorRetryAction),
+                    ),
+                  ],
                 ),
               ),
+            ),
           };
         },
       ),
@@ -110,10 +103,7 @@ class _ModerationHistoryView extends StatelessWidget {
 
 /// A single history entry card showing the status arc + attribution.
 class _HistoryEntryCard extends StatelessWidget {
-  const _HistoryEntryCard({
-    required this.entry,
-    required this.l10n,
-  });
+  const _HistoryEntryCard({required this.entry, required this.l10n});
 
   final ModerationHistoryEntry entry;
   final AppLocalizations l10n;
@@ -123,7 +113,8 @@ class _HistoryEntryCard extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final hasDetail =
-        entry.rejectionDetail != null && entry.rejectionDetail!.trim().isNotEmpty;
+        entry.rejectionDetail != null &&
+        entry.rejectionDetail!.trim().isNotEmpty;
 
     return Card(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
@@ -293,9 +284,7 @@ class _StatusPill extends StatelessWidget {
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: isNew
-            ? scheme.primaryContainer
-            : scheme.surfaceContainerHighest,
+        color: isNew ? scheme.primaryContainer : scheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(AppRadii.sm),
       ),
       child: Text(

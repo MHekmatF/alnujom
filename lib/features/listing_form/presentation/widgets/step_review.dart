@@ -188,8 +188,7 @@ class _MediaSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final sorted = [...media]
-      ..sort((a, b) => a.ordering.compareTo(b.ordering));
+    final sorted = [...media]..sort((a, b) => a.ordering.compareTo(b.ordering));
     return Card(
       margin: const EdgeInsetsDirectional.only(bottom: AppSpacing.md),
       child: Padding(
@@ -225,9 +224,7 @@ class _MediaSection extends StatelessWidget {
                   final m = sorted[index];
                   return _ReviewThumbnail(
                     media: m,
-                    mainBadge: m.isMain
-                        ? l10n.mediaThumbnailMainBadge
-                        : null,
+                    mainBadge: m.isMain ? l10n.mediaThumbnailMainBadge : null,
                   );
                 },
               ),

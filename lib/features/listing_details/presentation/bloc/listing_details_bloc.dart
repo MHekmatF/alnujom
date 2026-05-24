@@ -143,10 +143,7 @@ class ListingDetailsBloc
     final id = state.currentId;
     if (id == null) return;
     emit(
-      state.copyWith(
-        status: ListingDetailsStatus.loading,
-        clearFailure: true,
-      ),
+      state.copyWith(status: ListingDetailsStatus.loading, clearFailure: true),
     );
     await _fetchAndEmit(id, emit);
   }

@@ -66,7 +66,9 @@ class SupabaseListingMediaDatasource {
         .eq('listing_id', listingId)
         .order('ordering', ascending: true);
     return (rows as List)
-        .map((r) => ListingMediaDto.fromJson(Map<String, dynamic>.from(r as Map)))
+        .map(
+          (r) => ListingMediaDto.fromJson(Map<String, dynamic>.from(r as Map)),
+        )
         .toList();
   }
 
@@ -84,24 +86,31 @@ class SupabaseListingMediaDatasource {
     // and we send 0 as the sentinel — the listing_media_assign_ordering
     // BEFORE INSERT trigger computes the actual value server-side.
     final path = '$listingId/${_randomSuffix()}.jpg';
-    await _client.storage.from(_imagesBucket).uploadBinary(
-      path,
-      watermarkedJpegBytes,
-      fileOptions: const supabase.FileOptions(
-        contentType: 'image/jpeg',
-        upsert: false,
-      ),
-    );
+    await _client.storage
+        .from(_imagesBucket)
+        .uploadBinary(
+          path,
+          watermarkedJpegBytes,
+          fileOptions: const supabase.FileOptions(
+            contentType: 'image/jpeg',
+            upsert: false,
+          ),
+        );
     try {
-      final row = await _client.from('listing_media').insert(<String, dynamic>{
-        'listing_id': listingId,
-        'kind': 'image',
-        'storage_path': path,
-        'external_url': null,
-        'ordering': 0, // sentinel — trigger assigns max(ordering)+1
-        'is_main': isMain,
-        'watermarked': true, // FR-016 — always true for Phase 11 client uploads
-      }).select().single();
+      final row = await _client
+          .from('listing_media')
+          .insert(<String, dynamic>{
+            'listing_id': listingId,
+            'kind': 'image',
+            'storage_path': path,
+            'external_url': null,
+            'ordering': 0, // sentinel — trigger assigns max(ordering)+1
+            'is_main': isMain,
+            'watermarked':
+                true, // FR-016 — always true for Phase 11 client uploads
+          })
+          .select()
+          .single();
       return ListingMediaDto.fromJson(Map<String, dynamic>.from(row));
     } catch (e) {
       // On INSERT failure (cap trigger fire, RLS deny, etc.) — orphan cleanup.
@@ -123,24 +132,30 @@ class SupabaseListingMediaDatasource {
     required int ordering,
   }) async {
     final path = '$listingId/${_randomSuffix()}.mp4';
-    await _client.storage.from(_videosBucket).upload(
-      path,
-      File(filePath),
-      fileOptions: const supabase.FileOptions(
-        contentType: 'video/mp4',
-        upsert: false,
-      ),
-    );
+    await _client.storage
+        .from(_videosBucket)
+        .upload(
+          path,
+          File(filePath),
+          fileOptions: const supabase.FileOptions(
+            contentType: 'video/mp4',
+            upsert: false,
+          ),
+        );
     try {
-      final row = await _client.from('listing_media').insert(<String, dynamic>{
-        'listing_id': listingId,
-        'kind': 'video',
-        'storage_path': path,
-        'external_url': null,
-        'ordering': 0, // sentinel — trigger assigns
-        'is_main': false, // FR-002 CHECK — video rows can never be main
-        'watermarked': false,
-      }).select().single();
+      final row = await _client
+          .from('listing_media')
+          .insert(<String, dynamic>{
+            'listing_id': listingId,
+            'kind': 'video',
+            'storage_path': path,
+            'external_url': null,
+            'ordering': 0, // sentinel — trigger assigns
+            'is_main': false, // FR-002 CHECK — video rows can never be main
+            'watermarked': false,
+          })
+          .select()
+          .single();
       return ListingMediaDto.fromJson(Map<String, dynamic>.from(row));
     } catch (e) {
       try {

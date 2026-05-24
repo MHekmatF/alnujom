@@ -211,9 +211,8 @@ GoRouter buildAppRouter({
             path: 'listing-review/preview/:id',
             name: AppRouteNames.adminListingReviewPreview,
             redirect: requireListingReviewRedirect,
-            builder: (context, state) => ListingPreviewPage(
-              listingId: state.pathParameters['id']!,
-            ),
+            builder: (context, state) =>
+                ListingPreviewPage(listingId: state.pathParameters['id']!),
           ),
           GoRoute(
             path: 'super-admin/roles',
@@ -384,9 +383,8 @@ GoRouter buildAppRouter({
       GoRoute(
         path: AppRoutes.search,
         name: AppRouteNames.search,
-        builder: (context, state) => SearchPage(
-          initialPropertyType: state.extra as PropertyType?,
-        ),
+        builder: (context, state) =>
+            SearchPage(initialPropertyType: state.extra as PropertyType?),
       ),
       if (kDesignToolsEnabled)
         GoRoute(

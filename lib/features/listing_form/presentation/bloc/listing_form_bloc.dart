@@ -722,16 +722,15 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
     emit(state.copyWith(media: reordered));
 
     try {
-      await _reorderMedia(
-        listingId: listing.id,
-        newOrderIds: event.newOrder,
-      );
+      await _reorderMedia(listingId: listing.id, newOrderIds: event.newOrder);
     } catch (_) {
       // RPC failed — reload from the server to revert the optimistic UI.
       try {
         final reloaded = await _loadMediaForListing(listingId: listing.id);
         emit(state.copyWith(media: reloaded));
-      } catch (_) {/* nothing more to do */}
+      } catch (_) {
+        /* nothing more to do */
+      }
     }
   }
 
@@ -769,7 +768,9 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
         try {
           final reloaded = await _loadMediaForListing(listingId: listing.id);
           emit(state.copyWith(media: reloaded));
-        } catch (_) {/* nothing more to do */}
+        } catch (_) {
+          /* nothing more to do */
+        }
       }
     }
   }
@@ -779,9 +780,8 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
     Emitter<ListingFormState> emit,
   ) async {
     if (!state.uploadInFlight.containsKey(event.localId)) return;
-    final nextInFlight = <String, MediaUploadProgress>{
-      ...state.uploadInFlight,
-    }..remove(event.localId);
+    final nextInFlight = <String, MediaUploadProgress>{...state.uploadInFlight}
+      ..remove(event.localId);
     emit(state.copyWith(uploadInFlight: nextInFlight));
   }
 

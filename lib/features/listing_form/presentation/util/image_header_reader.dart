@@ -138,10 +138,7 @@ ImageDimensions? _readJpegDimensions(Uint8List bytes) {
 
     // SOF markers that encode image dimensions (height at +5..+6, width at +7..+8)
     // SOF0=0xC0, SOF1=0xC1, SOF2=0xC2, SOF9=0xC9 (progressive DCT)
-    if (marker == 0xC0 ||
-        marker == 0xC1 ||
-        marker == 0xC2 ||
-        marker == 0xC9) {
+    if (marker == 0xC0 || marker == 0xC1 || marker == 0xC2 || marker == 0xC9) {
       if (offset + 9 >= bytes.length) return null;
       // payload starts at offset+4; [0]=precision, [1..2]=height, [3..4]=width
       final h = (bytes[offset + 5] << 8) | bytes[offset + 6];
@@ -183,8 +180,10 @@ ImageDimensions? _readPngDimensions(Uint8List bytes) {
     return null;
   }
 
-  final w = (bytes[16] << 24) | (bytes[17] << 16) | (bytes[18] << 8) | bytes[19];
-  final h = (bytes[20] << 24) | (bytes[21] << 16) | (bytes[22] << 8) | bytes[23];
+  final w =
+      (bytes[16] << 24) | (bytes[17] << 16) | (bytes[18] << 8) | bytes[19];
+  final h =
+      (bytes[20] << 24) | (bytes[21] << 16) | (bytes[22] << 8) | bytes[23];
   if (w == 0 || h == 0) return null;
   return ImageDimensions(w, h);
 }
@@ -216,11 +215,13 @@ ImageDimensions? _readHeicDimensions(Uint8List bytes) {
       // 'ispe' tag is at i; full box payload starts at i+4 (version+flags),
       // then width at i+8, height at i+12.
       if (i + 16 > bytes.length) return null;
-      final w = (bytes[i + 8] << 24) |
+      final w =
+          (bytes[i + 8] << 24) |
           (bytes[i + 9] << 16) |
           (bytes[i + 10] << 8) |
           bytes[i + 11];
-      final h = (bytes[i + 12] << 24) |
+      final h =
+          (bytes[i + 12] << 24) |
           (bytes[i + 13] << 16) |
           (bytes[i + 14] << 8) |
           bytes[i + 15];
@@ -252,10 +253,16 @@ ImageDimensions? _readWebpDimensions(Uint8List bytes) {
   if (bytes.length < 30) return null;
 
   // Verify RIFF....WEBP header
-  if (bytes[0] != 0x52 || bytes[1] != 0x49 || bytes[2] != 0x46 || bytes[3] != 0x46) {
+  if (bytes[0] != 0x52 ||
+      bytes[1] != 0x49 ||
+      bytes[2] != 0x46 ||
+      bytes[3] != 0x46) {
     return null;
   }
-  if (bytes[8] != 0x57 || bytes[9] != 0x45 || bytes[10] != 0x42 || bytes[11] != 0x50) {
+  if (bytes[8] != 0x57 ||
+      bytes[9] != 0x45 ||
+      bytes[10] != 0x42 ||
+      bytes[11] != 0x50) {
     return null;
   }
 
@@ -285,10 +292,8 @@ ImageDimensions? _readWebpDimensions(Uint8List bytes) {
     if (bytes.length < 25) return null;
     if (bytes[20] != 0x2F) return null; // VP8L signature byte
     // Bits 0..13 = width - 1; bits 14..27 = height - 1 (packed across bytes 21..24)
-    final bits = bytes[21] |
-        (bytes[22] << 8) |
-        (bytes[23] << 16) |
-        (bytes[24] << 24);
+    final bits =
+        bytes[21] | (bytes[22] << 8) | (bytes[23] << 16) | (bytes[24] << 24);
     final w = (bits & 0x3FFF) + 1;
     final h = ((bits >> 14) & 0x3FFF) + 1;
     return ImageDimensions(w, h);

@@ -53,8 +53,9 @@ class SearchPage extends StatelessWidget {
         : FilterState.empty;
     return BlocProvider<SearchBloc>(
       // @injectable factory — every push of /search gets a fresh BLoC (R-77).
-      create: (_) => getIt<SearchBloc>()
-        ..add(SearchFiltersApplied(filters: initialFilters)),
+      create: (_) =>
+          getIt<SearchBloc>()
+            ..add(SearchFiltersApplied(filters: initialFilters)),
       child: _SearchPageView(autofocusSearchBar: initialPropertyType == null),
     );
   }
@@ -131,8 +132,7 @@ class _SearchBarState extends State<_SearchBar> {
         decoration: InputDecoration(
           hintText: l10n.search_placeholder,
           border: InputBorder.none,
-          contentPadding:
-              const EdgeInsetsDirectional.symmetric(horizontal: 8),
+          contentPadding: const EdgeInsetsDirectional.symmetric(horizontal: 8),
           suffixIcon: BlocBuilder<SearchBloc, SearchState>(
             buildWhen: (p, c) =>
                 (p.filters.query != null) != (c.filters.query != null),
@@ -145,11 +145,10 @@ class _SearchBarState extends State<_SearchBar> {
                 onPressed: () {
                   _controller.clear();
                   context.read<SearchBloc>().add(
-                        SearchFiltersApplied(
-                          filters:
-                              state.filters.copyWith(clearQuery: true),
-                        ),
-                      );
+                    SearchFiltersApplied(
+                      filters: state.filters.copyWith(clearQuery: true),
+                    ),
+                  );
                 },
               );
             },
@@ -161,13 +160,13 @@ class _SearchBarState extends State<_SearchBar> {
           final trimmed = v.trim();
           final current = context.read<SearchBloc>().state.filters;
           context.read<SearchBloc>().add(
-                SearchFiltersApplied(
-                  filters: current.copyWith(
-                    query: trimmed.isEmpty ? null : trimmed,
-                    clearQuery: trimmed.isEmpty,
-                  ),
-                ),
-              );
+            SearchFiltersApplied(
+              filters: current.copyWith(
+                query: trimmed.isEmpty ? null : trimmed,
+                clearQuery: trimmed.isEmpty,
+              ),
+            ),
+          );
         },
       ),
     );
@@ -181,8 +180,10 @@ class _SortAndFiltersRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Padding(
-      padding:
-          const EdgeInsetsDirectional.symmetric(horizontal: 12, vertical: 4),
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: 12,
+        vertical: 4,
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -252,9 +253,9 @@ class _ResultsArea extends StatelessWidget {
               return _ErrorView(
                 message: l10n.search_error_message,
                 retryLabel: l10n.search_error_retry,
-                onRetry: () => context
-                    .read<SearchBloc>()
-                    .add(const SearchRefreshRequested()),
+                onRetry: () => context.read<SearchBloc>().add(
+                  const SearchRefreshRequested(),
+                ),
               );
             }
             // Failure during pagination — keep showing existing results.
@@ -321,23 +322,17 @@ class _EmptyView extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 4),
-            Text(
-              l10n.search_empty_subtitle,
-              textAlign: TextAlign.center,
-            ),
+            Text(l10n.search_empty_subtitle, textAlign: TextAlign.center),
             const SizedBox(height: 8),
             TextButton(
-              onPressed: () => context
-                  .read<SearchBloc>()
-                  .add(const SearchFiltersApplied(
-                    filters: FilterState.empty,
-                  )),
+              onPressed: () => context.read<SearchBloc>().add(
+                const SearchFiltersApplied(filters: FilterState.empty),
+              ),
               child: Text(l10n.search_empty_clear_filters),
             ),
             if (state.isArabicQuery)
               Padding(
-                padding:
-                    const EdgeInsetsDirectional.symmetric(vertical: 8),
+                padding: const EdgeInsetsDirectional.symmetric(vertical: 8),
                 child: Text(
                   l10n.search_arabic_hint(
                     _suggestionFromQuery(state.filters.query!),

@@ -38,13 +38,15 @@ class SupabaseHomeFeedDatasource {
     // submit_listing RPC always inserts a primary price). `listing_media`
     // is a LEFT JOIN; the `.eq()` filters below narrow it to is_main=true
     // AND kind='image' so a card surfaces at most one thumbnail row.
-    final base = _client.from('listings').select(
-      'id, title, property_type, purpose, governorate_id, city_id, published_at, '
-      'listing_prices!inner(currency_code, amount, is_primary), '
-      'listing_media(storage_path, ordering, is_main, kind), '
-      'governorate:governorates(display_name), '
-      'city:cities(display_name)',
-    );
+    final base = _client
+        .from('listings')
+        .select(
+          'id, title, property_type, purpose, governorate_id, city_id, published_at, '
+          'listing_prices!inner(currency_code, amount, is_primary), '
+          'listing_media(storage_path, ordering, is_main, kind), '
+          'governorate:governorates(display_name), '
+          'city:cities(display_name)',
+        );
 
     // Embedded-select filters (PostgREST syntax) — apply to the JOINed
     // tables, not to `listings`.
@@ -75,9 +77,7 @@ class SupabaseHomeFeedDatasource {
       );
       final path = dto.mainImage?.storagePath;
       if (path == null) return dto;
-      final url = _client.storage
-          .from('listing-images')
-          .getPublicUrl(path);
+      final url = _client.storage.from('listing-images').getPublicUrl(path);
       return dto.copyWithMainImageUrl(url);
     }).toList();
   }

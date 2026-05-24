@@ -2054,8 +2054,10 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('mediaCapVideos2', (loc) => loc.mediaCapVideos2);
 
   @override
-  String get mediaReviewCarouselLabel =>
-      _resolve('mediaReviewCarouselLabel', (loc) => loc.mediaReviewCarouselLabel);
+  String get mediaReviewCarouselLabel => _resolve(
+    'mediaReviewCarouselLabel',
+    (loc) => loc.mediaReviewCarouselLabel,
+  );
 
   @override
   String get submitErrorImagesBelowMinimum => _resolve(
@@ -2114,10 +2116,8 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('adminPreviewCtaReject', (loc) => loc.adminPreviewCtaReject);
 
   @override
-  String get adminApproveDialogTitle => _resolve(
-    'adminApproveDialogTitle',
-    (loc) => loc.adminApproveDialogTitle,
-  );
+  String get adminApproveDialogTitle =>
+      _resolve('adminApproveDialogTitle', (loc) => loc.adminApproveDialogTitle);
 
   @override
   String get adminApproveDialogBody =>
@@ -2176,8 +2176,7 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('descriptionReadMore', (loc) => loc.descriptionReadMore);
 
   @override
-  String priceOriginallyWas(String price) =>
-      _active.priceOriginallyWas(price);
+  String priceOriginallyWas(String price) => _active.priceOriginallyWas(price);
 
   // ── Phase 12 / US2 — Reject flow + publisher rejection banner ────────────
 
@@ -2187,25 +2186,24 @@ final class _DebugAppLocalizations extends AppLocalizations {
 
   @override
   String get rejectDialogDetailLabelOptional => _resolve(
-        'rejectDialogDetailLabelOptional',
-        (loc) => loc.rejectDialogDetailLabelOptional,
-      );
+    'rejectDialogDetailLabelOptional',
+    (loc) => loc.rejectDialogDetailLabelOptional,
+  );
 
   @override
   String get rejectDialogDetailLabelRequired => _resolve(
-        'rejectDialogDetailLabelRequired',
-        (loc) => loc.rejectDialogDetailLabelRequired,
-      );
+    'rejectDialogDetailLabelRequired',
+    (loc) => loc.rejectDialogDetailLabelRequired,
+  );
 
   @override
   String get rejectDialogDetailHintOther => _resolve(
-        'rejectDialogDetailHintOther',
-        (loc) => loc.rejectDialogDetailHintOther,
-      );
+    'rejectDialogDetailHintOther',
+    (loc) => loc.rejectDialogDetailHintOther,
+  );
 
   @override
-  String rejectDialogCounter(int count) =>
-      _active.rejectDialogCounter(count);
+  String rejectDialogCounter(int count) => _active.rejectDialogCounter(count);
 
   @override
   String get rejectDialogConfirm =>
@@ -2217,33 +2215,33 @@ final class _DebugAppLocalizations extends AppLocalizations {
 
   @override
   String get rejectPresetMissingOrLowQualityPhotos => _resolve(
-        'rejectPresetMissingOrLowQualityPhotos',
-        (loc) => loc.rejectPresetMissingOrLowQualityPhotos,
-      );
+    'rejectPresetMissingOrLowQualityPhotos',
+    (loc) => loc.rejectPresetMissingOrLowQualityPhotos,
+  );
 
   @override
   String get rejectPresetIncorrectLocation => _resolve(
-        'rejectPresetIncorrectLocation',
-        (loc) => loc.rejectPresetIncorrectLocation,
-      );
+    'rejectPresetIncorrectLocation',
+    (loc) => loc.rejectPresetIncorrectLocation,
+  );
 
   @override
   String get rejectPresetUnrealisticPrice => _resolve(
-        'rejectPresetUnrealisticPrice',
-        (loc) => loc.rejectPresetUnrealisticPrice,
-      );
+    'rejectPresetUnrealisticPrice',
+    (loc) => loc.rejectPresetUnrealisticPrice,
+  );
 
   @override
   String get rejectPresetIncompleteDescription => _resolve(
-        'rejectPresetIncompleteDescription',
-        (loc) => loc.rejectPresetIncompleteDescription,
-      );
+    'rejectPresetIncompleteDescription',
+    (loc) => loc.rejectPresetIncompleteDescription,
+  );
 
   @override
   String get rejectPresetDuplicateListing => _resolve(
-        'rejectPresetDuplicateListing',
-        (loc) => loc.rejectPresetDuplicateListing,
-      );
+    'rejectPresetDuplicateListing',
+    (loc) => loc.rejectPresetDuplicateListing,
+  );
 
   @override
   String get rejectPresetOther =>
@@ -2255,33 +2253,31 @@ final class _DebugAppLocalizations extends AppLocalizations {
 
   @override
   String get publisherRejectionResubmit => _resolve(
-        'publisherRejectionResubmit',
-        (loc) => loc.publisherRejectionResubmit,
-      );
+    'publisherRejectionResubmit',
+    (loc) => loc.publisherRejectionResubmit,
+  );
 
   @override
   String get publisherRejectionViewHistory => _resolve(
-        'publisherRejectionViewHistory',
-        (loc) => loc.publisherRejectionViewHistory,
-      );
+    'publisherRejectionViewHistory',
+    (loc) => loc.publisherRejectionViewHistory,
+  );
 
   @override
   String get adminErrorInvalidReasonPreset => _resolve(
-        'adminErrorInvalidReasonPreset',
-        (loc) => loc.adminErrorInvalidReasonPreset,
-      );
+    'adminErrorInvalidReasonPreset',
+    (loc) => loc.adminErrorInvalidReasonPreset,
+  );
 
   @override
   String get adminErrorReasonDetailTooLong => _resolve(
-        'adminErrorReasonDetailTooLong',
-        (loc) => loc.adminErrorReasonDetailTooLong,
-      );
+    'adminErrorReasonDetailTooLong',
+    (loc) => loc.adminErrorReasonDetailTooLong,
+  );
 
   @override
-  String get adminToastRejectSuccess => _resolve(
-        'adminToastRejectSuccess',
-        (loc) => loc.adminToastRejectSuccess,
-      );
+  String get adminToastRejectSuccess =>
+      _resolve('adminToastRejectSuccess', (loc) => loc.adminToastRejectSuccess);
 
   // ── Phase 12 / US6 — Publisher moderation history page ───────────────────
 
@@ -2291,15 +2287,15 @@ final class _DebugAppLocalizations extends AppLocalizations {
 
   @override
   String get publisherHistoryAdminTeam => _resolve(
-        'publisherHistoryAdminTeam',
-        (loc) => loc.publisherHistoryAdminTeam,
-      );
+    'publisherHistoryAdminTeam',
+    (loc) => loc.publisherHistoryAdminTeam,
+  );
 
   @override
   String get publisherHistoryFirstEntry => _resolve(
-        'publisherHistoryFirstEntry',
-        (loc) => loc.publisherHistoryFirstEntry,
-      );
+    'publisherHistoryFirstEntry',
+    (loc) => loc.publisherHistoryFirstEntry,
+  );
 
   @override
   String get publisherHistoryEmpty =>
@@ -2307,55 +2303,57 @@ final class _DebugAppLocalizations extends AppLocalizations {
 
   @override
   String get publisherHistoryStatusDraft => _resolve(
-        'publisherHistoryStatusDraft',
-        (loc) => loc.publisherHistoryStatusDraft,
-      );
+    'publisherHistoryStatusDraft',
+    (loc) => loc.publisherHistoryStatusDraft,
+  );
 
   @override
   String get publisherHistoryStatusPendingReview => _resolve(
-        'publisherHistoryStatusPendingReview',
-        (loc) => loc.publisherHistoryStatusPendingReview,
-      );
+    'publisherHistoryStatusPendingReview',
+    (loc) => loc.publisherHistoryStatusPendingReview,
+  );
 
   @override
   String get publisherHistoryStatusApproved => _resolve(
-        'publisherHistoryStatusApproved',
-        (loc) => loc.publisherHistoryStatusApproved,
-      );
+    'publisherHistoryStatusApproved',
+    (loc) => loc.publisherHistoryStatusApproved,
+  );
 
   @override
   String get publisherHistoryStatusRejected => _resolve(
-        'publisherHistoryStatusRejected',
-        (loc) => loc.publisherHistoryStatusRejected,
-      );
+    'publisherHistoryStatusRejected',
+    (loc) => loc.publisherHistoryStatusRejected,
+  );
 
   @override
   String get publisherHistoryStatusPaused => _resolve(
-        'publisherHistoryStatusPaused',
-        (loc) => loc.publisherHistoryStatusPaused,
-      );
+    'publisherHistoryStatusPaused',
+    (loc) => loc.publisherHistoryStatusPaused,
+  );
 
   @override
-  String get publisherHistoryStatusSold =>
-      _resolve('publisherHistoryStatusSold', (loc) => loc.publisherHistoryStatusSold);
+  String get publisherHistoryStatusSold => _resolve(
+    'publisherHistoryStatusSold',
+    (loc) => loc.publisherHistoryStatusSold,
+  );
 
   @override
   String get publisherHistoryStatusRented => _resolve(
-        'publisherHistoryStatusRented',
-        (loc) => loc.publisherHistoryStatusRented,
-      );
+    'publisherHistoryStatusRented',
+    (loc) => loc.publisherHistoryStatusRented,
+  );
 
   @override
   String get publisherHistoryStatusExpired => _resolve(
-        'publisherHistoryStatusExpired',
-        (loc) => loc.publisherHistoryStatusExpired,
-      );
+    'publisherHistoryStatusExpired',
+    (loc) => loc.publisherHistoryStatusExpired,
+  );
 
   @override
   String get publisherHistoryStatusDeleted => _resolve(
-        'publisherHistoryStatusDeleted',
-        (loc) => loc.publisherHistoryStatusDeleted,
-      );
+    'publisherHistoryStatusDeleted',
+    (loc) => loc.publisherHistoryStatusDeleted,
+  );
 
   // ── Phase 13 — Public Home & Listing Details ──────────────────────────────
 
@@ -2365,16 +2363,22 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('home_app_bar_title', (loc) => loc.home_app_bar_title);
 
   @override
-  String get home_sign_in_icon_tooltip =>
-      _resolve('home_sign_in_icon_tooltip', (loc) => loc.home_sign_in_icon_tooltip);
+  String get home_sign_in_icon_tooltip => _resolve(
+    'home_sign_in_icon_tooltip',
+    (loc) => loc.home_sign_in_icon_tooltip,
+  );
 
   @override
-  String get home_search_bar_placeholder =>
-      _resolve('home_search_bar_placeholder', (loc) => loc.home_search_bar_placeholder);
+  String get home_search_bar_placeholder => _resolve(
+    'home_search_bar_placeholder',
+    (loc) => loc.home_search_bar_placeholder,
+  );
 
   @override
-  String get home_latest_listings_header =>
-      _resolve('home_latest_listings_header', (loc) => loc.home_latest_listings_header);
+  String get home_latest_listings_header => _resolve(
+    'home_latest_listings_header',
+    (loc) => loc.home_latest_listings_header,
+  );
 
   @override
   String get home_no_listings_yet =>
@@ -2397,46 +2401,66 @@ final class _DebugAppLocalizations extends AppLocalizations {
 
   // §5.3 Q2=A snackbar keys
   @override
-  String get contact_call_coming_soon =>
-      _resolve('contact_call_coming_soon', (loc) => loc.contact_call_coming_soon);
+  String get contact_call_coming_soon => _resolve(
+    'contact_call_coming_soon',
+    (loc) => loc.contact_call_coming_soon,
+  );
 
   @override
-  String get contact_whatsapp_coming_soon =>
-      _resolve('contact_whatsapp_coming_soon', (loc) => loc.contact_whatsapp_coming_soon);
+  String get contact_whatsapp_coming_soon => _resolve(
+    'contact_whatsapp_coming_soon',
+    (loc) => loc.contact_whatsapp_coming_soon,
+  );
 
   @override
-  String get contact_inquiry_coming_soon =>
-      _resolve('contact_inquiry_coming_soon', (loc) => loc.contact_inquiry_coming_soon);
+  String get contact_inquiry_coming_soon => _resolve(
+    'contact_inquiry_coming_soon',
+    (loc) => loc.contact_inquiry_coming_soon,
+  );
 
   @override
-  String get action_favorite_coming_soon =>
-      _resolve('action_favorite_coming_soon', (loc) => loc.action_favorite_coming_soon);
+  String get action_favorite_coming_soon => _resolve(
+    'action_favorite_coming_soon',
+    (loc) => loc.action_favorite_coming_soon,
+  );
 
   @override
-  String get action_share_coming_soon =>
-      _resolve('action_share_coming_soon', (loc) => loc.action_share_coming_soon);
+  String get action_share_coming_soon => _resolve(
+    'action_share_coming_soon',
+    (loc) => loc.action_share_coming_soon,
+  );
 
   @override
-  String get action_report_coming_soon =>
-      _resolve('action_report_coming_soon', (loc) => loc.action_report_coming_soon);
+  String get action_report_coming_soon => _resolve(
+    'action_report_coming_soon',
+    (loc) => loc.action_report_coming_soon,
+  );
 
   // §5.4 Q3=A reserved forward-state keys
   @override
-  String get auth_required_please_sign_in =>
-      _resolve('auth_required_please_sign_in', (loc) => loc.auth_required_please_sign_in);
+  String get auth_required_please_sign_in => _resolve(
+    'auth_required_please_sign_in',
+    (loc) => loc.auth_required_please_sign_in,
+  );
 
   @override
-  String get auth_required_sign_in_action =>
-      _resolve('auth_required_sign_in_action', (loc) => loc.auth_required_sign_in_action);
+  String get auth_required_sign_in_action => _resolve(
+    'auth_required_sign_in_action',
+    (loc) => loc.auth_required_sign_in_action,
+  );
 
   // §5.5 ListingDetailsPage chrome
   @override
-  String get listing_details_not_found_title =>
-      _resolve('listing_details_not_found_title', (loc) => loc.listing_details_not_found_title);
+  String get listing_details_not_found_title => _resolve(
+    'listing_details_not_found_title',
+    (loc) => loc.listing_details_not_found_title,
+  );
 
   @override
-  String get listing_details_not_found_return_home =>
-      _resolve('listing_details_not_found_return_home', (loc) => loc.listing_details_not_found_return_home);
+  String get listing_details_not_found_return_home => _resolve(
+    'listing_details_not_found_return_home',
+    (loc) => loc.listing_details_not_found_return_home,
+  );
 
   @override
   String listing_details_publisher_label(String name) => _resolve(
@@ -2446,8 +2470,7 @@ final class _DebugAppLocalizations extends AppLocalizations {
 
   // §5.6 CTA labels
   @override
-  String get cta_call =>
-      _resolve('cta_call', (loc) => loc.cta_call);
+  String get cta_call => _resolve('cta_call', (loc) => loc.cta_call);
 
   @override
   String get cta_whatsapp =>
@@ -2462,21 +2485,23 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('cta_favorite', (loc) => loc.cta_favorite);
 
   @override
-  String get cta_share =>
-      _resolve('cta_share', (loc) => loc.cta_share);
+  String get cta_share => _resolve('cta_share', (loc) => loc.cta_share);
 
   @override
-  String get cta_report =>
-      _resolve('cta_report', (loc) => loc.cta_report);
+  String get cta_report => _resolve('cta_report', (loc) => loc.cta_report);
 
   // §5.7 Error states
   @override
-  String get error_could_not_load_listings =>
-      _resolve('error_could_not_load_listings', (loc) => loc.error_could_not_load_listings);
+  String get error_could_not_load_listings => _resolve(
+    'error_could_not_load_listings',
+    (loc) => loc.error_could_not_load_listings,
+  );
 
   @override
-  String get error_could_not_load_listing =>
-      _resolve('error_could_not_load_listing', (loc) => loc.error_could_not_load_listing);
+  String get error_could_not_load_listing => _resolve(
+    'error_could_not_load_listing',
+    (loc) => loc.error_could_not_load_listing,
+  );
 
   @override
   String get action_retry =>
@@ -2488,12 +2513,16 @@ final class _DebugAppLocalizations extends AppLocalizations {
 
   // §5.8 Empty-state CTAs
   @override
-  String get home_empty_publish_first_listing =>
-      _resolve('home_empty_publish_first_listing', (loc) => loc.home_empty_publish_first_listing);
+  String get home_empty_publish_first_listing => _resolve(
+    'home_empty_publish_first_listing',
+    (loc) => loc.home_empty_publish_first_listing,
+  );
 
   @override
-  String get home_empty_sign_in_to_publish =>
-      _resolve('home_empty_sign_in_to_publish', (loc) => loc.home_empty_sign_in_to_publish);
+  String get home_empty_sign_in_to_publish => _resolve(
+    'home_empty_sign_in_to_publish',
+    (loc) => loc.home_empty_sign_in_to_publish,
+  );
 
   // ── Phase 14 — Search & Filters ──────────────────────────────────────────
 
@@ -2512,9 +2541,9 @@ final class _DebugAppLocalizations extends AppLocalizations {
 
   @override
   String search_results_count(int count) => _resolve(
-        'search_results_count',
-        (loc) => loc.search_results_count(count),
-      );
+    'search_results_count',
+    (loc) => loc.search_results_count(count),
+  );
 
   // §3.2 Sort Options
   @override
@@ -2531,8 +2560,10 @@ final class _DebugAppLocalizations extends AppLocalizations {
 
   // §3.3 Filter Sheet Chrome
   @override
-  String get search_filter_sheet_title =>
-      _resolve('search_filter_sheet_title', (loc) => loc.search_filter_sheet_title);
+  String get search_filter_sheet_title => _resolve(
+    'search_filter_sheet_title',
+    (loc) => loc.search_filter_sheet_title,
+  );
 
   @override
   String get search_filter_apply =>
@@ -2544,20 +2575,28 @@ final class _DebugAppLocalizations extends AppLocalizations {
 
   // §3.4 Filter Dimensions
   @override
-  String get search_filter_purpose_label =>
-      _resolve('search_filter_purpose_label', (loc) => loc.search_filter_purpose_label);
+  String get search_filter_purpose_label => _resolve(
+    'search_filter_purpose_label',
+    (loc) => loc.search_filter_purpose_label,
+  );
 
   @override
-  String get search_filter_property_type_label =>
-      _resolve('search_filter_property_type_label', (loc) => loc.search_filter_property_type_label);
+  String get search_filter_property_type_label => _resolve(
+    'search_filter_property_type_label',
+    (loc) => loc.search_filter_property_type_label,
+  );
 
   @override
-  String get search_filter_location_label =>
-      _resolve('search_filter_location_label', (loc) => loc.search_filter_location_label);
+  String get search_filter_location_label => _resolve(
+    'search_filter_location_label',
+    (loc) => loc.search_filter_location_label,
+  );
 
   @override
-  String get search_filter_governorate_hint =>
-      _resolve('search_filter_governorate_hint', (loc) => loc.search_filter_governorate_hint);
+  String get search_filter_governorate_hint => _resolve(
+    'search_filter_governorate_hint',
+    (loc) => loc.search_filter_governorate_hint,
+  );
 
   @override
   String get search_filter_city_hint =>
@@ -2568,48 +2607,70 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('search_filter_area_hint', (loc) => loc.search_filter_area_hint);
 
   @override
-  String get search_filter_price_range_label =>
-      _resolve('search_filter_price_range_label', (loc) => loc.search_filter_price_range_label);
+  String get search_filter_price_range_label => _resolve(
+    'search_filter_price_range_label',
+    (loc) => loc.search_filter_price_range_label,
+  );
 
   @override
-  String get search_filter_price_min_hint =>
-      _resolve('search_filter_price_min_hint', (loc) => loc.search_filter_price_min_hint);
+  String get search_filter_price_min_hint => _resolve(
+    'search_filter_price_min_hint',
+    (loc) => loc.search_filter_price_min_hint,
+  );
 
   @override
-  String get search_filter_price_max_hint =>
-      _resolve('search_filter_price_max_hint', (loc) => loc.search_filter_price_max_hint);
+  String get search_filter_price_max_hint => _resolve(
+    'search_filter_price_max_hint',
+    (loc) => loc.search_filter_price_max_hint,
+  );
 
   @override
-  String get search_filter_price_currency_label =>
-      _resolve('search_filter_price_currency_label', (loc) => loc.search_filter_price_currency_label);
+  String get search_filter_price_currency_label => _resolve(
+    'search_filter_price_currency_label',
+    (loc) => loc.search_filter_price_currency_label,
+  );
 
   @override
-  String get search_filter_price_min_max_error =>
-      _resolve('search_filter_price_min_max_error', (loc) => loc.search_filter_price_min_max_error);
+  String get search_filter_price_min_max_error => _resolve(
+    'search_filter_price_min_max_error',
+    (loc) => loc.search_filter_price_min_max_error,
+  );
 
   @override
-  String get search_filter_price_no_exchange_rate =>
-      _resolve('search_filter_price_no_exchange_rate', (loc) => loc.search_filter_price_no_exchange_rate);
+  String get search_filter_price_no_exchange_rate => _resolve(
+    'search_filter_price_no_exchange_rate',
+    (loc) => loc.search_filter_price_no_exchange_rate,
+  );
 
   @override
-  String get search_filter_rooms_label =>
-      _resolve('search_filter_rooms_label', (loc) => loc.search_filter_rooms_label);
+  String get search_filter_rooms_label => _resolve(
+    'search_filter_rooms_label',
+    (loc) => loc.search_filter_rooms_label,
+  );
 
   @override
-  String get search_filter_rooms_exactly =>
-      _resolve('search_filter_rooms_exactly', (loc) => loc.search_filter_rooms_exactly);
+  String get search_filter_rooms_exactly => _resolve(
+    'search_filter_rooms_exactly',
+    (loc) => loc.search_filter_rooms_exactly,
+  );
 
   @override
-  String get search_filter_rooms_at_least =>
-      _resolve('search_filter_rooms_at_least', (loc) => loc.search_filter_rooms_at_least);
+  String get search_filter_rooms_at_least => _resolve(
+    'search_filter_rooms_at_least',
+    (loc) => loc.search_filter_rooms_at_least,
+  );
 
   @override
-  String get search_filter_bathrooms_label =>
-      _resolve('search_filter_bathrooms_label', (loc) => loc.search_filter_bathrooms_label);
+  String get search_filter_bathrooms_label => _resolve(
+    'search_filter_bathrooms_label',
+    (loc) => loc.search_filter_bathrooms_label,
+  );
 
   @override
-  String get search_filter_area_size_label =>
-      _resolve('search_filter_area_size_label', (loc) => loc.search_filter_area_size_label);
+  String get search_filter_area_size_label => _resolve(
+    'search_filter_area_size_label',
+    (loc) => loc.search_filter_area_size_label,
+  );
 
   // §3.5 Empty / Error States
   @override
@@ -2621,14 +2682,16 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('search_empty_subtitle', (loc) => loc.search_empty_subtitle);
 
   @override
-  String get search_empty_clear_filters =>
-      _resolve('search_empty_clear_filters', (loc) => loc.search_empty_clear_filters);
+  String get search_empty_clear_filters => _resolve(
+    'search_empty_clear_filters',
+    (loc) => loc.search_empty_clear_filters,
+  );
 
   @override
   String search_arabic_hint(String suggestion) => _resolve(
-        'search_arabic_hint',
-        (loc) => loc.search_arabic_hint(suggestion),
-      );
+    'search_arabic_hint',
+    (loc) => loc.search_arabic_hint(suggestion),
+  );
 
   @override
   String get search_loading =>

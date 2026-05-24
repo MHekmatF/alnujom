@@ -44,8 +44,8 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context);
     return BlocProvider<HomeBloc>(
-      create: (_) => getIt<HomeBloc>()
-        ..add(HomeFeedLoadRequested(locale: locale)),
+      create: (_) =>
+          getIt<HomeBloc>()..add(HomeFeedLoadRequested(locale: locale)),
       child: const _HomeView(),
     );
   }
@@ -101,7 +101,8 @@ class _HomeViewState extends State<_HomeView> {
         actions: [
           const LocaleToggleAction(),
           BlocSelector<AuthBloc, AuthState, bool>(
-            selector: (state) => state is Authenticated ||
+            selector: (state) =>
+                state is Authenticated ||
                 state is PendingApproval ||
                 state is Rejected ||
                 state is Suspended,
@@ -135,9 +136,9 @@ class _HomeViewState extends State<_HomeView> {
             builder: (context, state) {
               return RefreshIndicator(
                 onRefresh: () async {
-                  context
-                      .read<HomeBloc>()
-                      .add(HomeFeedRefreshRequested(locale: locale));
+                  context.read<HomeBloc>().add(
+                    HomeFeedRefreshRequested(locale: locale),
+                  );
                 },
                 child: _buildBody(context, state, currenciesByCode, l10n),
               );
@@ -203,10 +204,8 @@ class _HomeViewState extends State<_HomeView> {
               message: l10n.error_could_not_load_listings,
               retryLabel: l10n.action_retry,
               onRetry: () => context.read<HomeBloc>().add(
-                    HomeFeedLoadRequested(
-                      locale: Localizations.localeOf(context),
-                    ),
-                  ),
+                HomeFeedLoadRequested(locale: Localizations.localeOf(context)),
+              ),
             ),
           ),
         ];
@@ -263,8 +262,8 @@ class _FeedFooter extends StatelessWidget {
           child: Text(
             l10n.home_no_more_listings,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ),
       );
@@ -287,7 +286,8 @@ class _EmptyView extends StatelessWidget {
           Authenticated(:final profile) => profile,
           _ => null,
         };
-        final isApprovedPublisher = profile != null &&
+        final isApprovedPublisher =
+            profile != null &&
             profile.accountStatus == AccountStatus.approved &&
             profile.publisherStatus == PublisherStatus.approved;
 
@@ -312,9 +312,8 @@ class _EmptyView extends StatelessWidget {
                 OutlinedButton.icon(
                   icon: const Icon(Icons.add_home_outlined),
                   label: Text(l10n.home_empty_publish_first_listing),
-                  onPressed: () => context.pushNamed(
-                    AppRouteNames.publisherListingsCreate,
-                  ),
+                  onPressed: () =>
+                      context.pushNamed(AppRouteNames.publisherListingsCreate),
                 )
               else
                 OutlinedButton.icon(
@@ -360,10 +359,7 @@ class _ErrorView extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.lg),
-          OutlinedButton(
-            onPressed: onRetry,
-            child: Text(retryLabel),
-          ),
+          OutlinedButton(onPressed: onRetry, child: Text(retryLabel)),
         ],
       ),
     );

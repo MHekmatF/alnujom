@@ -75,9 +75,7 @@ class ListingReviewRepositoryImpl implements ListingReviewRepository {
     try {
       final raw = await _datasource.loadListingPreview(listingId);
       if (raw == null) {
-        return const FailureResult(
-          UnknownFailure('Listing not found.'),
-        );
+        return const FailureResult(UnknownFailure('Listing not found.'));
       }
 
       final listing = ListingDto.fromMap(raw).toEntity();
@@ -94,20 +92,24 @@ class ListingReviewRepositoryImpl implements ListingReviewRepository {
       final pricesRaw = raw['prices'];
       final prices = pricesRaw is List
           ? pricesRaw
-              .map((p) => ListingPriceDto.fromMap(
+                .map(
+                  (p) => ListingPriceDto.fromMap(
                     Map<String, dynamic>.from(p as Map),
-                  ).toEntity())
-              .toList()
+                  ).toEntity(),
+                )
+                .toList()
           : <dynamic>[];
 
       // media: array of rows.
       final mediaRaw = raw['media'];
       final media = mediaRaw is List
           ? mediaRaw
-              .map((m) => ListingMediaDto.fromJson(
+                .map(
+                  (m) => ListingMediaDto.fromJson(
                     Map<String, dynamic>.from(m as Map),
-                  ).toEntity())
-              .toList()
+                  ).toEntity(),
+                )
+                .toList()
           : <dynamic>[];
 
       // governorate / city / area: single nested row (or null if FK is null).
@@ -233,8 +235,9 @@ class ListingReviewRepositoryImpl implements ListingReviewRepository {
           );
         }
         final returnedDetailRaw = data['reason_detail'];
-        final returnedDetail =
-            returnedDetailRaw is String ? returnedDetailRaw : null;
+        final returnedDetail = returnedDetailRaw is String
+            ? returnedDetailRaw
+            : null;
         final RejectionReason returnedPreset;
         try {
           returnedPreset = RejectionReason.fromKey(presetKey);
@@ -280,9 +283,7 @@ class ListingReviewRepositoryImpl implements ListingReviewRepository {
         return const InvalidReasonPresetFailure();
       case 'reason_detail_too_long':
         final max = data is Map ? data['max'] : null;
-        return ReasonDetailTooLongFailure(
-          max: max is int ? max : 500,
-        );
+        return ReasonDetailTooLongFailure(max: max is int ? max : 500);
       case 'listing_not_found':
         return const UnknownFailure('listing_not_found');
       case 'invalid_listing_id':

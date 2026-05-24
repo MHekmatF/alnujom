@@ -329,15 +329,15 @@ _i174.GetIt $initGetIt(
   gh.factory<_i311.SupabaseCurrenciesDatasource>(
     () => _i311.SupabaseCurrenciesDatasource(gh<_i454.SupabaseClient>()),
   );
+  gh.factory<_i333.SupabasePublisherDashboardDatasource>(
+    () =>
+        _i333.SupabasePublisherDashboardDatasource(gh<_i454.SupabaseClient>()),
+  );
   gh.factory<_i732.SupabaseHomeFeedDatasource>(
     () => _i732.SupabaseHomeFeedDatasource(gh<_i454.SupabaseClient>()),
   );
   gh.factory<_i1006.SupabaseListingDetailsDatasource>(
     () => _i1006.SupabaseListingDetailsDatasource(gh<_i454.SupabaseClient>()),
-  );
-  gh.factory<_i333.SupabasePublisherDashboardDatasource>(
-    () =>
-        _i333.SupabasePublisherDashboardDatasource(gh<_i454.SupabaseClient>()),
   );
   gh.factory<_i713.SupabaseSearchDatasource>(
     () => _i713.SupabaseSearchDatasource(gh<_i454.SupabaseClient>()),

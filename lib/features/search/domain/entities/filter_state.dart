@@ -87,15 +87,19 @@ class FilterState extends Equatable {
     return FilterState(
       query: clearQuery ? null : (query ?? this.query),
       purpose: clearPurpose ? null : (purpose ?? this.purpose),
-      propertyType:
-          clearPropertyType ? null : (propertyType ?? this.propertyType),
-      governorateId:
-          clearGovernorateId ? null : (governorateId ?? this.governorateId),
+      propertyType: clearPropertyType
+          ? null
+          : (propertyType ?? this.propertyType),
+      governorateId: clearGovernorateId
+          ? null
+          : (governorateId ?? this.governorateId),
       cityId: clearCityId ? null : (cityId ?? this.cityId),
       areaId: clearAreaId ? null : (areaId ?? this.areaId),
       priceMin: clearPriceMin ? null : (priceMin ?? this.priceMin),
       priceMax: clearPriceMax ? null : (priceMax ?? this.priceMax),
-      priceCurrency: clearPriceCurrency ? null : (priceCurrency ?? this.priceCurrency),
+      priceCurrency: clearPriceCurrency
+          ? null
+          : (priceCurrency ?? this.priceCurrency),
       rooms: clearRooms ? null : (rooms ?? this.rooms),
       roomsMode: roomsMode ?? this.roomsMode,
       bathrooms: clearBathrooms ? null : (bathrooms ?? this.bathrooms),
@@ -107,20 +111,20 @@ class FilterState extends Equatable {
 
   @override
   List<Object?> get props => [
-        query,
-        purpose,
-        propertyType,
-        governorateId,
-        cityId,
-        areaId,
-        priceMin,
-        priceMax,
-        priceCurrency,
-        rooms,
-        roomsMode,
-        bathrooms,
-        bathroomsMode,
-        areaSizeMin,
-        areaSizeMax,
-      ];
+    query,
+    purpose,
+    propertyType,
+    governorateId,
+    cityId,
+    areaId,
+    priceMin,
+    priceMax,
+    priceCurrency,
+    rooms,
+    roomsMode,
+    bathrooms,
+    bathroomsMode,
+    areaSizeMin,
+    areaSizeMax,
+  ];
 }

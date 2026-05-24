@@ -142,7 +142,9 @@ class ImageIsolateWorker {
     required bool isRtl,
   }) async {
     if (!_started || _workerSendPort == null) {
-      throw StateError('ImageIsolateWorker.start() must be called before processImage()');
+      throw StateError(
+        'ImageIsolateWorker.start() must be called before processImage()',
+      );
     }
 
     final replyPort = ReceivePort();
@@ -154,19 +156,25 @@ class ImageIsolateWorker {
         if (message.bytes != null) {
           completer.complete(message.bytes);
         } else {
-          completer.completeError(message.error ?? Exception('Unknown isolate error'));
+          completer.completeError(
+            message.error ?? Exception('Unknown isolate error'),
+          );
         }
       } else {
-        completer.completeError(Exception('Unexpected isolate response: $message'));
+        completer.completeError(
+          Exception('Unexpected isolate response: $message'),
+        );
       }
     });
 
-    _workerSendPort!.send(_ImageJob(
-      replyTo: replyPort.sendPort,
-      sourceBytes: sourceBytes,
-      watermarkAssetBytes: watermarkAssetBytes,
-      isRtl: isRtl,
-    ));
+    _workerSendPort!.send(
+      _ImageJob(
+        replyTo: replyPort.sendPort,
+        sourceBytes: sourceBytes,
+        watermarkAssetBytes: watermarkAssetBytes,
+        isRtl: isRtl,
+      ),
+    );
 
     return completer.future;
   }

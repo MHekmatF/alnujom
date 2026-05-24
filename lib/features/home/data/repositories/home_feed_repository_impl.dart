@@ -33,13 +33,10 @@ class HomeFeedRepositoryImpl implements HomeFeedRepository {
   }) async {
     try {
       final dtos = await _datasource.fetchPage(cursor: cursor);
-      final entities =
-          dtos.map((dto) => dto.toEntity(locale: locale)).toList();
+      final entities = dtos.map((dto) => dto.toEntity(locale: locale)).toList();
       return Success(entities);
     } on SocketException catch (e, st) {
-      return FailureResult(
-        NetworkFailure(e.message, cause: e, stackTrace: st),
-      );
+      return FailureResult(NetworkFailure(e.message, cause: e, stackTrace: st));
     } on TimeoutException catch (e, st) {
       return FailureResult(
         NetworkFailure(
@@ -54,9 +51,7 @@ class HomeFeedRepositoryImpl implements HomeFeedRepository {
       // as a NetworkFailure so the UI surfaces the FR-014 retry affordance.
       // We deliberately do not import `package:supabase_flutter` per FR-030.
       final message = e is Error ? e.toString() : e.toString();
-      return FailureResult(
-        NetworkFailure(message, cause: e, stackTrace: st),
-      );
+      return FailureResult(NetworkFailure(message, cause: e, stackTrace: st));
     }
   }
 }

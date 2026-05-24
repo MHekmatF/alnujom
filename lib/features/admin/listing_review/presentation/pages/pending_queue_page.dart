@@ -67,17 +67,14 @@ class _PendingQueueViewState extends State<_PendingQueueView> {
           if (state.failure != null && state.listings.isEmpty) {
             return _ErrorState(
               message: state.failure!.message,
-              onRetry: () => ctx
-                  .read<PendingQueueBloc>()
-                  .add(const PendingQueueRefresh()),
+              onRetry: () =>
+                  ctx.read<PendingQueueBloc>().add(const PendingQueueRefresh()),
             );
           }
           if (state.isEmpty) {
             return RefreshIndicator(
               onRefresh: () async {
-                ctx
-                    .read<PendingQueueBloc>()
-                    .add(const PendingQueueRefresh());
+                ctx.read<PendingQueueBloc>().add(const PendingQueueRefresh());
               },
               child: ListView(
                 children: [
@@ -95,8 +92,8 @@ class _PendingQueueViewState extends State<_PendingQueueView> {
             child: ListView.separated(
               controller: _scrollController,
               padding: const EdgeInsets.all(AppSpacing.md),
-              itemCount: state.listings.length +
-                  (state.isLoadingNextPage ? 1 : 0),
+              itemCount:
+                  state.listings.length + (state.isLoadingNextPage ? 1 : 0),
               separatorBuilder: (_, __) =>
                   const SizedBox(height: AppSpacing.sm),
               itemBuilder: (ctx, index) {

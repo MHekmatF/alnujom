@@ -66,12 +66,12 @@ class SearchState extends Equatable {
 
   @override
   List<Object?> get props => [
-        results,
-        filters,
-        sort,
-        cursor,
-        status,
-        failure,
-        hasNextPage,
-      ];
+    results,
+    filters,
+    sort,
+    cursor,
+    status,
+    failure,
+    hasNextPage,
+  ];
 }

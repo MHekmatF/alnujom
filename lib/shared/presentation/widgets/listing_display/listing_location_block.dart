@@ -45,12 +45,7 @@ class ListingLocationBlock extends StatelessWidget {
               color: theme.colorScheme.primary,
             ),
             const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: Text(
-                joined,
-                style: theme.textTheme.bodyLarge,
-              ),
-            ),
+            Expanded(child: Text(joined, style: theme.textTheme.bodyLarge)),
           ],
         ),
         if (addressText != null && addressText!.trim().isNotEmpty) ...[

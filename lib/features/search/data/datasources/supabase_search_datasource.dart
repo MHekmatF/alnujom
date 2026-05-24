@@ -70,8 +70,8 @@ class SupabaseSearchDatasource {
             (r as Map<String, dynamic>)['target_currency'] as String:
                 // NUMERIC may arrive as String on some Supabase driver versions.
                 r['rate'] is num
-                    ? (r['rate'] as num).toDouble()
-                    : double.parse(r['rate'].toString()),
+                ? (r['rate'] as num).toDouble()
+                : double.parse(r['rate'].toString()),
         };
         final usdRate = rateMap['USD'];
         final sypRate = rateMap['SYP'];
@@ -129,15 +129,16 @@ class SupabaseSearchDatasource {
 
     if (filters.rooms != null) {
       params['p_rooms'] = filters.rooms;
-      params['p_rooms_mode'] =
-          filters.roomsMode == CountFilterMode.exactly ? 'exactly' : 'at_least';
+      params['p_rooms_mode'] = filters.roomsMode == CountFilterMode.exactly
+          ? 'exactly'
+          : 'at_least';
     }
     if (filters.bathrooms != null) {
       params['p_bathrooms'] = filters.bathrooms;
       params['p_bathrooms_mode'] =
           filters.bathroomsMode == CountFilterMode.exactly
-              ? 'exactly'
-              : 'at_least';
+          ? 'exactly'
+          : 'at_least';
     }
     if (filters.areaSizeMin != null) {
       params['p_area_size_min'] = filters.areaSizeMin;
@@ -149,8 +150,9 @@ class SupabaseSearchDatasource {
     params['p_sort'] = _sortToRpc(sort);
 
     if (cursor is NewestCursor) {
-      params['p_cursor_published_at'] =
-          cursor.publishedAt.toUtc().toIso8601String();
+      params['p_cursor_published_at'] = cursor.publishedAt
+          .toUtc()
+          .toIso8601String();
       params['p_cursor_id_newest'] = cursor.id;
     } else if (cursor is PriceCursor) {
       params['p_cursor_price_amount'] = cursor.priceAmount;

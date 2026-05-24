@@ -27,12 +27,14 @@ class SearchResultCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final isAr = Localizations.localeOf(context).languageCode == 'ar';
-    final governorateName =
-        isAr ? item.governorateNameAr : item.governorateNameEn;
+    final governorateName = isAr
+        ? item.governorateNameAr
+        : item.governorateNameEn;
     final cityName = isAr ? item.cityNameAr : item.cityNameEn;
-    final locationLabel = [governorateName, cityName]
-        .where((s) => s.isNotEmpty)
-        .join(', ');
+    final locationLabel = [
+      governorateName,
+      cityName,
+    ].where((s) => s.isNotEmpty).join(', ');
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -48,61 +50,61 @@ class SearchResultCard extends StatelessWidget {
         child: SizedBox(
           height: 100,
           child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(
-              width: 100,
-              height: 100,
-              child: _CardImage(
-                imageUrl: item.mainImagePath,
-                fallbackLabel: l10n.image_unavailable,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                width: 100,
+                height: 100,
+                child: _CardImage(
+                  imageUrl: item.mainImagePath,
+                  fallbackLabel: l10n.image_unavailable,
+                ),
               ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsetsDirectional.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      item.title,
-                      style: Theme.of(context).textTheme.titleSmall,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.start,
-                    ),
-                    if (locationLabel.isNotEmpty)
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsetsDirectional.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        item.title,
+                        style: Theme.of(context).textTheme.titleSmall,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.start,
+                      ),
+                      if (locationLabel.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsetsDirectional.only(top: 4),
+                          child: Text(
+                            locationLabel,
+                            style: Theme.of(context).textTheme.bodySmall,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.start,
+                          ),
+                        ),
                       Padding(
                         padding: const EdgeInsetsDirectional.only(top: 4),
                         child: Text(
-                          locationLabel,
-                          style: Theme.of(context).textTheme.bodySmall,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                          l10n.priceWithCurrency(
+                            item.primaryAmount.toStringAsFixed(0),
+                            item.primaryCurrency,
+                          ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
                           textAlign: TextAlign.start,
                         ),
                       ),
-                    Padding(
-                      padding: const EdgeInsetsDirectional.only(top: 4),
-                      child: Text(
-                        l10n.priceWithCurrency(
-                          item.primaryAmount.toStringAsFixed(0),
-                          item.primaryCurrency,
-                        ),
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color:
-                                  Theme.of(context).colorScheme.primary,
-                            ),
-                        textAlign: TextAlign.start,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
           ),
         ),
       ),

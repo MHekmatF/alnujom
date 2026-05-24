@@ -24,7 +24,9 @@ class SupabaseListingDetailsDatasource {
   final supabase.SupabaseClient _client;
 
   Future<ListingDetailsAggregateDto?> fetchListing(String listingId) async {
-    final row = await _client.from('listings').select('''
+    final row = await _client
+        .from('listings')
+        .select('''
       id, title, property_type, purpose, governorate_id, city_id, area_id,
       phone, whatsapp, contact_name_visibility, location_visibility,
       area_size, rooms, bathrooms, floor, published_at,
@@ -36,7 +38,9 @@ class SupabaseListingDetailsDatasource {
       governorate:governorates(id, key, display_name, is_active, is_system, created_at, updated_at),
       city:cities(id, key, display_name, is_active, is_system, created_at, updated_at),
       area:areas(id, key, display_name, is_active, created_at, updated_at)
-    ''').eq('id', listingId).maybeSingle();
+    ''')
+        .eq('id', listingId)
+        .maybeSingle();
     // Note: publisher embedded select removed at Phase 13 verification time —
     // public.listings has no FK from publisher_user_id (the data-model.md §3.1
     // assumption was wrong; profiles has zero FKs to auth.users either, so

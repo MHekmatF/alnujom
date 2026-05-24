@@ -17,7 +17,7 @@ import 'moderation_history_state.dart';
 @injectable
 class ModerationHistoryCubit extends Cubit<ModerationHistoryState> {
   ModerationHistoryCubit(this._loadHistory)
-      : super(const ModerationHistoryInitial());
+    : super(const ModerationHistoryInitial());
 
   final LoadModerationHistoryUseCase _loadHistory;
 

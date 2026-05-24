@@ -31,30 +31,24 @@ class ContactBlock extends StatelessWidget {
         const SizedBox(height: AppSpacing.sm),
         // Call CTA
         OutlinedButton.icon(
-          onPressed: () => _showComingSoon(
-            context,
-            l10n.contact_call_coming_soon,
-          ),
+          onPressed: () =>
+              _showComingSoon(context, l10n.contact_call_coming_soon),
           icon: const Icon(Icons.phone_outlined),
           label: Text(l10n.cta_call),
         ),
         const SizedBox(height: AppSpacing.sm),
         // WhatsApp CTA
         OutlinedButton.icon(
-          onPressed: () => _showComingSoon(
-            context,
-            l10n.contact_whatsapp_coming_soon,
-          ),
+          onPressed: () =>
+              _showComingSoon(context, l10n.contact_whatsapp_coming_soon),
           icon: const Icon(Icons.chat_outlined),
           label: Text(l10n.cta_whatsapp),
         ),
         const SizedBox(height: AppSpacing.sm),
         // Send Inquiry CTA
         OutlinedButton.icon(
-          onPressed: () => _showComingSoon(
-            context,
-            l10n.contact_inquiry_coming_soon,
-          ),
+          onPressed: () =>
+              _showComingSoon(context, l10n.contact_inquiry_coming_soon),
           icon: const Icon(Icons.email_outlined),
           label: Text(l10n.cta_send_inquiry),
         ),

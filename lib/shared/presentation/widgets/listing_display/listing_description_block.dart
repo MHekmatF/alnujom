@@ -44,8 +44,7 @@ class _ListingDescriptionBlockState extends State<ListingDescriptionBlock> {
             widget.description,
             style: theme.textTheme.bodyLarge,
             maxLines: _expanded ? null : widget.collapsedMaxLines,
-            overflow:
-                _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
+            overflow: _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
           ),
         ),
         if (!_expanded) ...[

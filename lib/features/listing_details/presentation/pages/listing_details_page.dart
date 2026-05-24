@@ -47,8 +47,8 @@ class ListingDetailsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => getIt<ListingDetailsBloc>()
-        ..add(ListingDetailsLoadRequested(id)),
+      create: (_) =>
+          getIt<ListingDetailsBloc>()..add(ListingDetailsLoadRequested(id)),
       child: _ListingDetailsView(id: id),
     );
   }
@@ -361,11 +361,7 @@ class _ErrorView extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: theme.colorScheme.error,
-            ),
+            Icon(Icons.error_outline, size: 64, color: theme.colorScheme.error),
             const SizedBox(height: AppSpacing.md),
             Text(
               l10n.error_could_not_load_listing,
@@ -373,10 +369,7 @@ class _ErrorView extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.lg),
-            OutlinedButton(
-              onPressed: onRetry,
-              child: Text(l10n.action_retry),
-            ),
+            OutlinedButton(onPressed: onRetry, child: Text(l10n.action_retry)),
           ],
         ),
       ),

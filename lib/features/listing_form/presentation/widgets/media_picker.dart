@@ -62,9 +62,9 @@ class MediaPicker extends StatelessWidget {
                 media: m,
                 isEditable: isEditable,
                 onSetMain: m.kind == ListingMediaKind.image
-                    ? () => context
-                          .read<ListingFormBloc>()
-                          .add(MediaSetMain(m.id))
+                    ? () => context.read<ListingFormBloc>().add(
+                        MediaSetMain(m.id),
+                      )
                     : null,
                 onDelete: () => _confirmDelete(context, m),
                 onMoveUp: index > 0
@@ -79,9 +79,9 @@ class MediaPicker extends StatelessWidget {
             return MediaThumbnail.ghost(
               progress: ghost.value,
               onDismiss: ghost.value is MediaUploadProgressError
-                  ? () => context
-                        .read<ListingFormBloc>()
-                        .add(MediaUploadDismissed(ghost.key))
+                  ? () => context.read<ListingFormBloc>().add(
+                      MediaUploadDismissed(ghost.key),
+                    )
                   : null,
             );
           },
@@ -149,11 +149,7 @@ class _EmptyState extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(
-            Icons.image_outlined,
-            size: 48,
-            color: scheme.onSurfaceVariant,
-          ),
+          Icon(Icons.image_outlined, size: 48, color: scheme.onSurfaceVariant),
           const SizedBox(height: AppSpacing.md),
           Text(
             l10n.mediaActionReorderHint,

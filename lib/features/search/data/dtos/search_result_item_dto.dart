@@ -45,8 +45,7 @@ class SearchResultItemDto {
     return SearchResultItemDto(
       id: json['id'] as String,
       title: (json['title'] as String?) ?? '',
-      propertyType:
-          PropertyTypeDb.fromDbValue(json['property_type'] as String),
+      propertyType: PropertyTypeDb.fromDbValue(json['property_type'] as String),
       purpose: ListingPurposeDb.fromDbValue(json['purpose'] as String),
       governorateNameAr: (json['governorate_name_ar'] as String?) ?? '',
       governorateNameEn: (json['governorate_name_en'] as String?) ?? '',

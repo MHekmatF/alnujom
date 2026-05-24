@@ -47,14 +47,16 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     Emitter<SearchState> emit,
   ) async {
     _debounce?.cancel();
-    emit(state.copyWith(
-      filters: event.filters,
-      status: SearchStatus.loading,
-      results: const [],
-      clearCursor: true,
-      hasNextPage: false,
-      clearFailure: true,
-    ));
+    emit(
+      state.copyWith(
+        filters: event.filters,
+        status: SearchStatus.loading,
+        results: const [],
+        clearCursor: true,
+        hasNextPage: false,
+        clearFailure: true,
+      ),
+    );
     final result = await _useCase(
       filters: event.filters,
       sort: state.sort,
@@ -63,13 +65,15 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     );
     switch (result) {
       case Success<List<SearchResultItem>>(:final value):
-        emit(state.copyWith(
-          results: value,
-          status: SearchStatus.success,
-          cursor: _makeCursor(value, state.sort),
-          clearCursor: value.isEmpty,
-          hasNextPage: value.length == _pageSize,
-        ));
+        emit(
+          state.copyWith(
+            results: value,
+            status: SearchStatus.success,
+            cursor: _makeCursor(value, state.sort),
+            clearCursor: value.isEmpty,
+            hasNextPage: value.length == _pageSize,
+          ),
+        );
       case FailureResult<List<SearchResultItem>>(:final failure):
         emit(state.copyWith(status: SearchStatus.failure, failure: failure));
     }
@@ -79,14 +83,16 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     SearchSortChanged event,
     Emitter<SearchState> emit,
   ) async {
-    emit(state.copyWith(
-      sort: event.sort,
-      status: SearchStatus.loading,
-      results: const [],
-      clearCursor: true,
-      hasNextPage: false,
-      clearFailure: true,
-    ));
+    emit(
+      state.copyWith(
+        sort: event.sort,
+        status: SearchStatus.loading,
+        results: const [],
+        clearCursor: true,
+        hasNextPage: false,
+        clearFailure: true,
+      ),
+    );
     final result = await _useCase(
       filters: state.filters,
       sort: event.sort,
@@ -95,13 +101,15 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     );
     switch (result) {
       case Success<List<SearchResultItem>>(:final value):
-        emit(state.copyWith(
-          results: value,
-          status: SearchStatus.success,
-          cursor: _makeCursor(value, event.sort),
-          clearCursor: value.isEmpty,
-          hasNextPage: value.length == _pageSize,
-        ));
+        emit(
+          state.copyWith(
+            results: value,
+            status: SearchStatus.success,
+            cursor: _makeCursor(value, event.sort),
+            clearCursor: value.isEmpty,
+            hasNextPage: value.length == _pageSize,
+          ),
+        );
       case FailureResult<List<SearchResultItem>>(:final failure):
         emit(state.copyWith(status: SearchStatus.failure, failure: failure));
     }
@@ -114,12 +122,14 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 400), () {
       final trimmed = event.query.trim();
-      add(SearchFiltersApplied(
-        filters: state.filters.copyWith(
-          query: trimmed.isEmpty ? null : trimmed,
-          clearQuery: trimmed.isEmpty,
+      add(
+        SearchFiltersApplied(
+          filters: state.filters.copyWith(
+            query: trimmed.isEmpty ? null : trimmed,
+            clearQuery: trimmed.isEmpty,
+          ),
         ),
-      ));
+      );
     });
   }
 
@@ -138,13 +148,15 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     switch (result) {
       case Success<List<SearchResultItem>>(:final value):
         final combined = [...state.results, ...value];
-        emit(state.copyWith(
-          results: combined,
-          status: SearchStatus.success,
-          cursor: _makeCursor(value, state.sort),
-          clearCursor: value.isEmpty,
-          hasNextPage: value.length == _pageSize,
-        ));
+        emit(
+          state.copyWith(
+            results: combined,
+            status: SearchStatus.success,
+            cursor: _makeCursor(value, state.sort),
+            clearCursor: value.isEmpty,
+            hasNextPage: value.length == _pageSize,
+          ),
+        );
       case FailureResult<List<SearchResultItem>>():
         // Pagination failure: do NOT flip global status to failure (the user
         // keeps their existing results). Just stop further pagination.
@@ -156,13 +168,15 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     SearchRefreshRequested event,
     Emitter<SearchState> emit,
   ) async {
-    emit(state.copyWith(
-      status: SearchStatus.loading,
-      results: const [],
-      clearCursor: true,
-      hasNextPage: false,
-      clearFailure: true,
-    ));
+    emit(
+      state.copyWith(
+        status: SearchStatus.loading,
+        results: const [],
+        clearCursor: true,
+        hasNextPage: false,
+        clearFailure: true,
+      ),
+    );
     final result = await _useCase(
       filters: state.filters,
       sort: state.sort,
@@ -171,13 +185,15 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     );
     switch (result) {
       case Success<List<SearchResultItem>>(:final value):
-        emit(state.copyWith(
-          results: value,
-          status: SearchStatus.success,
-          cursor: _makeCursor(value, state.sort),
-          clearCursor: value.isEmpty,
-          hasNextPage: value.length == _pageSize,
-        ));
+        emit(
+          state.copyWith(
+            results: value,
+            status: SearchStatus.success,
+            cursor: _makeCursor(value, state.sort),
+            clearCursor: value.isEmpty,
+            hasNextPage: value.length == _pageSize,
+          ),
+        );
       case FailureResult<List<SearchResultItem>>(:final failure):
         emit(state.copyWith(status: SearchStatus.failure, failure: failure));
     }

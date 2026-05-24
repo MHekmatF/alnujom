@@ -26,7 +26,9 @@ class PriceRangeInput extends StatelessWidget {
             padding: const EdgeInsetsDirectional.only(end: 8),
             child: TextFormField(
               controller: minController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               decoration: InputDecoration(
                 hintText: l10n.search_filter_price_min_hint,
               ),
@@ -38,7 +40,9 @@ class PriceRangeInput extends StatelessWidget {
             padding: const EdgeInsetsDirectional.only(start: 8),
             child: TextFormField(
               controller: maxController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               decoration: InputDecoration(
                 hintText: l10n.search_filter_price_max_hint,
               ),
@@ -48,9 +52,7 @@ class PriceRangeInput extends StatelessWidget {
                     text.isNotEmpty) {
                   final minVal = double.tryParse(minController.text);
                   final maxVal = double.tryParse(text);
-                  if (minVal != null &&
-                      maxVal != null &&
-                      minVal > maxVal) {
+                  if (minVal != null && maxVal != null && minVal > maxVal) {
                     return l10n.search_filter_price_min_max_error;
                   }
                 }

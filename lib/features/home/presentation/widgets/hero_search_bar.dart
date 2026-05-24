@@ -34,10 +34,7 @@ class HeroSearchBar extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(
-                  Icons.search,
-                  color: scheme.onSurfaceVariant,
-                ),
+                Icon(Icons.search, color: scheme.onSurfaceVariant),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
@@ -54,5 +51,4 @@ class HeroSearchBar extends StatelessWidget {
       ),
     );
   }
-
 }
