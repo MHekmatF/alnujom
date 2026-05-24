@@ -56,3 +56,11 @@ final class ReasonDetailTooLongFailure extends Failure {
       : super('Rejection reason detail exceeds maximum length.');
   final int max;
 }
+
+// Phase 13 (spec/013-home-and-details) — emitted when
+// ListingDetailsBloc's data source returns null from .maybeSingle().
+// The two cases (RLS hides the row OR row doesn't exist) are
+// indistinguishable per Constitution III + FR-024. Per R-68.
+final class ListingNotFoundFailure extends Failure {
+  const ListingNotFoundFailure() : super('Listing not found.');
+}
