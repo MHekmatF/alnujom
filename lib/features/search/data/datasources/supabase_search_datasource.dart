@@ -161,16 +161,28 @@ class SupabaseSearchDatasource {
 
     // ---------------------------------------------------------------
     // Call the RPC + map rows to entities.
+    //
+    // Image URL post-processing mirrors Phase 13's
+    // `SupabaseHomeFeedDatasource.fetchPage` — the RPC returns a raw storage
+    // path (e.g. `listings/<uuid>/image.jpg`); we rewrite it to a full public
+    // URL here so the presentation layer can hand it straight to
+    // `CachedNetworkImage` without itself importing supabase_flutter
+    // (preserves Constitution IX / FR-030 isolation: this file is the SOLE
+    // supabase_flutter importer under `lib/features/search/`).
     // ---------------------------------------------------------------
     final result = await _client.rpc('search_listings', params: params);
     final rows = result as List<dynamic>;
-    return rows
-        .map(
-          (row) => SearchResultItemDto.fromJson(
-            Map<String, dynamic>.from(row as Map),
-          ).toEntity(),
-        )
-        .toList();
+    return rows.map((row) {
+      final entity = SearchResultItemDto.fromJson(
+        Map<String, dynamic>.from(row as Map),
+      ).toEntity();
+      final path = entity.mainImagePath;
+      if (path == null || path.isEmpty || path.startsWith('http')) {
+        return entity;
+      }
+      final url = _client.storage.from('listing-images').getPublicUrl(path);
+      return entity.copyWith(mainImagePath: url);
+    }).toList();
   }
 
   static String _sortToRpc(SortOrder sort) {
