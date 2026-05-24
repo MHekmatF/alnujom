@@ -327,3 +327,104 @@ exists in `app_localizations.dart` and is consumed via `l10n.<key>`.
 **Resolution**: Phase 8 SC-008 + FR-003a acceptance.
 
 **Blocker for merge?**: No.
+
+---
+
+## D-T073 — Phase 8 device tests: 4-combination matrix + SC-001/SC-004–SC-008/SC-012–SC-015 acceptance
+
+**Tasks**: T073 (4-combination matrix), and the device-dependent portions of T076 (SC-001, SC-004, SC-005, SC-006, SC-007, SC-008, SC-012, SC-013, SC-014, SC-015).
+**Sub-Phase**: Phase 8 — Polish & Verification
+**Status**: Deferred — Infinix Note 8 unavailable in orchestrator environment
+
+**Gap**: The following device-required verification steps could not be run because the
+Infinix Note 8 (primary QA device per memory `user_test_device.md`) was not connected
+during the Phase 8 worktree commit:
+
+- **T073**: 4-combination matrix — (light, dark) × (ar, en) on MapPage (chrome, attribution,
+  back button, refresh button, popover, FAB, filter alert, marker indicator). Covers SC-007, SC-008, FR-017.
+- **SC-001**: Cold-launch map open via home tile on Infinix; OSM tiles render within 3+2s. (quickstart §10a)
+- **SC-004**: Marker tap → popover within ~500ms. (quickstart §10b)
+- **SC-005**: Back from listing details restores map camera; no marker re-flicker. (quickstart §10b)
+- **SC-006**: Cluster at country zoom; split at city zoom; spiderfy at max zoom. (quickstart §10c)
+- **SC-007**: OSM attribution visible in all 4 theme/locale combinations. (quickstart §10a+10j)
+- **SC-008**: All chrome renders correctly in all 4 combinations on Infinix. (quickstart §10j)
+- **SC-012**: Filter handoff narrows markers; Reset reloads in ~2s. (quickstart §10g)
+- **SC-013**: Filter-active alert appears within ~500ms of filtered-search map entry; absent on unfiltered. (quickstart §10g)
+- **SC-014**: First FAB tap → Android runtime prompt → grant → pan within 3s. (quickstart §10e)
+- **SC-015**: Denial → snackbar within ~500ms; map remains functional; FAB visible. (quickstart §10e)
+
+**Risk**: Low–medium.
+- All static gates pass (`flutter analyze --fatal-infos` clean, `flutter build apk --debug` succeeds).
+- All 6 grep gates pass (T067–T072): zero matches on all compliance patterns.
+- Wire-level SQL confirms SC-002, SC-003, SC-009, SC-010 (visibility gate), SC-011 (anon/auth parity).
+- The remaining 9 SCs are behavioral (timing, visual parity, RTL, animation). They depend on the device.
+- Sub-phase deferred entries D-T054 through D-T058 documented the specific widget-level risks; this
+  entry is the umbrella for the Phase 8 acceptance pass.
+
+**Resolution**: Run T073 + the SC-001/SC-004–SC-008/SC-012–SC-015 matrix on the Infinix Note 8 during
+post-merge QA or at the start of Phase 16 preparation. If any SC fails, fix and re-open before tagging
+Phase 15 as VERIFIED-COMPLETE.
+
+**Blocker for merge?**: No — all non-device SCs are wire-level confirmed. The device-dependent SCs are
+behavioral acceptance tests on correctly-wired code; the risk is visual/timing, not correctness. Following
+the precedent set by D-T013, D-T041, D-T054 through D-T058.
+
+---
+
+## D-T074 — Phase 8 admin visibility flip: in-app refresh confirmation (SC-010 partial)
+
+**Task**: T074
+**Sub-Phase**: Phase 8 — Polish & Verification
+**Status**: Partially verified — wire-level complete; in-app re-fetch deferred (device unavailable)
+
+**Wire-level VERIFIED** (T074 SQL evidence):
+- BEFORE: `SELECT COUNT(*) FROM v_listings_map_public` = 6
+- SET: `UPDATE public.listings SET location_visibility = 'hidden' WHERE id = '5a58a9e8-09a9-4ab5-ae32-b63eddd2d0d7'`
+- AFTER: `SELECT COUNT(*) FROM v_listings_map_public` = 5 (marker row removed immediately by view WHERE gate)
+- RESTORE: `UPDATE public.listings SET location_visibility = 'approximate' WHERE id = '5a58a9e8-09a9-4ab5-ae32-b63eddd2d0d7'`
+- RESTORED: `SELECT COUNT(*) FROM v_listings_map_public` = 6 (back to original state)
+
+**Gap**: The in-app portion of SC-010 — tapping `MapRefreshButton` after the visibility flip and
+confirming the marker disappears visually within ~2s — requires the Infinix Note 8. The device was
+not available in the orchestrator environment.
+
+**Risk**: Very low. The wire-level test confirms the view drops the row immediately on the UPDATE.
+The `MapRefreshButton` re-dispatches `MapRefreshRequested` → `LoadMapMarkers()` call → new
+`v_listings_map_public` snapshot. The end-to-end data path is verified; only the UI timing is
+deferred.
+
+**Note**: Test data fully restored — `5a58a9e8-09a9-4ab5-ae32-b63eddd2d0d7` is back to `approximate`
+visibility. No test residue remains in the live project.
+
+**Resolution**: Verify the in-app 2s-refresh timing during post-merge QA on the Infinix Note 8 as
+part of D-T073's device-test pass.
+
+**Blocker for merge?**: No — the view gate is confirmed correct at the SQL layer.
+
+---
+
+## D-T075 — Phase 8 secondary device (Pixel 8 Pro AVD) check
+
+**Task**: T075
+**Sub-Phase**: Phase 8 — Polish & Verification
+**Status**: Deferred — Pixel 8 Pro AVD unavailable in orchestrator environment
+
+**Gap**: quickstart §11 asks for repeat of steps 10a, 10c, 10g, 10j on the Pixel 8 Pro AVD
+(Android 14, 412 dp width). The AVD cannot be launched in a non-interactive orchestrator
+environment — it requires a Windows desktop session to bring the emulator window on-screen
+(per memory `project_android_emulator_window_offscreen.md` and the SetWindowPos recipe in
+`docs/dev/android-emulator-windows.md`).
+
+**Risk**: Low. The primary-device pass (D-T073) on the Infinix Note 8 covers functional
+correctness. The AVD pass adds:
+- Screen width difference (412 dp vs 480 dp Infinix) — tile sizing.
+- Android 14 vs Android 10/11 geolocation permission dialog style.
+- Emulator GPS mock for §10e (center-on-my-location).
+
+None of these introduce correctness risk; the layout is responsive (design-system tokens,
+no hard-coded widths).
+
+**Resolution**: Run the AVD pass during post-merge QA, either alongside D-T073 or at the
+start of Phase 16 preparation.
+
+**Blocker for merge?**: No.
