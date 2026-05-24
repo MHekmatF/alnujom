@@ -6,7 +6,7 @@
 //   SearchPage
 //     └─ BlocProvider<SearchBloc>(create: fresh-from-DI ..add initial filters)
 //          └─ _SearchPageView (Scaffold)
-//                ├─ AppBar(leading: Navigator.canPop? BackButton : home icon)
+//                ├─ AppBar(leading: DeepLinkAwareBackButton)
 //                │   └─ title: _SearchBar
 //                └─ body: Column
 //                      ├─ _SortAndFiltersRow
@@ -18,9 +18,9 @@
 //   • Property-type chip tap (extra: PropertyType) → /search,
 //     BLoC pre-filters by propertyType, _SearchBar.autofocus=false.
 //
-// Back-navigation: Q4=D `Navigator.canPop()` convention — this is the
-// second consumer (after Phase 13 ListingDetailsPage) per R-77. Extraction
-// of DeepLinkAwareBackButton deferred to third consumer.
+// Back-navigation: Q4=D `Navigator.canPop()` convention — extracted to
+// DeepLinkAwareBackButton per Phase 14 DEFERRED.md §D-001 (Phase 15 is the
+// third consumer trigger). Both call sites now consume the shared widget.
 //
 // Anonymous-access: no `AuthBloc` dependency. FR-015.
 import 'package:flutter/material.dart';
@@ -28,7 +28,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
-import '../../../../core/routing/app_router.dart';
+import '../../../../core/widgets/deep_link_aware_back_button.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../listing_form/domain/entities/listing.dart';
 import '../../domain/entities/filter_state.dart';
@@ -70,12 +70,7 @@ class _SearchPageView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: Navigator.canPop(context)
-            ? const BackButton()
-            : IconButton(
-                icon: const Icon(Icons.home),
-                onPressed: () => context.go(AppRoutes.home),
-              ),
+        leading: const DeepLinkAwareBackButton(),
         title: _SearchBar(autofocus: autofocusSearchBar),
         titleSpacing: 0,
       ),

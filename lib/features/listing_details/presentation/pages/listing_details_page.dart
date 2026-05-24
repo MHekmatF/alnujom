@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/widgets/deep_link_aware_back_button.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../features/currencies/domain/entities/currency.dart';
 import '../../../../features/listing_form/domain/entities/listing_media.dart';
@@ -61,35 +62,25 @@ class _ListingDetailsView extends StatelessWidget {
 
   final String id;
 
-  /// Q4=D conditional back handler per R-71 + contracts/phase13-deep-link-back-button.md.
-  ///
-  /// Inline helper — NOT extracted to a reusable widget yet per R-71.
-  /// Extract to `lib/core/widgets/deep_link_aware_back_button.dart` when
-  /// the SECOND consumer arrives (Phase 14 search-result detail or Phase 22
-  /// push-notification deep-link target). Both must cite Q4=D by reference.
-  void _handleBack(BuildContext context) {
-    // Q4=D: Navigator.canPop() check — if there is a prior route, pop back;
-    // otherwise navigate to home (handles deep-link cold-launch entry).
-    if (Navigator.canPop(context)) {
-      Navigator.pop(context);
-    } else {
-      context.go(AppRoutes.home);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) _handleBack(context);
+        // System back gesture path — DeepLinkAwareBackButton handles the
+        // AppBar tap path. Inline the same Q4=D conditional logic here so the
+        // two paths remain semantically equivalent.
+        if (!didPop) {
+          if (Navigator.canPop(context)) {
+            Navigator.pop(context);
+          } else {
+            context.go(AppRoutes.home);
+          }
+        }
       },
       child: Scaffold(
         appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => _handleBack(context),
-          ),
+          leading: const DeepLinkAwareBackButton(),
         ),
         body: BlocBuilder<ListingDetailsBloc, ListingDetailsState>(
           builder: (context, state) {
