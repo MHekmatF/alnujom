@@ -592,5 +592,50 @@
   "publisherHistoryStatusSold": "تم البيع",
   "publisherHistoryStatusRented": "تم التأجير",
   "publisherHistoryStatusExpired": "منتهي الصلاحية",
-  "publisherHistoryStatusDeleted": "محذوف"
+  "publisherHistoryStatusDeleted": "محذوف",
+
+  "home_app_bar_title": "النجوم العقارية",
+  "home_sign_in_icon_tooltip": "تسجيل الدخول",
+  "home_search_bar_placeholder": "ابحث عن عقار...",
+  "home_latest_listings_header": "أحدث الإعلانات",
+  "home_no_listings_yet": "لا توجد إعلانات بعد — كن أول من ينشر!",
+  "home_no_more_listings": "لا توجد إعلانات أخرى",
+
+  "home_search_coming_soon": "البحث قريباً — تصفح أحدث الإعلانات أدناه",
+  "home_property_shortcut_coming_soon": "فلتر إعلانات {type} قريباً — تصفح كامل الإعلانات أدناه",
+  "@home_property_shortcut_coming_soon": {
+    "placeholders": { "type": { "type": "String" } }
+  },
+
+  "contact_call_coming_soon": "الاتصال المباشر قريباً — تابعنا للحصول على هذه الميزة",
+  "contact_whatsapp_coming_soon": "واتساب قريباً — تابعنا للحصول على هذه الميزة",
+  "contact_inquiry_coming_soon": "إرسال استفسار قريباً — تابعنا للحصول على هذه الميزة",
+  "action_favorite_coming_soon": "المفضلة قريباً — تابعنا للحصول على هذه الميزة",
+  "action_share_coming_soon": "المشاركة قريباً — تابعنا للحصول على هذه الميزة",
+  "action_report_coming_soon": "الإبلاغ قريباً — تابعنا للحصول على هذه الميزة",
+
+  "auth_required_please_sign_in": "يرجى تسجيل الدخول لاستخدام هذه الميزة",
+  "auth_required_sign_in_action": "تسجيل الدخول",
+
+  "listing_details_not_found_title": "الإعلان غير موجود",
+  "listing_details_not_found_return_home": "العودة إلى الصفحة الرئيسية",
+  "listing_details_publisher_label": "بواسطة {name}",
+  "@listing_details_publisher_label": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+
+  "cta_call": "اتصال",
+  "cta_whatsapp": "واتساب",
+  "cta_send_inquiry": "إرسال استفسار",
+  "cta_favorite": "إضافة للمفضلة",
+  "cta_share": "مشاركة",
+  "cta_report": "إبلاغ",
+
+  "error_could_not_load_listings": "تعذّر تحميل الإعلانات",
+  "error_could_not_load_listing": "تعذّر تحميل الإعلان",
+  "action_retry": "إعادة المحاولة",
+  "image_unavailable": "الصورة غير متاحة",
+
+  "home_empty_publish_first_listing": "انشر إعلانك الأول",
+  "home_empty_sign_in_to_publish": "سجّل الدخول للنشر"
 }
