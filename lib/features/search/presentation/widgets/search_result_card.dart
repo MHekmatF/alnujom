@@ -41,7 +41,13 @@ class SearchResultCard extends StatelessWidget {
         // context.push (not context.go) so SearchPage stays in the stack and
         // SearchBloc survives the back-navigation (R-77 / SC-005).
         onTap: () => context.push(AppRoutes.listingDetailsFor(item.id)),
-        child: Row(
+        // SizedBox gives the Row a bounded height before CrossAxisAlignment.stretch
+        // is applied — without it the Row receives ListView's unbounded height and
+        // the inner Column(spaceBetween, mainAxisSize.max) crashes with
+        // "BoxConstraints forces an infinite height".
+        child: SizedBox(
+          height: 100,
+          child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             SizedBox(
@@ -97,6 +103,7 @@ class SearchResultCard extends StatelessWidget {
               ),
             ),
           ],
+          ),
         ),
       ),
     );
