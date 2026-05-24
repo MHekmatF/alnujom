@@ -1,0 +1,288 @@
+// lib/features/map/presentation/widgets/marker_preview_popover.dart
+//
+// Phase 15 Sub-Phase E (T048) — bottom-anchored Card popover surfacing the
+// minimal preview projection of the tapped marker per FR-001. Tap →
+// `context.go(AppRoutes.listingDetailsFor(marker.id))` (Phase 13 route
+// helper).
+//
+// Price formatting (R-65 / Phase 13 home-feed parity):
+//   • Resolve [Currency] from `getIt<ListCurrencies>()` (FutureBuilder).
+//   • Anonymous fallback: render the marker's primaryCurrencyCode verbatim
+//     when the catalog lookup fails. Cross-currency conversion via the
+//     user's `display_currency` is forward-stated (same Phase-13 footprint).
+//
+// FR-003a visual indicator: when `marker.isApproximate`, render a localized
+// "Approximate location" badge.
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../../core/di/injection.dart';
+import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/radii.dart';
+import '../../../../core/theme/spacing.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/domain/value_objects/money.dart';
+import '../../../../shared/presentation/money_formatter.dart';
+import '../../../currencies/domain/entities/currency.dart';
+import '../../../currencies/domain/usecases/list_currencies.dart';
+import '../../../listing_form/domain/entities/listing.dart';
+import '../../domain/entities/map_marker.dart';
+import '../bloc/map_bloc.dart';
+import '../bloc/map_event.dart';
+
+class MarkerPreviewPopover extends StatefulWidget {
+  const MarkerPreviewPopover({super.key, required this.marker});
+
+  final MapMarker marker;
+
+  @override
+  State<MarkerPreviewPopover> createState() => _MarkerPreviewPopoverState();
+}
+
+class _MarkerPreviewPopoverState extends State<MarkerPreviewPopover> {
+  // Cache per-popover instance; mirrors Phase 13 HomePage pattern where the
+  // currency catalog is fetched once per page lifetime.
+  late final Future<List<Currency>> _currenciesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _currenciesFuture = getIt<ListCurrencies>().call(activeOnly: false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final locale = Localizations.localeOf(context);
+
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      margin: EdgeInsets.zero,
+      child: InkWell(
+        onTap: () =>
+            context.go(AppRoutes.listingDetailsFor(widget.marker.id)),
+        child: Padding(
+          padding: const EdgeInsetsDirectional.all(AppSpacing.md),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _PopoverImage(
+                imageUrl: widget.marker.mainImagePath,
+                l10n: l10n,
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      widget.marker.title.isEmpty ? '—' : widget.marker.title,
+                      style: theme.textTheme.titleSmall,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Wrap(
+                      spacing: AppSpacing.xs,
+                      runSpacing: AppSpacing.xs,
+                      children: [
+                        _Badge(
+                          label:
+                              _propertyTypeLabel(l10n, widget.marker.propertyType),
+                        ),
+                        _Badge(
+                          label: _purposeLabel(l10n, widget.marker.purpose),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    FutureBuilder<List<Currency>>(
+                      future: _currenciesFuture,
+                      builder: (context, snap) {
+                        final byCode = <String, Currency>{
+                          for (final c in snap.data ?? const <Currency>[])
+                            c.code: c,
+                        };
+                        return Text(
+                          _formatPrice(byCode, locale),
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        );
+                      },
+                    ),
+                    if (widget.marker.isApproximate) ...[
+                      const SizedBox(height: AppSpacing.xs),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            size: 14,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(width: AppSpacing.xs),
+                          Flexible(
+                            child: Text(
+                              l10n.map_marker_approximate_location_label,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                    const SizedBox(height: AppSpacing.sm),
+                    Align(
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: TextButton(
+                        onPressed: () => context
+                            .go(AppRoutes.listingDetailsFor(widget.marker.id)),
+                        child: Text(l10n.map_marker_view_details_action),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.close),
+                tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                onPressed: () => context
+                    .read<MapBloc>()
+                    .add(const PopoverDismissed()),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _formatPrice(Map<String, Currency> byCode, Locale locale) {
+    final currency = byCode[widget.marker.primaryCurrencyCode];
+    if (currency == null) {
+      // Anonymous fallback / catalog miss — show the verbatim amount + ISO
+      // code rather than crashing, matching Phase 13's home-feed convention.
+      final amount = widget.marker.primaryAmount;
+      final code = widget.marker.primaryCurrencyCode;
+      return '$amount $code';
+    }
+    return MoneyFormatter.format(
+      Money(
+        amount: widget.marker.primaryAmount,
+        currencyCode: widget.marker.primaryCurrencyCode,
+      ),
+      locale: locale,
+      currency: currency,
+    );
+  }
+
+  String _propertyTypeLabel(AppLocalizations l10n, PropertyType type) {
+    switch (type) {
+      case PropertyType.apartment:
+        return l10n.propertyTypeApartment;
+      case PropertyType.villa:
+        return l10n.propertyTypeVilla;
+      case PropertyType.land:
+        return l10n.propertyTypeLand;
+      case PropertyType.shop:
+        return l10n.propertyTypeShop;
+      case PropertyType.office:
+        return l10n.propertyTypeOffice;
+      case PropertyType.farm:
+        return l10n.propertyTypeFarm;
+      case PropertyType.warehouse:
+        return l10n.propertyTypeWarehouse;
+      case PropertyType.other:
+        return l10n.propertyTypeOther;
+    }
+  }
+
+  String _purposeLabel(AppLocalizations l10n, ListingPurpose purpose) {
+    switch (purpose) {
+      case ListingPurpose.sale:
+        return l10n.listingPurposeSale;
+      case ListingPurpose.rent:
+        return l10n.listingPurposeRent;
+      case ListingPurpose.dailyRent:
+        return l10n.listingPurposeDailyRent;
+      case ListingPurpose.investment:
+        return l10n.listingPurposeInvestment;
+    }
+  }
+}
+
+class _PopoverImage extends StatelessWidget {
+  const _PopoverImage({required this.imageUrl, required this.l10n});
+
+  final String? imageUrl;
+  final AppLocalizations l10n;
+
+  static const double _kSize = 72;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final placeholder = Container(
+      width: _kSize,
+      height: _kSize,
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(AppRadii.sm),
+      ),
+      child: Icon(
+        Icons.image_not_supported_outlined,
+        color: scheme.onSurfaceVariant,
+        semanticLabel: l10n.map_marker_image_unavailable,
+      ),
+    );
+    if (imageUrl == null || imageUrl!.isEmpty) return placeholder;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(AppRadii.sm),
+      child: CachedNetworkImage(
+        imageUrl: imageUrl!,
+        width: _kSize,
+        height: _kSize,
+        fit: BoxFit.cover,
+        placeholder: (context, _) => ColoredBox(
+          color: scheme.surfaceContainerHighest,
+          child: const SizedBox(width: _kSize, height: _kSize),
+        ),
+        errorWidget: (context, _, __) => placeholder,
+      ),
+    );
+  }
+}
+
+class _Badge extends StatelessWidget {
+  const _Badge({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Container(
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: scheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(AppRadii.sm),
+      ),
+      child: Text(
+        label,
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: scheme.onSecondaryContainer,
+        ),
+      ),
+    );
+  }
+}

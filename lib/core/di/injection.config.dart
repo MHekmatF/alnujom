@@ -183,6 +183,7 @@ import '../../features/map/data/datasources/supabase_map_datasource.dart'
 import '../../features/map/data/repositories/map_repository_impl.dart' as _i457;
 import '../../features/map/domain/repositories/map_repository.dart' as _i973;
 import '../../features/map/domain/usecases/load_map_markers.dart' as _i842;
+import '../../features/map/presentation/bloc/map_bloc.dart' as _i437;
 import '../../features/onboarding/data/datasources/onboarding_seen_storage.dart'
     as _i144;
 import '../../features/onboarding/data/repositories/onboarding_repository_impl.dart'
@@ -732,6 +733,7 @@ _i174.GetIt $initGetIt(
   gh.factory<_i293.SetExchangeRateBloc>(
     () => _i293.SetExchangeRateBloc(gh<_i488.SetExchangeRate>()),
   );
+  gh.factory<_i437.MapBloc>(() => _i437.MapBloc(gh<_i842.LoadMapMarkers>()));
   gh.factory<_i885.RoleEditorBloc>(
     () => _i885.RoleEditorBloc(
       gh<_i176.LoadRoleDetail>(),

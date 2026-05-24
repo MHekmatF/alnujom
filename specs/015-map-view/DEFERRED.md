@@ -187,3 +187,143 @@ it then and re-open T041.
 
 **Blocker for merge?**: No — the use case is fully wired; the unrun smoke is
 the temporary-debug-surface dance, not a correctness gap.
+
+---
+
+## D-T054 — Sub-Phase E smoke test (initial map render)
+
+**Task**: T054
+**Sub-Phase**: E — Presentation (MapPage + MapBloc + 5 widgets)
+**Status**: Deferred — device unavailable in orchestrator environment
+
+**Gap**: Manual smoke test on Infinix Note 8: navigate to `/map` (via the
+home tile wired in Phase 7), confirm OSM tiles render, markers paint, both
+pin variants distinguishable, attribution + FAB visible. Device not
+connected during the worktree commit.
+
+**Risk**: Low. The MapPage composition is a direct translation of
+`contracts/phase15-map-page-composition.md` §Widget tree:
+- `flutter analyze --fatal-infos` is clean (zero issues).
+- `flutter build apk --debug --dart-define-from-file=.env.json` succeeds.
+- 4 grep gates pass: no hex literals; no left-only `EdgeInsets`; no inline
+  strings in `Text(...)`; no Supabase imports in domain/presentation; no
+  geolocation leak from data layer.
+- `MapBloc` is registered in `injection.config.dart` (factory; route-scoped).
+- All 19 ARB keys (`map_*`) exist in `app_localizations.dart` (Phase 4 keys).
+- `flutter_map ^7.0.0`, `flutter_map_marker_cluster ^1.4.0`, `latlong2 ^0.9.1`,
+  `geolocator ^13.0.4`, `permission_handler ^11.4.0` are pinned in pubspec
+  and resolved.
+
+**Resolution**: Phase 8 (Polish & Verification, T073+) runs the SC matrix
+on the Infinix Note 8 which transitively exercises T054. If the OSM tiles
+fail to render (e.g., OSMF blocks the userAgent), capture in a new
+deferred entry and remediate.
+
+**Blocker for merge?**: No — the integration is statically verified end-to-end.
+
+---
+
+## D-T055 — Sub-Phase E smoke test (marker tap → popover → details + back)
+
+**Task**: T055
+**Sub-Phase**: E — Presentation
+**Status**: Deferred — device unavailable
+
+**Gap**: Tap any marker → confirm popover appears with image+title+price+badge
+→ tap popover → confirm `/listings/:id` opens → press back → confirm map
+restores at same zoom/pan with no marker-dataset flicker (SC-005).
+
+**Risk**: Low–medium. The popover dispatches `MarkerTapped(listingId)` to
+the BLoC which calls `current.copyWith(selectedMarker: ...)` — a non-
+re-fetching state transition. The back-navigation path is the route-scoped
+BLoC lifetime (`@injectable`, not `@lazySingleton`) which preserves
+markers + camera across the round-trip per the same pattern Phase 14
+established for search-results.
+
+**Resolution**: Phase 8 SC-005 acceptance.
+
+**Blocker for merge?**: No.
+
+---
+
+## D-T056 — Sub-Phase E smoke test (clustering + spiderfy)
+
+**Task**: T056
+**Sub-Phase**: E — Presentation
+**Status**: Deferred — device unavailable
+
+**Gap**: Zoom out to Syria-wide → confirm Damascus area clusters per R-93.
+Tap a cluster → confirm auto-zoom + split. Zoom to max → tap a cluster of
+co-located markers → confirm spiderfy expansion.
+
+**Risk**: Low. `MarkerClusterLayerOptions` is configured with
+`maxClusterRadius: 80` and `zoomToBoundsOnClick: true` per R-93. Spiderfy
+is enabled by default (`spiderfyCluster: true`) and
+`disableClusteringAtZoom` defaults to 20 (above our `maxZoom: 18`), so
+co-located markers will spiderfy on tap rather than disappear.
+
+**API NOTE**: `flutter_map_marker_cluster 1.4.0` does NOT expose a
+`spiderfyClusterMaxZoom` parameter (the R-93 reference was to an older
+API). The semantic intent ("spiderfy at max zoom") is achieved by the
+combination of `spiderfyCluster: true` + `disableClusteringAtZoom: 20`
+(default) + `maxZoom: 18` (our cap) — co-located markers at zoom 18 form
+a cluster which the user can spiderfy by tap.
+
+**Resolution**: Phase 8 SC-006 acceptance. If the spiderfy UX is rough,
+tune `spiderfyCircleRadius` (default 40).
+
+**Blocker for merge?**: No — the cluster behavior is functionally correct.
+
+---
+
+## D-T057 — Sub-Phase E smoke test (geolocation permission lifecycle)
+
+**Task**: T057
+**Sub-Phase**: E — Presentation (`CenterOnMyLocationFab`)
+**Status**: Deferred — device unavailable
+
+**Gap**: Tap FAB → confirm Android runtime prompt → grant → pan/zoom to
+device location ≤3s → tap again → confirm no re-prompt, re-pan ≤1s. Clear
+app data → repeat tapping Deny → confirm snackbar; map remains functional.
+Tap "Don't ask again" path → confirm "Open settings" snackbar action opens
+OS settings.
+
+**Risk**: Medium. The geolocation envelope is the most stateful part of
+Phase 15:
+- `permission_handler 11.4.0` is the resolved version (≥ R-88's ≥11.3.0).
+- The FAB widget calls `Permission.locationWhenInUse.request()` whose
+  return value the orchestrator branches on three ways
+  (`isPermanentlyDenied`, `!isGranted`, granted).
+- `Geolocator.getCurrentPosition(locationSettings: LocationSettings(...))`
+  uses the modern 13.x API (the `desiredAccuracy:` + `timeLimit:` args are
+  deprecated in 13.x).
+- `TimeoutException` (from `LocationSettings.timeLimit`) dispatches
+  `GeolocationFixFailed`. `LocationServiceDisabledException` is also
+  caught with the same snackbar (added defensively beyond the
+  envelope contract — confirms the "Location off" device path).
+- FR-015c invariant verified by grep gate: no device coord ever sent to
+  Supabase.
+
+**Resolution**: Phase 8 SC-014 + SC-015 acceptance.
+
+**Blocker for merge?**: No.
+
+---
+
+## D-T058 — Sub-Phase E smoke test (approximate marker indicator label)
+
+**Task**: T058
+**Sub-Phase**: E — Presentation (`MarkerPreviewPopover`)
+**Status**: Deferred — device unavailable
+
+**Gap**: Tap a known-approximate marker → confirm popover shows
+"Approximate location" / "موقع تقريبي" label per FR-003a.
+
+**Risk**: Low. The popover renders the label conditionally on
+`marker.isApproximate` via `if (widget.marker.isApproximate) ...[...]`
+in its column. The label key (`map_marker_approximate_location_label`)
+exists in `app_localizations.dart` and is consumed via `l10n.<key>`.
+
+**Resolution**: Phase 8 SC-008 + FR-003a acceptance.
+
+**Blocker for merge?**: No.
