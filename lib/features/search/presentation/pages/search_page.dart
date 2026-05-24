@@ -391,24 +391,39 @@ class _ResultsListView extends StatelessWidget {
         }
         final itemIndex = index - hintTrail;
         if (itemIndex == state.results.length) {
-          // Pagination sentinel — dispatch on next frame so the BLoC isn't
-          // reentered during build, then render a loading spinner.
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (context.mounted) {
-              context
-                  .read<SearchBloc>()
-                  .add(const SearchNextPageRequested());
-            }
-          });
-          return const Center(
-            child: Padding(
-              padding: EdgeInsetsDirectional.all(16),
-              child: CircularProgressIndicator(),
-            ),
-          );
+          return const _PaginationSentinel();
         }
         return SearchResultCard(item: state.results[itemIndex]);
       },
+    );
+  }
+}
+
+// Fires SearchNextPageRequested exactly once when it first enters the viewport
+// (in initState). Using a StatefulWidget prevents the double-dispatch that
+// occurs when addPostFrameCallback is called inside ListView.builder's
+// itemBuilder — which reruns on every rebuild before loading state propagates.
+class _PaginationSentinel extends StatefulWidget {
+  const _PaginationSentinel();
+
+  @override
+  State<_PaginationSentinel> createState() => _PaginationSentinelState();
+}
+
+class _PaginationSentinelState extends State<_PaginationSentinel> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<SearchBloc>().add(const SearchNextPageRequested());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Padding(
+        padding: EdgeInsetsDirectional.all(16),
+        child: CircularProgressIndicator(),
+      ),
     );
   }
 }

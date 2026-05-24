@@ -38,7 +38,9 @@ class SearchResultCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       margin: const EdgeInsetsDirectional.only(bottom: 8),
       child: InkWell(
-        onTap: () => context.go(AppRoutes.listingDetailsFor(item.id)),
+        // context.push (not context.go) so SearchPage stays in the stack and
+        // SearchBloc survives the back-navigation (R-77 / SC-005).
+        onTap: () => context.push(AppRoutes.listingDetailsFor(item.id)),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
