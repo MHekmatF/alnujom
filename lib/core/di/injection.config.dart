@@ -223,6 +223,7 @@ import '../../features/search/domain/repositories/search_repository.dart'
     as _i357;
 import '../../features/search/domain/usecases/search_listings_usecase.dart'
     as _i190;
+import '../../features/search/presentation/bloc/search_bloc.dart' as _i552;
 import '../../features/super_admin/data/datasources/supabase_role_catalog_datasource.dart'
     as _i1064;
 import '../../features/super_admin/data/datasources/supabase_user_search_datasource.dart'
@@ -633,6 +634,9 @@ _i174.GetIt $initGetIt(
       gh<_i354.AppLogger>(),
       initialLocale,
     ),
+  );
+  gh.factory<_i552.SearchBloc>(
+    () => _i552.SearchBloc(gh<_i190.SearchListingsUseCase>()),
   );
   gh.factory<_i778.ListingPreviewBloc>(
     () => _i778.ListingPreviewBloc(
