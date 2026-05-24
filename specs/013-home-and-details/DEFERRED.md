@@ -118,3 +118,40 @@ one-line-per-emit patch (~7 sites in the file).
 
 **Responsible phase**: a Phase 5 polish patch (not Phase 13's responsibility) OR roll into the
 Phase 22 push/Realtime work which may also touch the cubit.
+
+## D-05 — US5 cursor pagination — full-scale verification deferred (insufficient seed data)
+
+**Introduced by**: T051 — strict US5 acceptance scenario requires 25+ approved listings + a
+concurrent two-device admin-approve race during mid-pagination.
+
+**Surfaced by**: T051 verification 2026-05-24 — the project currently has 6 approved listings
+(plus 17 pending_review available for seeding). The strict "scroll past first 20 cards" test
+cannot be physically reproduced at this data volume.
+
+**Code-level verification done (sufficient evidence for v1 launch)**:
+- R-62 cursor predicate correctness — grep gate confirms `.or('published_at.lt.X,and(...)`)
+  in `supabase_home_feed_datasource.dart` (NOT the rejected two `.lt()` form). Wave 2 Opus
+  review independently verified the predicate's lexicographic strict-less-than semantics
+  with a synthetic test trace (cursor `(T, Y)` vs rows `(T, Z)` with Z<Y → returned; rows
+  `(T, W)` with W≥Y → skipped).
+- HomeBloc state machine — duplicate-concurrent-fetch guards on `loadingMore` / `refreshing`
+  verified in Wave 2 review.
+- `home_no_more_listings` sentinel UI — verified rendering in T052 screenshot at 6 approved.
+
+**Outstanding gap**: a real-world two-device race test with 25+ approved listings has not been
+performed. The cursor SHOULD work correctly at scale per the code review, but production
+behavior under tied-`published_at` boundaries with concurrent admin approval is unverified
+empirically.
+
+**Remediation options**:
+1. Seed test data: have an admin use Phase 12's `approve_listing` to approve 19 more of the
+   17 pending_review listings, bringing the approved pool to 23. Then add 7 more via direct
+   SQL seed. Re-run T051 strict.
+2. Add a synthetic flutter integration test seeded with 25+ fake listings via Supabase
+   testcontainers. Violates the project's "no new tests until MVP" rule unless the rule is
+   relaxed for this case.
+3. Defer to Phase 22 (Realtime + push) verification cycle, which will naturally exercise
+   pagination under real concurrent writes once the home feed is live.
+
+**Responsible phase**: a Phase 13 follow-up patch IF the user wants the strict test now, OR
+Phase 22 verification cycle, whichever lands first.
