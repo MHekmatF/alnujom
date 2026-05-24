@@ -35,6 +35,8 @@ import '../../features/locations/presentation/pages/locations_list_page.dart';
 import '../../features/listing_form/domain/entities/listing.dart';
 import '../../features/listing_form/domain/entities/listing_form_state.dart';
 import '../../features/listing_form/presentation/pages/listing_form_page.dart';
+import '../../features/map/domain/entities/map_entry_context.dart';
+import '../../features/map/presentation/pages/map_page.dart';
 import '../../features/search/presentation/pages/search_page.dart';
 import '../../features/publisher_dashboard/presentation/pages/listing_moderation_history_page.dart';
 import '../../features/publisher_dashboard/presentation/pages/my_listings_page.dart';
@@ -84,6 +86,8 @@ abstract final class AppRoutes {
   static const listingDetails = '/listings/:id';
   // Phase 14 FR-001 / FR-010: public search & filters route.
   static const search = '/search';
+  // Phase 15 FR-007: public map view route.
+  static const map = '/map';
   static const themeGallery = '/_debug/theme-gallery';
   static const debugMoneyFormatter = '/debug/money-formatter';
 
@@ -135,6 +139,8 @@ abstract final class AppRouteNames {
   static const listingDetails = 'listing-details';
   // Phase 14 FR-001 / FR-010: public search & filters route name.
   static const search = 'search';
+  // Phase 15 FR-007: public map view route name.
+  static const map = 'map';
   static const themeGallery = 'theme-gallery';
 }
 
@@ -386,6 +392,18 @@ GoRouter buildAppRouter({
         builder: (context, state) =>
             SearchPage(initialPropertyType: state.extra as PropertyType?),
       ),
+
+      // ─── Phase 15 — public map view ───
+      // Anonymous-accessible per FR-006. `state.extra` carries a
+      // MapEntryContext (FromHome / FromListing / FromSearch); null when
+      // navigated to directly (e.g., deep-link cold-launch).
+      GoRoute(
+        path: AppRoutes.map,
+        name: AppRouteNames.map,
+        builder: (context, state) =>
+            MapPage(entryContext: state.extra as MapEntryContext?),
+      ),
+
       if (kDesignToolsEnabled)
         GoRoute(
           path: AppRoutes.themeGallery,
