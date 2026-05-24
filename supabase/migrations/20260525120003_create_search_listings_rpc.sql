@@ -106,11 +106,18 @@ BEGIN
     AND (p_governorate_id IS NULL OR v.governorate_id = p_governorate_id)
     AND (p_city_id        IS NULL OR v.city_id        = p_city_id)
     AND (p_area_id        IS NULL OR v.area_id        = p_area_id)
-    -- Price range (compare against listing's native currency; client pre-converts bounds)
+    -- Price range — per-currency gating (Bug 1 fix: original OR short-circuited on NULL USD bound).
+    -- Client (R-75) provides both USD and SYP equivalents when filter is active.
+    -- Each currency is gated independently so SYP-only selections are not skipped.
     AND (
-      p_price_min_usd IS NULL OR p_price_max_usd IS NULL
-      OR (v.primary_currency = 'USD' AND v.primary_amount BETWEEN p_price_min_usd AND p_price_max_usd)
-      OR (v.primary_currency = 'SYP' AND v.primary_amount BETWEEN p_price_min_syp AND p_price_max_syp)
+      (v.primary_currency = 'USD' AND (
+        p_price_min_usd IS NULL OR p_price_max_usd IS NULL
+        OR v.primary_amount BETWEEN p_price_min_usd AND p_price_max_usd
+      ))
+      OR (v.primary_currency = 'SYP' AND (
+        p_price_min_syp IS NULL OR p_price_max_syp IS NULL
+        OR v.primary_amount BETWEEN p_price_min_syp AND p_price_max_syp
+      ))
     )
     -- Rooms filter
     AND (
@@ -127,31 +134,36 @@ BEGIN
     -- Area size range
     AND (p_area_size_min IS NULL OR v.area_size >= p_area_size_min)
     AND (p_area_size_max IS NULL OR v.area_size <= p_area_size_max)
-    -- Cursor predicates
+    -- Cursor predicates (Bug 2 fix: decomposed so id tie-breaker is always ASC, matching ORDER BY).
+    -- ORDER BY: newest → published_at DESC, id ASC; price → primary_amount ASC/DESC, id ASC.
     AND (
       p_sort <> 'newest'
       OR p_cursor_published_at IS NULL
-      OR (v.published_at, v.id) < (p_cursor_published_at, p_cursor_id_newest)
+      OR (v.published_at < p_cursor_published_at)
+      OR (v.published_at = p_cursor_published_at AND v.id > p_cursor_id_newest)
     )
     AND (
       p_sort NOT IN ('price_asc', 'price_desc')
       OR p_cursor_price_amount IS NULL
       OR (
         p_sort = 'price_asc'
-        AND (v.primary_amount, v.id::text) > (p_cursor_price_amount, p_cursor_id_price::text)
+        AND (
+          (v.primary_amount > p_cursor_price_amount)
+          OR (v.primary_amount = p_cursor_price_amount AND v.id > p_cursor_id_price)
+        )
       )
       OR (
         p_sort = 'price_desc'
-        AND (v.primary_amount, v.id::text) < (p_cursor_price_amount, p_cursor_id_price::text)
+        AND (
+          (v.primary_amount < p_cursor_price_amount)
+          OR (v.primary_amount = p_cursor_price_amount AND v.id > p_cursor_id_price)
+        )
       )
     )
   ORDER BY
-    CASE p_sort
-      WHEN 'newest'     THEN v.published_at END DESC,
-    CASE p_sort
-      WHEN 'price_asc'  THEN v.primary_amount END ASC,
-    CASE p_sort
-      WHEN 'price_desc' THEN v.primary_amount END DESC,
+    CASE p_sort WHEN 'newest'     THEN v.published_at   END DESC NULLS LAST,
+    CASE p_sort WHEN 'price_asc'  THEN v.primary_amount END ASC  NULLS LAST,
+    CASE p_sort WHEN 'price_desc' THEN v.primary_amount END DESC NULLS LAST,
     v.id ASC
   LIMIT p_limit;
 END;
