@@ -68,7 +68,10 @@ class SupabaseSearchDatasource {
         final rateMap = <String, double>{
           for (final r in list)
             (r as Map<String, dynamic>)['target_currency'] as String:
-                (r['rate'] as num).toDouble(),
+                // NUMERIC may arrive as String on some Supabase driver versions.
+                r['rate'] is num
+                    ? (r['rate'] as num).toDouble()
+                    : double.parse(r['rate'].toString()),
         };
         final usdRate = rateMap['USD'];
         final sypRate = rateMap['SYP'];

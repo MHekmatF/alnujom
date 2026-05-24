@@ -52,12 +52,17 @@ class SearchResultItemDto {
       governorateNameEn: (json['governorate_name_en'] as String?) ?? '',
       cityNameAr: (json['city_name_ar'] as String?) ?? '',
       cityNameEn: (json['city_name_en'] as String?) ?? '',
-      primaryAmount: (json['primary_amount'] as num).toDouble(),
+      primaryAmount: _toDouble(json['primary_amount']),
       primaryCurrency: json['primary_currency'] as String,
       mainImagePath: json['main_image_path'] as String?,
       publishedAt: DateTime.parse(json['published_at'] as String),
     );
   }
+
+  // Supabase may serialize NUMERIC columns as String on some drivers (same
+  // risk as Phase 13 home_listing_card_dto._decimal). Handle both.
+  static double _toDouble(dynamic v) =>
+      v is num ? v.toDouble() : double.parse(v.toString());
 
   SearchResultItem toEntity() {
     return SearchResultItem(
