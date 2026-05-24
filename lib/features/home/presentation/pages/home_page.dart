@@ -34,8 +34,8 @@ import '../widgets/property_type_shortcut_row.dart';
 /// - approved publisher → "Publish your first listing" → Phase 10 form
 /// - anonymous OR non-publisher → "Sign in to publish" → Phase 5 login
 ///
-/// Replaces the Phase 5 placeholder HomePage. The `/` route is rewired from
-/// `ShellHomePage` to this page by Phase 13 Sub-Phase F (T039).
+/// Replaces the Phase 5 placeholder HomePage. The `/` route is rewired to
+/// this page by Phase 13 Sub-Phase F (T039).
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 

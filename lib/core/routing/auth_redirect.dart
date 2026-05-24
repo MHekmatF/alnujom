@@ -54,10 +54,14 @@ FutureOr<String?> authRedirect(
 }
 
 const _authOnlyPaths = {'/login', '/register', '/reset-password'};
-const _publicPaths = {'/onboarding', '/splash'};
+// Phase 13 FR-008 + FR-010: `/` (HomePage) and `/listings/:id`
+// (ListingDetailsPage) are anonymous-readable per US1/US2/US4. The `/listings/`
+// prefix check covers the deep-link entry case per Q4=D.
+const _publicPaths = {'/', '/onboarding', '/splash'};
 
 String? _redirectIfProtected(String path) {
   if (_authOnlyPaths.contains(path) || _publicPaths.contains(path)) return null;
+  if (path.startsWith('/listings/')) return null;
   return '/login';
 }
 
@@ -67,7 +71,7 @@ String? _redirectAuthenticated(String path) {
     PermissionKeys.adminCategoryKeys,
   );
   if ((path == '/admin' || path.startsWith('/admin/')) && !hasAdminAccess) {
-    return '/home';
+    return AppRoutes.home;
   }
   return null;
 }

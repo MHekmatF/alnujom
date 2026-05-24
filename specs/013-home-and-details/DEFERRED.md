@@ -10,7 +10,7 @@
 `AppRouteNames.shellHome` → `AppRouteNames.home` (value `'home'`). Both old names are retained
 as `static const shellHome = home;` aliases in `lib/core/routing/app_router.dart`.
 
-**In-tree consumers still on the alias (3 call sites across 2 files)**:
+**In-tree consumers still on the alias (4 call sites across 2 files)**:
 - `lib/features/auth/presentation/pages/publisher_approval_pending_page.dart` line 37:
   `context.go(AppRoutes.shellHome)` — resolves correctly via alias.
 - `lib/features/listing_form/presentation/pages/listing_form_page.dart` lines 78, 81, 91:
