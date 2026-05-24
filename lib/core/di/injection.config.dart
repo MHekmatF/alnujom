@@ -85,6 +85,24 @@ import '../../features/currencies/presentation/bloc/exchange_rate_history_bloc.d
     as _i949;
 import '../../features/currencies/presentation/bloc/set_exchange_rate_bloc.dart'
     as _i293;
+import '../../features/home/data/datasources/supabase_home_feed_datasource.dart'
+    as _i732;
+import '../../features/home/data/repositories/home_feed_repository_impl.dart'
+    as _i857;
+import '../../features/home/domain/repositories/home_feed_repository.dart'
+    as _i433;
+import '../../features/home/domain/usecases/load_home_feed.dart' as _i321;
+import '../../features/home/presentation/bloc/home_bloc.dart' as _i202;
+import '../../features/listing_details/data/datasources/supabase_listing_details_datasource.dart'
+    as _i1006;
+import '../../features/listing_details/data/repositories/listing_details_repository_impl.dart'
+    as _i677;
+import '../../features/listing_details/domain/repositories/listing_details_repository.dart'
+    as _i895;
+import '../../features/listing_details/domain/usecases/load_listing_details.dart'
+    as _i281;
+import '../../features/listing_details/presentation/bloc/listing_details_bloc.dart'
+    as _i935;
 import '../../features/listing_form/data/datasources/supabase_listing_media_datasource.dart'
     as _i214;
 import '../../features/listing_form/data/datasources/supabase_listings_datasource.dart'
@@ -306,6 +324,12 @@ _i174.GetIt $initGetIt(
     () =>
         _i333.SupabasePublisherDashboardDatasource(gh<_i454.SupabaseClient>()),
   );
+  gh.factory<_i732.SupabaseHomeFeedDatasource>(
+    () => _i732.SupabaseHomeFeedDatasource(gh<_i454.SupabaseClient>()),
+  );
+  gh.factory<_i1006.SupabaseListingDetailsDatasource>(
+    () => _i1006.SupabaseListingDetailsDatasource(gh<_i454.SupabaseClient>()),
+  );
   gh.lazySingleton<_i155.ListingReviewRepository>(
     () => _i1072.ListingReviewRepositoryImpl(
       gh<_i530.SupabaseListingReviewDatasource>(),
@@ -439,6 +463,15 @@ _i174.GetIt $initGetIt(
       gh<_i650.PermissionChecker>(),
     ),
     dispose: (i) => i.dispose(),
+  );
+  gh.lazySingleton<_i433.HomeFeedRepository>(
+    () => _i857.HomeFeedRepositoryImpl(gh<_i732.SupabaseHomeFeedDatasource>()),
+  );
+  gh.lazySingleton<_i895.ListingDetailsRepository>(
+    () => _i677.ListingDetailsRepositoryImpl(
+      gh<_i1006.SupabaseListingDetailsDatasource>(),
+      gh<_i354.AppLogger>(),
+    ),
   );
   gh.factory<_i891.ListMyListings>(
     () => _i891.ListMyListings(gh<_i754.PublisherDashboardRepository>()),
@@ -677,6 +710,9 @@ _i174.GetIt $initGetIt(
   gh.factory<_i417.MyListingsBloc>(
     () => _i417.MyListingsBloc(gh<_i891.ListMyListings>()),
   );
+  gh.factory<_i321.LoadHomeFeed>(
+    () => _i321.LoadHomeFeed(gh<_i433.HomeFeedRepository>()),
+  );
   gh.factory<_i949.ExchangeRateHistoryBloc>(
     () => _i949.ExchangeRateHistoryBloc(gh<_i776.ListExchangeRateHistory>()),
   );
@@ -692,6 +728,9 @@ _i174.GetIt $initGetIt(
       gh<_i53.ListCitiesForGovernorate>(),
       gh<_i358.ListAreasForCity>(),
     ),
+  );
+  gh.factory<_i281.LoadListingDetails>(
+    () => _i281.LoadListingDetails(gh<_i895.ListingDetailsRepository>()),
   );
   gh.factory<_i669.LocationsListBloc>(
     () => _i669.LocationsListBloc(gh<_i533.ListGovernorates>()),
@@ -720,6 +759,13 @@ _i174.GetIt $initGetIt(
       gh<_i406.LoadMediaForListing>(),
     ),
   );
+  gh.factory<_i935.ListingDetailsBloc>(
+    () => _i935.ListingDetailsBloc(
+      gh<_i281.LoadListingDetails>(),
+      gh<_i797.AuthBloc>(),
+    ),
+  );
+  gh.factory<_i202.HomeBloc>(() => _i202.HomeBloc(gh<_i321.LoadHomeFeed>()));
   return getIt;
 }
 

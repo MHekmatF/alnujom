@@ -2356,4 +2356,142 @@ final class _DebugAppLocalizations extends AppLocalizations {
         'publisherHistoryStatusDeleted',
         (loc) => loc.publisherHistoryStatusDeleted,
       );
+
+  // ── Phase 13 — Public Home & Listing Details ──────────────────────────────
+
+  // §5.1 HomePage chrome
+  @override
+  String get home_app_bar_title =>
+      _resolve('home_app_bar_title', (loc) => loc.home_app_bar_title);
+
+  @override
+  String get home_sign_in_icon_tooltip =>
+      _resolve('home_sign_in_icon_tooltip', (loc) => loc.home_sign_in_icon_tooltip);
+
+  @override
+  String get home_search_bar_placeholder =>
+      _resolve('home_search_bar_placeholder', (loc) => loc.home_search_bar_placeholder);
+
+  @override
+  String get home_latest_listings_header =>
+      _resolve('home_latest_listings_header', (loc) => loc.home_latest_listings_header);
+
+  @override
+  String get home_no_listings_yet =>
+      _resolve('home_no_listings_yet', (loc) => loc.home_no_listings_yet);
+
+  @override
+  String get home_no_more_listings =>
+      _resolve('home_no_more_listings', (loc) => loc.home_no_more_listings);
+
+  // §5.2 Q1=A snackbar keys
+  @override
+  String get home_search_coming_soon =>
+      _resolve('home_search_coming_soon', (loc) => loc.home_search_coming_soon);
+
+  @override
+  String home_property_shortcut_coming_soon(String type) => _resolve(
+    'home_property_shortcut_coming_soon',
+    (loc) => loc.home_property_shortcut_coming_soon(type),
+  );
+
+  // §5.3 Q2=A snackbar keys
+  @override
+  String get contact_call_coming_soon =>
+      _resolve('contact_call_coming_soon', (loc) => loc.contact_call_coming_soon);
+
+  @override
+  String get contact_whatsapp_coming_soon =>
+      _resolve('contact_whatsapp_coming_soon', (loc) => loc.contact_whatsapp_coming_soon);
+
+  @override
+  String get contact_inquiry_coming_soon =>
+      _resolve('contact_inquiry_coming_soon', (loc) => loc.contact_inquiry_coming_soon);
+
+  @override
+  String get action_favorite_coming_soon =>
+      _resolve('action_favorite_coming_soon', (loc) => loc.action_favorite_coming_soon);
+
+  @override
+  String get action_share_coming_soon =>
+      _resolve('action_share_coming_soon', (loc) => loc.action_share_coming_soon);
+
+  @override
+  String get action_report_coming_soon =>
+      _resolve('action_report_coming_soon', (loc) => loc.action_report_coming_soon);
+
+  // §5.4 Q3=A reserved forward-state keys
+  @override
+  String get auth_required_please_sign_in =>
+      _resolve('auth_required_please_sign_in', (loc) => loc.auth_required_please_sign_in);
+
+  @override
+  String get auth_required_sign_in_action =>
+      _resolve('auth_required_sign_in_action', (loc) => loc.auth_required_sign_in_action);
+
+  // §5.5 ListingDetailsPage chrome
+  @override
+  String get listing_details_not_found_title =>
+      _resolve('listing_details_not_found_title', (loc) => loc.listing_details_not_found_title);
+
+  @override
+  String get listing_details_not_found_return_home =>
+      _resolve('listing_details_not_found_return_home', (loc) => loc.listing_details_not_found_return_home);
+
+  @override
+  String listing_details_publisher_label(String name) => _resolve(
+    'listing_details_publisher_label',
+    (loc) => loc.listing_details_publisher_label(name),
+  );
+
+  // §5.6 CTA labels
+  @override
+  String get cta_call =>
+      _resolve('cta_call', (loc) => loc.cta_call);
+
+  @override
+  String get cta_whatsapp =>
+      _resolve('cta_whatsapp', (loc) => loc.cta_whatsapp);
+
+  @override
+  String get cta_send_inquiry =>
+      _resolve('cta_send_inquiry', (loc) => loc.cta_send_inquiry);
+
+  @override
+  String get cta_favorite =>
+      _resolve('cta_favorite', (loc) => loc.cta_favorite);
+
+  @override
+  String get cta_share =>
+      _resolve('cta_share', (loc) => loc.cta_share);
+
+  @override
+  String get cta_report =>
+      _resolve('cta_report', (loc) => loc.cta_report);
+
+  // §5.7 Error states
+  @override
+  String get error_could_not_load_listings =>
+      _resolve('error_could_not_load_listings', (loc) => loc.error_could_not_load_listings);
+
+  @override
+  String get error_could_not_load_listing =>
+      _resolve('error_could_not_load_listing', (loc) => loc.error_could_not_load_listing);
+
+  @override
+  String get action_retry =>
+      _resolve('action_retry', (loc) => loc.action_retry);
+
+  @override
+  String get image_unavailable =>
+      _resolve('image_unavailable', (loc) => loc.image_unavailable);
+
+  // §5.8 Empty-state CTAs
+  @override
+  String get home_empty_publish_first_listing =>
+      _resolve('home_empty_publish_first_listing', (loc) => loc.home_empty_publish_first_listing);
+
+  @override
+  String get home_empty_sign_in_to_publish =>
+      _resolve('home_empty_sign_in_to_publish', (loc) => loc.home_empty_sign_in_to_publish);
 }
