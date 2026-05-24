@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -66,7 +67,7 @@ class HomeListingCardTile extends StatelessWidget {
         vertical: AppSpacing.sm,
       ),
       child: InkWell(
-        onTap: () => context.go('/listings/${card.id}'),
+        onTap: () => context.go(AppRoutes.listingDetailsFor(card.id)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

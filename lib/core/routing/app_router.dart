@@ -20,6 +20,7 @@ import '../../features/currencies/presentation/pages/currency_form_page.dart';
 import '../../features/currencies/presentation/pages/exchange_rate_history_page.dart';
 import '../../features/currencies/presentation/pages/set_exchange_rate_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
+import '../../features/listing_details/presentation/pages/listing_details_page.dart';
 import '../../features/onboarding/presentation/pages/onboarding_page.dart';
 import '../../features/onboarding/presentation/pages/splash_page.dart';
 import '../../features/profile/presentation/pages/profile_edit_page.dart';
@@ -39,7 +40,6 @@ import '../../features/super_admin/presentation/pages/assign_role_page.dart';
 import '../../features/super_admin/presentation/pages/create_role_page.dart';
 import '../../features/super_admin/presentation/pages/role_editor_page.dart';
 import '../../features/super_admin/presentation/pages/roles_list_page.dart';
-import '../../shell/shell_home_page.dart';
 import '../flags/app_flags.dart';
 import '../logging/app_logger.dart';
 import 'auth_redirect.dart';
@@ -52,7 +52,10 @@ abstract final class AppRoutes {
   static const pending = '/pending';
   static const rejected = '/rejected';
   static const suspended = '/suspended';
-  static const home = '/home';
+  // Phase 13 FR-008: '/' is the public home feed (was '/home' in Phase 5 era).
+  static const home = '/';
+  // Interim back-compat alias per R-69 — remove after all consumers migrate.
+  static const shellHome = home;
   static const admin = '/admin';
   static const adminApprovals = '/admin/approvals';
   static const superAdminRoles = '/admin/super-admin/roles';
@@ -75,9 +78,14 @@ abstract final class AppRoutes {
   static const publisherApprovalPending = '/publisher/pending-approval';
   static const publisherListingsModerationHistory =
       '/publisher/listings/:id/moderation-history';
-  static const shellHome = '/';
+  // Phase 13 FR-010: listing details deep-link route.
+  static const listingDetails = '/listings/:id';
   static const themeGallery = '/_debug/theme-gallery';
   static const debugMoneyFormatter = '/debug/money-formatter';
+
+  /// Phase 13 FR-010 helper — resolves Wave 2 F1 finding (no more literal
+  /// string interpolation in [HomeListingCardTile]).
+  static String listingDetailsFor(String id) => '/listings/$id';
 }
 
 abstract final class AppRouteNames {
@@ -88,7 +96,10 @@ abstract final class AppRouteNames {
   static const pending = 'pending';
   static const rejected = 'rejected';
   static const suspended = 'suspended';
+  // Phase 13 FR-008: canonical name for the public home feed route.
   static const home = 'home';
+  // Interim back-compat alias per R-69 — remove after all consumers migrate.
+  static const shellHome = home;
   static const admin = 'admin';
   static const adminApprovals = 'admin-approvals';
   static const superAdminRoles = 'super-admin-roles';
@@ -116,7 +127,8 @@ abstract final class AppRouteNames {
   static const publisherApprovalPending = 'publisher-pending-approval';
   static const publisherListingsModerationHistory =
       'publisher-listings-moderation-history';
-  static const shellHome = 'shell-home';
+  // Phase 13 FR-010: listing details deep-link route name.
+  static const listingDetails = 'listing-details';
   static const themeGallery = 'theme-gallery';
 }
 
@@ -351,11 +363,12 @@ GoRouter buildAppRouter({
         ),
       ),
 
-      // ─── Phase 1–4 legacy routes (kept for design tools) ───
+      // ─── Phase 13 — public listing details ───
       GoRoute(
-        path: AppRoutes.shellHome,
-        name: AppRouteNames.shellHome,
-        builder: (context, state) => const ShellHomePage(),
+        path: AppRoutes.listingDetails,
+        name: AppRouteNames.listingDetails,
+        builder: (context, state) =>
+            ListingDetailsPage(id: state.pathParameters['id']!),
       ),
       if (kDesignToolsEnabled)
         GoRoute(

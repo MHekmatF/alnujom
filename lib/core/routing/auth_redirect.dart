@@ -62,7 +62,7 @@ String? _redirectIfProtected(String path) {
 }
 
 String? _redirectAuthenticated(String path) {
-  if (_authOnlyPaths.contains(path) || path == '/') return '/home';
+  if (_authOnlyPaths.contains(path)) return AppRoutes.home;
   final hasAdminAccess = getIt<PermissionChecker>().any(
     PermissionKeys.adminCategoryKeys,
   );
