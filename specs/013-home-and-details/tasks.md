@@ -31,7 +31,7 @@ Repo layout is **Flutter app + Supabase backend** (per plan.md Project Structure
 
 **Purpose**: Confirm the workspace is ready for Phase 13 implementation.
 
-- [ ] T001 Verify the active feature directory is `specs/013-home-and-details` per `.specify/feature.json` and that the active git branch is `013-home-and-details` per `git branch --show-current`. If either is wrong, halt and ask before proceeding.
+- [X] T001 Verify the active feature directory is `specs/013-home-and-details` per `.specify/feature.json` and that the active git branch is `013-home-and-details` per `git branch --show-current`. If either is wrong, halt and ask before proceeding.
 
 ---
 
@@ -49,9 +49,9 @@ Repo layout is **Flutter app + Supabase backend** (per plan.md Project Structure
 
 ### Sub-Phase B — `url_launcher` dependency + AndroidManifest `<queries>` (per FR-032, FR-033)
 
-- [ ] T005 [P] Add `url_launcher: ^6.x` to the `dependencies:` block of `pubspec.yaml`. Do NOT add `share_plus` (FR-033 deferred per Q2=A).
-- [ ] T006 [P] Run `flutter pub get` to update `pubspec.lock`. Pin the exact resolved version (do not check in a `^` constraint at the lock layer).
-- [ ] T007 [P] Add the `<queries>` element to `android/app/src/main/AndroidManifest.xml` whitelisting the `https:` scheme only (NOT `tel:` or `mailto:` — Q2=A stubs those CTAs). Pattern:
+- [X] T005 [P] Add `url_launcher: ^6.x` to the `dependencies:` block of `pubspec.yaml`. Do NOT add `share_plus` (FR-033 deferred per Q2=A).
+- [X] T006 [P] Run `flutter pub get` to update `pubspec.lock`. Pin the exact resolved version (do not check in a `^` constraint at the lock layer).
+- [X] T007 [P] Add the `<queries>` element to `android/app/src/main/AndroidManifest.xml` whitelisting the `https:` scheme only (NOT `tel:` or `mailto:` — Q2=A stubs those CTAs). Pattern:
   ```xml
   <queries>
     <intent>
