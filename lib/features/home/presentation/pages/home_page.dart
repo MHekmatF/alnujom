@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/locale_toggle_action.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/account_status.dart';
 import '../../../../shared/domain/value_objects/publisher_status.dart';
@@ -98,6 +99,7 @@ class _HomeViewState extends State<_HomeView> {
       appBar: AppBar(
         title: Text(l10n.home_app_bar_title),
         actions: [
+          const LocaleToggleAction(),
           BlocSelector<AuthBloc, AuthState, bool>(
             selector: (state) => state is Authenticated ||
                 state is PendingApproval ||
