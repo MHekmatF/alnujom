@@ -153,3 +153,37 @@ approved-approximate-no-area rows in production. Until then the guard keeps
 the view safe.
 
 **Blocker for merge?**: No — the privacy invariant is strengthened, not weakened.
+
+---
+
+## D-T041 — Sub-Phase D smoke test (LoadMapMarkers use case end-to-end)
+
+**Task**: T041
+**Sub-Phase**: D — Domain + data layer
+**Status**: Deferred — device + debug-surface unavailable in orchestrator environment
+
+**Gap**: T041 asked for a temporary debug surface (e.g., a button on the home
+page) that calls `await getIt<LoadMapMarkers>()(filter: null)` from a running
+app instance and prints the result. The Phase 5 worktree agent erred out mid-task
+(API: Internal server error after 46 tool uses) so the orchestrator salvaged the
+partial work and finished T038/T039 inline; this path does not include adding +
+removing a debug surface in a running app.
+
+**Risk**: Low. The data path's correctness has independent verification:
+- Wire-level: `anon=6` markers via Supabase MCP `execute_sql` (Wave 1 review pass).
+- Build-level: `flutter analyze --fatal-infos` clean; `flutter build apk --debug`
+  succeeds.
+- DI registration: `dart run build_runner build` wrote `injection.config.dart`
+  with `SupabaseMapDatasource`, `MapRepositoryImpl` (as `MapRepository`), and
+  `LoadMapMarkers` entries.
+- Pattern parity: the datasource mirrors Phase 14's `SupabaseSearchDatasource`
+  exactly (same `_client` injection, same R-75 price-range conversion, same
+  storage URL rewrite for `main_image_path`).
+
+**Resolution**: Phase 8 (Polish & Verification, T076 SC matrix) verifies the
+integrated MapPage end-to-end on the Infinix Note 8 via the home-tile entry,
+which transitively exercises `LoadMapMarkers`. If a regression surfaces, fix
+it then and re-open T041.
+
+**Blocker for merge?**: No — the use case is fully wired; the unrun smoke is
+the temporary-debug-surface dance, not a correctness gap.

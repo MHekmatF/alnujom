@@ -178,6 +178,11 @@ import '../../features/locations/presentation/bloc/location_picker_bloc.dart'
     as _i610;
 import '../../features/locations/presentation/bloc/locations_list_bloc.dart'
     as _i669;
+import '../../features/map/data/datasources/supabase_map_datasource.dart'
+    as _i245;
+import '../../features/map/data/repositories/map_repository_impl.dart' as _i457;
+import '../../features/map/domain/repositories/map_repository.dart' as _i973;
+import '../../features/map/domain/usecases/load_map_markers.dart' as _i842;
 import '../../features/onboarding/data/datasources/onboarding_seen_storage.dart'
     as _i144;
 import '../../features/onboarding/data/repositories/onboarding_repository_impl.dart'
@@ -342,6 +347,12 @@ _i174.GetIt $initGetIt(
   gh.factory<_i713.SupabaseSearchDatasource>(
     () => _i713.SupabaseSearchDatasource(gh<_i454.SupabaseClient>()),
   );
+  gh.factory<_i245.SupabaseMapDatasource>(
+    () => _i245.SupabaseMapDatasource(gh<_i454.SupabaseClient>()),
+  );
+  gh.factory<_i973.MapRepository>(
+    () => _i457.MapRepositoryImpl(gh<_i245.SupabaseMapDatasource>()),
+  );
   gh.lazySingleton<_i155.ListingReviewRepository>(
     () => _i1072.ListingReviewRepositoryImpl(
       gh<_i530.SupabaseListingReviewDatasource>(),
@@ -420,6 +431,9 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i190.SearchListingsUseCase>(
     () => _i190.SearchListingsUseCase(gh<_i357.SearchRepository>()),
+  );
+  gh.factory<_i842.LoadMapMarkers>(
+    () => _i842.LoadMapMarkers(gh<_i973.MapRepository>()),
   );
   gh.lazySingleton<_i430.OnboardingRepository>(
     () => _i452.OnboardingRepositoryImpl(gh<_i144.OnboardingSeenStorage>()),
