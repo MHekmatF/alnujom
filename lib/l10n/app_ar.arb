@@ -637,5 +637,54 @@
   "image_unavailable": "الصورة غير متاحة",
 
   "home_empty_publish_first_listing": "انشر إعلانك الأول",
-  "home_empty_sign_in_to_publish": "سجّل الدخول للنشر"
+  "home_empty_sign_in_to_publish": "سجّل الدخول للنشر",
+
+  "search_placeholder": "ابحث عن شقق، فيلل، أراضي...",
+  "search_filters_button": "الفلاتر",
+  "search_sort_label": "ترتيب:",
+  "search_results_count": "{count, plural, zero{لا نتائج} one{نتيجة واحدة} two{نتيجتان} few{{count} نتائج} many{{count} نتيجة} other{{count} نتيجة}}",
+  "@search_results_count": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "search_sort_newest": "الأحدث",
+  "search_sort_price_asc": "السعر: من الأقل",
+  "search_sort_price_desc": "السعر: من الأعلى",
+
+  "search_filter_sheet_title": "الفلاتر",
+  "search_filter_apply": "تطبيق",
+  "search_filter_reset": "إعادة تعيين",
+
+  "search_filter_purpose_label": "الغرض",
+  "search_filter_property_type_label": "نوع العقار",
+  "search_filter_location_label": "الموقع",
+  "search_filter_governorate_hint": "اختر المحافظة",
+  "search_filter_city_hint": "اختر المدينة",
+  "search_filter_area_hint": "اختر المنطقة",
+  "search_filter_price_range_label": "نطاق السعر",
+  "search_filter_price_min_hint": "الحد الأدنى",
+  "search_filter_price_max_hint": "الحد الأعلى",
+  "search_filter_price_currency_label": "العملة",
+  "search_filter_price_min_max_error": "الحد الأدنى يجب أن يكون أقل من الأعلى",
+  "search_filter_price_no_exchange_rate": "سعر الصرف غير متاح لهذه العملة",
+  "search_filter_rooms_label": "غرف النوم",
+  "search_filter_rooms_exactly": "تماماً",
+  "search_filter_rooms_at_least": "على الأقل",
+  "search_filter_bathrooms_label": "الحمامات",
+  "search_filter_area_size_label": "المساحة (م²)",
+
+  "search_empty_title": "لا توجد نتائج",
+  "search_empty_subtitle": "حاول تغيير الكلمات أو الفلاتر",
+  "search_empty_clear_filters": "مسح الفلاتر",
+  "search_arabic_hint": "البحث بالعربية يطابق الكلمة تماماً. جرب: {suggestion}",
+  "@search_arabic_hint": {
+    "placeholders": {
+      "suggestion": { "type": "String" }
+    }
+  },
+  "search_loading": "جارٍ البحث...",
+  "search_error_message": "حدث خطأ أثناء البحث",
+  "search_error_retry": "إعادة المحاولة"
 }

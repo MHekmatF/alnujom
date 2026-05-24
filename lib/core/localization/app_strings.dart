@@ -2494,4 +2494,151 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String get home_empty_sign_in_to_publish =>
       _resolve('home_empty_sign_in_to_publish', (loc) => loc.home_empty_sign_in_to_publish);
+
+  // ── Phase 14 — Search & Filters ──────────────────────────────────────────
+
+  // §3.1 Search Page Chrome
+  @override
+  String get search_placeholder =>
+      _resolve('search_placeholder', (loc) => loc.search_placeholder);
+
+  @override
+  String get search_filters_button =>
+      _resolve('search_filters_button', (loc) => loc.search_filters_button);
+
+  @override
+  String get search_sort_label =>
+      _resolve('search_sort_label', (loc) => loc.search_sort_label);
+
+  @override
+  String search_results_count(int count) => _resolve(
+        'search_results_count',
+        (loc) => loc.search_results_count(count),
+      );
+
+  // §3.2 Sort Options
+  @override
+  String get search_sort_newest =>
+      _resolve('search_sort_newest', (loc) => loc.search_sort_newest);
+
+  @override
+  String get search_sort_price_asc =>
+      _resolve('search_sort_price_asc', (loc) => loc.search_sort_price_asc);
+
+  @override
+  String get search_sort_price_desc =>
+      _resolve('search_sort_price_desc', (loc) => loc.search_sort_price_desc);
+
+  // §3.3 Filter Sheet Chrome
+  @override
+  String get search_filter_sheet_title =>
+      _resolve('search_filter_sheet_title', (loc) => loc.search_filter_sheet_title);
+
+  @override
+  String get search_filter_apply =>
+      _resolve('search_filter_apply', (loc) => loc.search_filter_apply);
+
+  @override
+  String get search_filter_reset =>
+      _resolve('search_filter_reset', (loc) => loc.search_filter_reset);
+
+  // §3.4 Filter Dimensions
+  @override
+  String get search_filter_purpose_label =>
+      _resolve('search_filter_purpose_label', (loc) => loc.search_filter_purpose_label);
+
+  @override
+  String get search_filter_property_type_label =>
+      _resolve('search_filter_property_type_label', (loc) => loc.search_filter_property_type_label);
+
+  @override
+  String get search_filter_location_label =>
+      _resolve('search_filter_location_label', (loc) => loc.search_filter_location_label);
+
+  @override
+  String get search_filter_governorate_hint =>
+      _resolve('search_filter_governorate_hint', (loc) => loc.search_filter_governorate_hint);
+
+  @override
+  String get search_filter_city_hint =>
+      _resolve('search_filter_city_hint', (loc) => loc.search_filter_city_hint);
+
+  @override
+  String get search_filter_area_hint =>
+      _resolve('search_filter_area_hint', (loc) => loc.search_filter_area_hint);
+
+  @override
+  String get search_filter_price_range_label =>
+      _resolve('search_filter_price_range_label', (loc) => loc.search_filter_price_range_label);
+
+  @override
+  String get search_filter_price_min_hint =>
+      _resolve('search_filter_price_min_hint', (loc) => loc.search_filter_price_min_hint);
+
+  @override
+  String get search_filter_price_max_hint =>
+      _resolve('search_filter_price_max_hint', (loc) => loc.search_filter_price_max_hint);
+
+  @override
+  String get search_filter_price_currency_label =>
+      _resolve('search_filter_price_currency_label', (loc) => loc.search_filter_price_currency_label);
+
+  @override
+  String get search_filter_price_min_max_error =>
+      _resolve('search_filter_price_min_max_error', (loc) => loc.search_filter_price_min_max_error);
+
+  @override
+  String get search_filter_price_no_exchange_rate =>
+      _resolve('search_filter_price_no_exchange_rate', (loc) => loc.search_filter_price_no_exchange_rate);
+
+  @override
+  String get search_filter_rooms_label =>
+      _resolve('search_filter_rooms_label', (loc) => loc.search_filter_rooms_label);
+
+  @override
+  String get search_filter_rooms_exactly =>
+      _resolve('search_filter_rooms_exactly', (loc) => loc.search_filter_rooms_exactly);
+
+  @override
+  String get search_filter_rooms_at_least =>
+      _resolve('search_filter_rooms_at_least', (loc) => loc.search_filter_rooms_at_least);
+
+  @override
+  String get search_filter_bathrooms_label =>
+      _resolve('search_filter_bathrooms_label', (loc) => loc.search_filter_bathrooms_label);
+
+  @override
+  String get search_filter_area_size_label =>
+      _resolve('search_filter_area_size_label', (loc) => loc.search_filter_area_size_label);
+
+  // §3.5 Empty / Error States
+  @override
+  String get search_empty_title =>
+      _resolve('search_empty_title', (loc) => loc.search_empty_title);
+
+  @override
+  String get search_empty_subtitle =>
+      _resolve('search_empty_subtitle', (loc) => loc.search_empty_subtitle);
+
+  @override
+  String get search_empty_clear_filters =>
+      _resolve('search_empty_clear_filters', (loc) => loc.search_empty_clear_filters);
+
+  @override
+  String search_arabic_hint(String suggestion) => _resolve(
+        'search_arabic_hint',
+        (loc) => loc.search_arabic_hint(suggestion),
+      );
+
+  @override
+  String get search_loading =>
+      _resolve('search_loading', (loc) => loc.search_loading);
+
+  @override
+  String get search_error_message =>
+      _resolve('search_error_message', (loc) => loc.search_error_message);
+
+  @override
+  String get search_error_retry =>
+      _resolve('search_error_retry', (loc) => loc.search_error_retry);
 }
