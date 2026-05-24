@@ -90,20 +90,20 @@ class FilterActiveAlertDialog extends StatelessWidget {
         _propertyTypeLabel(l10n, f.propertyType!),
       ));
     }
-    if (f.governorateId != null) {
-      out.add(_labelled(
-        l10n.search_filter_governorate_hint,
-        // The id is shown verbatim — the alert is a coarse summary, not a
-        // fully resolved location label (the search-results page renders
-        // the human-readable name and is one back-press away).
-        f.governorateId!,
-      ));
-    }
-    if (f.cityId != null) {
-      out.add(_labelled(l10n.search_filter_city_hint, f.cityId!));
-    }
-    if (f.areaId != null) {
-      out.add(_labelled(l10n.search_filter_area_hint, f.areaId!));
+    // Location filter: collapse {governorate, city, area} into a single
+    // chip showing the most specific level set. Raw IDs (UUIDs / slugs) would
+    // be meaningless to the user; resolving them to display names would
+    // require an extra lookup that this short-lived alert dialog isn't worth.
+    // The search-results page (one back-press away) renders the resolved name.
+    final locationLabel = f.areaId != null
+        ? l10n.search_filter_area_hint
+        : f.cityId != null
+            ? l10n.search_filter_city_hint
+            : f.governorateId != null
+                ? l10n.search_filter_governorate_hint
+                : null;
+    if (locationLabel != null) {
+      out.add(locationLabel);
     }
     if (f.priceMin != null || f.priceMax != null) {
       out.add(_priceRangeLabel(l10n, f));

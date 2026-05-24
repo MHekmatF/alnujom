@@ -103,20 +103,31 @@ class _MapView extends StatelessWidget {
         listenWhen: (prev, curr) => curr is MapLoaded,
         listener: (context, state) {
           // Use Element-tree access to the _MapPageState ancestor so the
-          // _alertShown gate survives BLoC rebuilds.
+          // _alertShown gate survives BLoC rebuilds. NOTE: relies on
+          // _MapView being a direct descendant of MapPage — any future
+          // refactor that hoists _MapView out of this file must port
+          // _alertShown into an InheritedWidget / Provider.
           final pageState = context.findAncestorStateOfType<_MapPageState>();
           if (state is MapLoaded &&
               state.showFilterAlert &&
               pageState != null &&
               !pageState._alertShown) {
             pageState._alertShown = true;
+            final bloc = context.read<MapBloc>();
             showDialog<void>(
               context: context,
               barrierDismissible: true,
               builder: (_) => FilterActiveAlertDialog(
                 filterState: state.activeFilter!,
               ),
-            );
+            ).then((_) {
+              // Barrier-tap dismiss does NOT call either action's onPressed;
+              // dispatch FilterAlertDismissed unconditionally on any close
+              // path so the BLoC's showFilterAlert flag flips to false. The
+              // Reset path has already mutated state (filter cleared) by the
+              // time this runs, so a no-op extra Dismissed is harmless.
+              bloc.add(const FilterAlertDismissed());
+            });
           }
         },
         builder: (context, state) {
