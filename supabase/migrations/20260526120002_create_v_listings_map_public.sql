@@ -17,14 +17,16 @@
 --   (NO publisher contact details, NO description, NO full address — per FR-001 + ADR-0001.)
 --
 -- RLS posture:
---   The view inherits RLS from the underlying public.listings table. The base
---   table's listings_select_public policy permits anon/authenticated reads when
---   status='approved' AND publish-window — the view's WHERE re-enforces the same
---   gate (defense in depth) plus the visibility-tier gate.
---   GRANT SELECT explicitly to authenticated + anon makes the public read intent
---   explicit at the view layer.
+--   WITH (security_invoker = true) ensures the view executes as the calling role,
+--   so RLS on the underlying public.listings table is enforced (matches Phase 10's
+--   v_publisher_listings pattern). The base table's listings_select_public policy
+--   permits anon/authenticated reads when status='approved' AND publish-window —
+--   the view's WHERE re-enforces the same gate (defense in depth) plus the
+--   visibility-tier gate. GRANT SELECT explicitly to authenticated + anon makes
+--   the public read intent explicit at the view layer.
 
-CREATE OR REPLACE VIEW public.v_listings_map_public AS
+CREATE OR REPLACE VIEW public.v_listings_map_public
+WITH (security_invoker = true) AS
 SELECT
   l.id,
   l.title,

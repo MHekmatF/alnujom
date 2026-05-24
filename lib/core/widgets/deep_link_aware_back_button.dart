@@ -24,7 +24,8 @@ class DeepLinkAwareBackButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: const Icon(Icons.arrow_back),
+      icon: const BackButtonIcon(),
+      tooltip: MaterialLocalizations.of(context).backButtonTooltip,
       onPressed: () {
         if (Navigator.canPop(context)) {
           Navigator.pop(context);
