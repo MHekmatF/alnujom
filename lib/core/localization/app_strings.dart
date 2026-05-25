@@ -2704,4 +2704,133 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String get search_error_retry =>
       _resolve('search_error_retry', (loc) => loc.search_error_retry);
+
+  // ── Phase 15 Map View ─────────────────────────────────────────────────────
+
+  // §1 Map page chrome
+  @override
+  String get map_page_title =>
+      _resolve('map_page_title', (loc) => loc.map_page_title);
+
+  @override
+  String get map_osm_attribution =>
+      _resolve('map_osm_attribution', (loc) => loc.map_osm_attribution);
+
+  @override
+  String get map_empty_state_no_listings => _resolve(
+    'map_empty_state_no_listings',
+    (loc) => loc.map_empty_state_no_listings,
+  );
+
+  @override
+  String get map_error_load_failed =>
+      _resolve('map_error_load_failed', (loc) => loc.map_error_load_failed);
+
+  @override
+  String get map_error_retry_action =>
+      _resolve('map_error_retry_action', (loc) => loc.map_error_retry_action);
+
+  @override
+  String get map_tiles_unavailable =>
+      _resolve('map_tiles_unavailable', (loc) => loc.map_tiles_unavailable);
+
+  // §2 Marker preview popover
+  @override
+  String get map_marker_view_details_action => _resolve(
+    'map_marker_view_details_action',
+    (loc) => loc.map_marker_view_details_action,
+  );
+
+  @override
+  String get map_marker_approximate_location_label => _resolve(
+    'map_marker_approximate_location_label',
+    (loc) => loc.map_marker_approximate_location_label,
+  );
+
+  @override
+  String get map_marker_image_unavailable => _resolve(
+    'map_marker_image_unavailable',
+    (loc) => loc.map_marker_image_unavailable,
+  );
+
+  // §3 Center on my location FAB
+  @override
+  String get map_fab_center_on_me_tooltip => _resolve(
+    'map_fab_center_on_me_tooltip',
+    (loc) => loc.map_fab_center_on_me_tooltip,
+  );
+
+  @override
+  String get map_geolocation_permission_denied_message => _resolve(
+    'map_geolocation_permission_denied_message',
+    (loc) => loc.map_geolocation_permission_denied_message,
+  );
+
+  @override
+  String get map_geolocation_permission_permanently_denied_message => _resolve(
+    'map_geolocation_permission_permanently_denied_message',
+    (loc) => loc.map_geolocation_permission_permanently_denied_message,
+  );
+
+  @override
+  String get map_geolocation_open_settings_action => _resolve(
+    'map_geolocation_open_settings_action',
+    (loc) => loc.map_geolocation_open_settings_action,
+  );
+
+  @override
+  String get map_geolocation_fix_unavailable_message => _resolve(
+    'map_geolocation_fix_unavailable_message',
+    (loc) => loc.map_geolocation_fix_unavailable_message,
+  );
+
+  // §4 Filter-active alert dialog
+  @override
+  String get map_filter_alert_title =>
+      _resolve('map_filter_alert_title', (loc) => loc.map_filter_alert_title);
+
+  @override
+  String get map_filter_alert_body_prefix => _resolve(
+    'map_filter_alert_body_prefix',
+    (loc) => loc.map_filter_alert_body_prefix,
+  );
+
+  @override
+  String get map_filter_alert_action_reset => _resolve(
+    'map_filter_alert_action_reset',
+    (loc) => loc.map_filter_alert_action_reset,
+  );
+
+  @override
+  String get map_filter_alert_action_keep => _resolve(
+    'map_filter_alert_action_keep',
+    (loc) => loc.map_filter_alert_action_keep,
+  );
+
+  // §5 Refresh button + entry-point labels
+  @override
+  String get map_refresh_button_tooltip => _resolve(
+    'map_refresh_button_tooltip',
+    (loc) => loc.map_refresh_button_tooltip,
+  );
+
+  @override
+  String get home_map_tile_title =>
+      _resolve('home_map_tile_title', (loc) => loc.home_map_tile_title);
+
+  @override
+  String get home_map_tile_subtitle =>
+      _resolve('home_map_tile_subtitle', (loc) => loc.home_map_tile_subtitle);
+
+  @override
+  String get listing_details_view_on_map_action => _resolve(
+    'listing_details_view_on_map_action',
+    (loc) => loc.listing_details_view_on_map_action,
+  );
+
+  @override
+  String get search_results_show_on_map_action => _resolve(
+    'search_results_show_on_map_action',
+    (loc) => loc.search_results_show_on_map_action,
+  );
 }

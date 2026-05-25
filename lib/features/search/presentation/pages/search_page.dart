@@ -6,7 +6,7 @@
 //   SearchPage
 //     └─ BlocProvider<SearchBloc>(create: fresh-from-DI ..add initial filters)
 //          └─ _SearchPageView (Scaffold)
-//                ├─ AppBar(leading: Navigator.canPop? BackButton : home icon)
+//                ├─ AppBar(leading: DeepLinkAwareBackButton)
 //                │   └─ title: _SearchBar
 //                └─ body: Column
 //                      ├─ _SortAndFiltersRow
@@ -18,9 +18,9 @@
 //   • Property-type chip tap (extra: PropertyType) → /search,
 //     BLoC pre-filters by propertyType, _SearchBar.autofocus=false.
 //
-// Back-navigation: Q4=D `Navigator.canPop()` convention — this is the
-// second consumer (after Phase 13 ListingDetailsPage) per R-77. Extraction
-// of DeepLinkAwareBackButton deferred to third consumer.
+// Back-navigation: Q4=D `Navigator.canPop()` convention — extracted to
+// DeepLinkAwareBackButton per Phase 14 DEFERRED.md §D-001 (Phase 15 is the
+// third consumer trigger). Both call sites now consume the shared widget.
 //
 // Anonymous-access: no `AuthBloc` dependency. FR-015.
 import 'package:flutter/material.dart';
@@ -29,6 +29,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/widgets/deep_link_aware_back_button.dart';
+import '../../../../features/map/domain/entities/map_entry_context.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../listing_form/domain/entities/listing.dart';
 import '../../domain/entities/filter_state.dart';
@@ -70,12 +72,7 @@ class _SearchPageView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: Navigator.canPop(context)
-            ? const BackButton()
-            : IconButton(
-                icon: const Icon(Icons.home),
-                onPressed: () => context.go(AppRoutes.home),
-              ),
+        leading: const DeepLinkAwareBackButton(),
         title: _SearchBar(autofocus: autofocusSearchBar),
         titleSpacing: 0,
       ),
@@ -197,24 +194,51 @@ class _SortAndFiltersRow extends StatelessWidget {
               const InlineSortControl(),
             ],
           ),
-          BlocBuilder<SearchBloc, SearchState>(
-            buildWhen: (p, c) => p.filters.isEmpty != c.filters.isEmpty,
-            builder: (context, state) {
-              final highlight = !state.filters.isEmpty;
-              final color = highlight
-                  ? Theme.of(context).colorScheme.primary
-                  : null;
-              return TextButton.icon(
-                onPressed: () => _openFilterSheet(context, state.filters),
-                icon: Icon(Icons.tune, color: color),
-                label: Text(
-                  l10n.search_filters_button,
-                  style: TextStyle(color: color),
-                ),
-              );
-            },
+          Row(
+            children: [
+              // Phase 15 G3: "Show on map" entry point per
+              // contracts/phase15-search-show-on-map.md. Always visible;
+              // no state mutation on SearchBloc.
+              TextButton.icon(
+                onPressed: () => _openMap(context),
+                icon: const Icon(Icons.map_outlined),
+                label: Text(l10n.search_results_show_on_map_action),
+              ),
+              const SizedBox(width: 4),
+              BlocBuilder<SearchBloc, SearchState>(
+                buildWhen: (p, c) => p.filters.isEmpty != c.filters.isEmpty,
+                builder: (context, state) {
+                  final highlight = !state.filters.isEmpty;
+                  final color = highlight
+                      ? Theme.of(context).colorScheme.primary
+                      : null;
+                  return TextButton.icon(
+                    onPressed: () => _openFilterSheet(context, state.filters),
+                    icon: Icon(Icons.tune, color: color),
+                    label: Text(
+                      l10n.search_filters_button,
+                      style: TextStyle(color: color),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
         ],
+      ),
+    );
+  }
+
+  /// Phase 15 G3: Navigate to MapPage with the current [FilterState] snapshot.
+  /// Reads the filter from [SearchBloc] without mutating it (R-77 BLoC
+  /// lifetime preserved — pressing back returns to identical search results).
+  void _openMap(BuildContext context) {
+    final filters = context.read<SearchBloc>().state.filters;
+    context.go(
+      AppRoutes.map,
+      extra: MapEntryFromSearch(
+        filterState: filters,
+        showFilterAlert: filters.hasAnyActiveFilter,
       ),
     );
   }
