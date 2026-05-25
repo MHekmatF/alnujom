@@ -431,11 +431,11 @@ start of Phase 16 preparation.
 
 ---
 
-## D-T075-followup — Pixel 8 Pro AVD walk: §10j matrix incomplete + SC-015 snackbar text not captured
+## D-T075-followup — Pixel 8 Pro AVD walk: RESOLVED 2026-05-25 (most), one residual
 
 **Task**: T075 (supersedes original §D-T075)
 **Sub-Phase**: Polish
-**Status**: Partially deferred — most quickstart §10 paths verified on AVD 2026-05-25; specific combos remain.
+**Status**: ✅ Mostly RESOLVED 2026-05-25 — all 4 theme/locale combos walked; SC-015 deny + permanently-denied snackbars both walked. One residual: SC-006 spiderfy needs co-located seed data (out of scope for Phase 15).
 
 ### What was walked on Pixel 8 Pro AVD (2026-05-25)
 By user:
@@ -451,10 +451,10 @@ By orchestrator (via adb input):
 - Back-arrow auto-flips for RTL (Wave 1 audit fix verified visually)
 
 ### What remains
-1. **§10j 4-combination matrix (light/en, dark/ar, dark/en)** — only light/ar was walked. Affects SC-007 (attribution visible in all 4) and SC-008 (chrome renders correctly in all 4). The other 3 combos require theme/locale toggles in the app — would take ~5 min of additional walk time on the running AVD.
-2. **SC-015 deny-path snackbar text** — system permission dialog appears correctly; deny tap dispatches the BLoC event; the snackbar `l10n.map_geolocation_permission_denied_message` fires per code path but the orchestrator's adb-driven taps drifted and the 4-second snackbar window closed before precise screencap. Code path is correct; visual confirmation deferred.
-3. **SC-015 permanently-denied "Open settings" snackbar** — requires denying twice OR setting permission flag via `pm` flags. Not walked.
-4. **SC-006 spiderfy at max zoom** — current 6-row test dataset has no co-located markers; spiderfy condition cannot trigger naturally. Would need seed data with ≥2 markers at the same area centroid.
+1. ~~§10j 4-combination matrix~~ — ✅ **CLOSED 2026-05-25**: user walked light/en + dark/en + dark/ar (in addition to orchestrator's light/ar) → SC-007 + SC-008 fully VERIFIED — AVD.
+2. ~~SC-015 deny-path snackbar text~~ — ✅ **CLOSED 2026-05-25**: user walked the FAB → "Don't allow" → snackbar path → SC-015 deny branch VERIFIED — AVD.
+3. ~~SC-015 permanently-denied "Open settings" snackbar~~ — ✅ **CLOSED 2026-05-25**: user walked the second-tap path → "Open settings" snackbar appeared → SC-015 permanently-denied branch VERIFIED — AVD.
+4. **SC-006 spiderfy at max zoom** — current 6-row test dataset has no co-located markers; spiderfy condition cannot trigger naturally. Would need seed data with ≥2 markers at the same area centroid. **Defer to a future spec** when test data is seeded with overlapping listings, OR to first real-world cluster of co-located listings post-launch.
 
 ### Risk
 Low for combos (light/ar walk confirms the theme + RTL pipeline works end-to-end; the other 3 combos are mechanical theme-token + Directionality switches). Low for SC-015 (BLoC event dispatch verified at system-prompt level; snackbar is mechanical Material widget). Low for spiderfy (defaults from `flutter_map_marker_cluster ^1.4.0` per Phase 6 agent's note are documented to handle this — needs co-located data to surface).
@@ -462,4 +462,39 @@ Low for combos (light/ar walk confirms the theme + RTL pipeline works end-to-end
 ### Resolution path
 Either: (a) walk the remaining combos + deny-path on the AVD next time it's running (low-cost), (b) defer to Infinix Note 8 walk and close §D-T073 + this entry together, or (c) seed two listings at the same area centroid to enable spiderfy testing.
 
-**Blocker for merge?**: No — substitute-device evidence covers 6 prior PARTIAL SCs (now AVD-verified); primary-device walk still recommended per memory `feedback_strict_task_completion.md` but the PR can squash-merge with this DEFERRED entry as the audit trail.
+**Blocker for merge?**: No — fully closed except spiderfy (low-risk, blocked by test-data shape not code). Per memory `feedback_avd_acceptable_qa.md` (saved 2026-05-25), AVD walks count as primary QA for this MVP.
+
+---
+
+## D-Dark-Map-Tiles — Dark-mode OSM tile source
+
+**Task**: (forward-stated in Phase 15 plan + CLAUDE.md; lifted to explicit entry for future-spec findability)
+**Sub-Phase**: cross-cutting (Sub-Phase E composition + R-94 tile choice)
+**Status**: Forward-stated deferral — intentional Phase 15 scope cut; raised here for visibility.
+
+### Observation
+User noted (2026-05-25 AVD walk): in dark theme, MapPage chrome (AppBar, FAB, refresh, popover, attribution, marker pins, cluster badges) all use dark theme tokens correctly — but the **OSM raster tiles themselves remain light/colorful**, creating a visual contrast between dark UI chrome and bright map content.
+
+### Why this is the documented design
+Phase 15 R-94 locked the tile source to `https://tile.openstreetmap.org/{z}/{x}/{y}.png` (single public OSM tile server). Phase 15's plan explicitly forward-states:
+
+> "Forward-stated dark-mode tile source: A future spec MAY add a dedicated dark-mode OSM tile source (e.g., a CartoDB Dark Matter mirror) for the map page's dark theme. Phase 15 ships one tile source for both themes; the marker + popover chrome respects the active theme tokens."
+
+This is also called out in `CLAUDE.md` SPECKIT block under "Cross-cutting → Forward-stated dark-mode tile source."
+
+### Why deferred (rationale recap)
+1. **Provider TOS + attribution work**: switching tile providers (e.g., CartoDB Dark Matter, Stadia Maps Alidade Dark) requires re-verifying the attribution surface, usage limits, and ToS — each provider has its own constraints.
+2. **Cache invalidation**: an existing user pulling fresh tiles on theme switch would burn bandwidth; needs a coordinated cache strategy.
+3. **Single-tile-source simplicity**: keeps Phase 15 contained — adding two tile sources doubles the tile-layer complexity in MapPage composition.
+
+### Resolution path (future spec)
+A future spec MAY:
+1. Add a second `TileLayer` instance wrapped in a `BlocBuilder<ThemeBloc, ThemeState>` that swaps URL based on `state.brightness`.
+2. Pick a dark-mode provider (CartoDB Dark Matter is the de-facto default for OSM-style dark maps; verify their attribution requirements).
+3. Update `OsmAttributionWidget` to include the new provider's attribution when the dark layer is active.
+4. Coordinate with the design system on shared dark-tile color palette to keep marker pins legible against the dark map.
+
+### Risk if shipped as-is
+Cosmetic only. Users who prefer dark theme see a visual mismatch but the map remains fully functional. No accessibility regression (light tiles in dark mode is still WCAG-acceptable contrast).
+
+**Blocker for merge?**: No — explicitly within Phase 15 scope per the plan.
