@@ -65,3 +65,18 @@ final class ReasonDetailTooLongFailure extends Failure {
 final class ListingNotFoundFailure extends Failure {
   const ListingNotFoundFailure() : super('Listing not found.');
 }
+
+// Phase 16 (spec/016-contact-inquiries) — validation failure for
+// InquirySubmission.validate() + RPC-level input validation codes.
+// [code] carries a localization key (e.g. 'invalid_sender_name').
+final class ValidationFailure extends Failure {
+  const ValidationFailure(this.code) : super('Validation failed: $code');
+  final String code;
+}
+
+// Phase 16 (spec/016-contact-inquiries) — emitted when the
+// enforce_inquiry_transition trigger rejects a status mutation
+// (SQLSTATE 23514 with 'invalid_inquiry_transition' in the message).
+final class TransitionInvalidFailure extends Failure {
+  const TransitionInvalidFailure() : super('Invalid inquiry status transition.');
+}

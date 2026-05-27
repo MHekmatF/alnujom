@@ -93,6 +93,27 @@ import '../../features/home/domain/repositories/home_feed_repository.dart'
     as _i433;
 import '../../features/home/domain/usecases/load_home_feed.dart' as _i321;
 import '../../features/home/presentation/bloc/home_bloc.dart' as _i202;
+import '../../features/inquiries/data/datasources/supabase_inquiries_datasource.dart'
+    as _i1043;
+import '../../features/inquiries/data/repositories/inquiry_repository_impl.dart'
+    as _i614;
+import '../../features/inquiries/data/repositories/lead_event_repository_impl.dart'
+    as _i33;
+import '../../features/inquiries/domain/repositories/inquiry_repository.dart'
+    as _i272;
+import '../../features/inquiries/domain/repositories/lead_event_repository.dart'
+    as _i866;
+import '../../features/inquiries/domain/usecases/load_inbox_unread_count.dart'
+    as _i868;
+import '../../features/inquiries/domain/usecases/load_inquiry_detail.dart'
+    as _i1054;
+import '../../features/inquiries/domain/usecases/load_inquiry_inbox.dart'
+    as _i155;
+import '../../features/inquiries/domain/usecases/record_lead_event.dart'
+    as _i615;
+import '../../features/inquiries/domain/usecases/submit_inquiry.dart' as _i73;
+import '../../features/inquiries/domain/usecases/update_inquiry_status.dart'
+    as _i684;
 import '../../features/listing_details/data/datasources/supabase_listing_details_datasource.dart'
     as _i1006;
 import '../../features/listing_details/data/repositories/listing_details_repository_impl.dart'
@@ -351,6 +372,12 @@ _i174.GetIt $initGetIt(
   gh.factory<_i245.SupabaseMapDatasource>(
     () => _i245.SupabaseMapDatasource(gh<_i454.SupabaseClient>()),
   );
+  gh.factory<_i1043.SupabaseInquiriesDatasource>(
+    () => _i1043.SupabaseInquiriesDatasource(gh<_i454.SupabaseClient>()),
+  );
+  gh.factory<_i272.InquiryRepository>(
+    () => _i614.InquiryRepositoryImpl(gh<_i1043.SupabaseInquiriesDatasource>()),
+  );
   gh.factory<_i973.MapRepository>(
     () => _i457.MapRepositoryImpl(gh<_i245.SupabaseMapDatasource>()),
   );
@@ -395,6 +422,10 @@ _i174.GetIt $initGetIt(
       gh<_i1064.SupabaseRoleCatalogDataSource>(),
       gh<_i354.AppLogger>(),
     ),
+  );
+  gh.factory<_i866.LeadEventRepository>(
+    () =>
+        _i33.LeadEventRepositoryImpl(gh<_i1043.SupabaseInquiriesDatasource>()),
   );
   gh.lazySingleton<_i120.AccountApprovalsRepository>(
     () => _i278.AccountApprovalsRepositoryImpl(
@@ -472,6 +503,9 @@ _i174.GetIt $initGetIt(
     ),
     dispose: (i) => i.dispose(),
   );
+  gh.factory<_i615.RecordLeadEvent>(
+    () => _i615.RecordLeadEvent(gh<_i866.LeadEventRepository>()),
+  );
   gh.factory<_i404.ApproveListingUseCase>(
     () => _i404.ApproveListingUseCase(gh<_i155.ListingReviewRepository>()),
   );
@@ -505,6 +539,21 @@ _i174.GetIt $initGetIt(
       gh<_i1006.SupabaseListingDetailsDatasource>(),
       gh<_i354.AppLogger>(),
     ),
+  );
+  gh.factory<_i868.LoadInboxUnreadCount>(
+    () => _i868.LoadInboxUnreadCount(gh<_i272.InquiryRepository>()),
+  );
+  gh.factory<_i1054.LoadInquiryDetail>(
+    () => _i1054.LoadInquiryDetail(gh<_i272.InquiryRepository>()),
+  );
+  gh.factory<_i155.LoadInquiryInbox>(
+    () => _i155.LoadInquiryInbox(gh<_i272.InquiryRepository>()),
+  );
+  gh.factory<_i73.SubmitInquiry>(
+    () => _i73.SubmitInquiry(gh<_i272.InquiryRepository>()),
+  );
+  gh.factory<_i684.UpdateInquiryStatus>(
+    () => _i684.UpdateInquiryStatus(gh<_i272.InquiryRepository>()),
   );
   gh.factory<_i891.ListMyListings>(
     () => _i891.ListMyListings(gh<_i754.PublisherDashboardRepository>()),
