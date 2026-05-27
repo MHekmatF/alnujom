@@ -2833,4 +2833,251 @@ final class _DebugAppLocalizations extends AppLocalizations {
     'search_results_show_on_map_action',
     (loc) => loc.search_results_show_on_map_action,
   );
+
+  // ── Phase 16 — Contact, Inquiries & Lead Events ───────────────────────────
+
+  // §T038 ContactBlock
+  @override
+  String get contact_call_disabled_tooltip => _resolve(
+    'contact_call_disabled_tooltip',
+    (loc) => loc.contact_call_disabled_tooltip,
+  );
+
+  @override
+  String get contact_whatsapp_disabled_tooltip => _resolve(
+    'contact_whatsapp_disabled_tooltip',
+    (loc) => loc.contact_whatsapp_disabled_tooltip,
+  );
+
+  @override
+  String get contact_dialer_unavailable => _resolve(
+    'contact_dialer_unavailable',
+    (loc) => loc.contact_dialer_unavailable,
+  );
+
+  @override
+  String get contact_whatsapp_app_unavailable => _resolve(
+    'contact_whatsapp_app_unavailable',
+    (loc) => loc.contact_whatsapp_app_unavailable,
+  );
+
+  // §T039 Inquiry form sheet
+  @override
+  String get inquiry_form_title =>
+      _resolve('inquiry_form_title', (loc) => loc.inquiry_form_title);
+
+  @override
+  String get inquiry_form_name_label =>
+      _resolve('inquiry_form_name_label', (loc) => loc.inquiry_form_name_label);
+
+  @override
+  String get inquiry_form_name_placeholder => _resolve(
+    'inquiry_form_name_placeholder',
+    (loc) => loc.inquiry_form_name_placeholder,
+  );
+
+  @override
+  String get inquiry_form_phone_label => _resolve(
+    'inquiry_form_phone_label',
+    (loc) => loc.inquiry_form_phone_label,
+  );
+
+  @override
+  String get inquiry_form_message_label => _resolve(
+    'inquiry_form_message_label',
+    (loc) => loc.inquiry_form_message_label,
+  );
+
+  @override
+  String get inquiry_form_message_placeholder => _resolve(
+    'inquiry_form_message_placeholder',
+    (loc) => loc.inquiry_form_message_placeholder,
+  );
+
+  @override
+  String inquiry_form_message_counter(int remaining) => _resolve(
+    'inquiry_form_message_counter',
+    (loc) => loc.inquiry_form_message_counter(remaining),
+  );
+
+  @override
+  String get inquiry_form_submit_button => _resolve(
+    'inquiry_form_submit_button',
+    (loc) => loc.inquiry_form_submit_button,
+  );
+
+  @override
+  String get inquiry_form_success_snackbar => _resolve(
+    'inquiry_form_success_snackbar',
+    (loc) => loc.inquiry_form_success_snackbar,
+  );
+
+  @override
+  String get inquiry_form_validation_name_required => _resolve(
+    'inquiry_form_validation_name_required',
+    (loc) => loc.inquiry_form_validation_name_required,
+  );
+
+  @override
+  String get inquiry_form_validation_phone_invalid => _resolve(
+    'inquiry_form_validation_phone_invalid',
+    (loc) => loc.inquiry_form_validation_phone_invalid,
+  );
+
+  @override
+  String get inquiry_form_validation_message_required => _resolve(
+    'inquiry_form_validation_message_required',
+    (loc) => loc.inquiry_form_validation_message_required,
+  );
+
+  @override
+  String get inquiry_form_validation_message_too_long => _resolve(
+    'inquiry_form_validation_message_too_long',
+    (loc) => loc.inquiry_form_validation_message_too_long,
+  );
+
+  @override
+  String get inquiry_form_submission_failed => _resolve(
+    'inquiry_form_submission_failed',
+    (loc) => loc.inquiry_form_submission_failed,
+  );
+
+  // §T040 Inbox chrome + status badges
+  @override
+  String get inquiry_inbox_app_bar_title => _resolve(
+    'inquiry_inbox_app_bar_title',
+    (loc) => loc.inquiry_inbox_app_bar_title,
+  );
+
+  @override
+  String get inquiry_inbox_empty_state => _resolve(
+    'inquiry_inbox_empty_state',
+    (loc) => loc.inquiry_inbox_empty_state,
+  );
+
+  @override
+  String get inquiry_inbox_filter_status_label => _resolve(
+    'inquiry_inbox_filter_status_label',
+    (loc) => loc.inquiry_inbox_filter_status_label,
+  );
+
+  @override
+  String get inquiry_inbox_filter_listing_label => _resolve(
+    'inquiry_inbox_filter_listing_label',
+    (loc) => loc.inquiry_inbox_filter_listing_label,
+  );
+
+  @override
+  String get inquiry_inbox_load_more => _resolve(
+    'inquiry_inbox_load_more',
+    (loc) => loc.inquiry_inbox_load_more,
+  );
+
+  @override
+  String get inquiry_inbox_anonymous_sender_label => _resolve(
+    'inquiry_inbox_anonymous_sender_label',
+    (loc) => loc.inquiry_inbox_anonymous_sender_label,
+  );
+
+  @override
+  String get inquiry_status_new =>
+      _resolve('inquiry_status_new', (loc) => loc.inquiry_status_new);
+
+  @override
+  String get inquiry_status_seen =>
+      _resolve('inquiry_status_seen', (loc) => loc.inquiry_status_seen);
+
+  @override
+  String get inquiry_status_responded => _resolve(
+    'inquiry_status_responded',
+    (loc) => loc.inquiry_status_responded,
+  );
+
+  @override
+  String get inquiry_status_closed =>
+      _resolve('inquiry_status_closed', (loc) => loc.inquiry_status_closed);
+
+  @override
+  String get inquiry_status_spam =>
+      _resolve('inquiry_status_spam', (loc) => loc.inquiry_status_spam);
+
+  // §T041 Inquiry detail
+  @override
+  String get inquiry_detail_app_bar_title => _resolve(
+    'inquiry_detail_app_bar_title',
+    (loc) => loc.inquiry_detail_app_bar_title,
+  );
+
+  @override
+  String get inquiry_detail_callback_phone_label => _resolve(
+    'inquiry_detail_callback_phone_label',
+    (loc) => loc.inquiry_detail_callback_phone_label,
+  );
+
+  @override
+  String get inquiry_detail_phone_unavailable_placeholder => _resolve(
+    'inquiry_detail_phone_unavailable_placeholder',
+    (loc) => loc.inquiry_detail_phone_unavailable_placeholder,
+  );
+
+  @override
+  String get inquiry_detail_tap_to_call_action => _resolve(
+    'inquiry_detail_tap_to_call_action',
+    (loc) => loc.inquiry_detail_tap_to_call_action,
+  );
+
+  @override
+  String get inquiry_detail_listing_link_label => _resolve(
+    'inquiry_detail_listing_link_label',
+    (loc) => loc.inquiry_detail_listing_link_label,
+  );
+
+  @override
+  String get inquiry_detail_mark_responded_action => _resolve(
+    'inquiry_detail_mark_responded_action',
+    (loc) => loc.inquiry_detail_mark_responded_action,
+  );
+
+  @override
+  String get inquiry_detail_mark_closed_action => _resolve(
+    'inquiry_detail_mark_closed_action',
+    (loc) => loc.inquiry_detail_mark_closed_action,
+  );
+
+  @override
+  String get inquiry_detail_reopen_to_seen_action => _resolve(
+    'inquiry_detail_reopen_to_seen_action',
+    (loc) => loc.inquiry_detail_reopen_to_seen_action,
+  );
+
+  @override
+  String get inquiry_detail_reopen_to_responded_action => _resolve(
+    'inquiry_detail_reopen_to_responded_action',
+    (loc) => loc.inquiry_detail_reopen_to_responded_action,
+  );
+
+  // §T042 Admin oversight + home action
+  @override
+  String get admin_inquiries_tier_banner => _resolve(
+    'admin_inquiries_tier_banner',
+    (loc) => loc.admin_inquiries_tier_banner,
+  );
+
+  @override
+  String get admin_inquiries_app_bar_title => _resolve(
+    'admin_inquiries_app_bar_title',
+    (loc) => loc.admin_inquiries_app_bar_title,
+  );
+
+  @override
+  String get admin_inquiries_publisher_filter_label => _resolve(
+    'admin_inquiries_publisher_filter_label',
+    (loc) => loc.admin_inquiries_publisher_filter_label,
+  );
+
+  @override
+  String get home_inquiries_action_tooltip => _resolve(
+    'home_inquiries_action_tooltip',
+    (loc) => loc.home_inquiries_action_tooltip,
+  );
 }
