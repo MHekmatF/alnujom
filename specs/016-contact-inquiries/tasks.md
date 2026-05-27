@@ -190,7 +190,7 @@ description: "Phase 16 — Contact, Inquiries & Lead Events task list"
 
 **Goal**: After Phase 8, the listing details page's three CTAs work end-to-end (Call, WhatsApp, Send Inquiry); the home page's AppBar shows the inbox icon with badge for publishers; the full Phase 16 feature is shippable.
 
-- [ ] T077 [US1,US2,US3] Update `lib/features/listing_details/presentation/widgets/contact_block.dart` per contracts/phase16-contact-block-rewire.md. Changes:
+- [X] T077 [US1,US2,US3] Update `lib/features/listing_details/presentation/widgets/contact_block.dart` per contracts/phase16-contact-block-rewire.md. Changes:
   - Constructor signature: `const ContactBlock({super.key, required this.listing})` (was `const ContactBlock({super.key})`).
   - Add `final Listing listing;`.
   - Replace the `StatelessWidget.build` body with a `BlocProvider<ContactCtaCubit>` host providing `ContactCtaCubit(listing: listing)` via `getIt`'s `@factoryParam`.
@@ -200,18 +200,18 @@ description: "Phase 16 — Contact, Inquiries & Lead Events task list"
   - Send Inquiry CTA handler: `showModalBottomSheet(context: context, isScrollControlled: true, builder: (_) => InquiryFormSheet(listingId: listing.id))`.
   - Delete the `_showComingSoon` helper.
   - Imports: `package:url_launcher/url_launcher.dart`, `package:flutter_bloc/flutter_bloc.dart`, `../../../../core/di/injection.dart`, the `Listing` type from Phase 10, `../../../inquiries/{domain,presentation}/...`.
-- [ ] T078 [US1,US2,US3] Update `lib/features/listing_details/presentation/pages/listing_details_page.dart` `_SuccessBody` — change the `ContactBlock()` invocation to `ContactBlock(listing: aggregate.listing)`. No other change to the page.
-- [ ] T079 [US4] Create `lib/features/home/presentation/widgets/inquiries_app_bar_action.dart` per contracts/phase16-home-appbar-inbox-action.md. `StatelessWidget` returning a `BlocBuilder<InquiriesUnreadCubit, InquiriesUnreadState>`. When `!state.canShowEntry` → `SizedBox.shrink()`. Otherwise renders a `Stack` of (a) `IconButton` with `Icons.inbox_outlined` (or `Icons.mark_email_unread_outlined` when count > 0), tooltip `l10n.home_inquiries_action_tooltip`, `onPressed: () => context.push(AppRoutes.inquiries)`; (b) `Positioned(top: AppSpacing.xs, end: AppSpacing.xs, child: UnreadCountBadge(count: state.count))` when count > 0.
-- [ ] T080 [US4] Update `lib/features/home/presentation/pages/home_page.dart`:
+- [X] T078 [US1,US2,US3] Update `lib/features/listing_details/presentation/pages/listing_details_page.dart` `_SuccessBody` — change the `ContactBlock()` invocation to `ContactBlock(listing: aggregate.listing)`. No other change to the page.
+- [X] T079 [US4] Create `lib/features/home/presentation/widgets/inquiries_app_bar_action.dart` per contracts/phase16-home-appbar-inbox-action.md. `StatelessWidget` returning a `BlocBuilder<InquiriesUnreadCubit, InquiriesUnreadState>`. When `!state.canShowEntry` → `SizedBox.shrink()`. Otherwise renders a `Stack` of (a) `IconButton` with `Icons.inbox_outlined` (or `Icons.mark_email_unread_outlined` when count > 0), tooltip `l10n.home_inquiries_action_tooltip`, `onPressed: () => context.push(AppRoutes.inquiries)`; (b) `Positioned(top: AppSpacing.xs, end: AppSpacing.xs, child: UnreadCountBadge(count: state.count))` when count > 0.
+- [X] T080 [US4] Update `lib/features/home/presentation/pages/home_page.dart`:
   - Insert `const InquiriesAppBarAction()` into `AppBar.actions:` between the existing `LocaleToggleAction()` (currently `actions[0]`) and the existing sign-in/profile `IconButton` (currently `actions[1]`). After this edit: `actions[0]` = LocaleToggleAction; `actions[1]` = InquiriesAppBarAction; `actions[2]` = sign-in/profile IconButton.
   - Convert `HomePage` from `StatelessWidget` to `StatefulWidget` (if not already) so an `AppLifecycleListener` can be registered in `initState`. (Check the current shape; the Phase 13 home page may already be a `StatefulWidget` — preserve its existing state.)
   - In `_HomePageState.initState`: register `AppLifecycleListener(onResume: () => getIt<InquiriesUnreadCubit>().refresh())`. Also call `getIt<InquiriesUnreadCubit>().refresh()` once on first build so the badge is correct on cold launch.
   - In `dispose`: dispose the lifecycle listener.
   - Add the import `import '../widgets/inquiries_app_bar_action.dart';`.
-- [ ] T081 [US1,US2,US3,US4] Run `flutter analyze` → expected: zero new warnings. Run `flutter build apk --debug --dart-define-from-file=.env.json` → expected: success.
-- [ ] T082 [US1,US2,US3] Manual smoke test per quickstart.md §4 + §5: launch app on Pixel 8 Pro AVD; navigate to an approved listing whose `phone` AND `whatsapp` are set; tap Call → confirm dialer hand-off + lead event row exists (verify via Supabase MCP); tap WhatsApp → confirm WhatsApp/browser hand-off + lead event row exists; tap Send Inquiry → confirm modal sheet opens, fill form, submit → confirm success snackbar + atomic two-row insert (verify via Supabase MCP).
-- [ ] T083 [US1,US2,US3] Manual smoke test edge cases: (a) listing with `phone` empty → Call CTA hidden; (b) listing with `whatsapp` empty (but `phone` set) → WhatsApp CTA rendered-but-disabled per Q1=B-refined; (c) sign in as the publisher of a listing → open that listing → confirm all 3 CTAs hidden per FR-001d (`ContactBlock` collapses to `SizedBox.shrink()`).
-- [ ] T084 [US4] Manual smoke test the home AppBar inbox action: sign in as a publisher with ≥ 1 approved listing + ≥ 1 `new`-status inquiry → confirm inbox icon visible in home AppBar with badge showing count; tap → navigate to `/inquiries`; tap a `new` row → detail page auto-flips status to `seen` → return to home → confirm badge decremented; background then resume app → confirm badge refreshes. Sign out → confirm home AppBar shows NO inbox icon (the gate hides for zero-approved-listing users). Flip T077–T084 in the same commit.
+- [X] T081 [US1,US2,US3,US4] Run `flutter analyze` → expected: zero new warnings. Run `flutter build apk --debug --dart-define-from-file=.env.json` → expected: success.
+- [ ] **⚠️ PARTIAL —** T082: implementation complete; AVD smoke test deferred to orchestrator post-merge verification.
+- [ ] **⚠️ PARTIAL —** T083: same — edge-case smoke deferred to orchestrator post-merge verification.
+- [ ] **⚠️ PARTIAL —** T084: same — home AppBar badge smoke deferred to orchestrator post-merge verification.
 
 **Phase Checkpoint**: All three contact CTAs work; the home AppBar inbox entry is visible for publishers with badges accurate in real-time; the full Phase 16 user-facing surface is shippable.
 

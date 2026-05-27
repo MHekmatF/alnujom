@@ -13,11 +13,13 @@ import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../../currencies/domain/entities/currency.dart';
 import '../../../currencies/domain/usecases/list_currencies.dart';
+import '../../../inquiries/presentation/bloc/inquiries_unread_cubit.dart';
 import '../bloc/home_bloc.dart';
 import '../bloc/home_event.dart';
 import '../bloc/home_state.dart';
 import '../widgets/hero_search_bar.dart';
 import '../widgets/home_listing_card.dart';
+import '../widgets/inquiries_app_bar_action.dart';
 import '../widgets/map_entry_tile.dart';
 import '../widgets/property_type_shortcut_row.dart';
 
@@ -62,6 +64,7 @@ class _HomeView extends StatefulWidget {
 class _HomeViewState extends State<_HomeView> {
   late final ScrollController _scrollController;
   late final Future<List<Currency>> _currenciesFuture;
+  AppLifecycleListener? _lifecycleListener;
 
   /// Threshold (in pixels) from the bottom that triggers
   /// `HomeFeedNextPageRequested` per FR-016. Approximately 5 cards' worth.
@@ -72,10 +75,18 @@ class _HomeViewState extends State<_HomeView> {
     super.initState();
     _scrollController = ScrollController()..addListener(_onScroll);
     _currenciesFuture = getIt<ListCurrencies>().call(activeOnly: false);
+
+    // Phase 16 FR-019a: refresh unread inquiry count on cold launch and on
+    // every app foreground-resume (AppLifecycleState.resumed).
+    getIt<InquiriesUnreadCubit>().refresh();
+    _lifecycleListener = AppLifecycleListener(
+      onResume: () => getIt<InquiriesUnreadCubit>().refresh(),
+    );
   }
 
   @override
   void dispose() {
+    _lifecycleListener?.dispose();
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
@@ -101,6 +112,8 @@ class _HomeViewState extends State<_HomeView> {
         title: Text(l10n.home_app_bar_title),
         actions: [
           const LocaleToggleAction(),
+          // Phase 16 FR-019: inbox badge action (hidden for non-publishers).
+          const InquiriesAppBarAction(),
           BlocSelector<AuthBloc, AuthState, bool>(
             selector: (state) =>
                 state is Authenticated ||
