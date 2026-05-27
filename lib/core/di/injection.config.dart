@@ -114,6 +114,16 @@ import '../../features/inquiries/domain/usecases/record_lead_event.dart'
 import '../../features/inquiries/domain/usecases/submit_inquiry.dart' as _i73;
 import '../../features/inquiries/domain/usecases/update_inquiry_status.dart'
     as _i684;
+import '../../features/inquiries/presentation/bloc/contact_cta_cubit.dart'
+    as _i95;
+import '../../features/inquiries/presentation/bloc/inquiries_unread_cubit.dart'
+    as _i74;
+import '../../features/inquiries/presentation/bloc/inquiry_detail_bloc.dart'
+    as _i1;
+import '../../features/inquiries/presentation/bloc/inquiry_form_bloc.dart'
+    as _i193;
+import '../../features/inquiries/presentation/bloc/inquiry_inbox_bloc.dart'
+    as _i264;
 import '../../features/listing_details/data/datasources/supabase_listing_details_datasource.dart'
     as _i1006;
 import '../../features/listing_details/data/repositories/listing_details_repository_impl.dart'
@@ -130,6 +140,7 @@ import '../../features/listing_form/data/datasources/supabase_listings_datasourc
     as _i207;
 import '../../features/listing_form/data/repositories/listings_repository_impl.dart'
     as _i946;
+import '../../features/listing_form/domain/entities/listing.dart' as _i699;
 import '../../features/listing_form/domain/repositories/listings_repository.dart'
     as _i340;
 import '../../features/listing_form/domain/usecases/delete_draft.dart' as _i814;
@@ -423,6 +434,9 @@ _i174.GetIt $initGetIt(
       gh<_i354.AppLogger>(),
     ),
   );
+  gh.factoryParam<_i95.ContactCtaCubit, _i699.Listing, dynamic>(
+    (listing, _) => _i95.ContactCtaCubit(listing),
+  );
   gh.factory<_i866.LeadEventRepository>(
     () =>
         _i33.LeadEventRepositoryImpl(gh<_i1043.SupabaseInquiriesDatasource>()),
@@ -589,6 +603,9 @@ _i174.GetIt $initGetIt(
   gh.factory<_i315.MutateRole>(
     () => _i315.MutateRole(gh<_i681.RoleCatalogRepository>()),
   );
+  gh.lazySingleton<_i74.InquiriesUnreadCubit>(
+    () => _i74.InquiriesUnreadCubit(gh<_i868.LoadInboxUnreadCount>()),
+  );
   gh.factory<_i655.CountCityDependents>(
     () => _i655.CountCityDependents(gh<_i704.LocationsRepository>()),
   );
@@ -692,6 +709,9 @@ _i174.GetIt $initGetIt(
   gh.factory<_i143.SearchUsers>(
     () => _i143.SearchUsers(gh<_i765.UserSearchRepository>()),
   );
+  gh.factory<_i264.InquiryInboxBloc>(
+    () => _i264.InquiryInboxBloc(gh<_i155.LoadInquiryInbox>()),
+  );
   gh.factoryParam<_i960.LocaleCubit, _i264.Locale?, dynamic>(
     (initialLocale, _) => _i960.LocaleCubit(
       gh<_i753.PreferencesStore>(),
@@ -715,6 +735,10 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i611.ThemeCubit>(
     () => _i611.ThemeCubit(gh<_i753.PreferencesStore>(), gh<_i354.AppLogger>()),
+  );
+  gh.factoryParam<_i193.InquiryFormBloc, String, dynamic>(
+    (_listingId, _) =>
+        _i193.InquiryFormBloc(gh<_i73.SubmitInquiry>(), _listingId),
   );
   gh.factory<_i295.AccountApprovalsCubit>(
     () => _i295.AccountApprovalsCubit(
@@ -781,6 +805,13 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i293.SetExchangeRateBloc>(
     () => _i293.SetExchangeRateBloc(gh<_i488.SetExchangeRate>()),
+  );
+  gh.factory<_i1.InquiryDetailBloc>(
+    () => _i1.InquiryDetailBloc(
+      gh<_i1054.LoadInquiryDetail>(),
+      gh<_i684.UpdateInquiryStatus>(),
+      gh<_i74.InquiriesUnreadCubit>(),
+    ),
   );
   gh.factory<_i437.MapBloc>(() => _i437.MapBloc(gh<_i842.LoadMapMarkers>()));
   gh.factory<_i885.RoleEditorBloc>(
