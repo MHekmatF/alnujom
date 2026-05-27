@@ -35,6 +35,9 @@ import '../../features/locations/presentation/pages/locations_list_page.dart';
 import '../../features/listing_form/domain/entities/listing.dart';
 import '../../features/listing_form/domain/entities/listing_form_state.dart';
 import '../../features/listing_form/presentation/pages/listing_form_page.dart';
+import '../../features/inquiries/presentation/pages/admin_inquiry_oversight_page.dart';
+import '../../features/inquiries/presentation/pages/inquiry_detail_page.dart';
+import '../../features/inquiries/presentation/pages/inquiry_inbox_page.dart';
 import '../../features/map/domain/entities/map_entry_context.dart';
 import '../../features/map/presentation/pages/map_page.dart';
 import '../../features/search/presentation/pages/search_page.dart';
@@ -44,8 +47,10 @@ import '../../features/super_admin/presentation/pages/assign_role_page.dart';
 import '../../features/super_admin/presentation/pages/create_role_page.dart';
 import '../../features/super_admin/presentation/pages/role_editor_page.dart';
 import '../../features/super_admin/presentation/pages/roles_list_page.dart';
+import '../di/injection.dart';
 import '../flags/app_flags.dart';
 import '../logging/app_logger.dart';
+import '../security/permission_checker.dart';
 import 'auth_redirect.dart';
 
 abstract final class AppRoutes {
@@ -88,12 +93,21 @@ abstract final class AppRoutes {
   static const search = '/search';
   // Phase 15 FR-007: public map view route.
   static const map = '/map';
+  // Phase 16 FR-001: publisher inquiry inbox route.
+  static const inquiries = '/inquiries';
+  // Phase 16 FR-001: per-inquiry detail route (path template).
+  static const inquiryDetail = '/inquiries/:id';
+  // Phase 16 US7: admin inquiry oversight route.
+  static const adminInquiries = '/admin/inquiries';
   static const themeGallery = '/_debug/theme-gallery';
   static const debugMoneyFormatter = '/debug/money-formatter';
 
   /// Phase 13 FR-010 helper — resolves Wave 2 F1 finding (no more literal
   /// string interpolation in [HomeListingCardTile]).
   static String listingDetailsFor(String id) => '/listings/$id';
+
+  /// Phase 16 FR-001 helper — resolves per-inquiry detail path.
+  static String inquiryDetailFor(String id) => '/inquiries/$id';
 }
 
 abstract final class AppRouteNames {
@@ -141,6 +155,12 @@ abstract final class AppRouteNames {
   static const search = 'search';
   // Phase 15 FR-007: public map view route name.
   static const map = 'map';
+  // Phase 16 FR-001: publisher inquiry inbox route name.
+  static const inquiries = 'inquiries';
+  // Phase 16 FR-001: per-inquiry detail route name.
+  static const inquiryDetail = 'inquiry-detail';
+  // Phase 16 US7: admin inquiry oversight route name.
+  static const adminInquiries = 'admin-inquiries';
   static const themeGallery = 'theme-gallery';
 }
 
@@ -402,6 +422,34 @@ GoRouter buildAppRouter({
         name: AppRouteNames.map,
         builder: (context, state) =>
             MapPage(entryContext: state.extra as MapEntryContext?),
+      ),
+
+      // ─── Phase 16 — publisher inquiry inbox ───
+      // Authenticated publishers; the BLoC (Sub-Phase E) enforces RLS.
+      GoRoute(
+        path: AppRoutes.inquiries,
+        name: AppRouteNames.inquiries,
+        builder: (context, state) => const InquiryInboxPage(),
+      ),
+
+      // ─── Phase 16 — per-inquiry detail ───
+      GoRoute(
+        path: AppRoutes.inquiryDetail,
+        name: AppRouteNames.inquiryDetail,
+        builder: (context, state) =>
+            InquiryDetailPage(id: state.pathParameters['id']!),
+      ),
+
+      // ─── Phase 16 — admin inquiry oversight ───
+      // Gated by 'inquiries.view_all' permission; redirects to home otherwise.
+      GoRoute(
+        path: AppRoutes.adminInquiries,
+        name: AppRouteNames.adminInquiries,
+        redirect: (context, state) =>
+            getIt<PermissionChecker>().has('inquiries.view_all')
+                ? null
+                : AppRoutes.home,
+        builder: (context, state) => const AdminInquiryOversightPage(),
       ),
 
       if (kDesignToolsEnabled)
