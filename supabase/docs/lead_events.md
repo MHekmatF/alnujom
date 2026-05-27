@@ -104,3 +104,50 @@ All client-side writes go through SECURITY DEFINER RPCs in Sub-Phase D:
 - FK violation on `listing_id` → SQLSTATE 23503.
 - Direct `INSERT`/`UPDATE`/`DELETE` from `authenticated` or `anon` clients is
   rejected by Sub-Phase C's REVOKE.
+
+## RLS Matrix (Sub-Phase C, `20260527120004_create_lead_events_policies.sql`)
+
+Defined by Sub-Phase C; authoritative contract at
+[`specs/016-contact-inquiries/contracts/phase16-lead-events-policies.md`](../../specs/016-contact-inquiries/contracts/phase16-lead-events-policies.md).
+
+The visibility rule is **two-tier** on SELECT (publisher of the listing,
+admin holding `inquiries.view_all`). All client-facing writes are blocked
+at the table level — every row originates from a Sub-Phase D SECURITY
+DEFINER RPC. The `metadata` column (server-side trusted `{ip, user_agent}`
+payload per Q5=B) MUST NOT be exposed to publisher-tier readers per
+FR-014b, but RLS partitions rows, not columns — the masking is enforced
+by **view projection** in `20260527120008_create_v_lead_events_views.sql`:
+the publisher view OMITS the column from its SELECT clause; the admin view
+projects it AND adds a defensive `WHERE
+public.current_user_has_permission('inquiries.view_all')` predicate.
+
+| Actor                          | SELECT (base table) | SELECT (`v_lead_events_publisher`) | SELECT (`v_lead_events_admin`) | INSERT       | UPDATE       | DELETE       |
+|--------------------------------|---------------------|------------------------------------|--------------------------------|--------------|--------------|--------------|
+| `anon`                         | none                | none (no GRANT)                    | none (no GRANT)                | RPC only     | none         | none         |
+| `authenticated` — publisher    | own listings' events| own listings' events (no `metadata`) | zero rows (defensive WHERE)  | RPC only     | none         | none         |
+| `authenticated` — admin (`inquiries.view_all`) | all events | all events (no `metadata`)    | all events (with `metadata`)   | RPC only     | none         | none         |
+| `authenticated` — other        | none                | none                               | zero rows (defensive WHERE)    | RPC only     | none         | none         |
+
+Notes:
+
+- **Publisher tier reads via `v_lead_events_publisher`**: the view projects
+  five columns (`id, listing_id, user_id, event_type, created_at`) — the
+  `metadata` column is intentionally absent from the SELECT clause, so
+  publisher-side analytics queries (counts, time series) can be computed
+  without any IP/UA exposure. The Sub-Phase D advisor-hardening migration
+  also REVOKEs base-table SELECT from `authenticated` so the view is the
+  only readable surface.
+- **Admin tier reads via `v_lead_events_admin`**: the view projects all
+  six columns AND adds `WHERE public.current_user_has_permission('inquiries.view_all')`
+  as a second line of defense. A non-admin who somehow obtains SELECT on
+  this view still gets zero rows.
+- **No direct table writes from clients**: `REVOKE INSERT, UPDATE, DELETE
+  ON public.lead_events FROM authenticated, anon` means every row
+  originates from `public.submit_inquiry` (writes `inquiry_sent`) or
+  `public.record_lead_event` (writes `phone_revealed` / `whatsapp_clicked`),
+  both SECURITY DEFINER. The `favorite_added` event type is reserved for
+  Phase 17 — no Phase 16 RPC emits it.
+- **`metadata` is server-trusted**: the RPCs capture IP via
+  `inet_client_addr()` and UA via `current_setting('request.headers',
+  true)::jsonb->>'user-agent'` — client-supplied values are NEVER
+  accepted (the RPCs do not declare parameters for these fields).
