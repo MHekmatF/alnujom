@@ -832,5 +832,22 @@
   "admin_inquiries_publisher_filter_label": "تصفية حسب الناشر",
   "@admin_inquiries_publisher_filter_label": { "description": "Phase 16 — Label for the publisher filter chip row in the admin inquiries view." },
   "home_inquiries_action_tooltip": "صندوق الاستفسارات",
-  "@home_inquiries_action_tooltip": { "description": "Phase 16 — Tooltip for the inquiries AppBar action icon on the home page." }
+  "@home_inquiries_action_tooltip": { "description": "Phase 16 — Tooltip for the inquiries AppBar action icon on the home page." },
+
+  "favorite_heart_label": "حفظ العقار",
+  "@favorite_heart_label": { "description": "Phase 17 — Semantic label / tooltip for the FavoriteHeartButton when the listing is NOT yet favorited." },
+  "favorite_unsave_label": "إزالة من المفضلة",
+  "@favorite_unsave_label": { "description": "Phase 17 — Semantic label / tooltip for the FavoriteHeartButton when the listing IS already favorited." },
+  "favorite_sign_in_prompt": "سجّل الدخول لحفظ العقار",
+  "@favorite_sign_in_prompt": { "description": "Phase 17 — Snackbar / prompt shown when an anonymous user taps the FavoriteHeartButton." },
+  "favorites_page_title": "المفضلة",
+  "@favorites_page_title": { "description": "Phase 17 — AppBar title for the FavoritesPage." },
+  "favorites_empty_state": "لم تقم بحفظ أي عقار بعد",
+  "@favorites_empty_state": { "description": "Phase 17 — Empty-state message on the FavoritesPage when the user has no saved listings." },
+  "favorite_unavailable_indicator": "لم يعد متاحاً",
+  "@favorite_unavailable_indicator": { "description": "Phase 17 — Badge / label on a FavoritesPage card when is_available=false." },
+  "profile_favorites_tile": "المفضلة",
+  "@profile_favorites_tile": { "description": "Phase 17 — ListTile label on the ProfilePage that navigates to FavoritesPage." },
+  "favorite_toggle_failed": "تعذّر تحديث المفضلة. حاول مجدداً.",
+  "@favorite_toggle_failed": { "description": "Phase 17 — Snackbar shown when the optimistic toggle reverts due to a backend error." }
 }
