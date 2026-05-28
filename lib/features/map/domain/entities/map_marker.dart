@@ -37,16 +37,16 @@ class MapMarker extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        position,
-        title,
-        primaryAmount,
-        primaryCurrencyCode,
-        mainImagePath,
-        propertyType,
-        purpose,
-        isApproximate,
-        governorateNameAr,
-        governorateNameEn,
-      ];
+    id,
+    position,
+    title,
+    primaryAmount,
+    primaryCurrencyCode,
+    mainImagePath,
+    propertyType,
+    purpose,
+    isApproximate,
+    governorateNameAr,
+    governorateNameEn,
+  ];
 }

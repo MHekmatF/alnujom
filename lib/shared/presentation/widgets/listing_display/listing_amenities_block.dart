@@ -29,10 +29,7 @@ class ListingAmenitiesBlock extends StatelessWidget {
             label: Text(_humanize(key)),
             backgroundColor: theme.colorScheme.surfaceContainerHighest,
             side: BorderSide.none,
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.sm,
-              vertical: 0,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
           ),
       ],
     );

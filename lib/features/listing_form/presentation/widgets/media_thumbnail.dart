@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/listing_form_state.dart';
 import '../../domain/entities/listing_media.dart';
@@ -181,7 +182,7 @@ class MediaThumbnail extends StatelessWidget {
                   ),
                   title: Text(
                     l10n.mediaActionDelete,
-                    style: TextStyle(
+                    style: AppTextStyles.of(sheetCtx).bodyLarge.copyWith(
                       color: Theme.of(sheetCtx).colorScheme.error,
                     ),
                   ),
@@ -214,10 +215,9 @@ class _MainBadge extends StatelessWidget {
       ),
       child: Text(
         l10n.mediaThumbnailMainBadge,
-        style: TextStyle(
+        style: AppTextStyles.of(context).labelMedium.copyWith(
           color: scheme.onPrimary,
           fontWeight: FontWeight.bold,
-          fontSize: 12,
         ),
       ),
     );
@@ -242,7 +242,9 @@ class _OrderingBadge extends StatelessWidget {
       ),
       child: Text(
         '$ordering',
-        style: TextStyle(color: scheme.onInverseSurface, fontSize: 12),
+        style: AppTextStyles.of(
+          context,
+        ).labelMedium.copyWith(color: scheme.onInverseSurface),
       ),
     );
   }
@@ -279,7 +281,9 @@ class _GhostOverlay extends StatelessWidget {
                     Text(
                       _resolveErrorKey(l10n, key),
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: scheme.error, fontSize: 11),
+                      style: AppTextStyles.of(context).labelMedium.copyWith(
+                        color: scheme.error,
+                      ), // was fontSize:11 — labelMedium(12) is nearest token
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -306,7 +310,7 @@ class _GhostOverlay extends StatelessWidget {
                   customBorder: const CircleBorder(),
                   onTap: onDismiss,
                   child: Padding(
-                    padding: const EdgeInsets.all(2),
+                    padding: const EdgeInsets.all(AppSpacing.xs),
                     child: Icon(Icons.close, size: 18, color: scheme.error),
                   ),
                 ),

@@ -62,17 +62,13 @@ class _MarkerPreviewPopoverState extends State<MarkerPreviewPopover> {
       clipBehavior: Clip.antiAlias,
       margin: EdgeInsets.zero,
       child: InkWell(
-        onTap: () =>
-            context.go(AppRoutes.listingDetailsFor(widget.marker.id)),
+        onTap: () => context.go(AppRoutes.listingDetailsFor(widget.marker.id)),
         child: Padding(
           padding: const EdgeInsetsDirectional.all(AppSpacing.md),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _PopoverImage(
-                imageUrl: widget.marker.mainImagePath,
-                l10n: l10n,
-              ),
+              _PopoverImage(imageUrl: widget.marker.mainImagePath, l10n: l10n),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
@@ -91,8 +87,10 @@ class _MarkerPreviewPopoverState extends State<MarkerPreviewPopover> {
                       runSpacing: AppSpacing.xs,
                       children: [
                         _Badge(
-                          label:
-                              _propertyTypeLabel(l10n, widget.marker.propertyType),
+                          label: _propertyTypeLabel(
+                            l10n,
+                            widget.marker.propertyType,
+                          ),
                         ),
                         _Badge(
                           label: _purposeLabel(l10n, widget.marker.purpose),
@@ -141,8 +139,9 @@ class _MarkerPreviewPopoverState extends State<MarkerPreviewPopover> {
                     Align(
                       alignment: AlignmentDirectional.centerEnd,
                       child: TextButton(
-                        onPressed: () => context
-                            .go(AppRoutes.listingDetailsFor(widget.marker.id)),
+                        onPressed: () => context.go(
+                          AppRoutes.listingDetailsFor(widget.marker.id),
+                        ),
                         child: Text(l10n.map_marker_view_details_action),
                       ),
                     ),
@@ -152,9 +151,8 @@ class _MarkerPreviewPopoverState extends State<MarkerPreviewPopover> {
               IconButton(
                 icon: const Icon(Icons.close),
                 tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
-                onPressed: () => context
-                    .read<MapBloc>()
-                    .add(const PopoverDismissed()),
+                onPressed: () =>
+                    context.read<MapBloc>().add(const PopoverDismissed()),
               ),
             ],
           ),

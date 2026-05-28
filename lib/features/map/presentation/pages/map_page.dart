@@ -117,9 +117,8 @@ class _MapView extends StatelessWidget {
             showDialog<void>(
               context: context,
               barrierDismissible: true,
-              builder: (_) => FilterActiveAlertDialog(
-                filterState: state.activeFilter!,
-              ),
+              builder: (_) =>
+                  FilterActiveAlertDialog(filterState: state.activeFilter!),
             ).then((_) {
               // Barrier-tap dismiss does NOT call either action's onPressed;
               // dispatch FilterAlertDismissed unconditionally on any close
@@ -209,8 +208,7 @@ class _LoadedBodyState extends State<_LoadedBody> {
           ),
           children: [
             TileLayer(
-              urlTemplate:
-                  'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
               userAgentPackageName: 'app.alnujom.realestate',
               maxZoom: 18,
               errorTileCallback: (_, __, ___) {
@@ -230,7 +228,9 @@ class _LoadedBodyState extends State<_LoadedBody> {
                 centerMarkerOnClick: true,
                 showPolygon: false,
                 size: const Size(40, 40),
-                padding: const EdgeInsets.all(40),
+                padding: const EdgeInsets.all(
+                  AppSpacing.xxl + AppSpacing.sm,
+                ), // 32+8=40
                 maxZoom: 18,
                 markers: state.markers
                     .map((m) => _buildMarker(context, m))
@@ -282,9 +282,7 @@ class _LoadedBodyState extends State<_LoadedBody> {
       child: GestureDetector(
         onTap: () =>
             context.read<MapBloc>().add(MarkerTapped(listingId: marker.id)),
-        child: isApprox
-            ? const ApproximateMarkerPin()
-            : const ExactMarkerPin(),
+        child: isApprox ? const ApproximateMarkerPin() : const ExactMarkerPin(),
       ),
     );
   }
@@ -304,11 +302,7 @@ class _ErrorBody extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 48,
-              color: theme.colorScheme.error,
-            ),
+            Icon(Icons.error_outline, size: 48, color: theme.colorScheme.error),
             const SizedBox(height: AppSpacing.md),
             Text(
               l10n.map_error_load_failed,
@@ -327,9 +321,8 @@ class _ErrorBody extends StatelessWidget {
             FilledButton.icon(
               icon: const Icon(Icons.refresh),
               label: Text(l10n.map_error_retry_action),
-              onPressed: () => context
-                  .read<MapBloc>()
-                  .add(const MarkersRefreshRequested()),
+              onPressed: () =>
+                  context.read<MapBloc>().add(const MarkersRefreshRequested()),
             ),
           ],
         ),
@@ -363,12 +356,7 @@ class _EmptyDatasetBanner extends StatelessWidget {
               color: theme.colorScheme.onSurfaceVariant,
             ),
             const SizedBox(width: AppSpacing.sm),
-            Flexible(
-              child: Text(
-                message,
-                style: theme.textTheme.bodySmall,
-              ),
-            ),
+            Flexible(child: Text(message, style: theme.textTheme.bodySmall)),
           ],
         ),
       ),

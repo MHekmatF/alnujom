@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/listing_form_state.dart';
 import '../../domain/entities/listing_media.dart';
@@ -261,7 +262,7 @@ class _ReviewThumbnail extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.xs,
-                    vertical: 2,
+                    vertical: AppSpacing.xs,
                   ),
                   decoration: BoxDecoration(
                     color: scheme.primary,
@@ -269,11 +270,10 @@ class _ReviewThumbnail extends StatelessWidget {
                   ),
                   child: Text(
                     mainBadge!,
-                    style: TextStyle(
+                    style: AppTextStyles.of(context).labelMedium.copyWith(
                       color: scheme.onPrimary,
-                      fontSize: 10,
                       fontWeight: FontWeight.w600,
-                    ),
+                    ), // was fontSize:10 — labelMedium(12) is nearest token
                   ),
                 ),
               ),

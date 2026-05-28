@@ -36,10 +36,8 @@ class MapEntryTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppRadii.md),
         ),
         child: InkWell(
-          onTap: () => context.go(
-            AppRoutes.map,
-            extra: const MapEntryFromHome(),
-          ),
+          onTap: () =>
+              context.go(AppRoutes.map, extra: const MapEntryFromHome()),
           child: Padding(
             padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
             child: Row(

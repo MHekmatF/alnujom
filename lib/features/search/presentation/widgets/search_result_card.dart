@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/search_result_item.dart';
 
@@ -38,7 +39,7 @@ class SearchResultCard extends StatelessWidget {
 
     return Card(
       clipBehavior: Clip.antiAlias,
-      margin: const EdgeInsetsDirectional.only(bottom: 8),
+      margin: const EdgeInsetsDirectional.only(bottom: AppSpacing.sm),
       child: InkWell(
         // context.push (not context.go) so SearchPage stays in the stack and
         // SearchBloc survives the back-navigation (R-77 / SC-005).
@@ -48,13 +49,12 @@ class SearchResultCard extends StatelessWidget {
         // the inner Column(spaceBetween, mainAxisSize.max) crashes with
         // "BoxConstraints forces an infinite height".
         child: SizedBox(
-          height: 100,
+          height: 116,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SizedBox(
-                width: 100,
-                height: 100,
+                width: 116,
                 child: _CardImage(
                   imageUrl: item.mainImagePath,
                   fallbackLabel: l10n.image_unavailable,
@@ -62,7 +62,7 @@ class SearchResultCard extends StatelessWidget {
               ),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsetsDirectional.all(12),
+                  padding: const EdgeInsetsDirectional.all(AppSpacing.md),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -76,7 +76,9 @@ class SearchResultCard extends StatelessWidget {
                       ),
                       if (locationLabel.isNotEmpty)
                         Padding(
-                          padding: const EdgeInsetsDirectional.only(top: 4),
+                          padding: const EdgeInsetsDirectional.only(
+                            top: AppSpacing.xs,
+                          ),
                           child: Text(
                             locationLabel,
                             style: Theme.of(context).textTheme.bodySmall,
@@ -86,7 +88,9 @@ class SearchResultCard extends StatelessWidget {
                           ),
                         ),
                       Padding(
-                        padding: const EdgeInsetsDirectional.only(top: 4),
+                        padding: const EdgeInsetsDirectional.only(
+                          top: AppSpacing.xs,
+                        ),
                         child: Text(
                           l10n.priceWithCurrency(
                             item.primaryAmount.toStringAsFixed(0),

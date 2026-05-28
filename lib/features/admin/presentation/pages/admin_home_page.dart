@@ -44,6 +44,13 @@ class AdminHomePage extends StatelessWidget {
           trailing: const Icon(Icons.chevron_right),
           onTap: () => context.push(AppRoutes.superAdminRoles),
         ),
+      if (checker.has(PermissionKeys.inquiriesViewAll))
+        ListTile(
+          leading: const Icon(Icons.forum_outlined),
+          title: Text(l10n.admin_inquiries_app_bar_title),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => context.push(AppRoutes.adminInquiries),
+        ),
       if (checker.has(PermissionKeys.locationsManage))
         ListTile(
           leading: const Icon(Icons.location_on_outlined),

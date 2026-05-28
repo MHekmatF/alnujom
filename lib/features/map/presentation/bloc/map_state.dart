@@ -104,8 +104,9 @@ final class MapLoaded extends MapState {
       selectedMarker: clearSelectedMarker
           ? null
           : (selectedMarker ?? this.selectedMarker),
-      activeFilter:
-          clearActiveFilter ? null : (activeFilter ?? this.activeFilter),
+      activeFilter: clearActiveFilter
+          ? null
+          : (activeFilter ?? this.activeFilter),
       showFilterAlert: showFilterAlert ?? this.showFilterAlert,
       geolocationStatus: geolocationStatus ?? this.geolocationStatus,
     );
@@ -113,15 +114,15 @@ final class MapLoaded extends MapState {
 
   @override
   List<Object?> get props => [
-        markers,
-        // CameraFit is not Equatable in flutter_map ^7 — identity-compare is
-        // acceptable since handlers always emit a fresh instance.
-        identityHashCode(cameraFit),
-        selectedMarker,
-        activeFilter,
-        showFilterAlert,
-        geolocationStatus,
-      ];
+    markers,
+    // CameraFit is not Equatable in flutter_map ^7 — identity-compare is
+    // acceptable since handlers always emit a fresh instance.
+    identityHashCode(cameraFit),
+    selectedMarker,
+    activeFilter,
+    showFilterAlert,
+    geolocationStatus,
+  ];
 }
 
 final class MapError extends MapState {

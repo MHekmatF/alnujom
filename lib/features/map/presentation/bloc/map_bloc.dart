@@ -26,6 +26,8 @@
 // FR-015c invariant: NO event handler ever sends the device's coordinates
 // to Supabase. The grep gate in quickstart.md §8c verifies this.
 import 'package:flutter/widgets.dart' show EdgeInsets;
+
+import '../../../../core/theme/spacing.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart' show CameraFit, LatLngBounds;
 import 'package:injectable/injectable.dart';
@@ -47,9 +49,8 @@ import 'map_state.dart';
 final _syriaSouthWest = const LatLng(32.3, 35.7);
 final _syriaNorthEast = const LatLng(37.3, 42.4);
 
-CameraFit _syriaWideFit() => CameraFit.bounds(
-      bounds: LatLngBounds(_syriaSouthWest, _syriaNorthEast),
-    );
+CameraFit _syriaWideFit() =>
+    CameraFit.bounds(bounds: LatLngBounds(_syriaSouthWest, _syriaNorthEast));
 
 CameraFit _centerOnFit(MarkerCoordinates position, {double maxZoom = 15}) =>
     CameraFit.coordinates(
@@ -66,7 +67,7 @@ CameraFit _fitToMarkers(List<MapMarker> markers) {
     coordinates: markers
         .map((m) => LatLng(m.position.latitude, m.position.longitude))
         .toList(growable: false),
-    padding: const EdgeInsets.all(40),
+    padding: const EdgeInsets.all(AppSpacing.xxl + AppSpacing.sm), // 32+8=40
   );
 }
 
@@ -106,14 +107,16 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       case Success<List<MapMarker>>(:final value):
         final cameraFit = _initialCameraFit(context, value);
         final selected = _initialSelectedMarker(context, value);
-        emit(MapLoaded(
-          markers: value,
-          cameraFit: cameraFit,
-          selectedMarker: selected,
-          activeFilter: filter,
-          showFilterAlert: showFilterAlert,
-          geolocationStatus: GeolocationStatus.unknown,
-        ));
+        emit(
+          MapLoaded(
+            markers: value,
+            cameraFit: cameraFit,
+            selectedMarker: selected,
+            activeFilter: filter,
+            showFilterAlert: showFilterAlert,
+            geolocationStatus: GeolocationStatus.unknown,
+          ),
+        );
       case FailureResult<List<MapMarker>>(:final failure):
         emit(MapError(failure: failure));
     }
@@ -130,16 +133,18 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     final result = await _loadMapMarkers(filter: filter);
     switch (result) {
       case Success<List<MapMarker>>(:final value):
-        emit(MapLoaded(
-          markers: value,
-          // Preserve the user's current camera per contract §Transitions.
-          cameraFit: current.cameraFit,
-          activeFilter: filter,
-          // showFilterAlert flips false on refresh — the alert is a
-          // one-shot UX moment tied to the search-handoff entry.
-          showFilterAlert: false,
-          geolocationStatus: current.geolocationStatus,
-        ));
+        emit(
+          MapLoaded(
+            markers: value,
+            // Preserve the user's current camera per contract §Transitions.
+            cameraFit: current.cameraFit,
+            activeFilter: filter,
+            // showFilterAlert flips false on refresh — the alert is a
+            // one-shot UX moment tied to the search-handoff entry.
+            showFilterAlert: false,
+            geolocationStatus: current.geolocationStatus,
+          ),
+        );
       case FailureResult<List<MapMarker>>(:final failure):
         emit(MapError(failure: failure));
     }
@@ -176,10 +181,12 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   ) {
     final current = state;
     if (current is! MapLoaded) return;
-    emit(current.copyWith(
-      cameraFit: _centerOnFit(event.devicePosition),
-      geolocationStatus: GeolocationStatus.granted,
-    ));
+    emit(
+      current.copyWith(
+        cameraFit: _centerOnFit(event.devicePosition),
+        geolocationStatus: GeolocationStatus.granted,
+      ),
+    );
   }
 
   void _onGeolocationDenied(
@@ -188,11 +195,13 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   ) {
     final current = state;
     if (current is! MapLoaded) return;
-    emit(current.copyWith(
-      geolocationStatus: event.permanentlyDenied
-          ? GeolocationStatus.permanentlyDenied
-          : GeolocationStatus.denied,
-    ));
+    emit(
+      current.copyWith(
+        geolocationStatus: event.permanentlyDenied
+            ? GeolocationStatus.permanentlyDenied
+            : GeolocationStatus.denied,
+      ),
+    );
   }
 
   void _onGeolocationFixFailed(
@@ -222,13 +231,15 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     final result = await _loadMapMarkers(filter: null);
     switch (result) {
       case Success<List<MapMarker>>(:final value):
-        emit(MapLoaded(
-          markers: value,
-          cameraFit: _syriaWideFit(),
-          activeFilter: null,
-          showFilterAlert: false,
-          geolocationStatus: GeolocationStatus.unknown,
-        ));
+        emit(
+          MapLoaded(
+            markers: value,
+            cameraFit: _syriaWideFit(),
+            activeFilter: null,
+            showFilterAlert: false,
+            geolocationStatus: GeolocationStatus.unknown,
+          ),
+        );
       case FailureResult<List<MapMarker>>(:final failure):
         emit(MapError(failure: failure));
     }

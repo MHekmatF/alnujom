@@ -1,8 +1,8 @@
 <!-- SPECKIT START -->
-Active Spec Kit feature: `015-map-view` (Phase 15 — Map View)
+Active Spec Kit feature: `016-contact-inquiries` (Phase 16 — Contact, Inquiries & Lead Events)
 
 For technologies, project structure, and shell commands, read the plan:
-[specs/015-map-view/plan.md](specs/015-map-view/plan.md)
+[specs/016-contact-inquiries/plan.md](specs/016-contact-inquiries/plan.md)
 
 Companion artifacts in the same folder:
 - `spec.md` — 6 user stories (US1 home-shell map open; US2 marker tap → preview → details; US3 location-visibility honored end-to-end with no client-side leak; US4 marker clustering; US5 entry from listing details "View on map"; US6 entry from filtered search with reset alert), FRs (FR-001..FR-020 + FR-001a/FR-003a/FR-007a/FR-014a/FR-015a/FR-015b/FR-015c), 15 success criteria (SC-001..SC-015), 8 clarifications resolved (3 in `/speckit-specify` Q1=A both home + per-listing entry points / Q2=A filter propagation with reset alert / Q3=A Syria-wide default + geolocation FAB; 5 in `/speckit-clarify` Q4=A deterministic-per-listing jitter with visible "approximate" indicator / Q5=A full country one fetch no bbox / Q6=A cluster conditional auto-zoom vs spiderfy / Q7=A pull-to-refresh or button matching Phase 13 pattern / Q8=B prominent home tile not bottom-nav)

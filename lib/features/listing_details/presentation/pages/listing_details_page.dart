@@ -83,9 +83,7 @@ class _ListingDetailsView extends StatelessWidget {
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          leading: const DeepLinkAwareBackButton(),
-        ),
+        appBar: AppBar(leading: const DeepLinkAwareBackButton()),
         body: BlocBuilder<ListingDetailsBloc, ListingDetailsState>(
           builder: (context, state) {
             switch (state.status) {
@@ -207,8 +205,8 @@ class _SuccessBody extends StatelessWidget {
                     ),
                   ),
                 const SizedBox(height: AppSpacing.md),
-                // 6. Contact block — Phase 13 Q2=A stubs
-                const ContactBlock(),
+                // 6. Contact block — Phase 16 rewired (listing passed for ContactCtaCubit)
+                ContactBlock(listing: aggregate.listing),
                 const SizedBox(height: AppSpacing.md),
                 // 7. Amenities block — Phase 12 Q8=A VERBATIM
                 ListingAmenitiesBlock(amenities: aggregate.details.amenities),

@@ -147,10 +147,15 @@ class _RejectReasonDialogState extends State<RejectReasonDialog> {
               controller: _detailController,
               maxLines: 4,
               maxLength: _maxDetailLength,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                counterText: '',
-              ),
+              decoration: const InputDecoration(border: OutlineInputBorder()),
+              // Custom counter rendered below — suppress the built-in one.
+              buildCounter:
+                  (
+                    _, {
+                    required currentLength,
+                    required isFocused,
+                    maxLength,
+                  }) => null,
             ),
             Align(
               alignment: AlignmentDirectional.centerEnd,

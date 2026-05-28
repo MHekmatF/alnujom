@@ -50,10 +50,18 @@ class SupabaseHomeFeedDatasource {
 
     // Embedded-select filters (PostgREST syntax) — apply to the JOINed
     // tables, not to `listings`.
+    //
+    // `published_at IS NOT NULL` keeps the public feed to PUBLISHED rows only.
+    // This is NOT a status-column filter (FR-018 keeps status gating in RLS) —
+    // it excludes the caller's OWN draft/pending listings, which the listings
+    // RLS surfaces to owners and which carry a null published_at. Without it,
+    // a signed-in publisher's unpublished row reaches HomeListingCardDto.fromJson
+    // and crashes the whole feed on `DateTime.parse(null)`.
     var query = base
         .eq('listing_prices.is_primary', true)
         .eq('listing_media.is_main', true)
-        .eq('listing_media.kind', 'image');
+        .eq('listing_media.kind', 'image')
+        .not('published_at', 'is', null);
 
     // R-62 (CORRECTED) cursor predicate. Single `.or()` filter; do NOT use
     // two chained less-than filters on (published_at, id) — that silently
