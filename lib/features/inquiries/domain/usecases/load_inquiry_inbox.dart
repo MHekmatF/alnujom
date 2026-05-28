@@ -17,10 +17,12 @@ class LoadInquiryInbox {
     String? listingIdFilter,
     String? cursor,
     int limit = 30,
+    bool adminTier = false,
   }) => _repository.loadInbox(
     statusFilter: statusFilter,
     listingIdFilter: listingIdFilter,
     cursor: cursor,
     limit: limit,
+    adminTier: adminTier,
   );
 }

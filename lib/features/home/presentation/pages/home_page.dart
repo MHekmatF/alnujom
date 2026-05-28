@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/security/permission_checker.dart';
+import '../../../../core/security/permission_keys.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/locale_toggle_action.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -114,6 +116,24 @@ class _HomeViewState extends State<_HomeView> {
           const LocaleToggleAction(),
           // Phase 16 FR-019: inbox badge action (hidden for non-publishers).
           const InquiriesAppBarAction(),
+          // Admin-panel entry — visible only to users holding any admin-family
+          // permission. Provides the sole in-app route to the admin home
+          // (and from there, the Admin: Inquiries oversight screen).
+          BlocSelector<AuthBloc, AuthState, bool>(
+            selector: (state) =>
+                state is Authenticated &&
+                getIt<PermissionChecker>().any(
+                  PermissionKeys.adminCategoryKeys,
+                ),
+            builder: (context, isAdmin) {
+              if (!isAdmin) return const SizedBox.shrink();
+              return IconButton(
+                tooltip: l10n.admin_home_title,
+                icon: const Icon(Icons.admin_panel_settings_outlined),
+                onPressed: () => context.push(AppRoutes.admin),
+              );
+            },
+          ),
           BlocSelector<AuthBloc, AuthState, bool>(
             selector: (state) =>
                 state is Authenticated ||

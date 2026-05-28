@@ -16,6 +16,7 @@ abstract class InquiryRepository {
     String? listingIdFilter,
     String? cursor,
     int limit = 30,
+    bool adminTier = false,
   });
 
   /// Loads a single inquiry by id.

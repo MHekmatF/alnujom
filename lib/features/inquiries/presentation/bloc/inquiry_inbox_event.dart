@@ -9,8 +9,18 @@ sealed class InquiryInboxEvent extends Equatable {
 }
 
 /// Dispatched when the inbox page first mounts.
+///
+/// [adminTier] = false (default) → personal publisher inbox: only inquiries on
+/// listings the viewer publishes (filtered by `viewer_is_publisher`). This
+/// matters for admin users, whose RLS would otherwise surface ALL inquiries
+/// in their personal inbox. [adminTier] = true → admin oversight: all rows.
 final class InquiryInboxOpened extends InquiryInboxEvent {
-  const InquiryInboxOpened();
+  const InquiryInboxOpened({this.adminTier = false});
+
+  final bool adminTier;
+
+  @override
+  List<Object?> get props => [adminTier];
 }
 
 /// Dispatched by the RefreshIndicator pull-to-refresh.

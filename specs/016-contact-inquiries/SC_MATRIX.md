@@ -31,9 +31,9 @@ Legend:
 
 **Verified automatically (SQL/RLS/wire)**: 11 of 17 (SC-003, 004, 005, 006, 007, 008, 010, 011, 014, 015, 016)
 
-**Verified on physical device (Infinix Note 8, 2026-05-28 walk)**: SC-001, SC-002, SC-003, SC-017 + FR-001d self-contact hiding. The walk also confirmed `lead_events.metadata.user_agent` IS populated through the real client (`Dart/3.9 (dart:io)`), closing deferred item D-003.
+**Verified on physical device (Infinix Note 8, 2026-05-28 walk)**: SC-001, SC-002, SC-003, SC-017, **SC-008** (admin oversight cross-publisher + read-only), **SC-009** (transitions persist across full app restart), **SC-012** (empty-inbox state), **SC-013** (LTR/RTL × light/dark), **FR-021a** (transition allowlist incl. Q2=B reopen), **FR-001d** (self-contact hiding). The walk also confirmed `lead_events.metadata.user_agent` IS populated through the real client (`Dart/3.9 (dart:io)`), closing D-003.
 
-**Still deferred**: SC-009 (status persistence across full app restart — auto `new→seen` was confirmed, but the cross-restart/cross-device leg is unverified), SC-012 (empty-inbox state — the test inbox had ≥1 row), SC-013 (LTR/RTL × light/dark visual pass), and admin oversight (SC-008 UI). Tracked in DEFERRED.md §D-001.
+**All 17 SCs + load-bearing FRs are now verified** (automatically and/or on device). The full device walk (D-001) is complete; the bugs it surfaced were fixed in-session — see DEFERRED.md §D-001 for the list (home-feed crash, search/card overflow, contact heading, inbox visibility gate, admin entry point, admin read-only, personal-inbox isolation, transition-trigger alignment).
 
 ### Device-session fixes (2026-05-28, folded into this PR)
 

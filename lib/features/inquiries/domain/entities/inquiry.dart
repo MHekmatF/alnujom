@@ -16,6 +16,7 @@ class Inquiry extends Equatable {
     required this.status,
     required this.createdAt,
     required this.updatedAt,
+    this.viewerIsPublisher = false,
   });
 
   final String id;
@@ -33,6 +34,13 @@ class Inquiry extends Equatable {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  /// True when the signed-in viewer is the listing's publisher. Drives the
+  /// detail page's read-only mode: admins (and senders) viewing an inquiry on
+  /// a listing they do not publish see no status-mutation affordances and no
+  /// auto new→seen transition (the admin-oversight contract is read-only;
+  /// RLS inquiries_update_publisher enforces the same at the data layer).
+  final bool viewerIsPublisher;
+
   Inquiry copyWith({InquiryStatus? status}) => Inquiry(
     id: id,
     listingId: listingId,
@@ -45,6 +53,7 @@ class Inquiry extends Equatable {
     status: status ?? this.status,
     createdAt: createdAt,
     updatedAt: updatedAt,
+    viewerIsPublisher: viewerIsPublisher,
   );
 
   @override
@@ -60,5 +69,6 @@ class Inquiry extends Equatable {
     status,
     createdAt,
     updatedAt,
+    viewerIsPublisher,
   ];
 }

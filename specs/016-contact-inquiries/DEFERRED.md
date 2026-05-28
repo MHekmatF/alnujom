@@ -4,21 +4,26 @@ Tracks items that landed as `**⚠️ PARTIAL —**` in `tasks.md` or remain to 
 
 ---
 
-## D-001 — Manual device smoke tests (T075, T076, T082, T083, T084)
+## D-001 — Manual device smoke tests (T075, T076, T082, T083, T084) — ✅ COMPLETE
 
-**Status**: PARTIALLY COMPLETE — verified on the **Infinix Note 8** (physical device, better than the planned AVD) on 2026-05-28.
+**Status**: ✅ FULLY VERIFIED on the **Infinix Note 8** (physical device, exceeds the planned AVD) on 2026-05-28.
 
-**Verified on device (2026-05-28 walk):**
-- ✅ T082 ContactBlock golden path — Call (dialer + `phone_revealed` event), WhatsApp (`whatsapp_clicked` event), Send inquiry (form → success + atomic inquiry+`inquiry_sent` rows).
-- ✅ T083 edge cases — empty-phone listing hides Call; empty-WhatsApp listing renders WhatsApp disabled (tooltip); own-listing hides the entire contact block (FR-001d).
-- ✅ T084 home inbox badge — appears on foreground-resume; reading an inquiry auto-flips `new→seen` and clears the badge; the icon now stays visible at zero unread (Q6=B fix).
+- ✅ T082 ContactBlock golden path — Call (`phone_revealed` + IP/UA), WhatsApp (`whatsapp_clicked`), Send inquiry (atomic inquiry+`inquiry_sent`).
+- ✅ T083 edge cases — empty-phone hides Call; empty-WhatsApp disabled-with-tooltip; own-listing collapses the block (FR-001d).
+- ✅ T084 home inbox badge — shows for publishers (Q6=B owns-approved-listing gate), appears on resume, decrements on read, stays visible at zero unread; personal inbox scoped to own listings.
+- ✅ T075 inbox detail — status transitions (responded→seen→closed→responded) persist incl. across full app restart (SC-009).
+- ✅ T076 admin oversight — reached via the new home shield → Admin home → Admin: Inquiries tile; cross-publisher rows + banner; non-publisher detail view is read-only.
+- ✅ SC-012 empty-inbox state + SC-013 LTR/RTL × light/dark — both confirmed.
 
-**Still pending (next session):**
-- ⏳ T075 inbox detail — status mutation buttons ("Mark responded"/"Mark closed"/reopen) round-trip + persistence across app restart (SC-009 cross-restart leg).
-- ⏳ T076 admin oversight — `/admin/inquiries` banner + cross-publisher rows + non-admin redirect (needs an admin account on the device).
-- ⏳ SC-012 empty-inbox state + SC-013 LTR/RTL × light/dark visual pass.
-
-**Owner**: Orchestrator post-merge or a dedicated follow-up session.
+**Bugs fixed during the device walk (all folded into the PR):**
+1. Home feed crash on null `published_at` (Phase 13).
+2. Search row + card overflow (Phase 14/15).
+3. ContactBlock "Call" heading → "Contact" (Phase 16).
+4. Inbox entry gated on unread>0 → Q6=B owns-approved-listing gate (Phase 16).
+5. Admin entry point missing → added a home shield icon → admin home (pre-existing gap).
+6. Admin oversight detail was mutable + auto-transitioned → now read-only for non-publishers (`viewer_is_publisher`), plus 0-row-UPDATE rollback.
+7. Personal inbox over-showed all rows for admins → now scoped to own listings via `viewer_is_publisher` (admin oversight passes `adminTier=true` to show all).
+8. Transition trigger missing `responded → seen` vs data-model §2.5 + enum → trigger realigned to spec (11 pairs).
 
 **Scope** (one walk on Pixel 8 Pro AVD, per memory `feedback_avd_acceptable_qa.md`):
 

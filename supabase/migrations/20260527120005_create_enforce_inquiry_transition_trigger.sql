@@ -2,13 +2,14 @@
 -- BEFORE UPDATE OF status trigger enforcing the inquiry-status transition
 -- allowlist per FR-021a + Q2=B + Q3=B.
 --
--- Allowed pairs (10 total — copied from spec FR-021a + contract):
+-- Allowed pairs (11 total — per data-model.md §2.5 + §3.1 InquiryStatus enum):
 --   new       -> seen
 --   new       -> spam
 --   seen      -> responded
 --   seen      -> closed
 --   seen      -> spam
 --   responded -> closed
+--   responded -> seen        (undo: publisher reverts an accidental "responded")
 --   responded -> spam
 --   closed    -> seen        (soft-terminal reopen per Q2=B)
 --   closed    -> responded   (soft-terminal reopen per Q2=B)
@@ -16,7 +17,6 @@
 --
 -- Forbidden (notable):
 --   closed    -> new         (Q2=B — `new` semantics preserved; no UI affordance)
---   responded -> seen        (FR-021a — forward-only on the way out)
 --   seen      -> new         (no regression to `new`)
 --   spam      -> *           (spam is a terminal-ish side branch in Phase 16)
 --
@@ -42,7 +42,7 @@ BEGIN
     RETURN NEW;
   END IF;
 
-  -- Allowed transitions (10 pairs per FR-021a + Q2=B + Q3=B).
+  -- Allowed transitions (11 pairs per data-model.md §2.5 + §3.1).
   IF (OLD.status, NEW.status) IN (
     ('new',       'seen'),
     ('new',       'spam'),
@@ -50,6 +50,7 @@ BEGIN
     ('seen',      'closed'),
     ('seen',      'spam'),
     ('responded', 'closed'),
+    ('responded', 'seen'),
     ('responded', 'spam'),
     ('closed',    'seen'),
     ('closed',    'responded'),
@@ -59,7 +60,7 @@ BEGIN
   END IF;
 
   -- Everything else: reject. Notable forbidden pairs include closed->new
-  -- (Q2=B) and responded->seen (FR-021a forward-only on the way out).
+  -- (Q2=B) and seen->new / spam->* (no regression to new; spam terminal).
   RAISE EXCEPTION
     'invalid_inquiry_transition: % -> %', OLD.status, NEW.status
     USING ERRCODE = '23514';

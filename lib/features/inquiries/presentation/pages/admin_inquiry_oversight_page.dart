@@ -30,7 +30,8 @@ class AdminInquiryOversightPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<InquiryInboxBloc>(
-      create: (_) => getIt<InquiryInboxBloc>()..add(const InquiryInboxOpened()),
+      create: (_) =>
+          getIt<InquiryInboxBloc>()..add(const InquiryInboxOpened(adminTier: true)),
       child: const _AdminOversightView(),
     );
   }

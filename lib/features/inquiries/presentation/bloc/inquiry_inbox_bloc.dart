@@ -29,10 +29,16 @@ class InquiryInboxBloc extends Bloc<InquiryInboxEvent, InquiryInboxState> {
 
   static const int _pageSize = 30;
 
+  /// Set on [InquiryInboxOpened]; remembered for all subsequent re-fetches
+  /// (refresh, filter, pagination). false = personal publisher inbox (own
+  /// listings only); true = admin oversight (all publishers).
+  bool _adminTier = false;
+
   Future<void> _onOpened(
     InquiryInboxOpened event,
     Emitter<InquiryInboxState> emit,
   ) async {
+    _adminTier = event.adminTier;
     emit(const InquiryInboxLoading());
     await _fetch(emit, statusFilter: null, listingFilter: null);
   }
@@ -69,6 +75,7 @@ class InquiryInboxBloc extends Bloc<InquiryInboxEvent, InquiryInboxState> {
       listingIdFilter: loaded.listingFilter,
       cursor: loaded.cursor,
       limit: _pageSize,
+      adminTier: _adminTier,
     );
 
     switch (result) {
@@ -127,6 +134,7 @@ class InquiryInboxBloc extends Bloc<InquiryInboxEvent, InquiryInboxState> {
       statusFilter: statusFilter,
       listingIdFilter: listingFilter,
       limit: _pageSize,
+      adminTier: _adminTier,
     );
 
     switch (result) {

@@ -50,6 +50,7 @@ class InquiryRepositoryImpl implements InquiryRepository {
     String? listingIdFilter,
     String? cursor,
     int limit = 30,
+    bool adminTier = false,
   }) async {
     try {
       final dtos = await _datasource.loadInbox(
@@ -57,6 +58,7 @@ class InquiryRepositoryImpl implements InquiryRepository {
         listingIdFilter: listingIdFilter,
         cursor: cursor,
         limit: limit,
+        adminTier: adminTier,
       );
       return Success(dtos.map((d) => d.toEntity()).toList());
     } on SocketException catch (e, st) {

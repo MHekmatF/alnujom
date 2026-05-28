@@ -48,8 +48,10 @@ class InquiryDetailBloc extends Bloc<InquiryDetailEvent, InquiryDetailState> {
       case Success<Inquiry>(:final value):
         Inquiry inquiry = value;
 
-        // FR-021 auto-transition: new → seen on first open.
-        if (inquiry.status == InquiryStatus.new_) {
+        // FR-021 auto-transition: new → seen on first open — ONLY for the
+        // listing's publisher. Admins/senders viewing via oversight are
+        // read-only (the RLS update policy would block them anyway).
+        if (inquiry.status == InquiryStatus.new_ && inquiry.viewerIsPublisher) {
           final transitionResult = await _updateStatus(
             inquiry.id,
             InquiryStatus.seen,

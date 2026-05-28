@@ -194,6 +194,11 @@ class _StatusMutationButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final bloc = context.read<InquiryDetailBloc>();
+
+    // Read-only for non-publishers (admin oversight / sender views): only the
+    // listing's publisher may mutate status. RLS enforces the same server-side.
+    if (!inquiry.viewerIsPublisher) return const SizedBox.shrink();
+
     final allowed = inquiry.status.allowedTransitions;
 
     // Filter out spam (Q3=B: no publisher-side spam marking in Phase 16).

@@ -53,8 +53,17 @@ class SupabaseInquiriesDatasource {
     String? listingIdFilter,
     String? cursor,
     int limit = 30,
+    bool adminTier = false,
   }) async {
     var query = _client.from('v_inquiries_inbox').select();
+
+    // Personal publisher inbox: restrict to listings the viewer publishes.
+    // Without this, admin callers (whose RLS unlocks all rows) would see every
+    // publisher's inquiries in their personal inbox. Admin oversight passes
+    // adminTier=true to intentionally show all rows.
+    if (!adminTier) {
+      query = query.eq('viewer_is_publisher', true);
+    }
 
     if (cursor != null) {
       query = query.lt('created_at', cursor);
@@ -92,10 +101,18 @@ class SupabaseInquiriesDatasource {
   /// the mutation (SQLSTATE 23514 / message containing 'invalid_inquiry_transition').
   /// The repository layer maps this to [TransitionInvalidFailure].
   Future<void> updateStatus(String id, InquiryStatus newStatus) async {
-    await _client
+    // `.select()` returns the affected rows. A 0-row result means the
+    // inquiries_update_publisher RLS policy blocked the write (caller is not
+    // the listing's publisher) — surface it as a failure so the optimistic UI
+    // rolls back instead of showing a status the DB never accepted.
+    final rows = await _client
         .from('inquiries')
         .update({'status': newStatus.wireValue})
-        .eq('id', id);
+        .eq('id', id)
+        .select('id');
+    if ((rows as List).isEmpty) {
+      throw StateError('inquiry_update_blocked: no row updated for $id');
+    }
   }
 
   /// Calls `get_inbox_unread_count` RPC. Returns the integer badge count.

@@ -21,6 +21,7 @@ class InquiryDto {
     required this.createdAt,
     required this.updatedAt,
     this.inquirerPhoneDecrypted,
+    this.viewerIsPublisher = false,
   });
 
   final String id;
@@ -37,6 +38,10 @@ class InquiryDto {
   /// Null when the caller is not authorized or Vault decrypt failed (FR-026).
   final String? inquirerPhoneDecrypted;
 
+  /// True when the signed-in viewer publishes the inquiry's listing. Drives
+  /// the detail page's read-only mode for admin/sender viewers.
+  final bool viewerIsPublisher;
+
   factory InquiryDto.fromJson(Map<String, dynamic> json) {
     return InquiryDto(
       id: json['id'] as String,
@@ -50,6 +55,7 @@ class InquiryDto {
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
       inquirerPhoneDecrypted: json['inquirer_phone_decrypted'] as String?,
+      viewerIsPublisher: json['viewer_is_publisher'] as bool? ?? false,
     );
   }
 
@@ -66,6 +72,7 @@ class InquiryDto {
       status: InquiryStatus.fromWire(status),
       createdAt: createdAt,
       updatedAt: updatedAt,
+      viewerIsPublisher: viewerIsPublisher,
     );
   }
 }

@@ -177,8 +177,8 @@ description: "Phase 16 — Contact, Inquiries & Lead Events task list"
 - [X] T072 [US4,US7] Implement `lib/features/inquiries/presentation/bloc/inquiries_unread_cubit.dart` per plan §Sub-Phase F step 8. `@lazySingleton` Cubit. State: `InquiriesUnreadState({count, canShowEntry})`. Constructor wires `LoadInboxUnreadCount` + the existing `SupabaseClientWrapper` (for the one-time "owns ≥1 approved listing" check). Methods: `refresh()` (re-fetches both `canShowEntry` and `count`), `decrement()` (called by `InquiryDetailBloc` after `new → seen` transition).
 - [X] T073 [US7] Implement `lib/features/inquiries/presentation/pages/admin_inquiry_oversight_page.dart` (REPLACES the Sub-Phase A stub) per contracts/phase16-admin-oversight-overlay.md + R-106. The page composes a reused `InquiryInboxPage`-style widget tree with the `AdminTierBanner` at the top of the body + an additional `PublisherFilterDropdown` in the AppBar `actions:`. The `InquiryInboxBloc` is constructed with a `tier: AdminTier()` parameter so the underlying data source reads cross-publisher via the RLS `inquiries_select_admin` policy. The PublisherFilterDropdown queries publishers via the existing publisher/profile data path (or a thin lookup `SELECT DISTINCT publisher_user_id, full_name FROM listings JOIN profiles ON ... LIMIT 100`).
 - [X] T074 [US3,US4,US6,US7] Run `flutter pub run build_runner build --delete-conflicting-outputs` to regenerate `lib/core/di/injection.config.dart`. Verify all 5 BLoCs + 2 cubits are registered. Run `flutter analyze` → expected: zero new warnings.
-- [ ] **⚠️ PARTIAL —** T075: implementation complete; AVD smoke test deferred to orchestrator post-merge verification.
-- [ ] **⚠️ PARTIAL —** T076: same — admin oversight smoke deferred.
+- [X] T075: VERIFIED on Infinix Note 8 (2026-05-28) — inbox renders, status transitions (responded→seen→closed→responded) persist; reopen paths (Q2=B) work.
+- [X] T076: VERIFIED on Infinix Note 8 — admin oversight (reached via new home shield → Admin home → Admin: Inquiries tile) shows cross-publisher rows + banner; non-publisher view is read-only (no status buttons, no auto new→seen; RLS confirms zero mutation).
 
 **Phase Checkpoint**: The full publisher inbox UX is shippable. The admin oversight surface works. Status mutations persist. The unread-count cubit is registered as a singleton but not yet consumed (Sub-Phase H wires it into the home AppBar).
 
@@ -209,9 +209,9 @@ description: "Phase 16 — Contact, Inquiries & Lead Events task list"
   - In `dispose`: dispose the lifecycle listener.
   - Add the import `import '../widgets/inquiries_app_bar_action.dart';`.
 - [X] T081 [US1,US2,US3,US4] Run `flutter analyze` → expected: zero new warnings. Run `flutter build apk --debug --dart-define-from-file=.env.json` → expected: success.
-- [ ] **⚠️ PARTIAL —** T082: implementation complete; AVD smoke test deferred to orchestrator post-merge verification.
-- [ ] **⚠️ PARTIAL —** T083: same — edge-case smoke deferred to orchestrator post-merge verification.
-- [ ] **⚠️ PARTIAL —** T084: same — home AppBar badge smoke deferred to orchestrator post-merge verification.
+- [X] T082: VERIFIED on Infinix Note 8 (2026-05-28) — Call → dialer + `phone_revealed` lead event (IP+UA captured); WhatsApp → hand-off + `whatsapp_clicked`; Send inquiry → form → success + atomic inquiry+`inquiry_sent` insert (identical timestamps).
+- [X] T083: VERIFIED on Infinix Note 8 — empty-phone listing hides Call; empty-WhatsApp renders WhatsApp disabled (tooltip); own-listing collapses the whole contact block (FR-001d).
+- [X] T084: VERIFIED on Infinix Note 8 — inbox icon shows for publishers (owns ≥1 approved listing, Q6=B); badge appears on resume, decrements on read, icon stays at zero unread; personal inbox scoped to own listings (empty state confirmed).
 
 **Phase Checkpoint**: All three contact CTAs work; the home AppBar inbox entry is visible for publishers with badges accurate in real-time; the full Phase 16 user-facing surface is shippable.
 
