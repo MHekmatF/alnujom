@@ -39,7 +39,11 @@ class LeadEventRepositoryImpl implements LeadEventRepository {
       return FailureResult(NetworkFailure(e.message, cause: e, stackTrace: st));
     } on TimeoutException catch (e, st) {
       return FailureResult(
-        NetworkFailure(e.message ?? 'Request timed out', cause: e, stackTrace: st),
+        NetworkFailure(
+          e.message ?? 'Request timed out',
+          cause: e,
+          stackTrace: st,
+        ),
       );
     } catch (e, st) {
       return FailureResult(
@@ -69,7 +73,11 @@ class LeadEventRepositoryImpl implements LeadEventRepository {
       return FailureResult(NetworkFailure(e.message, cause: e, stackTrace: st));
     } on TimeoutException catch (e, st) {
       return FailureResult(
-        NetworkFailure(e.message ?? 'Request timed out', cause: e, stackTrace: st),
+        NetworkFailure(
+          e.message ?? 'Request timed out',
+          cause: e,
+          stackTrace: st,
+        ),
       );
     } catch (e, st) {
       return FailureResult(

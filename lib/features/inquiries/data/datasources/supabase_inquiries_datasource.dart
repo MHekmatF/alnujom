@@ -35,12 +35,15 @@ class SupabaseInquiriesDatasource {
 
   /// Calls `submit_inquiry` RPC. Returns the new inquiry UUID.
   Future<String> submitInquiry(InquirySubmission submission) async {
-    final result = await _client.rpc('submit_inquiry', params: {
-      'p_listing_id': submission.listingId,
-      'p_sender_name': submission.senderName,
-      'p_inquirer_phone': submission.phone,
-      'p_message': submission.message,
-    });
+    final result = await _client.rpc(
+      'submit_inquiry',
+      params: {
+        'p_listing_id': submission.listingId,
+        'p_sender_name': submission.senderName,
+        'p_inquirer_phone': submission.phone,
+        'p_message': submission.message,
+      },
+    );
     return result as String;
   }
 
@@ -80,7 +83,9 @@ class SupabaseInquiriesDatasource {
         .order('id', ascending: false)
         .limit(limit);
     return (rows as List<dynamic>)
-        .map((row) => InquiryDto.fromJson(Map<String, dynamic>.from(row as Map)))
+        .map(
+          (row) => InquiryDto.fromJson(Map<String, dynamic>.from(row as Map)),
+        )
         .toList();
   }
 
@@ -138,10 +143,10 @@ class SupabaseInquiriesDatasource {
     required String listingId,
     required LeadEventType eventType,
   }) async {
-    final result = await _client.rpc('record_lead_event', params: {
-      'p_listing_id': listingId,
-      'p_event_type': eventType.wireValue,
-    });
+    final result = await _client.rpc(
+      'record_lead_event',
+      params: {'p_listing_id': listingId, 'p_event_type': eventType.wireValue},
+    );
     return result as String;
   }
 
@@ -164,7 +169,9 @@ class SupabaseInquiriesDatasource {
 
     final rows = await query.order('created_at', ascending: false);
     return (rows as List<dynamic>)
-        .map((row) => LeadEventDto.fromJson(Map<String, dynamic>.from(row as Map)))
+        .map(
+          (row) => LeadEventDto.fromJson(Map<String, dynamic>.from(row as Map)),
+        )
         .toList();
   }
 }

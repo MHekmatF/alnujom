@@ -20,10 +20,8 @@ part 'inquiry_form_state.dart';
 
 @injectable
 class InquiryFormBloc extends Bloc<InquiryFormEvent, InquiryFormState> {
-  InquiryFormBloc(
-    this._submitInquiry,
-    @factoryParam this._listingId,
-  ) : super(const InquiryFormEditing(name: '', phone: '', message: '')) {
+  InquiryFormBloc(this._submitInquiry, @factoryParam this._listingId)
+    : super(const InquiryFormEditing(name: '', phone: '', message: '')) {
     on<InquiryFormFieldChanged>(_onFieldChanged);
     on<InquiryFormSubmitted>(_onSubmitted);
   }
@@ -60,7 +58,9 @@ class InquiryFormBloc extends Bloc<InquiryFormEvent, InquiryFormState> {
       message: editing.message,
     );
 
-    if (validationResult case FailureResult<InquirySubmission>(:final failure)) {
+    if (validationResult case FailureResult<InquirySubmission>(
+      :final failure,
+    )) {
       // Map validation code → per-field error map.
       final errors = _mapValidationCode(
         failure is ValidationFailure ? failure.code : 'unknown',

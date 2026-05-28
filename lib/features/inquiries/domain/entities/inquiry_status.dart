@@ -33,7 +33,8 @@ enum InquiryStatus {
       InquiryStatus.responded,
       InquiryStatus.spam,
     },
-    InquiryStatus.spam: <InquiryStatus>{}, // terminal — no publisher-side path out
+    InquiryStatus.spam:
+        <InquiryStatus>{}, // terminal — no publisher-side path out
   };
 
   /// Returns the set of statuses this status can transition to.

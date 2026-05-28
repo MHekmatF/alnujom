@@ -52,23 +52,25 @@ class CenterOnMyLocationFab extends StatelessWidget {
 
     if (status.isPermanentlyDenied) {
       bloc.add(const GeolocationPermissionDenied(permanentlyDenied: true));
-      messenger.showSnackBar(SnackBar(
-        content: Text(
-          l10n.map_geolocation_permission_permanently_denied_message,
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n.map_geolocation_permission_permanently_denied_message,
+          ),
+          action: SnackBarAction(
+            label: l10n.map_geolocation_open_settings_action,
+            onPressed: openAppSettings,
+          ),
         ),
-        action: SnackBarAction(
-          label: l10n.map_geolocation_open_settings_action,
-          onPressed: openAppSettings,
-        ),
-      ));
+      );
       return;
     }
 
     if (!status.isGranted) {
       bloc.add(const GeolocationPermissionDenied(permanentlyDenied: false));
-      messenger.showSnackBar(SnackBar(
-        content: Text(l10n.map_geolocation_permission_denied_message),
-      ));
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.map_geolocation_permission_denied_message)),
+      );
       return;
     }
 
@@ -79,22 +81,24 @@ class CenterOnMyLocationFab extends StatelessWidget {
           timeLimit: _kFixTimeout,
         ),
       );
-      bloc.add(GeolocationPermissionGranted(
-        devicePosition: MarkerCoordinates(
-          latitude: position.latitude,
-          longitude: position.longitude,
+      bloc.add(
+        GeolocationPermissionGranted(
+          devicePosition: MarkerCoordinates(
+            latitude: position.latitude,
+            longitude: position.longitude,
+          ),
         ),
-      ));
+      );
     } on TimeoutException {
       bloc.add(const GeolocationFixFailed());
-      messenger.showSnackBar(SnackBar(
-        content: Text(l10n.map_geolocation_fix_unavailable_message),
-      ));
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.map_geolocation_fix_unavailable_message)),
+      );
     } on LocationServiceDisabledException {
       bloc.add(const GeolocationFixFailed());
-      messenger.showSnackBar(SnackBar(
-        content: Text(l10n.map_geolocation_fix_unavailable_message),
-      ));
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.map_geolocation_fix_unavailable_message)),
+      );
     }
   }
 }

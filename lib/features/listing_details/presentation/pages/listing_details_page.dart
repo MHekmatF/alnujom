@@ -83,9 +83,7 @@ class _ListingDetailsView extends StatelessWidget {
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          leading: const DeepLinkAwareBackButton(),
-        ),
+        appBar: AppBar(leading: const DeepLinkAwareBackButton()),
         body: BlocBuilder<ListingDetailsBloc, ListingDetailsState>(
           builder: (context, state) {
             switch (state.status) {

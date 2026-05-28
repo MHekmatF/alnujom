@@ -22,5 +22,12 @@ class LeadEvent extends Equatable {
   final DateTime createdAt;
 
   @override
-  List<Object?> get props => [id, listingId, userId, eventType, metadata, createdAt];
+  List<Object?> get props => [
+    id,
+    listingId,
+    userId,
+    eventType,
+    metadata,
+    createdAt,
+  ];
 }

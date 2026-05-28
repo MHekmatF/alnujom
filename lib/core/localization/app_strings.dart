@@ -2972,10 +2972,8 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
-  String get inquiry_inbox_load_more => _resolve(
-    'inquiry_inbox_load_more',
-    (loc) => loc.inquiry_inbox_load_more,
-  );
+  String get inquiry_inbox_load_more =>
+      _resolve('inquiry_inbox_load_more', (loc) => loc.inquiry_inbox_load_more);
 
   @override
   String get inquiry_inbox_anonymous_sender_label => _resolve(

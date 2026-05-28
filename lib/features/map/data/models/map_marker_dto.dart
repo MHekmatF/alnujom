@@ -27,23 +27,23 @@ class MapMarkerDto {
   });
 
   factory MapMarkerDto.fromJson(Map<String, dynamic> json) => MapMarkerDto(
-        id: json['id'] as String,
-        title: json['title'] as String,
-        markerLat: (json['marker_lat'] as num).toDouble(),
-        markerLng: (json['marker_lng'] as num).toDouble(),
-        isApproximate: json['is_approximate'] as bool,
-        primaryAmount: Decimal.parse(json['primary_amount'].toString()),
-        primaryCurrency: json['primary_currency'] as String,
-        mainImagePath: json['main_image_path'] as String?,
-        propertyType: PropertyType.values.firstWhere(
-          (e) => e.toDbValue() == (json['property_type'] as String),
-        ),
-        purpose: ListingPurpose.values.firstWhere(
-          (e) => e.toDbValue() == (json['purpose'] as String),
-        ),
-        governorateNameAr: (json['governorate_name_ar'] as String?) ?? '',
-        governorateNameEn: (json['governorate_name_en'] as String?) ?? '',
-      );
+    id: json['id'] as String,
+    title: json['title'] as String,
+    markerLat: (json['marker_lat'] as num).toDouble(),
+    markerLng: (json['marker_lng'] as num).toDouble(),
+    isApproximate: json['is_approximate'] as bool,
+    primaryAmount: Decimal.parse(json['primary_amount'].toString()),
+    primaryCurrency: json['primary_currency'] as String,
+    mainImagePath: json['main_image_path'] as String?,
+    propertyType: PropertyType.values.firstWhere(
+      (e) => e.toDbValue() == (json['property_type'] as String),
+    ),
+    purpose: ListingPurpose.values.firstWhere(
+      (e) => e.toDbValue() == (json['purpose'] as String),
+    ),
+    governorateNameAr: (json['governorate_name_ar'] as String?) ?? '',
+    governorateNameEn: (json['governorate_name_en'] as String?) ?? '',
+  );
 
   final String id;
   final String title;
@@ -59,16 +59,16 @@ class MapMarkerDto {
   final String governorateNameEn;
 
   MapMarker toEntity() => MapMarker(
-        id: id,
-        position: MarkerCoordinates(latitude: markerLat, longitude: markerLng),
-        title: title,
-        primaryAmount: primaryAmount,
-        primaryCurrencyCode: primaryCurrency,
-        mainImagePath: mainImagePath,
-        propertyType: propertyType,
-        purpose: purpose,
-        isApproximate: isApproximate,
-        governorateNameAr: governorateNameAr,
-        governorateNameEn: governorateNameEn,
-      );
+    id: id,
+    position: MarkerCoordinates(latitude: markerLat, longitude: markerLng),
+    title: title,
+    primaryAmount: primaryAmount,
+    primaryCurrencyCode: primaryCurrency,
+    mainImagePath: mainImagePath,
+    propertyType: propertyType,
+    purpose: purpose,
+    isApproximate: isApproximate,
+    governorateNameAr: governorateNameAr,
+    governorateNameEn: governorateNameEn,
+  );
 }

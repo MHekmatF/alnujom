@@ -447,8 +447,8 @@ GoRouter buildAppRouter({
         name: AppRouteNames.adminInquiries,
         redirect: (context, state) =>
             getIt<PermissionChecker>().has('inquiries.view_all')
-                ? null
-                : AppRoutes.home,
+            ? null
+            : AppRoutes.home,
         builder: (context, state) => const AdminInquiryOversightPage(),
       ),
 

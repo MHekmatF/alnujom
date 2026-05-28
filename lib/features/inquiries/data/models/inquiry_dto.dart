@@ -1,4 +1,5 @@
-import '../../../listing_form/domain/entities/listing.dart' show ListingStatusDb;
+import '../../../listing_form/domain/entities/listing.dart'
+    show ListingStatusDb;
 import '../../domain/entities/inquiry.dart';
 import '../../domain/entities/inquiry_status.dart';
 

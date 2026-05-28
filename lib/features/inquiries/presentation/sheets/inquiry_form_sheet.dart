@@ -60,36 +60,46 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
 
     // Dispatch initial prefill values into the BLoC.
     if (prefillName.isNotEmpty) {
-      _bloc.add(InquiryFormFieldChanged(
-        field: InquiryFormField.name,
-        value: prefillName,
-      ));
+      _bloc.add(
+        InquiryFormFieldChanged(
+          field: InquiryFormField.name,
+          value: prefillName,
+        ),
+      );
     }
     if (prefillPhone.isNotEmpty) {
-      _bloc.add(InquiryFormFieldChanged(
-        field: InquiryFormField.phone,
-        value: prefillPhone,
-      ));
+      _bloc.add(
+        InquiryFormFieldChanged(
+          field: InquiryFormField.phone,
+          value: prefillPhone,
+        ),
+      );
     }
 
     // Wire text controllers to BLoC.
     _nameCtrl.addListener(() {
-      _bloc.add(InquiryFormFieldChanged(
-        field: InquiryFormField.name,
-        value: _nameCtrl.text,
-      ));
+      _bloc.add(
+        InquiryFormFieldChanged(
+          field: InquiryFormField.name,
+          value: _nameCtrl.text,
+        ),
+      );
     });
     _phoneCtrl.addListener(() {
-      _bloc.add(InquiryFormFieldChanged(
-        field: InquiryFormField.phone,
-        value: _phoneCtrl.text,
-      ));
+      _bloc.add(
+        InquiryFormFieldChanged(
+          field: InquiryFormField.phone,
+          value: _phoneCtrl.text,
+        ),
+      );
     });
     _messageCtrl.addListener(() {
-      _bloc.add(InquiryFormFieldChanged(
-        field: InquiryFormField.message,
-        value: _messageCtrl.text,
-      ));
+      _bloc.add(
+        InquiryFormFieldChanged(
+          field: InquiryFormField.message,
+          value: _messageCtrl.text,
+        ),
+      );
     });
   }
 
@@ -261,9 +271,9 @@ class _SheetBody extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: (isSubmitting || !_hasRequiredFields(state))
                       ? null
-                      : () => context
-                          .read<InquiryFormBloc>()
-                          .add(const InquiryFormSubmitted()),
+                      : () => context.read<InquiryFormBloc>().add(
+                          const InquiryFormSubmitted(),
+                        ),
                   child: isSubmitting
                       ? const SizedBox.square(
                           dimension: 20,

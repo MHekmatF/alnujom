@@ -61,16 +61,17 @@ class _StatusFilterButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final currentFilter =
-        state is InquiryInboxLoaded ? (state as InquiryInboxLoaded).statusFilter : null;
+    final currentFilter = state is InquiryInboxLoaded
+        ? (state as InquiryInboxLoaded).statusFilter
+        : null;
 
     return PopupMenuButton<InquiryStatus?>(
       tooltip: l10n.inquiry_inbox_filter_status_label,
       icon: const Icon(Icons.filter_list),
       onSelected: (value) {
-        context
-            .read<InquiryInboxBloc>()
-            .add(InquiryInboxStatusFilterChanged(value));
+        context.read<InquiryInboxBloc>().add(
+          InquiryInboxStatusFilterChanged(value),
+        );
       },
       itemBuilder: (_) => [
         PopupMenuItem(
@@ -112,9 +113,9 @@ class _ListingFilterButton extends StatelessWidget {
       tooltip: l10n.inquiry_inbox_filter_listing_label,
       icon: const Icon(Icons.home_outlined),
       onSelected: (value) {
-        context
-            .read<InquiryInboxBloc>()
-            .add(InquiryInboxListingFilterChanged(value));
+        context.read<InquiryInboxBloc>().add(
+          InquiryInboxListingFilterChanged(value),
+        );
       },
       itemBuilder: (_) => [
         PopupMenuItem(
@@ -138,30 +139,30 @@ class _InboxBody extends StatelessWidget {
     return switch (state) {
       InquiryInboxLoading() => const Center(child: CircularProgressIndicator()),
       InquiryInboxError(:final failure) => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.error_outline, size: 48),
-              const SizedBox(height: 16),
-              Text(failure.message),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => context
-                    .read<InquiryInboxBloc>()
-                    .add(const InquiryInboxRefreshRequested()),
-                child: const Icon(Icons.refresh),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error_outline, size: 48),
+            const SizedBox(height: 16),
+            Text(failure.message),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => context.read<InquiryInboxBloc>().add(
+                const InquiryInboxRefreshRequested(),
               ),
-            ],
-          ),
+              child: const Icon(Icons.refresh),
+            ),
+          ],
         ),
+      ),
       InquiryInboxLoaded(inquiries: final inquiries, hasMore: final hasMore) =>
         inquiries.isEmpty
             ? Center(child: Text(l10n.inquiry_inbox_empty_state))
             : RefreshIndicator(
                 onRefresh: () async {
-                  context
-                      .read<InquiryInboxBloc>()
-                      .add(const InquiryInboxRefreshRequested());
+                  context.read<InquiryInboxBloc>().add(
+                    const InquiryInboxRefreshRequested(),
+                  );
                 },
                 child: ListView.builder(
                   itemCount: inquiries.length + (hasMore ? 1 : 0),
@@ -169,9 +170,9 @@ class _InboxBody extends StatelessWidget {
                     // Trigger load-more at 80% scroll.
                     if (index >= (inquiries.length * 0.8).floor() && hasMore) {
                       WidgetsBinding.instance.addPostFrameCallback((_) {
-                        context
-                            .read<InquiryInboxBloc>()
-                            .add(const InquiryInboxMoreLoaded());
+                        context.read<InquiryInboxBloc>().add(
+                          const InquiryInboxMoreLoaded(),
+                        );
                       });
                     }
 
@@ -200,19 +201,16 @@ class _InquiryRowTile extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final matLoc = MaterialLocalizations.of(context);
 
-    final displayPhone = inquiry.decryptedPhone ??
+    final displayPhone =
+        inquiry.decryptedPhone ??
         l10n.inquiry_detail_phone_unavailable_placeholder;
     final displayName = inquiry.senderName.isEmpty
         ? l10n.inquiry_inbox_anonymous_sender_label
         : inquiry.senderName;
-    final formattedDate =
-        matLoc.formatCompactDate(inquiry.createdAt.toLocal());
+    final formattedDate = matLoc.formatCompactDate(inquiry.createdAt.toLocal());
 
     return Card(
-      margin: const EdgeInsetsDirectional.symmetric(
-        horizontal: 8,
-        vertical: 4,
-      ),
+      margin: const EdgeInsetsDirectional.symmetric(horizontal: 8, vertical: 4),
       child: InkWell(
         onTap: () => context.push(AppRoutes.inquiryDetailFor(inquiry.id)),
         child: Padding(

@@ -48,9 +48,9 @@ class InboxStatusBadge extends StatelessWidget {
     return Chip(
       label: Text(label),
       backgroundColor: bgColor,
-      labelStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
-        color: fgColor,
-      ),
+      labelStyle: Theme.of(
+        context,
+      ).textTheme.labelSmall?.copyWith(color: fgColor),
       padding: EdgeInsets.zero,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       visualDensity: VisualDensity.compact,

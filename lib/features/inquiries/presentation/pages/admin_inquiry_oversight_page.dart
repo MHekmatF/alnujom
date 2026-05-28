@@ -31,7 +31,8 @@ class AdminInquiryOversightPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider<InquiryInboxBloc>(
       create: (_) =>
-          getIt<InquiryInboxBloc>()..add(const InquiryInboxOpened(adminTier: true)),
+          getIt<InquiryInboxBloc>()
+            ..add(const InquiryInboxOpened(adminTier: true)),
       child: const _AdminOversightView(),
     );
   }
@@ -85,9 +86,9 @@ class _AdminStatusFilterButton extends StatelessWidget {
     return PopupMenuButton<InquiryStatus?>(
       tooltip: l10n.inquiry_inbox_filter_status_label,
       icon: const Icon(Icons.filter_list),
-      onSelected: (value) => context
-          .read<InquiryInboxBloc>()
-          .add(InquiryInboxStatusFilterChanged(value)),
+      onSelected: (value) => context.read<InquiryInboxBloc>().add(
+        InquiryInboxStatusFilterChanged(value),
+      ),
       itemBuilder: (_) => [
         PopupMenuItem(
           value: null,
@@ -153,42 +154,39 @@ class _AdminInboxBody extends StatelessWidget {
     return switch (state) {
       InquiryInboxLoading() => const Center(child: CircularProgressIndicator()),
       InquiryInboxError(:final failure) => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.error_outline, size: 48),
-              const SizedBox(height: 16),
-              Text(failure.message),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => context
-                    .read<InquiryInboxBloc>()
-                    .add(const InquiryInboxRefreshRequested()),
-                child: const Icon(Icons.refresh),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error_outline, size: 48),
+            const SizedBox(height: 16),
+            Text(failure.message),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => context.read<InquiryInboxBloc>().add(
+                const InquiryInboxRefreshRequested(),
               ),
-            ],
-          ),
+              child: const Icon(Icons.refresh),
+            ),
+          ],
         ),
-      InquiryInboxLoaded(
-        inquiries: final inquiries,
-        hasMore: final hasMore,
-      ) =>
+      ),
+      InquiryInboxLoaded(inquiries: final inquiries, hasMore: final hasMore) =>
         inquiries.isEmpty
             ? Center(child: Text(l10n.inquiry_inbox_empty_state))
             : RefreshIndicator(
                 onRefresh: () async {
-                  context
-                      .read<InquiryInboxBloc>()
-                      .add(const InquiryInboxRefreshRequested());
+                  context.read<InquiryInboxBloc>().add(
+                    const InquiryInboxRefreshRequested(),
+                  );
                 },
                 child: ListView.builder(
                   itemCount: inquiries.length + (hasMore ? 1 : 0),
                   itemBuilder: (context, index) {
                     if (index >= (inquiries.length * 0.8).floor() && hasMore) {
                       WidgetsBinding.instance.addPostFrameCallback((_) {
-                        context
-                            .read<InquiryInboxBloc>()
-                            .add(const InquiryInboxMoreLoaded());
+                        context.read<InquiryInboxBloc>().add(
+                          const InquiryInboxMoreLoaded(),
+                        );
                       });
                     }
                     if (index >= inquiries.length) {
@@ -215,7 +213,8 @@ class _AdminInquiryRowTile extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final matLoc = MaterialLocalizations.of(context);
 
-    final displayPhone = inquiry.decryptedPhone ??
+    final displayPhone =
+        inquiry.decryptedPhone ??
         l10n.inquiry_detail_phone_unavailable_placeholder;
     final displayName = inquiry.senderName.isEmpty
         ? l10n.inquiry_inbox_anonymous_sender_label
@@ -224,8 +223,7 @@ class _AdminInquiryRowTile extends StatelessWidget {
     return Card(
       margin: const EdgeInsetsDirectional.symmetric(horizontal: 8, vertical: 4),
       child: InkWell(
-        onTap: () =>
-            context.push(AppRoutes.inquiryDetailFor(inquiry.id)),
+        onTap: () => context.push(AppRoutes.inquiryDetailFor(inquiry.id)),
         child: Padding(
           padding: const EdgeInsetsDirectional.all(12),
           child: Row(

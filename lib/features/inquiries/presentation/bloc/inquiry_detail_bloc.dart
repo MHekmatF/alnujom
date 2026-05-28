@@ -20,11 +20,8 @@ part 'inquiry_detail_state.dart';
 
 @injectable
 class InquiryDetailBloc extends Bloc<InquiryDetailEvent, InquiryDetailState> {
-  InquiryDetailBloc(
-    this._loadDetail,
-    this._updateStatus,
-    this._unreadCubit,
-  ) : super(const InquiryDetailLoading()) {
+  InquiryDetailBloc(this._loadDetail, this._updateStatus, this._unreadCubit)
+    : super(const InquiryDetailLoading()) {
     on<InquiryDetailOpened>(_onOpened);
     on<MarkResponded>(_onMarkResponded);
     on<MarkClosed>(_onMarkClosed);

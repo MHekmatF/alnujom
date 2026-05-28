@@ -79,16 +79,20 @@ class FilterActiveAlertDialog extends StatelessWidget {
   List<String> _buildChips(AppLocalizations l10n, FilterState f) {
     final out = <String>[];
     if (f.purpose != null) {
-      out.add(_labelled(
-        l10n.search_filter_purpose_label,
-        _purposeLabel(l10n, f.purpose!),
-      ));
+      out.add(
+        _labelled(
+          l10n.search_filter_purpose_label,
+          _purposeLabel(l10n, f.purpose!),
+        ),
+      );
     }
     if (f.propertyType != null) {
-      out.add(_labelled(
-        l10n.search_filter_property_type_label,
-        _propertyTypeLabel(l10n, f.propertyType!),
-      ));
+      out.add(
+        _labelled(
+          l10n.search_filter_property_type_label,
+          _propertyTypeLabel(l10n, f.propertyType!),
+        ),
+      );
     }
     // Location filter: collapse {governorate, city, area} into a single
     // chip showing the most specific level set. Raw IDs (UUIDs / slugs) would
@@ -98,10 +102,10 @@ class FilterActiveAlertDialog extends StatelessWidget {
     final locationLabel = f.areaId != null
         ? l10n.search_filter_area_hint
         : f.cityId != null
-            ? l10n.search_filter_city_hint
-            : f.governorateId != null
-                ? l10n.search_filter_governorate_hint
-                : null;
+        ? l10n.search_filter_city_hint
+        : f.governorateId != null
+        ? l10n.search_filter_governorate_hint
+        : null;
     if (locationLabel != null) {
       out.add(locationLabel);
     }
@@ -109,16 +113,20 @@ class FilterActiveAlertDialog extends StatelessWidget {
       out.add(_priceRangeLabel(l10n, f));
     }
     if (f.rooms != null) {
-      out.add(_labelled(
-        l10n.search_filter_rooms_label,
-        _countLabel(l10n, f.rooms!, f.roomsMode),
-      ));
+      out.add(
+        _labelled(
+          l10n.search_filter_rooms_label,
+          _countLabel(l10n, f.rooms!, f.roomsMode),
+        ),
+      );
     }
     if (f.bathrooms != null) {
-      out.add(_labelled(
-        l10n.search_filter_bathrooms_label,
-        _countLabel(l10n, f.bathrooms!, f.bathroomsMode),
-      ));
+      out.add(
+        _labelled(
+          l10n.search_filter_bathrooms_label,
+          _countLabel(l10n, f.bathrooms!, f.bathroomsMode),
+        ),
+      );
     }
     if (f.areaSizeMin != null || f.areaSizeMax != null) {
       out.add(_areaSizeLabel(l10n, f));

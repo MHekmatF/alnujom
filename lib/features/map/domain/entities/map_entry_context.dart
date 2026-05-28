@@ -21,10 +21,7 @@ final class MapEntryFromHome extends MapEntryContext {
 /// Carries the listing id (for marker pre-selection) and the listing's
 /// coordinates (for camera centering).
 final class MapEntryFromListing extends MapEntryContext {
-  const MapEntryFromListing({
-    required this.listingId,
-    required this.position,
-  });
+  const MapEntryFromListing({required this.listingId, required this.position});
   final String listingId;
   final MarkerCoordinates position;
   @override

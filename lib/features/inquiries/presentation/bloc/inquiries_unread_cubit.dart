@@ -23,7 +23,7 @@ part 'inquiries_unread_state.dart';
 @lazySingleton
 class InquiriesUnreadCubit extends Cubit<InquiriesUnreadState> {
   InquiriesUnreadCubit(this._loadUnreadCount, this._checkOwnsApprovedListing)
-      : super(const InquiriesUnreadState(count: 0, canShowEntry: false));
+    : super(const InquiriesUnreadState(count: 0, canShowEntry: false));
 
   final LoadInboxUnreadCount _loadUnreadCount;
   final CheckOwnsApprovedListing _checkOwnsApprovedListing;
@@ -37,8 +37,7 @@ class InquiriesUnreadCubit extends Cubit<InquiriesUnreadState> {
     final canShowEntry = ownsResult is Success<bool>
         ? ownsResult.value
         : state.canShowEntry;
-    final count =
-        countResult is Success<int> ? countResult.value : state.count;
+    final count = countResult is Success<int> ? countResult.value : state.count;
 
     emit(InquiriesUnreadState(count: count, canShowEntry: canShowEntry));
   }
@@ -49,10 +48,7 @@ class InquiriesUnreadCubit extends Cubit<InquiriesUnreadState> {
   void decrement() {
     final newCount = (state.count - 1).clamp(0, double.maxFinite.toInt());
     emit(
-      InquiriesUnreadState(
-        count: newCount,
-        canShowEntry: state.canShowEntry,
-      ),
+      InquiriesUnreadState(count: newCount, canShowEntry: state.canShowEntry),
     );
   }
 }

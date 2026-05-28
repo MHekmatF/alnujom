@@ -66,8 +66,8 @@ class SupabaseMapDatasource {
         final list = ratesResult as List<dynamic>;
         final rateMap = <String, double>{
           for (final r in list)
-            (r as Map<String, dynamic>)['target_currency'] as String:
-                r['rate'] is num
+            (r as Map<String, dynamic>)['target_currency']
+                as String: r['rate'] is num
                 ? (r['rate'] as num).toDouble()
                 : double.parse(r['rate'].toString()),
         };
@@ -142,9 +142,7 @@ class SupabaseMapDatasource {
 
   List<MapMarker> _rowsToMarkers(List<dynamic> rows) {
     return rows.map((row) {
-      final dto = MapMarkerDto.fromJson(
-        Map<String, dynamic>.from(row as Map),
-      );
+      final dto = MapMarkerDto.fromJson(Map<String, dynamic>.from(row as Map));
       final entity = dto.toEntity();
       final path = entity.mainImagePath;
       if (path == null || path.isEmpty || path.startsWith('http')) {

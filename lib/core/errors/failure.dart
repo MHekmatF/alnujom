@@ -78,5 +78,6 @@ final class ValidationFailure extends Failure {
 // enforce_inquiry_transition trigger rejects a status mutation
 // (SQLSTATE 23514 with 'invalid_inquiry_transition' in the message).
 final class TransitionInvalidFailure extends Failure {
-  const TransitionInvalidFailure() : super('Invalid inquiry status transition.');
+  const TransitionInvalidFailure()
+    : super('Invalid inquiry status transition.');
 }

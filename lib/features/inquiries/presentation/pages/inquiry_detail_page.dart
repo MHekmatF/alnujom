@@ -24,8 +24,7 @@ class InquiryDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<InquiryDetailBloc>(
-      create: (_) => getIt<InquiryDetailBloc>()
-        ..add(InquiryDetailOpened(id)),
+      create: (_) => getIt<InquiryDetailBloc>()..add(InquiryDetailOpened(id)),
       child: _InquiryDetailView(id: id),
     );
   }
@@ -48,27 +47,29 @@ class _InquiryDetailView extends StatelessWidget {
       body: BlocBuilder<InquiryDetailBloc, InquiryDetailState>(
         builder: (context, state) {
           return switch (state) {
-            InquiryDetailLoading() =>
-              const Center(child: CircularProgressIndicator()),
+            InquiryDetailLoading() => const Center(
+              child: CircularProgressIndicator(),
+            ),
             InquiryDetailError(:final failure) => Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.error_outline, size: 48),
-                    const SizedBox(height: 16),
-                    Text(failure.message),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () => context
-                          .read<InquiryDetailBloc>()
-                          .add(InquiryDetailOpened(id)),
-                      child: const Icon(Icons.refresh),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.error_outline, size: 48),
+                  const SizedBox(height: 16),
+                  Text(failure.message),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => context.read<InquiryDetailBloc>().add(
+                      InquiryDetailOpened(id),
                     ),
-                  ],
-                ),
+                    child: const Icon(Icons.refresh),
+                  ),
+                ],
               ),
-            InquiryDetailLoaded(:final inquiry) =>
-              _InquiryDetailBody(inquiry: inquiry),
+            ),
+            InquiryDetailLoaded(:final inquiry) => _InquiryDetailBody(
+              inquiry: inquiry,
+            ),
           };
         },
       ),
@@ -88,7 +89,8 @@ class _InquiryDetailBody extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     final displayPhone =
-        inquiry.decryptedPhone ?? l10n.inquiry_detail_phone_unavailable_placeholder;
+        inquiry.decryptedPhone ??
+        l10n.inquiry_detail_phone_unavailable_placeholder;
 
     return SingleChildScrollView(
       padding: const EdgeInsetsDirectional.all(16),
@@ -130,9 +132,8 @@ class _InquiryDetailBody extends StatelessWidget {
                   message: l10n.inquiry_detail_tap_to_call_action,
                   child: IconButton(
                     icon: const Icon(Icons.phone_outlined),
-                    onPressed: () => launchUrl(
-                      Uri.parse('tel:${inquiry.decryptedPhone}'),
-                    ),
+                    onPressed: () =>
+                        launchUrl(Uri.parse('tel:${inquiry.decryptedPhone}')),
                   ),
                 ),
             ],
@@ -140,17 +141,13 @@ class _InquiryDetailBody extends StatelessWidget {
           const SizedBox(height: 16),
 
           // Message
-          Text(
-            inquiry.message,
-            style: textTheme.bodyMedium,
-          ),
+          Text(inquiry.message, style: textTheme.bodyMedium),
           const SizedBox(height: 16),
 
           // Listing reference (tappable)
           InkWell(
-            onTap: () => context.push(
-              AppRoutes.listingDetailsFor(inquiry.listingId),
-            ),
+            onTap: () =>
+                context.push(AppRoutes.listingDetailsFor(inquiry.listingId)),
             child: Row(
               children: [
                 const Icon(Icons.home_outlined, size: 18),
@@ -202,8 +199,9 @@ class _StatusMutationButtons extends StatelessWidget {
     final allowed = inquiry.status.allowedTransitions;
 
     // Filter out spam (Q3=B: no publisher-side spam marking in Phase 16).
-    final visibleTransitions =
-        allowed.where((s) => s != InquiryStatus.spam).toSet();
+    final visibleTransitions = allowed
+        .where((s) => s != InquiryStatus.spam)
+        .toSet();
 
     if (visibleTransitions.isEmpty) return const SizedBox.shrink();
 

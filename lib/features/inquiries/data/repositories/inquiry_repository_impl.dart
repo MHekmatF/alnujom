@@ -35,7 +35,11 @@ class InquiryRepositoryImpl implements InquiryRepository {
       return FailureResult(NetworkFailure(e.message, cause: e, stackTrace: st));
     } on TimeoutException catch (e, st) {
       return FailureResult(
-        NetworkFailure(e.message ?? 'Request timed out', cause: e, stackTrace: st),
+        NetworkFailure(
+          e.message ?? 'Request timed out',
+          cause: e,
+          stackTrace: st,
+        ),
       );
     } catch (e, st) {
       return FailureResult(
@@ -65,7 +69,11 @@ class InquiryRepositoryImpl implements InquiryRepository {
       return FailureResult(NetworkFailure(e.message, cause: e, stackTrace: st));
     } on TimeoutException catch (e, st) {
       return FailureResult(
-        NetworkFailure(e.message ?? 'Request timed out', cause: e, stackTrace: st),
+        NetworkFailure(
+          e.message ?? 'Request timed out',
+          cause: e,
+          stackTrace: st,
+        ),
       );
     } catch (e, st) {
       return FailureResult(
@@ -86,7 +94,11 @@ class InquiryRepositoryImpl implements InquiryRepository {
       return FailureResult(NetworkFailure(e.message, cause: e, stackTrace: st));
     } on TimeoutException catch (e, st) {
       return FailureResult(
-        NetworkFailure(e.message ?? 'Request timed out', cause: e, stackTrace: st),
+        NetworkFailure(
+          e.message ?? 'Request timed out',
+          cause: e,
+          stackTrace: st,
+        ),
       );
     } catch (e, st) {
       return FailureResult(
@@ -110,13 +122,21 @@ class InquiryRepositoryImpl implements InquiryRepository {
         return const FailureResult(TransitionInvalidFailure());
       }
       return FailureResult(
-        UnknownFailure('updateStatus failed: ${e.message}', cause: e, stackTrace: st),
+        UnknownFailure(
+          'updateStatus failed: ${e.message}',
+          cause: e,
+          stackTrace: st,
+        ),
       );
     } on SocketException catch (e, st) {
       return FailureResult(NetworkFailure(e.message, cause: e, stackTrace: st));
     } on TimeoutException catch (e, st) {
       return FailureResult(
-        NetworkFailure(e.message ?? 'Request timed out', cause: e, stackTrace: st),
+        NetworkFailure(
+          e.message ?? 'Request timed out',
+          cause: e,
+          stackTrace: st,
+        ),
       );
     } catch (e, st) {
       return FailureResult(
@@ -134,7 +154,11 @@ class InquiryRepositoryImpl implements InquiryRepository {
       return FailureResult(NetworkFailure(e.message, cause: e, stackTrace: st));
     } on TimeoutException catch (e, st) {
       return FailureResult(
-        NetworkFailure(e.message ?? 'Request timed out', cause: e, stackTrace: st),
+        NetworkFailure(
+          e.message ?? 'Request timed out',
+          cause: e,
+          stackTrace: st,
+        ),
       );
     } catch (e, st) {
       return FailureResult(
@@ -152,11 +176,19 @@ class InquiryRepositoryImpl implements InquiryRepository {
       return FailureResult(NetworkFailure(e.message, cause: e, stackTrace: st));
     } on TimeoutException catch (e, st) {
       return FailureResult(
-        NetworkFailure(e.message ?? 'Request timed out', cause: e, stackTrace: st),
+        NetworkFailure(
+          e.message ?? 'Request timed out',
+          cause: e,
+          stackTrace: st,
+        ),
       );
     } catch (e, st) {
       return FailureResult(
-        UnknownFailure('ownsApprovedListing failed: $e', cause: e, stackTrace: st),
+        UnknownFailure(
+          'ownsApprovedListing failed: $e',
+          cause: e,
+          stackTrace: st,
+        ),
       );
     }
   }

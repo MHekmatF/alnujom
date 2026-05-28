@@ -20,9 +20,8 @@ part 'contact_cta_state.dart';
 
 @injectable
 class ContactCtaCubit extends Cubit<ContactCtaState> {
-  ContactCtaCubit(
-    @factoryParam Listing listing,
-  ) : super(_compute(listing, getIt<AuthBloc>().state));
+  ContactCtaCubit(@factoryParam Listing listing)
+    : super(_compute(listing, getIt<AuthBloc>().state));
 
   /// Derives visibility flags from the [Listing] + the current [AuthState].
   ///
@@ -36,8 +35,7 @@ class ContactCtaCubit extends Cubit<ContactCtaState> {
     }
 
     // FR-001a: Call CTA visible only when a non-empty phone number is present.
-    final showCall =
-        listing.phone != null && listing.phone!.isNotEmpty;
+    final showCall = listing.phone != null && listing.phone!.isNotEmpty;
 
     // FR-001b (Q1=B-refined): WhatsApp button always renders but is disabled
     // when no whatsapp number is stored.

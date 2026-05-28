@@ -69,8 +69,7 @@ class ContactBlock extends StatelessWidget {
                       : l10n.contact_whatsapp_disabled_tooltip,
                   child: OutlinedButton.icon(
                     onPressed: state.whatsappEnabled
-                        ? () =>
-                            _onWhatsAppPressed(context, state.whatsapp!)
+                        ? () => _onWhatsAppPressed(context, state.whatsapp!)
                         : null,
                     icon: const Icon(Icons.chat_outlined),
                     label: Text(l10n.cta_whatsapp),
@@ -109,10 +108,7 @@ class ContactBlock extends StatelessWidget {
     }
   }
 
-  Future<void> _onWhatsAppPressed(
-    BuildContext context,
-    String whatsapp,
-  ) async {
+  Future<void> _onWhatsAppPressed(BuildContext context, String whatsapp) async {
     await getIt<RecordLeadEvent>()(
       listingId: listing.id,
       eventType: LeadEventType.whatsappClicked,
