@@ -104,3 +104,51 @@ times the heart is toggled (R-112).
 - Cross-user SELECT (forged `WHERE user_id='<other>'`) → 0 rows (self-only
   RLS; SC-005).
 - Cross-user DELETE → 0 rows affected (self-only RLS; SC-006).
+
+## RLS matrix (live — Migration 2)
+
+Migration `20260529120002_create_favorites_policies.sql` attaches the self-only
+policies that Migration 1 forward-stated. The policies are the load-bearing
+privacy boundary for FR-017..FR-019 and SC-005..SC-006.
+
+| Reader | SELECT | DELETE | INSERT | UPDATE |
+|--------|--------|--------|--------|--------|
+| Owner (`auth.uid() = user_id`) | own rows only (`favorites_select_self`) | own rows only (`favorites_delete_self`) | denied — no grant; use `add_favorite` RPC | denied — no policy, no grant |
+| Other authenticated user | 0 rows | 0 rows affected | denied | denied |
+| Anonymous (`anon`) | denied — no `TO anon` policy | denied | denied | denied |
+| Admin / super-admin | own rows only — there is **no** `favorites.view_all` and no admin override (FR-019) | own rows only | denied | denied |
+
+Policy definitions:
+
+- `favorites_select_self` — `FOR SELECT TO authenticated USING (user_id = auth.uid())`.
+- `favorites_delete_self` — `FOR DELETE TO authenticated USING (user_id = auth.uid())` (the un-favorite client path per Q5=A + FR-012; emits no lead event).
+- `REVOKE INSERT, UPDATE ON public.favorites FROM authenticated, anon` — row creation is exclusively via the `add_favorite` SECURITY DEFINER RPC (Migration 4); favorites are insert/delete-only so there is no UPDATE path.
+- No `anon` policy and no INSERT policy — anonymous sessions are denied entirely, and even an authenticated client cannot create a row that bypasses the co-transactional `favorite_added` event (FR-011 + FR-017).
+
+## `v_favorites` view + `is_available` contract (Migration 3)
+
+Migration `20260529120003_create_v_favorites_view.sql` defines the FavoritesPage
+projection. Key properties:
+
+- **`SECURITY INVOKER`** (`WITH (security_invoker = true)`): the view executes
+  with the caller's role, so the base-table `favorites_select_self` RLS applies
+  to view reads. A caller sees only their own favorites — verified identical to
+  the table-level isolation. (Phase 16 `20260527120013` precedent; the default
+  `security_invoker = false` would run as the view owner and bypass RLS.)
+- **`GRANT SELECT … TO authenticated`** only — NOT to `anon`.
+- **Projects ZERO publisher private fields** — no legal name, national id,
+  phone, or whatsapp. Card-safe columns only: `id` (= `favorites.listing_id`),
+  `favorited_at` (= `favorites.created_at`), `title`, `property_type`,
+  `purpose`, `primary_amount`/`primary_currency` (LATERAL primary price),
+  `main_image_path` (LATERAL lowest-ordering image), and the bilingual
+  `governorate_name_ar/_en` + `city_name_ar/_en` from the `display_name` JSONB.
+- **`is_available` flag** — computed as
+  `l.status = 'approved' AND (l.expires_at IS NULL OR l.expires_at > now())`.
+- **Does NOT filter on `l.status`** (unlike `v_listings_public`): unavailable
+  favorites MUST still appear in the result set with `is_available = false`,
+  driving the FavoritesPage "no longer available" indicator (Q4=A + FR-025).
+  Flipping a favorited listing away from `approved` therefore keeps its row in
+  `v_favorites` with `is_available = false` rather than removing it.
+- Read newest-first by `favorited_at DESC`; cursor pagination on `favorited_at`
+  (R-117), backed by the `idx_favorites_user_created` index (no full scan,
+  SC-015).
