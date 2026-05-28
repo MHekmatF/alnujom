@@ -184,27 +184,36 @@ class _SortAndFiltersRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              Text(
-                l10n.search_sort_label,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              const SizedBox(width: 4),
-              const InlineSortControl(),
-            ],
+          Flexible(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: Text(
+                    l10n.search_sort_label,
+                    style: Theme.of(context).textTheme.bodySmall,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                const Flexible(child: InlineSortControl()),
+              ],
+            ),
           ),
           Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               // Phase 15 G3: "Show on map" entry point per
               // contracts/phase15-search-show-on-map.md. Always visible;
-              // no state mutation on SearchBloc.
-              TextButton.icon(
+              // no state mutation on SearchBloc. Icon-only to fit narrow
+              // viewports (the labeled variant overflowed on 336dp-wide
+              // screens alongside the sort control + filters button).
+              IconButton(
                 onPressed: () => _openMap(context),
                 icon: const Icon(Icons.map_outlined),
-                label: Text(l10n.search_results_show_on_map_action),
+                tooltip: l10n.search_results_show_on_map_action,
               ),
-              const SizedBox(width: 4),
               BlocBuilder<SearchBloc, SearchState>(
                 buildWhen: (p, c) => p.filters.isEmpty != c.filters.isEmpty,
                 builder: (context, state) {

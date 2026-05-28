@@ -2470,6 +2470,10 @@ final class _DebugAppLocalizations extends AppLocalizations {
 
   // §5.6 CTA labels
   @override
+  String get contact_section_title =>
+      _resolve('contact_section_title', (loc) => loc.contact_section_title);
+
+  @override
   String get cta_call => _resolve('cta_call', (loc) => loc.cta_call);
 
   @override

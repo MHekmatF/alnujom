@@ -9,9 +9,9 @@ Legend:
 
 | SC | Description (one-line) | Status | Evidence |
 |----|------------------------|--------|----------|
-| **SC-001** | Call CTA opens dialer + records `phone_revealed` lead event within 1s | ⚠️ AVD-DEFERRED | ContactBlock rewired (commit `3edc7be`); `record_lead_event` RPC live; manual AVD walk pending. |
-| **SC-002** | WhatsApp CTA opens WhatsApp + records `whatsapp_clicked` event within 1s | ⚠️ AVD-DEFERRED | ContactBlock handler `launchUrl('https://wa.me/...')` + RPC call wired; render-but-disabled gate when `whatsapp` empty per Q1=B-refined. |
-| **SC-003** | Inquiry form submit → success snackbar within 2s + atomic 2-row insert | ✅ VERIFIED | Phase 4 T035 smoke: `submit_inquiry` round-trip on test listing returned UUID `444f71ce…`; companion `inquiry_sent` lead event row created in same MCP call. Atomicity is the natural Postgres transaction semantic. UI 2s budget pending AVD timing. |
+| **SC-001** | Call CTA opens dialer + records `phone_revealed` lead event within 1s | ✅ VERIFIED (device) | **Infinix Note 8 walk (2026-05-28)**: tapped Call on "Luxury HOuse in AlMaza" → dialer opened; `lead_events` row `phone_revealed` landed with `ip=::1/128` + `user_agent=Dart/3.9 (dart:io)`. |
+| **SC-002** | WhatsApp CTA opens WhatsApp + records `whatsapp_clicked` event within 1s | ✅ VERIFIED (device) | **Infinix Note 8 walk**: tapped WhatsApp → app/browser opened; `lead_events` row `whatsapp_clicked` landed with IP + UA. Render-but-disabled gate also confirmed on a listing with no WhatsApp number (Q1=B-refined). |
+| **SC-003** | Inquiry form submit → success snackbar within 2s + atomic 2-row insert | ✅ VERIFIED (device) | **Infinix Note 8 walk**: filled + submitted the inquiry form → success; `inquiries` row + companion `inquiry_sent` `lead_events` row landed at the **identical** `created_at` timestamp → confirms the atomic two-row insert through the real client path (not just the Phase 4 MCP smoke). |
 | **SC-004** | Wire-level: `inquirer_phone` never appears plaintext in any SELECT unless caller is publisher/sender/admin | ✅ VERIFIED | Phase 4 T036 three-tier decrypt smoke: publisher → `+963991234567`; unrelated user → NULL; admin → `+963991234567`. The `v_inquiries_inbox` view calls `decrypt_inquirer_phone(i.id)` which self-gates. |
 | **SC-005** | `pg_dump` + grep plaintext phone → 0 matches | ✅ VERIFIED | MCP-side equivalent: `SELECT count(*) WHERE sender_name/message/metadata/encode(bytea) ILIKE '%+963991234567%'` → 0 across all four. Ciphertext bytes don't contain the plaintext. |
 | **SC-006** | Cross-tenant publisher SELECT isolation | ✅ VERIFIED | T085(a) wire smoke: publisher A (owner) sees 1 row; unrelated user `22222222…` (neither sender nor publisher) sees 0 rows. **Fixed during polish**: migration `20260527120013` set `security_invoker = true` on `v_inquiries_inbox` after T085 caught the RLS-bypass. |
@@ -25,13 +25,23 @@ Legend:
 | **SC-014** | Decrypt failure → "Phone unavailable" placeholder, no crash | ✅ VERIFIED | T088 polish smoke: corrupted `inquirer_phone_encrypted = '\x00'::bytea`; `decrypt_inquirer_phone` returned NULL (FR-026 try/catch); `v_inquiries_inbox` row rendered with all other columns intact and `inquirer_phone_decrypted IS NULL = true`. |
 | **SC-015** | Cross-tenant UPDATE denied | ✅ VERIFIED | T085(c) wire smoke: user `22222222…` attempting `UPDATE inquiries SET status='closed' WHERE id='444f71ce…'` → 0 rows affected. The `inquiries_update_publisher` RLS USING predicate hides the row. |
 | **SC-016** | Lead-events metadata visible to admins only | ✅ VERIFIED | T085(d) wire smoke: (1) `v_lead_events_publisher` columns = `id, listing_id, user_id, event_type, created_at` (NO `metadata`); (2) publisher querying `v_lead_events_admin` → 0 rows (defensive WHERE); (3) admin querying `v_lead_events_admin` → returns `metadata->>'ip' = '2600:1f18:...'`. **Note on `user_agent`**: returned NULL when the smoke call originated from MCP `execute_sql` (PostgREST gateway is the only path that populates `request.headers`). Live Flutter calls through PostgREST will include UA. |
-| **SC-017** | Home AppBar inbox entry: visible iff publisher with `new` inquiries, badge accurate | ⚠️ AVD-DEFERRED | `InquiriesAppBarAction` wired (commit `3edc7be`); `canShowEntry = count > 0` gate (simpler than the "owns ≥1 approved listing" check per Phase 7 deviation note); `AppLifecycleListener` refreshes on resume. Visual + decrement-on-read smoke pending AVD. |
+| **SC-017** | Home AppBar inbox entry: visible iff publisher owns ≥1 approved listing, badge = unread count, decrements on read | ✅ VERIFIED (device) | **Infinix Note 8 walk**: badge showed "1" after foreground-resume; reading the inquiry auto-flipped `new→seen` and the badge cleared in real time. **Spec-correction during the walk**: the Phase 7 `canShowEntry = count > 0` shortcut was replaced with the Q6=B-faithful "owns ≥1 approved listing" gate (new RPC `publisher_owns_approved_listing` + `CheckOwnsApprovedListing` use case) — the inbox icon now stays visible at zero unread, confirmed on device. |
 
 ## Summary
 
-**Verified automatically**: 11 of 17 (SC-003, 004, 005, 006, 007, 008, 010, 011, 014, 015, 016)
+**Verified automatically (SQL/RLS/wire)**: 11 of 17 (SC-003, 004, 005, 006, 007, 008, 010, 011, 014, 015, 016)
 
-**AVD-deferred**: 6 of 17 (SC-001, 002, 009, 012-visual, 013, 017) — all are UI-flow / cross-restart smokes that require a running emulator. Implementation complete; manual walk lands in a follow-up.
+**Verified on physical device (Infinix Note 8, 2026-05-28 walk)**: SC-001, SC-002, SC-003, SC-017 + FR-001d self-contact hiding. The walk also confirmed `lead_events.metadata.user_agent` IS populated through the real client (`Dart/3.9 (dart:io)`), closing deferred item D-003.
+
+**Still deferred**: SC-009 (status persistence across full app restart — auto `new→seen` was confirmed, but the cross-restart/cross-device leg is unverified), SC-012 (empty-inbox state — the test inbox had ≥1 row), SC-013 (LTR/RTL × light/dark visual pass), and admin oversight (SC-008 UI). Tracked in DEFERRED.md §D-001.
+
+### Device-session fixes (2026-05-28, folded into this PR)
+
+The physical-device walk surfaced bugs that were fixed in-session:
+- **Home feed crash** (pre-existing Phase 13): a signed-in publisher's own rejected listings (null `published_at`) leaked into the public feed query via owner-RLS and crashed `DateTime.parse(null)`, breaking the whole feed. Fixed by filtering the feed to `published_at IS NOT NULL` (published rows only — not a status-column filter).
+- **Search row + card overflow** (pre-existing Phase 14/15): "Show on map" button → icon-only; `SearchResultCard` height 100→116.
+- **ContactBlock "Call" header** (Phase 16): the section heading reused `cta_call` ("Call"); replaced with a proper `contact_section_title` ("Contact"/"التواصل").
+- **Inbox visibility** (Phase 16, SC-017): see the SC-017 row — `count > 0` gate corrected to the Q6=B "owns ≥1 approved listing" gate.
 
 **Critical polish-phase discoveries**:
 - T085 caught a real RLS-bypass + anon-grant leak on the views — fixed via two follow-up migrations:

@@ -624,6 +624,7 @@
     "placeholders": { "name": { "type": "String" } }
   },
 
+  "contact_section_title": "التواصل",
   "cta_call": "اتصال",
   "cta_whatsapp": "واتساب",
   "cta_send_inquiry": "إرسال استفسار",

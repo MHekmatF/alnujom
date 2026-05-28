@@ -46,7 +46,7 @@ class ContactBlock extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                l10n.cta_call,
+                l10n.contact_section_title,
                 style: theme.textTheme.titleSmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),

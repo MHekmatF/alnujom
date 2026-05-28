@@ -103,6 +103,8 @@ import '../../features/inquiries/domain/repositories/inquiry_repository.dart'
     as _i272;
 import '../../features/inquiries/domain/repositories/lead_event_repository.dart'
     as _i866;
+import '../../features/inquiries/domain/usecases/check_owns_approved_listing.dart'
+    as _i704;
 import '../../features/inquiries/domain/usecases/load_inbox_unread_count.dart'
     as _i868;
 import '../../features/inquiries/domain/usecases/load_inquiry_detail.dart'
@@ -569,6 +571,9 @@ _i174.GetIt $initGetIt(
   gh.factory<_i684.UpdateInquiryStatus>(
     () => _i684.UpdateInquiryStatus(gh<_i272.InquiryRepository>()),
   );
+  gh.factory<_i704.CheckOwnsApprovedListing>(
+    () => _i704.CheckOwnsApprovedListing(gh<_i272.InquiryRepository>()),
+  );
   gh.factory<_i891.ListMyListings>(
     () => _i891.ListMyListings(gh<_i754.PublisherDashboardRepository>()),
   );
@@ -602,9 +607,6 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i315.MutateRole>(
     () => _i315.MutateRole(gh<_i681.RoleCatalogRepository>()),
-  );
-  gh.lazySingleton<_i74.InquiriesUnreadCubit>(
-    () => _i74.InquiriesUnreadCubit(gh<_i868.LoadInboxUnreadCount>()),
   );
   gh.factory<_i655.CountCityDependents>(
     () => _i655.CountCityDependents(gh<_i704.LocationsRepository>()),
@@ -793,6 +795,12 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i554.PendingQueueBloc>(
     () => _i554.PendingQueueBloc(gh<_i207.LoadPendingQueueUseCase>()),
+  );
+  gh.lazySingleton<_i74.InquiriesUnreadCubit>(
+    () => _i74.InquiriesUnreadCubit(
+      gh<_i868.LoadInboxUnreadCount>(),
+      gh<_i704.CheckOwnsApprovedListing>(),
+    ),
   );
   gh.factory<_i176.CurrenciesListBloc>(
     () => _i176.CurrenciesListBloc(

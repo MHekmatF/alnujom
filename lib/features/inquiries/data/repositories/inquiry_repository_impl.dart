@@ -140,4 +140,22 @@ class InquiryRepositoryImpl implements InquiryRepository {
       );
     }
   }
+
+  @override
+  Future<Result<bool>> ownsApprovedListing() async {
+    try {
+      final owns = await _datasource.ownsApprovedListing();
+      return Success(owns);
+    } on SocketException catch (e, st) {
+      return FailureResult(NetworkFailure(e.message, cause: e, stackTrace: st));
+    } on TimeoutException catch (e, st) {
+      return FailureResult(
+        NetworkFailure(e.message ?? 'Request timed out', cause: e, stackTrace: st),
+      );
+    } catch (e, st) {
+      return FailureResult(
+        UnknownFailure('ownsApprovedListing failed: $e', cause: e, stackTrace: st),
+      );
+    }
+  }
 }

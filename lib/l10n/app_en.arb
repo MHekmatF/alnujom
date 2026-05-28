@@ -700,6 +700,7 @@
     "placeholders": { "name": { "type": "String" } }
   },
 
+  "contact_section_title": "Contact",
   "cta_call": "Call",
   "cta_whatsapp": "WhatsApp",
   "cta_send_inquiry": "Send inquiry",

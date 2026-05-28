@@ -104,6 +104,14 @@ class SupabaseInquiriesDatasource {
     return (result as num).toInt();
   }
 
+  /// Calls `publisher_owns_approved_listing` RPC. Drives the home inbox-entry
+  /// visibility gate (FR-019 / Q6=B) — true when the caller owns ≥ 1 approved
+  /// listing, independent of unread count.
+  Future<bool> ownsApprovedListing() async {
+    final result = await _client.rpc('publisher_owns_approved_listing');
+    return result as bool? ?? false;
+  }
+
   // ---------------------------------------------------------------------------
   // Lead-event operations
   // ---------------------------------------------------------------------------

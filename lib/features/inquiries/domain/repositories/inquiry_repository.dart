@@ -28,4 +28,8 @@ abstract class InquiryRepository {
   /// Returns the count of `status='new'` inquiries on listings owned by the
   /// current user. Used to drive the home AppBar badge.
   Future<Result<int>> loadUnreadCount();
+
+  /// True when the current user owns ≥ 1 approved listing. Drives the home
+  /// inbox-entry visibility gate (FR-019 / Q6=B) independently of unread count.
+  Future<Result<bool>> ownsApprovedListing();
 }

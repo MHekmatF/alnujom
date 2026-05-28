@@ -48,13 +48,12 @@ class SearchResultCard extends StatelessWidget {
         // the inner Column(spaceBetween, mainAxisSize.max) crashes with
         // "BoxConstraints forces an infinite height".
         child: SizedBox(
-          height: 100,
+          height: 116,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SizedBox(
-                width: 100,
-                height: 100,
+                width: 116,
                 child: _CardImage(
                   imageUrl: item.mainImagePath,
                   fallbackLabel: l10n.image_unavailable,

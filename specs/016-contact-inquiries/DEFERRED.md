@@ -4,9 +4,19 @@ Tracks items that landed as `**⚠️ PARTIAL —**` in `tasks.md` or remain to 
 
 ---
 
-## D-001 — Manual AVD smoke tests (T075, T076, T082, T083, T084)
+## D-001 — Manual device smoke tests (T075, T076, T082, T083, T084)
 
-**Status**: Implementation complete; visual + flow verification pending.
+**Status**: PARTIALLY COMPLETE — verified on the **Infinix Note 8** (physical device, better than the planned AVD) on 2026-05-28.
+
+**Verified on device (2026-05-28 walk):**
+- ✅ T082 ContactBlock golden path — Call (dialer + `phone_revealed` event), WhatsApp (`whatsapp_clicked` event), Send inquiry (form → success + atomic inquiry+`inquiry_sent` rows).
+- ✅ T083 edge cases — empty-phone listing hides Call; empty-WhatsApp listing renders WhatsApp disabled (tooltip); own-listing hides the entire contact block (FR-001d).
+- ✅ T084 home inbox badge — appears on foreground-resume; reading an inquiry auto-flips `new→seen` and clears the badge; the icon now stays visible at zero unread (Q6=B fix).
+
+**Still pending (next session):**
+- ⏳ T075 inbox detail — status mutation buttons ("Mark responded"/"Mark closed"/reopen) round-trip + persistence across app restart (SC-009 cross-restart leg).
+- ⏳ T076 admin oversight — `/admin/inquiries` banner + cross-publisher rows + non-admin redirect (needs an admin account on the device).
+- ⏳ SC-012 empty-inbox state + SC-013 LTR/RTL × light/dark visual pass.
 
 **Owner**: Orchestrator post-merge or a dedicated follow-up session.
 
@@ -43,7 +53,9 @@ Tracks items that landed as `**⚠️ PARTIAL —**` in `tasks.md` or remain to 
 
 ## D-003 — `lead_events.metadata.user_agent` populated from PostgREST headers
 
-**Status**: Schema captures `user_agent`; `record_lead_event` and `submit_inquiry` RPCs read `current_setting('request.headers', true)::jsonb->>'user-agent'` from the trusted server context.
+**Status**: ✅ RESOLVED — confirmed on the 2026-05-28 Infinix walk. The `phone_revealed` + `whatsapp_clicked` rows produced by the real Flutter client carried `metadata.user_agent = "Dart/3.9 (dart:io)"` (and `metadata.ip`). The earlier MCP-side NULL was purely an artifact of calling via `execute_sql` instead of the PostgREST gateway.
+
+**(historical note)** Schema captures `user_agent`; `record_lead_event` and `submit_inquiry` RPCs read `current_setting('request.headers', true)::jsonb->>'user-agent'` from the trusted server context.
 
 **Caveat noted in SC-016 verification**: When called via MCP `execute_sql` directly (NOT through the PostgREST gateway), `request.headers` is unset and `user_agent` lands as NULL. Real Flutter calls through PostgREST WILL populate the column.
 
