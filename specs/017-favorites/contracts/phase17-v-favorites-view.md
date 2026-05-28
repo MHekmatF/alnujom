@@ -17,7 +17,9 @@
 | `governorate_name_ar/_en`, `city_name_ar/_en` | `governorates`/`cities` `display_name` JSONB |
 | `is_available` | `l.status='approved' AND (l.expires_at IS NULL OR l.expires_at > now())` |
 
-**Critical**: the view does **NOT** filter on `l.status` (unlike `v_listings_public`). Unavailable favorites MUST still appear; `is_available=false` drives the "no longer available" indicator (Q4=A + FR-025).
+**Critical**: the view does **NOT** filter on `l.status` (unlike `v_listings_public`), and uses a **`LEFT JOIN public.listings`** (not INNER). Because the view is `SECURITY INVOKER`, the listings join runs under the caller's RLS, which exposes only `approved`+in-window rows to a non-owner. A favorited listing that has left `approved` (sold/rented/rejected/paused/expired/deleted) is therefore RLS-hidden — the LEFT JOIN keeps the favorite row (FR-025: never silently dropped) with **NULL listing columns** (`title`, `primary_amount`, `primary_currency`, `main_image_path`, governorate/city names all NULL) and `is_available=false` (via `COALESCE(..., false)`).
+
+**Downstream NULL-tolerance contract (Phase 5 + Phase 6)**: `FavoriteListingDto.fromJson` MUST null-coalesce the listing fields (e.g., `title ?? ''`, nullable `primaryAmount`/`mainImagePath`) for `is_available=false` rows; `FavoritesPage` renders such rows as the localized "no longer available" card (badge + heart, recognizable details may be blank) and still routes to the Phase 13 details page on tap (Q4=A). This is the accepted trade-off of the SECURITY-INVOKER choice (chosen over a SECURITY DEFINER read to preserve the Phase 16 anti-`security_definer_view` hardening posture).
 
 **Grant**: `SELECT TO authenticated`. NOT to `anon`.
 

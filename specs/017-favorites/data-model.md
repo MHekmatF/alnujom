@@ -107,10 +107,18 @@ SELECT
   g.display_name->>'en'                     AS governorate_name_en,
   c.display_name->>'ar'                     AS city_name_ar,
   c.display_name->>'en'                     AS city_name_en,
-  (l.status = 'approved'
-    AND (l.expires_at IS NULL OR l.expires_at > now())) AS is_available
+  COALESCE(
+    l.status = 'approved'
+      AND (l.expires_at IS NULL OR l.expires_at > now()),
+    false
+  ) AS is_available
 FROM public.favorites f
-JOIN public.listings l ON l.id = f.listing_id
+-- LEFT JOIN: SECURITY INVOKER means the listings join runs under the caller's
+-- RLS (non-owner sees only approved+in-window). Unavailable favorites are
+-- RLS-hidden, so a LEFT JOIN keeps the favorite row (FR-025) with NULL listing
+-- columns + is_available=false. Consumers (FavoriteListingDto, FavoritesPage)
+-- MUST null-tolerate title/price/image/location for is_available=false rows.
+LEFT JOIN public.listings l ON l.id = f.listing_id
 LEFT JOIN LATERAL (
   SELECT amount, currency_code
   FROM public.listing_prices

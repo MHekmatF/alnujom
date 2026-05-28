@@ -20,10 +20,20 @@ SELECT
   g.display_name->>'en'                     AS governorate_name_en,
   c.display_name->>'ar'                     AS city_name_ar,
   c.display_name->>'en'                     AS city_name_en,
-  (l.status = 'approved'
-    AND (l.expires_at IS NULL OR l.expires_at > now())) AS is_available
+  COALESCE(
+    l.status = 'approved'
+      AND (l.expires_at IS NULL OR l.expires_at > now()),
+    false
+  ) AS is_available
 FROM public.favorites f
-JOIN public.listings l ON l.id = f.listing_id
+-- LEFT JOIN (not INNER): this view is SECURITY INVOKER, so the join to
+-- public.listings runs under the caller's RLS, which exposes only
+-- approved+in-window rows to a non-owner. A favorited listing that has since
+-- left 'approved' (sold/rented/rejected/paused/expired/deleted) is therefore
+-- RLS-hidden — a LEFT JOIN keeps the favorite row (FR-025: unavailable
+-- favorites MUST NOT be silently dropped) with NULL listing columns and
+-- is_available=false. Consumers must null-tolerate the listing fields.
+LEFT JOIN public.listings l ON l.id = f.listing_id
 LEFT JOIN LATERAL (
   SELECT amount, currency_code
   FROM public.listing_prices
