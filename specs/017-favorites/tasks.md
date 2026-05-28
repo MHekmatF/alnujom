@@ -128,9 +128,9 @@ description: "Phase 17 — Favorites task list"
 
 **Goal**: After Phase 7, `l10n.favorites_page_title`, `favorite_sign_in_prompt`, etc. resolve in both `ar` and `en`.
 
-- [ ] T036 [P] Add the ~8 keys to `lib/l10n/app_en.arb` per plan.md Sub-Phase G: `favorite_heart_label`, `favorite_unsave_label`, `favorite_sign_in_prompt`, `favorites_page_title`, `favorites_empty_state`, `favorite_unavailable_indicator`, `profile_favorites_tile`, `favorite_toggle_failed` (English values).
-- [ ] T037 [P] Add the same ~8 keys to `lib/l10n/app_ar.arb` with Syrian-friendly Arabic values (e.g., `favorites_page_title` = "المفضلة", `favorite_sign_in_prompt` = "سجّل الدخول لحفظ العقار").
-- [ ] T038 Run `flutter gen-l10n` to regenerate `lib/l10n/app_localizations.dart` + `app_localizations_ar.dart` + `app_localizations_en.dart`. Confirm `flutter analyze` clean.
+- [X] T036 [P] Add the ~8 keys to `lib/l10n/app_en.arb` per plan.md Sub-Phase G: `favorite_heart_label`, `favorite_unsave_label`, `favorite_sign_in_prompt`, `favorites_page_title`, `favorites_empty_state`, `favorite_unavailable_indicator`, `profile_favorites_tile`, `favorite_toggle_failed` (English values).
+- [X] T037 [P] Add the same ~8 keys to `lib/l10n/app_ar.arb` with Syrian-friendly Arabic values (e.g., `favorites_page_title` = "المفضلة", `favorite_sign_in_prompt` = "سجّل الدخول لحفظ العقار").
+- [X] T038 Run `flutter gen-l10n` to regenerate `lib/l10n/app_localizations.dart` + `app_localizations_ar.dart` + `app_localizations_en.dart`. Confirm `flutter analyze` clean.
 
 **Phase Checkpoint**: Both ARBs carry all 8 keys (ar + en); generated getters compile.
 

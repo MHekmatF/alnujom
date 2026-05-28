@@ -3082,4 +3082,44 @@ final class _DebugAppLocalizations extends AppLocalizations {
     'home_inquiries_action_tooltip',
     (loc) => loc.home_inquiries_action_tooltip,
   );
+
+  // ── Phase 17 Favorites ────────────────────────────────────────────────────
+
+  @override
+  String get favorite_heart_label =>
+      _resolve('favorite_heart_label', (loc) => loc.favorite_heart_label);
+
+  @override
+  String get favorite_unsave_label =>
+      _resolve('favorite_unsave_label', (loc) => loc.favorite_unsave_label);
+
+  @override
+  String get favorite_sign_in_prompt => _resolve(
+    'favorite_sign_in_prompt',
+    (loc) => loc.favorite_sign_in_prompt,
+  );
+
+  @override
+  String get favorites_page_title =>
+      _resolve('favorites_page_title', (loc) => loc.favorites_page_title);
+
+  @override
+  String get favorites_empty_state =>
+      _resolve('favorites_empty_state', (loc) => loc.favorites_empty_state);
+
+  @override
+  String get favorite_unavailable_indicator => _resolve(
+    'favorite_unavailable_indicator',
+    (loc) => loc.favorite_unavailable_indicator,
+  );
+
+  @override
+  String get profile_favorites_tile =>
+      _resolve('profile_favorites_tile', (loc) => loc.profile_favorites_tile);
+
+  @override
+  String get favorite_toggle_failed => _resolve(
+    'favorite_toggle_failed',
+    (loc) => loc.favorite_toggle_failed,
+  );
 }
