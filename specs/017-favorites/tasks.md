@@ -27,12 +27,12 @@ description: "Phase 17 — Favorites task list"
 
 **Goal**: After Phase 1, `flutter build` is green and navigating to `/favorites` (signed-in) shows a stub page; an anonymous deep-link to `/favorites` redirects to `/login`.
 
-- [ ] T001 [US2] In `lib/core/routing/app_router.dart`, add `static const favorites = '/favorites';` to `AppRoutes` (after `static const inquiryDetail = '/inquiries/:id';`) and `static const favorites = 'favorites';` to `AppRouteNames`.
-- [ ] T002 [P] Create the `lib/features/favorites/` skeleton directories: `data/datasources/`, `data/models/`, `data/repositories/`, `domain/entities/`, `domain/repositories/`, `domain/usecases/`, `presentation/bloc/`, `presentation/pages/`, `presentation/widgets/` (each with a placeholder file so it commits).
-- [ ] T003 [P] [US1] Create `lib/features/favorites/domain/entities/favorite.dart` per data-model.md §6 — `Favorite extends Equatable { final String listingId; final DateTime createdAt; }`. Import only `package:equatable/equatable.dart`.
-- [ ] T004 [P] [US2] Create stub `lib/features/favorites/presentation/pages/favorites_page.dart` — `class FavoritesPage extends StatelessWidget { const FavoritesPage({super.key}); }` rendering an empty `Scaffold` + `AppBar` (placeholder title, replaced in Phase 7).
-- [ ] T005 [US2] In `lib/core/routing/app_router.dart`, register a `GoRoute` at `AppRoutes.favorites` → `const FavoritesPage()` with a `redirect:` returning `AppRoutes.login` when the resolved `AuthBloc.state is Unauthenticated` and `null` otherwise (per contracts/phase17-favorites-page-and-entry-points.md §Route + R-115). Add the `FavoritesPage` import.
-- [ ] T006 Run `flutter build apk --debug --dart-define-from-file=.env.json` to confirm the app builds. Flip checkboxes T001–T006 in the same commit.
+- [X] T001 [US2] In `lib/core/routing/app_router.dart`, add `static const favorites = '/favorites';` to `AppRoutes` (after `static const inquiryDetail = '/inquiries/:id';`) and `static const favorites = 'favorites';` to `AppRouteNames`.
+- [X] T002 [P] Create the `lib/features/favorites/` skeleton directories: `data/datasources/`, `data/models/`, `data/repositories/`, `domain/entities/`, `domain/repositories/`, `domain/usecases/`, `presentation/bloc/`, `presentation/pages/`, `presentation/widgets/` (each with a placeholder file so it commits).
+- [X] T003 [P] [US1] Create `lib/features/favorites/domain/entities/favorite.dart` per data-model.md §6 — `Favorite extends Equatable { final String listingId; final DateTime createdAt; }`. Import only `package:equatable/equatable.dart`.
+- [X] T004 [P] [US2] Create stub `lib/features/favorites/presentation/pages/favorites_page.dart` — `class FavoritesPage extends StatelessWidget { const FavoritesPage({super.key}); }` rendering an empty `Scaffold` + `AppBar` (placeholder title, replaced in Phase 7).
+- [X] T005 [US2] In `lib/core/routing/app_router.dart`, register a `GoRoute` at `AppRoutes.favorites` → `const FavoritesPage()` with a `redirect:` returning `AppRoutes.login` when the resolved `AuthBloc.state is Unauthenticated` and `null` otherwise (per contracts/phase17-favorites-page-and-entry-points.md §Route + R-115). Add the `FavoritesPage` import.
+- [X] T006 Run `flutter build apk --debug --dart-define-from-file=.env.json` to confirm the app builds. Flip checkboxes T001–T006 in the same commit.
 
 **Phase Checkpoint**: App launches; signed-in navigation to `/favorites` shows the stub; anonymous deep-link to `/favorites` redirects to `/login`. Build green.
 
