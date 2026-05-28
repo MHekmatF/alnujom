@@ -15,6 +15,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/inquiry.dart';
@@ -191,7 +192,7 @@ class _AdminInboxBody extends StatelessWidget {
                     }
                     if (index >= inquiries.length) {
                       return const Padding(
-                        padding: EdgeInsets.all(16),
+                        padding: EdgeInsets.all(AppSpacing.lg),
                         child: Center(child: CircularProgressIndicator()),
                       );
                     }
@@ -221,11 +222,14 @@ class _AdminInquiryRowTile extends StatelessWidget {
         : inquiry.senderName;
 
     return Card(
-      margin: const EdgeInsetsDirectional.symmetric(horizontal: 8, vertical: 4),
+      margin: const EdgeInsetsDirectional.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
       child: InkWell(
         onTap: () => context.push(AppRoutes.inquiryDetailFor(inquiry.id)),
         child: Padding(
-          padding: const EdgeInsetsDirectional.all(12),
+          padding: const EdgeInsetsDirectional.all(AppSpacing.md),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

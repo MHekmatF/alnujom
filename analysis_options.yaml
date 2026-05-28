@@ -7,6 +7,14 @@ l10n_lint_exempt:
   - test/goldens/**
   - lib/features/locations/presentation/pages/location_picker_smoke_test_page.dart
   - lib/features/currencies/presentation/pages/money_formatter_showcase_page.dart
+  # Admin widget — dynamic data interpolations (gov/city/publisher name); not translatable copy.
+  - lib/features/admin/listing_review/presentation/widgets/pending_queue_card.dart
+  # Numeric ordering badge ('$ordering') — pure data, not translatable copy.
+  - lib/features/listing_form/presentation/widgets/media_thumbnail.dart
+  # Timestamp + admin-team label composite ('${timestamp} • ${label}') — dynamic data.
+  - lib/features/publisher_dashboard/presentation/pages/listing_moderation_history_page.dart
+  # Currency code+symbol display ('${c.code} ${c.symbol}') — pure data, not translatable copy.
+  - lib/features/search/presentation/widgets/search_filter_sheet.dart
 
 analyzer:
   errors:

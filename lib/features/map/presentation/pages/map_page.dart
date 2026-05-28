@@ -228,7 +228,9 @@ class _LoadedBodyState extends State<_LoadedBody> {
                 centerMarkerOnClick: true,
                 showPolygon: false,
                 size: const Size(40, 40),
-                padding: const EdgeInsets.all(40),
+                padding: const EdgeInsets.all(
+                  AppSpacing.xxl + AppSpacing.sm,
+                ), // 32+8=40
                 maxZoom: 18,
                 markers: state.markers
                     .map((m) => _buildMarker(context, m))

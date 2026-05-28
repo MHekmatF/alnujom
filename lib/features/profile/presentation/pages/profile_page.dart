@@ -7,6 +7,7 @@ import '../../../../core/localization/locale_cubit.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/account_status.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
@@ -141,7 +142,9 @@ class _ProfileView extends StatelessWidget {
                   leading: Icon(Icons.logout, color: theme.colorScheme.error),
                   title: Text(
                     l10n.sign_out,
-                    style: TextStyle(color: theme.colorScheme.error),
+                    style: AppTextStyles.of(
+                      context,
+                    ).bodyLarge.copyWith(color: theme.colorScheme.error),
                   ),
                   onTap: () {
                     // Dispatch logout first so the AuthBloc transitions to

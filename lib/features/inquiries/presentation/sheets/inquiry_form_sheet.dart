@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
@@ -191,7 +192,9 @@ class _SheetBody extends StatelessWidget {
                   margin: const EdgeInsets.only(bottom: AppSpacing.lg),
                   decoration: BoxDecoration(
                     color: colorScheme.outlineVariant,
-                    borderRadius: BorderRadius.circular(2),
+                    borderRadius: BorderRadius.circular(
+                      AppRadii.pill,
+                    ), // drag-handle bar — fully rounded
                   ),
                 ),
               ),
@@ -238,11 +241,18 @@ class _SheetBody extends StatelessWidget {
                 decoration: InputDecoration(
                   labelText: l10n.inquiry_form_message_label,
                   hintText: l10n.inquiry_form_message_placeholder,
-                  counterText: '',
+                  // Custom counter rendered below — suppress the built-in one.
                   errorText: errors.containsKey('message')
                       ? _resolveMessageError(l10n, errors['message']!)
                       : null,
                 ),
+                buildCounter:
+                    (
+                      _, {
+                      required currentLength,
+                      required isFocused,
+                      maxLength,
+                    }) => null,
               ),
               // Conditional counter — visible at ≥ 1600 chars (R-108).
               if (showCounter)

@@ -26,6 +26,8 @@
 // FR-015c invariant: NO event handler ever sends the device's coordinates
 // to Supabase. The grep gate in quickstart.md §8c verifies this.
 import 'package:flutter/widgets.dart' show EdgeInsets;
+
+import '../../../../core/theme/spacing.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart' show CameraFit, LatLngBounds;
 import 'package:injectable/injectable.dart';
@@ -65,7 +67,7 @@ CameraFit _fitToMarkers(List<MapMarker> markers) {
     coordinates: markers
         .map((m) => LatLng(m.position.latitude, m.position.longitude))
         .toList(growable: false),
-    padding: const EdgeInsets.all(40),
+    padding: const EdgeInsets.all(AppSpacing.xxl + AppSpacing.sm), // 32+8=40
   );
 }
 

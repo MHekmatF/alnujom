@@ -29,6 +29,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
 import '../../../../features/map/domain/entities/map_entry_context.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -129,7 +131,9 @@ class _SearchBarState extends State<_SearchBar> {
         decoration: InputDecoration(
           hintText: l10n.search_placeholder,
           border: InputBorder.none,
-          contentPadding: const EdgeInsetsDirectional.symmetric(horizontal: 8),
+          contentPadding: const EdgeInsetsDirectional.symmetric(
+            horizontal: AppSpacing.sm,
+          ),
           suffixIcon: BlocBuilder<SearchBloc, SearchState>(
             buildWhen: (p, c) =>
                 (p.filters.query != null) != (c.filters.query != null),
@@ -178,8 +182,8 @@ class _SortAndFiltersRow extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsetsDirectional.symmetric(
-        horizontal: 12,
-        vertical: 4,
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.xs,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -226,7 +230,9 @@ class _SortAndFiltersRow extends StatelessWidget {
                     icon: Icon(Icons.tune, color: color),
                     label: Text(
                       l10n.search_filters_button,
-                      style: TextStyle(color: color),
+                      style: AppTextStyles.of(
+                        context,
+                      ).labelLarge.copyWith(color: color),
                     ),
                   );
                 },
@@ -319,7 +325,7 @@ class _ErrorView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsetsDirectional.all(24),
+        padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -343,7 +349,7 @@ class _EmptyView extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
-        padding: const EdgeInsetsDirectional.all(24),
+        padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -365,7 +371,9 @@ class _EmptyView extends StatelessWidget {
             ),
             if (state.isArabicQuery)
               Padding(
-                padding: const EdgeInsetsDirectional.symmetric(vertical: 8),
+                padding: const EdgeInsetsDirectional.symmetric(
+                  vertical: AppSpacing.sm,
+                ),
                 child: Text(
                   l10n.search_arabic_hint(
                     _suggestionFromQuery(state.filters.query!),
@@ -396,8 +404,8 @@ class _ResultsListView extends StatelessWidget {
 
     return ListView.builder(
       padding: const EdgeInsetsDirectional.symmetric(
-        horizontal: 12,
-        vertical: 8,
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
       ),
       itemCount: state.results.length + pagingTrail + hintTrail,
       itemBuilder: (context, index) {
@@ -405,10 +413,10 @@ class _ResultsListView extends StatelessWidget {
           return Container(
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
             padding: const EdgeInsetsDirectional.symmetric(
-              horizontal: 16,
-              vertical: 8,
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.sm,
             ),
-            margin: const EdgeInsetsDirectional.only(bottom: 8),
+            margin: const EdgeInsetsDirectional.only(bottom: AppSpacing.sm),
             child: Text(
               l10n.search_arabic_hint(
                 _suggestionFromQuery(state.filters.query!),
@@ -449,7 +457,7 @@ class _PaginationSentinelState extends State<_PaginationSentinel> {
   Widget build(BuildContext context) {
     return const Center(
       child: Padding(
-        padding: EdgeInsetsDirectional.all(16),
+        padding: EdgeInsetsDirectional.all(AppSpacing.lg),
         child: CircularProgressIndicator(),
       ),
     );

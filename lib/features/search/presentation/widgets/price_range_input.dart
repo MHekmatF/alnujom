@@ -1,6 +1,7 @@
 // lib/features/search/presentation/widgets/price_range_input.dart
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
 
 class PriceRangeInput extends StatelessWidget {
@@ -23,7 +24,7 @@ class PriceRangeInput extends StatelessWidget {
       children: [
         Expanded(
           child: Padding(
-            padding: const EdgeInsetsDirectional.only(end: 8),
+            padding: const EdgeInsetsDirectional.only(end: AppSpacing.sm),
             child: TextFormField(
               controller: minController,
               keyboardType: const TextInputType.numberWithOptions(
@@ -37,7 +38,7 @@ class PriceRangeInput extends StatelessWidget {
         ),
         Expanded(
           child: Padding(
-            padding: const EdgeInsetsDirectional.only(start: 8),
+            padding: const EdgeInsetsDirectional.only(start: AppSpacing.sm),
             child: TextFormField(
               controller: maxController,
               keyboardType: const TextInputType.numberWithOptions(

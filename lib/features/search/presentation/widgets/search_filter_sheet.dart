@@ -2,6 +2,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/theme/radii.dart';
+import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../currencies/domain/entities/currency.dart';
 import '../../../currencies/domain/repositories/currencies_repository.dart';
@@ -183,7 +185,7 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
         child: SingleChildScrollView(
           controller: scrollController,
           child: Padding(
-            padding: const EdgeInsetsDirectional.all(16),
+            padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -216,13 +218,15 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
   Widget _buildHandle() {
     return Center(
       child: Padding(
-        padding: const EdgeInsetsDirectional.only(bottom: 12),
+        padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.md),
         child: Container(
           width: 40,
           height: 4,
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.outlineVariant,
-            borderRadius: BorderRadius.circular(2),
+            borderRadius: BorderRadius.circular(
+              AppRadii.pill,
+            ), // drag-handle bar — fully rounded
           ),
         ),
       ),
@@ -458,7 +462,9 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                   : null,
             ),
             Padding(
-              padding: const EdgeInsetsDirectional.symmetric(horizontal: 16),
+              padding: const EdgeInsetsDirectional.symmetric(
+                horizontal: AppSpacing.lg,
+              ),
               child: Text(
                 _rooms?.toString() ?? '—',
                 style: Theme.of(context).textTheme.bodyLarge,
@@ -516,7 +522,9 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                   : null,
             ),
             Padding(
-              padding: const EdgeInsetsDirectional.symmetric(horizontal: 16),
+              padding: const EdgeInsetsDirectional.symmetric(
+                horizontal: AppSpacing.lg,
+              ),
               child: Text(
                 _bathrooms?.toString() ?? '—',
                 style: Theme.of(context).textTheme.bodyLarge,
@@ -549,7 +557,7 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
           children: [
             Expanded(
               child: Padding(
-                padding: const EdgeInsetsDirectional.only(end: 8),
+                padding: const EdgeInsetsDirectional.only(end: AppSpacing.sm),
                 child: TextFormField(
                   controller: _areaSizeMinController,
                   keyboardType: const TextInputType.numberWithOptions(
@@ -563,7 +571,7 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsetsDirectional.only(start: 8),
+                padding: const EdgeInsetsDirectional.only(start: AppSpacing.sm),
                 child: TextFormField(
                   controller: _areaSizeMaxController,
                   keyboardType: const TextInputType.numberWithOptions(
