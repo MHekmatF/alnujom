@@ -90,16 +90,16 @@ description: "Phase 17 — Favorites task list"
 
 **Goal**: After Phase 5, the repository can add/remove a favorite, load the user's favorited ids, and page the FavoritesPage list — all behind the domain interface, Supabase confined to `data/`.
 
-- [ ] T020 [P] [US2] Create `lib/features/favorites/domain/entities/favorite_listing.dart` per data-model.md §6 — `FavoriteListing extends Equatable` with `id`, `title`, `propertyType` (PropertyType, Phase 10), `purpose` (ListingPurpose, Phase 10), `primaryAmount`, `primaryCurrency`, `mainImagePath` (String?), `governorateNameAr/_En`, `cityNameAr/_En`, `isAvailable` (bool), `favoritedAt` (DateTime).
-- [ ] T021 [P] [US1] Create `lib/features/favorites/domain/repositories/favorites_repository.dart` per data-model.md §6 — `abstract interface class FavoritesRepository` with `addFavorite`, `removeFavorite`, `loadFavoriteIds`, `loadFavorites({cursor, limit})`, all returning `Result<…, Failure>` from `lib/core/errors/`.
-- [ ] T022 [P] [US1] Create `lib/features/favorites/domain/usecases/add_favorite.dart` — single-method use case wrapping `FavoritesRepository.addFavorite`. `@injectable`.
-- [ ] T023 [P] [US1] Create `lib/features/favorites/domain/usecases/remove_favorite.dart` — wraps `removeFavorite`. `@injectable`.
-- [ ] T024 [P] [US1] Create `lib/features/favorites/domain/usecases/load_favorite_ids.dart` — wraps `loadFavoriteIds`. `@injectable`.
-- [ ] T025 [P] [US2] Create `lib/features/favorites/domain/usecases/load_favorites.dart` — wraps `loadFavorites`. `@injectable`.
-- [ ] T026 [P] [US2] Create `lib/features/favorites/data/models/favorite_listing_dto.dart` mirroring the `v_favorites` row shape (`fromJson` + `toEntity()`).
-- [ ] T027 [US1,US2] Create `lib/features/favorites/data/datasources/supabase_favorites_datasource.dart` per plan.md Sub-Phase E step 5: `addFavorite` → `rpc('add_favorite', {'p_listing_id': …})`; `removeFavorite` → `from('favorites').delete().eq('listing_id', …)`; `loadFavoriteIds` → `from('favorites').select('listing_id')`; `loadFavorites` → `from('v_favorites').select().order('favorited_at', ascending: false)` with cursor pagination on `favorited_at`. `@injectable`.
-- [ ] T028 [US1,US2] Create `lib/features/favorites/data/repositories/favorites_repository_impl.dart` implementing `FavoritesRepository`, mapping DTOs → entities + datasource errors → `Failure`. `@Injectable(as: FavoritesRepository)`.
-- [ ] T029 [US1,US2] Run `flutter pub run build_runner build --delete-conflicting-outputs` to regenerate `lib/core/di/injection.config.dart` (picks up the 4 use cases + datasource + repository). Confirm `flutter analyze` is clean.
+- [X] T020 [P] [US2] Create `lib/features/favorites/domain/entities/favorite_listing.dart` per data-model.md §6 — `FavoriteListing extends Equatable` with `id`, `title`, `propertyType` (PropertyType, Phase 10), `purpose` (ListingPurpose, Phase 10), `primaryAmount`, `primaryCurrency`, `mainImagePath` (String?), `governorateNameAr/_En`, `cityNameAr/_En`, `isAvailable` (bool), `favoritedAt` (DateTime).
+- [X] T021 [P] [US1] Create `lib/features/favorites/domain/repositories/favorites_repository.dart` per data-model.md §6 — `abstract interface class FavoritesRepository` with `addFavorite`, `removeFavorite`, `loadFavoriteIds`, `loadFavorites({cursor, limit})`, all returning `Result<…, Failure>` from `lib/core/errors/`.
+- [X] T022 [P] [US1] Create `lib/features/favorites/domain/usecases/add_favorite.dart` — single-method use case wrapping `FavoritesRepository.addFavorite`. `@injectable`.
+- [X] T023 [P] [US1] Create `lib/features/favorites/domain/usecases/remove_favorite.dart` — wraps `removeFavorite`. `@injectable`.
+- [X] T024 [P] [US1] Create `lib/features/favorites/domain/usecases/load_favorite_ids.dart` — wraps `loadFavoriteIds`. `@injectable`.
+- [X] T025 [P] [US2] Create `lib/features/favorites/domain/usecases/load_favorites.dart` — wraps `loadFavorites`. `@injectable`.
+- [X] T026 [P] [US2] Create `lib/features/favorites/data/models/favorite_listing_dto.dart` mirroring the `v_favorites` row shape (`fromJson` + `toEntity()`).
+- [X] T027 [US1,US2] Create `lib/features/favorites/data/datasources/supabase_favorites_datasource.dart` per plan.md Sub-Phase E step 5: `addFavorite` → `rpc('add_favorite', {'p_listing_id': …})`; `removeFavorite` → `from('favorites').delete().eq('listing_id', …)`; `loadFavoriteIds` → `from('favorites').select('listing_id')`; `loadFavorites` → `from('v_favorites').select().order('favorited_at', ascending: false)` with cursor pagination on `favorited_at`. `@injectable`.
+- [X] T028 [US1,US2] Create `lib/features/favorites/data/repositories/favorites_repository_impl.dart` implementing `FavoritesRepository`, mapping DTOs → entities + datasource errors → `Failure`. `@Injectable(as: FavoritesRepository)`.
+- [X] T029 [US1,US2] Run `flutter pub run build_runner build --delete-conflicting-outputs` to regenerate `lib/core/di/injection.config.dart` (picks up the 4 use cases + datasource + repository). Confirm `flutter analyze` is clean.
 
 **Phase Checkpoint**: `flutter analyze` clean; DI resolves `FavoritesRepository` + the 4 use cases; no `package:supabase_flutter` import under `domain/`.
 
