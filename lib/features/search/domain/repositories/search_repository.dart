@@ -14,8 +14,9 @@ import '../entities/sort_order.dart';
 ///   next page driven by passing the appropriate `SearchCursor`.
 /// - `FailureResult(NetworkFailure(...))` → transport error.
 ///
-/// No `package:supabase_flutter` import — the concrete implementation
-/// (`SearchRepositoryImpl`) in the data layer is the sole Supabase consumer.
+/// No Supabase SDK import in this domain interface — the concrete
+/// implementation (`SearchRepositoryImpl`) in the data layer is the sole
+/// Supabase consumer (Constitution IX).
 abstract class SearchRepository {
   Future<Result<List<SearchResultItem>>> search({
     required FilterState filters,
