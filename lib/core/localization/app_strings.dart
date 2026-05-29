@@ -3250,6 +3250,10 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('reports_queue_title', (loc) => loc.reports_queue_title);
 
   @override
+  String get reports_queue_empty =>
+      _resolve('reports_queue_empty', (loc) => loc.reports_queue_empty);
+
+  @override
   String get report_filter_status_label => _resolve(
     'report_filter_status_label',
     (loc) => loc.report_filter_status_label,
