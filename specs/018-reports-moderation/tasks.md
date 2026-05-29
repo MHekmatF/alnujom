@@ -83,14 +83,14 @@
 
 **Goal**: the `ReportsRepository` + datasource the reporter UI consumes.
 
-- [ ] T022 [US1] Create `lib/features/reports/domain/repositories/reports_repository.dart` — `submitReport`, `loadMyReports`, `loadMyReportForListing` returning `Result<T, Failure>`.
-- [ ] T023 [P] [US1] Create `lib/features/reports/domain/usecases/submit_report.dart`.
-- [ ] T024 [P] [US3] Create `lib/features/reports/domain/usecases/load_my_reports.dart`.
-- [ ] T025 [P] [US3] Create `lib/features/reports/domain/usecases/load_my_report_for_listing.dart`.
-- [ ] T026 [US1] Create `lib/features/reports/data/models/report_dto.dart` mirroring the `v_reports` row shape; `fromJson` + `toEntity()`.
-- [ ] T027 [US1] Create `lib/features/reports/data/datasources/supabase_reports_datasource.dart`: `submitReport` → `rpc('submit_report', …)`; `loadMyReports` → `from('v_reports').select().order('created_at',ascending:false)` cursor; `loadMyReportForListing` → `from('v_reports').select().eq('listing_id',…).limit(1)`.
-- [ ] T028 [US1] Create `lib/features/reports/data/repositories/reports_repository_impl.dart` mapping RPC error codes (`auth_required`, `already_reported`, `listing_not_approved`, …) to `Failure`s.
-- [ ] T029 Register the 3 use cases + repository + datasource with `@injectable`; run `build_runner` to regenerate `lib/core/di/injection.config.dart`.
+- [X] T022 [US1] Create `lib/features/reports/domain/repositories/reports_repository.dart` — `submitReport`, `loadMyReports`, `loadMyReportForListing` returning `Result<T, Failure>`.
+- [X] T023 [P] [US1] Create `lib/features/reports/domain/usecases/submit_report.dart`.
+- [X] T024 [P] [US3] Create `lib/features/reports/domain/usecases/load_my_reports.dart`.
+- [X] T025 [P] [US3] Create `lib/features/reports/domain/usecases/load_my_report_for_listing.dart`.
+- [X] T026 [US1] Create `lib/features/reports/data/models/report_dto.dart` mirroring the `v_reports` row shape; `fromJson` + `toEntity()`.
+- [X] T027 [US1] Create `lib/features/reports/data/datasources/supabase_reports_datasource.dart`: `submitReport` → `rpc('submit_report', …)`; `loadMyReports` → `from('v_reports').select().order('created_at',ascending:false)` cursor; `loadMyReportForListing` → `from('v_reports').select().eq('listing_id',…).limit(1)`.
+- [X] T028 [US1] Create `lib/features/reports/data/repositories/reports_repository_impl.dart` mapping RPC error codes (`auth_required`, `already_reported`, `listing_not_approved`, …) to `Failure`s.
+- [X] T029 Register the 3 use cases + repository + datasource with `@injectable`; run `build_runner` to regenerate `lib/core/di/injection.config.dart`.
 
 **Checkpoint**: `flutter analyze` clean; no `package:supabase_flutter` import under `lib/features/reports/domain/`.
 

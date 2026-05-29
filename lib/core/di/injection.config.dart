@@ -270,6 +270,16 @@ import '../../features/publisher_dashboard/presentation/bloc/moderation_history_
     as _i711;
 import '../../features/publisher_dashboard/presentation/bloc/my_listings_bloc.dart'
     as _i417;
+import '../../features/reports/data/datasources/supabase_reports_datasource.dart'
+    as _i231;
+import '../../features/reports/data/repositories/reports_repository_impl.dart'
+    as _i227;
+import '../../features/reports/domain/repositories/reports_repository.dart'
+    as _i808;
+import '../../features/reports/domain/usecases/load_my_report_for_listing.dart'
+    as _i682;
+import '../../features/reports/domain/usecases/load_my_reports.dart' as _i991;
+import '../../features/reports/domain/usecases/submit_report.dart' as _i684;
 import '../../features/search/data/datasources/supabase_search_datasource.dart'
     as _i713;
 import '../../features/search/data/repositories/search_repository_impl.dart'
@@ -384,27 +394,30 @@ _i174.GetIt $initGetIt(
   gh.factory<_i311.SupabaseCurrenciesDatasource>(
     () => _i311.SupabaseCurrenciesDatasource(gh<_i454.SupabaseClient>()),
   );
+  gh.factory<_i8.SupabaseFavoritesDatasource>(
+    () => _i8.SupabaseFavoritesDatasource(gh<_i454.SupabaseClient>()),
+  );
   gh.factory<_i732.SupabaseHomeFeedDatasource>(
     () => _i732.SupabaseHomeFeedDatasource(gh<_i454.SupabaseClient>()),
   );
+  gh.factory<_i1043.SupabaseInquiriesDatasource>(
+    () => _i1043.SupabaseInquiriesDatasource(gh<_i454.SupabaseClient>()),
+  );
   gh.factory<_i1006.SupabaseListingDetailsDatasource>(
     () => _i1006.SupabaseListingDetailsDatasource(gh<_i454.SupabaseClient>()),
+  );
+  gh.factory<_i245.SupabaseMapDatasource>(
+    () => _i245.SupabaseMapDatasource(gh<_i454.SupabaseClient>()),
   );
   gh.factory<_i333.SupabasePublisherDashboardDatasource>(
     () =>
         _i333.SupabasePublisherDashboardDatasource(gh<_i454.SupabaseClient>()),
   );
+  gh.factory<_i231.SupabaseReportsDatasource>(
+    () => _i231.SupabaseReportsDatasource(gh<_i454.SupabaseClient>()),
+  );
   gh.factory<_i713.SupabaseSearchDatasource>(
     () => _i713.SupabaseSearchDatasource(gh<_i454.SupabaseClient>()),
-  );
-  gh.factory<_i245.SupabaseMapDatasource>(
-    () => _i245.SupabaseMapDatasource(gh<_i454.SupabaseClient>()),
-  );
-  gh.factory<_i1043.SupabaseInquiriesDatasource>(
-    () => _i1043.SupabaseInquiriesDatasource(gh<_i454.SupabaseClient>()),
-  );
-  gh.factory<_i8.SupabaseFavoritesDatasource>(
-    () => _i8.SupabaseFavoritesDatasource(gh<_i454.SupabaseClient>()),
   );
   gh.factory<_i272.InquiryRepository>(
     () => _i614.InquiryRepositoryImpl(gh<_i1043.SupabaseInquiriesDatasource>()),
@@ -479,6 +492,9 @@ _i174.GetIt $initGetIt(
       gh<_i354.AppLogger>(),
     ),
     dispose: (i) => i.dispose(),
+  );
+  gh.factory<_i808.ReportsRepository>(
+    () => _i227.ReportsRepositoryImpl(gh<_i231.SupabaseReportsDatasource>()),
   );
   gh.lazySingleton<_i704.LocationsRepository>(
     () => _i178.LocationsRepositoryImpl(
@@ -577,6 +593,9 @@ _i174.GetIt $initGetIt(
       gh<_i354.AppLogger>(),
     ),
   );
+  gh.factory<_i704.CheckOwnsApprovedListing>(
+    () => _i704.CheckOwnsApprovedListing(gh<_i272.InquiryRepository>()),
+  );
   gh.factory<_i868.LoadInboxUnreadCount>(
     () => _i868.LoadInboxUnreadCount(gh<_i272.InquiryRepository>()),
   );
@@ -591,9 +610,6 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i684.UpdateInquiryStatus>(
     () => _i684.UpdateInquiryStatus(gh<_i272.InquiryRepository>()),
-  );
-  gh.factory<_i704.CheckOwnsApprovedListing>(
-    () => _i704.CheckOwnsApprovedListing(gh<_i272.InquiryRepository>()),
   );
   gh.factory<_i891.ListMyListings>(
     () => _i891.ListMyListings(gh<_i754.PublisherDashboardRepository>()),
@@ -856,6 +872,15 @@ _i174.GetIt $initGetIt(
       gh<_i684.UpdateInquiryStatus>(),
       gh<_i74.InquiriesUnreadCubit>(),
     ),
+  );
+  gh.factory<_i991.LoadMyReports>(
+    () => _i991.LoadMyReports(gh<_i808.ReportsRepository>()),
+  );
+  gh.factory<_i682.LoadMyReportForListing>(
+    () => _i682.LoadMyReportForListing(gh<_i808.ReportsRepository>()),
+  );
+  gh.factory<_i684.SubmitReport>(
+    () => _i684.SubmitReport(gh<_i808.ReportsRepository>()),
   );
   gh.factory<_i437.MapBloc>(() => _i437.MapBloc(gh<_i842.LoadMapMarkers>()));
   gh.factory<_i885.RoleEditorBloc>(
