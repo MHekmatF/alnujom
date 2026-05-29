@@ -123,6 +123,20 @@ String? requireListingReviewRedirect(
   return null;
 }
 
+/// Phase 18 — gate for `/admin/reports` route. Requires `reports.manage`
+/// permission; redirects to `/admin?denied=reports` otherwise.
+/// Mirrors [requireListingReviewRedirect] (lines 112–124 above).
+String? requireReportsManageRedirect(
+  BuildContext context,
+  GoRouterState state,
+) {
+  final checker = getIt<PermissionChecker>();
+  if (!checker.has(PermissionKeys.reportsManage)) {
+    return '/admin?denied=reports';
+  }
+  return null;
+}
+
 /// Phase 12 / US6 — login-only gate for the publisher moderation history page.
 /// Owner-only access is enforced server-side; no publisher-status check needed.
 String? requirePublisherLoginRedirect(
