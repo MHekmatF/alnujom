@@ -17,6 +17,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../favorites/presentation/widgets/favorite_heart_button.dart';
 import '../../domain/entities/search_result_item.dart';
 
 class SearchResultCard extends StatelessWidget {
@@ -55,9 +56,18 @@ class SearchResultCard extends StatelessWidget {
             children: [
               SizedBox(
                 width: 116,
-                child: _CardImage(
-                  imageUrl: item.mainImagePath,
-                  fallbackLabel: l10n.image_unavailable,
+                child: Stack(
+                  children: [
+                    _CardImage(
+                      imageUrl: item.mainImagePath,
+                      fallbackLabel: l10n.image_unavailable,
+                    ),
+                    PositionedDirectional(
+                      top: AppSpacing.xs,
+                      end: AppSpacing.xs,
+                      child: FavoriteHeartButton(listingId: item.id),
+                    ),
+                  ],
                 ),
               ),
               Expanded(

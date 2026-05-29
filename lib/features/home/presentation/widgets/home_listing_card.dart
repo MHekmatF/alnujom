@@ -9,6 +9,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/money.dart';
 import '../../../../shared/presentation/money_formatter.dart';
 import '../../../currencies/domain/entities/currency.dart';
+import '../../../favorites/presentation/widgets/favorite_heart_button.dart';
 import '../../../listing_form/domain/entities/listing.dart';
 import '../../domain/entities/home_listing_card.dart';
 
@@ -71,7 +72,12 @@ class HomeListingCardTile extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _Hero(imageUrl: card.mainImageUrl, l10n: l10n, scheme: scheme),
+            _Hero(
+              imageUrl: card.mainImageUrl,
+              l10n: l10n,
+              scheme: scheme,
+              listingId: card.id,
+            ),
             Padding(
               padding: const EdgeInsetsDirectional.all(AppSpacing.md),
               child: Column(
@@ -205,47 +211,59 @@ class _Hero extends StatelessWidget {
     required this.imageUrl,
     required this.l10n,
     required this.scheme,
+    required this.listingId,
   });
 
   final String? imageUrl;
   final AppLocalizations l10n;
   final ColorScheme scheme;
+  final String listingId;
 
   @override
   Widget build(BuildContext context) {
-    if (imageUrl == null) {
-      return AspectRatio(
-        aspectRatio: 16 / 9,
-        child: ColoredBox(
-          color: scheme.surfaceContainerHighest,
-          child: Center(
-            child: Icon(
-              Icons.image_not_supported_outlined,
-              color: scheme.onSurfaceVariant,
-              semanticLabel: l10n.image_unavailable,
+    final image = imageUrl == null
+        ? AspectRatio(
+            aspectRatio: 16 / 9,
+            child: ColoredBox(
+              color: scheme.surfaceContainerHighest,
+              child: Center(
+                child: Icon(
+                  Icons.image_not_supported_outlined,
+                  color: scheme.onSurfaceVariant,
+                  semanticLabel: l10n.image_unavailable,
+                ),
+              ),
             ),
-          ),
-        ),
-      );
-    }
-    return AspectRatio(
-      aspectRatio: 16 / 9,
-      child: CachedNetworkImage(
-        imageUrl: imageUrl!,
-        fit: BoxFit.cover,
-        placeholder: (context, _) =>
-            ColoredBox(color: scheme.surfaceContainerHighest),
-        errorWidget: (context, _, __) => ColoredBox(
-          color: scheme.surfaceContainerHighest,
-          child: Center(
-            child: Icon(
-              Icons.broken_image_outlined,
-              color: scheme.onSurfaceVariant,
-              semanticLabel: l10n.image_unavailable,
+          )
+        : AspectRatio(
+            aspectRatio: 16 / 9,
+            child: CachedNetworkImage(
+              imageUrl: imageUrl!,
+              fit: BoxFit.cover,
+              placeholder: (context, _) =>
+                  ColoredBox(color: scheme.surfaceContainerHighest),
+              errorWidget: (context, _, __) => ColoredBox(
+                color: scheme.surfaceContainerHighest,
+                child: Center(
+                  child: Icon(
+                    Icons.broken_image_outlined,
+                    color: scheme.onSurfaceVariant,
+                    semanticLabel: l10n.image_unavailable,
+                  ),
+                ),
+              ),
             ),
-          ),
+          );
+
+    return Stack(
+      children: [
+        image,
+        PositionedDirectional(
+          top: AppSpacing.sm,
+          end: AppSpacing.sm,
+          child: FavoriteHeartButton(listingId: listingId),
         ),
-      ),
+      ],
     );
   }
 }

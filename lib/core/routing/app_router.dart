@@ -8,6 +8,7 @@ import '../../features/admin/listing_review/presentation/pages/listing_preview_p
 import '../../features/admin/listing_review/presentation/pages/pending_queue_page.dart';
 import '../../features/admin/presentation/pages/admin_home_page.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
+import '../../features/auth/presentation/bloc/auth_state.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/pending_approval_page.dart';
 import '../../features/auth/presentation/pages/publisher_approval_pending_page.dart';
@@ -35,6 +36,7 @@ import '../../features/locations/presentation/pages/locations_list_page.dart';
 import '../../features/listing_form/domain/entities/listing.dart';
 import '../../features/listing_form/domain/entities/listing_form_state.dart';
 import '../../features/listing_form/presentation/pages/listing_form_page.dart';
+import '../../features/favorites/presentation/pages/favorites_page.dart';
 import '../../features/inquiries/presentation/pages/admin_inquiry_oversight_page.dart';
 import '../../features/inquiries/presentation/pages/inquiry_detail_page.dart';
 import '../../features/inquiries/presentation/pages/inquiry_inbox_page.dart';
@@ -99,6 +101,8 @@ abstract final class AppRoutes {
   static const inquiryDetail = '/inquiries/:id';
   // Phase 16 US7: admin inquiry oversight route.
   static const adminInquiries = '/admin/inquiries';
+  // Phase 17 FR-020: authenticated favorites page route.
+  static const favorites = '/favorites';
   static const themeGallery = '/_debug/theme-gallery';
   static const debugMoneyFormatter = '/debug/money-formatter';
 
@@ -161,6 +165,8 @@ abstract final class AppRouteNames {
   static const inquiryDetail = 'inquiry-detail';
   // Phase 16 US7: admin inquiry oversight route name.
   static const adminInquiries = 'admin-inquiries';
+  // Phase 17 FR-020: authenticated favorites page route name.
+  static const favorites = 'favorites';
   static const themeGallery = 'theme-gallery';
 }
 
@@ -450,6 +456,16 @@ GoRouter buildAppRouter({
             ? null
             : AppRoutes.home,
         builder: (context, state) => const AdminInquiryOversightPage(),
+      ),
+
+      // ─── Phase 17 — authenticated favorites page ───
+      // Requires sign-in (R-115); anonymous deep-links redirect to /login.
+      GoRoute(
+        path: AppRoutes.favorites,
+        name: AppRouteNames.favorites,
+        redirect: (context, state) =>
+            authBloc.state is Unauthenticated ? AppRoutes.login : null,
+        builder: (context, state) => const FavoritesPage(),
       ),
 
       if (kDesignToolsEnabled)

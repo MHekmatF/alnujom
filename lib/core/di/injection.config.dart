@@ -85,6 +85,21 @@ import '../../features/currencies/presentation/bloc/exchange_rate_history_bloc.d
     as _i949;
 import '../../features/currencies/presentation/bloc/set_exchange_rate_bloc.dart'
     as _i293;
+import '../../features/favorites/data/datasources/supabase_favorites_datasource.dart'
+    as _i8;
+import '../../features/favorites/data/repositories/favorites_repository_impl.dart'
+    as _i144;
+import '../../features/favorites/domain/repositories/favorites_repository.dart'
+    as _i212;
+import '../../features/favorites/domain/usecases/add_favorite.dart' as _i705;
+import '../../features/favorites/domain/usecases/load_favorite_ids.dart'
+    as _i896;
+import '../../features/favorites/domain/usecases/load_favorites.dart' as _i1041;
+import '../../features/favorites/domain/usecases/remove_favorite.dart' as _i828;
+import '../../features/favorites/presentation/bloc/favorites_cubit.dart'
+    as _i991;
+import '../../features/favorites/presentation/bloc/favorites_page_bloc.dart'
+    as _i171;
 import '../../features/home/data/datasources/supabase_home_feed_datasource.dart'
     as _i732;
 import '../../features/home/data/repositories/home_feed_repository_impl.dart'
@@ -388,6 +403,9 @@ _i174.GetIt $initGetIt(
   gh.factory<_i1043.SupabaseInquiriesDatasource>(
     () => _i1043.SupabaseInquiriesDatasource(gh<_i454.SupabaseClient>()),
   );
+  gh.factory<_i8.SupabaseFavoritesDatasource>(
+    () => _i8.SupabaseFavoritesDatasource(gh<_i454.SupabaseClient>()),
+  );
   gh.factory<_i272.InquiryRepository>(
     () => _i614.InquiryRepositoryImpl(gh<_i1043.SupabaseInquiriesDatasource>()),
   );
@@ -479,6 +497,9 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i190.SearchListingsUseCase>(
     () => _i190.SearchListingsUseCase(gh<_i357.SearchRepository>()),
+  );
+  gh.factory<_i212.FavoritesRepository>(
+    () => _i144.FavoritesRepositoryImpl(gh<_i8.SupabaseFavoritesDatasource>()),
   );
   gh.factory<_i842.LoadMapMarkers>(
     () => _i842.LoadMapMarkers(gh<_i973.MapRepository>()),
@@ -699,6 +720,18 @@ _i174.GetIt $initGetIt(
   gh.factory<_i431.RejectAccount>(
     () => _i431.RejectAccount(gh<_i120.AccountApprovalsRepository>()),
   );
+  gh.factory<_i705.AddFavorite>(
+    () => _i705.AddFavorite(gh<_i212.FavoritesRepository>()),
+  );
+  gh.factory<_i1041.LoadFavorites>(
+    () => _i1041.LoadFavorites(gh<_i212.FavoritesRepository>()),
+  );
+  gh.factory<_i896.LoadFavoriteIds>(
+    () => _i896.LoadFavoriteIds(gh<_i212.FavoritesRepository>()),
+  );
+  gh.factory<_i828.RemoveFavorite>(
+    () => _i828.RemoveFavorite(gh<_i212.FavoritesRepository>()),
+  );
   gh.factory<_i650.AssignRoleToUser>(
     () => _i650.AssignRoleToUser(gh<_i765.UserSearchRepository>()),
   );
@@ -748,6 +781,9 @@ _i174.GetIt $initGetIt(
       gh<_i858.ApproveAccount>(),
       gh<_i431.RejectAccount>(),
     ),
+  );
+  gh.factory<_i171.FavoritesPageBloc>(
+    () => _i171.FavoritesPageBloc(gh<_i1041.LoadFavorites>()),
   );
   gh.factory<_i906.DeriveAreaCentroid>(
     () => _i906.DeriveAreaCentroid(gh<_i704.LocationsRepository>()),
@@ -840,6 +876,15 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i949.ExchangeRateHistoryBloc>(
     () => _i949.ExchangeRateHistoryBloc(gh<_i776.ListExchangeRateHistory>()),
+  );
+  gh.lazySingleton<_i991.FavoritesCubit>(
+    () => _i991.FavoritesCubit(
+      gh<_i896.LoadFavoriteIds>(),
+      gh<_i705.AddFavorite>(),
+      gh<_i828.RemoveFavorite>(),
+      gh<_i797.AuthBloc>(),
+    ),
+    dispose: (i) => i.dispose(),
   );
   gh.factory<_i796.GovernorateDetailBloc>(
     () => _i796.GovernorateDetailBloc(
