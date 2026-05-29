@@ -17,6 +17,7 @@ import '../../../../../core/theme/spacing.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../reports/domain/entities/report_reason.dart';
 import '../../../../reports/domain/entities/report_status.dart';
+import '../../../../reports/presentation/widgets/report_status_chip.dart';
 import '../../domain/entities/report_queue_item.dart';
 import '../../domain/usecases/load_reports_queue.dart';
 import '../bloc/report_resolve_cubit.dart';
@@ -218,7 +219,7 @@ class _ReportDetailView extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
 
             // ── Status chip + reviewer soft-lock notice ───────────────────
-            _ReportStatusChipRow(status: item.status),
+            ReportStatusChip(item.status),
             if (item.reviewingBy != null) ...[
               const SizedBox(height: AppSpacing.xs),
               Text(
@@ -273,59 +274,6 @@ class _ReportDetailView extends StatelessWidget {
             ],
           ],
         ),
-      ),
-    );
-  }
-}
-
-// ─── Status chip row (uses the local pill from report_queue_card.dart) ────────
-
-// Re-export the private `_ReportStatusChip` concept via a named row widget
-// since the private class is in another file. We inline a minimal version here.
-class _ReportStatusChipRow extends StatelessWidget {
-  const _ReportStatusChipRow({required this.status});
-  final ReportStatus status;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-
-    final (label, bg, fg) = switch (status) {
-      ReportStatus.newReport => (
-          l10n.report_status_new,
-          theme.colorScheme.primaryContainer,
-          theme.colorScheme.onPrimaryContainer,
-        ),
-      ReportStatus.reviewing => (
-          l10n.report_status_reviewing,
-          theme.colorScheme.secondaryContainer,
-          theme.colorScheme.onSecondaryContainer,
-        ),
-      ReportStatus.resolved => (
-          l10n.report_status_resolved,
-          theme.colorScheme.tertiaryContainer,
-          theme.colorScheme.onTertiaryContainer,
-        ),
-      ReportStatus.dismissed => (
-          l10n.report_status_dismissed,
-          theme.colorScheme.surfaceContainerHighest,
-          theme.colorScheme.onSurfaceVariant,
-        ),
-    };
-
-    return Container(
-      padding: const EdgeInsetsDirectional.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(AppSpacing.sm),
-      ),
-      child: Text(
-        label,
-        style: theme.textTheme.labelMedium?.copyWith(color: fg),
       ),
     );
   }

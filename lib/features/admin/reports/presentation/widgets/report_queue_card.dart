@@ -15,7 +15,7 @@ import 'package:flutter/material.dart';
 import '../../../../../core/theme/spacing.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../reports/domain/entities/report_reason.dart';
-import '../../../../reports/domain/entities/report_status.dart';
+import '../../../../reports/presentation/widgets/report_status_chip.dart';
 import '../../domain/entities/report_queue_item.dart';
 
 class ReportQueueCard extends StatelessWidget {
@@ -87,7 +87,7 @@ class ReportQueueCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: AppSpacing.sm),
-                  _ReportStatusChip(status: item.status),
+                  ReportStatusChip(item.status),
                 ],
               ),
               if (locationParts.isNotEmpty) ...[
@@ -137,60 +137,6 @@ class ReportQueueCard extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-// ─── Local status chip (Phase 8 ships the canonical version) ─────────────────
-
-/// Minimal status pill used by [ReportQueueCard] and [ReportDetailPage] until
-/// Phase 8's `report_status_chip.dart` is merged. The orchestrator will
-/// replace this with the canonical import after the Wave 4 merge.
-class _ReportStatusChip extends StatelessWidget {
-  const _ReportStatusChip({required this.status});
-  final ReportStatus status;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-
-    final (label, bg, fg) = switch (status) {
-      ReportStatus.newReport => (
-          l10n.report_status_new,
-          theme.colorScheme.primaryContainer,
-          theme.colorScheme.onPrimaryContainer,
-        ),
-      ReportStatus.reviewing => (
-          l10n.report_status_reviewing,
-          theme.colorScheme.secondaryContainer,
-          theme.colorScheme.onSecondaryContainer,
-        ),
-      ReportStatus.resolved => (
-          l10n.report_status_resolved,
-          theme.colorScheme.tertiaryContainer,
-          theme.colorScheme.onTertiaryContainer,
-        ),
-      ReportStatus.dismissed => (
-          l10n.report_status_dismissed,
-          theme.colorScheme.surfaceContainerHighest,
-          theme.colorScheme.onSurfaceVariant,
-        ),
-    };
-
-    return Container(
-      padding: const EdgeInsetsDirectional.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(AppSpacing.sm),
-      ),
-      child: Text(
-        label,
-        style: theme.textTheme.labelSmall?.copyWith(color: fg),
       ),
     );
   }
