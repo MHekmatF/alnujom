@@ -17,6 +17,7 @@
 | `resolved_by` | UUID | NULL, FK → `auth.users(id)` `ON DELETE SET NULL` |
 | `resolved_at` | TIMESTAMPTZ | NULL |
 | `resolution` | TEXT | NULL (records the action) |
+| `metadata` | JSONB | NULL — optional reporter IP / user-agent capture (FR-010(e), mirrors `lead_events.metadata`) |
 | `created_at` | TIMESTAMPTZ | NOT NULL, DEFAULT `now()` |
 
 ## Indices

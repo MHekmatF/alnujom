@@ -17,7 +17,7 @@ public.submit_report(p_listing_id UUID, p_reason TEXT, p_note TEXT DEFAULT NULL)
 2. `invalid_reason` (`22023`) if `p_reason` ∉ the 8 canonical reasons.
 3. Listing validity (Q6=A / FR-010(b)): `listing_not_found` (`23503`) if the listing does not exist; `listing_not_approved` (`23514`) if `status <> 'approved'`.
 4. Open-report dedup (FR-004): `already_reported` (`23505`) if the caller has a `new`/`reviewing` report on the listing. The `ux_reports_open_per_reporter_listing` partial unique index is the race-safe backstop.
-5. Insert `reports` row with `reporter_user_id := auth.uid()`, `status := 'new'`, `note := NULLIF(p_note,'')`. Return the new id.
+5. Insert `reports` row with `reporter_user_id := auth.uid()`, `status := 'new'`, `note := NULLIF(p_note,'')`, and `metadata := jsonb_build_object('ip', inet_client_addr()::text, 'user_agent', current_setting('request.headers', true)::jsonb->>'user-agent')` (FR-010(e), mirrors `record_lead_event`). Return the new id.
 
 ## Client mapping (Flutter)
 

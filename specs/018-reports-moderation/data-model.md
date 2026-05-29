@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS public.reports (
   resolved_by           UUID         REFERENCES auth.users(id) ON DELETE SET NULL,
   resolved_at           TIMESTAMPTZ,
   resolution            TEXT,
+  metadata              JSONB,        -- optional reporter IP / user-agent (FR-010(e))
   created_at            TIMESTAMPTZ  NOT NULL DEFAULT now()
 );
 
@@ -212,8 +213,14 @@ BEGIN
     RAISE EXCEPTION 'already_reported' USING ERRCODE = '23505';
   END IF;
 
-  INSERT INTO public.reports (listing_id, reporter_user_id, reason, note, status)
-  VALUES (p_listing_id, v_uid, p_reason, NULLIF(p_note, ''), 'new')
+  INSERT INTO public.reports (listing_id, reporter_user_id, reason, note, status, metadata)
+  VALUES (
+    p_listing_id, v_uid, p_reason, NULLIF(p_note, ''), 'new',
+    jsonb_build_object(
+      'ip', inet_client_addr()::text,
+      'user_agent', current_setting('request.headers', true)::jsonb->>'user-agent'
+    )                                            -- FR-010(e), mirrors record_lead_event
+  )
   RETURNING id INTO v_id;
 
   RETURN v_id;

@@ -34,7 +34,7 @@
 
 **Goal**: both tables exist with indices (incl. the open-report dedup index) and RLS enabled.
 
-- [ ] T009 [US1] Create migration `supabase/migrations/20260530120001_create_reports_table.sql` — `public.reports` table + the 4 indices (incl. `ux_reports_open_per_reporter_listing` partial unique) + `ENABLE ROW LEVEL SECURITY`, per data-model §1.1.
+- [ ] T009 [US1] Create migration `supabase/migrations/20260530120001_create_reports_table.sql` — `public.reports` table (incl. the `metadata jsonb` column for FR-010(e) IP/UA capture) + the 4 indices (incl. `ux_reports_open_per_reporter_listing` partial unique) + `ENABLE ROW LEVEL SECURITY`, per data-model §1.1.
 - [ ] T010 [P] [US2] Create migration `supabase/migrations/20260530120002_create_moderation_actions_table.sql` — `public.moderation_actions` append-only table + `idx_moderation_actions_target` + `ENABLE ROW LEVEL SECURITY`, per data-model §1.2.
 - [ ] T011 [P] Create `supabase/docs/reports.md` (columns, dedup index, FK delete behaviors R-131, forward-stated RLS).
 - [ ] T012 [P] Create `supabase/docs/moderation_actions.md` (append-only, FK behaviors, admin-only read).
@@ -60,7 +60,7 @@
 
 **Goal**: the bypass-proof, authenticated, approved-only, dedup'd report-creation path.
 
-- [ ] T017 [US1] Create migration `supabase/migrations/20260530120006_create_submit_report_rpc.sql` — `public.submit_report(p_listing_id uuid, p_reason text, p_note text)` SECURITY DEFINER with the `auth_required` → `invalid_reason` → `listing_not_found`/`listing_not_approved` (Q6=A) → `already_reported` (FR-004) → insert chain, per data-model §1.6; `GRANT EXECUTE TO authenticated` only.
+- [ ] T017 [US1] Create migration `supabase/migrations/20260530120006_create_submit_report_rpc.sql` — `public.submit_report(p_listing_id uuid, p_reason text, p_note text)` SECURITY DEFINER with the `auth_required` → `invalid_reason` → `listing_not_found`/`listing_not_approved` (Q6=A) → `already_reported` (FR-004) → insert chain (capturing reporter IP/UA into `reports.metadata`, FR-010(e)), per data-model §1.6; `GRANT EXECUTE TO authenticated` only.
 
 **Checkpoint**: `contracts/phase18-submit-report-rpc.md` smoke tests (authenticated insert / anon `auth_required` / non-approved reject / dedup `already_reported`).
 
@@ -197,7 +197,7 @@ Shared / contended files each phase modifies (the orchestrator warns sub-agents 
 - **Phase 2 (B)**: `supabase/migrations/20260530120001_create_reports_table.sql`, `supabase/migrations/20260530120002_create_moderation_actions_table.sql`, `supabase/docs/reports.md` (CREATE), `supabase/docs/moderation_actions.md` (CREATE).
 - **Phase 3 (C)**: `supabase/migrations/20260530120003_create_reports_policies.sql`, `…120004_create_v_reports_view.sql`, `…120005_create_reports_audit_trigger.sql`, `supabase/docs/reports.md` (APPEND), `supabase/docs/moderation_actions.md` (APPEND).
 - **Phase 4 (D)**: `supabase/migrations/20260530120006_create_submit_report_rpc.sql`.
-- **Phase 5 (E)**: `supabase/migrations/20260530120007_create_resolve_report_rpcs.sql`, `…120008_phase18_advisor_hardening.sql`, `supabase/functions/resolve_report/index.ts`, **possibly** `supabase/migrations/20260519120006_create_listing_status_history.sql` (only if the R-124 guard amendment is needed — do NOT edit in place; the amendment ships inside `…120007`).
+- **Phase 5 (E)**: `supabase/migrations/20260530120007_create_resolve_report_rpcs.sql`, `…120008_phase18_advisor_hardening.sql`, `supabase/functions/resolve_report/index.ts`. (The R-124 listing-transition-guard amendment, if T018 finds it necessary, ships **inside** `…120007` — `20260519120006_create_listing_status_history.sql` is never edited in place, so it is NOT a contended file.)
 - **Phase 6 (F)**: `lib/core/di/injection.config.dart` (codegen) — all other files are new under `lib/features/reports/{domain,data}/`.
 - **Phase 7 (G)**: `lib/core/di/injection.config.dart` (codegen) — all other files are new under `lib/features/admin/reports/{domain,data}/`.
 - **Phase 8 (H)**: `lib/features/listing_details/presentation/widgets/per_listing_action_block.dart`, `lib/features/listing_details/presentation/pages/listing_details_page.dart`, `lib/features/profile/presentation/pages/profile_page.dart`, `lib/core/di/injection.config.dart` (codegen).
