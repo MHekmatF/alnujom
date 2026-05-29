@@ -72,7 +72,7 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     } else {
       optimisticSet.add(listingId);
     }
-    emit(state.copyWith(favoritedIds: optimisticSet));
+    emit(state.copyWith(favoritedIds: optimisticSet, lastToggleFailed: false));
 
     // Persist.
     final Result<void> result;

@@ -29,6 +29,11 @@ class FavoriteHeartButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<FavoritesCubit, FavoritesState>(
+      // The cubit is a GetIt @lazySingleton, not provided in the widget tree —
+      // pass it explicitly so this button works on every surface (home/search/
+      // map/details/favorites page) without requiring a BlocProvider ancestor
+      // (mirrors Phase 16 InquiriesAppBarAction).
+      bloc: getIt<FavoritesCubit>(),
       // Only rebuild when the favorite state for THIS listing changes.
       buildWhen: (previous, current) =>
           previous.favoritedIds.contains(listingId) !=
