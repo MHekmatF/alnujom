@@ -96,6 +96,10 @@ import '../../features/favorites/domain/usecases/load_favorite_ids.dart'
     as _i896;
 import '../../features/favorites/domain/usecases/load_favorites.dart' as _i1041;
 import '../../features/favorites/domain/usecases/remove_favorite.dart' as _i828;
+import '../../features/favorites/presentation/bloc/favorites_cubit.dart'
+    as _i991;
+import '../../features/favorites/presentation/bloc/favorites_page_bloc.dart'
+    as _i171;
 import '../../features/home/data/datasources/supabase_home_feed_datasource.dart'
     as _i732;
 import '../../features/home/data/repositories/home_feed_repository_impl.dart'
@@ -778,6 +782,9 @@ _i174.GetIt $initGetIt(
       gh<_i431.RejectAccount>(),
     ),
   );
+  gh.factory<_i171.FavoritesPageBloc>(
+    () => _i171.FavoritesPageBloc(gh<_i1041.LoadFavorites>()),
+  );
   gh.factory<_i906.DeriveAreaCentroid>(
     () => _i906.DeriveAreaCentroid(gh<_i704.LocationsRepository>()),
   );
@@ -869,6 +876,15 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i949.ExchangeRateHistoryBloc>(
     () => _i949.ExchangeRateHistoryBloc(gh<_i776.ListExchangeRateHistory>()),
+  );
+  gh.lazySingleton<_i991.FavoritesCubit>(
+    () => _i991.FavoritesCubit(
+      gh<_i896.LoadFavoriteIds>(),
+      gh<_i705.AddFavorite>(),
+      gh<_i828.RemoveFavorite>(),
+      gh<_i797.AuthBloc>(),
+    ),
+    dispose: (i) => i.dispose(),
   );
   gh.factory<_i796.GovernorateDetailBloc>(
     () => _i796.GovernorateDetailBloc(
