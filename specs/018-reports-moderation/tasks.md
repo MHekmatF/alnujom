@@ -168,8 +168,8 @@
 
 ## Polish & Cross-Cutting
 
-- [ ] T064 Execute the `quickstart.md` 13-step manual recipe on the Pixel 8 Pro AVD (412 dp) + Infinix Note 8 (480 dp); confirm SC-001..SC-015. Record evidence per memory `feedback_strict_task_completion.md` (partials stay `- [ ]` with `**⚠️ PARTIAL —**`).
-- [ ] T065 Run the constitution grep gates (SC-013): zero new pubspec deps; zero hardcoded role branch in `lib/features/reports/` + `lib/features/admin/reports/`; no `package:supabase_flutter` under any `domain/` or `presentation/`; no inline string literals; `lead_events.event_type` + `listings.status` CHECKs unchanged.
+- [ ] T064 **⚠️ PARTIAL — pending human/device QA.** The `quickstart.md` 13-step recipe (SC-001..SC-015) has NOT been run: the 8 Phase-18 migrations + the `resolve_report` Edge Function were created as files but NOT applied/deployed to the Supabase project (agents stayed in file-scope), and no Pixel 8 Pro AVD / Infinix Note 8 walk has been performed. Static gates are green (analyze clean, 225 tests pass, T065 below). **Remaining to close T064:** (1) apply migrations `20260530120001`–`…008` via Supabase MCP `apply_migration` in order + deploy `resolve_report`; (2) run `get_advisors` (expect clean); (3) execute the `quickstart.md` device walk and record evidence. Tracked as the spec's QA handoff.
+- [X] T065 Ran the constitution grep gates (SC-013) — ALL PASS: `pubspec.yaml` unchanged vs `main` (zero new deps); zero hardcoded role branch in `lib/features/reports/` + `lib/features/admin/reports/` (gating is `PermissionKeys.reportsManage` via `PermissionChecker`); no `package:supabase_flutter` under any `domain/` or `presentation/`; no inline `Text('…')` literals in the feature code; no Phase-18 migration alters the `lead_events.event_type` or `listings.status` CHECK (the only match was an explanatory comment in `…120007`).
 
 ---
 
