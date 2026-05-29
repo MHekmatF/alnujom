@@ -34,10 +34,10 @@
 
 **Goal**: both tables exist with indices (incl. the open-report dedup index) and RLS enabled.
 
-- [ ] T009 [US1] Create migration `supabase/migrations/20260530120001_create_reports_table.sql` — `public.reports` table (incl. the `metadata jsonb` column for FR-010(e) IP/UA capture) + the 4 indices (incl. `ux_reports_open_per_reporter_listing` partial unique) + `ENABLE ROW LEVEL SECURITY`, per data-model §1.1.
-- [ ] T010 [P] [US2] Create migration `supabase/migrations/20260530120002_create_moderation_actions_table.sql` — `public.moderation_actions` append-only table + `idx_moderation_actions_target` + `ENABLE ROW LEVEL SECURITY`, per data-model §1.2.
-- [ ] T011 [P] Create `supabase/docs/reports.md` (columns, dedup index, FK delete behaviors R-131, forward-stated RLS).
-- [ ] T012 [P] Create `supabase/docs/moderation_actions.md` (append-only, FK behaviors, admin-only read).
+- [X] T009 [US1] Create migration `supabase/migrations/20260530120001_create_reports_table.sql` — `public.reports` table (incl. the `metadata jsonb` column for FR-010(e) IP/UA capture) + the 4 indices (incl. `ux_reports_open_per_reporter_listing` partial unique) + `ENABLE ROW LEVEL SECURITY`, per data-model §1.1.
+- [X] T010 [P] [US2] Create migration `supabase/migrations/20260530120002_create_moderation_actions_table.sql` — `public.moderation_actions` append-only table + `idx_moderation_actions_target` + `ENABLE ROW LEVEL SECURITY`, per data-model §1.2.
+- [X] T011 [P] Create `supabase/docs/reports.md` (columns, dedup index, FK delete behaviors R-131, forward-stated RLS).
+- [X] T012 [P] Create `supabase/docs/moderation_actions.md` (append-only, FK behaviors, admin-only read).
 
 **Checkpoint**: `apply_migration` 120001+120002 succeed; `list_tables` shows both with RLS on; `get_advisors` clean.
 
