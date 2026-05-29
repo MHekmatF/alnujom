@@ -220,8 +220,8 @@ class _SuccessBody extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.md),
                 ],
-                // 9. Per-listing action block — Phase 13 Q2=A stubs
-                const PerListingActionBlock(),
+                // 9. Per-listing action block — Phase 17 Favorite live; Share/Report stubs
+                PerListingActionBlock(listingId: aggregate.listing.id),
                 const SizedBox(height: AppSpacing.lg),
               ],
             ),

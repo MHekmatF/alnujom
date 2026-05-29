@@ -1,21 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/di/injection.dart';
+import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../features/favorites/presentation/bloc/favorites_cubit.dart';
 import '../../../../l10n/app_localizations.dart';
 
 /// Phase 13 (spec/013-home-and-details) — Per-listing action block.
 ///
-/// Three Q2=A stub CTAs (Favorite / Share / Report). All taps show a
-/// floating Coming-soon snackbar; NO share-sheet / favorites mutation /
-/// report INSERT per Q2=A + contracts/phase13-cta-stub-treatment.md.
+/// Favorite CTA rewired in Phase 17 (spec/017-favorites) to a live
+/// `BlocSelector`-driven toggle with the anonymous-aware `FavoritesCubit`
+/// branch. Share + Report stay as Q2=A Coming-soon stubs (FR-033).
 ///
 /// Future phases:
-/// - Favorites: dedicated phase wires favorite mutation + auth-required Q3=A.
 /// - Share: `share_plus` introduced at share-wiring phase (NOT Phase 13 —
 ///   FR-033 explicitly excludes share_plus from Phase 13 pubspec).
 /// - Report: inquiry / reports phase wires report submission.
 class PerListingActionBlock extends StatelessWidget {
-  const PerListingActionBlock({super.key});
+  const PerListingActionBlock({super.key, required this.listingId});
+
+  final String listingId;
 
   @override
   Widget build(BuildContext context) {
@@ -24,15 +30,22 @@ class PerListingActionBlock extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        // Favorite CTA
-        _ActionButton(
-          icon: Icons.favorite_border,
-          label: l10n.cta_favorite,
-          onPressed: () =>
-              _showComingSoon(context, l10n.action_favorite_coming_soon),
+        // Favorite CTA — Phase 17 live toggle (Share + Report unchanged).
+        BlocSelector<FavoritesCubit, FavoritesState, bool>(
+          bloc: getIt<FavoritesCubit>(),
+          selector: (s) => s.favoritedIds.contains(listingId),
+          builder: (context, isFavorited) {
+            return _ActionButton(
+              icon: isFavorited ? Icons.favorite : Icons.favorite_border,
+              label: isFavorited
+                  ? l10n.favorite_unsave_label
+                  : l10n.favorite_heart_label,
+              onPressed: () => _onFavoriteTap(context),
+            );
+          },
         ),
         const SizedBox(width: AppSpacing.sm),
-        // Share CTA
+        // Share CTA — Q2=A stub (FR-033)
         _ActionButton(
           icon: Icons.share_outlined,
           label: l10n.cta_share,
@@ -40,7 +53,7 @@ class PerListingActionBlock extends StatelessWidget {
               _showComingSoon(context, l10n.action_share_coming_soon),
         ),
         const SizedBox(width: AppSpacing.sm),
-        // Report CTA
+        // Report CTA — Q2=A stub (FR-033)
         _ActionButton(
           icon: Icons.flag_outlined,
           label: l10n.cta_report,
@@ -49,6 +62,21 @@ class PerListingActionBlock extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  /// Mirrors `FavoriteHeartButton._onTap` — anonymous branch shows prompt +
+  /// routes to login; authenticated branch toggles via the shared singleton.
+  void _onFavoriteTap(BuildContext context) {
+    final cubit = getIt<FavoritesCubit>();
+    if (!cubit.state.isSignedIn) {
+      final l10n = AppLocalizations.of(context)!;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.favorite_sign_in_prompt)),
+      );
+      context.push(AppRoutes.login);
+      return;
+    }
+    cubit.toggle(listingId);
   }
 
   void _showComingSoon(BuildContext context, String message) {
