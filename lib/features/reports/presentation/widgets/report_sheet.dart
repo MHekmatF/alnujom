@@ -1,0 +1,193 @@
+// lib/features/reports/presentation/widgets/report_sheet.dart
+//
+// Phase 18 (spec/018-reports-moderation) Sub-Phase H (T042).
+// Modal bottom sheet: reason dropdown + optional note + submit/cancel.
+// Phase 2 tokens only; no inline hex/font-size/padding.
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../../core/di/injection.dart';
+import '../../../../core/theme/spacing.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../domain/entities/report_reason.dart';
+import '../cubit/report_submission_cubit.dart';
+
+/// Modal bottom sheet for submitting a report against [listingId].
+///
+/// Provide a fresh [ReportSubmissionCubit] from DI so each sheet instance has
+/// isolated form state.
+class ReportSheet extends StatelessWidget {
+  const ReportSheet({super.key, required this.listingId});
+
+  final String listingId;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider<ReportSubmissionCubit>(
+      create: (_) => getIt<ReportSubmissionCubit>(),
+      child: _ReportSheetBody(listingId: listingId),
+    );
+  }
+}
+
+class _ReportSheetBody extends StatefulWidget {
+  const _ReportSheetBody({required this.listingId});
+
+  final String listingId;
+
+  @override
+  State<_ReportSheetBody> createState() => _ReportSheetBodyState();
+}
+
+class _ReportSheetBodyState extends State<_ReportSheetBody> {
+  final _noteController = TextEditingController();
+
+  @override
+  void dispose() {
+    _noteController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+
+    return BlocListener<ReportSubmissionCubit, ReportSubmissionState>(
+      listenWhen: (prev, curr) => curr.result != null && prev.result == null,
+      listener: (context, state) {
+        switch (state.result!) {
+          case SubmitResult.success:
+            Navigator.of(context).pop();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(l10n.report_submitted_success)),
+            );
+          case SubmitResult.alreadyReported:
+            Navigator.of(context).pop();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(l10n.report_already_reported)),
+            );
+          case SubmitResult.failure:
+            Navigator.of(context).pop();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(l10n.report_submit_failed)),
+            );
+        }
+      },
+      child: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: AppSpacing.lg,
+            right: AppSpacing.lg,
+            top: AppSpacing.lg,
+            bottom: MediaQuery.viewInsetsOf(context).bottom + AppSpacing.lg,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Title
+              Text(
+                l10n.report_sheet_title,
+                style: theme.textTheme.titleLarge,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              // Reason dropdown
+              BlocBuilder<ReportSubmissionCubit, ReportSubmissionState>(
+                buildWhen: (prev, curr) => prev.reason != curr.reason,
+                builder: (context, state) {
+                  return DropdownButtonFormField<ReportReason>(
+                    initialValue: state.reason,
+                    decoration: InputDecoration(
+                      labelText: l10n.report_reason_field_label,
+                      border: const OutlineInputBorder(),
+                    ),
+                    items: ReportReason.values.map((reason) {
+                      return DropdownMenuItem<ReportReason>(
+                        value: reason,
+                        child: Text(_reasonLabel(l10n, reason)),
+                      );
+                    }).toList(),
+                    onChanged: (reason) => context
+                        .read<ReportSubmissionCubit>()
+                        .reasonChanged(reason),
+                  );
+                },
+              ),
+              const SizedBox(height: AppSpacing.md),
+              // Optional note
+              TextField(
+                controller: _noteController,
+                decoration: InputDecoration(
+                  hintText: l10n.report_note_field_hint,
+                  border: const OutlineInputBorder(),
+                ),
+                maxLines: 3,
+                minLines: 2,
+                inputFormatters: [LengthLimitingTextInputFormatter(1000)],
+                onChanged: (note) =>
+                    context.read<ReportSubmissionCubit>().noteChanged(note),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              // Submit + Cancel
+              BlocBuilder<ReportSubmissionCubit, ReportSubmissionState>(
+                buildWhen: (prev, curr) =>
+                    prev.canSubmit != curr.canSubmit ||
+                    prev.isSubmitting != curr.isSubmitting,
+                builder: (context, state) {
+                  return Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: state.isSubmitting
+                              ? null
+                              : () => Navigator.of(context).pop(),
+                          child: Text(l10n.report_cancel_button),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: FilledButton(
+                          onPressed: state.canSubmit
+                              ? () => context
+                                  .read<ReportSubmissionCubit>()
+                                  .submit(widget.listingId)
+                              : null,
+                          child: state.isSubmitting
+                              ? const SizedBox(
+                                  width: AppSpacing.lg,
+                                  height: AppSpacing.lg,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Text(l10n.report_submit_button),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _reasonLabel(AppLocalizations l10n, ReportReason reason) {
+    return switch (reason) {
+      ReportReason.fakeListing => l10n.report_reason_fake_listing,
+      ReportReason.wrongPrice => l10n.report_reason_wrong_price,
+      ReportReason.alreadySoldOrRented =>
+        l10n.report_reason_already_sold_or_rented,
+      ReportReason.duplicate => l10n.report_reason_duplicate,
+      ReportReason.spam => l10n.report_reason_spam,
+      ReportReason.wrongLocation => l10n.report_reason_wrong_location,
+      ReportReason.inappropriateContent =>
+        l10n.report_reason_inappropriate_content,
+      ReportReason.other => l10n.report_reason_other,
+    };
+  }
+}

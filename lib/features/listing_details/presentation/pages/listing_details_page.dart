@@ -22,6 +22,7 @@ import '../../domain/entities/listing_details_aggregate.dart';
 import '../bloc/listing_details_bloc.dart';
 import '../widgets/contact_block.dart';
 import '../widgets/per_listing_action_block.dart';
+import '../../../reports/presentation/widgets/reporter_status_banner.dart';
 import '../../data/listing_details_video_launcher.dart';
 
 /// Phase 13 (spec/013-home-and-details) — listing details page.
@@ -143,6 +144,9 @@ class _SuccessBody extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Phase 18: Reporter status banner (renders nothing for non-
+                // reporters / anon). Self-contained: hosts its own cubit.
+                ReporterStatusBanner(listingId: aggregate.listing.id),
                 // 3. Listing title
                 Text(
                   aggregate.listing.title,
