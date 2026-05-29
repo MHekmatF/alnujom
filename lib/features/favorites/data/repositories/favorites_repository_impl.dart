@@ -34,7 +34,11 @@ class FavoritesRepositoryImpl implements FavoritesRepository {
       return const Success(null);
     } on PostgrestException catch (e, st) {
       return FailureResult(
-        UnknownFailure('addFavorite failed: ${e.message}', cause: e, stackTrace: st),
+        UnknownFailure(
+          'addFavorite failed: ${e.message}',
+          cause: e,
+          stackTrace: st,
+        ),
       );
     } on SocketException catch (e, st) {
       return FailureResult(NetworkFailure(e.message, cause: e, stackTrace: st));

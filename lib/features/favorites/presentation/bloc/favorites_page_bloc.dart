@@ -67,10 +67,12 @@ class FavoritesPageBloc extends Bloc<FavoritesPageEvent, FavoritesPageState> {
 
     if (result is Success<List<FavoriteListing>>) {
       final newItems = result.value;
-      emit(FavoritesPageLoaded(
-        items: [...current.items, ...newItems],
-        hasMore: newItems.length == _pageSize,
-      ));
+      emit(
+        FavoritesPageLoaded(
+          items: [...current.items, ...newItems],
+          hasMore: newItems.length == _pageSize,
+        ),
+      );
     }
     // On error during pagination: silently keep current page (no error state
     // so the user doesn't lose their list; they can pull-to-refresh to retry).
@@ -84,10 +86,9 @@ class FavoritesPageBloc extends Bloc<FavoritesPageEvent, FavoritesPageState> {
     final result = await _loadFavorites(cursor: null, limit: _pageSize);
     switch (result) {
       case Success<List<FavoriteListing>>(:final value):
-        emit(FavoritesPageLoaded(
-          items: value,
-          hasMore: value.length == _pageSize,
-        ));
+        emit(
+          FavoritesPageLoaded(items: value, hasMore: value.length == _pageSize),
+        );
       case FailureResult<List<FavoriteListing>>(:final failure):
         emit(FavoritesPageError(failure));
     }

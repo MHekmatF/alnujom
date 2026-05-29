@@ -48,8 +48,9 @@ class _FavoritesView extends StatelessWidget {
       body: BlocBuilder<FavoritesPageBloc, FavoritesPageState>(
         builder: (context, state) {
           return switch (state) {
-            FavoritesPageLoading() =>
-              const Center(child: CircularProgressIndicator()),
+            FavoritesPageLoading() => const Center(
+              child: CircularProgressIndicator(),
+            ),
             FavoritesPageError(:final failure) => _ErrorBody(failure: failure),
             FavoritesPageLoaded(:final items, :final hasMore) =>
               items.isEmpty
@@ -198,8 +199,7 @@ class _FavoriteCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: scheme.errorContainer,
-                        borderRadius:
-                            BorderRadius.circular(AppSpacing.xs),
+                        borderRadius: BorderRadius.circular(AppSpacing.xs),
                       ),
                       child: Text(
                         l10n.favorite_unavailable_indicator,
@@ -222,7 +222,10 @@ class _FavoriteCard extends StatelessWidget {
                       item.primaryCurrency != null) ...[
                     const SizedBox(height: AppSpacing.xs),
                     Text(
-                      '${item.primaryAmount} ${item.primaryCurrency}',
+                      l10n.priceWithCurrency(
+                        item.primaryAmount!.toStringAsFixed(0),
+                        item.primaryCurrency!,
+                      ),
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),

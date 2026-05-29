@@ -70,9 +70,9 @@ class PerListingActionBlock extends StatelessWidget {
     final cubit = getIt<FavoritesCubit>();
     if (!cubit.state.isSignedIn) {
       final l10n = AppLocalizations.of(context)!;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.favorite_sign_in_prompt)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.favorite_sign_in_prompt)));
       context.push(AppRoutes.login);
       return;
     }

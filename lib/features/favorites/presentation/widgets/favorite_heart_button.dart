@@ -44,9 +44,9 @@ class FavoriteHeartButton extends StatelessWidget {
           current.lastToggleFailed && !previous.lastToggleFailed,
       listener: (context, state) {
         final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.favorite_toggle_failed)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.favorite_toggle_failed)));
       },
       builder: (context, state) {
         final isFavorited = state.favoritedIds.contains(listingId);
@@ -72,9 +72,9 @@ class FavoriteHeartButton extends StatelessWidget {
     // (Q2=A / FR-008 / FR-009 / R-116).
     if (!state.isSignedIn) {
       final l10n = AppLocalizations.of(context)!;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.favorite_sign_in_prompt)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.favorite_sign_in_prompt)));
       context.push(AppRoutes.login);
       return;
     }

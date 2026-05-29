@@ -91,12 +91,7 @@ class FavoritesCubit extends Cubit<FavoritesState> {
       } else {
         revertedSet.remove(listingId);
       }
-      emit(
-        state.copyWith(
-          favoritedIds: revertedSet,
-          lastToggleFailed: true,
-        ),
-      );
+      emit(state.copyWith(favoritedIds: revertedSet, lastToggleFailed: true));
     }
   }
 
@@ -114,10 +109,12 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     // represents a live session — hydrate the set.
     final result = await _loadFavoriteIds();
     if (result is Success<List<String>>) {
-      emit(FavoritesState(
-        favoritedIds: Set<String>.from(result.value),
-        isSignedIn: true,
-      ));
+      emit(
+        FavoritesState(
+          favoritedIds: Set<String>.from(result.value),
+          isSignedIn: true,
+        ),
+      );
     } else {
       // Keep current set if load fails; mark signed in so the button toggles.
       emit(state.copyWith(isSignedIn: true));

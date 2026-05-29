@@ -34,10 +34,7 @@ class SupabaseFavoritesDatasource {
   ///   - listing_not_found (23503) — bad listing id
   ///   - listing_not_approved (23514) — listing not in `approved` status
   Future<void> addFavorite(String listingId) async {
-    await _client.rpc(
-      'add_favorite',
-      params: {'p_listing_id': listingId},
-    );
+    await _client.rpc('add_favorite', params: {'p_listing_id': listingId});
   }
 
   /// Deletes the row from `public.favorites` for the current user via the
@@ -45,10 +42,7 @@ class SupabaseFavoritesDatasource {
   ///
   /// Silent no-op when the row does not exist (already un-favorited).
   Future<void> removeFavorite(String listingId) async {
-    await _client
-        .from('favorites')
-        .delete()
-        .eq('listing_id', listingId);
+    await _client.from('favorites').delete().eq('listing_id', listingId);
   }
 
   // ---------------------------------------------------------------------------
@@ -86,8 +80,9 @@ class SupabaseFavoritesDatasource {
         .limit(limit);
     return (rows as List<dynamic>)
         .map(
-          (row) =>
-              FavoriteListingDto.fromJson(Map<String, dynamic>.from(row as Map)),
+          (row) => FavoriteListingDto.fromJson(
+            Map<String, dynamic>.from(row as Map),
+          ),
         )
         .toList();
   }
