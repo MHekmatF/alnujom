@@ -17,14 +17,14 @@
 
 **Goal**: `/reports` + `/admin/reports` resolve end-to-end (to stubs); the shared report value objects exist for both feature folders to type against. No story behavior yet.
 
-- [ ] T001 Add route constants to `lib/core/routing/app_router.dart`: `AppRoutes.reports = '/reports'`, `AppRoutes.adminReports = '/admin/reports'`, `AppRouteNames.reports = 'reports'`, `AppRouteNames.adminReports = 'admin-reports'`.
-- [ ] T002 Add `String? requireReportsManageRedirect(BuildContext, GoRouterState)` to `lib/core/routing/auth_redirect.dart` returning `'/admin?denied=reports'` when `!getIt<PermissionChecker>().has(PermissionKeys.reportsManage)` (mirror `requireListingReviewRedirect`, lines 112–124).
-- [ ] T003 Register the two routes in `lib/core/routing/app_router.dart`: a top-level `GoRoute(path: AppRoutes.reports, name: AppRouteNames.reports, redirect: (c,s) => authBloc.state is Unauthenticated ? AppRoutes.login : null, builder: … MyReportsPage())` (mirror `/favorites`, lines 463–469) and a child `GoRoute(path: 'reports', name: AppRouteNames.adminReports, redirect: requireReportsManageRedirect, builder: … ReportsQueuePage())` under the `/admin` route. (Depends on T001 + T002; same file as T001.)
-- [ ] T004 [P] Create `lib/features/reports/domain/entities/report_reason.dart` — `enum ReportReason` with `wireValue` over the 8 canonical reasons + `fromWire` (data-model §2.1).
-- [ ] T005 [P] Create `lib/features/reports/domain/entities/report_status.dart` — `enum ReportStatus { newReport, reviewing, resolved, dismissed }` with `wireValue`, `isOpen`, `fromWire` (data-model §2.2).
-- [ ] T006 Create `lib/features/reports/domain/entities/report.dart` — the `Report` `Equatable` entity per data-model §2.3 (imports `ReportReason`/`ReportStatus` from T004/T005).
-- [ ] T007 [P] Create stub `lib/features/reports/presentation/pages/my_reports_page.dart` (empty `Scaffold` + `AppBar`).
-- [ ] T008 [P] Create stub `lib/features/admin/reports/presentation/pages/reports_queue_page.dart` (empty `Scaffold` + `AppBar`).
+- [X] T001 Add route constants to `lib/core/routing/app_router.dart`: `AppRoutes.reports = '/reports'`, `AppRoutes.adminReports = '/admin/reports'`, `AppRouteNames.reports = 'reports'`, `AppRouteNames.adminReports = 'admin-reports'`.
+- [X] T002 Add `String? requireReportsManageRedirect(BuildContext, GoRouterState)` to `lib/core/routing/auth_redirect.dart` returning `'/admin?denied=reports'` when `!getIt<PermissionChecker>().has(PermissionKeys.reportsManage)` (mirror `requireListingReviewRedirect`, lines 112–124).
+- [X] T003 Register the two routes in `lib/core/routing/app_router.dart`: a top-level `GoRoute(path: AppRoutes.reports, name: AppRouteNames.reports, redirect: (c,s) => authBloc.state is Unauthenticated ? AppRoutes.login : null, builder: … MyReportsPage())` (mirror `/favorites`, lines 463–469) and a child `GoRoute(path: 'reports', name: AppRouteNames.adminReports, redirect: requireReportsManageRedirect, builder: … ReportsQueuePage())` under the `/admin` route. (Depends on T001 + T002; same file as T001.)
+- [X] T004 [P] Create `lib/features/reports/domain/entities/report_reason.dart` — `enum ReportReason` with `wireValue` over the 8 canonical reasons + `fromWire` (data-model §2.1).
+- [X] T005 [P] Create `lib/features/reports/domain/entities/report_status.dart` — `enum ReportStatus { newReport, reviewing, resolved, dismissed }` with `wireValue`, `isOpen`, `fromWire` (data-model §2.2).
+- [X] T006 Create `lib/features/reports/domain/entities/report.dart` — the `Report` `Equatable` entity per data-model §2.3 (imports `ReportReason`/`ReportStatus` from T004/T005).
+- [X] T007 [P] Create stub `lib/features/reports/presentation/pages/my_reports_page.dart` (empty `Scaffold` + `AppBar`).
+- [X] T008 [P] Create stub `lib/features/admin/reports/presentation/pages/reports_queue_page.dart` (empty `Scaffold` + `AppBar`).
 
 **Checkpoint**: `flutter analyze` clean; `/reports` and `/admin/reports` navigate to stubs (the admin one redirects without `reports.manage`).
 
