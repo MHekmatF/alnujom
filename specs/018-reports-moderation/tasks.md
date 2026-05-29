@@ -159,8 +159,8 @@
 
 **Goal**: all ~22 new strings localized in `ar` + `en`.
 
-- [ ] T062 Add the ~22 keys to BOTH `lib/l10n/app_ar.arb` AND `lib/l10n/app_en.arb` (8 reason labels + sheet/queue/resolve/My-Reports/banner/prompt/status/tile copy), per plan Sub-Phase J. Arabic copy Syrian-friendly.
-- [ ] T063 Run `flutter gen-l10n` to regenerate `lib/l10n/app_localizations*.dart`.
+- [X] T062 Add the ~22 keys to BOTH `lib/l10n/app_ar.arb` AND `lib/l10n/app_en.arb` (8 reason labels + sheet/queue/resolve/My-Reports/banner/prompt/status/tile copy), per plan Sub-Phase J. Arabic copy Syrian-friendly.
+- [X] T063 Run `flutter gen-l10n` to regenerate `lib/l10n/app_localizations*.dart`.
 
 **Checkpoint**: no inline `Text('...')` literals in the two feature folders; all strings resolve via `AppLocalizations`.
 

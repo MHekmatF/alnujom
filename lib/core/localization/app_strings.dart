@@ -3118,4 +3118,188 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String get favorite_toggle_failed =>
       _resolve('favorite_toggle_failed', (loc) => loc.favorite_toggle_failed);
+
+  // ── Phase 18 Reports & Moderation ────────────────────────────────────────
+
+  @override
+  String get report_reason_fake_listing => _resolve(
+    'report_reason_fake_listing',
+    (loc) => loc.report_reason_fake_listing,
+  );
+
+  @override
+  String get report_reason_wrong_price => _resolve(
+    'report_reason_wrong_price',
+    (loc) => loc.report_reason_wrong_price,
+  );
+
+  @override
+  String get report_reason_already_sold_or_rented => _resolve(
+    'report_reason_already_sold_or_rented',
+    (loc) => loc.report_reason_already_sold_or_rented,
+  );
+
+  @override
+  String get report_reason_duplicate => _resolve(
+    'report_reason_duplicate',
+    (loc) => loc.report_reason_duplicate,
+  );
+
+  @override
+  String get report_reason_spam =>
+      _resolve('report_reason_spam', (loc) => loc.report_reason_spam);
+
+  @override
+  String get report_reason_wrong_location => _resolve(
+    'report_reason_wrong_location',
+    (loc) => loc.report_reason_wrong_location,
+  );
+
+  @override
+  String get report_reason_inappropriate_content => _resolve(
+    'report_reason_inappropriate_content',
+    (loc) => loc.report_reason_inappropriate_content,
+  );
+
+  @override
+  String get report_reason_other =>
+      _resolve('report_reason_other', (loc) => loc.report_reason_other);
+
+  @override
+  String get report_sheet_title =>
+      _resolve('report_sheet_title', (loc) => loc.report_sheet_title);
+
+  @override
+  String get report_reason_field_label => _resolve(
+    'report_reason_field_label',
+    (loc) => loc.report_reason_field_label,
+  );
+
+  @override
+  String get report_note_field_hint =>
+      _resolve('report_note_field_hint', (loc) => loc.report_note_field_hint);
+
+  @override
+  String get report_submit_button =>
+      _resolve('report_submit_button', (loc) => loc.report_submit_button);
+
+  @override
+  String get report_cancel_button =>
+      _resolve('report_cancel_button', (loc) => loc.report_cancel_button);
+
+  @override
+  String get report_submitted_success => _resolve(
+    'report_submitted_success',
+    (loc) => loc.report_submitted_success,
+  );
+
+  @override
+  String get report_already_reported => _resolve(
+    'report_already_reported',
+    (loc) => loc.report_already_reported,
+  );
+
+  @override
+  String get report_sign_in_prompt =>
+      _resolve('report_sign_in_prompt', (loc) => loc.report_sign_in_prompt);
+
+  @override
+  String get report_submit_failed =>
+      _resolve('report_submit_failed', (loc) => loc.report_submit_failed);
+
+  @override
+  String get reports_my_title =>
+      _resolve('reports_my_title', (loc) => loc.reports_my_title);
+
+  @override
+  String get reports_my_empty_state =>
+      _resolve('reports_my_empty_state', (loc) => loc.reports_my_empty_state);
+
+  @override
+  String get profile_reports_tile =>
+      _resolve('profile_reports_tile', (loc) => loc.profile_reports_tile);
+
+  @override
+  String report_banner_status(String status) => _resolve(
+    'report_banner_status',
+    (loc) => loc.report_banner_status(status),
+  );
+
+  @override
+  String get report_status_new =>
+      _resolve('report_status_new', (loc) => loc.report_status_new);
+
+  @override
+  String get report_status_reviewing =>
+      _resolve('report_status_reviewing', (loc) => loc.report_status_reviewing);
+
+  @override
+  String get report_status_resolved =>
+      _resolve('report_status_resolved', (loc) => loc.report_status_resolved);
+
+  @override
+  String get report_status_dismissed =>
+      _resolve('report_status_dismissed', (loc) => loc.report_status_dismissed);
+
+  @override
+  String get admin_tile_reports =>
+      _resolve('admin_tile_reports', (loc) => loc.admin_tile_reports);
+
+  @override
+  String get reports_queue_title =>
+      _resolve('reports_queue_title', (loc) => loc.reports_queue_title);
+
+  @override
+  String get report_filter_status_label => _resolve(
+    'report_filter_status_label',
+    (loc) => loc.report_filter_status_label,
+  );
+
+  @override
+  String get report_filter_reason_label => _resolve(
+    'report_filter_reason_label',
+    (loc) => loc.report_filter_reason_label,
+  );
+
+  @override
+  String get report_start_review_button => _resolve(
+    'report_start_review_button',
+    (loc) => loc.report_start_review_button,
+  );
+
+  @override
+  String report_being_reviewed_by(String name) => _resolve(
+    'report_being_reviewed_by',
+    (loc) => loc.report_being_reviewed_by(name),
+  );
+
+  @override
+  String get resolve_action_dismiss =>
+      _resolve('resolve_action_dismiss', (loc) => loc.resolve_action_dismiss);
+
+  @override
+  String get resolve_action_hide =>
+      _resolve('resolve_action_hide', (loc) => loc.resolve_action_hide);
+
+  @override
+  String get resolve_action_mark_duplicate => _resolve(
+    'resolve_action_mark_duplicate',
+    (loc) => loc.resolve_action_mark_duplicate,
+  );
+
+  @override
+  String get resolve_action_delete =>
+      _resolve('resolve_action_delete', (loc) => loc.resolve_action_delete);
+
+  @override
+  String get resolve_confirm_title =>
+      _resolve('resolve_confirm_title', (loc) => loc.resolve_confirm_title);
+
+  @override
+  String get resolve_confirm_body =>
+      _resolve('resolve_confirm_body', (loc) => loc.resolve_confirm_body);
+
+  @override
+  String get report_resolved_success =>
+      _resolve('report_resolved_success', (loc) => loc.report_resolved_success);
 }
