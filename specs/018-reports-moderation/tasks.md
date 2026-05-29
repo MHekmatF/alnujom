@@ -141,15 +141,15 @@
 
 **Goal**: the `reports.manage`-gated queue with filters + pagination, the resolve flow with confirmation, the admin-home tile.
 
-- [ ] T053 [US2] Create `lib/features/admin/reports/presentation/bloc/reports_queue_bloc.dart` (+ `reports_queue_state.dart`) — `Opened`/`FilterChanged(status?,reason?)`/`LoadMore`/`Refresh` calling `LoadReportsQueue` (cursor pagination, FR-020).
-- [ ] T054 [US2] Create `lib/features/admin/reports/presentation/widgets/report_filter_bar.dart` — status + reason dropdowns (`reviewing` selectable, FR-036).
-- [ ] T055 [P] [US2] Create `lib/features/admin/reports/presentation/widgets/report_queue_card.dart` — listing/reason/reporter/note + `ReportStatusChip`.
-- [ ] T056 [US2] Replace the Phase-1 stub `lib/features/admin/reports/presentation/pages/reports_queue_page.dart` — `AppBar(l10n.reports_queue_title)` + `ReportFilterBar` + paginated `ListView`; tap → `report_detail_page.dart`.
-- [ ] T057 [US2] Create `lib/features/admin/reports/presentation/widgets/resolve_action_dialog.dart` — the 4 actions; destructive ones (hide/mark_duplicate/delete) require explicit confirmation (FR-017).
-- [ ] T058 [US2] Create `lib/features/admin/reports/presentation/bloc/report_resolve_cubit.dart` — `startReview()` (`StartReportReview`) + `resolve(action, note)` (`ResolveReport`).
-- [ ] T059 [US2] Create `lib/features/admin/reports/presentation/pages/report_detail_page.dart` — report + listing context + "Start review" (soft lock, shows current reviewer) + the 4 actions via `ResolveActionDialog`.
-- [ ] T060 [US2] Add the Reports tile to `lib/features/admin/presentation/pages/admin_home_page.dart`: `if (checker.has(PermissionKeys.reportsManage)) ListTile(Icons.flag_outlined, l10n.admin_tile_reports, → AppRoutes.adminReports)` (mirror the listing-review tile, lines 30–39).
-- [ ] T061 Register the bloc/cubit with `@injectable`; regenerate `lib/core/di/injection.config.dart`.
+- [X] T053 [US2] Create `lib/features/admin/reports/presentation/bloc/reports_queue_bloc.dart` (+ `reports_queue_state.dart`) — `Opened`/`FilterChanged(status?,reason?)`/`LoadMore`/`Refresh` calling `LoadReportsQueue` (cursor pagination, FR-020).
+- [X] T054 [US2] Create `lib/features/admin/reports/presentation/widgets/report_filter_bar.dart` — status + reason dropdowns (`reviewing` selectable, FR-036).
+- [X] T055 [P] [US2] Create `lib/features/admin/reports/presentation/widgets/report_queue_card.dart` — listing/reason/reporter/note + `ReportStatusChip`.
+- [X] T056 [US2] Replace the Phase-1 stub `lib/features/admin/reports/presentation/pages/reports_queue_page.dart` — `AppBar(l10n.reports_queue_title)` + `ReportFilterBar` + paginated `ListView`; tap → `report_detail_page.dart`.
+- [X] T057 [US2] Create `lib/features/admin/reports/presentation/widgets/resolve_action_dialog.dart` — the 4 actions; destructive ones (hide/mark_duplicate/delete) require explicit confirmation (FR-017).
+- [X] T058 [US2] Create `lib/features/admin/reports/presentation/bloc/report_resolve_cubit.dart` — `startReview()` (`StartReportReview`) + `resolve(action, note)` (`ResolveReport`).
+- [X] T059 [US2] Create `lib/features/admin/reports/presentation/pages/report_detail_page.dart` — report + listing context + "Start review" (soft lock, shows current reviewer) + the 4 actions via `ResolveActionDialog`.
+- [X] T060 [US2] Add the Reports tile to `lib/features/admin/presentation/pages/admin_home_page.dart`: `if (checker.has(PermissionKeys.reportsManage)) ListTile(Icons.flag_outlined, l10n.admin_tile_reports, → AppRoutes.adminReports)` (mirror the listing-review tile, lines 30–39).
+- [X] T061 Register the bloc/cubit with `@injectable`; regenerate `lib/core/di/injection.config.dart`.
 
 **Checkpoint**: SC-003 (gating + queue), SC-004 (4 actions + status map), SC-005 (off public surface), SC-015 (double-resolve) from `quickstart.md`.
 

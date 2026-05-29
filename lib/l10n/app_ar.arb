@@ -914,6 +914,8 @@
   "@admin_tile_reports": { "description": "Phase 18 — Admin-home tile label opening the reports moderation queue." },
   "reports_queue_title": "قائمة البلاغات",
   "@reports_queue_title": { "description": "Phase 18 — AppBar title for the admin reports queue page." },
+  "reports_queue_empty": "لا توجد بلاغات",
+  "@reports_queue_empty": { "description": "Phase 18 — Empty-state message on the admin reports queue page." },
   "report_filter_status_label": "تصفية حسب الحالة",
   "@report_filter_status_label": { "description": "Phase 18 — Label for the status filter dropdown in the reports queue." },
   "report_filter_reason_label": "تصفية حسب السبب",
