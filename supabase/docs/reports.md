@@ -97,3 +97,53 @@ and is appended to this doc in Sub-Phase C (T016).
   `start_report_review` (authenticated + `reports.manage` self-gate, Migration
   7). No client UPDATE grant.
 - **DELETE**: none from application code.
+
+## RLS reader/writer matrix (live — Migration 3, data-model §1.9)
+
+Attached by `supabase/migrations/20260530120003_create_reports_policies.sql`.
+This matrix is load-bearing (Principle III) and is the SC-009 test surface.
+
+| Actor | `reports` SELECT | `reports` INSERT | `reports` UPDATE/DELETE | `moderation_actions` SELECT | `moderation_actions` write |
+|-------|------------------|------------------|--------------------------|------------------------------|----------------------------|
+| Anonymous | ❌ (no anon policy) | ❌ | ❌ | ❌ | ❌ |
+| Authenticated reporter | ✅ own rows only | ❌ (RPC only) | ❌ | ❌ | ❌ |
+| Authenticated non-reporter (no perm) | ✅ own rows only | ❌ | ❌ | ❌ | ❌ |
+| `reports.manage` holder | ✅ ALL rows | ❌ (RPC only) | ❌ (Edge Fn → service-role RPC only) | ✅ ALL rows | ❌ (resolve RPC only) |
+| `service_role` (Edge Fn) | n/a (bypasses RLS) | via RPC | via `resolve_report_internal` | n/a | via `resolve_report_internal` |
+
+- `reports_select_self_or_admin` (TO `authenticated`):
+  `USING (reporter_user_id = auth.uid() OR public.current_user_has_permission('reports.manage'))`.
+- `REVOKE INSERT, UPDATE, DELETE ON public.reports FROM authenticated, anon`.
+- No `anon` SELECT policy ⇒ anonymous sessions are denied entirely (FR-027).
+- No publisher path, no aggregate save/report count, no admin client UPDATE
+  (FR-028). This is IMPLEMENTATION_PLAN §6.4 verbatim.
+
+## `v_reports` scoping contract (Migration 4)
+
+`public.v_reports` (`supabase/migrations/20260530120004_create_v_reports_view.sql`)
+is declared `WITH (security_invoker = true)`, so the base-table `reports` RLS
+above applies to view reads: a reporter sees only their own report rows; a
+`reports.manage` holder sees all. One view serves BOTH the reporter ("My
+Reports") and the admin (queue) — visibility differs naturally by RLS.
+
+- INNER JOIN `reports → listings`; LEFT JOIN `governorates` / `cities`
+  (`display_name` JSONB → `_ar` / `_en`); LATERAL main image
+  (`listing_media.is_main = true`, lowest `ordering`) — same join set as
+  `v_listings_public` (`20260525120002`).
+- **NOT filtered on `l.status`** — reports about non-approved listings still
+  appear; `listing_status` reflects the current listing state.
+- `GRANT SELECT ON public.v_reports TO authenticated`; NOT granted to `anon`.
+- Projects NO publisher private field and NO aggregate count (FR-028).
+
+## Resolution-audit trigger (Migration 5)
+
+`trg_reports_audit_resolution`
+(`supabase/migrations/20260530120005_create_reports_audit_trigger.sql`) is an
+`AFTER UPDATE OF status` trigger that reuses the Phase 4 `log_audit()` function
+(`20260506120004`). It fires only on a real transition into a terminal state
+(`WHEN NEW.status IN ('resolved','dismissed') AND OLD.status IS DISTINCT FROM
+NEW.status`) and records the `status, resolution, resolved_by` columns into
+`audit_logs.before_state` / `after_state` with `action = 'report.resolved'` and
+`target_id` resolved from the `id` PK column. The terminal transition is driven
+by `resolve_report_internal` (Migration 7), so the audit row co-commits in the
+same resolve transaction (FR-013, FR-035).

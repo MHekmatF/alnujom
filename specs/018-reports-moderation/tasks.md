@@ -47,10 +47,10 @@
 
 **Goal**: the reporter-self/admin read matrix, the SECURITY INVOKER view, and the resolution audit trigger are in place.
 
-- [ ] T013 [US4] Create migration `supabase/migrations/20260530120003_create_reports_policies.sql` — `reports_select_self_or_admin` SELECT policy + `REVOKE INSERT,UPDATE,DELETE ON public.reports`; `moderation_actions_select_admin` SELECT policy + `REVOKE INSERT,UPDATE,DELETE ON public.moderation_actions`, per data-model §1.3.
-- [ ] T014 [P] [US3] Create migration `supabase/migrations/20260530120004_create_v_reports_view.sql` — `public.v_reports WITH (security_invoker = true)` joining `reports → listings` (+ main image + governorate/city), NOT filtered on `l.status`; `GRANT SELECT TO authenticated`, per data-model §1.4.
-- [ ] T015 [P] [US2] Create migration `supabase/migrations/20260530120005_create_reports_audit_trigger.sql` — `trg_reports_audit_resolution AFTER UPDATE OF status` reusing `log_audit('report.resolved','status,resolution,resolved_by','id')`, per data-model §1.5.
-- [ ] T016 Update `supabase/docs/reports.md` + `supabase/docs/moderation_actions.md` with the full RLS reader/writer matrix (data-model §1.9) + the `v_reports` scoping + audit-trigger notes.
+- [X] T013 [US4] Create migration `supabase/migrations/20260530120003_create_reports_policies.sql` — `reports_select_self_or_admin` SELECT policy + `REVOKE INSERT,UPDATE,DELETE ON public.reports`; `moderation_actions_select_admin` SELECT policy + `REVOKE INSERT,UPDATE,DELETE ON public.moderation_actions`, per data-model §1.3.
+- [X] T014 [P] [US3] Create migration `supabase/migrations/20260530120004_create_v_reports_view.sql` — `public.v_reports WITH (security_invoker = true)` joining `reports → listings` (+ main image + governorate/city), NOT filtered on `l.status`; `GRANT SELECT TO authenticated`, per data-model §1.4.
+- [X] T015 [P] [US2] Create migration `supabase/migrations/20260530120005_create_reports_audit_trigger.sql` — `trg_reports_audit_resolution AFTER UPDATE OF status` reusing `log_audit('report.resolved','status,resolution,resolved_by','id')`, per data-model §1.5.
+- [X] T016 Update `supabase/docs/reports.md` + `supabase/docs/moderation_actions.md` with the full RLS reader/writer matrix (data-model §1.9) + the `v_reports` scoping + audit-trigger notes.
 
 **Checkpoint**: wire-level read-matrix smoke (reporter own-only / admin all / anon zero) per `contracts/phase18-reports-policies.md`.
 
