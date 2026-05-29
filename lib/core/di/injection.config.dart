@@ -48,6 +48,18 @@ import '../../features/admin/listing_review/presentation/bloc/listing_preview_bl
     as _i778;
 import '../../features/admin/listing_review/presentation/bloc/pending_queue_bloc.dart'
     as _i554;
+import '../../features/admin/reports/data/datasources/supabase_reports_admin_datasource.dart'
+    as _i433;
+import '../../features/admin/reports/data/repositories/reports_admin_repository_impl.dart'
+    as _i303;
+import '../../features/admin/reports/domain/repositories/reports_admin_repository.dart'
+    as _i973;
+import '../../features/admin/reports/domain/usecases/load_reports_queue.dart'
+    as _i911;
+import '../../features/admin/reports/domain/usecases/resolve_report.dart'
+    as _i943;
+import '../../features/admin/reports/domain/usecases/start_report_review.dart'
+    as _i771;
 import '../../features/auth/data/datasources/supabase_auth_datasource.dart'
     as _i76;
 import '../../features/auth/data/repositories/auth_repository_impl.dart'
@@ -391,6 +403,9 @@ _i174.GetIt $initGetIt(
   gh.factory<_i530.SupabaseListingReviewDatasource>(
     () => _i530.SupabaseListingReviewDatasource(gh<_i454.SupabaseClient>()),
   );
+  gh.factory<_i433.SupabaseReportsAdminDatasource>(
+    () => _i433.SupabaseReportsAdminDatasource(gh<_i454.SupabaseClient>()),
+  );
   gh.factory<_i311.SupabaseCurrenciesDatasource>(
     () => _i311.SupabaseCurrenciesDatasource(gh<_i454.SupabaseClient>()),
   );
@@ -574,6 +589,12 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i754.PublisherDashboardRepository>(
     () => _i240.PublisherDashboardRepositoryImpl(
       gh<_i333.SupabasePublisherDashboardDatasource>(),
+    ),
+  );
+  gh.lazySingleton<_i973.ReportsAdminRepository>(
+    () => _i303.ReportsAdminRepositoryImpl(
+      gh<_i433.SupabaseReportsAdminDatasource>(),
+      gh<_i354.AppLogger>(),
     ),
   );
   gh.lazySingleton<_i797.AuthBloc>(
@@ -762,6 +783,15 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i264.InquiryInboxBloc>(
     () => _i264.InquiryInboxBloc(gh<_i155.LoadInquiryInbox>()),
+  );
+  gh.factory<_i911.LoadReportsQueue>(
+    () => _i911.LoadReportsQueue(gh<_i973.ReportsAdminRepository>()),
+  );
+  gh.factory<_i943.ResolveReport>(
+    () => _i943.ResolveReport(gh<_i973.ReportsAdminRepository>()),
+  );
+  gh.factory<_i771.StartReportReview>(
+    () => _i771.StartReportReview(gh<_i973.ReportsAdminRepository>()),
   );
   gh.factoryParam<_i960.LocaleCubit, _i264.Locale?, dynamic>(
     (initialLocale, _) => _i960.LocaleCubit(

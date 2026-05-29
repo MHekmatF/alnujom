@@ -100,17 +100,17 @@
 
 **Goal**: the `ReportsAdminRepository` + datasource the admin queue/resolve UI consumes.
 
-- [ ] T030 [P] [US2] Create `lib/features/admin/reports/domain/entities/moderation_action_type.dart` — `enum ModerationActionType { dismiss, hide, markDuplicate, delete }` + `wireValue` + `isListingAffecting` (data-model §2.4).
-- [ ] T031 [P] [US2] Create `lib/features/admin/reports/domain/entities/report_queue_item.dart`.
-- [ ] T032 [P] [US2] Create `lib/features/admin/reports/domain/entities/moderation_action.dart`.
-- [ ] T033 [US2] Create `lib/features/admin/reports/domain/repositories/reports_admin_repository.dart` — `loadQueue({status?, reason?, cursor?, limit})`, `startReview(reportId)`, `resolve(reportId, action, note?)`.
-- [ ] T034 [P] [US2] Create `lib/features/admin/reports/domain/usecases/load_reports_queue.dart`.
-- [ ] T035 [P] [US2] Create `lib/features/admin/reports/domain/usecases/start_report_review.dart`.
-- [ ] T036 [P] [US2] Create `lib/features/admin/reports/domain/usecases/resolve_report.dart`.
-- [ ] T037 [US2] Create `lib/features/admin/reports/data/dtos/report_queue_item_dto.dart`.
-- [ ] T038 [US2] Create `lib/features/admin/reports/data/datasources/supabase_reports_admin_datasource.dart`: `loadQueue` → `from('v_reports').select()` + `.eq('status',…)`/`.eq('reason',…)` + cursor; `startReview` → `rpc('start_report_review', …)`; `resolve` → `functions.invoke('resolve_report', body: {...})`.
-- [ ] T039 [US2] Create `lib/features/admin/reports/data/repositories/reports_admin_repository_impl.dart`.
-- [ ] T040 Register the 3 use cases + repository + datasource with `@injectable`; regenerate `lib/core/di/injection.config.dart`.
+- [X] T030 [P] [US2] Create `lib/features/admin/reports/domain/entities/moderation_action_type.dart` — `enum ModerationActionType { dismiss, hide, markDuplicate, delete }` + `wireValue` + `isListingAffecting` (data-model §2.4).
+- [X] T031 [P] [US2] Create `lib/features/admin/reports/domain/entities/report_queue_item.dart`.
+- [X] T032 [P] [US2] Create `lib/features/admin/reports/domain/entities/moderation_action.dart`.
+- [X] T033 [US2] Create `lib/features/admin/reports/domain/repositories/reports_admin_repository.dart` — `loadQueue({status?, reason?, cursor?, limit})`, `startReview(reportId)`, `resolve(reportId, action, note?)`.
+- [X] T034 [P] [US2] Create `lib/features/admin/reports/domain/usecases/load_reports_queue.dart`.
+- [X] T035 [P] [US2] Create `lib/features/admin/reports/domain/usecases/start_report_review.dart`.
+- [X] T036 [P] [US2] Create `lib/features/admin/reports/domain/usecases/resolve_report.dart`.
+- [X] T037 [US2] Create `lib/features/admin/reports/data/dtos/report_queue_item_dto.dart`.
+- [X] T038 [US2] Create `lib/features/admin/reports/data/datasources/supabase_reports_admin_datasource.dart`: `loadQueue` → `from('v_reports').select()` + `.eq('status',…)`/`.eq('reason',…)` + cursor; `startReview` → `rpc('start_report_review', …)`; `resolve` → `functions.invoke('resolve_report', body: {...})`.
+- [X] T039 [US2] Create `lib/features/admin/reports/data/repositories/reports_admin_repository_impl.dart`.
+- [X] T040 Register the 3 use cases + repository + datasource with `@injectable`; regenerate `lib/core/di/injection.config.dart`.
 
 **Checkpoint**: `flutter analyze` clean; admin domain imports the shared `ReportReason`/`ReportStatus` from `lib/features/reports/domain/entities/`; no Supabase import under `domain/`.
 
