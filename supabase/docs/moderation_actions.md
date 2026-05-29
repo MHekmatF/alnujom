@@ -64,3 +64,42 @@ the per-listing moderation history, newest-first.
 
 The full live reader/writer matrix lands in Migration 3 (data-model section 1.9)
 and is appended to this doc in Sub-Phase C (T016).
+
+## RLS reader/writer matrix (live — Migration 3, data-model §1.9)
+
+Attached by `supabase/migrations/20260530120003_create_reports_policies.sql`.
+This matrix is load-bearing (Principle III) and is the SC-009 test surface.
+
+| Actor | `reports` SELECT | `reports` INSERT | `reports` UPDATE/DELETE | `moderation_actions` SELECT | `moderation_actions` write |
+|-------|------------------|------------------|--------------------------|------------------------------|----------------------------|
+| Anonymous | ❌ (no anon policy) | ❌ | ❌ | ❌ | ❌ |
+| Authenticated reporter | ✅ own rows only | ❌ (RPC only) | ❌ | ❌ | ❌ |
+| Authenticated non-reporter (no perm) | ✅ own rows only | ❌ | ❌ | ❌ | ❌ |
+| `reports.manage` holder | ✅ ALL rows | ❌ (RPC only) | ❌ (Edge Fn → service-role RPC only) | ✅ ALL rows | ❌ (resolve RPC only) |
+| `service_role` (Edge Fn) | n/a (bypasses RLS) | via RPC | via `resolve_report_internal` | n/a | via `resolve_report_internal` |
+
+For `public.moderation_actions` specifically:
+
+- `moderation_actions_select_admin` (TO `authenticated`):
+  `USING (public.current_user_has_permission('reports.manage'))` — admin-only
+  read; no reporter, publisher, or anonymous reader path (FR-026, FR-028).
+- `REVOKE INSERT, UPDATE, DELETE ON public.moderation_actions FROM authenticated,
+  anon` — append-only, written ONLY by the service-role
+  `resolve_report_internal` RPC (Migration 7).
+- No `anon` SELECT policy ⇒ anonymous sessions are denied entirely (FR-027).
+
+## `v_reports` scoping note (Migration 4)
+
+`moderation_actions` rows are NOT projected through `v_reports`; that SECURITY
+INVOKER view serves the report queue / My-Reports surfaces only. The admin
+moderation-history surface reads `public.moderation_actions` directly under
+`moderation_actions_select_admin`.
+
+## Audit relationship (Migration 5)
+
+A `moderation_actions` row and an `audit_logs` row are written for the same
+resolve event from different mechanisms: `resolve_report_internal` (Migration 7)
+INSERTs the `moderation_actions` row explicitly, while the
+`trg_reports_audit_resolution` trigger (Migration 5, reusing Phase 4
+`log_audit()`) writes the `audit_logs` row on the report's terminal status
+transition. Both co-commit in the single resolve transaction (FR-013, FR-035).
