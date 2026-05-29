@@ -60,7 +60,7 @@
 
 **Goal**: the bypass-proof, authenticated, approved-only, dedup'd report-creation path.
 
-- [ ] T017 [US1] Create migration `supabase/migrations/20260530120006_create_submit_report_rpc.sql` — `public.submit_report(p_listing_id uuid, p_reason text, p_note text)` SECURITY DEFINER with the `auth_required` → `invalid_reason` → `listing_not_found`/`listing_not_approved` (Q6=A) → `already_reported` (FR-004) → insert chain (capturing reporter IP/UA into `reports.metadata`, FR-010(e)), per data-model §1.6; `GRANT EXECUTE TO authenticated` only.
+- [X] T017 [US1] Create migration `supabase/migrations/20260530120006_create_submit_report_rpc.sql` — `public.submit_report(p_listing_id uuid, p_reason text, p_note text)` SECURITY DEFINER with the `auth_required` → `invalid_reason` → `listing_not_found`/`listing_not_approved` (Q6=A) → `already_reported` (FR-004) → insert chain (capturing reporter IP/UA into `reports.metadata`, FR-010(e)), per data-model §1.6; `GRANT EXECUTE TO authenticated` only.
 
 **Checkpoint**: `contracts/phase18-submit-report-rpc.md` smoke tests (authenticated insert / anon `auth_required` / non-approved reject / dedup `already_reported`).
 
