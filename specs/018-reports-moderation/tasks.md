@@ -120,18 +120,18 @@
 
 **Goal**: the report sheet wired to the Report CTA (with the anonymous nudge), the My-Reports page, and the reporter banner.
 
-- [ ] T041 [US1] Create `lib/features/reports/presentation/cubit/report_submission_cubit.dart` (`@injectable`) — sheet state + `submit()` calling `SubmitReport`, surfacing success / `already_reported` / failure.
-- [ ] T042 [US1] Create `lib/features/reports/presentation/widgets/report_sheet.dart` — `DropdownButtonFormField<ReportReason>` (8 reasons) + optional note (≤1000) + submit/cancel; Phase 2 tokens.
-- [ ] T043 [P] [US3] Create `lib/features/reports/presentation/widgets/report_status_chip.dart` — localized `ReportStatus` pill.
-- [ ] T044 [P] [US3] Create `lib/features/reports/presentation/widgets/my_reports_empty_state.dart`.
-- [ ] T045 [US3] Create `lib/features/reports/presentation/cubit/my_reports_bloc.dart` (+ `my_reports_state.dart`) — `Opened`/`Refresh`/`LoadMore` calling `LoadMyReports` (cursor pagination, FR-022).
-- [ ] T046 [US3] Replace the Phase-1 stub `lib/features/reports/presentation/pages/my_reports_page.dart` — `AppBar(l10n.reports_my_title)` + `RefreshIndicator` + paginated `ListView` of report cards + empty-state; tap → `AppRoutes.listingDetailsFor(item.listingId)`.
-- [ ] T047 [US3] Create `lib/features/reports/presentation/cubit/listing_report_status_cubit.dart` (`@injectable`) — calls `LoadMyReportForListing`.
-- [ ] T048 [US3] Create `lib/features/reports/presentation/widgets/reporter_status_banner.dart` — renders `l10n.report_banner_status` + `ReportStatusChip` when a report exists; nothing for non-reporters/anon (FR-023).
-- [ ] T049 [US1] [US5] Rewire the Report CTA in `lib/features/listing_details/presentation/widgets/per_listing_action_block.dart` — replace the Report `_ActionButton`'s `_showComingSoon(…)` with `_onReportTap`: anon → `l10n.report_sign_in_prompt` snackbar + `context.push(AppRoutes.login)`; signed-in → `showModalBottomSheet(builder: (_) => ReportSheet(listingId: listingId))`. **Favorite + Share CTAs and row layout UNCHANGED** (FR-034).
-- [ ] T050 [US3] Host `ReporterStatusBanner(listingId: id)` in `lib/features/listing_details/presentation/pages/listing_details_page.dart` (wrapped with `ListingReportStatusCubit`).
-- [ ] T051 [US3] Add the "My Reports" `ListTile(Icons.flag_outlined, l10n.profile_reports_tile, → AppRoutes.reports)` to `lib/features/profile/presentation/pages/profile_page.dart` immediately after the "My Favorites" tile (lines 139–145).
-- [ ] T052 Register the cubits/bloc with `@injectable`; regenerate `lib/core/di/injection.config.dart`.
+- [X] T041 [US1] Create `lib/features/reports/presentation/cubit/report_submission_cubit.dart` (`@injectable`) — sheet state + `submit()` calling `SubmitReport`, surfacing success / `already_reported` / failure.
+- [X] T042 [US1] Create `lib/features/reports/presentation/widgets/report_sheet.dart` — `DropdownButtonFormField<ReportReason>` (8 reasons) + optional note (≤1000) + submit/cancel; Phase 2 tokens.
+- [X] T043 [P] [US3] Create `lib/features/reports/presentation/widgets/report_status_chip.dart` — localized `ReportStatus` pill.
+- [X] T044 [P] [US3] Create `lib/features/reports/presentation/widgets/my_reports_empty_state.dart`.
+- [X] T045 [US3] Create `lib/features/reports/presentation/cubit/my_reports_bloc.dart` (+ `my_reports_state.dart`) — `Opened`/`Refresh`/`LoadMore` calling `LoadMyReports` (cursor pagination, FR-022).
+- [X] T046 [US3] Replace the Phase-1 stub `lib/features/reports/presentation/pages/my_reports_page.dart` — `AppBar(l10n.reports_my_title)` + `RefreshIndicator` + paginated `ListView` of report cards + empty-state; tap → `AppRoutes.listingDetailsFor(item.listingId)`.
+- [X] T047 [US3] Create `lib/features/reports/presentation/cubit/listing_report_status_cubit.dart` (`@injectable`) — calls `LoadMyReportForListing`.
+- [X] T048 [US3] Create `lib/features/reports/presentation/widgets/reporter_status_banner.dart` — renders `l10n.report_banner_status` + `ReportStatusChip` when a report exists; nothing for non-reporters/anon (FR-023).
+- [X] T049 [US1] [US5] Rewire the Report CTA in `lib/features/listing_details/presentation/widgets/per_listing_action_block.dart` — replace the Report `_ActionButton`'s `_showComingSoon(…)` with `_onReportTap`: anon → `l10n.report_sign_in_prompt` snackbar + `context.push(AppRoutes.login)`; signed-in → `showModalBottomSheet(builder: (_) => ReportSheet(listingId: listingId))`. **Favorite + Share CTAs and row layout UNCHANGED** (FR-034).
+- [X] T050 [US3] Host `ReporterStatusBanner(listingId: id)` in `lib/features/listing_details/presentation/pages/listing_details_page.dart` (wrapped with `ListingReportStatusCubit`).
+- [X] T051 [US3] Add the "My Reports" `ListTile(Icons.flag_outlined, l10n.profile_reports_tile, → AppRoutes.reports)` to `lib/features/profile/presentation/pages/profile_page.dart` immediately after the "My Favorites" tile (lines 139–145).
+- [X] T052 Register the cubits/bloc with `@injectable`; regenerate `lib/core/di/injection.config.dart`.
 
 **Checkpoint**: SC-001 (submit), SC-007 (My Reports), SC-008 (banner), SC-011 (anon prompt) from `quickstart.md`.
 
