@@ -15,6 +15,7 @@ import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../../currencies/domain/entities/currency.dart';
 import '../../../currencies/domain/usecases/list_currencies.dart';
+import '../../../favorites/presentation/bloc/favorites_cubit.dart';
 import '../../../inquiries/presentation/bloc/inquiries_unread_cubit.dart';
 import '../bloc/home_bloc.dart';
 import '../bloc/home_event.dart';
@@ -77,6 +78,12 @@ class _HomeViewState extends State<_HomeView> {
     super.initState();
     _scrollController = ScrollController()..addListener(_onScroll);
     _currenciesFuture = getIt<ListCurrencies>().call(activeOnly: false);
+
+    // Phase 17: instantiate FavoritesCubit so its AuthBloc subscription
+    // hydrates the session favorited-id set on first signed-in build
+    // (mirrors Phase 16 InquiriesUnreadCubit touch; no AppLifecycleListener
+    // needed — favorites state is auth-driven, not time-driven).
+    getIt<FavoritesCubit>();
 
     // Phase 16 FR-019a: refresh unread inquiry count on cold launch and on
     // every app foreground-resume (AppLifecycleState.resumed).

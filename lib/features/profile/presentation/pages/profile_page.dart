@@ -136,6 +136,13 @@ class _ProfileView extends StatelessWidget {
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push(AppRoutes.profilePrivate),
                 ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.favorite_border),
+                  title: Text(l10n.profile_favorites_tile),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push(AppRoutes.favorites),
+                ),
                 const Divider(height: AppSpacing.xl),
                 ListTile(
                   contentPadding: EdgeInsets.zero,

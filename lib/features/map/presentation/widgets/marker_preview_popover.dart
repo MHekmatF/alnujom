@@ -27,6 +27,7 @@ import '../../../../shared/domain/value_objects/money.dart';
 import '../../../../shared/presentation/money_formatter.dart';
 import '../../../currencies/domain/entities/currency.dart';
 import '../../../currencies/domain/usecases/list_currencies.dart';
+import '../../../favorites/presentation/widgets/favorite_heart_button.dart';
 import '../../../listing_form/domain/entities/listing.dart';
 import '../../domain/entities/map_marker.dart';
 import '../bloc/map_bloc.dart';
@@ -136,14 +137,17 @@ class _MarkerPreviewPopoverState extends State<MarkerPreviewPopover> {
                       ),
                     ],
                     const SizedBox(height: AppSpacing.sm),
-                    Align(
-                      alignment: AlignmentDirectional.centerEnd,
-                      child: TextButton(
-                        onPressed: () => context.go(
-                          AppRoutes.listingDetailsFor(widget.marker.id),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        FavoriteHeartButton(listingId: widget.marker.id),
+                        TextButton(
+                          onPressed: () => context.go(
+                            AppRoutes.listingDetailsFor(widget.marker.id),
+                          ),
+                          child: Text(l10n.map_marker_view_details_action),
                         ),
-                        child: Text(l10n.map_marker_view_details_action),
-                      ),
+                      ],
                     ),
                   ],
                 ),
