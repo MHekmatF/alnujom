@@ -37,6 +37,8 @@ import '../../features/listing_form/domain/entities/listing.dart';
 import '../../features/listing_form/domain/entities/listing_form_state.dart';
 import '../../features/listing_form/presentation/pages/listing_form_page.dart';
 import '../../features/favorites/presentation/pages/favorites_page.dart';
+import '../../features/reports/presentation/pages/my_reports_page.dart';
+import '../../features/admin/reports/presentation/pages/reports_queue_page.dart';
 import '../../features/inquiries/presentation/pages/admin_inquiry_oversight_page.dart';
 import '../../features/inquiries/presentation/pages/inquiry_detail_page.dart';
 import '../../features/inquiries/presentation/pages/inquiry_inbox_page.dart';
@@ -103,6 +105,10 @@ abstract final class AppRoutes {
   static const adminInquiries = '/admin/inquiries';
   // Phase 17 FR-020: authenticated favorites page route.
   static const favorites = '/favorites';
+  // Phase 18 FR-022: authenticated My-Reports page route.
+  static const reports = '/reports';
+  // Phase 18 FR-019: admin moderation queue route.
+  static const adminReports = '/admin/reports';
   static const themeGallery = '/_debug/theme-gallery';
   static const debugMoneyFormatter = '/debug/money-formatter';
 
@@ -167,6 +173,10 @@ abstract final class AppRouteNames {
   static const adminInquiries = 'admin-inquiries';
   // Phase 17 FR-020: authenticated favorites page route name.
   static const favorites = 'favorites';
+  // Phase 18 FR-022: authenticated My-Reports page route name.
+  static const reports = 'reports';
+  // Phase 18 FR-019: admin moderation queue route name.
+  static const adminReports = 'admin-reports';
   static const themeGallery = 'theme-gallery';
 }
 
@@ -339,6 +349,14 @@ GoRouter buildAppRouter({
               ),
             ],
           ),
+          // ─── Phase 18 — admin moderation queue ───
+          // Gated by `reports.manage` permission (FR-019).
+          GoRoute(
+            path: 'reports',
+            name: AppRouteNames.adminReports,
+            redirect: requireReportsManageRedirect,
+            builder: (context, state) => const ReportsQueuePage(),
+          ),
         ],
       ),
       GoRoute(
@@ -466,6 +484,16 @@ GoRouter buildAppRouter({
         redirect: (context, state) =>
             authBloc.state is Unauthenticated ? AppRoutes.login : null,
         builder: (context, state) => const FavoritesPage(),
+      ),
+
+      // ─── Phase 18 — authenticated My-Reports page ───
+      // Requires sign-in (FR-022); anonymous deep-links redirect to /login.
+      GoRoute(
+        path: AppRoutes.reports,
+        name: AppRouteNames.reports,
+        redirect: (context, state) =>
+            authBloc.state is Unauthenticated ? AppRoutes.login : null,
+        builder: (context, state) => const MyReportsPage(),
       ),
 
       if (kDesignToolsEnabled)

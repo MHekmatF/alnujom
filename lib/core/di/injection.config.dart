@@ -48,6 +48,22 @@ import '../../features/admin/listing_review/presentation/bloc/listing_preview_bl
     as _i778;
 import '../../features/admin/listing_review/presentation/bloc/pending_queue_bloc.dart'
     as _i554;
+import '../../features/admin/reports/data/datasources/supabase_reports_admin_datasource.dart'
+    as _i433;
+import '../../features/admin/reports/data/repositories/reports_admin_repository_impl.dart'
+    as _i303;
+import '../../features/admin/reports/domain/repositories/reports_admin_repository.dart'
+    as _i973;
+import '../../features/admin/reports/domain/usecases/load_reports_queue.dart'
+    as _i911;
+import '../../features/admin/reports/domain/usecases/resolve_report.dart'
+    as _i943;
+import '../../features/admin/reports/domain/usecases/start_report_review.dart'
+    as _i771;
+import '../../features/admin/reports/presentation/bloc/report_resolve_cubit.dart'
+    as _i902;
+import '../../features/admin/reports/presentation/bloc/reports_queue_bloc.dart'
+    as _i1051;
 import '../../features/auth/data/datasources/supabase_auth_datasource.dart'
     as _i76;
 import '../../features/auth/data/repositories/auth_repository_impl.dart'
@@ -270,6 +286,22 @@ import '../../features/publisher_dashboard/presentation/bloc/moderation_history_
     as _i711;
 import '../../features/publisher_dashboard/presentation/bloc/my_listings_bloc.dart'
     as _i417;
+import '../../features/reports/data/datasources/supabase_reports_datasource.dart'
+    as _i231;
+import '../../features/reports/data/repositories/reports_repository_impl.dart'
+    as _i227;
+import '../../features/reports/domain/repositories/reports_repository.dart'
+    as _i808;
+import '../../features/reports/domain/usecases/load_my_report_for_listing.dart'
+    as _i682;
+import '../../features/reports/domain/usecases/load_my_reports.dart' as _i991;
+import '../../features/reports/domain/usecases/submit_report.dart' as _i684;
+import '../../features/reports/presentation/cubit/listing_report_status_cubit.dart'
+    as _i1007;
+import '../../features/reports/presentation/cubit/my_reports_bloc.dart'
+    as _i749;
+import '../../features/reports/presentation/cubit/report_submission_cubit.dart'
+    as _i980;
 import '../../features/search/data/datasources/supabase_search_datasource.dart'
     as _i713;
 import '../../features/search/data/repositories/search_repository_impl.dart'
@@ -406,6 +438,12 @@ _i174.GetIt $initGetIt(
   gh.factory<_i8.SupabaseFavoritesDatasource>(
     () => _i8.SupabaseFavoritesDatasource(gh<_i454.SupabaseClient>()),
   );
+  gh.factory<_i433.SupabaseReportsAdminDatasource>(
+    () => _i433.SupabaseReportsAdminDatasource(gh<_i454.SupabaseClient>()),
+  );
+  gh.factory<_i231.SupabaseReportsDatasource>(
+    () => _i231.SupabaseReportsDatasource(gh<_i454.SupabaseClient>()),
+  );
   gh.factory<_i272.InquiryRepository>(
     () => _i614.InquiryRepositoryImpl(gh<_i1043.SupabaseInquiriesDatasource>()),
   );
@@ -479,6 +517,9 @@ _i174.GetIt $initGetIt(
       gh<_i354.AppLogger>(),
     ),
     dispose: (i) => i.dispose(),
+  );
+  gh.factory<_i808.ReportsRepository>(
+    () => _i227.ReportsRepositoryImpl(gh<_i231.SupabaseReportsDatasource>()),
   );
   gh.lazySingleton<_i704.LocationsRepository>(
     () => _i178.LocationsRepositoryImpl(
@@ -558,6 +599,12 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i754.PublisherDashboardRepository>(
     () => _i240.PublisherDashboardRepositoryImpl(
       gh<_i333.SupabasePublisherDashboardDatasource>(),
+    ),
+  );
+  gh.lazySingleton<_i973.ReportsAdminRepository>(
+    () => _i303.ReportsAdminRepositoryImpl(
+      gh<_i433.SupabaseReportsAdminDatasource>(),
+      gh<_i354.AppLogger>(),
     ),
   );
   gh.lazySingleton<_i797.AuthBloc>(
@@ -747,6 +794,15 @@ _i174.GetIt $initGetIt(
   gh.factory<_i264.InquiryInboxBloc>(
     () => _i264.InquiryInboxBloc(gh<_i155.LoadInquiryInbox>()),
   );
+  gh.factory<_i911.LoadReportsQueue>(
+    () => _i911.LoadReportsQueue(gh<_i973.ReportsAdminRepository>()),
+  );
+  gh.factory<_i943.ResolveReport>(
+    () => _i943.ResolveReport(gh<_i973.ReportsAdminRepository>()),
+  );
+  gh.factory<_i771.StartReportReview>(
+    () => _i771.StartReportReview(gh<_i973.ReportsAdminRepository>()),
+  );
   gh.factoryParam<_i960.LocaleCubit, _i264.Locale?, dynamic>(
     (initialLocale, _) => _i960.LocaleCubit(
       gh<_i753.PreferencesStore>(),
@@ -829,6 +885,12 @@ _i174.GetIt $initGetIt(
   gh.factory<_i807.OnboardingCubit>(
     () => _i807.OnboardingCubit(gh<_i430.OnboardingRepository>()),
   );
+  gh.factory<_i902.ReportResolveCubit>(
+    () => _i902.ReportResolveCubit(
+      gh<_i771.StartReportReview>(),
+      gh<_i943.ResolveReport>(),
+    ),
+  );
   gh.factory<_i554.PendingQueueBloc>(
     () => _i554.PendingQueueBloc(gh<_i207.LoadPendingQueueUseCase>()),
   );
@@ -856,6 +918,18 @@ _i174.GetIt $initGetIt(
       gh<_i684.UpdateInquiryStatus>(),
       gh<_i74.InquiriesUnreadCubit>(),
     ),
+  );
+  gh.factory<_i991.LoadMyReports>(
+    () => _i991.LoadMyReports(gh<_i808.ReportsRepository>()),
+  );
+  gh.factory<_i682.LoadMyReportForListing>(
+    () => _i682.LoadMyReportForListing(gh<_i808.ReportsRepository>()),
+  );
+  gh.factory<_i684.SubmitReport>(
+    () => _i684.SubmitReport(gh<_i808.ReportsRepository>()),
+  );
+  gh.factory<_i1051.ReportsQueueBloc>(
+    () => _i1051.ReportsQueueBloc(gh<_i911.LoadReportsQueue>()),
   );
   gh.factory<_i437.MapBloc>(() => _i437.MapBloc(gh<_i842.LoadMapMarkers>()));
   gh.factory<_i885.RoleEditorBloc>(
@@ -886,6 +960,9 @@ _i174.GetIt $initGetIt(
     ),
     dispose: (i) => i.dispose(),
   );
+  gh.factory<_i1007.ListingReportStatusCubit>(
+    () => _i1007.ListingReportStatusCubit(gh<_i682.LoadMyReportForListing>()),
+  );
   gh.factory<_i796.GovernorateDetailBloc>(
     () => _i796.GovernorateDetailBloc(
       gh<_i441.LoadGovernorateDetail>(),
@@ -904,6 +981,9 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i669.LocationsListBloc>(
     () => _i669.LocationsListBloc(gh<_i533.ListGovernorates>()),
+  );
+  gh.factory<_i749.MyReportsBloc>(
+    () => _i749.MyReportsBloc(gh<_i991.LoadMyReports>()),
   );
   gh.factory<_i657.CurrencyFormBloc>(
     () => _i657.CurrencyFormBloc(
@@ -934,6 +1014,9 @@ _i174.GetIt $initGetIt(
       gh<_i281.LoadListingDetails>(),
       gh<_i797.AuthBloc>(),
     ),
+  );
+  gh.factory<_i980.ReportSubmissionCubit>(
+    () => _i980.ReportSubmissionCubit(gh<_i684.SubmitReport>()),
   );
   gh.factory<_i202.HomeBloc>(() => _i202.HomeBloc(gh<_i321.LoadHomeFeed>()));
   return getIt;
