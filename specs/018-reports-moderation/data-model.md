@@ -304,19 +304,24 @@ BEGIN
   VALUES ('listing', v_listing_id, p_report_id, p_action, p_actor_user_id, p_note, v_before, v_after);
 
   -- Sibling auto-resolve (Q5=A) — only for listing-affecting actions.
+  -- NOTE: alias the reports table (sib) — the OUT param `listing_id` would
+  -- otherwise make a bare `WHERE listing_id = …` ambiguous (fixed in
+  -- 20260530120009 after device QA).
   IF p_action <> 'dismiss' THEN
     FOR v_sib IN
-      SELECT id FROM public.reports
-      WHERE listing_id = v_listing_id AND id <> p_report_id
-        AND status IN ('new','reviewing')
+      SELECT sib.id AS sib_id
+      FROM public.reports sib
+      WHERE sib.listing_id = v_listing_id
+        AND sib.id <> p_report_id
+        AND sib.status IN ('new','reviewing')
     LOOP
       UPDATE public.reports
          SET status = 'resolved', resolved_by = p_actor_user_id,
              resolved_at = now(), resolution = p_action
-       WHERE id = v_sib.id;
+       WHERE id = v_sib.sib_id;
       INSERT INTO public.moderation_actions
         (target_type, target_id, report_id, action, performed_by, reason, before_state, after_state)
-      VALUES ('listing', v_listing_id, v_sib.id, p_action, p_actor_user_id,
+      VALUES ('listing', v_listing_id, v_sib.sib_id, p_action, p_actor_user_id,
               'auto-resolved: listing actioned via report ' || p_report_id::text,
               v_before, v_after);
     END LOOP;
