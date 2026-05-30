@@ -169,8 +169,8 @@
 
 **Goal**: all ~40 new strings localized in `ar` + `en`.
 
-- [ ] T072 Add the ~40 keys to BOTH `lib/l10n/app_ar.arb` AND `lib/l10n/app_en.arb` (create/profile/members/invite/verify/analytics/badge/admin-queue/decisions/tiles), per plan Sub-Phase J. Arabic copy Syrian-friendly. (The `profile_agency_tile` vs `admin_tile_agencies` key-naming asymmetry is INTENTIONAL — it mirrors the established Phase 18 `profile_reports_tile` + `admin_tile_reports` convention; keep it for cross-phase consistency rather than inventing a new symmetric scheme.)
-- [ ] T073 Run `flutter gen-l10n` to regenerate `lib/l10n/app_localizations*.dart`.
+- [X] T072 Add the ~40 keys to BOTH `lib/l10n/app_ar.arb` AND `lib/l10n/app_en.arb` (create/profile/members/invite/verify/analytics/badge/admin-queue/decisions/tiles), per plan Sub-Phase J. Arabic copy Syrian-friendly. (The `profile_agency_tile` vs `admin_tile_agencies` key-naming asymmetry is INTENTIONAL — it mirrors the established Phase 18 `profile_reports_tile` + `admin_tile_reports` convention; keep it for cross-phase consistency rather than inventing a new symmetric scheme.)
+- [X] T073 Run `flutter gen-l10n` to regenerate `lib/l10n/app_localizations*.dart`.
 
 **Checkpoint**: no inline `Text('...')` literals in the two feature folders; all strings resolve via `AppLocalizations`.
 
