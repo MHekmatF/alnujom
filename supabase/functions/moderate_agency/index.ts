@@ -120,7 +120,9 @@ Deno.serve(async (req: Request) => {
     const presetRaw = (reasonRaw as { preset?: unknown }).preset;
     const detailRaw = (reasonRaw as { detail?: unknown }).detail;
     const preset =
-      typeof presetRaw === "string" && presetRaw.length > 0 ? presetRaw : null;
+      typeof presetRaw === "string" && presetRaw.trim().length > 0
+        ? presetRaw.trim()
+        : null;
     let detail: string | null;
     if (detailRaw === undefined || detailRaw === null) {
       detail = null;
@@ -131,7 +133,7 @@ Deno.serve(async (req: Request) => {
           400,
         );
       }
-      detail = detailRaw.length > 0 ? detailRaw : null;
+      detail = detailRaw.trim().length > 0 ? detailRaw.trim() : null;
     } else {
       return json({ code: "invalid_request" }, 400);
     }

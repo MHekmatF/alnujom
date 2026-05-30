@@ -37,8 +37,8 @@ BEGIN
 
   -- A reject MUST carry a reason (the agency_verification_reason_when_rejected CHECK requires it).
   IF p_action = 'reject'
-     AND COALESCE(NULLIF(p_reason_json::jsonb->>'detail',''), p_reason_json::jsonb->>'preset') IS NULL THEN
-    RAISE EXCEPTION 'rejection_reason_required' USING ERRCODE = '22023';
+     AND COALESCE(NULLIF(trim(p_reason_json::jsonb->>'detail'),''), NULLIF(trim(p_reason_json::jsonb->>'preset'),'')) IS NULL THEN
+    RAISE EXCEPTION 'rejection_reason_required' USING ERRCODE = '22023';   -- trim() so a whitespace-only reason is a clean 400, not a CHECK-violation 500
   END IF;
 
   IF p_action = 'approve' THEN
@@ -68,8 +68,8 @@ BEGIN
     UPDATE public.agency_verification_requests
        SET decision        = (CASE WHEN p_action='approve' THEN 'approved' ELSE 'rejected' END),
            decision_reason  = CASE WHEN p_action='reject'
-                                   THEN COALESCE(NULLIF(p_reason_json::jsonb->>'detail',''),
-                                                 p_reason_json::jsonb->>'preset') END,
+                                   THEN COALESCE(NULLIF(trim(p_reason_json::jsonb->>'detail'),''),
+                                                 NULLIF(trim(p_reason_json::jsonb->>'preset'),'')) END,
            reviewed_by      = p_actor_user_id,
            reviewed_at      = now()
      WHERE agency_id = p_agency_id AND decision = 'pending';                 -- fires trg_agency_verification_audit

@@ -32,4 +32,4 @@
 2. Non-`agencies.approve` caller → 403 (Edge Fn); a direct `rpc('moderate_agency_internal', …)` from the client → permission denied (no grant) (SC-011).
 3. `suspend` an `approved` agency by an `agencies.suspend` holder → `suspended`; its approved listings keep their status; profile/badge gone (SC-005).
 4. `approve` when another approved agency holds the same name → `name_taken` 409 (R-145).
-5. `approve` an already-`approved` agency → `invalid_transition` 409.
+5. `approve` an already-`approved` agency → 409. (Because the `no_pending_verification` guard runs before the transition guard, an already-decided agency — which has no `pending` verification request — returns `no_pending_verification`; an agency still `pending` but with no open request also returns `no_pending_verification`; both map to 409, as does `invalid_transition`.)
