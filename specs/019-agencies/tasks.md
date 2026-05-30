@@ -17,17 +17,17 @@
 
 **Goal**: `/agency*` + `/agency/:id` + `/admin/agencies` resolve end-to-end (to stubs); the shared agency value objects exist for both feature folders to type against. No story behavior yet.
 
-- [ ] T001 Add route constants to `lib/core/routing/app_router.dart`: `AppRoutes.agency='/agency'`, `agencyMembers='/agency/members'`, `agencyListings='/agency/listings'`, `agencyAnalytics='/agency/analytics'`, `agencyVerify='/agency/verify'`, `agencyProfile='/agency/:id'`, `adminAgencies='/admin/agencies'` (+ matching `AppRouteNames`).
-- [ ] T002 Add `String? requireAgenciesManageRedirect(BuildContext, GoRouterState)` to `lib/core/routing/auth_redirect.dart` returning `'/admin?denied=agencies'` when `!getIt<PermissionChecker>().any([PermissionKeys.agenciesView, PermissionKeys.agenciesApprove, PermissionKeys.agenciesSuspend])` (mirror `requireListingReviewRedirect`, lines 112–124).
-- [ ] T003 Register the routes in `lib/core/routing/app_router.dart`: the `/agency*` self-service routes with `redirect: (c,s) => authBloc.state is Unauthenticated ? AppRoutes.login : null` (mirror `/favorites`, lines 480–487), the public `/agency/:id` (no redirect), and a child `GoRoute(path:'agencies', name: AppRouteNames.adminAgencies, redirect: requireAgenciesManageRedirect, builder: … AgencyQueuePage())` under `/admin` (mirror `reports`, lines 354–359). (Depends on T001 + T002; same file as T001.)
-- [ ] T004 [P] Create `lib/features/agency/domain/entities/agency_status.dart` — `enum AgencyStatus { pending, approved, rejected, suspended }` with `wireValue`/`fromWire`/`isPublic`/`canPublishUnder` (data-model §2.1).
-- [ ] T005 [P] Create `lib/features/agency/domain/entities/agency_member_role.dart` — `enum AgencyMemberRole { admin, agent }` + `wireValue`/`isAdmin`/`fromWire` (data-model §2.2).
-- [ ] T006 [P] Create `lib/features/agency/domain/entities/agency_member_status.dart` — `enum AgencyMemberStatus { pending, active, removed }` + `wireValue`/`isActive`/`fromWire` (data-model §2.2).
-- [ ] T007 Create `lib/features/agency/domain/entities/agency.dart` — the `Agency` `Equatable` entity per data-model §2.3 (imports `AgencyStatus` from T004).
-- [ ] T008 [P] Create `lib/features/agency/domain/entities/agency_member.dart` — per data-model §2.4 (imports T005/T006).
-- [ ] T009 [P] Create `lib/features/agency/domain/entities/agency_verification_request.dart` — the `AgencyVerificationRequest` entity + `enum VerificationDecision` per data-model §2.5.
-- [ ] T010 [P] Create stub `lib/features/agency/presentation/pages/agency_home_page.dart` (empty `Scaffold` + `AppBar`).
-- [ ] T011 [P] Create stub `lib/features/admin/agencies/presentation/pages/agency_queue_page.dart` (empty `Scaffold` + `AppBar`).
+- [X] T001 Add route constants to `lib/core/routing/app_router.dart`: `AppRoutes.agency='/agency'`, `agencyMembers='/agency/members'`, `agencyListings='/agency/listings'`, `agencyAnalytics='/agency/analytics'`, `agencyVerify='/agency/verify'`, `agencyProfile='/agency/:id'`, `adminAgencies='/admin/agencies'` (+ matching `AppRouteNames`).
+- [X] T002 Add `String? requireAgenciesManageRedirect(BuildContext, GoRouterState)` to `lib/core/routing/auth_redirect.dart` returning `'/admin?denied=agencies'` when `!getIt<PermissionChecker>().any([PermissionKeys.agenciesView, PermissionKeys.agenciesApprove, PermissionKeys.agenciesSuspend])` (mirror `requireListingReviewRedirect`, lines 112–124).
+- [X] T003 Register the routes in `lib/core/routing/app_router.dart`: the `/agency*` self-service routes with `redirect: (c,s) => authBloc.state is Unauthenticated ? AppRoutes.login : null` (mirror `/favorites`, lines 480–487), the public `/agency/:id` (no redirect), and a child `GoRoute(path:'agencies', name: AppRouteNames.adminAgencies, redirect: requireAgenciesManageRedirect, builder: … AgencyQueuePage())` under `/admin` (mirror `reports`, lines 354–359). (Depends on T001 + T002; same file as T001.)
+- [X] T004 [P] Create `lib/features/agency/domain/entities/agency_status.dart` — `enum AgencyStatus { pending, approved, rejected, suspended }` with `wireValue`/`fromWire`/`isPublic`/`canPublishUnder` (data-model §2.1).
+- [X] T005 [P] Create `lib/features/agency/domain/entities/agency_member_role.dart` — `enum AgencyMemberRole { admin, agent }` + `wireValue`/`isAdmin`/`fromWire` (data-model §2.2).
+- [X] T006 [P] Create `lib/features/agency/domain/entities/agency_member_status.dart` — `enum AgencyMemberStatus { pending, active, removed }` + `wireValue`/`isActive`/`fromWire` (data-model §2.2).
+- [X] T007 Create `lib/features/agency/domain/entities/agency.dart` — the `Agency` `Equatable` entity per data-model §2.3 (imports `AgencyStatus` from T004).
+- [X] T008 [P] Create `lib/features/agency/domain/entities/agency_member.dart` — per data-model §2.4 (imports T005/T006).
+- [X] T009 [P] Create `lib/features/agency/domain/entities/agency_verification_request.dart` — the `AgencyVerificationRequest` entity + `enum VerificationDecision` per data-model §2.5.
+- [X] T010 [P] Create stub `lib/features/agency/presentation/pages/agency_home_page.dart` (empty `Scaffold` + `AppBar`).
+- [X] T011 [P] Create stub `lib/features/admin/agencies/presentation/pages/agency_queue_page.dart` (empty `Scaffold` + `AppBar`).
 
 **Checkpoint**: `flutter analyze` clean; `/agency` (auth-redirects signed-out) and `/admin/agencies` (redirects without `agencies.*`) navigate to stubs; `/agency/:id` resolves publicly.
 
