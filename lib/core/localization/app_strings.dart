@@ -3570,4 +3570,8 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String get agency_decision_success =>
       _resolve('agency_decision_success', (loc) => loc.agency_decision_success);
+
+  @override
+  String get agencies_queue_empty =>
+      _resolve('agencies_queue_empty', (loc) => loc.agencies_queue_empty);
 }
