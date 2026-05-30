@@ -108,13 +108,13 @@
 
 **Goal**: the `AgenciesAdminRepository` + datasource the verification queue/decision UI consumes.
 
-- [ ] T038 [P] [US2] Create `lib/features/admin/agencies/domain/entities/agency_verification_item.dart` per data-model §2.6 (the `Agency` + `AgencyVerificationRequest` + admin-only decrypted id/registration numbers + owner display name).
-- [ ] T039 [US2] Create `lib/features/admin/agencies/domain/repositories/agencies_admin_repository.dart` — `loadQueue({status?, cursor?})`, `loadDetail(agencyId)`, `approve`, `reject`, `suspend`, `reinstate` (all `Result<T>`).
-- [ ] T040 [P] [US2] Create the 5 use cases under `lib/features/admin/agencies/domain/usecases/` — `load_agency_verification_queue.dart`, `approve_agency.dart`, `reject_agency.dart`, `suspend_agency.dart`, `reinstate_agency.dart` (each `@injectable`).
-- [ ] T041 [US2] Create `lib/features/admin/agencies/data/dtos/agency_verification_item_dto.dart`.
-- [ ] T042 [US2] Create `lib/features/admin/agencies/data/datasources/supabase_agencies_admin_datasource.dart` — `loadQueue`/`loadDetail` via `from('v_agencies'/'agency_verification_requests').select()` + `rpc('app_vault_secret_for_agency',…)` for the decrypted id fields; `approve`/`reject`/`suspend`/`reinstate` via `functions.invoke('moderate_agency', body:{...})`.
-- [ ] T043 [US2] Create `lib/features/admin/agencies/data/repositories/agencies_admin_repository_impl.dart`.
-- [ ] T044 Register the use cases + repository + datasource with `@injectable`/`@LazySingleton`; regenerate `lib/core/di/injection.config.dart`.
+- [X] T038 [P] [US2] Create `lib/features/admin/agencies/domain/entities/agency_verification_item.dart` per data-model §2.6 (the `Agency` + `AgencyVerificationRequest` + admin-only decrypted id/registration numbers + owner display name).
+- [X] T039 [US2] Create `lib/features/admin/agencies/domain/repositories/agencies_admin_repository.dart` — `loadQueue({status?, cursor?})`, `loadDetail(agencyId)`, `approve`, `reject`, `suspend`, `reinstate` (all `Result<T>`).
+- [X] T040 [P] [US2] Create the 5 use cases under `lib/features/admin/agencies/domain/usecases/` — `load_agency_verification_queue.dart`, `approve_agency.dart`, `reject_agency.dart`, `suspend_agency.dart`, `reinstate_agency.dart` (each `@injectable`).
+- [X] T041 [US2] Create `lib/features/admin/agencies/data/dtos/agency_verification_item_dto.dart`.
+- [X] T042 [US2] Create `lib/features/admin/agencies/data/datasources/supabase_agencies_admin_datasource.dart` — `loadQueue`/`loadDetail` via `from('v_agencies'/'agency_verification_requests').select()` + `rpc('app_vault_secret_for_agency',…)` for the decrypted id fields; `approve`/`reject`/`suspend`/`reinstate` via `functions.invoke('moderate_agency', body:{...})`.
+- [X] T043 [US2] Create `lib/features/admin/agencies/data/repositories/agencies_admin_repository_impl.dart`.
+- [X] T044 Register the use cases + repository + datasource with `@injectable`/`@LazySingleton`; regenerate `lib/core/di/injection.config.dart`.
 
 **Checkpoint**: `flutter analyze` clean; admin domain imports the shared `Agency`/`AgencyStatus` from `lib/features/agency/domain/entities/`; no Supabase import under `domain/`.
 
