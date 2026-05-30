@@ -61,6 +61,8 @@ class FieldChanged extends ListingFormEvent {
   const FieldChanged.phone(this.value) : field = ListingFormField.phone;
   const FieldChanged.whatsapp(this.value) : field = ListingFormField.whatsapp;
   const FieldChanged.hideUntil(this.value) : field = ListingFormField.hideUntil;
+  // Phase 19 (T062) — publish under an agency (null payload = personal).
+  const FieldChanged.agencyId(this.value) : field = ListingFormField.agencyId;
 
   final ListingFormField field;
   final Object? value;
@@ -149,6 +151,7 @@ enum ListingFormField {
   phone,
   whatsapp,
   hideUntil,
+  agencyId,
 }
 
 // Re-export for convenience.

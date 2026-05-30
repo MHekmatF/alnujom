@@ -23,6 +23,7 @@ import '../bloc/listing_details_bloc.dart';
 import '../widgets/contact_block.dart';
 import '../widgets/per_listing_action_block.dart';
 import '../../../reports/presentation/widgets/reporter_status_banner.dart';
+import '../../../agency/presentation/widgets/listing_agency_badge.dart';
 import '../../data/listing_details_video_launcher.dart';
 
 /// Phase 13 (spec/013-home-and-details) — listing details page.
@@ -163,6 +164,11 @@ class _SuccessBody extends StatelessWidget {
                     ),
                   ),
                 ],
+                // Phase 19 (FR-022/T061): verified-agency badge. Renders
+                // nothing unless the listing's agency is approved. Does NOT
+                // alter the Phase 13/17/18 Favorite/Share/Report CTAs.
+                if (aggregate.listing.agencyId != null)
+                  ListingAgencyBadge(agencyId: aggregate.listing.agencyId!),
                 const SizedBox(height: AppSpacing.md),
                 // 4. Price block — Phase 12 Q8=A VERBATIM
                 if (displayCurrency != null && aggregate.prices.isNotEmpty) ...[

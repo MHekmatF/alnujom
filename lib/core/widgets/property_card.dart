@@ -29,6 +29,7 @@ class PropertyCard extends StatelessWidget {
     this.onTap,
     this.onLongPress,
     this.onFavoritePressed,
+    this.agencyBadge,
     super.key,
   });
 
@@ -45,6 +46,11 @@ class PropertyCard extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
   final VoidCallback? onFavoritePressed;
+
+  /// Phase 19 (FR-022/FR-023) — optional verified-agency badge rendered below
+  /// the location row. Rendered ONLY when non-null; passing null leaves the
+  /// existing layout completely unchanged (no reflow).
+  final Widget? agencyBadge;
 
   @override
   Widget build(BuildContext context) {
@@ -129,6 +135,13 @@ class PropertyCard extends StatelessWidget {
             ),
           ],
         ),
+        if (agencyBadge != null) ...[
+          const SizedBox(height: AppSpacing.sm),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: agencyBadge,
+          ),
+        ],
       ],
     );
   }

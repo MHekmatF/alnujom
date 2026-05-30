@@ -124,25 +124,25 @@
 
 **Goal**: the create/profile/members/verify/analytics pages, the pending-invitations surface, the verified badge, and the publish-under-agency selector.
 
-- [ ] T045 [US1] Create `lib/features/agency/presentation/bloc/agency_home_cubit.dart` (`@injectable`) — none/owner/member state via `LoadMyAgency`.
-- [ ] T046 [US3] Create `lib/features/agency/presentation/bloc/agency_members_bloc.dart` (+ `_state.dart`) — roster load + invite/role/remove via the membership use cases.
-- [ ] T047 [US1] Create `lib/features/agency/presentation/bloc/agency_verification_cubit.dart` — submit + status via `SubmitAgencyVerification`/`LoadMyAgency`.
-- [ ] T048 [US3] Create `lib/features/agency/presentation/bloc/agency_invitations_cubit.dart` — pending invitations + accept/decline via `LoadMyAgencyInvitations`/`RespondAgencyInvitation`.
-- [ ] T049 [US6] Create `lib/features/agency/presentation/bloc/agency_listings_bloc.dart` (+ `_state.dart`, paginated) + `agency_analytics_cubit.dart`.
-- [ ] T050 [P] [US5] Create `lib/features/agency/presentation/widgets/agency_status_chip.dart` + `agency_member_tile.dart` (Phase 2 tokens).
-- [ ] T051 [US3] Create `lib/features/agency/presentation/widgets/invite_member_sheet.dart` — phone + role; surfaces `user_not_found`/`already_member`.
-- [ ] T052 [P] [US5] Create `lib/features/agency/presentation/widgets/agency_badge.dart` — name + logo, links to `/agency/:id`.
-- [ ] T053 [US3] Create `lib/features/agency/presentation/widgets/publish_under_agency_field.dart` — selector over "personal" + the user's active agencies in {pending,approved}.
-- [ ] T054 [US1] Replace the Phase-1 stub `lib/features/agency/presentation/pages/agency_home_page.dart` — "Create agency" when none; the management surface (links to members/listings/analytics/verify) when owner/member.
-- [ ] T055 [US5] Create `lib/features/agency/presentation/pages/agency_profile_page.dart` — public `/agency/:id` (name/logo/contact + approved listings).
-- [ ] T056 [US3] Create `lib/features/agency/presentation/pages/agency_members_page.dart` — roster + invite sheet + pending invitations + role/remove.
-- [ ] T057 [US6] Create `lib/features/agency/presentation/pages/agency_listings_page.dart` (paginated) + `agency_analytics_page.dart` (member + listing-by-status counters).
-- [ ] T058 [US1] Create `lib/features/agency/presentation/pages/agency_verification_page.dart` — doc upload + ID/registration fields + status banner + rejection reason.
-- [ ] T059 [US1] Add the "My Agency" `ListTile(Icons.business_outlined, l10n.profile_agency_tile, → AppRoutes.agency)` to `lib/features/profile/presentation/pages/profile_page.dart` between the "My Favorites" tile (lines 139–145) and the "My Reports" tile (lines 147–153).
-- [ ] T060 [US5] Add an OPTIONAL `agencyName`/`agencyLogoPath` (or `Widget? agencyBadge`) param to `lib/core/widgets/property_card.dart` and render it only when non-null — NO layout change when null (FR-023). Card sites pass the badge fields from `v_listings_public`.
-- [ ] T061 [US5] Mount `AgencyBadge(...)` in `lib/features/listing_details/presentation/pages/listing_details_page.dart` only when the loaded listing's agency is `approved` (the Favorite/Share/Report CTAs UNCHANGED).
-- [ ] T062 [US3] Host `PublishUnderAgencyField` in `lib/features/listing_form/presentation/widgets/step_basics.dart` (after property-type) and carry `agencyId` in `lib/features/listing_form/presentation/bloc/listing_form_bloc.dart` — load active memberships in `attachContext` (lines 106–112) + `draftListing.copyWith(agencyId:…)` (listing.dart lines 268–301).
-- [ ] T063 Register the cubits/blocs with `@injectable`; regenerate `lib/core/di/injection.config.dart`.
+- [X] T045 [US1] Create `lib/features/agency/presentation/bloc/agency_home_cubit.dart` (`@injectable`) — none/owner/member state via `LoadMyAgency`.
+- [X] T046 [US3] Create `lib/features/agency/presentation/bloc/agency_members_bloc.dart` (+ `_state.dart`) — roster load + invite/role/remove via the membership use cases.
+- [X] T047 [US1] Create `lib/features/agency/presentation/bloc/agency_verification_cubit.dart` — submit + status via `SubmitAgencyVerification`/`LoadMyAgency`.
+- [X] T048 [US3] Create `lib/features/agency/presentation/bloc/agency_invitations_cubit.dart` — pending invitations + accept/decline via `LoadMyAgencyInvitations`/`RespondAgencyInvitation`.
+- [X] T049 [US6] Create `lib/features/agency/presentation/bloc/agency_listings_bloc.dart` (+ `_state.dart`, paginated) + `agency_analytics_cubit.dart`.
+- [X] T050 [P] [US5] Create `lib/features/agency/presentation/widgets/agency_status_chip.dart` + `agency_member_tile.dart` (Phase 2 tokens).
+- [X] T051 [US3] Create `lib/features/agency/presentation/widgets/invite_member_sheet.dart` — phone + role; surfaces `user_not_found`/`already_member`.
+- [X] T052 [P] [US5] Create `lib/features/agency/presentation/widgets/agency_badge.dart` — name + logo, links to `/agency/:id`.
+- [X] T053 [US3] Create `lib/features/agency/presentation/widgets/publish_under_agency_field.dart` — selector over "personal" + the user's active agencies in {pending,approved}.
+- [X] T054 [US1] Replace the Phase-1 stub `lib/features/agency/presentation/pages/agency_home_page.dart` — "Create agency" when none; the management surface (links to members/listings/analytics/verify) when owner/member.
+- [X] T055 [US5] Create `lib/features/agency/presentation/pages/agency_profile_page.dart` — public `/agency/:id` (name/logo/contact + approved listings).
+- [X] T056 [US3] Create `lib/features/agency/presentation/pages/agency_members_page.dart` — roster + invite sheet + pending invitations + role/remove.
+- [X] T057 [US6] Create `lib/features/agency/presentation/pages/agency_listings_page.dart` (paginated) + `agency_analytics_page.dart` (member + listing-by-status counters).
+- [X] T058 [US1] Create `lib/features/agency/presentation/pages/agency_verification_page.dart` — doc upload + ID/registration fields + status banner + rejection reason.
+- [X] T059 [US1] Add the "My Agency" `ListTile(Icons.business_outlined, l10n.profile_agency_tile, → AppRoutes.agency)` to `lib/features/profile/presentation/pages/profile_page.dart` between the "My Favorites" tile (lines 139–145) and the "My Reports" tile (lines 147–153).
+- [X] T060 [US5] Add an OPTIONAL `agencyName`/`agencyLogoPath` (or `Widget? agencyBadge`) param to `lib/core/widgets/property_card.dart` and render it only when non-null — NO layout change when null (FR-023). Card sites pass the badge fields from `v_listings_public`.
+- [X] T061 [US5] Mount `AgencyBadge(...)` in `lib/features/listing_details/presentation/pages/listing_details_page.dart` only when the loaded listing's agency is `approved` (the Favorite/Share/Report CTAs UNCHANGED).
+- [X] T062 [US3] Host `PublishUnderAgencyField` in `lib/features/listing_form/presentation/widgets/step_basics.dart` (after property-type) and carry `agencyId` in `lib/features/listing_form/presentation/bloc/listing_form_bloc.dart` — load active memberships in `attachContext` (lines 106–112) + `draftListing.copyWith(agencyId:…)` (listing.dart lines 268–301).
+- [X] T063 Register the cubits/blocs with `@injectable`; regenerate `lib/core/di/injection.config.dart`.
 
 **Checkpoint**: SC-001 (create), SC-002 (verification), SC-006 (invite+accept), SC-007 (publish under agency), SC-008 (badge) from `quickstart.md`.
 

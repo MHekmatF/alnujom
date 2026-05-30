@@ -3570,4 +3570,68 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String get agency_decision_success =>
       _resolve('agency_decision_success', (loc) => loc.agency_decision_success);
+
+  @override
+  String get agency_create_description_hint => _resolve(
+    'agency_create_description_hint',
+    (loc) => loc.agency_create_description_hint,
+  );
+
+  @override
+  String get agency_save_button =>
+      _resolve('agency_save_button', (loc) => loc.agency_save_button);
+
+  @override
+  String get agency_manage_members =>
+      _resolve('agency_manage_members', (loc) => loc.agency_manage_members);
+
+  @override
+  String get agency_manage_listings =>
+      _resolve('agency_manage_listings', (loc) => loc.agency_manage_listings);
+
+  @override
+  String get agency_manage_analytics =>
+      _resolve('agency_manage_analytics', (loc) => loc.agency_manage_analytics);
+
+  @override
+  String get agency_manage_verify =>
+      _resolve('agency_manage_verify', (loc) => loc.agency_manage_verify);
+
+  @override
+  String get agency_listings_title =>
+      _resolve('agency_listings_title', (loc) => loc.agency_listings_title);
+
+  @override
+  String get agency_listings_empty =>
+      _resolve('agency_listings_empty', (loc) => loc.agency_listings_empty);
+
+  @override
+  String get agency_members_empty =>
+      _resolve('agency_members_empty', (loc) => loc.agency_members_empty);
+
+  @override
+  String get agency_invitations_empty =>
+      _resolve('agency_invitations_empty', (loc) => loc.agency_invitations_empty);
+
+  @override
+  String get agency_generic_error =>
+      _resolve('agency_generic_error', (loc) => loc.agency_generic_error);
+
+  @override
+  String get agency_no_agency_message =>
+      _resolve('agency_no_agency_message', (loc) => loc.agency_no_agency_message);
+
+  @override
+  String get agency_member_remove_confirm => _resolve(
+    'agency_member_remove_confirm',
+    (loc) => loc.agency_member_remove_confirm,
+  );
+
+  @override
+  String get agency_cancel_button =>
+      _resolve('agency_cancel_button', (loc) => loc.agency_cancel_button);
+
+  @override
+  String get agency_action_failed =>
+      _resolve('agency_action_failed', (loc) => loc.agency_action_failed);
 }
