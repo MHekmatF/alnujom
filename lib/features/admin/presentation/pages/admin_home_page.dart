@@ -73,6 +73,14 @@ class AdminHomePage extends StatelessWidget {
           trailing: const Icon(Icons.chevron_right),
           onTap: () => context.push(AppRoutes.adminReports),
         ),
+      // Phase 19 — agencies.view gated tile (FR-008, no hardcoded role branch).
+      if (checker.has(PermissionKeys.agenciesView))
+        ListTile(
+          leading: const Icon(Icons.business_outlined),
+          title: Text(l10n.admin_tile_agencies),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => context.push(AppRoutes.adminAgencies),
+        ),
       if (kDebugMode) const LocationsSmokeTestTile(),
     ];
 

@@ -1151,5 +1151,8 @@
   "agency_suspend_confirm_body": "Suspending the agency will hide its profile and badge and block new agency publishing.",
   "@agency_suspend_confirm_body": { "description": "Phase 19 — Body text of the suspend-confirmation dialog." },
   "agency_decision_success": "Action completed successfully",
-  "@agency_decision_success": { "description": "Phase 19 — Success snackbar shown after any admin agency moderation action completes." }
+  "@agency_decision_success": { "description": "Phase 19 — Success snackbar shown after any admin agency moderation action completes." },
+
+  "agencies_queue_empty": "No agencies found",
+  "@agencies_queue_empty": { "description": "Phase 19 — Empty-state message on the admin agency verification queue page." }
 }

@@ -152,14 +152,14 @@
 
 **Goal**: the `agencies.*`-gated verification queue with pagination, the decision flow with confirmation, the admin-home tile.
 
-- [ ] T064 [US2] Create `lib/features/admin/agencies/presentation/bloc/agency_queue_bloc.dart` (+ `agency_queue_state.dart`) — `Opened`/`FilterChanged(status?)`/`LoadMore`/`Refresh` calling `LoadAgencyVerificationQueue` (cursor pagination, FR-007/SC-015).
-- [ ] T065 [P] [US2] Create `lib/features/admin/agencies/presentation/widgets/agency_queue_card.dart` — agency name + owner + submitted-at.
-- [ ] T066 [US2] Replace the Phase-1 stub `lib/features/admin/agencies/presentation/pages/agency_queue_page.dart` — `AppBar(l10n.agencies_queue_title)` + status filter + paginated `ListView`; tap → `agency_detail_page.dart`.
-- [ ] T067 [P] [US2] Create `lib/features/admin/agencies/presentation/widgets/agency_decision_dialog.dart` — approve / reject (reason) / suspend (destructive confirm, FR-010) / reinstate.
-- [ ] T068 [US2] Create `lib/features/admin/agencies/presentation/bloc/agency_moderation_cubit.dart` — `approve`/`reject`/`suspend`/`reinstate` via the admin use cases.
-- [ ] T069 [US2] Create `lib/features/admin/agencies/presentation/pages/agency_detail_page.dart` — profile + decrypted ID/registration numbers + evidence docs + the 4 actions via `AgencyDecisionDialog`.
-- [ ] T070 [US2] Add the Agencies tile to `lib/features/admin/presentation/pages/admin_home_page.dart`: `if (checker.has(PermissionKeys.agenciesView)) ListTile(Icons.business_outlined, l10n.admin_tile_agencies, → AppRoutes.adminAgencies)` (mirror the reports tile, lines 69–75).
-- [ ] T071 Register the bloc/cubit with `@injectable`; regenerate `lib/core/di/injection.config.dart`.
+- [X] T064 [US2] Create `lib/features/admin/agencies/presentation/bloc/agency_queue_bloc.dart` (+ `agency_queue_state.dart`) — `Opened`/`FilterChanged(status?)`/`LoadMore`/`Refresh` calling `LoadAgencyVerificationQueue` (cursor pagination, FR-007/SC-015).
+- [X] T065 [P] [US2] Create `lib/features/admin/agencies/presentation/widgets/agency_queue_card.dart` — agency name + owner + submitted-at.
+- [X] T066 [US2] Replace the Phase-1 stub `lib/features/admin/agencies/presentation/pages/agency_queue_page.dart` — `AppBar(l10n.agencies_queue_title)` + status filter + paginated `ListView`; tap → `agency_detail_page.dart`.
+- [X] T067 [P] [US2] Create `lib/features/admin/agencies/presentation/widgets/agency_decision_dialog.dart` — approve / reject (reason) / suspend (destructive confirm, FR-010) / reinstate.
+- [X] T068 [US2] Create `lib/features/admin/agencies/presentation/bloc/agency_moderation_cubit.dart` — `approve`/`reject`/`suspend`/`reinstate` via the admin use cases.
+- [X] T069 [US2] Create `lib/features/admin/agencies/presentation/pages/agency_detail_page.dart` — profile + decrypted ID/registration numbers + evidence docs + the 4 actions via `AgencyDecisionDialog`.
+- [X] T070 [US2] Add the Agencies tile to `lib/features/admin/presentation/pages/admin_home_page.dart`: `if (checker.has(PermissionKeys.agenciesView)) ListTile(Icons.business_outlined, l10n.admin_tile_agencies, → AppRoutes.adminAgencies)` (mirror the reports tile, lines 69–75).
+- [X] T071 Register the bloc/cubit with `@injectable`; regenerate `lib/core/di/injection.config.dart`.
 
 **Checkpoint**: SC-003 (gating + queue + decrypted ID), SC-004 (approve/reject + audit), SC-005 (suspend hides profile/badge), SC-011 (unauthorized rejected) from `quickstart.md`.
 
