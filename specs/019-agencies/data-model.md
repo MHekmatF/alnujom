@@ -419,6 +419,8 @@ REVOKE ALL ON FUNCTION public.submit_agency_verification(UUID,TEXT,TEXT,JSONB) F
 GRANT EXECUTE ON FUNCTION public.submit_agency_verification(UUID,TEXT,TEXT,JSONB) TO authenticated;
 ```
 
+> **`update_agency_profile` (migration `20260531120014`, added after the Wave-3 review):** the FR-002 editable-profile write path. `agencies` has no client UPDATE grant, so the owner/agency-admin edits the profile through `public.update_agency_profile(p_agency_id, p_name, p_description, p_phone, p_whatsapp, p_address, p_logo_path, p_cover_path)` — SECURITY DEFINER, gated by `is_agency_admin`, PATCH semantics (omitted/NULL params leave the column unchanged via `COALESCE`), editable only while `status IN ('pending','approved')` (else `agency_not_editable`); a rename collision among `approved` agencies is rejected by `ux_agencies_name_approved`. `GRANT EXECUTE … TO authenticated`. (Omitted from the original §1.8 set — the `AgencyRepository.updateProfile` path needs it.)
+
 ### 1.9 `submit_listing` agency-membership amendment (migration `20260531120009`) — R-143 integration check
 
 ```sql

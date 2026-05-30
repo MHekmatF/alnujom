@@ -17,6 +17,7 @@
 | `set_agency_member_role(agency_id, user_id, role) → void` | `is_agency_admin` | UPDATE `member_role` (owner protected) | `permission_denied`, `invalid_role`, `cannot_modify_owner` |
 | `remove_agency_member(agency_id, user_id) → void` | `is_agency_admin` | set `status='removed'` (owner protected) | `permission_denied`, `cannot_remove_owner` |
 | `submit_agency_verification(agency_id, id_document_number, registration_number, evidence_urls?) → uuid` | `is_agency_admin` | INSERT `agency_verification_requests` `pending` + Vault-store the two numbers | `permission_denied`, `23505` (open request exists) |
+| `update_agency_profile(agency_id, name?, description?, phone?, whatsapp?, address?, logo_path?, cover_path?) → void` (migration `…014`) | `is_agency_admin` | PATCH the agency profile (COALESCE — omitted params unchanged); editable only while `pending`/`approved` | `permission_denied`, `invalid_name`, `agency_not_editable`, `23505` (rename to an approved name) |
 
 ## Smoke tests
 
