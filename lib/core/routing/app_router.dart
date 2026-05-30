@@ -39,6 +39,8 @@ import '../../features/listing_form/presentation/pages/listing_form_page.dart';
 import '../../features/favorites/presentation/pages/favorites_page.dart';
 import '../../features/reports/presentation/pages/my_reports_page.dart';
 import '../../features/admin/reports/presentation/pages/reports_queue_page.dart';
+import '../../features/agency/presentation/pages/agency_home_page.dart';
+import '../../features/admin/agencies/presentation/pages/agency_queue_page.dart';
 import '../../features/inquiries/presentation/pages/admin_inquiry_oversight_page.dart';
 import '../../features/inquiries/presentation/pages/inquiry_detail_page.dart';
 import '../../features/inquiries/presentation/pages/inquiry_inbox_page.dart';
@@ -109,6 +111,16 @@ abstract final class AppRoutes {
   static const reports = '/reports';
   // Phase 18 FR-019: admin moderation queue route.
   static const adminReports = '/admin/reports';
+  // Phase 19: agency self-service routes (auth-required).
+  static const agency = '/agency';
+  static const agencyMembers = '/agency/members';
+  static const agencyListings = '/agency/listings';
+  static const agencyAnalytics = '/agency/analytics';
+  static const agencyVerify = '/agency/verify';
+  // Phase 19: public agency profile deep-link (no auth redirect).
+  static const agencyProfile = '/agency/:id';
+  // Phase 19: admin agency verification queue route.
+  static const adminAgencies = '/admin/agencies';
   static const themeGallery = '/_debug/theme-gallery';
   static const debugMoneyFormatter = '/debug/money-formatter';
 
@@ -177,6 +189,16 @@ abstract final class AppRouteNames {
   static const reports = 'reports';
   // Phase 18 FR-019: admin moderation queue route name.
   static const adminReports = 'admin-reports';
+  // Phase 19: agency self-service route names.
+  static const agency = 'agency';
+  static const agencyMembers = 'agency-members';
+  static const agencyListings = 'agency-listings';
+  static const agencyAnalytics = 'agency-analytics';
+  static const agencyVerify = 'agency-verify';
+  // Phase 19: public agency profile route name.
+  static const agencyProfile = 'agency-profile';
+  // Phase 19: admin agency verification queue route name.
+  static const adminAgencies = 'admin-agencies';
   static const themeGallery = 'theme-gallery';
 }
 
@@ -357,6 +379,14 @@ GoRouter buildAppRouter({
             redirect: requireReportsManageRedirect,
             builder: (context, state) => const ReportsQueuePage(),
           ),
+          // ─── Phase 19 — admin agency verification queue ───
+          // Gated by agencies.view / agencies.approve / agencies.suspend (FR-006).
+          GoRoute(
+            path: 'agencies',
+            name: AppRouteNames.adminAgencies,
+            redirect: requireAgenciesManageRedirect,
+            builder: (context, state) => const AgencyQueuePage(),
+          ),
         ],
       ),
       GoRoute(
@@ -495,6 +525,18 @@ GoRouter buildAppRouter({
             authBloc.state is Unauthenticated ? AppRoutes.login : null,
         builder: (context, state) => const MyReportsPage(),
       ),
+
+      // ─── Phase 19 — agency self-service hub ───
+      // Requires sign-in; anonymous deep-links redirect to /login (mirrors Phase 17/18).
+      GoRoute(
+        path: AppRoutes.agency,
+        name: AppRouteNames.agency,
+        redirect: (context, state) =>
+            authBloc.state is Unauthenticated ? AppRoutes.login : null,
+        builder: (context, state) => const AgencyHomePage(),
+      ),
+      // Phase 8/9: register agencyProfile/members/listings/analytics/verify GoRoutes
+      // when their pages land (those pages do not exist until Phase 8/9).
 
       if (kDesignToolsEnabled)
         GoRoute(
