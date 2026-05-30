@@ -77,7 +77,7 @@
 
 **Goal**: the atomic dual-layer-gated agency moderation; the soft-gate publish validation; advisor hardening; the storage buckets.
 
-- [ ] T025 [US3] **Integration check (R-143)**: read `supabase/migrations/20260522120004_amend_submit_listing_rpc_for_media_minimum.sql` (the LATEST `submit_listing` body) and confirm the exact insertion point — after the final required-field validation, immediately BEFORE the `UPDATE … status='pending_review'`. Re-base T026's amendment on that body so NO existing validation (profile approval, ≥1 price, ≥1 image, residential rules) is dropped.
+- [ ] T025 [US3] **Integration check (R-143) — BLOCKING for T026 (author T026 ONLY after T025 completes)**: read `supabase/migrations/20260522120004_amend_submit_listing_rpc_for_media_minimum.sql` (the LATEST `submit_listing` body) and confirm the exact insertion point — after the final required-field validation, immediately BEFORE the `UPDATE … status='pending_review'`. Re-base T026's amendment on that body so NO existing validation (profile approval, ≥1 price, ≥1 image, residential rules) is dropped. T026 MUST be a `CREATE OR REPLACE` that re-asserts the ENTIRE existing body verbatim PLUS the agency-membership branch.
 - [ ] T026 [US3] Create migration `supabase/migrations/20260531120009_amend_submit_listing_agency_check.sql` — `CREATE OR REPLACE FUNCTION public.submit_listing(p_listing_id uuid)` re-asserting the latest body PLUS the agency-membership `IF v_listing.agency_id IS NOT NULL THEN … not_an_agency_member` branch (active member of an agency in {pending,approved}), per data-model §1.9 / `contracts/phase19-submit-listing-agency-amendment.md`. **The existing per-user publish RLS is untouched.**
 - [ ] T027 [US2] Create migration `supabase/migrations/20260531120010_create_agency_moderation_rpcs.sql` — `public.moderate_agency_internal(p_agency_id, p_actor_user_id, p_action, p_reason_json)` SECURITY DEFINER (service_role only) per data-model §1.10: `set_config('app.current_user_id')` → `no_pending_verification` guard → `rejection_reason_required` guard → transition guards (`invalid_transition`) → `name_taken` guard on approve → agency UPDATE (fires audit) → verification-request UPDATE on approve/reject (fires audit) → return row.
 - [ ] T028 [US2] Create Edge Function `supabase/functions/moderate_agency/index.ts` — a near-copy of `supabase/functions/approve_listing/index.ts`: validate `{agency_id, action, reason?}` (reject requires reason) → `parseJwtSub` → per-action `jwtClient.rpc('current_user_has_permission',{perm_key})` (`agencies.approve` for approve/reject, `agencies.suspend` for suspend/reinstate; 403 on false) → `adminClient.rpc('moderate_agency_internal', {...})` → map `agency_not_found`→404, `invalid_transition`/`name_taken`/`no_pending_verification`→409, `rejection_reason_required`→400, success→200, per `contracts/phase19-moderate-agency-edge-function.md`.
@@ -169,7 +169,7 @@
 
 **Goal**: all ~40 new strings localized in `ar` + `en`.
 
-- [ ] T072 Add the ~40 keys to BOTH `lib/l10n/app_ar.arb` AND `lib/l10n/app_en.arb` (create/profile/members/invite/verify/analytics/badge/admin-queue/decisions/tiles), per plan Sub-Phase J. Arabic copy Syrian-friendly.
+- [ ] T072 Add the ~40 keys to BOTH `lib/l10n/app_ar.arb` AND `lib/l10n/app_en.arb` (create/profile/members/invite/verify/analytics/badge/admin-queue/decisions/tiles), per plan Sub-Phase J. Arabic copy Syrian-friendly. (The `profile_agency_tile` vs `admin_tile_agencies` key-naming asymmetry is INTENTIONAL — it mirrors the established Phase 18 `profile_reports_tile` + `admin_tile_reports` convention; keep it for cross-phase consistency rather than inventing a new symmetric scheme.)
 - [ ] T073 Run `flutter gen-l10n` to regenerate `lib/l10n/app_localizations*.dart`.
 
 **Checkpoint**: no inline `Text('...')` literals in the two feature folders; all strings resolve via `AppLocalizations`.
@@ -180,6 +180,7 @@
 
 - [ ] T074 **Device QA** (Infinix Note 8 + Pixel 8 Pro AVD): apply the 13 migrations (`…009` re-based first) + deploy the `moderate_agency` Edge Function, then walk the full `quickstart.md` recipe on-device + at the wire level. Confirm ALL 15 SCs (SC-001..SC-015), including the public/owner/member/admin/anon read matrix (SC-009), the admin-only Vault decrypt (SC-010), the dual-layer unauthorized-moderation rejection (SC-011), and the 4-combination theme×locale matrix (SC-013).
 - [ ] T075 Run the constitution grep gates (SC-014): `pubspec.yaml` unchanged vs `main` (zero new deps); zero hardcoded role/permission branch in `lib/features/agency/` + `lib/features/admin/agencies/` (gating is `is_agency_admin` / `PermissionKeys.agencies*`); no `package:supabase_flutter` under any `domain/`/`presentation/`; no inline `Text('…')` literals; no Phase 19 migration adds a value to the `listings.status` CHECK or touches `lead_events`.
+- [ ] T076 Verify each of the 8 `contracts/*.md` smoke-test blocks is exercised by a `quickstart.md` step (`phase19-agencies-table`, `phase19-agency-members-table`, `phase19-agency-verification-requests-table`, `phase19-agency-policies-and-v-agencies`, `phase19-agency-write-rpcs`, `phase19-moderate-agency-edge-function`, `phase19-submit-listing-agency-amendment`, `phase19-agency-ui-and-entry-points`); record any contract assertion not yet covered by the recipe (read-only audit — no contract is implementation, so no checkbox dependency).
 
 ---
 
@@ -249,7 +250,7 @@ Topological sort, ≤4 phases per wave (no wave exceeds 3):
 - **Wave 2**: Phase 3, Phase 4, Phase 5 — all deps (Phase 2) satisfied by Wave 1. (Phase 5 runs the R-143 `submit_listing` integration check + reads B's tables for the storage/membership predicates.)
 - **Wave 3**: Phase 6, Phase 7 — deps (Phases 1, 3, 4, 5) satisfied by Waves 1–2.
 - **Wave 4**: Phase 8, Phase 9 — deps (Phases 1, 6, 10 / Phases 1, 7, 10) satisfied by Waves 1–3.
-- **Polish**: T074–T075 run after Wave 4 merges (manual device QA + grep gates).
+- **Polish**: T074–T076 run after Wave 4 merges (manual device QA + grep gates + contract-coverage audit).
 
 ## Model Routing per Phase
 
