@@ -115,11 +115,14 @@ REVOKE INSERT, UPDATE, DELETE ON public.moderation_actions FROM authenticated, a
 ### 1.4 `public.v_reports` view (migration `20260530120004`)
 
 ```sql
--- SECURITY INVOKER so the base-table reports RLS scopes view reads
--- (reporter sees own rows; reports.manage sees all). NOT filtered on
--- listing status — reports about non-approved listings still appear.
-CREATE OR REPLACE VIEW public.v_reports
-WITH (security_invoker = true) AS
+-- SECURITY DEFINER + explicit self-scoping WHERE. (Originally SECURITY INVOKER,
+-- but device QA showed the invoker + INNER JOIN listings combination let the
+-- listings RLS hide a reporter's own report once the reported listing left
+-- 'approved' — fixed in 20260530120010.) auth.uid() / current_user_has_permission
+-- still resolve to the CALLER inside a definer view, so the WHERE clause
+-- preserves cross-user isolation (SC-009) while the join shows non-approved
+-- listings' display fields. NOT filtered on listing status.
+CREATE VIEW public.v_reports AS
 SELECT
   r.id,
   r.listing_id,
@@ -149,8 +152,11 @@ LEFT JOIN LATERAL (
   WHERE m.listing_id = l.id AND m.is_main = true
   ORDER BY m.ordering
   LIMIT 1
-) lm ON true;
+) lm ON true
+WHERE r.reporter_user_id = auth.uid()
+   OR public.current_user_has_permission('reports.manage');
 
+REVOKE ALL ON public.v_reports FROM anon;
 GRANT SELECT ON public.v_reports TO authenticated;
 ```
 

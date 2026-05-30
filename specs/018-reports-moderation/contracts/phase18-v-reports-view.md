@@ -4,7 +4,9 @@
 
 ## Declaration
 
-`CREATE VIEW public.v_reports WITH (security_invoker = true) AS …` — SECURITY INVOKER so the base-table `reports` RLS applies to view reads. One view serves BOTH the reporter ("My Reports") and the admin (queue); row visibility differs naturally by RLS.
+`CREATE VIEW public.v_reports AS … WHERE r.reporter_user_id = auth.uid() OR public.current_user_has_permission('reports.manage')` — **SECURITY DEFINER** (default) with an **explicit self-scoping WHERE**. One view serves BOTH the reporter ("My Reports") and the admin (queue); row visibility is enforced by the WHERE clause (reporter-self OR `reports.manage`).
+
+> **Why definer, not invoker** (corrected after device QA, migration `20260530120010`): the original SECURITY INVOKER + INNER JOIN `listings` let the `listings` RLS (public read only for `approved`) hide a reporter's OWN report once the reported listing left `approved`. A definer view bypasses the listings RLS for the display join, while `auth.uid()` / `current_user_has_permission` still resolve to the caller — so the explicit WHERE preserves cross-user isolation. Trade-off: this view is flagged by the `security_definer_view` advisor (same accepted pattern as `v_listings_public`).
 
 ## Projection
 

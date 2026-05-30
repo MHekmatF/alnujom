@@ -100,11 +100,11 @@ All NEEDS-CLARIFICATION items from the Technical Context are resolved below. Eac
 
 ## R-128 — `v_reports` view shape
 
-**Decision**: `public.v_reports` is a `SECURITY INVOKER` view joining `reports` → `listings` (+ main-image LATERAL + governorate/city display-name joins) projecting the queue/My-Reports card fields plus `listing_status`. It does NOT filter on `l.status` (reports about non-approved listings still appear). The base-table `reports` RLS scopes it — a reporter sees only their rows; a `reports.manage` holder sees all.
+**Decision** (amended after device QA — migration `20260530120010`): `public.v_reports` is a `SECURITY DEFINER` view joining `reports` → `listings` (+ main-image LATERAL + governorate/city display-name joins) projecting the queue/My-Reports card fields plus `listing_status`, with an **explicit self-scoping WHERE** `r.reporter_user_id = auth.uid() OR public.current_user_has_permission('reports.manage')`. It does NOT filter on `l.status`. One view serves both the reporter ("My Reports") and the admin (queue) with the WHERE enforcing visibility.
 
-**Rationale**: FR-024/FR-025/FR-026 + R-129. `SECURITY INVOKER` (the Phase 16 `20260527120013` precedent) means one view serves both the reporter ("My Reports") and the admin (queue) with naturally different visibility, no duplicate views, and no leak.
+**Rationale**: FR-024/FR-025/FR-026 + R-129. The view was ORIGINALLY `SECURITY INVOKER` (the Phase 16 `20260527120013` precedent), but device QA proved that under invoker the INNER JOIN to `listings` re-applies the listings RLS (public read only for `approved`), so a reporter LOST their own report the moment the reported listing left `approved` (hide/mark_duplicate/delete) — the exact post-moderation case SC-007/SC-008 require. A definer view bypasses the listings RLS for the display join; `auth.uid()` / `current_user_has_permission` still resolve to the caller, so the explicit WHERE reproduces the reader matrix without leak.
 
-**Alternatives rejected**: two separate views (mine vs. queue) — redundant; a `SECURITY DEFINER` view (would bypass the base RLS and require re-implementing the reader matrix in the view).
+**Alternatives rejected**: SECURITY INVOKER (the original — drops reporters' reports on non-approved listings); LEFT JOIN under invoker (keeps the report row but nulls `listing_status`/`title`, losing the very listing context the reporter wants); a definer helper function for the listing fields (keeps the view invoker but exposes any listing's title/status to any authenticated caller via the RPC — a wider leak surface). **Trade-off accepted**: the definer view is flagged by the `security_definer_view` advisor, consistent with the existing `v_listings_public` / `v_lead_events_*` definer views in this repo.
 
 ---
 
