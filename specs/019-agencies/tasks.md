@@ -92,13 +92,13 @@
 
 **Goal**: the `AgencyRepository` + datasource the self-service UI consumes.
 
-- [ ] T031 [US1] Create `lib/features/agency/domain/repositories/agency_repository.dart` — `createAgency`, `loadMyAgency`, `updateProfile`, `submitVerification`, `loadMembers`, `inviteMember`, `respondInvitation`, `setMemberRole`, `removeMember`, `loadMyInvitations`, `loadAgencyListings`, `loadAnalytics` (all `Result<T>`), per data-model §2.7.
-- [ ] T032 [P] [US1] Create the agency-profile use cases under `lib/features/agency/domain/usecases/` — `create_agency.dart`, `load_my_agency.dart`, `update_agency_profile.dart`, `submit_agency_verification.dart`, `load_agency_listings.dart`, `load_agency_analytics.dart` (each `@injectable`, one repo method).
-- [ ] T033 [P] [US3] Create the membership use cases under `lib/features/agency/domain/usecases/` — `load_agency_members.dart`, `invite_agency_member.dart`, `respond_agency_invitation.dart`, `set_agency_member_role.dart`, `remove_agency_member.dart`, `load_my_agency_invitations.dart` (each `@injectable`).
-- [ ] T034 [P] [US1] Create `lib/features/agency/data/dtos/agency_dto.dart` + `agency_member_dto.dart` (mirror `v_agencies` + `agency_members` rows; `fromJson` + `toEntity()`).
-- [ ] T035 [US1] Create `lib/features/agency/data/datasources/supabase_agency_datasource.dart` — `createAgency`/member-ops/`submitVerification` via `rpc(...)`; `loadMyAgency`/`loadMembers`/`loadMyInvitations` via `from('v_agencies'/'agency_members').select()`; verification doc upload to the `agency-documents` bucket; `loadAgencyListings` via the badge-augmented `v_listings_public`; `loadAnalytics` via bounded count queries.
-- [ ] T036 [US1] Create `lib/features/agency/data/repositories/agency_repository_impl.dart` mapping RPC error codes (`not_a_publisher`, `already_owns_agency`, `user_not_found`, `permission_denied`, …) to `Failure`s.
-- [ ] T037 Register the use cases + repository (`@LazySingleton(as: AgencyRepository)`) + datasource with `@injectable`; run `build_runner` to regenerate `lib/core/di/injection.config.dart`.
+- [X] T031 [US1] Create `lib/features/agency/domain/repositories/agency_repository.dart` — `createAgency`, `loadMyAgency`, `updateProfile`, `submitVerification`, `loadMembers`, `inviteMember`, `respondInvitation`, `setMemberRole`, `removeMember`, `loadMyInvitations`, `loadAgencyListings`, `loadAnalytics` (all `Result<T>`), per data-model §2.7.
+- [X] T032 [P] [US1] Create the agency-profile use cases under `lib/features/agency/domain/usecases/` — `create_agency.dart`, `load_my_agency.dart`, `update_agency_profile.dart`, `submit_agency_verification.dart`, `load_agency_listings.dart`, `load_agency_analytics.dart` (each `@injectable`, one repo method).
+- [X] T033 [P] [US3] Create the membership use cases under `lib/features/agency/domain/usecases/` — `load_agency_members.dart`, `invite_agency_member.dart`, `respond_agency_invitation.dart`, `set_agency_member_role.dart`, `remove_agency_member.dart`, `load_my_agency_invitations.dart` (each `@injectable`).
+- [X] T034 [P] [US1] Create `lib/features/agency/data/dtos/agency_dto.dart` + `agency_member_dto.dart` (mirror `v_agencies` + `agency_members` rows; `fromJson` + `toEntity()`).
+- [X] T035 [US1] Create `lib/features/agency/data/datasources/supabase_agency_datasource.dart` — `createAgency`/member-ops/`submitVerification` via `rpc(...)`; `loadMyAgency`/`loadMembers`/`loadMyInvitations` via `from('v_agencies'/'agency_members').select()`; verification doc upload to the `agency-documents` bucket; `loadAgencyListings` via the badge-augmented `v_listings_public`; `loadAnalytics` via bounded count queries.
+- [X] T036 [US1] Create `lib/features/agency/data/repositories/agency_repository_impl.dart` mapping RPC error codes (`not_a_publisher`, `already_owns_agency`, `user_not_found`, `permission_denied`, …) to `Failure`s.
+- [X] T037 Register the use cases + repository (`@LazySingleton(as: AgencyRepository)`) + datasource with `@injectable`; run `build_runner` to regenerate `lib/core/di/injection.config.dart`.
 
 **Checkpoint**: `flutter analyze` clean; no `package:supabase_flutter` import under `lib/features/agency/domain/`.
 
