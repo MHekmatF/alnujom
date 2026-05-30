@@ -61,7 +61,16 @@ class SupabaseReportsDatasource {
     String? cursor,
     int limit = 30,
   }) async {
-    var query = _client.from('v_reports').select();
+    final uid = _client.auth.currentUser?.id;
+    if (uid == null) return const <ReportDto>[];
+
+    // Explicit self-scope: v_reports returns ALL rows to a reports.manage holder
+    // (for the admin queue), so "My Reports" must filter to the caller's own
+    // reports regardless of role (FR-022/FR-024).
+    var query = _client
+        .from('v_reports')
+        .select()
+        .eq('reporter_user_id', uid);
 
     if (cursor != null) {
       query = query.lt('created_at', cursor);
@@ -83,9 +92,16 @@ class SupabaseReportsDatasource {
   /// or `null` when none exists. Used to drive the reporter-status banner
   /// (FR-023).
   Future<ReportDto?> loadMyReportForListing(String listingId) async {
+    final uid = _client.auth.currentUser?.id;
+    if (uid == null) return null;
+
+    // Self-scope: the banner is shown ONLY for the caller's OWN report (FR-023),
+    // so filter by reporter_user_id — v_reports would otherwise return any
+    // user's report on this listing to a reports.manage holder.
     final rows = await _client
         .from('v_reports')
         .select()
+        .eq('reporter_user_id', uid)
         .eq('listing_id', listingId)
         .order('created_at', ascending: false)
         .limit(1);
