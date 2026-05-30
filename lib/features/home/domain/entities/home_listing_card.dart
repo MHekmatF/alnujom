@@ -31,6 +31,9 @@ class HomeListingCard extends Equatable {
     required this.mainImageStoragePath,
     required this.mainImageUrl,
     required this.publishedAt,
+    this.agencyId,
+    this.agencyName,
+    this.agencyLogoUrl,
   });
 
   final String id;
@@ -55,6 +58,15 @@ class HomeListingCard extends Equatable {
 
   final DateTime publishedAt;
 
+  /// Phase 19 (FR-022) — verified-agency badge fields. Populated ONLY when the
+  /// listing is under an `approved` agency (else null → no badge per FR-023).
+  final String? agencyId;
+  final String? agencyName;
+
+  /// Resolved public URL for the agency logo (agency-assets bucket); may be
+  /// null even when [agencyId] is set (agency has no logo).
+  final String? agencyLogoUrl;
+
   @override
   List<Object?> get props => [
     id,
@@ -67,5 +79,8 @@ class HomeListingCard extends Equatable {
     mainImageStoragePath,
     mainImageUrl,
     publishedAt,
+    agencyId,
+    agencyName,
+    agencyLogoUrl,
   ];
 }

@@ -95,6 +95,50 @@ class AgencyRepositoryImpl implements AgencyRepository {
   }
 
   @override
+  Future<Result<Agency?>> loadAgencyById(String agencyId) async {
+    try {
+      final dto = await _datasource.loadAgencyById(agencyId);
+      return Success(dto?.toEntity());
+    } on PostgrestException catch (e, st) {
+      return FailureResult(
+        UnknownFailure('loadAgencyById failed: ${e.message}', cause: e, stackTrace: st),
+      );
+    } on SocketException catch (e, st) {
+      return FailureResult(NetworkFailure(e.message, cause: e, stackTrace: st));
+    } on TimeoutException catch (e, st) {
+      return FailureResult(
+        NetworkFailure(e.message ?? 'Request timed out', cause: e, stackTrace: st),
+      );
+    } catch (e, st) {
+      return FailureResult(
+        UnknownFailure('loadAgencyById failed: $e', cause: e, stackTrace: st),
+      );
+    }
+  }
+
+  @override
+  Future<Result<List<Agency>>> loadMyActiveAgencies() async {
+    try {
+      final dtos = await _datasource.loadMyActiveAgencies();
+      return Success(dtos.map((d) => d.toEntity()).toList());
+    } on PostgrestException catch (e, st) {
+      return FailureResult(
+        UnknownFailure('loadMyActiveAgencies failed: ${e.message}', cause: e, stackTrace: st),
+      );
+    } on SocketException catch (e, st) {
+      return FailureResult(NetworkFailure(e.message, cause: e, stackTrace: st));
+    } on TimeoutException catch (e, st) {
+      return FailureResult(
+        NetworkFailure(e.message ?? 'Request timed out', cause: e, stackTrace: st),
+      );
+    } catch (e, st) {
+      return FailureResult(
+        UnknownFailure('loadMyActiveAgencies failed: $e', cause: e, stackTrace: st),
+      );
+    }
+  }
+
+  @override
   Future<Result<void>> updateProfile({
     required String agencyId,
     String? name,

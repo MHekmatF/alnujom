@@ -8,7 +8,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show PostgrestException;
 
+import '../../../../core/errors/result.dart';
 import '../../../../core/validators/video_file_validator.dart';
+import '../../../agency/domain/entities/agency.dart';
+import '../../../agency/domain/usecases/load_my_active_agencies.dart';
 import '../../data/datasources/supabase_listing_media_datasource.dart'
     show MediaDeleteException;
 import '../../domain/entities/listing.dart';
@@ -51,6 +54,7 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
     this._setMainImage,
     this._deleteMedia,
     this._loadMediaForListing,
+    this._loadMyActiveAgencies,
   ) : super(
         const ListingFormState(
           mode: ListingFormMode.create,
@@ -88,6 +92,7 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
   final SetMainImage _setMainImage;
   final DeleteMedia _deleteMedia;
   final LoadMediaForListing _loadMediaForListing;
+  final LoadMyActiveAgencies _loadMyActiveAgencies;
 
   // Phase 11 — lazily-instantiated isolate worker per R-25 (one per BLoC
   // lifecycle, processes images sequentially).
@@ -128,6 +133,12 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
     emit(
       state.copyWith(mode: _mode, loadInProgress: true, lastSaveError: null),
     );
+
+    // Phase 19 (T062) — load the user's active agencies eligible to publish
+    // under (status ∈ {pending, approved}). Best-effort: on failure the
+    // selector simply hides itself. Does not block draft loading.
+    final agencies = await _loadEligibleAgencies();
+
     try {
       // Edit mode (Resubmit CTA from MyListingsPage, or deep-link to a
       // specific draft/rejected listing): load by id + child rows. Otherwise
@@ -162,6 +173,7 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
             loadInProgress: false,
             media: media,
             uploadInFlight: const <String, MediaUploadProgress>{},
+            availableAgencies: agencies,
           ),
         );
       } else {
@@ -180,12 +192,25 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
             loadInProgress: false,
             media: media,
             uploadInFlight: const <String, MediaUploadProgress>{},
+            availableAgencies: agencies,
           ),
         );
       }
     } catch (e) {
       emit(state.copyWith(loadInProgress: false, lastSaveError: e.toString()));
     }
+  }
+
+  /// Loads the current user's active agencies that permit publishing under
+  /// them. Best-effort: returns an empty list on any failure.
+  Future<List<Agency>> _loadEligibleAgencies() async {
+    final result = await _loadMyActiveAgencies();
+    if (result is Success<List<Agency>>) {
+      return result.value
+          .where((a) => a.status.canPublishUnder)
+          .toList();
+    }
+    return const <Agency>[];
   }
 
   Future<void> _onFieldChanged(
@@ -291,6 +316,10 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
           lastUpdatedBy: nextVisibility?.lastUpdatedBy,
           updatedAt: DateTime.now(),
         );
+      case ListingFormField.agencyId:
+        // Phase 19 (T062) — carry the chosen agency (or null = personal) into
+        // the draft. The copyWith sentinel lets a null explicitly clear it.
+        nextListing = listing.copyWith(agencyId: event.value as String?);
     }
 
     emit(

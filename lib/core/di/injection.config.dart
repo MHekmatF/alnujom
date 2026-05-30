@@ -95,10 +95,13 @@ import '../../features/agency/domain/usecases/invite_agency_member.dart'
     as _i917;
 import '../../features/agency/domain/usecases/load_agency_analytics.dart'
     as _i570;
+import '../../features/agency/domain/usecases/load_agency_by_id.dart' as _i686;
 import '../../features/agency/domain/usecases/load_agency_listings.dart'
     as _i1048;
 import '../../features/agency/domain/usecases/load_agency_members.dart'
     as _i144;
+import '../../features/agency/domain/usecases/load_my_active_agencies.dart'
+    as _i611;
 import '../../features/agency/domain/usecases/load_my_agency.dart' as _i324;
 import '../../features/agency/domain/usecases/load_my_agency_invitations.dart'
     as _i470;
@@ -112,6 +115,18 @@ import '../../features/agency/domain/usecases/submit_agency_verification.dart'
     as _i377;
 import '../../features/agency/domain/usecases/update_agency_profile.dart'
     as _i609;
+import '../../features/agency/presentation/bloc/agency_analytics_cubit.dart'
+    as _i840;
+import '../../features/agency/presentation/bloc/agency_home_cubit.dart'
+    as _i988;
+import '../../features/agency/presentation/bloc/agency_invitations_cubit.dart'
+    as _i800;
+import '../../features/agency/presentation/bloc/agency_listings_bloc.dart'
+    as _i261;
+import '../../features/agency/presentation/bloc/agency_members_bloc.dart'
+    as _i71;
+import '../../features/agency/presentation/bloc/agency_verification_cubit.dart'
+    as _i524;
 import '../../features/auth/data/datasources/supabase_auth_datasource.dart'
     as _i76;
 import '../../features/auth/data/repositories/auth_repository_impl.dart'
@@ -458,45 +473,45 @@ _i174.GetIt $initGetIt(
     () => _i650.PermissionChecker(gh<_i1015.PermissionCatalogRepository>()),
   );
   gh.lazySingleton<_i354.AppLogger>(() => _i1026.ConsoleLogger());
-  gh.factory<_i185.SupabaseAgenciesAdminDatasource>(
-    () => _i185.SupabaseAgenciesAdminDatasource(gh<_i454.SupabaseClient>()),
-  );
   gh.factory<_i530.SupabaseListingReviewDatasource>(
     () => _i530.SupabaseListingReviewDatasource(gh<_i454.SupabaseClient>()),
-  );
-  gh.factory<_i433.SupabaseReportsAdminDatasource>(
-    () => _i433.SupabaseReportsAdminDatasource(gh<_i454.SupabaseClient>()),
-  );
-  gh.factory<_i514.SupabaseAgencyDatasource>(
-    () => _i514.SupabaseAgencyDatasource(gh<_i454.SupabaseClient>()),
   );
   gh.factory<_i311.SupabaseCurrenciesDatasource>(
     () => _i311.SupabaseCurrenciesDatasource(gh<_i454.SupabaseClient>()),
   );
-  gh.factory<_i8.SupabaseFavoritesDatasource>(
-    () => _i8.SupabaseFavoritesDatasource(gh<_i454.SupabaseClient>()),
-  );
   gh.factory<_i732.SupabaseHomeFeedDatasource>(
     () => _i732.SupabaseHomeFeedDatasource(gh<_i454.SupabaseClient>()),
   );
-  gh.factory<_i1043.SupabaseInquiriesDatasource>(
-    () => _i1043.SupabaseInquiriesDatasource(gh<_i454.SupabaseClient>()),
-  );
   gh.factory<_i1006.SupabaseListingDetailsDatasource>(
     () => _i1006.SupabaseListingDetailsDatasource(gh<_i454.SupabaseClient>()),
-  );
-  gh.factory<_i245.SupabaseMapDatasource>(
-    () => _i245.SupabaseMapDatasource(gh<_i454.SupabaseClient>()),
   );
   gh.factory<_i333.SupabasePublisherDashboardDatasource>(
     () =>
         _i333.SupabasePublisherDashboardDatasource(gh<_i454.SupabaseClient>()),
   );
+  gh.factory<_i713.SupabaseSearchDatasource>(
+    () => _i713.SupabaseSearchDatasource(gh<_i454.SupabaseClient>()),
+  );
+  gh.factory<_i245.SupabaseMapDatasource>(
+    () => _i245.SupabaseMapDatasource(gh<_i454.SupabaseClient>()),
+  );
+  gh.factory<_i1043.SupabaseInquiriesDatasource>(
+    () => _i1043.SupabaseInquiriesDatasource(gh<_i454.SupabaseClient>()),
+  );
+  gh.factory<_i8.SupabaseFavoritesDatasource>(
+    () => _i8.SupabaseFavoritesDatasource(gh<_i454.SupabaseClient>()),
+  );
+  gh.factory<_i433.SupabaseReportsAdminDatasource>(
+    () => _i433.SupabaseReportsAdminDatasource(gh<_i454.SupabaseClient>()),
+  );
   gh.factory<_i231.SupabaseReportsDatasource>(
     () => _i231.SupabaseReportsDatasource(gh<_i454.SupabaseClient>()),
   );
-  gh.factory<_i713.SupabaseSearchDatasource>(
-    () => _i713.SupabaseSearchDatasource(gh<_i454.SupabaseClient>()),
+  gh.factory<_i185.SupabaseAgenciesAdminDatasource>(
+    () => _i185.SupabaseAgenciesAdminDatasource(gh<_i454.SupabaseClient>()),
+  );
+  gh.factory<_i514.SupabaseAgencyDatasource>(
+    () => _i514.SupabaseAgencyDatasource(gh<_i454.SupabaseClient>()),
   );
   gh.factory<_i272.InquiryRepository>(
     () => _i614.InquiryRepositoryImpl(gh<_i1043.SupabaseInquiriesDatasource>()),
@@ -626,6 +641,12 @@ _i174.GetIt $initGetIt(
   gh.factory<_i609.UpdateAgencyProfile>(
     () => _i609.UpdateAgencyProfile(gh<_i1006.AgencyRepository>()),
   );
+  gh.factory<_i686.LoadAgencyById>(
+    () => _i686.LoadAgencyById(gh<_i1006.AgencyRepository>()),
+  );
+  gh.factory<_i611.LoadMyActiveAgencies>(
+    () => _i611.LoadMyActiveAgencies(gh<_i1006.AgencyRepository>()),
+  );
   gh.lazySingleton<_i752.SupabaseClientWrapper>(
     () => _i748.SupabaseClientWrapperImpl(gh<_i354.AppLogger>()),
   );
@@ -637,6 +658,14 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i842.LoadMapMarkers>(
     () => _i842.LoadMapMarkers(gh<_i973.MapRepository>()),
+  );
+  gh.factory<_i71.AgencyMembersBloc>(
+    () => _i71.AgencyMembersBloc(
+      gh<_i144.LoadAgencyMembers>(),
+      gh<_i917.InviteAgencyMember>(),
+      gh<_i975.SetAgencyMemberRole>(),
+      gh<_i262.RemoveAgencyMember>(),
+    ),
   );
   gh.lazySingleton<_i430.OnboardingRepository>(
     () => _i452.OnboardingRepositoryImpl(gh<_i144.OnboardingSeenStorage>()),
@@ -670,6 +699,13 @@ _i174.GetIt $initGetIt(
     () => _i884.UserSearchRepositoryImpl(
       gh<_i24.SupabaseUserSearchDataSource>(),
       gh<_i354.AppLogger>(),
+    ),
+  );
+  gh.factory<_i800.AgencyInvitationsCubit>(
+    () => _i800.AgencyInvitationsCubit(
+      gh<_i470.LoadMyAgencyInvitations>(),
+      gh<_i686.LoadAgencyById>(),
+      gh<_i552.RespondAgencyInvitation>(),
     ),
   );
   gh.lazySingleton<_i787.AuthRepository>(
@@ -738,8 +774,8 @@ _i174.GetIt $initGetIt(
       gh<_i354.AppLogger>(),
     ),
   );
-  gh.factory<_i704.CheckOwnsApprovedListing>(
-    () => _i704.CheckOwnsApprovedListing(gh<_i272.InquiryRepository>()),
+  gh.factory<_i840.AgencyAnalyticsCubit>(
+    () => _i840.AgencyAnalyticsCubit(gh<_i570.LoadAgencyAnalytics>()),
   );
   gh.factory<_i868.LoadInboxUnreadCount>(
     () => _i868.LoadInboxUnreadCount(gh<_i272.InquiryRepository>()),
@@ -755,6 +791,9 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i684.UpdateInquiryStatus>(
     () => _i684.UpdateInquiryStatus(gh<_i272.InquiryRepository>()),
+  );
+  gh.factory<_i704.CheckOwnsApprovedListing>(
+    () => _i704.CheckOwnsApprovedListing(gh<_i272.InquiryRepository>()),
   );
   gh.factory<_i891.ListMyListings>(
     () => _i891.ListMyListings(gh<_i754.PublisherDashboardRepository>()),
@@ -789,6 +828,9 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i315.MutateRole>(
     () => _i315.MutateRole(gh<_i681.RoleCatalogRepository>()),
+  );
+  gh.factory<_i261.AgencyListingsBloc>(
+    () => _i261.AgencyListingsBloc(gh<_i1048.LoadAgencyListings>()),
   );
   gh.factory<_i655.CountCityDependents>(
     () => _i655.CountCityDependents(gh<_i704.LocationsRepository>()),
@@ -974,6 +1016,13 @@ _i174.GetIt $initGetIt(
       gh<_i358.ListAreasForCity>(),
     ),
   );
+  gh.factory<_i988.AgencyHomeCubit>(
+    () => _i988.AgencyHomeCubit(
+      gh<_i324.LoadMyAgency>(),
+      gh<_i611.LoadMyActiveAgencies>(),
+      gh<_i195.CreateAgency>(),
+    ),
+  );
   gh.factory<_i669.AssignRoleBloc>(
     () => _i669.AssignRoleBloc(
       gh<_i143.SearchUsers>(),
@@ -994,6 +1043,12 @@ _i174.GetIt $initGetIt(
       gh<_i1058.UpdateCity>(),
       gh<_i880.CreateArea>(),
       gh<_i188.UpdateArea>(),
+    ),
+  );
+  gh.factory<_i524.AgencyVerificationCubit>(
+    () => _i524.AgencyVerificationCubit(
+      gh<_i686.LoadAgencyById>(),
+      gh<_i377.SubmitAgencyVerification>(),
     ),
   );
   gh.factory<_i807.OnboardingCubit>(
@@ -1114,6 +1169,19 @@ _i174.GetIt $initGetIt(
       gh<_i510.LoadCurrencyDetail>(),
     ),
   );
+  gh.factory<_i916.AgencyQueueBloc>(
+    () => _i916.AgencyQueueBloc(gh<_i998.LoadAgencyVerificationQueue>()),
+  );
+  gh.factory<_i935.ListingDetailsBloc>(
+    () => _i935.ListingDetailsBloc(
+      gh<_i281.LoadListingDetails>(),
+      gh<_i797.AuthBloc>(),
+    ),
+  );
+  gh.factory<_i980.ReportSubmissionCubit>(
+    () => _i980.ReportSubmissionCubit(gh<_i684.SubmitReport>()),
+  );
+  gh.factory<_i202.HomeBloc>(() => _i202.HomeBloc(gh<_i321.LoadHomeFeed>()));
   gh.factory<_i315.ListingFormBloc>(
     () => _i315.ListingFormBloc(
       gh<_i802.LoadOrCreateDraft>(),
@@ -1129,21 +1197,9 @@ _i174.GetIt $initGetIt(
       gh<_i629.SetMainImage>(),
       gh<_i732.DeleteMedia>(),
       gh<_i406.LoadMediaForListing>(),
+      gh<_i611.LoadMyActiveAgencies>(),
     ),
   );
-  gh.factory<_i916.AgencyQueueBloc>(
-    () => _i916.AgencyQueueBloc(gh<_i998.LoadAgencyVerificationQueue>()),
-  );
-  gh.factory<_i935.ListingDetailsBloc>(
-    () => _i935.ListingDetailsBloc(
-      gh<_i281.LoadListingDetails>(),
-      gh<_i797.AuthBloc>(),
-    ),
-  );
-  gh.factory<_i980.ReportSubmissionCubit>(
-    () => _i980.ReportSubmissionCubit(gh<_i684.SubmitReport>()),
-  );
-  gh.factory<_i202.HomeBloc>(() => _i202.HomeBloc(gh<_i321.LoadHomeFeed>()));
   return getIt;
 }
 

@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../agency/domain/entities/agency.dart';
 import 'listing.dart';
 import 'listing_details.dart';
 import 'listing_media.dart';
@@ -85,6 +86,7 @@ class ListingFormState extends Equatable {
     this.savedAndExited = false,
     this.media = const <ListingMedia>[],
     this.uploadInFlight = const <String, MediaUploadProgress>{},
+    this.availableAgencies = const <Agency>[],
   });
 
   final ListingFormMode mode;
@@ -111,6 +113,11 @@ class ListingFormState extends Equatable {
   /// picker grid before the row lands in [media].
   final Map<String, MediaUploadProgress> uploadInFlight;
 
+  /// Phase 19 (T062) — the user's active agencies whose status permits
+  /// publishing under them ({pending, approved}); empty when the user belongs
+  /// to no eligible agency (the publish-under-agency selector hides itself).
+  final List<Agency> availableAgencies;
+
   bool get isReady => draftListing != null && !loadInProgress;
 
   ListingFormState copyWith({
@@ -130,6 +137,7 @@ class ListingFormState extends Equatable {
     bool? savedAndExited,
     List<ListingMedia>? media,
     Map<String, MediaUploadProgress>? uploadInFlight,
+    List<Agency>? availableAgencies,
   }) {
     return ListingFormState(
       mode: mode ?? this.mode,
@@ -158,6 +166,7 @@ class ListingFormState extends Equatable {
       savedAndExited: savedAndExited ?? this.savedAndExited,
       media: media ?? this.media,
       uploadInFlight: uploadInFlight ?? this.uploadInFlight,
+      availableAgencies: availableAgencies ?? this.availableAgencies,
     );
   }
 
@@ -179,6 +188,7 @@ class ListingFormState extends Equatable {
     savedAndExited,
     media,
     uploadInFlight,
+    availableAgencies,
   ];
 }
 

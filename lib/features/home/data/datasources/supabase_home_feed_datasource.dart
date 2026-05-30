@@ -45,7 +45,11 @@ class SupabaseHomeFeedDatasource {
           'listing_prices!inner(currency_code, amount, is_primary), '
           'listing_media(storage_path, ordering, is_main, kind), '
           'governorate:governorates(display_name), '
-          'city:cities(display_name)',
+          'city:cities(display_name), '
+          // Phase 19 (FR-022) — embed the owning agency for the verified badge.
+          // LEFT JOIN (no !inner) so non-agency listings are unaffected; the
+          // DTO renders the badge only when the agency status is 'approved'.
+          'agency:agencies(id, name, logo_path, status)',
         );
 
     // Embedded-select filters (PostgREST syntax) — apply to the JOINed
@@ -80,9 +84,16 @@ class SupabaseHomeFeedDatasource {
         .limit(20);
 
     return (rows as List<dynamic>).map((r) {
-      final dto = HomeListingCardDto.fromJson(
+      var dto = HomeListingCardDto.fromJson(
         Map<String, dynamic>.from(r as Map),
       );
+      // Resolve the agency logo public URL (agency-assets bucket) when present.
+      final logoPath = dto.agencyLogoPath;
+      if (logoPath != null && logoPath.isNotEmpty) {
+        final logoUrl =
+            _client.storage.from('agency-assets').getPublicUrl(logoPath);
+        dto = dto.copyWithAgencyLogoUrl(logoUrl);
+      }
       final path = dto.mainImage?.storagePath;
       if (path == null) return dto;
       final url = _client.storage.from('listing-images').getPublicUrl(path);

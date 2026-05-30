@@ -107,6 +107,51 @@ class SupabaseAgencyDatasource {
     return AgencyDto.fromJson(Map<String, dynamic>.from(list.first as Map));
   }
 
+  /// Reads a single agency row by [agencyId] from `public.v_agencies`.
+  /// The SECURITY DEFINER view returns approved agencies to anyone plus the
+  /// caller's own agency at any status. Returns `null` when not visible.
+  Future<AgencyDto?> loadAgencyById(String agencyId) async {
+    final row = await _client
+        .from('v_agencies')
+        .select()
+        .eq('id', agencyId)
+        .maybeSingle();
+
+    if (row == null) return null;
+    return AgencyDto.fromJson(Map<String, dynamic>.from(row));
+  }
+
+  /// Loads the agencies the current user is an `active` member of.
+  ///
+  /// Two-step: read `agency_members` (user_id = current uid, status='active')
+  /// for the agency ids, then fetch the matching `v_agencies` rows (which the
+  /// definer view scopes to approved-or-own). Returns an empty list when the
+  /// user is anonymous or a member of nothing.
+  Future<List<AgencyDto>> loadMyActiveAgencies() async {
+    final uid = _client.auth.currentUser?.id;
+    if (uid == null) return const <AgencyDto>[];
+
+    final memberRows = await _client
+        .from('agency_members')
+        .select('agency_id')
+        .eq('user_id', uid)
+        .eq('status', 'active');
+
+    final agencyIds = (memberRows as List<dynamic>)
+        .map((r) => (r as Map)['agency_id'] as String)
+        .toList();
+    if (agencyIds.isEmpty) return const <AgencyDto>[];
+
+    final rows = await _client
+        .from('v_agencies')
+        .select()
+        .inFilter('id', agencyIds);
+
+    return (rows as List<dynamic>)
+        .map((r) => AgencyDto.fromJson(Map<String, dynamic>.from(r as Map)))
+        .toList();
+  }
+
   // ---------------------------------------------------------------------------
   // Verification — write path
   // ---------------------------------------------------------------------------

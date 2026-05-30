@@ -45,6 +45,22 @@ abstract interface class AgencyRepository {
   /// agency yet.
   Future<Result<Agency?>> loadMyAgency();
 
+  /// Reads a single agency by [agencyId] via `public.v_agencies`.
+  ///
+  /// `v_agencies` returns approved agencies to anyone plus the caller's own
+  /// agency at any status. Returns [Success] with the [Agency] when visible,
+  /// or `null` when the agency does not exist / is not visible to the caller.
+  /// Powers the public `/agency/:id` profile page (T055) and the listing-
+  /// details verified badge (T061).
+  Future<Result<Agency?>> loadAgencyById(String agencyId);
+
+  /// Loads the agencies the current user is an `active` member of (owner or
+  /// invited-and-accepted), via `public.agency_members` (status='active') +
+  /// the matching `public.v_agencies` rows. Powers the publish-under-agency
+  /// selector (T053/T062): a member of someone else's agency may also publish
+  /// under it, which [loadMyAgency] (owner-only) does not surface.
+  Future<Result<List<Agency>>> loadMyActiveAgencies();
+
   /// Updates the agency profile fields via the `update_agency_profile` RPC.
   /// Agency-admin only.
   Future<Result<void>> updateProfile({
