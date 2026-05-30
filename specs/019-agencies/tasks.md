@@ -37,13 +37,13 @@
 
 **Goal**: all three tables exist with indices (incl. the open-verification dedup index) + the membership predicates + the enforced `listings.agency_id` FK; RLS enabled.
 
-- [ ] T012 [US1] Create migration `supabase/migrations/20260531120001_create_agencies_table.sql` — `CREATE TYPE agency_status` + `public.agencies` (UNIQUE `owner_user_id` ON DELETE CASCADE, `name` NOT NULL CHECK) + `idx_agencies_status` + `set_updated_at` trigger + `ENABLE ROW LEVEL SECURITY`, per data-model §1.1.
-- [ ] T013 [P] [US3] Create migration `supabase/migrations/20260531120002_create_agency_members_table.sql` — `public.agency_members` (PK `(agency_id,user_id)`, FKs CASCADE, role/status CHECKs) + `idx_agency_members_user` + the SECURITY DEFINER `is_agency_member`/`is_agency_admin` predicates + `ENABLE ROW LEVEL SECURITY`, per data-model §1.2.
-- [ ] T014 [P] [US1] Create migration `supabase/migrations/20260531120003_create_agency_verification_requests_table.sql` — `public.agency_verification_requests` (account-approval-template CHECKs) + `ux_agency_open_verification` partial unique + `idx_agency_verification_decision` + `set_updated_at` trigger + `ENABLE ROW LEVEL SECURITY`, per data-model §1.3.
-- [ ] T015 [US3] Create migration `supabase/migrations/20260531120004_enforce_listings_agency_fk.sql` — `ALTER TABLE public.listings ADD CONSTRAINT fk_listings_agency FOREIGN KEY (agency_id) REFERENCES public.agencies(id) ON DELETE SET NULL`, per data-model §1.4. (Depends on T012; existing listings all have `agency_id = NULL`.)
-- [ ] T016 [P] Create `supabase/docs/agencies.md` (columns, UNIQUE owner, FK delete behaviors R-144, forward-stated RLS + name-unique-among-approved).
-- [ ] T017 [P] Create `supabase/docs/agency_members.md` (PK, lifecycle, predicates, FK behaviors).
-- [ ] T018 [P] Create `supabase/docs/agency_verification_requests.md` (account-approval template, Vault note, one-open-request index).
+- [X] T012 [US1] Create migration `supabase/migrations/20260531120001_create_agencies_table.sql` — `CREATE TYPE agency_status` + `public.agencies` (UNIQUE `owner_user_id` ON DELETE CASCADE, `name` NOT NULL CHECK) + `idx_agencies_status` + `set_updated_at` trigger + `ENABLE ROW LEVEL SECURITY`, per data-model §1.1.
+- [X] T013 [P] [US3] Create migration `supabase/migrations/20260531120002_create_agency_members_table.sql` — `public.agency_members` (PK `(agency_id,user_id)`, FKs CASCADE, role/status CHECKs) + `idx_agency_members_user` + the SECURITY DEFINER `is_agency_member`/`is_agency_admin` predicates + `ENABLE ROW LEVEL SECURITY`, per data-model §1.2.
+- [X] T014 [P] [US1] Create migration `supabase/migrations/20260531120003_create_agency_verification_requests_table.sql` — `public.agency_verification_requests` (account-approval-template CHECKs) + `ux_agency_open_verification` partial unique + `idx_agency_verification_decision` + `set_updated_at` trigger + `ENABLE ROW LEVEL SECURITY`, per data-model §1.3.
+- [X] T015 [US3] Create migration `supabase/migrations/20260531120004_enforce_listings_agency_fk.sql` — `ALTER TABLE public.listings ADD CONSTRAINT fk_listings_agency FOREIGN KEY (agency_id) REFERENCES public.agencies(id) ON DELETE SET NULL`, per data-model §1.4. (Depends on T012; existing listings all have `agency_id = NULL`.)
+- [X] T016 [P] Create `supabase/docs/agencies.md` (columns, UNIQUE owner, FK delete behaviors R-144, forward-stated RLS + name-unique-among-approved).
+- [X] T017 [P] Create `supabase/docs/agency_members.md` (PK, lifecycle, predicates, FK behaviors).
+- [X] T018 [P] Create `supabase/docs/agency_verification_requests.md` (account-approval template, Vault note, one-open-request index).
 
 **Checkpoint**: `apply_migration` 120001–120004 succeed; `list_tables` shows all 3 with RLS on + the listings FK; `get_advisors` clean.
 
