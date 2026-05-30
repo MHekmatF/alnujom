@@ -286,7 +286,8 @@ BEGIN
 
   UPDATE public.reports
      SET status = v_new_report, resolved_by = p_actor_user_id,
-         resolved_at = now(), resolution = p_action
+         resolved_at = now(), resolution = p_action,
+         reviewing_by = NULL, reviewing_started_at = NULL  -- clear the soft-claim on resolve (20260530120012)
    WHERE id = p_report_id;
 
   -- Listing transition (Q1=A). The existing listing triggers fire here.
@@ -323,7 +324,8 @@ BEGIN
     LOOP
       UPDATE public.reports
          SET status = 'resolved', resolved_by = p_actor_user_id,
-             resolved_at = now(), resolution = p_action
+             resolved_at = now(), resolution = p_action,
+             reviewing_by = NULL, reviewing_started_at = NULL
        WHERE id = v_sib.sib_id;
       INSERT INTO public.moderation_actions
         (target_type, target_id, report_id, action, performed_by, reason, before_state, after_state)
