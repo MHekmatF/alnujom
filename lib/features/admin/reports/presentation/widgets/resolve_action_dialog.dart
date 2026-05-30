@@ -117,7 +117,7 @@ class _ResolveActionDialogState extends State<ResolveActionDialog> {
   Widget _buildActionStep(AppLocalizations l10n) {
     final theme = Theme.of(context);
     return AlertDialog(
-      title: Text(l10n.reports_queue_title),
+      title: Text(l10n.report_resolve_dialog_title),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -165,7 +165,7 @@ class _ResolveActionDialogState extends State<ResolveActionDialog> {
           onPressed: _selectedAction != null
               ? () => _onSelectAction(_selectedAction!)
               : null,
-          child: Text(l10n.report_start_review_button),
+          child: Text(l10n.report_resolve_button),
         ),
       ],
     );

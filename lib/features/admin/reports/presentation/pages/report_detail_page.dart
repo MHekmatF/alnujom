@@ -254,7 +254,7 @@ class _ReportDetailView extends StatelessWidget {
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Icon(Icons.gavel_outlined),
-                    label: Text(l10n.resolve_action_dismiss),
+                    label: Text(l10n.report_resolve_button),
                     onPressed: isLoading
                         ? null
                         : () async {

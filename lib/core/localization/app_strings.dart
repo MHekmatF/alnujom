@@ -3306,4 +3306,12 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String get report_resolved_success =>
       _resolve('report_resolved_success', (loc) => loc.report_resolved_success);
+
+  @override
+  String get report_resolve_button =>
+      _resolve('report_resolve_button', (loc) => loc.report_resolve_button);
+
+  @override
+  String get report_resolve_dialog_title =>
+      _resolve('report_resolve_dialog_title', (loc) => loc.report_resolve_dialog_title);
 }

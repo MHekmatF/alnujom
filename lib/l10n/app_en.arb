@@ -1018,5 +1018,9 @@
   "resolve_confirm_body": "This action cannot be undone. Are you sure you want to proceed?",
   "@resolve_confirm_body": { "description": "Phase 18 — Body text of the destructive-action confirmation dialog." },
   "report_resolved_success": "Report resolved",
-  "@report_resolved_success": { "description": "Phase 18 — Success snackbar after a report is successfully resolved by an admin." }
+  "@report_resolved_success": { "description": "Phase 18 — Success snackbar after a report is successfully resolved by an admin." },
+  "report_resolve_button": "Resolve",
+  "@report_resolve_button": { "description": "Phase 18 — Primary button that opens the resolve-action dialog (admin moderation)." },
+  "report_resolve_dialog_title": "Choose a resolution",
+  "@report_resolve_dialog_title": { "description": "Phase 18 — Title of the resolve-action picker dialog." }
 }
