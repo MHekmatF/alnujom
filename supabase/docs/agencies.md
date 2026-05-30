@@ -95,3 +95,52 @@ The full live reader/writer matrix (data-model §1.14) is appended to this doc i
 Sub-Phase C (T022). Reads in the app go through the SECURITY DEFINER `v_agencies`
 view (Migration …006), which reproduces the public/owner/member/admin read
 matrix in its WHERE clause and never projects the Vault ID/registration numbers.
+
+## Live RLS reader/writer matrix (Sub-Phase C, Migration …005)
+
+Attached by `supabase/migrations/20260531120005_create_agency_policies.sql`. This
+is the load-bearing reader/writer matrix (Principle III, data-model §1.14):
+
+| Actor | `agencies` SELECT | `agency_members` SELECT | `agency_verification_requests` SELECT | any table INSERT/UPDATE/DELETE | Vault id/registration |
+|-------|-------------------|--------------------------|----------------------------------------|--------------------------------|------------------------|
+| Anonymous | ✅ only `status='approved'` | ❌ | ❌ | ❌ | ❌ |
+| Authenticated non-member | ✅ approved only | ✅ own invitation row only | ❌ | ❌ (RPC only) | ❌ |
+| Owner / active member | ✅ own agency (any status) | ✅ own agency roster | agency-admins ✅ / agents ❌ | ❌ (RPC only) | ❌ (admin-decrypt only) |
+| `agencies.view`/`approve`/`suspend` holder | ✅ ALL | ✅ ALL | ✅ ALL | ❌ (moderate_agency → service-role RPC only) | ✅ via `app_vault_secret_for_agency` |
+| `service_role` (Edge Fn) | n/a (bypasses RLS) | n/a | n/a | via `moderate_agency_internal` only | n/a |
+
+`agencies` policies (Migration …005):
+
+- `agencies_select_authenticated` — `TO authenticated USING (status='approved' OR
+  owner_user_id=auth.uid() OR public.is_agency_member(id) OR
+  public.current_user_has_permission('agencies.view'))`.
+- `agencies_select_anon` — `TO anon USING (status='approved')` (FR-032).
+- `REVOKE INSERT, UPDATE, DELETE ON public.agencies FROM authenticated, anon` —
+  no client write; creation via `create_agency`, transitions via
+  `moderate_agency_internal` only.
+
+## `v_agencies` definer-view scoping (Migration …006)
+
+`public.v_agencies` (`supabase/migrations/20260531120006_create_v_agencies_view.sql`)
+is a **SECURITY DEFINER** view (no `security_invoker` set ⇒ definer default). Its
+explicit `WHERE status='approved' OR owner_user_id=auth.uid() OR
+public.is_agency_member(id) OR public.current_user_has_permission('agencies.view')`
+reproduces the public/owner/member/admin matrix above, so a member's own `pending`
+agency stays visible (an invoker view would re-apply the `agencies` RLS and hide it
+— the Phase 18 `20260530120010` gotcha, memory `project_supabase_view_rls_gotchas`).
+`auth.uid()` / `current_user_has_permission()` still resolve to the CALLER inside a
+definer view (they read the request JWT), so cross-user isolation (SC-009) is
+preserved by the WHERE. `GRANT SELECT TO anon, authenticated` (anon sees only
+`approved` rows because the member/permission predicates are false for anon). The
+view projects the public profile fields ONLY — never the Vault id/registration
+numbers. The `v_listings_public` badge amendment (same migration) LEFT JOINs
+`agencies … AND status='approved'`, so only approved-agency listings carry the
+`agency_id`/`agency_name`/`agency_logo_path` badge fields (others get NULLs, no reflow).
+
+## Audit triggers (Migration …011)
+
+`supabase/migrations/20260531120011_create_agency_audit_triggers.sql` attaches
+`trg_agencies_audit_status` — `AFTER UPDATE OF status … WHEN (OLD.status IS
+DISTINCT FROM NEW.status) EXECUTE FUNCTION log_audit('agency.status_changed',
+'status', 'id')` — reusing the Phase 4 `log_audit()` emitter (FR-012/FR-041). The
+actor is read from `app.current_user_id` (set by `moderate_agency_internal`).

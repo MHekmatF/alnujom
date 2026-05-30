@@ -94,3 +94,41 @@ reject) sets `decision_reason`. A fresh request may follow a rejection.
 
 The full live reader/writer matrix (data-model §1.14) is appended to this doc in
 Sub-Phase C (T022).
+
+## Live RLS reader/writer matrix (Sub-Phase C, Migration …005)
+
+Attached by `supabase/migrations/20260531120005_create_agency_policies.sql`
+(load-bearing — Principle III, data-model §1.14):
+
+| Actor | `agencies` SELECT | `agency_members` SELECT | `agency_verification_requests` SELECT | any table INSERT/UPDATE/DELETE | Vault id/registration |
+|-------|-------------------|--------------------------|----------------------------------------|--------------------------------|------------------------|
+| Anonymous | ✅ only `status='approved'` | ❌ | ❌ | ❌ | ❌ |
+| Authenticated non-member | ✅ approved only | ✅ own invitation row only | ❌ | ❌ (RPC only) | ❌ |
+| Owner / active member | ✅ own agency (any status) | ✅ own agency roster | agency-admins ✅ / agents ❌ | ❌ (RPC only) | ❌ (admin-decrypt only) |
+| `agencies.view`/`approve`/`suspend` holder | ✅ ALL | ✅ ALL | ✅ ALL | ❌ (moderate_agency → service-role RPC only) | ✅ via `app_vault_secret_for_agency` |
+| `service_role` (Edge Fn) | n/a (bypasses RLS) | n/a | n/a | via `moderate_agency_internal` only | n/a |
+
+`agency_verification_requests` policy (Migration …005):
+
+- `agency_verification_select` — `TO authenticated USING
+  (public.is_agency_admin(agency_id) OR
+  public.current_user_has_permission('agencies.view'))` — an agency-admin of that
+  agency sees its requests; agents do NOT; an `agencies.view` holder sees all.
+- `REVOKE INSERT, UPDATE, DELETE ON public.agency_verification_requests FROM
+  authenticated, anon` — submission via `submit_agency_verification`, decisions via
+  `moderate_agency_internal` only.
+- No `anon` policy.
+
+The Vault ID-document + commercial-registration numbers are NEVER in any policy-
+readable column and NEVER in `v_agencies` (the SECURITY DEFINER directory view,
+Migration …006, projects public profile fields only). They are decryptable solely
+by an `agencies.view` holder via `app_vault_secret_for_agency` (R-141 / FR-005).
+
+## Audit trigger (Migration …011)
+
+`supabase/migrations/20260531120011_create_agency_audit_triggers.sql` attaches
+`trg_agency_verification_audit` — `AFTER UPDATE OF decision … WHEN (OLD.decision IS
+DISTINCT FROM NEW.decision) EXECUTE FUNCTION
+log_audit('agency_verification.decided', 'decision,decision_reason,reviewed_by',
+'id')` — reusing the Phase 4 `log_audit()` emitter (FR-012/FR-041). The actor is
+read from `app.current_user_id` (set by `moderate_agency_internal`).

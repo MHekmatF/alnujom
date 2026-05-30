@@ -87,3 +87,53 @@ agency-membership branch (Migration …009).
 
 The full live reader/writer matrix (data-model §1.14) is appended to this doc in
 Sub-Phase C (T022).
+
+## Live RLS reader/writer matrix (Sub-Phase C, Migration …005)
+
+Attached by `supabase/migrations/20260531120005_create_agency_policies.sql`
+(load-bearing — Principle III, data-model §1.14):
+
+| Actor | `agencies` SELECT | `agency_members` SELECT | `agency_verification_requests` SELECT | any table INSERT/UPDATE/DELETE | Vault id/registration |
+|-------|-------------------|--------------------------|----------------------------------------|--------------------------------|------------------------|
+| Anonymous | ✅ only `status='approved'` | ❌ | ❌ | ❌ | ❌ |
+| Authenticated non-member | ✅ approved only | ✅ own invitation row only | ❌ | ❌ (RPC only) | ❌ |
+| Owner / active member | ✅ own agency (any status) | ✅ own agency roster | agency-admins ✅ / agents ❌ | ❌ (RPC only) | ❌ (admin-decrypt only) |
+| `agencies.view`/`approve`/`suspend` holder | ✅ ALL | ✅ ALL | ✅ ALL | ❌ (moderate_agency → service-role RPC only) | ✅ via `app_vault_secret_for_agency` |
+| `service_role` (Edge Fn) | n/a (bypasses RLS) | n/a | n/a | via `moderate_agency_internal` only | n/a |
+
+`agency_members` policy (Migration …005):
+
+- `agency_members_select` — `TO authenticated USING (user_id=auth.uid() OR
+  public.is_agency_member(agency_id) OR
+  public.current_user_has_permission('agencies.view'))` — an invitee sees their own
+  pending row, an active member sees the same-agency roster, an `agencies.view`
+  holder sees all.
+- `REVOKE INSERT, UPDATE, DELETE ON public.agency_members FROM authenticated, anon`
+  — no client write; all member writes flow through the privileged RPCs (FR-017).
+- No `anon` policy.
+
+## Roster reads via `v_agencies` scoping
+
+App reads of agency profiles go through the SECURITY DEFINER `public.v_agencies`
+view (Migration …006), whose explicit owner/member/admin WHERE reproduces rows 1–4
+of the matrix above (so a member's own `pending` agency stays visible). The
+`agency_members` base policy here governs roster reads + defense-in-depth.
+
+## Audit triggers (Migration …011)
+
+`supabase/migrations/20260531120011_create_agency_audit_triggers.sql` attaches TWO
+triggers (the INSERT/DELETE and the UPDATE-OF cases are intentionally **split** —
+combining an `OF column-list` with INSERT/DELETE in one `CREATE TRIGGER` is
+ambiguous), both reusing the Phase 4 `log_audit()` emitter (FR-012/FR-041):
+
+- `trg_agency_members_audit_ins_del` — `AFTER INSERT OR DELETE … EXECUTE FUNCTION
+  log_audit('agency_member.changed', 'agency_id,user_id,member_role,status',
+  'user_id')`.
+- `trg_agency_members_audit_upd` — `AFTER UPDATE OF member_role, status … WHEN
+  (OLD.member_role IS DISTINCT FROM NEW.member_role OR OLD.status IS DISTINCT FROM
+  NEW.status) EXECUTE FUNCTION log_audit('agency_member.changed',
+  'agency_id,user_id,member_role,status', 'user_id')`.
+
+`pk_col = 'user_id'` (the affected member); the column list carries `agency_id +
+user_id` so the composite identity survives in the before/after snapshot. The actor
+is `auth.uid()` (the member-change RPC path).
