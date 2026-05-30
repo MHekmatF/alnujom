@@ -204,6 +204,8 @@ screenshots/
 .claude/.local/
 .claude/settings.local.json
 .claude/scheduled_tasks.lock
+# /wave + Agent-tool git worktrees — full repo copies; NEVER commit.
+.claude/worktrees/
 
 # Spec Kit local state
 .specify/.cache/
