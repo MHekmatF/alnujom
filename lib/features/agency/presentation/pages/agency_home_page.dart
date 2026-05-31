@@ -14,6 +14,7 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/agency.dart';
 import '../bloc/agency_home_cubit.dart';
+import '../bloc/agency_invitations_cubit.dart' show AgencyInvitation;
 import '../widgets/agency_status_chip.dart';
 
 class AgencyHomePage extends StatelessWidget {
@@ -52,13 +53,14 @@ class _AgencyHomeView extends StatelessWidget {
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
-            title: Text(
-              state is AgencyHomeNone ||
-                      state is AgencyHomeCreating ||
-                      state is AgencyHomeCreateFailure
-                  ? l10n.agency_create_title
-                  : l10n.agency_profile_title,
-            ),
+            title: Text(switch (state) {
+              AgencyHomeNone() ||
+              AgencyHomeCreating() ||
+              AgencyHomeCreateFailure() =>
+                l10n.agency_create_title,
+              AgencyHomeInvited() => l10n.agency_invitations_title,
+              _ => l10n.agency_profile_title,
+            }),
           ),
           body: switch (state) {
             AgencyHomeLoading() =>
@@ -68,6 +70,8 @@ class _AgencyHomeView extends StatelessWidget {
             AgencyHomeCreating() ||
             AgencyHomeCreateFailure() =>
               _CreateAgencyForm(submitting: state is AgencyHomeCreating),
+            AgencyHomeInvited(:final invitations, :final responding) =>
+              _InvitedView(invitations: invitations, responding: responding),
             AgencyHomeOwner(:final agency) =>
               _ManagementSurface(agency: agency, isOwner: true),
             AgencyHomeMember(:final agency) =>
@@ -208,6 +212,67 @@ class _Field extends StatelessWidget {
         hintText: hint,
         border: const OutlineInputBorder(),
       ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Invited view (pending invitation(s), not yet a member) — B-4 fix
+// ---------------------------------------------------------------------------
+
+class _InvitedView extends StatelessWidget {
+  const _InvitedView({required this.invitations, required this.responding});
+
+  final List<AgencyInvitation> invitations;
+  final bool responding;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final cubit = context.read<AgencyHomeCubit>();
+
+    return ListView(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      children: [
+        Text(l10n.agency_invitations_title, style: theme.textTheme.titleMedium),
+        const SizedBox(height: AppSpacing.sm),
+        for (final invite in invitations)
+          Card(
+            margin: const EdgeInsetsDirectional.only(bottom: AppSpacing.sm),
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l10n.agency_invitation_pending_from(invite.agencyName),
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: responding
+                        ? null
+                        : () => cubit.respondInvitation(
+                              agencyId: invite.membership.agencyId,
+                              accept: false,
+                            ),
+                    child: Text(l10n.agency_invitation_decline),
+                  ),
+                  FilledButton(
+                    onPressed: responding
+                        ? null
+                        : () => cubit.respondInvitation(
+                              agencyId: invite.membership.agencyId,
+                              accept: true,
+                            ),
+                    child: Text(l10n.agency_invitation_accept),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

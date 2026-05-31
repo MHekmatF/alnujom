@@ -11,9 +11,14 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/errors/failure.dart';
 import '../../../../core/errors/result.dart';
 import '../../domain/entities/agency.dart';
+import '../../domain/entities/agency_member.dart';
 import '../../domain/usecases/create_agency.dart';
+import '../../domain/usecases/load_agency_by_id.dart';
 import '../../domain/usecases/load_my_active_agencies.dart';
 import '../../domain/usecases/load_my_agency.dart';
+import '../../domain/usecases/load_my_agency_invitations.dart';
+import '../../domain/usecases/respond_agency_invitation.dart';
+import 'agency_invitations_cubit.dart' show AgencyInvitation;
 
 // ---------------------------------------------------------------------------
 // State
@@ -47,6 +52,18 @@ final class AgencyHomeMember extends AgencyHomeState {
   final Agency agency;
 }
 
+/// The user owns no agency and is an active member of none, but has one or more
+/// PENDING invitations. The hub surfaces them with Accept/Decline (alongside the
+/// create form). Without this state an invitee only ever saw the create form and
+/// could never reach the Accept action — it lived solely on the Members page,
+/// which is unreachable until you are already a member (the B-4 finding).
+final class AgencyHomeInvited extends AgencyHomeState {
+  const AgencyHomeInvited(this.invitations, {this.responding = false});
+
+  final List<AgencyInvitation> invitations;
+  final bool responding;
+}
+
 final class AgencyHomeError extends AgencyHomeState {
   const AgencyHomeError();
 }
@@ -76,11 +93,17 @@ class AgencyHomeCubit extends Cubit<AgencyHomeState> {
     this._loadMyAgency,
     this._loadMyActiveAgencies,
     this._createAgency,
+    this._loadInvitations,
+    this._loadAgencyById,
+    this._respondInvitation,
   ) : super(const AgencyHomeLoading());
 
   final LoadMyAgency _loadMyAgency;
   final LoadMyActiveAgencies _loadMyActiveAgencies;
   final CreateAgency _createAgency;
+  final LoadMyAgencyInvitations _loadInvitations;
+  final LoadAgencyById _loadAgencyById;
+  final RespondAgencyInvitation _respondInvitation;
 
   Future<void> load() async {
     emit(const AgencyHomeLoading());
@@ -95,18 +118,54 @@ class AgencyHomeCubit extends Cubit<AgencyHomeState> {
       return;
     }
 
-    // No owned agency — check for a membership in someone else's agency.
+    // No owned agency — check for an ACTIVE membership in someone else's agency.
     final memberResult = await _loadMyActiveAgencies();
-    switch (memberResult) {
-      case Success<List<Agency>>(:final value):
-        if (value.isEmpty) {
-          emit(const AgencyHomeNone());
-        } else {
-          emit(AgencyHomeMember(value.first));
-        }
-      case FailureResult<List<Agency>>():
-        emit(const AgencyHomeError());
+    if (memberResult is Success<List<Agency>> && memberResult.value.isNotEmpty) {
+      emit(AgencyHomeMember(memberResult.value.first));
+      return;
     }
+    if (memberResult is FailureResult<List<Agency>>) {
+      emit(const AgencyHomeError());
+      return;
+    }
+
+    // No owned agency, no active membership — surface any PENDING invitations so
+    // the invitee can Accept/Decline from the hub (the create form alone left
+    // them with no path to Accept). Invitation read failure is non-fatal: fall
+    // back to the plain create form.
+    final invResult = await _loadInvitations();
+    if (invResult is Success<List<AgencyMember>> && invResult.value.isNotEmpty) {
+      final enriched = <AgencyInvitation>[];
+      for (final m in invResult.value) {
+        final agencyResult = await _loadAgencyById(m.agencyId);
+        final agency =
+            agencyResult is Success<Agency?> ? agencyResult.value : null;
+        enriched.add(
+          AgencyInvitation(
+            membership: m,
+            agencyName: agency?.name ?? m.agencyId,
+          ),
+        );
+      }
+      emit(AgencyHomeInvited(enriched));
+      return;
+    }
+
+    emit(const AgencyHomeNone());
+  }
+
+  /// Accept or decline a pending invitation, then reload so the hub re-resolves
+  /// (accept → AgencyHomeMember; decline → remaining invitations / None).
+  Future<void> respondInvitation({
+    required String agencyId,
+    required bool accept,
+  }) async {
+    final current = state;
+    if (current is AgencyHomeInvited) {
+      emit(AgencyHomeInvited(current.invitations, responding: true));
+    }
+    await _respondInvitation(agencyId: agencyId, accept: accept);
+    await load();
   }
 
   /// Calls `create_agency`; on success reloads the home state so the create
