@@ -183,6 +183,26 @@ class SupabaseAgencyDatasource {
     return result as String;
   }
 
+  /// Loads the latest verification request row for [agencyId] (most recent by
+  /// created_at), or null when none. RLS permits the agency admin or an
+  /// `agencies.view` holder to read it.
+  Future<Map<String, dynamic>?> loadLatestVerificationRequest(
+    String agencyId,
+  ) async {
+    final rows = await _client
+        .from('agency_verification_requests')
+        .select(
+          'id, agency_id, decision, decision_reason, evidence_urls, '
+          'submitted_at, reviewed_at',
+        )
+        .eq('agency_id', agencyId)
+        .order('created_at', ascending: false)
+        .limit(1);
+    final list = rows as List<dynamic>;
+    if (list.isEmpty) return null;
+    return Map<String, dynamic>.from(list.first as Map);
+  }
+
   /// Uploads a verification document file to the `agency-documents` bucket.
   /// Path shape: `'<agencyId>/<filename>'` (matches the storage policy uuid
   /// prefix regex — the policy checks `is_agency_admin` on the prefix UUID).
