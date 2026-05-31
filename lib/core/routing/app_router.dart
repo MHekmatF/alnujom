@@ -39,6 +39,14 @@ import '../../features/listing_form/presentation/pages/listing_form_page.dart';
 import '../../features/favorites/presentation/pages/favorites_page.dart';
 import '../../features/reports/presentation/pages/my_reports_page.dart';
 import '../../features/admin/reports/presentation/pages/reports_queue_page.dart';
+import '../../features/agency/presentation/pages/agency_home_page.dart';
+import '../../features/agency/presentation/pages/agency_profile_page.dart';
+import '../../features/agency/presentation/pages/agency_members_page.dart';
+import '../../features/agency/presentation/pages/agency_listings_page.dart';
+import '../../features/agency/presentation/pages/agency_analytics_page.dart';
+import '../../features/agency/presentation/pages/agency_verification_page.dart';
+import '../../features/agency/domain/entities/agency.dart';
+import '../../features/admin/agencies/presentation/pages/agency_queue_page.dart';
 import '../../features/inquiries/presentation/pages/admin_inquiry_oversight_page.dart';
 import '../../features/inquiries/presentation/pages/inquiry_detail_page.dart';
 import '../../features/inquiries/presentation/pages/inquiry_inbox_page.dart';
@@ -109,6 +117,16 @@ abstract final class AppRoutes {
   static const reports = '/reports';
   // Phase 18 FR-019: admin moderation queue route.
   static const adminReports = '/admin/reports';
+  // Phase 19: agency self-service routes (auth-required).
+  static const agency = '/agency';
+  static const agencyMembers = '/agency/members';
+  static const agencyListings = '/agency/listings';
+  static const agencyAnalytics = '/agency/analytics';
+  static const agencyVerify = '/agency/verify';
+  // Phase 19: public agency profile deep-link (no auth redirect).
+  static const agencyProfile = '/agency/:id';
+  // Phase 19: admin agency verification queue route.
+  static const adminAgencies = '/admin/agencies';
   static const themeGallery = '/_debug/theme-gallery';
   static const debugMoneyFormatter = '/debug/money-formatter';
 
@@ -177,6 +195,16 @@ abstract final class AppRouteNames {
   static const reports = 'reports';
   // Phase 18 FR-019: admin moderation queue route name.
   static const adminReports = 'admin-reports';
+  // Phase 19: agency self-service route names.
+  static const agency = 'agency';
+  static const agencyMembers = 'agency-members';
+  static const agencyListings = 'agency-listings';
+  static const agencyAnalytics = 'agency-analytics';
+  static const agencyVerify = 'agency-verify';
+  // Phase 19: public agency profile route name.
+  static const agencyProfile = 'agency-profile';
+  // Phase 19: admin agency verification queue route name.
+  static const adminAgencies = 'admin-agencies';
   static const themeGallery = 'theme-gallery';
 }
 
@@ -357,6 +385,14 @@ GoRouter buildAppRouter({
             redirect: requireReportsManageRedirect,
             builder: (context, state) => const ReportsQueuePage(),
           ),
+          // ─── Phase 19 — admin agency verification queue ───
+          // Gated by agencies.view / agencies.approve / agencies.suspend (FR-006).
+          GoRoute(
+            path: 'agencies',
+            name: AppRouteNames.adminAgencies,
+            redirect: requireAgenciesManageRedirect,
+            builder: (context, state) => const AgencyQueuePage(),
+          ),
         ],
       ),
       GoRoute(
@@ -494,6 +530,60 @@ GoRouter buildAppRouter({
         redirect: (context, state) =>
             authBloc.state is Unauthenticated ? AppRoutes.login : null,
         builder: (context, state) => const MyReportsPage(),
+      ),
+
+      // ─── Phase 19 — agency self-service hub ───
+      // Requires sign-in; anonymous deep-links redirect to /login (mirrors Phase 17/18).
+      GoRoute(
+        path: AppRoutes.agency,
+        name: AppRouteNames.agency,
+        redirect: (context, state) =>
+            authBloc.state is Unauthenticated ? AppRoutes.login : null,
+        builder: (context, state) => const AgencyHomePage(),
+      ),
+      // Phase 19 (T056/T057/T058) — agency self-service management pages.
+      // Declared BEFORE the public `/agency/:id` so the literal segments
+      // (members/listings/analytics/verify) win over the `:id` wildcard.
+      // `state.extra` carries the Agency (members) or its id (others).
+      GoRoute(
+        path: AppRoutes.agencyMembers,
+        name: AppRouteNames.agencyMembers,
+        redirect: (context, state) =>
+            authBloc.state is Unauthenticated ? AppRoutes.login : null,
+        builder: (context, state) =>
+            AgencyMembersPage(agency: state.extra as Agency),
+      ),
+      GoRoute(
+        path: AppRoutes.agencyListings,
+        name: AppRouteNames.agencyListings,
+        redirect: (context, state) =>
+            authBloc.state is Unauthenticated ? AppRoutes.login : null,
+        builder: (context, state) =>
+            AgencyListingsPage(agencyId: state.extra as String),
+      ),
+      GoRoute(
+        path: AppRoutes.agencyAnalytics,
+        name: AppRouteNames.agencyAnalytics,
+        redirect: (context, state) =>
+            authBloc.state is Unauthenticated ? AppRoutes.login : null,
+        builder: (context, state) =>
+            AgencyAnalyticsPage(agencyId: state.extra as String),
+      ),
+      GoRoute(
+        path: AppRoutes.agencyVerify,
+        name: AppRouteNames.agencyVerify,
+        redirect: (context, state) =>
+            authBloc.state is Unauthenticated ? AppRoutes.login : null,
+        builder: (context, state) =>
+            AgencyVerificationPage(agencyId: state.extra as String),
+      ),
+      // Public agency profile (no auth redirect; approved-only enforced by the
+      // page + v_agencies). Declared LAST so the literal routes above win.
+      GoRoute(
+        path: AppRoutes.agencyProfile,
+        name: AppRouteNames.agencyProfile,
+        builder: (context, state) =>
+            AgencyProfilePage(agencyId: state.pathParameters['id']!),
       ),
 
       if (kDesignToolsEnabled)

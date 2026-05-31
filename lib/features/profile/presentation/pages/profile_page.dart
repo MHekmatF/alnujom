@@ -143,6 +143,14 @@ class _ProfileView extends StatelessWidget {
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push(AppRoutes.favorites),
                 ),
+                // Phase 19 — My Agency tile (T059)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.business_outlined),
+                  title: Text(l10n.profile_agency_tile),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push(AppRoutes.agency),
+                ),
                 // Phase 18 — My Reports tile (T051)
                 ListTile(
                   contentPadding: EdgeInsets.zero,

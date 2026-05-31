@@ -25,6 +25,10 @@ class HomeListingCardDto {
     required this.mainImageUrl,
     required this.governorate,
     required this.city,
+    this.agencyId,
+    this.agencyName,
+    this.agencyLogoPath,
+    this.agencyLogoUrl,
   });
 
   final String id;
@@ -47,6 +51,18 @@ class HomeListingCardDto {
   /// — Phase 8 governorate/city FKs are nullable on the listings row.
   final HomeListingLocationNameDto? governorate;
   final HomeListingLocationNameDto? city;
+
+  /// Phase 19 (FR-022) — owning agency badge fields. Only populated when the
+  /// listing is under an `approved` agency (others stay null → no badge).
+  final String? agencyId;
+  final String? agencyName;
+
+  /// Raw `logo_path` storage path from the embedded agency row (resolved to a
+  /// public URL by the datasource into [agencyLogoUrl]).
+  final String? agencyLogoPath;
+
+  /// Resolved public URL for the agency logo (agency-assets bucket).
+  final String? agencyLogoUrl;
 
   /// Parses the embedded-selects projection shape from
   /// `SupabaseHomeFeedDatasource.fetchPage`. Defensive against missing
@@ -99,6 +115,18 @@ class HomeListingCardDto {
     final govMap = row['governorate'] as Map<String, dynamic>?;
     final cityMap = row['city'] as Map<String, dynamic>?;
 
+    // Phase 19 (FR-022) — embedded agency row. Surface the badge ONLY when the
+    // agency is approved (others get null → no badge per FR-023).
+    final agencyMap = row['agency'] as Map<String, dynamic>?;
+    String? agencyId;
+    String? agencyName;
+    String? agencyLogoPath;
+    if (agencyMap != null && agencyMap['status'] == 'approved') {
+      agencyId = agencyMap['id'] as String?;
+      agencyName = agencyMap['name'] as String?;
+      agencyLogoPath = agencyMap['logo_path'] as String?;
+    }
+
     return HomeListingCardDto(
       id: row['id'] as String,
       title: (row['title'] as String?) ?? '',
@@ -117,6 +145,9 @@ class HomeListingCardDto {
       city: cityMap == null
           ? null
           : HomeListingLocationNameDto.fromDisplayName(cityMap['display_name']),
+      agencyId: agencyId,
+      agencyName: agencyName,
+      agencyLogoPath: agencyLogoPath,
     );
   }
 
@@ -134,6 +165,30 @@ class HomeListingCardDto {
       mainImageUrl: url,
       governorate: governorate,
       city: city,
+      agencyId: agencyId,
+      agencyName: agencyName,
+      agencyLogoPath: agencyLogoPath,
+      agencyLogoUrl: agencyLogoUrl,
+    );
+  }
+
+  /// Returns a copy with the resolved agency-logo public URL populated.
+  HomeListingCardDto copyWithAgencyLogoUrl(String? url) {
+    return HomeListingCardDto(
+      id: id,
+      title: title,
+      propertyType: propertyType,
+      purpose: purpose,
+      publishedAt: publishedAt,
+      primaryPrice: primaryPrice,
+      mainImage: mainImage,
+      mainImageUrl: mainImageUrl,
+      governorate: governorate,
+      city: city,
+      agencyId: agencyId,
+      agencyName: agencyName,
+      agencyLogoPath: agencyLogoPath,
+      agencyLogoUrl: url,
     );
   }
 
@@ -169,6 +224,9 @@ class HomeListingCardDto {
       mainImageStoragePath: mainImage?.storagePath,
       mainImageUrl: mainImageUrl,
       publishedAt: publishedAt,
+      agencyId: agencyId,
+      agencyName: agencyName,
+      agencyLogoUrl: agencyLogoUrl,
     );
   }
 }

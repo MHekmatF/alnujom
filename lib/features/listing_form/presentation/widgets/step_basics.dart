@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../agency/presentation/widgets/publish_under_agency_field.dart';
 import '../../domain/entities/listing.dart';
 import '../../domain/entities/listing_form_state.dart';
 import '../bloc/listing_form_bloc.dart';
@@ -122,6 +123,15 @@ class _StepBasicsState extends State<StepBasics> {
                   );
                 }
               },
+            ),
+            // Phase 19 (T062) — publish-under-agency selector. Renders nothing
+            // when the user has no eligible agency (no reflow for personal).
+            PublishUnderAgencyField(
+              agencies: state.availableAgencies,
+              selectedAgencyId: listing.agencyId,
+              onChanged: (agencyId) => context
+                  .read<ListingFormBloc>()
+                  .add(FieldChanged.agencyId(agencyId)),
             ),
           ],
         );

@@ -8,6 +8,7 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/money.dart';
 import '../../../../shared/presentation/money_formatter.dart';
+import '../../../agency/presentation/widgets/agency_badge.dart';
 import '../../../currencies/domain/entities/currency.dart';
 import '../../../favorites/presentation/widgets/favorite_heart_button.dart';
 import '../../../listing_form/domain/entities/listing.dart';
@@ -121,6 +122,20 @@ class HomeListingCardTile extends StatelessWidget {
                       color: scheme.onSurfaceVariant,
                     ),
                   ),
+                  // Phase 19 (FR-022) — verified-agency badge; rendered only
+                  // when the listing is under an approved agency (no reflow
+                  // otherwise per FR-023).
+                  if (card.agencyId != null && card.agencyName != null) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: AgencyBadge(
+                        agencyId: card.agencyId!,
+                        agencyName: card.agencyName!,
+                        logoUrl: card.agencyLogoUrl,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

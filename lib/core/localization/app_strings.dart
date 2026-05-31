@@ -3314,4 +3314,327 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String get report_resolve_dialog_title =>
       _resolve('report_resolve_dialog_title', (loc) => loc.report_resolve_dialog_title);
+
+  // ── Phase 19 Agencies ────────────────────────────────────────────────────
+
+  @override
+  String get profile_agency_tile =>
+      _resolve('profile_agency_tile', (loc) => loc.profile_agency_tile);
+
+  @override
+  String get admin_tile_agencies =>
+      _resolve('admin_tile_agencies', (loc) => loc.admin_tile_agencies);
+
+  @override
+  String get agency_create_title =>
+      _resolve('agency_create_title', (loc) => loc.agency_create_title);
+
+  @override
+  String get agency_name_label =>
+      _resolve('agency_name_label', (loc) => loc.agency_name_label);
+
+  @override
+  String get agency_description_label =>
+      _resolve('agency_description_label', (loc) => loc.agency_description_label);
+
+  @override
+  String get agency_phone_label =>
+      _resolve('agency_phone_label', (loc) => loc.agency_phone_label);
+
+  @override
+  String get agency_whatsapp_label =>
+      _resolve('agency_whatsapp_label', (loc) => loc.agency_whatsapp_label);
+
+  @override
+  String get agency_address_label =>
+      _resolve('agency_address_label', (loc) => loc.agency_address_label);
+
+  @override
+  String get agency_logo_label =>
+      _resolve('agency_logo_label', (loc) => loc.agency_logo_label);
+
+  @override
+  String get agency_create_button =>
+      _resolve('agency_create_button', (loc) => loc.agency_create_button);
+
+  @override
+  String get agency_create_not_publisher => _resolve(
+    'agency_create_not_publisher',
+    (loc) => loc.agency_create_not_publisher,
+  );
+
+  @override
+  String get agency_already_owns =>
+      _resolve('agency_already_owns', (loc) => loc.agency_already_owns);
+
+  @override
+  String get agency_profile_title =>
+      _resolve('agency_profile_title', (loc) => loc.agency_profile_title);
+
+  @override
+  String get agency_edit_button =>
+      _resolve('agency_edit_button', (loc) => loc.agency_edit_button);
+
+  @override
+  String get agency_status_pending =>
+      _resolve('agency_status_pending', (loc) => loc.agency_status_pending);
+
+  @override
+  String get agency_status_approved =>
+      _resolve('agency_status_approved', (loc) => loc.agency_status_approved);
+
+  @override
+  String get agency_status_rejected =>
+      _resolve('agency_status_rejected', (loc) => loc.agency_status_rejected);
+
+  @override
+  String get agency_status_suspended =>
+      _resolve('agency_status_suspended', (loc) => loc.agency_status_suspended);
+
+  @override
+  String get agency_members_title =>
+      _resolve('agency_members_title', (loc) => loc.agency_members_title);
+
+  @override
+  String get agency_invite_button =>
+      _resolve('agency_invite_button', (loc) => loc.agency_invite_button);
+
+  @override
+  String get agency_invite_phone_label => _resolve(
+    'agency_invite_phone_label',
+    (loc) => loc.agency_invite_phone_label,
+  );
+
+  @override
+  String get agency_invite_role_label =>
+      _resolve('agency_invite_role_label', (loc) => loc.agency_invite_role_label);
+
+  @override
+  String get agency_role_admin =>
+      _resolve('agency_role_admin', (loc) => loc.agency_role_admin);
+
+  @override
+  String get agency_role_agent =>
+      _resolve('agency_role_agent', (loc) => loc.agency_role_agent);
+
+  @override
+  String get agency_member_remove =>
+      _resolve('agency_member_remove', (loc) => loc.agency_member_remove);
+
+  @override
+  String get agency_invite_user_not_found => _resolve(
+    'agency_invite_user_not_found',
+    (loc) => loc.agency_invite_user_not_found,
+  );
+
+  @override
+  String get agency_invite_already_member => _resolve(
+    'agency_invite_already_member',
+    (loc) => loc.agency_invite_already_member,
+  );
+
+  @override
+  String get agency_invitations_title =>
+      _resolve('agency_invitations_title', (loc) => loc.agency_invitations_title);
+
+  @override
+  String get agency_invitation_accept =>
+      _resolve('agency_invitation_accept', (loc) => loc.agency_invitation_accept);
+
+  @override
+  String get agency_invitation_decline => _resolve(
+    'agency_invitation_decline',
+    (loc) => loc.agency_invitation_decline,
+  );
+
+  @override
+  String agency_invitation_pending_from(String agencyName) => _resolve(
+    'agency_invitation_pending_from',
+    (loc) => loc.agency_invitation_pending_from(agencyName),
+  );
+
+  @override
+  String get agency_verify_title =>
+      _resolve('agency_verify_title', (loc) => loc.agency_verify_title);
+
+  @override
+  String get agency_verify_id_number_label => _resolve(
+    'agency_verify_id_number_label',
+    (loc) => loc.agency_verify_id_number_label,
+  );
+
+  @override
+  String get agency_verify_registration_label => _resolve(
+    'agency_verify_registration_label',
+    (loc) => loc.agency_verify_registration_label,
+  );
+
+  @override
+  String get agency_verify_documents_label => _resolve(
+    'agency_verify_documents_label',
+    (loc) => loc.agency_verify_documents_label,
+  );
+
+  @override
+  String get agency_verify_submit_button => _resolve(
+    'agency_verify_submit_button',
+    (loc) => loc.agency_verify_submit_button,
+  );
+
+  @override
+  String get agency_verify_submitted =>
+      _resolve('agency_verify_submitted', (loc) => loc.agency_verify_submitted);
+
+  @override
+  String agency_verify_rejected_reason(String reason) => _resolve(
+    'agency_verify_rejected_reason',
+    (loc) => loc.agency_verify_rejected_reason(reason),
+  );
+
+  @override
+  String get listing_publish_under_agency_label => _resolve(
+    'listing_publish_under_agency_label',
+    (loc) => loc.listing_publish_under_agency_label,
+  );
+
+  @override
+  String get listing_publish_personal_option => _resolve(
+    'listing_publish_personal_option',
+    (loc) => loc.listing_publish_personal_option,
+  );
+
+  @override
+  String get agency_verified_badge =>
+      _resolve('agency_verified_badge', (loc) => loc.agency_verified_badge);
+
+  @override
+  String get agency_analytics_title =>
+      _resolve('agency_analytics_title', (loc) => loc.agency_analytics_title);
+
+  @override
+  String agency_analytics_members(int count) => _resolve(
+    'agency_analytics_members',
+    (loc) => loc.agency_analytics_members(count),
+  );
+
+  @override
+  String agency_analytics_listings(int count) => _resolve(
+    'agency_analytics_listings',
+    (loc) => loc.agency_analytics_listings(count),
+  );
+
+  @override
+  String get agencies_queue_title =>
+      _resolve('agencies_queue_title', (loc) => loc.agencies_queue_title);
+
+  @override
+  String get agency_filter_status_label => _resolve(
+    'agency_filter_status_label',
+    (loc) => loc.agency_filter_status_label,
+  );
+
+  @override
+  String get agency_action_approve =>
+      _resolve('agency_action_approve', (loc) => loc.agency_action_approve);
+
+  @override
+  String get agency_action_reject =>
+      _resolve('agency_action_reject', (loc) => loc.agency_action_reject);
+
+  @override
+  String get agency_action_suspend =>
+      _resolve('agency_action_suspend', (loc) => loc.agency_action_suspend);
+
+  @override
+  String get agency_action_reinstate =>
+      _resolve('agency_action_reinstate', (loc) => loc.agency_action_reinstate);
+
+  @override
+  String get agency_reject_reason_label => _resolve(
+    'agency_reject_reason_label',
+    (loc) => loc.agency_reject_reason_label,
+  );
+
+  @override
+  String get agency_suspend_confirm_title => _resolve(
+    'agency_suspend_confirm_title',
+    (loc) => loc.agency_suspend_confirm_title,
+  );
+
+  @override
+  String get agency_suspend_confirm_body => _resolve(
+    'agency_suspend_confirm_body',
+    (loc) => loc.agency_suspend_confirm_body,
+  );
+
+  @override
+  String get agency_decision_success =>
+      _resolve('agency_decision_success', (loc) => loc.agency_decision_success);
+
+  @override
+  String get agencies_queue_empty =>
+      _resolve('agencies_queue_empty', (loc) => loc.agencies_queue_empty);
+  @override
+  String get agency_create_description_hint => _resolve(
+    'agency_create_description_hint',
+    (loc) => loc.agency_create_description_hint,
+  );
+
+  @override
+  String get agency_save_button =>
+      _resolve('agency_save_button', (loc) => loc.agency_save_button);
+
+  @override
+  String get agency_manage_members =>
+      _resolve('agency_manage_members', (loc) => loc.agency_manage_members);
+
+  @override
+  String get agency_manage_listings =>
+      _resolve('agency_manage_listings', (loc) => loc.agency_manage_listings);
+
+  @override
+  String get agency_manage_analytics =>
+      _resolve('agency_manage_analytics', (loc) => loc.agency_manage_analytics);
+
+  @override
+  String get agency_manage_verify =>
+      _resolve('agency_manage_verify', (loc) => loc.agency_manage_verify);
+
+  @override
+  String get agency_listings_title =>
+      _resolve('agency_listings_title', (loc) => loc.agency_listings_title);
+
+  @override
+  String get agency_listings_empty =>
+      _resolve('agency_listings_empty', (loc) => loc.agency_listings_empty);
+
+  @override
+  String get agency_members_empty =>
+      _resolve('agency_members_empty', (loc) => loc.agency_members_empty);
+
+  @override
+  String get agency_invitations_empty =>
+      _resolve('agency_invitations_empty', (loc) => loc.agency_invitations_empty);
+
+  @override
+  String get agency_generic_error =>
+      _resolve('agency_generic_error', (loc) => loc.agency_generic_error);
+
+  @override
+  String get agency_no_agency_message =>
+      _resolve('agency_no_agency_message', (loc) => loc.agency_no_agency_message);
+
+  @override
+  String get agency_member_remove_confirm => _resolve(
+    'agency_member_remove_confirm',
+    (loc) => loc.agency_member_remove_confirm,
+  );
+
+  @override
+  String get agency_cancel_button =>
+      _resolve('agency_cancel_button', (loc) => loc.agency_cancel_button);
+
+  @override
+  String get agency_action_failed =>
+      _resolve('agency_action_failed', (loc) => loc.agency_action_failed);
 }
