@@ -551,32 +551,40 @@ GoRouter buildAppRouter({
       GoRoute(
         path: AppRoutes.agencyMembers,
         name: AppRouteNames.agencyMembers,
-        redirect: (context, state) =>
-            authBloc.state is Unauthenticated ? AppRoutes.login : null,
+        // B-5: `extra` is not part of the URI, so it is null after process
+        // recreation (e.g. a low-RAM device returning from an external
+        // activity). Bounce to the hub instead of red-screening on the
+        // `state.extra as Agency` cast in the builder.
+        redirect: (context, state) => authBloc.state is Unauthenticated
+            ? AppRoutes.login
+            : (state.extra == null ? AppRoutes.agency : null),
         builder: (context, state) =>
             AgencyMembersPage(agency: state.extra as Agency),
       ),
       GoRoute(
         path: AppRoutes.agencyListings,
         name: AppRouteNames.agencyListings,
-        redirect: (context, state) =>
-            authBloc.state is Unauthenticated ? AppRoutes.login : null,
+        redirect: (context, state) => authBloc.state is Unauthenticated // B-5
+            ? AppRoutes.login
+            : (state.extra == null ? AppRoutes.agency : null),
         builder: (context, state) =>
             AgencyListingsPage(agencyId: state.extra as String),
       ),
       GoRoute(
         path: AppRoutes.agencyAnalytics,
         name: AppRouteNames.agencyAnalytics,
-        redirect: (context, state) =>
-            authBloc.state is Unauthenticated ? AppRoutes.login : null,
+        redirect: (context, state) => authBloc.state is Unauthenticated // B-5
+            ? AppRoutes.login
+            : (state.extra == null ? AppRoutes.agency : null),
         builder: (context, state) =>
             AgencyAnalyticsPage(agencyId: state.extra as String),
       ),
       GoRoute(
         path: AppRoutes.agencyVerify,
         name: AppRouteNames.agencyVerify,
-        redirect: (context, state) =>
-            authBloc.state is Unauthenticated ? AppRoutes.login : null,
+        redirect: (context, state) => authBloc.state is Unauthenticated // B-5
+            ? AppRoutes.login
+            : (state.extra == null ? AppRoutes.agency : null),
         builder: (context, state) =>
             AgencyVerificationPage(agencyId: state.extra as String),
       ),

@@ -32,6 +32,7 @@ import '../../../../core/errors/failure.dart';
 import '../../../../core/errors/result.dart';
 import '../../domain/entities/agency.dart';
 import '../../domain/entities/agency_member.dart';
+import '../../domain/entities/agency_verification_request.dart';
 import '../../domain/repositories/agency_repository.dart';
 import '../datasources/supabase_agency_datasource.dart';
 
@@ -231,6 +232,70 @@ class AgencyRepositoryImpl implements AgencyRepository {
     } catch (e, st) {
       return FailureResult(
         UnknownFailure('submitVerification failed: $e', cause: e, stackTrace: st),
+      );
+    }
+  }
+
+  @override
+  Future<Result<String>> uploadVerificationDocument({
+    required String agencyId,
+    required String filename,
+    required List<int> bytes,
+    String contentType = 'image/jpeg',
+  }) async {
+    try {
+      final path = await _datasource.uploadVerificationDocument(
+        agencyId: agencyId,
+        filename: filename,
+        bytes: Uint8List.fromList(bytes),
+        contentType: contentType,
+      );
+      return Success(path);
+    } on SocketException catch (e, st) {
+      return FailureResult(NetworkFailure(e.message, cause: e, stackTrace: st));
+    } on TimeoutException catch (e, st) {
+      return FailureResult(
+        NetworkFailure(e.message ?? 'Request timed out', cause: e, stackTrace: st),
+      );
+    } catch (e, st) {
+      return FailureResult(
+        UnknownFailure('uploadVerificationDocument failed: $e',
+            cause: e, stackTrace: st),
+      );
+    }
+  }
+
+  @override
+  Future<Result<AgencyVerificationRequest?>> loadMyVerificationRequest(
+    String agencyId,
+  ) async {
+    try {
+      final row = await _datasource.loadLatestVerificationRequest(agencyId);
+      if (row == null) return const Success(null);
+      final evidence = row['evidence_urls'] as List<dynamic>?;
+      final reviewedAt = row['reviewed_at'] as String?;
+      return Success(
+        AgencyVerificationRequest(
+          id: row['id'] as String,
+          agencyId: row['agency_id'] as String,
+          decision: VerificationDecision.fromWire(row['decision'] as String),
+          submittedAt: DateTime.parse(row['submitted_at'] as String),
+          decisionReason: row['decision_reason'] as String?,
+          evidenceUrls: evidence?.map((e) => e.toString()).toList(),
+          reviewedAt: reviewedAt == null ? null : DateTime.parse(reviewedAt),
+        ),
+      );
+    } on PostgrestException catch (e, st) {
+      return FailureResult(
+        UnknownFailure('loadMyVerificationRequest failed: ${e.message}',
+            cause: e, stackTrace: st),
+      );
+    } on SocketException catch (e, st) {
+      return FailureResult(NetworkFailure(e.message, cause: e, stackTrace: st));
+    } catch (e, st) {
+      return FailureResult(
+        UnknownFailure('loadMyVerificationRequest failed: $e',
+            cause: e, stackTrace: st),
       );
     }
   }

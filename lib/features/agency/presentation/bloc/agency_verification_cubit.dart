@@ -10,7 +10,9 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/errors/failure.dart';
 import '../../../../core/errors/result.dart';
 import '../../domain/entities/agency.dart';
+import '../../domain/entities/agency_verification_request.dart';
 import '../../domain/usecases/load_agency_by_id.dart';
+import '../../domain/usecases/load_my_verification_request.dart';
 import '../../domain/usecases/submit_agency_verification.dart';
 
 // ---------------------------------------------------------------------------
@@ -28,12 +30,16 @@ final class AgencyVerificationLoading extends AgencyVerificationState {
 final class AgencyVerificationReady extends AgencyVerificationState {
   const AgencyVerificationReady({
     required this.agency,
+    this.request,
     this.submitting = false,
     this.submitted = false,
     this.errorCode,
   });
 
   final Agency agency;
+
+  /// Latest verification request (for the rejection reason when rejected); D-3.
+  final AgencyVerificationRequest? request;
   final bool submitting;
   final bool submitted;
 
@@ -42,6 +48,7 @@ final class AgencyVerificationReady extends AgencyVerificationState {
 
   AgencyVerificationReady copyWith({
     Agency? agency,
+    AgencyVerificationRequest? request,
     bool? submitting,
     bool? submitted,
     String? errorCode,
@@ -49,6 +56,7 @@ final class AgencyVerificationReady extends AgencyVerificationState {
   }) {
     return AgencyVerificationReady(
       agency: agency ?? this.agency,
+      request: request ?? this.request,
       submitting: submitting ?? this.submitting,
       submitted: submitted ?? this.submitted,
       errorCode: clearError ? null : (errorCode ?? this.errorCode),
@@ -66,11 +74,15 @@ final class AgencyVerificationError extends AgencyVerificationState {
 
 @injectable
 class AgencyVerificationCubit extends Cubit<AgencyVerificationState> {
-  AgencyVerificationCubit(this._loadAgencyById, this._submitVerification)
-      : super(const AgencyVerificationLoading());
+  AgencyVerificationCubit(
+    this._loadAgencyById,
+    this._submitVerification,
+    this._loadRequest,
+  ) : super(const AgencyVerificationLoading());
 
   final LoadAgencyById _loadAgencyById;
   final SubmitAgencyVerification _submitVerification;
+  final LoadMyVerificationRequest _loadRequest;
 
   Future<void> load(String agencyId) async {
     emit(const AgencyVerificationLoading());
@@ -80,7 +92,13 @@ class AgencyVerificationCubit extends Cubit<AgencyVerificationState> {
         if (value == null) {
           emit(const AgencyVerificationError());
         } else {
-          emit(AgencyVerificationReady(agency: value));
+          // Also load the latest verification request (best-effort) so a
+          // rejected agency can surface its rejection reason (D-3).
+          final reqResult = await _loadRequest(agencyId);
+          final request = reqResult is Success<AgencyVerificationRequest?>
+              ? reqResult.value
+              : null;
+          emit(AgencyVerificationReady(agency: value, request: request));
         }
       case FailureResult<Agency?>():
         emit(const AgencyVerificationError());

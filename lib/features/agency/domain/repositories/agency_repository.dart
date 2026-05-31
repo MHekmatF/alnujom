@@ -6,6 +6,7 @@
 import '../../../../core/errors/result.dart';
 import '../entities/agency.dart';
 import '../entities/agency_member.dart';
+import '../entities/agency_verification_request.dart';
 
 /// Analytics counters for an agency's self-service dashboard.
 class AgencyAnalytics {
@@ -99,6 +100,25 @@ abstract interface class AgencyRepository {
     required String registrationNumber,
     List<String>? evidenceUrls,
   });
+
+  /// Uploads a verification document file (e.g. a photo of the ID / commercial
+  /// registration document) to the private `agency-documents` bucket and returns
+  /// the storage object path (pass it as one of [submitVerification]'s
+  /// evidenceUrls). Agency-admin only.
+  Future<Result<String>> uploadVerificationDocument({
+    required String agencyId,
+    required String filename,
+    required List<int> bytes,
+    String contentType,
+  });
+
+  /// Loads the latest verification request for [agencyId] (most recent by
+  /// `created_at`), or null when none exists. Used to surface the rejection
+  /// reason to the owner when the agency is `rejected` (D-3). Readable by the
+  /// agency admin or an `agencies.view` holder.
+  Future<Result<AgencyVerificationRequest?>> loadMyVerificationRequest(
+    String agencyId,
+  );
 
   /// Loads the active roster for [agencyId] via `public.agency_members`.
   /// Accessible to the caller when they are themselves an active member or

@@ -105,6 +105,8 @@ import '../../features/agency/domain/usecases/load_my_active_agencies.dart'
 import '../../features/agency/domain/usecases/load_my_agency.dart' as _i324;
 import '../../features/agency/domain/usecases/load_my_agency_invitations.dart'
     as _i470;
+import '../../features/agency/domain/usecases/load_my_verification_request.dart'
+    as _i977;
 import '../../features/agency/domain/usecases/remove_agency_member.dart'
     as _i262;
 import '../../features/agency/domain/usecases/respond_agency_invitation.dart'
@@ -647,6 +649,9 @@ _i174.GetIt $initGetIt(
   gh.factory<_i611.LoadMyActiveAgencies>(
     () => _i611.LoadMyActiveAgencies(gh<_i1006.AgencyRepository>()),
   );
+  gh.factory<_i977.LoadMyVerificationRequest>(
+    () => _i977.LoadMyVerificationRequest(gh<_i1006.AgencyRepository>()),
+  );
   gh.lazySingleton<_i752.SupabaseClientWrapper>(
     () => _i748.SupabaseClientWrapperImpl(gh<_i354.AppLogger>()),
   );
@@ -730,6 +735,13 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i880.RejectListingUseCase>(
     () => _i880.RejectListingUseCase(gh<_i155.ListingReviewRepository>()),
+  );
+  gh.factory<_i524.AgencyVerificationCubit>(
+    () => _i524.AgencyVerificationCubit(
+      gh<_i686.LoadAgencyById>(),
+      gh<_i377.SubmitAgencyVerification>(),
+      gh<_i977.LoadMyVerificationRequest>(),
+    ),
   );
   gh.lazySingleton<_i754.PublisherDashboardRepository>(
     () => _i240.PublisherDashboardRepositoryImpl(
@@ -1046,12 +1058,6 @@ _i174.GetIt $initGetIt(
       gh<_i1058.UpdateCity>(),
       gh<_i880.CreateArea>(),
       gh<_i188.UpdateArea>(),
-    ),
-  );
-  gh.factory<_i524.AgencyVerificationCubit>(
-    () => _i524.AgencyVerificationCubit(
-      gh<_i686.LoadAgencyById>(),
-      gh<_i377.SubmitAgencyVerification>(),
     ),
   );
   gh.factory<_i807.OnboardingCubit>(

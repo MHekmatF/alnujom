@@ -3354,6 +3354,10 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('agency_logo_label', (loc) => loc.agency_logo_label);
 
   @override
+  String get agency_cover_label =>
+      _resolve('agency_cover_label', (loc) => loc.agency_cover_label);
+
+  @override
   String get agency_create_button =>
       _resolve('agency_create_button', (loc) => loc.agency_create_button);
 

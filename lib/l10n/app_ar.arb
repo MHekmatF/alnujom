@@ -967,6 +967,8 @@
   "@agency_address_label": { "description": "Phase 19 — Label for the agency address field." },
   "agency_logo_label": "شعار الوكالة",
   "@agency_logo_label": { "description": "Phase 19 — Label for the agency logo upload field." },
+  "agency_cover_label": "صورة الغلاف",
+  "@agency_cover_label": { "description": "Phase 19 — Label for the agency cover image upload field." },
   "agency_create_button": "إنشاء وكالة",
   "@agency_create_button": { "description": "Phase 19 — Submit button on the create-agency form." },
   "agency_create_not_publisher": "فقط الناشرون المعتمدون يمكنهم إنشاء وكالة",
