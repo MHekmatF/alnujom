@@ -13,7 +13,7 @@ import '../../../../../core/theme/spacing.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../agency/domain/entities/agency_status.dart';
 import '../../domain/entities/agency_verification_item.dart';
-import '../../domain/usecases/load_agency_verification_queue.dart';
+import '../../domain/repositories/agencies_admin_repository.dart';
 import '../bloc/agency_moderation_cubit.dart';
 import '../widgets/agency_decision_dialog.dart';
 
@@ -42,20 +42,19 @@ class _AgencyDetailPageState extends State<AgencyDetailPage> {
       _loading = true;
       _error = null;
     });
-    // Use the queue use-case and find by id — the repository's loadDetail
-    // method populates Vault-decrypted PII. In a future optimisation we would
-    // inject a dedicated LoadAgencyDetail use-case; for now mirror Phase 18.
-    final useCase = getIt<LoadAgencyVerificationQueue>();
-    final result = await useCase(limit: 100);
+    // Load the single agency by id via the repository's loadDetail — it reads
+    // v_agencies (admin sees ANY status) + the latest verification request +
+    // the Vault-decrypted PII. (Previously this reused the pending-only queue
+    // use-case + firstWhere, so an approved/suspended agency was never found
+    // and the page rendered a spurious "something went wrong".)
+    final result = await getIt<AgenciesAdminRepository>().loadDetail(
+      widget.agencyId,
+    );
     switch (result) {
       case Success(:final value):
-        final found = value.cast<AgencyVerificationItem?>().firstWhere(
-          (i) => i?.agency.id == widget.agencyId,
-          orElse: () => null,
-        );
         if (mounted) {
           setState(() {
-            _item = found;
+            _item = value;
             _loading = false;
           });
         }

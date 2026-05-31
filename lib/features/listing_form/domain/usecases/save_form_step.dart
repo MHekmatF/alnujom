@@ -21,6 +21,7 @@ class SaveFormStep {
           title: listing.title,
           purpose: listing.purpose,
           propertyType: listing.propertyType,
+          agencyId: listing.agencyId,
         );
       case ListingFormStep.location:
         if (listing.governorateId == null ||

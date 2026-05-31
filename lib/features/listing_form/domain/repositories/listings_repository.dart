@@ -25,12 +25,15 @@ abstract class ListingsRepository {
   Future<ListingDetails?> loadDetails(String listingId);
   Future<ListingPrice?> loadPrimaryPrice(String listingId);
 
-  /// Persists the basics step (title, purpose, property_type).
+  /// Persists the basics step (title, purpose, property_type, agency_id).
+  /// [agencyId] is null for a personal listing; the membership gate is enforced
+  /// at submit time by the submit_listing RPC (Phase 19 R-143 soft gate).
   Future<void> saveBasicsStep({
     required String listingId,
     required String title,
     required ListingPurpose purpose,
     required PropertyType propertyType,
+    String? agencyId,
   });
 
   /// Persists the location step (parent columns + auto-filled centroid).

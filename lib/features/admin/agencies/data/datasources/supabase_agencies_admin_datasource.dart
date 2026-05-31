@@ -51,10 +51,17 @@ class SupabaseAgenciesAdminDatasource {
         .select(
           'avr_id:id, decision, submitted_at, decision_reason, evidence_urls, reviewed_at, '
           'agencies!inner(id, owner_user_id, name, status, created_at, description, phone, whatsapp, address, logo_path, cover_path)',
-        )
-        .eq('decision', 'pending');
+        );
 
-    if (statusWire != null) {
+    // Default (no filter) = the open verification queue (pending requests).
+    // A status filter instead targets the AGENCY's status: an approved /
+    // suspended / rejected agency no longer has a 'pending' request, so gating
+    // on decision='pending' hid every non-pending agency — which made the
+    // Approved/Rejected/Suspended filter chips return nothing and left
+    // suspend/reinstate unreachable from the admin UI.
+    if (statusWire == null) {
+      query = query.eq('decision', 'pending');
+    } else {
       query = query.eq('agencies.status', statusWire);
     }
     if (cursor != null) {
