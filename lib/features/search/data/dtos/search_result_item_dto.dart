@@ -26,6 +26,9 @@ class SearchResultItemDto {
     required this.primaryCurrency,
     required this.mainImagePath,
     required this.publishedAt,
+    this.agencyId,
+    this.agencyName,
+    this.agencyLogoUrl,
   });
 
   final String id;
@@ -40,6 +43,9 @@ class SearchResultItemDto {
   final String primaryCurrency;
   final String? mainImagePath;
   final DateTime publishedAt;
+  final String? agencyId;
+  final String? agencyName;
+  final String? agencyLogoUrl;
 
   factory SearchResultItemDto.fromJson(Map<String, dynamic> json) {
     return SearchResultItemDto(
@@ -55,6 +61,10 @@ class SearchResultItemDto {
       primaryCurrency: json['primary_currency'] as String,
       mainImagePath: json['main_image_path'] as String?,
       publishedAt: DateTime.parse(json['published_at'] as String),
+      agencyId: json['agency_id'] as String?,
+      agencyName: json['agency_name'] as String?,
+      // Stored as a full public URL (agency logos), so passed through directly.
+      agencyLogoUrl: json['agency_logo_path'] as String?,
     );
   }
 
@@ -77,6 +87,9 @@ class SearchResultItemDto {
       primaryCurrency: primaryCurrency,
       mainImagePath: mainImagePath,
       publishedAt: publishedAt,
+      agencyId: agencyId,
+      agencyName: agencyName,
+      agencyLogoUrl: agencyLogoUrl,
     );
   }
 }

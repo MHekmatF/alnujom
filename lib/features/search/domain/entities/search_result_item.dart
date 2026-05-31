@@ -16,6 +16,13 @@ class SearchResultItem extends Equatable {
   final String? mainImagePath;
   final DateTime publishedAt;
 
+  /// Phase 19 D-1 — verified-agency badge fields. Non-null only when the
+  /// listing belongs to an APPROVED agency (the v_listings_public LEFT JOIN is
+  /// approved-only); the card renders the badge when [agencyName] is present.
+  final String? agencyId;
+  final String? agencyName;
+  final String? agencyLogoUrl;
+
   const SearchResultItem({
     required this.id,
     required this.title,
@@ -29,6 +36,9 @@ class SearchResultItem extends Equatable {
     required this.primaryCurrency,
     this.mainImagePath,
     required this.publishedAt,
+    this.agencyId,
+    this.agencyName,
+    this.agencyLogoUrl,
   });
 
   /// Phase 14 Sub-Phase F pre-work — used by [SupabaseSearchDatasource] to
@@ -50,6 +60,9 @@ class SearchResultItem extends Equatable {
       primaryCurrency: primaryCurrency,
       mainImagePath: mainImagePath ?? this.mainImagePath,
       publishedAt: publishedAt,
+      agencyId: agencyId,
+      agencyName: agencyName,
+      agencyLogoUrl: agencyLogoUrl,
     );
   }
 
