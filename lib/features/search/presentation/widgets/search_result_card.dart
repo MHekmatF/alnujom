@@ -17,6 +17,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../agency/presentation/widgets/agency_badge.dart';
 import '../../../favorites/presentation/widgets/favorite_heart_button.dart';
 import '../../domain/entities/search_result_item.dart';
 
@@ -67,6 +68,21 @@ class SearchResultCard extends StatelessWidget {
                       end: AppSpacing.xs,
                       child: FavoriteHeartButton(listingId: item.id),
                     ),
+                    // Phase 19 D-1: verified-agency badge (compact overlay).
+                    // agencyName is non-null only for approved agencies.
+                    if (item.agencyName != null &&
+                        item.agencyName!.isNotEmpty &&
+                        item.agencyId != null)
+                      PositionedDirectional(
+                        bottom: AppSpacing.xs,
+                        start: AppSpacing.xs,
+                        child: AgencyBadge(
+                          agencyId: item.agencyId!,
+                          agencyName: item.agencyName!,
+                          logoUrl: item.agencyLogoUrl,
+                          compact: true,
+                        ),
+                      ),
                   ],
                 ),
               ),

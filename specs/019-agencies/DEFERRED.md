@@ -4,7 +4,7 @@ Intentional gaps left at the end of the `/wave all --auto` implementation run, c
 
 | ID | Gap | Tasks | FR / SC | Status |
 |----|-----|-------|---------|--------|
-| D-1 | Search-results verified badge | T060 | FR-022 | Deferred |
+| D-1 | Search-results verified badge | T060 | FR-022 | ✅ Done (2026-06-01) |
 | D-2 | Verification document **file** upload | T058 | FR-006, US1 AS#4 | Deferred |
 | D-3 | Rejection-reason text shown to the owner | T058 | FR-009, US1 AS#5 | Deferred |
 
@@ -88,4 +88,6 @@ Bugs surfaced by the live click-path walk (the backend/RLS/Vault spine was corre
 
 **Agency logo upload — DONE (2026-05-31):** added a self-loading Edit-profile page (`agency_edit_profile_page.dart`, route `/agency/edit`, owner-gated tile) with an image picker → uploads to `agency-assets` → stores the public URL via `update_agency_profile`. Verified on device: logo renders on the badge + public profile. (Cover image not yet wired — would need one new ARB key; logo was the explicit ask.)
 
-**Still outstanding from the original deferrals:** D-1 (search-results badge), D-2 (verification document file **upload** UI — the datasource helper + repo path now exist; needs a picker on the verify page), D-3 (rejection-reason text shown to owner), plus the agency **cover** image picker.
+**Search-results badge — DONE (2026-06-01, D-1):** migration `20260601120001` recreated the `search_listings` RPC + `search_result_row` type to project `agency_id`/`agency_name`/`agency_logo_path` (from the approved-only `v_listings_public` join); the search DTO/entity carry them and `SearchResultCard` renders a compact `AgencyBadge` overlay. Verified on device.
+
+**Still outstanding from the original deferrals:** D-2 (verification document file **upload** UI — the datasource helper + repo path now exist; needs a picker on the verify page), D-3 (rejection-reason text shown to owner), plus the agency **cover** image picker and B-5 (harden the remaining `extra`-based agency routes).
