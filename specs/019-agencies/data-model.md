@@ -470,8 +470,8 @@ BEGIN
 
   -- approve/reject act on a pending verification request (the queue only surfaces those).
   IF p_action IN ('approve','reject')
-     AND NOT EXISTS (SELECT 1 FROM public.agency_verification_requests
-                     WHERE agency_id = p_agency_id AND decision = 'pending') THEN
+     AND NOT EXISTS (SELECT 1 FROM public.agency_verification_requests avr
+                     WHERE avr.agency_id = p_agency_id AND avr.decision = 'pending') THEN  -- aliased: agency_id collides with the OUT param (20260531120015)
     RAISE EXCEPTION 'no_pending_verification' USING ERRCODE = 'P0002';
   END IF;
 
@@ -505,14 +505,14 @@ BEGIN
   UPDATE public.agencies SET status = v_new WHERE id = p_agency_id;          -- fires trg_agencies_audit_status
 
   IF p_action IN ('approve','reject') THEN
-    UPDATE public.agency_verification_requests
+    UPDATE public.agency_verification_requests AS avr
        SET decision        = (CASE WHEN p_action='approve' THEN 'approved' ELSE 'rejected' END),
            decision_reason  = CASE WHEN p_action='reject'
                                    THEN COALESCE(NULLIF(trim(p_reason_json::jsonb->>'detail'),''),
                                                  NULLIF(trim(p_reason_json::jsonb->>'preset'),'')) END,
            reviewed_by      = p_actor_user_id,
            reviewed_at      = now()
-     WHERE agency_id = p_agency_id AND decision = 'pending';                 -- fires trg_agency_verification_audit
+     WHERE avr.agency_id = p_agency_id AND avr.decision = 'pending';         -- aliased (OUT-param collision fix, 20260531120015); fires trg_agency_verification_audit
   END IF;
 
   RETURN QUERY SELECT p_agency_id, v_new::text;
