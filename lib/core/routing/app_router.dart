@@ -45,6 +45,7 @@ import '../../features/agency/presentation/pages/agency_members_page.dart';
 import '../../features/agency/presentation/pages/agency_listings_page.dart';
 import '../../features/agency/presentation/pages/agency_analytics_page.dart';
 import '../../features/agency/presentation/pages/agency_verification_page.dart';
+import '../../features/agency/presentation/pages/agency_edit_profile_page.dart';
 import '../../features/agency/domain/entities/agency.dart';
 import '../../features/admin/agencies/presentation/pages/agency_queue_page.dart';
 import '../../features/inquiries/presentation/pages/admin_inquiry_oversight_page.dart';
@@ -123,6 +124,7 @@ abstract final class AppRoutes {
   static const agencyListings = '/agency/listings';
   static const agencyAnalytics = '/agency/analytics';
   static const agencyVerify = '/agency/verify';
+  static const agencyEdit = '/agency/edit';
   // Phase 19: public agency profile deep-link (no auth redirect).
   static const agencyProfile = '/agency/:id';
   // Phase 19: admin agency verification queue route.
@@ -201,6 +203,7 @@ abstract final class AppRouteNames {
   static const agencyListings = 'agency-listings';
   static const agencyAnalytics = 'agency-analytics';
   static const agencyVerify = 'agency-verify';
+  static const agencyEdit = 'agency-edit';
   // Phase 19: public agency profile route name.
   static const agencyProfile = 'agency-profile';
   // Phase 19: admin agency verification queue route name.
@@ -576,6 +579,13 @@ GoRouter buildAppRouter({
             authBloc.state is Unauthenticated ? AppRoutes.login : null,
         builder: (context, state) =>
             AgencyVerificationPage(agencyId: state.extra as String),
+      ),
+      GoRoute(
+        path: AppRoutes.agencyEdit,
+        name: AppRouteNames.agencyEdit,
+        redirect: (context, state) =>
+            authBloc.state is Unauthenticated ? AppRoutes.login : null,
+        builder: (context, state) => const AgencyEditProfilePage(),
       ),
       // Public agency profile (no auth redirect; approved-only enforced by the
       // page + v_agencies). Declared LAST so the literal routes above win.

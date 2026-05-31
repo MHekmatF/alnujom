@@ -23,6 +23,7 @@
 
 import 'dart:async';
 import 'dart:io' show SocketException;
+import 'dart:typed_data' show Uint8List;
 
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show PostgrestException;
@@ -172,6 +173,34 @@ class AgencyRepositoryImpl implements AgencyRepository {
     } catch (e, st) {
       return FailureResult(
         UnknownFailure('updateProfile failed: $e', cause: e, stackTrace: st),
+      );
+    }
+  }
+
+  @override
+  Future<Result<String>> uploadAgencyAsset({
+    required String agencyId,
+    required String filename,
+    required List<int> bytes,
+    String contentType = 'image/jpeg',
+  }) async {
+    try {
+      final url = await _datasource.uploadAgencyAsset(
+        agencyId: agencyId,
+        filename: filename,
+        bytes: Uint8List.fromList(bytes),
+        contentType: contentType,
+      );
+      return Success(url);
+    } on SocketException catch (e, st) {
+      return FailureResult(NetworkFailure(e.message, cause: e, stackTrace: st));
+    } on TimeoutException catch (e, st) {
+      return FailureResult(
+        NetworkFailure(e.message ?? 'Request timed out', cause: e, stackTrace: st),
+      );
+    } catch (e, st) {
+      return FailureResult(
+        UnknownFailure('uploadAgencyAsset failed: $e', cause: e, stackTrace: st),
       );
     }
   }

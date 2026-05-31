@@ -276,6 +276,18 @@ class _ManagementSurface extends StatelessWidget {
         ),
         if (isOwner)
           _ManageTile(
+            icon: Icons.edit_outlined,
+            label: l10n.agency_edit_button,
+            onTap: () async {
+              final changed =
+                  await context.push<bool>(AppRoutes.agencyEdit);
+              if (changed == true && context.mounted) {
+                await context.read<AgencyHomeCubit>().load();
+              }
+            },
+          ),
+        if (isOwner)
+          _ManageTile(
             icon: Icons.verified_outlined,
             label: l10n.agency_manage_verify,
             onTap: () => context.push(
