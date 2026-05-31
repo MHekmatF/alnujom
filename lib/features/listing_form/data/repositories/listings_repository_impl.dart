@@ -55,11 +55,15 @@ class ListingsRepositoryImpl implements ListingsRepository {
     required String title,
     required ListingPurpose purpose,
     required PropertyType propertyType,
+    String? agencyId,
   }) async {
     await _ds.updateListing(listingId, <String, dynamic>{
       'title': title,
       'purpose': purpose.toDbValue(),
       'property_type': propertyType.toDbValue(),
+      // Phase 19: persist the publish-under-agency selection (null = personal).
+      // submit_listing validates active membership at submission (R-143).
+      'agency_id': agencyId,
     });
   }
 

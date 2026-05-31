@@ -187,6 +187,24 @@ class _HomeViewState extends State<_HomeView> {
           );
         },
       ),
+      // Persistent publish entry for approved publishers — the empty-state
+      // button only shows when the feed is empty, leaving no way to create a
+      // second listing once the public feed is populated.
+      floatingActionButton: BlocSelector<AuthBloc, AuthState, bool>(
+        selector: (state) =>
+            state is Authenticated &&
+            state.profile.accountStatus == AccountStatus.approved &&
+            state.profile.publisherStatus == PublisherStatus.approved,
+        builder: (context, isApprovedPublisher) {
+          if (!isApprovedPublisher) return const SizedBox.shrink();
+          return FloatingActionButton(
+            tooltip: l10n.home_empty_publish_first_listing,
+            onPressed: () =>
+                context.pushNamed(AppRouteNames.publisherListingsCreate),
+            child: const Icon(Icons.add_home_outlined),
+          );
+        },
+      ),
     );
   }
 
