@@ -74,6 +74,16 @@ abstract interface class AgencyRepository {
     String? coverPath,
   });
 
+  /// Uploads an agency logo/cover image to the public `agency-assets` bucket
+  /// and returns its public URL (suitable to pass straight to [updateProfile]'s
+  /// `logoPath`/`coverPath`). Agency-admin only.
+  Future<Result<String>> uploadAgencyAsset({
+    required String agencyId,
+    required String filename,
+    required List<int> bytes,
+    String contentType,
+  });
+
   /// Uploads document bytes to the `agency-documents` bucket then calls
   /// `submit_agency_verification(agency_id, id_document_number,
   /// registration_number, evidence_urls?)`. Agency-admin only; one open

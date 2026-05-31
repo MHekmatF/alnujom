@@ -203,6 +203,32 @@ class SupabaseAgencyDatasource {
     return path;
   }
 
+  /// Uploads an agency asset (logo/cover) to the PUBLIC `agency-assets` bucket
+  /// at `'<agencyId>/<filename>'` and returns its **public URL** — the
+  /// `agencies.logo_path` / `cover_path` column is consumed directly as an
+  /// image URL by the badge + profile widgets (CachedNetworkImage), so we store
+  /// the resolved URL rather than the raw object path. Agency-admin only
+  /// (the agency_assets_admin_write storage policy gates the prefix UUID).
+  ///
+  /// Throws [supabase.StorageException] on upload failure.
+  Future<String> uploadAgencyAsset({
+    required String agencyId,
+    required String filename,
+    required Uint8List bytes,
+    String contentType = 'image/jpeg',
+  }) async {
+    final path = '$agencyId/$filename';
+    await _client.storage.from('agency-assets').uploadBinary(
+          path,
+          bytes,
+          fileOptions: supabase.FileOptions(
+            contentType: contentType,
+            upsert: true,
+          ),
+        );
+    return _client.storage.from('agency-assets').getPublicUrl(path);
+  }
+
   // ---------------------------------------------------------------------------
   // Member operations — write path
   // ---------------------------------------------------------------------------
