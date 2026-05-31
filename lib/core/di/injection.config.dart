@@ -765,6 +765,16 @@ _i174.GetIt $initGetIt(
     ),
     dispose: (i) => i.dispose(),
   );
+  gh.factory<_i988.AgencyHomeCubit>(
+    () => _i988.AgencyHomeCubit(
+      gh<_i324.LoadMyAgency>(),
+      gh<_i611.LoadMyActiveAgencies>(),
+      gh<_i195.CreateAgency>(),
+      gh<_i470.LoadMyAgencyInvitations>(),
+      gh<_i686.LoadAgencyById>(),
+      gh<_i552.RespondAgencyInvitation>(),
+    ),
+  );
   gh.lazySingleton<_i433.HomeFeedRepository>(
     () => _i857.HomeFeedRepositoryImpl(gh<_i732.SupabaseHomeFeedDatasource>()),
   );
@@ -1014,13 +1024,6 @@ _i174.GetIt $initGetIt(
       gh<_i645.LoadCityDetail>(),
       gh<_i441.LoadGovernorateDetail>(),
       gh<_i358.ListAreasForCity>(),
-    ),
-  );
-  gh.factory<_i988.AgencyHomeCubit>(
-    () => _i988.AgencyHomeCubit(
-      gh<_i324.LoadMyAgency>(),
-      gh<_i611.LoadMyActiveAgencies>(),
-      gh<_i195.CreateAgency>(),
     ),
   );
   gh.factory<_i669.AssignRoleBloc>(
