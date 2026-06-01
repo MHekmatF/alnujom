@@ -48,7 +48,9 @@ String? validateLinkValue(AdLinkKind kind, String value) {
 String? _validateUrl(String v) {
   final uri = Uri.tryParse(v.trim());
   if (uri == null || !uri.hasScheme) return 'adLinkValueInvalidUrl';
-  if (uri.scheme != 'http' && uri.scheme != 'https') return 'adLinkValueInvalidUrl';
+  if (uri.scheme != 'http' && uri.scheme != 'https') {
+    return 'adLinkValueInvalidUrl';
+  }
   return null;
 }
 
@@ -58,7 +60,9 @@ String? _validateUuid(String v) {
 }
 
 String? _validateCategoryKey(String v) {
-  if (!_kPropertyTypeKeys.contains(v.trim())) return 'adLinkValueInvalidCategoryKey';
+  if (!_kPropertyTypeKeys.contains(v.trim())) {
+    return 'adLinkValueInvalidCategoryKey';
+  }
   return null;
 }
 
@@ -99,8 +103,7 @@ class _LinkTargetPickerState extends State<LinkTargetPicker> {
     super.dispose();
   }
 
-  void _notifyChanged() =>
-      widget.onChanged(_kind, _valueController.text);
+  void _notifyChanged() => widget.onChanged(_kind, _valueController.text);
 
   @override
   Widget build(BuildContext context) {
@@ -116,10 +119,7 @@ class _LinkTargetPickerState extends State<LinkTargetPicker> {
           initialValue: _kind,
           decoration: InputDecoration(labelText: l10n.adLinkKindLabel),
           items: AdLinkKind.values.map((k) {
-            return DropdownMenuItem(
-              value: k,
-              child: Text(_kindLabel(l10n, k)),
-            );
+            return DropdownMenuItem(value: k, child: Text(_kindLabel(l10n, k)));
           }).toList(),
           onChanged: (k) {
             if (k == null) return;

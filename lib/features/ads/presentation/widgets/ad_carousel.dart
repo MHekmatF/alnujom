@@ -20,11 +20,7 @@ import '../../domain/entities/serving_ad.dart';
 import 'ad_banner_card.dart';
 
 class AdCarousel extends StatefulWidget {
-  const AdCarousel({
-    super.key,
-    required this.ads,
-    required this.onAdTap,
-  });
+  const AdCarousel({super.key, required this.ads, required this.onAdTap});
 
   /// ≥2 ads ordered priority DESC (R-173). Must not be empty.
   final List<ServingAd> ads;
@@ -88,18 +84,12 @@ class _AdCarouselState extends State<AdCarousel> {
               padding: const EdgeInsetsDirectional.symmetric(
                 horizontal: AppSpacing.xs,
               ),
-              child: AdBannerCard(
-                ad: ad,
-                onTap: () => widget.onAdTap(ad),
-              ),
+              child: AdBannerCard(ad: ad, onTap: () => widget.onAdTap(ad)),
             );
           },
         ),
         const SizedBox(height: AppSpacing.xs),
-        _PageIndicator(
-          count: widget.ads.length,
-          current: _currentPage,
-        ),
+        _PageIndicator(count: widget.ads.length, current: _currentPage),
       ],
     );
   }
@@ -121,7 +111,7 @@ class _PageIndicator extends StatelessWidget {
         return AnimatedContainer(
           duration: const Duration(milliseconds: 250),
           margin: const EdgeInsetsDirectional.symmetric(
-            horizontal: AppSpacing.xs / 2,
+            horizontal: AppSpacing.xs,
           ),
           width: isActive ? AppSpacing.md : AppSpacing.sm,
           height: AppSpacing.xs,

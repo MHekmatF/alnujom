@@ -19,9 +19,6 @@ class SetAdActive {
   /// Toggle the active state of an ad.
   ///
   /// Returns [Success(null)] on success.
-  Future<Result<void>> call({
-    required String adId,
-    required bool isActive,
-  }) =>
+  Future<Result<void>> call({required String adId, required bool isActive}) =>
       _repository.setAdActive(adId: adId, isActive: isActive);
 }

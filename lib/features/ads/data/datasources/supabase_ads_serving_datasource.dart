@@ -62,10 +62,7 @@ class SupabaseAdsServingDatasource {
   }) async {
     final result = await _client.rpc(
       'record_ad_event',
-      params: {
-        'p_ad_id': adId,
-        'p_placement_key': placementKey,
-      },
+      params: {'p_ad_id': adId, 'p_placement_key': placementKey},
     );
     return result as String;
   }

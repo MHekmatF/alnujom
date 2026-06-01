@@ -21,11 +21,7 @@ import '../../../../core/theme/spacing.dart';
 import '../../domain/entities/serving_ad.dart';
 
 class AdBannerCard extends StatelessWidget {
-  const AdBannerCard({
-    super.key,
-    required this.ad,
-    required this.onTap,
-  });
+  const AdBannerCard({super.key, required this.ad, required this.onTap});
 
   final ServingAd ad;
   final VoidCallback onTap;
@@ -34,8 +30,7 @@ class AdBannerCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context);
     final isArabic = locale.languageCode == 'ar';
-    final caption =
-        isArabic ? ad.captionAr : ad.captionEn;
+    final caption = isArabic ? ad.captionAr : ad.captionEn;
 
     final imageUrl = Supabase.instance.client.storage
         .from('ads')

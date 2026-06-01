@@ -81,26 +81,26 @@ class Ad extends Equatable {
   /// Do NOT store or compare across serialization boundaries; recompute
   /// from the stored fields when needed.
   AdStatus get status => AdStatus.compute(
-        isActive: isActive,
-        archivedAt: archivedAt,
-        startAt: startAt,
-        endAt: endAt,
-      );
+    isActive: isActive,
+    archivedAt: archivedAt,
+    startAt: startAt,
+    endAt: endAt,
+  );
 
   @override
   List<Object?> get props => [
-        id,
-        title,
-        imagePath,
-        captionAr,
-        captionEn,
-        linkKind,
-        linkValue,
-        startAt,
-        endAt,
-        isActive,
-        archivedAt,
-        placements,
-        createdAt,
-      ];
+    id,
+    title,
+    imagePath,
+    captionAr,
+    captionEn,
+    linkKind,
+    linkValue,
+    startAt,
+    endAt,
+    isActive,
+    archivedAt,
+    placements,
+    createdAt,
+  ];
 }

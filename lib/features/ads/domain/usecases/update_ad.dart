@@ -31,18 +31,17 @@ class UpdateAd {
     DateTime? endAt,
     required bool isActive,
     required List<Map<String, dynamic>> placements,
-  }) =>
-      _repository.updateAd(
-        adId: adId,
-        title: title,
-        imagePath: imagePath,
-        captionAr: captionAr,
-        captionEn: captionEn,
-        linkKind: linkKind,
-        linkValue: linkValue,
-        startAt: startAt,
-        endAt: endAt,
-        isActive: isActive,
-        placements: placements,
-      );
+  }) => _repository.updateAd(
+    adId: adId,
+    title: title,
+    imagePath: imagePath,
+    captionAr: captionAr,
+    captionEn: captionEn,
+    linkKind: linkKind,
+    linkValue: linkValue,
+    startAt: startAt,
+    endAt: endAt,
+    isActive: isActive,
+    placements: placements,
+  );
 }

@@ -27,6 +27,5 @@ class RecordAdClick {
   Future<Result<void>> call({
     required String adId,
     required AdPlacement placement,
-  }) =>
-      _repository.recordClick(adId: adId, placement: placement);
+  }) => _repository.recordClick(adId: adId, placement: placement);
 }

@@ -32,9 +32,8 @@ class SchedulePicker extends StatelessWidget {
     final theme = Theme.of(context);
 
     // Validate: start must be before end.
-    final hasError = startAt != null &&
-        endAt != null &&
-        !startAt!.isBefore(endAt!);
+    final hasError =
+        startAt != null && endAt != null && !startAt!.isBefore(endAt!);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,7 +118,7 @@ class _DateTimeField extends StatelessWidget {
           );
         }
       },
-      borderRadius: BorderRadius.circular(4),
+      borderRadius: BorderRadius.circular(AppSpacing.xs),
       child: InputDecorator(
         decoration: InputDecoration(
           labelText: label,
@@ -137,9 +136,7 @@ class _DateTimeField extends StatelessWidget {
           ),
         ),
         child: Text(
-          value != null
-              ? _formatDateTime(value!)
-              : l10n.scheduleNotSet,
+          value != null ? _formatDateTime(value!) : l10n.scheduleNotSet,
           style: value != null
               ? theme.textTheme.bodyMedium
               : theme.textTheme.bodyMedium?.copyWith(

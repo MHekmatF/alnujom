@@ -53,16 +53,13 @@ class AdDto {
   factory AdDto.fromJson(Map<String, dynamic> json) {
     final rawPlacements =
         (json['ad_placements'] as List<dynamic>?) ?? <dynamic>[];
-    final placements = rawPlacements
-        .map((p) {
-          final row = p as Map<String, dynamic>;
-          return AdPlacementAssignment(
-            placement:
-                AdPlacement.fromWire(row['placement_key'] as String),
-            priority: (row['priority'] as num?)?.toInt() ?? 0,
-          );
-        })
-        .toList();
+    final placements = rawPlacements.map((p) {
+      final row = p as Map<String, dynamic>;
+      return AdPlacementAssignment(
+        placement: AdPlacement.fromWire(row['placement_key'] as String),
+        priority: (row['priority'] as num?)?.toInt() ?? 0,
+      );
+    }).toList();
 
     return AdDto(
       id: json['id'] as String,
@@ -88,18 +85,18 @@ class AdDto {
   }
 
   Ad toEntity() => Ad(
-        id: id,
-        title: title,
-        imagePath: imagePath,
-        captionAr: captionAr,
-        captionEn: captionEn,
-        linkKind: linkKind,
-        linkValue: linkValue,
-        startAt: startAt,
-        endAt: endAt,
-        isActive: isActive,
-        archivedAt: archivedAt,
-        placements: placements,
-        createdAt: createdAt,
-      );
+    id: id,
+    title: title,
+    imagePath: imagePath,
+    captionAr: captionAr,
+    captionEn: captionEn,
+    linkKind: linkKind,
+    linkValue: linkValue,
+    startAt: startAt,
+    endAt: endAt,
+    isActive: isActive,
+    archivedAt: archivedAt,
+    placements: placements,
+    createdAt: createdAt,
+  );
 }

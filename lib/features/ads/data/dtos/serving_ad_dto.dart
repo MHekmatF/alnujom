@@ -47,13 +47,13 @@ class ServingAdDto {
   }
 
   ServingAd toEntity() => ServingAd(
-        adId: adId,
-        imagePath: imagePath,
-        captionAr: captionAr,
-        captionEn: captionEn,
-        linkKind: linkKind,
-        linkValue: linkValue,
-        placement: placement,
-        priority: priority,
-      );
+    adId: adId,
+    imagePath: imagePath,
+    captionAr: captionAr,
+    captionEn: captionEn,
+    linkKind: linkKind,
+    linkValue: linkValue,
+    placement: placement,
+    priority: priority,
+  );
 }

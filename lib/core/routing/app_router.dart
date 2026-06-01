@@ -591,7 +591,9 @@ GoRouter buildAppRouter({
       GoRoute(
         path: AppRoutes.agencyListings,
         name: AppRouteNames.agencyListings,
-        redirect: (context, state) => authBloc.state is Unauthenticated // B-5
+        redirect: (context, state) =>
+            authBloc.state
+                is Unauthenticated // B-5
             ? AppRoutes.login
             : (state.extra == null ? AppRoutes.agency : null),
         builder: (context, state) =>
@@ -600,7 +602,9 @@ GoRouter buildAppRouter({
       GoRoute(
         path: AppRoutes.agencyAnalytics,
         name: AppRouteNames.agencyAnalytics,
-        redirect: (context, state) => authBloc.state is Unauthenticated // B-5
+        redirect: (context, state) =>
+            authBloc.state
+                is Unauthenticated // B-5
             ? AppRoutes.login
             : (state.extra == null ? AppRoutes.agency : null),
         builder: (context, state) =>
@@ -609,7 +613,9 @@ GoRouter buildAppRouter({
       GoRoute(
         path: AppRoutes.agencyVerify,
         name: AppRouteNames.agencyVerify,
-        redirect: (context, state) => authBloc.state is Unauthenticated // B-5
+        redirect: (context, state) =>
+            authBloc.state
+                is Unauthenticated // B-5
             ? AppRoutes.login
             : (state.extra == null ? AppRoutes.agency : null),
         builder: (context, state) =>

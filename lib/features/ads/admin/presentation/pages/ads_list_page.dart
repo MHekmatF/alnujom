@@ -47,15 +47,13 @@ class _AdsListView extends StatelessWidget {
                   state is AdsAdminList && state.includeArchived;
               return IconButton(
                 icon: Icon(
-                  includeArchived
-                      ? Icons.archive
-                      : Icons.archive_outlined,
+                  includeArchived ? Icons.archive : Icons.archive_outlined,
                 ),
                 tooltip: l10n.adsAdminArchivedFilterTooltip,
                 onPressed: () {
                   ctx.read<AdsAdminCubit>().loadAds(
-                        includeArchived: !includeArchived,
-                      );
+                    includeArchived: !includeArchived,
+                  );
                 },
               );
             },
@@ -65,9 +63,9 @@ class _AdsListView extends StatelessWidget {
       body: BlocConsumer<AdsAdminCubit, AdsAdminState>(
         listener: (ctx, state) {
           if (state is AdsAdminError) {
-            ScaffoldMessenger.of(ctx).showSnackBar(
-              SnackBar(content: Text(state.failure.message)),
-            );
+            ScaffoldMessenger.of(
+              ctx,
+            ).showSnackBar(SnackBar(content: Text(state.failure.message)));
           }
         },
         builder: (ctx, state) {
@@ -80,8 +78,8 @@ class _AdsListView extends StatelessWidget {
             }
             return RefreshIndicator(
               onRefresh: () => ctx.read<AdsAdminCubit>().loadAds(
-                    includeArchived: state.includeArchived,
-                  ),
+                includeArchived: state.includeArchived,
+              ),
               child: ListView.separated(
                 padding: const EdgeInsets.all(AppSpacing.lg),
                 itemCount: state.ads.length,
@@ -130,29 +128,27 @@ class _AdsListView extends StatelessWidget {
   void _openEditor(BuildContext context, {Ad? ad}) {
     final cubit = context.read<AdsAdminCubit>();
     final state = cubit.state;
-    final includeArchived =
-        state is AdsAdminList && state.includeArchived;
+    final includeArchived = state is AdsAdminList && state.includeArchived;
     // Reload on return so backing out mid-edit (cubit left in a transient
     // upload/save state by the shared instance) restores the list, preserving
     // the archived filter (review Bug 1 + Gap 2).
     unawaited(
-      Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => BlocProvider<AdsAdminCubit>.value(
-            value: cubit,
-            child: AdEditorPage(ad: ad),
-          ),
-        ),
-      ).then((_) => cubit.loadAds(includeArchived: includeArchived)),
+      Navigator.of(context)
+          .push(
+            MaterialPageRoute<void>(
+              builder: (_) => BlocProvider<AdsAdminCubit>.value(
+                value: cubit,
+                child: AdEditorPage(ad: ad),
+              ),
+            ),
+          )
+          .then((_) => cubit.loadAds(includeArchived: includeArchived)),
     );
   }
 }
 
 class _AdListTile extends StatelessWidget {
-  const _AdListTile({
-    required this.ad,
-    required this.onTap,
-  });
+  const _AdListTile({required this.ad, required this.onTap});
 
   final Ad ad;
   final VoidCallback onTap;
@@ -186,9 +182,9 @@ class _AdListTile extends StatelessWidget {
                     : l10n.adsAdminActivateTooltip,
                 onPressed: () {
                   context.read<AdsAdminCubit>().setAdActive(
-                        ad.id,
-                        isActive: !ad.isActive,
-                      );
+                    ad.id,
+                    isActive: !ad.isActive,
+                  );
                 },
               ),
               // Archive (soft-delete)

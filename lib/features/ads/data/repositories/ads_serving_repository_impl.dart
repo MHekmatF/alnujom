@@ -32,12 +32,9 @@ class AdsServingRepositoryImpl implements AdsServingRepository {
   final SupabaseAdsServingDatasource _datasource;
 
   @override
-  Future<Result<List<ServingAd>>> loadServingAds(
-    AdPlacement placement,
-  ) async {
+  Future<Result<List<ServingAd>>> loadServingAds(AdPlacement placement) async {
     try {
-      final dtos =
-          await _datasource.loadServingAds(placement.wireValue);
+      final dtos = await _datasource.loadServingAds(placement.wireValue);
       return Success(dtos.map((d) => d.toEntity()).toList());
     } on PostgrestException catch (e, st) {
       return FailureResult(
@@ -51,7 +48,11 @@ class AdsServingRepositoryImpl implements AdsServingRepository {
       return FailureResult(NetworkFailure(e.message, cause: e, stackTrace: st));
     } on TimeoutException catch (e, st) {
       return FailureResult(
-        NetworkFailure(e.message ?? 'Request timed out', cause: e, stackTrace: st),
+        NetworkFailure(
+          e.message ?? 'Request timed out',
+          cause: e,
+          stackTrace: st,
+        ),
       );
     } catch (e, st) {
       return FailureResult(
@@ -87,7 +88,11 @@ class AdsServingRepositoryImpl implements AdsServingRepository {
       return FailureResult(NetworkFailure(e.message, cause: e, stackTrace: st));
     } on TimeoutException catch (e, st) {
       return FailureResult(
-        NetworkFailure(e.message ?? 'Request timed out', cause: e, stackTrace: st),
+        NetworkFailure(
+          e.message ?? 'Request timed out',
+          cause: e,
+          stackTrace: st,
+        ),
       );
     } catch (e, st) {
       return FailureResult(

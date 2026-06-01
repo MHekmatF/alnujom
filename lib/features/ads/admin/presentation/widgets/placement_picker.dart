@@ -43,9 +43,7 @@ class _PlacementPickerState extends State<PlacementPicker> {
     super.initState();
     _priorityControllers = {
       for (final p in AdPlacement.values)
-        p: TextEditingController(
-          text: _priorityFor(p)?.toString() ?? '1',
-        ),
+        p: TextEditingController(text: _priorityFor(p)?.toString() ?? '1'),
     };
   }
 
@@ -59,9 +57,7 @@ class _PlacementPickerState extends State<PlacementPicker> {
 
   int? _priorityFor(AdPlacement placement) {
     try {
-      return widget.value
-          .firstWhere((a) => a.placement == placement)
-          .priority;
+      return widget.value.firstWhere((a) => a.placement == placement).priority;
     } catch (_) {
       return null;
     }
@@ -75,7 +71,9 @@ class _PlacementPickerState extends State<PlacementPicker> {
     if (selected) {
       final priorityText = _priorityControllers[placement]!.text.trim();
       final priority = int.tryParse(priorityText) ?? 1;
-      updated.add(AdPlacementAssignment(placement: placement, priority: priority));
+      updated.add(
+        AdPlacementAssignment(placement: placement, priority: priority),
+      );
     } else {
       updated.removeWhere((a) => a.placement == placement);
     }
@@ -102,10 +100,7 @@ class _PlacementPickerState extends State<PlacementPicker> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          l10n.adsAdminPlacementsLabel,
-          style: theme.textTheme.titleSmall,
-        ),
+        Text(l10n.adsAdminPlacementsLabel, style: theme.textTheme.titleSmall),
         const SizedBox(height: AppSpacing.sm),
         ...AdPlacement.values.map((placement) {
           final selected = _isSelected(placement);

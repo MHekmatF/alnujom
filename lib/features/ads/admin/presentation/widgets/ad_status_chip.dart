@@ -24,30 +24,30 @@ class AdStatusChip extends StatelessWidget {
 
     final (label, background, foreground) = switch (status) {
       AdStatus.active => (
-          l10n.adStatusActive,
-          colorScheme.primaryContainer,
-          colorScheme.onPrimaryContainer,
-        ),
+        l10n.adStatusActive,
+        colorScheme.primaryContainer,
+        colorScheme.onPrimaryContainer,
+      ),
       AdStatus.scheduled => (
-          l10n.adStatusScheduled,
-          colorScheme.secondaryContainer,
-          colorScheme.onSecondaryContainer,
-        ),
+        l10n.adStatusScheduled,
+        colorScheme.secondaryContainer,
+        colorScheme.onSecondaryContainer,
+      ),
       AdStatus.expired => (
-          l10n.adStatusExpired,
-          colorScheme.errorContainer,
-          colorScheme.onErrorContainer,
-        ),
+        l10n.adStatusExpired,
+        colorScheme.errorContainer,
+        colorScheme.onErrorContainer,
+      ),
       AdStatus.inactive => (
-          l10n.adStatusInactive,
-          colorScheme.surfaceContainerHighest,
-          colorScheme.onSurfaceVariant,
-        ),
+        l10n.adStatusInactive,
+        colorScheme.surfaceContainerHighest,
+        colorScheme.onSurfaceVariant,
+      ),
       AdStatus.archived => (
-          l10n.adStatusArchived,
-          colorScheme.surfaceContainerHighest,
-          colorScheme.outline,
-        ),
+        l10n.adStatusArchived,
+        colorScheme.surfaceContainerHighest,
+        colorScheme.outline,
+      ),
     };
 
     return Chip(

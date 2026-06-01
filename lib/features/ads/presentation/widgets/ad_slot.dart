@@ -67,13 +67,13 @@ class _AdSlotView extends StatelessWidget {
       builder: (context, state) {
         return switch (state) {
           AdSlotSingle(:final ad) => AdBannerCard(
-              ad: ad,
-              onTap: () => _handleTap(context, ad),
-            ),
+            ad: ad,
+            onTap: () => _handleTap(context, ad),
+          ),
           AdSlotCarousel(:final ads) => AdCarousel(
-              ads: ads,
-              onAdTap: (ad) => _handleTap(context, ad),
-            ),
+            ads: ads,
+            onAdTap: (ad) => _handleTap(context, ad),
+          ),
           // initial / empty / error → zero height, no reflow (FR-012)
           _ => const SizedBox.shrink(),
         };
@@ -85,9 +85,7 @@ class _AdSlotView extends StatelessWidget {
   /// Swallows all click-recording errors per FR-017.
   void _handleTap(BuildContext context, ServingAd ad) {
     // Best-effort, non-blocking — do NOT await.
-    getIt<RecordAdClick>()
-        .call(adId: ad.adId, placement: placement)
-        .ignore();
+    getIt<RecordAdClick>().call(adId: ad.adId, placement: placement).ignore();
 
     _openTarget(context, ad);
   }
@@ -101,17 +99,17 @@ class _AdSlotView extends StatelessWidget {
             _showFallback(context);
             return;
           }
-          final launched =
-              await launchUrl(uri, mode: LaunchMode.externalApplication);
+          final launched = await launchUrl(
+            uri,
+            mode: LaunchMode.externalApplication,
+          );
           if (!launched && context.mounted) {
             _showFallback(context);
           }
 
         case AdLinkKind.listing:
           if (context.mounted) {
-            unawaited(
-              context.push(AppRoutes.listingDetailsFor(ad.linkValue)),
-            );
+            unawaited(context.push(AppRoutes.listingDetailsFor(ad.linkValue)));
           }
 
         case AdLinkKind.agency:
@@ -149,8 +147,8 @@ class _AdSlotView extends StatelessWidget {
   void _showFallback(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final message = l10n?.adSlotTargetNotFound ?? 'Link unavailable';
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 }

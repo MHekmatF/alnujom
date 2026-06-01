@@ -174,10 +174,7 @@ String? requireAgenciesManageRedirect(
 /// Phase 21 — gate for `/admin/ads` route. Requires the data-driven
 /// `ads.manage` permission; redirects to `/admin?denied=ads` otherwise.
 /// Mirrors [requireAuditLogsViewRedirect].
-String? requireAdsManageRedirect(
-  BuildContext context,
-  GoRouterState state,
-) {
+String? requireAdsManageRedirect(BuildContext context, GoRouterState state) {
   final checker = getIt<PermissionChecker>();
   if (!checker.has(PermissionKeys.adsManage)) {
     return '/admin?denied=ads';

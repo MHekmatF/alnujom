@@ -27,9 +27,8 @@ enum AdPlacement {
   final String wireValue;
 
   /// Parse from a wire string; throws [StateError] for unknown values.
-  static AdPlacement fromWire(String v) =>
-      AdPlacement.values.firstWhere(
-        (e) => e.wireValue == v,
-        orElse: () => throw StateError('Unknown AdPlacement wire value: $v'),
-      );
+  static AdPlacement fromWire(String v) => AdPlacement.values.firstWhere(
+    (e) => e.wireValue == v,
+    orElse: () => throw StateError('Unknown AdPlacement wire value: $v'),
+  );
 }

@@ -26,9 +26,8 @@ enum AdLinkKind {
   final String wireValue;
 
   /// Parse from a wire string; throws [StateError] for unknown values.
-  static AdLinkKind fromWire(String v) =>
-      AdLinkKind.values.firstWhere(
-        (e) => e.wireValue == v,
-        orElse: () => throw StateError('Unknown AdLinkKind wire value: $v'),
-      );
+  static AdLinkKind fromWire(String v) => AdLinkKind.values.firstWhere(
+    (e) => e.wireValue == v,
+    orElse: () => throw StateError('Unknown AdLinkKind wire value: $v'),
+  );
 }

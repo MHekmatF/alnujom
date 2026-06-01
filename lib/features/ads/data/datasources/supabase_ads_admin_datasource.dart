@@ -44,7 +44,9 @@ class SupabaseAdsAdminDatasource {
     final prefix = _generateUuid();
     final extension = _extensionForContentType(contentType);
     final path = '$prefix/banner$extension';
-    await _client.storage.from(_bucket).uploadBinary(
+    await _client.storage
+        .from(_bucket)
+        .uploadBinary(
           path,
           bytes,
           fileOptions: supabase.FileOptions(contentType: contentType),
@@ -151,10 +153,7 @@ class SupabaseAdsAdminDatasource {
   }) async {
     await _client.rpc(
       'set_ad_active',
-      params: {
-        'p_ad_id': adId,
-        'p_is_active': isActive,
-      },
+      params: {'p_ad_id': adId, 'p_is_active': isActive},
     );
   }
 
@@ -162,10 +161,7 @@ class SupabaseAdsAdminDatasource {
   ///
   /// Throws [supabase.PostgrestException] on 42501 or 23503.
   Future<void> archiveAd(String adId) async {
-    await _client.rpc(
-      'archive_ad',
-      params: {'p_ad_id': adId},
-    );
+    await _client.rpc('archive_ad', params: {'p_ad_id': adId});
   }
 
   // ---------------------------------------------------------------------------
@@ -181,9 +177,11 @@ class SupabaseAdsAdminDatasource {
   Future<List<AdDto>> loadAds({bool includeArchived = false}) async {
     final baseQuery = _client
         .from('ads')
-        .select('id, title, image_path, caption_ar, caption_en, link_kind, '
-            'link_value, start_at, end_at, is_active, archived_at, created_at, '
-            'ad_placements(placement_key, priority)');
+        .select(
+          'id, title, image_path, caption_ar, caption_en, link_kind, '
+          'link_value, start_at, end_at, is_active, archived_at, created_at, '
+          'ad_placements(placement_key, priority)',
+        );
 
     final List<dynamic> rows;
     if (includeArchived) {

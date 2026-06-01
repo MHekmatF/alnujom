@@ -26,6 +26,5 @@ class UploadAdImage {
   Future<Result<String>> call({
     required Uint8List bytes,
     required String contentType,
-  }) =>
-      _repository.uploadAdImage(bytes: bytes, contentType: contentType);
+  }) => _repository.uploadAdImage(bytes: bytes, contentType: contentType);
 }

@@ -57,13 +57,13 @@ class ServingAd extends Equatable {
 
   @override
   List<Object?> get props => [
-        adId,
-        imagePath,
-        captionAr,
-        captionEn,
-        linkKind,
-        linkValue,
-        placement,
-        priority,
-      ];
+    adId,
+    imagePath,
+    captionAr,
+    captionEn,
+    linkKind,
+    linkValue,
+    placement,
+    priority,
+  ];
 }

@@ -13,6 +13,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../../core/theme/radii.dart';
 import '../../../../../core/theme/spacing.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../domain/entities/ad.dart';
@@ -124,17 +125,17 @@ class _AdEditorPageState extends State<AdEditorPage> {
 
     // Schedule validation
     if (_startAt != null && _endAt != null && !_startAt!.isBefore(_endAt!)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.scheduleStartMustBeforeEnd)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.scheduleStartMustBeforeEnd)));
       return;
     }
 
     // Image required
     if (_imagePath == null || _imagePath!.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.adsAdminImageRequired)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.adsAdminImageRequired)));
       return;
     }
 
@@ -152,10 +153,12 @@ class _AdEditorPageState extends State<AdEditorPage> {
     final captionEn = enFilled ? _captionEnController.text.trim() : null;
 
     final placementMaps = _placements
-        .map((a) => <String, dynamic>{
-              'placement_key': a.placement.wireValue,
-              'priority': a.priority,
-            })
+        .map(
+          (a) => <String, dynamic>{
+            'placement_key': a.placement.wireValue,
+            'priority': a.priority,
+          },
+        )
         .toList();
 
     final cubit = context.read<AdsAdminCubit>();
@@ -213,18 +216,16 @@ class _AdEditorPageState extends State<AdEditorPage> {
         }
 
         if (state is AdsAdminError) {
-          ScaffoldMessenger.of(ctx).showSnackBar(
-            SnackBar(content: Text(state.failure.message)),
-          );
+          ScaffoldMessenger.of(
+            ctx,
+          ).showSnackBar(SnackBar(content: Text(state.failure.message)));
         }
       },
       builder: (ctx, state) {
         return Scaffold(
           appBar: AppBar(
             title: Text(
-              _isEditing
-                  ? l10n.adsAdminEditTitle
-                  : l10n.adsAdminCreateTitle,
+              _isEditing ? l10n.adsAdminEditTitle : l10n.adsAdminCreateTitle,
             ),
             actions: [
               if (_isSaving)
@@ -238,10 +239,7 @@ class _AdEditorPageState extends State<AdEditorPage> {
                   ),
                 )
               else
-                TextButton(
-                  onPressed: _save,
-                  child: Text(l10n.saveLabel),
-                ),
+                TextButton(onPressed: _save, child: Text(l10n.saveLabel)),
             ],
           ),
           body: Form(
@@ -284,8 +282,8 @@ class _AdEditorPageState extends State<AdEditorPage> {
                 Text(
                   l10n.adsAdminCaptionBothOrNeitherHint,
                   style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(ctx).colorScheme.outline,
-                      ),
+                    color: Theme.of(ctx).colorScheme.outline,
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 TextFormField(
@@ -296,8 +294,9 @@ class _AdEditorPageState extends State<AdEditorPage> {
                   textDirection: TextDirection.rtl,
                   validator: (v) {
                     final arFilled = (v ?? '').trim().isNotEmpty;
-                    final enFilled =
-                        _captionEnController.text.trim().isNotEmpty;
+                    final enFilled = _captionEnController.text
+                        .trim()
+                        .isNotEmpty;
                     if (!arFilled && enFilled) {
                       return l10n.adsAdminCaptionBothOrNeither;
                     }
@@ -312,8 +311,9 @@ class _AdEditorPageState extends State<AdEditorPage> {
                   ),
                   validator: (v) {
                     final enFilled = (v ?? '').trim().isNotEmpty;
-                    final arFilled =
-                        _captionArController.text.trim().isNotEmpty;
+                    final arFilled = _captionArController.text
+                        .trim()
+                        .isNotEmpty;
                     if (!enFilled && arFilled) {
                       return l10n.adsAdminCaptionBothOrNeither;
                     }
@@ -347,8 +347,7 @@ class _AdEditorPageState extends State<AdEditorPage> {
                 // ── Placements ───────────────────────────────────────────
                 PlacementPicker(
                   value: _placements,
-                  onChanged: (updated) =>
-                      setState(() => _placements = updated),
+                  onChanged: (updated) => setState(() => _placements = updated),
                 ),
                 const SizedBox(height: AppSpacing.lg),
 
@@ -398,7 +397,7 @@ class _ImagePickerArea extends StatelessWidget {
         height: 160,
         decoration: BoxDecoration(
           color: theme.colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppRadii.sm),
           border: Border.all(color: theme.colorScheme.outline),
         ),
         child: hasImage
@@ -407,7 +406,7 @@ class _ImagePickerArea extends StatelessWidget {
                 children: [
                   if (imagePreviewBytes != null)
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(AppRadii.sm),
                       child: Image.memory(
                         imagePreviewBytes!,
                         fit: BoxFit.cover,
@@ -425,9 +424,8 @@ class _ImagePickerArea extends StatelessWidget {
                   if (isSaving)
                     Container(
                       decoration: BoxDecoration(
-                        color:
-                            theme.colorScheme.surface.withValues(alpha: 0.7),
-                        borderRadius: BorderRadius.circular(8),
+                        color: theme.colorScheme.surface.withValues(alpha: 0.7),
+                        borderRadius: BorderRadius.circular(AppRadii.sm),
                       ),
                       child: const Center(child: CircularProgressIndicator()),
                     ),

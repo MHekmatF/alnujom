@@ -50,14 +50,21 @@ class AdsAdminRepositoryImpl implements AdsAdminRepository {
       return Success(path);
     } on StorageException catch (e, st) {
       return FailureResult(
-        UnknownFailure('uploadAdImage failed: ${e.message}',
-            cause: e, stackTrace: st),
+        UnknownFailure(
+          'uploadAdImage failed: ${e.message}',
+          cause: e,
+          stackTrace: st,
+        ),
       );
     } on SocketException catch (e, st) {
       return FailureResult(NetworkFailure(e.message, cause: e, stackTrace: st));
     } on TimeoutException catch (e, st) {
       return FailureResult(
-        NetworkFailure(e.message ?? 'Request timed out', cause: e, stackTrace: st),
+        NetworkFailure(
+          e.message ?? 'Request timed out',
+          cause: e,
+          stackTrace: st,
+        ),
       );
     } catch (e, st) {
       return FailureResult(
@@ -102,7 +109,11 @@ class AdsAdminRepositoryImpl implements AdsAdminRepository {
       return FailureResult(NetworkFailure(e.message, cause: e, stackTrace: st));
     } on TimeoutException catch (e, st) {
       return FailureResult(
-        NetworkFailure(e.message ?? 'Request timed out', cause: e, stackTrace: st),
+        NetworkFailure(
+          e.message ?? 'Request timed out',
+          cause: e,
+          stackTrace: st,
+        ),
       );
     } catch (e, st) {
       return FailureResult(
@@ -146,7 +157,11 @@ class AdsAdminRepositoryImpl implements AdsAdminRepository {
       return FailureResult(NetworkFailure(e.message, cause: e, stackTrace: st));
     } on TimeoutException catch (e, st) {
       return FailureResult(
-        NetworkFailure(e.message ?? 'Request timed out', cause: e, stackTrace: st),
+        NetworkFailure(
+          e.message ?? 'Request timed out',
+          cause: e,
+          stackTrace: st,
+        ),
       );
     } catch (e, st) {
       return FailureResult(
@@ -169,7 +184,11 @@ class AdsAdminRepositoryImpl implements AdsAdminRepository {
       return FailureResult(NetworkFailure(e.message, cause: e, stackTrace: st));
     } on TimeoutException catch (e, st) {
       return FailureResult(
-        NetworkFailure(e.message ?? 'Request timed out', cause: e, stackTrace: st),
+        NetworkFailure(
+          e.message ?? 'Request timed out',
+          cause: e,
+          stackTrace: st,
+        ),
       );
     } catch (e, st) {
       return FailureResult(
@@ -189,7 +208,11 @@ class AdsAdminRepositoryImpl implements AdsAdminRepository {
       return FailureResult(NetworkFailure(e.message, cause: e, stackTrace: st));
     } on TimeoutException catch (e, st) {
       return FailureResult(
-        NetworkFailure(e.message ?? 'Request timed out', cause: e, stackTrace: st),
+        NetworkFailure(
+          e.message ?? 'Request timed out',
+          cause: e,
+          stackTrace: st,
+        ),
       );
     } catch (e, st) {
       return FailureResult(
@@ -205,13 +228,21 @@ class AdsAdminRepositoryImpl implements AdsAdminRepository {
       return Success(dtos.map((d) => d.toEntity()).toList());
     } on PostgrestException catch (e, st) {
       return FailureResult(
-        UnknownFailure('loadAds failed: ${e.message}', cause: e, stackTrace: st),
+        UnknownFailure(
+          'loadAds failed: ${e.message}',
+          cause: e,
+          stackTrace: st,
+        ),
       );
     } on SocketException catch (e, st) {
       return FailureResult(NetworkFailure(e.message, cause: e, stackTrace: st));
     } on TimeoutException catch (e, st) {
       return FailureResult(
-        NetworkFailure(e.message ?? 'Request timed out', cause: e, stackTrace: st),
+        NetworkFailure(
+          e.message ?? 'Request timed out',
+          cause: e,
+          stackTrace: st,
+        ),
       );
     } catch (e, st) {
       return FailureResult(

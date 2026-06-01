@@ -3140,10 +3140,8 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
-  String get report_reason_duplicate => _resolve(
-    'report_reason_duplicate',
-    (loc) => loc.report_reason_duplicate,
-  );
+  String get report_reason_duplicate =>
+      _resolve('report_reason_duplicate', (loc) => loc.report_reason_duplicate);
 
   @override
   String get report_reason_spam =>
@@ -3194,10 +3192,8 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
-  String get report_already_reported => _resolve(
-    'report_already_reported',
-    (loc) => loc.report_already_reported,
-  );
+  String get report_already_reported =>
+      _resolve('report_already_reported', (loc) => loc.report_already_reported);
 
   @override
   String get report_sign_in_prompt =>
@@ -3312,8 +3308,10 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('report_resolve_button', (loc) => loc.report_resolve_button);
 
   @override
-  String get report_resolve_dialog_title =>
-      _resolve('report_resolve_dialog_title', (loc) => loc.report_resolve_dialog_title);
+  String get report_resolve_dialog_title => _resolve(
+    'report_resolve_dialog_title',
+    (loc) => loc.report_resolve_dialog_title,
+  );
 
   // ── Phase 19 Agencies ────────────────────────────────────────────────────
 
@@ -3334,8 +3332,10 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('agency_name_label', (loc) => loc.agency_name_label);
 
   @override
-  String get agency_description_label =>
-      _resolve('agency_description_label', (loc) => loc.agency_description_label);
+  String get agency_description_label => _resolve(
+    'agency_description_label',
+    (loc) => loc.agency_description_label,
+  );
 
   @override
   String get agency_phone_label =>
@@ -3410,8 +3410,10 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
-  String get agency_invite_role_label =>
-      _resolve('agency_invite_role_label', (loc) => loc.agency_invite_role_label);
+  String get agency_invite_role_label => _resolve(
+    'agency_invite_role_label',
+    (loc) => loc.agency_invite_role_label,
+  );
 
   @override
   String get agency_role_admin =>
@@ -3438,12 +3440,16 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
-  String get agency_invitations_title =>
-      _resolve('agency_invitations_title', (loc) => loc.agency_invitations_title);
+  String get agency_invitations_title => _resolve(
+    'agency_invitations_title',
+    (loc) => loc.agency_invitations_title,
+  );
 
   @override
-  String get agency_invitation_accept =>
-      _resolve('agency_invitation_accept', (loc) => loc.agency_invitation_accept);
+  String get agency_invitation_accept => _resolve(
+    'agency_invitation_accept',
+    (loc) => loc.agency_invitation_accept,
+  );
 
   @override
   String get agency_invitation_decline => _resolve(
@@ -3617,16 +3623,20 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('agency_members_empty', (loc) => loc.agency_members_empty);
 
   @override
-  String get agency_invitations_empty =>
-      _resolve('agency_invitations_empty', (loc) => loc.agency_invitations_empty);
+  String get agency_invitations_empty => _resolve(
+    'agency_invitations_empty',
+    (loc) => loc.agency_invitations_empty,
+  );
 
   @override
   String get agency_generic_error =>
       _resolve('agency_generic_error', (loc) => loc.agency_generic_error);
 
   @override
-  String get agency_no_agency_message =>
-      _resolve('agency_no_agency_message', (loc) => loc.agency_no_agency_message);
+  String get agency_no_agency_message => _resolve(
+    'agency_no_agency_message',
+    (loc) => loc.agency_no_agency_message,
+  );
 
   @override
   String get agency_member_remove_confirm => _resolve(
@@ -3739,8 +3749,10 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
-  String get dashboardCountersLoading =>
-      _resolve('dashboardCountersLoading', (loc) => loc.dashboardCountersLoading);
+  String get dashboardCountersLoading => _resolve(
+    'dashboardCountersLoading',
+    (loc) => loc.dashboardCountersLoading,
+  );
 
   @override
   String get dashboardCountersError =>
@@ -3799,8 +3811,10 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
-  String adsAdminArchiveConfirmBody(String title) =>
-      _resolve('adsAdminArchiveConfirmBody', (loc) => loc.adsAdminArchiveConfirmBody(title));
+  String adsAdminArchiveConfirmBody(String title) => _resolve(
+    'adsAdminArchiveConfirmBody',
+    (loc) => loc.adsAdminArchiveConfirmBody(title),
+  );
 
   @override
   String get adsAdminArchiveAction =>
