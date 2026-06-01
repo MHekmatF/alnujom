@@ -171,6 +171,20 @@ String? requireAgenciesManageRedirect(
   return null;
 }
 
+/// Phase 21 — gate for `/admin/ads` route. Requires the data-driven
+/// `ads.manage` permission; redirects to `/admin?denied=ads` otherwise.
+/// Mirrors [requireAuditLogsViewRedirect].
+String? requireAdsManageRedirect(
+  BuildContext context,
+  GoRouterState state,
+) {
+  final checker = getIt<PermissionChecker>();
+  if (!checker.has(PermissionKeys.adsManage)) {
+    return '/admin?denied=ads';
+  }
+  return null;
+}
+
 /// Phase 12 / US6 — login-only gate for the publisher moderation history page.
 /// Owner-only access is enforced server-side; no publisher-status check needed.
 String? requirePublisherLoginRedirect(
