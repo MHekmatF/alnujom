@@ -3641,4 +3641,112 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String get agency_action_failed =>
       _resolve('agency_action_failed', (loc) => loc.agency_action_failed);
+
+  @override
+  String get auditLogsTitle =>
+      _resolve('auditLogsTitle', (loc) => loc.auditLogsTitle);
+
+  @override
+  String get auditLogsEmpty =>
+      _resolve('auditLogsEmpty', (loc) => loc.auditLogsEmpty);
+
+  @override
+  String get auditLogsActorLabel =>
+      _resolve('auditLogsActorLabel', (loc) => loc.auditLogsActorLabel);
+
+  @override
+  String get auditLogsActorSystem =>
+      _resolve('auditLogsActorSystem', (loc) => loc.auditLogsActorSystem);
+
+  @override
+  String get auditLogsActionLabel =>
+      _resolve('auditLogsActionLabel', (loc) => loc.auditLogsActionLabel);
+
+  @override
+  String get auditLogsTargetLabel =>
+      _resolve('auditLogsTargetLabel', (loc) => loc.auditLogsTargetLabel);
+
+  @override
+  String get auditLogsTimestampLabel =>
+      _resolve('auditLogsTimestampLabel', (loc) => loc.auditLogsTimestampLabel);
+
+  @override
+  String get auditLogsBeforeLabel =>
+      _resolve('auditLogsBeforeLabel', (loc) => loc.auditLogsBeforeLabel);
+
+  @override
+  String get auditLogsAfterLabel =>
+      _resolve('auditLogsAfterLabel', (loc) => loc.auditLogsAfterLabel);
+
+  @override
+  String get auditLogsNoData =>
+      _resolve('auditLogsNoData', (loc) => loc.auditLogsNoData);
+
+  @override
+  String get auditLogsAccessDenied =>
+      _resolve('auditLogsAccessDenied', (loc) => loc.auditLogsAccessDenied);
+
+  // ── Phase 20 — Dashboard grid + counters (P3) ────────────────────────────
+
+  @override
+  String get dashboardTileAuditLogs =>
+      _resolve('dashboardTileAuditLogs', (loc) => loc.dashboardTileAuditLogs);
+
+  @override
+  String get dashboardTileAds =>
+      _resolve('dashboardTileAds', (loc) => loc.dashboardTileAds);
+
+  @override
+  String get dashboardTileSettings =>
+      _resolve('dashboardTileSettings', (loc) => loc.dashboardTileSettings);
+
+  @override
+  String get dashboardTileInquiries =>
+      _resolve('dashboardTileInquiries', (loc) => loc.dashboardTileInquiries);
+
+  @override
+  String get dashboardComingSoon =>
+      _resolve('dashboardComingSoon', (loc) => loc.dashboardComingSoon);
+
+  @override
+  String get dashboardCounterPendingUsers => _resolve(
+    'dashboardCounterPendingUsers',
+    (loc) => loc.dashboardCounterPendingUsers,
+  );
+
+  @override
+  String get dashboardCounterPendingListings => _resolve(
+    'dashboardCounterPendingListings',
+    (loc) => loc.dashboardCounterPendingListings,
+  );
+
+  @override
+  String get dashboardCounterOpenReports => _resolve(
+    'dashboardCounterOpenReports',
+    (loc) => loc.dashboardCounterOpenReports,
+  );
+
+  @override
+  String get dashboardCounterNewInquiries24h => _resolve(
+    'dashboardCounterNewInquiries24h',
+    (loc) => loc.dashboardCounterNewInquiries24h,
+  );
+
+  @override
+  String get dashboardCounterActiveListings => _resolve(
+    'dashboardCounterActiveListings',
+    (loc) => loc.dashboardCounterActiveListings,
+  );
+
+  @override
+  String get dashboardCountersLoading =>
+      _resolve('dashboardCountersLoading', (loc) => loc.dashboardCountersLoading);
+
+  @override
+  String get dashboardCountersError =>
+      _resolve('dashboardCountersError', (loc) => loc.dashboardCountersError);
+
+  @override
+  String get dashboardCountersRetry =>
+      _resolve('dashboardCountersRetry', (loc) => loc.dashboardCountersRetry);
 }

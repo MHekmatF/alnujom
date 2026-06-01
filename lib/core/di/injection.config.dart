@@ -50,6 +50,26 @@ import '../../features/admin/agencies/presentation/bloc/agency_moderation_cubit.
     as _i664;
 import '../../features/admin/agencies/presentation/bloc/agency_queue_bloc.dart'
     as _i916;
+import '../../features/admin/audit_logs/data/datasources/audit_logs_datasource.dart'
+    as _i617;
+import '../../features/admin/audit_logs/data/repositories/audit_log_repository_impl.dart'
+    as _i373;
+import '../../features/admin/audit_logs/domain/repositories/audit_log_repository.dart'
+    as _i881;
+import '../../features/admin/audit_logs/domain/usecases/load_audit_log_page.dart'
+    as _i365;
+import '../../features/admin/audit_logs/presentation/bloc/audit_log_cubit.dart'
+    as _i48;
+import '../../features/admin/dashboard/data/datasources/dashboard_counts_datasource.dart'
+    as _i801;
+import '../../features/admin/dashboard/data/repositories/dashboard_repository_impl.dart'
+    as _i469;
+import '../../features/admin/dashboard/domain/repositories/dashboard_repository.dart'
+    as _i662;
+import '../../features/admin/dashboard/domain/usecases/load_dashboard_counts.dart'
+    as _i670;
+import '../../features/admin/dashboard/presentation/bloc/dashboard_cubit.dart'
+    as _i616;
 import '../../features/admin/listing_review/data/datasources/supabase_listing_review_datasource.dart'
     as _i530;
 import '../../features/admin/listing_review/data/repositories/listing_review_repository_impl.dart'
@@ -515,6 +535,18 @@ _i174.GetIt $initGetIt(
   gh.factory<_i514.SupabaseAgencyDatasource>(
     () => _i514.SupabaseAgencyDatasource(gh<_i454.SupabaseClient>()),
   );
+  gh.factory<_i617.AuditLogsDatasource>(
+    () => _i617.AuditLogsDatasource(gh<_i454.SupabaseClient>()),
+  );
+  gh.factory<_i801.DashboardCountsDatasource>(
+    () => _i801.DashboardCountsDatasource(gh<_i454.SupabaseClient>()),
+  );
+  gh.lazySingleton<_i881.AuditLogRepository>(
+    () => _i373.AuditLogRepositoryImpl(
+      gh<_i617.AuditLogsDatasource>(),
+      gh<_i354.AppLogger>(),
+    ),
+  );
   gh.factory<_i272.InquiryRepository>(
     () => _i614.InquiryRepositoryImpl(gh<_i1043.SupabaseInquiriesDatasource>()),
   );
@@ -556,6 +588,12 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i490.UploadVideo>(
     () => _i490.UploadVideo(gh<_i340.ListingsRepository>()),
+  );
+  gh.lazySingleton<_i662.DashboardRepository>(
+    () => _i469.DashboardRepositoryImpl(
+      gh<_i801.DashboardCountsDatasource>(),
+      gh<_i354.AppLogger>(),
+    ),
   );
   gh.lazySingleton<_i681.RoleCatalogRepository>(
     () => _i564.RoleCatalogRepositoryImpl(
@@ -671,6 +709,12 @@ _i174.GetIt $initGetIt(
       gh<_i975.SetAgencyMemberRole>(),
       gh<_i262.RemoveAgencyMember>(),
     ),
+  );
+  gh.factory<_i365.LoadAuditLogPage>(
+    () => _i365.LoadAuditLogPage(gh<_i881.AuditLogRepository>()),
+  );
+  gh.factory<_i670.LoadDashboardCounts>(
+    () => _i670.LoadDashboardCounts(gh<_i662.DashboardRepository>()),
   );
   gh.lazySingleton<_i430.OnboardingRepository>(
     () => _i452.OnboardingRepositoryImpl(gh<_i144.OnboardingSeenStorage>()),
@@ -789,6 +833,9 @@ _i174.GetIt $initGetIt(
   );
   gh.lazySingleton<_i433.HomeFeedRepository>(
     () => _i857.HomeFeedRepositoryImpl(gh<_i732.SupabaseHomeFeedDatasource>()),
+  );
+  gh.factory<_i48.AuditLogCubit>(
+    () => _i48.AuditLogCubit(gh<_i365.LoadAuditLogPage>()),
   );
   gh.lazySingleton<_i895.ListingDetailsRepository>(
     () => _i677.ListingDetailsRepositoryImpl(
@@ -1046,6 +1093,9 @@ _i174.GetIt $initGetIt(
       gh<_i950.RevokeRoleFromUser>(),
       gh<_i1018.ListRoles>(),
     ),
+  );
+  gh.factory<_i616.DashboardCubit>(
+    () => _i616.DashboardCubit(gh<_i670.LoadDashboardCounts>()),
   );
   gh.factory<_i419.LocationFormBloc>(
     () => _i419.LocationFormBloc(
