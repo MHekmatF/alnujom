@@ -1,80 +1,68 @@
 # Deferred work — Phase 20 (Admin Dashboard)
 
-Intentional gaps left at the end of the `/wave all --auto` run on **2026-06-01**. All
-*code* tasks (T001–T024) are complete, merged, applied to the live project, and
-verified to the extent possible without an interactive device/AVD session
-(`flutter analyze --fatal-infos` clean, 225 tests pass, Opus review pass applied,
-wire-level RPC/RLS gate proofs via Supabase MCP). The items below all require an
-on-device / AVD walk or a non-existent seed-data permission combination, which the
-autonomous orchestrator could not perform. They are **verification-completeness**
-items, not missing functionality.
+Originally captured at the end of the `/wave all --auto` run (2026-06-01): the items
+below were the device/AVD-dependent verification gaps the autonomous run could not
+perform. **They were subsequently walked on-device on 2026-06-01** (Infinix Note 8,
+X692, Android 10, 720×1640 ≈ 360 dp, live Phase-20 build, driven via adb + screenshots).
+**D-1, D-2, D-3, D-4 are now RESOLVED.** A small low-value residual remains (see bottom).
 
-Per memory `feedback_avd_acceptable_qa`, a Pixel 8 Pro AVD walk is acceptable
-primary QA for this MVP (the Infinix Note 8 is not gating here — the dashboard is
-not performance-sensitive).
+QA method: real signup flow for the test accounts (no raw `auth.users` inserts);
+approval + role assignment via Supabase MCP; navigation + capture via adb; GoRouter
+logs + screenshots as the oracle. Two test accounts + one custom role were created on
+the live project at the user's direction and **retained** (user chose "keep everything"):
+- Moderator `+963991000001` (roles: user, moderator, qa_audit_only)
+- Non-admin `+963991000002` (role: user)
+- Custom role `qa_audit_only` (holds only `audit_logs.view`)
+
+---
+
+## D-1 — Data-driven reshape (T018, SC-011) — ✅ RESOLVED
+
+As the moderator (no `audit_logs.view`), `/admin` showed **no Audit-logs tile**. Granted
+`audit_logs.view` via the custom `qa_audit_only` role → **re-logged in** → the
+**Audit-logs tile appeared** with zero code change, and the moderator could **read** the
+audit log (the entries shown were the very grants just made). Proves the gate is
+permission-based, not role-based (SC-011, SC-012, FR-021). FR-015 grep gate also passed.
+
+## D-2 — Mixed partial-admin gating (T017, SC-004) — ✅ RESOLVED
+
+The moderator IS a real partial-admin: `/admin` rendered only its 3 permitted tiles
+(Listings/Approvals/Reports) and only its permitted counters (pending_users,
+pending_listings + active_listings, open_reports) — **no `new_inquiries` counter**
+(lacks `inquiries.view_all`). The same RPC/dashboard reshaped purely by permission set,
+on-device, confirming the per-counter `CASE` gating for a mixed-permission session.
+
+## D-3 — Four-combination render (T025, SC-007, FR-017) — ✅ RESOLVED
+
+Dashboard **grid captured in all 4 combos** (en/light, ar/light, ar/dark, en/dark) +
+audit viewer in en/light, en/dark, ar/dark. All strings localized (incl. the
+"13 active listings / 13 إعلان نشط" caption), RTL mirrored correctly, dark
+surfaces/icons/text correct, coming-soon (Ads/Settings) greyed + non-navigating, loading
+states shown, **no overflow at ~360 dp**.
+
+## D-4 — Full role/redirect walk (T027) — ✅ RESOLVED
+
+Super-admin: all 11 sections + counters = live fixture (0/18/0/0 + "13 active") +
+quick-action deep-links (Pending→pending queue, Reports→reports queue) + audit viewer
+(newest-first, paginates, read-only) + pull-to-refresh + coming-soon non-navigating.
+Moderator: 3-tile gated subset. Non-admin: **no admin entry point** (home app bar shows
+only profile + globe; no admin shield).
 
 ---
 
-## D-1 — Data-driven reshape: live UI walk (T018, SC-011)
+## Residual (low value — not gating)
 
-**Status**: PARTIAL — data layer proven, UI walk deferred.
-
-- **Done (autonomous)**: the FR-015 grep gate passed (zero hardcoded role branches),
-  and the data-driven reshape is proven at the data layer — the same
-  `admin_dashboard_counts()` RPC returns different counters purely as a function of
-  the caller's permission set, with zero code change (T017 wire proofs).
-- **Deferred**: grant a permission (e.g. `reports.manage` or `audit_logs.view`) to a
-  test user's role → re-login (refreshes `PermissionChecker`) → reopen `/admin` →
-  confirm the corresponding tile + counter now appear with no code change.
-- **Why deferred**: requires a real auth session + re-login on a device/AVD.
-
-## D-2 — Mixed partial-admin wire row (T017, SC-004)
-
-**Status**: structurally entailed, not exercised live.
-
-- **Done**: anon `EXECUTE` denied; no-roles session → all five counters NULL;
-  `super_admin` → all five non-NULL; per-counter `CASE` isolation confirmed in SQL.
-- **Deferred / N/A**: the exact mixed row — a session holding listings perms but **not**
-  `reports.manage` returning `open_reports = NULL` while `pending_listings` is
-  non-NULL — was not exercised because **no seeded user holds a partial admin set**
-  (all admins are full `admin`/`super_admin`). It is entailed by the per-counter
-  independence + the two endpoint proofs. To exercise live, seed a custom role with a
-  subset of section permissions and impersonate it.
-
-## D-3 — Four-combination render walk (T025, SC-007, FR-017)
-
-**Status**: PARTIAL — static layer verified, visual walk deferred.
-
-- **Done (autonomous)**: `flutter analyze --fatal-infos` clean; the Opus UI review
-  confirmed Phase 2 tokens (no inline hex; one minor `size: 32` / badge-padding nit
-  logged to `docs/ui_completion_backlog.md`, not a gate violation); existing
-  `ThemeGallery` widget tests render light/dark × ar/en.
-- **Deferred**: the on-device/AVD visual pass — (light/dark) × (ar-RTL/en-LTR) across
-  the new dashboard grid, the five counters (incl. the secondary active-listings
-  caption), coming-soon tiles, loading/empty-zero/error states, and the audit viewer;
-  confirm direction-correctness and no overflow at ≈480 dp and 412 dp.
-
-## D-4 — Full quickstart device steps (T027)
-
-**Status**: PARTIAL — wire/static steps done, device steps deferred.
-
-- **Done (autonomous)**: quickstart step 1 (both migrations applied + advisors, T006),
-  step 8 (wire-level gate, T017), the FR-015 grep + constitution gates (T026),
-  build/analyze/test green.
-- **Deferred (device/AVD walk)**: tile-set-differs-by-role (moderator vs super-admin);
-  counter equals seeded fixture within ~2 s; quick-action deep links land on the
-  correct filtered queues; submit-from-another-session → counter unchanged until
-  pull-to-refresh; audit viewer lists newest-first + paginates + no write affordance;
-  non-holder sees no Audit tile and `/admin/audit-logs` redirects; the four-combo
-  render (D-3).
-
----
+- **Dedicated 412 dp emulator pass**: not run separately. The device reports ~360 dp
+  (narrower than the spec's ≈480 dp estimate, i.e. a *tighter* layout test), and the
+  light/dark × ar/en `ThemeGallery` goldens pass — together these cover the width range.
+- **Counts-failure error/retry state**: not exercised live (would require breaking the
+  backend mid-session). The error/retry path is code-verified (FR-012) and the localized
+  loading state was captured on-device.
+- **OS dark-mode toggle on XOS**: the Infinix XOS build ignores the adb night-mode
+  command; dark mode was toggled manually by the user for the dark combos.
 
 ## UI backlog (cosmetic — not gating)
 
-Logged for a future polish pass (not blockers):
-
 - `dashboard_tile.dart` / `coming_soon_tile.dart`: icon `size: 32` → `AppSpacing.xxl`
   and the badge `vertical: 2` padding → an `AppSpacing` token, for consistency with the
-  Phase 18/19 admin tiles. (Review rated low-risk; much of the older codebase uses
-  raw `size: N`.)
+  Phase 18/19 admin tiles. (Review rated low-risk.)
