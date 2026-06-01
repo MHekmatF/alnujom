@@ -34,7 +34,18 @@ Reconcile on (re)subscribe via a fresh count fetch — no client-side incrementa
 | `inquiry_received` | Phase 16 inquiries route (`params.inquiry_id`) |
 | `agency_invitation` | `/agency` (Phase 19) |
 
-Unresolved target (deleted listing/inquiry) → localized "content unavailable" fallback; the notification is still marked read (FR-007/FR-018). On-tap from a push uses `PushMessagingService.onMessageOpenedApp` → same resolver (FR-012).
+Unresolved target (deleted listing/inquiry) → localized "content unavailable" fallback; the notification is still marked read (FR-007/FR-018).
+
+## Push listener (PN — `notification_push_listener.dart`)
+An app-level listener, registered at the app shell/router, consuming the PD `PushMessagingService` streams (provider-agnostic — silent under the no-op adapter):
+
+| Provider signal | Trigger | Action |
+|---|---|---|
+| `onMessageOpenedApp` | user taps a push while app is backgrounded | route via `notification_deep_link_resolver` (marks read on nav) — FR-012 |
+| `initialMessage()` | app cold-started (terminated → launched) by a push tap | same resolver route on first frame — FR-012 / SC-002 |
+| `onMessage` | push arrives while app is foregrounded | refresh `NotificationBadgeCubit` / center; OPTIONAL lightweight in-app affordance (snackbar); NO duplicate system-tray banner — FR-014 |
+
+Push-tap and in-app-tap therefore share one resolver and cannot diverge. The listener is inert (streams empty) when the no-op push adapter is bound (push unconfigured — FR-013).
 
 ## Badge liveness (R-193)
 `NotificationBadgeCubit` loads `unread_notification_count()` on mount + on foreground-resume — NOT a Realtime subscription (keeps Realtime scope to admin counters + permission refresh, and keeps PN independent of PR).

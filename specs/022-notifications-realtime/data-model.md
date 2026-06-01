@@ -290,7 +290,8 @@ abstract interface class PushMessagingService {
   Future<String?> currentToken();
   Stream<String> onTokenRefresh();
   Stream<PushPayload> onMessage();         // foreground; PushPayload = {type, params}
-  Stream<PushPayload> onMessageOpenedApp();// tap (background/cold) → deep link
+  Stream<PushPayload> onMessageOpenedApp();// tap from background → deep link
+  Future<PushPayload?> initialMessage();   // app launched from terminated by a push tap (cold start)
 }
 ```
 
@@ -315,9 +316,9 @@ DTO (`data/dtos/`): `AppNotificationDto` ↔ `notifications` row (json `params`)
 | FR-009 self-only read | `notifications_select_self` policy | SC-007 cross-user read denied |
 | FR-010 pluggable push | `PushMessagingService` + FCM adapter + no-op | Push arrives when configured; SC-002 |
 | FR-011 register/deregister (any status) | `AuthBloc` + `register/deregister_notification_token` | SC-011; pending user receives approval push (SC-002) |
-| FR-012 tap opens deep link (bg/cold) | `onMessageOpenedApp` → resolver | SC-002 cold-start tap |
+| FR-012 tap opens deep link (bg/cold) | app-level push listener: `onMessageOpenedApp` + `initialMessage` (cold start) → `notification_deep_link_resolver` (marks read on nav) | SC-002 cold-start tap |
 | FR-013 degrade silently | no-op adapter + trigger skip when secret null | SC-003: push disabled → app works, no error |
-| FR-014 fg vs bg surfacing | `onMessage` (in-app surface) vs system tray | On-device fg/bg test |
+| FR-014 fg vs bg surfacing | same app-level listener: `onMessage` → badge/center refresh (no duplicate banner) vs OS system tray | On-device fg/bg test |
 | FR-015 admin counters live | `DashboardCubit` Realtime → `refresh()`; publication add | SC-004 two-device |
 | FR-016 admin-gated + reconcile | existing RLS on listings/reports; re-fetch on (re)subscribe | SC-004 drop/reconnect; non-admin gets nothing |
 | FR-017 live permission refresh | `AuthBloc` `user_roles` subscription → `PermissionChecker.refresh()` | SC-005 grant/revoke without re-login |
