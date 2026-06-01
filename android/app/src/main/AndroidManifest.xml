@@ -36,6 +36,12 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- Phase 22: FCM default notification channel for Android 8.0+.
+             Required by firebase_messaging for background messages.
+             The app builds and runs without google-services.json (SC-003). -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="alnujom_notifications" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

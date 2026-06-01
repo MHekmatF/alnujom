@@ -5,6 +5,14 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// Phase 22: Apply the google-services plugin ONLY when google-services.json is
+// present in the app directory.  When the file is absent (e.g. CI without
+// Firebase, Syria-sanction degraded mode) the plugin is skipped entirely and
+// the build succeeds with NoopPushMessagingService bound (SC-003/SC-010/FR-024).
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}
+
 android {
     namespace = "com.alnujom.app"
     compileSdk = flutter.compileSdkVersion
