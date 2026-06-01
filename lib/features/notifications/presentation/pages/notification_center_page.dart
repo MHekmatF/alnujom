@@ -96,8 +96,7 @@ class _NotificationCenterViewState extends State<_NotificationCenterView> {
               return _ErrorView(
                 message: l10n.notification_load_error,
                 retryLabel: l10n.notification_retry,
-                onRetry: () =>
-                    context.read<NotificationsCubit>().load(),
+                onRetry: () => context.read<NotificationsCubit>().load(),
               );
 
             case NotificationsStatus.list:
@@ -111,12 +110,10 @@ class _NotificationCenterViewState extends State<_NotificationCenterView> {
                 onRefresh: () => context.read<NotificationsCubit>().load(),
                 child: ListView.separated(
                   controller: _scrollController,
-                  itemCount: state.notifications.length +
-                      (state.isPaginating ? 1 : 0),
-                  separatorBuilder: (_, __) => Divider(
-                    height: 1,
-                    color: colors.divider,
-                  ),
+                  itemCount:
+                      state.notifications.length + (state.isPaginating ? 1 : 0),
+                  separatorBuilder: (_, __) =>
+                      Divider(height: 1, color: colors.divider),
                   itemBuilder: (context, index) {
                     if (index >= state.notifications.length) {
                       return const Padding(
@@ -197,11 +194,7 @@ class _ErrorView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.error_outline,
-            size: 48,
-            color: colors.error,
-          ),
+          Icon(Icons.error_outline, size: 48, color: colors.error),
           const SizedBox(height: AppSpacing.md),
           Text(
             message,

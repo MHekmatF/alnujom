@@ -110,11 +110,7 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
       );
     } catch (e, st) {
       return FailureResult(
-        UnknownFailure(
-          'loadUnreadCount failed: $e',
-          cause: e,
-          stackTrace: st,
-        ),
+        UnknownFailure('loadUnreadCount failed: $e', cause: e, stackTrace: st),
       );
     }
   }

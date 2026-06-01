@@ -35,6 +35,7 @@ abstract final class NotificationDeepLinkResolver {
   static Future<void> resolve({
     required BuildContext context,
     required AppNotification notification,
+
     /// When `true` the method also calls NotificationsCubit.markRead so the
     /// center page reflects the change immediately (in-app tap).  When `false`
     /// (push-tap) we still fire the RPC but don't touch the cubit because the

@@ -36,8 +36,9 @@ class SupabaseNotificationsDatasource {
         .range(offset, offset + limit - 1);
     return (rows as List<dynamic>)
         .map(
-          (row) =>
-              AppNotificationDto.fromJson(Map<String, dynamic>.from(row as Map)),
+          (row) => AppNotificationDto.fromJson(
+            Map<String, dynamic>.from(row as Map),
+          ),
         )
         .toList();
   }

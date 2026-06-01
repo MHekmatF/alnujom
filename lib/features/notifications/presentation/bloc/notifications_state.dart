@@ -13,24 +13,23 @@ final class NotificationsState extends Equatable {
   });
 
   const NotificationsState.initial()
-      : this._(status: NotificationsStatus.initial);
+    : this._(status: NotificationsStatus.initial);
 
   const NotificationsState.loading()
-      : this._(status: NotificationsStatus.loading);
+    : this._(status: NotificationsStatus.loading);
 
   const NotificationsState.list({
     required List<AppNotification> notifications,
     required bool hasMore,
     required int offset,
   }) : this._(
-          status: NotificationsStatus.list,
-          notifications: notifications,
-          hasMore: hasMore,
-          offset: offset,
-        );
+         status: NotificationsStatus.list,
+         notifications: notifications,
+         hasMore: hasMore,
+         offset: offset,
+       );
 
-  const NotificationsState.error()
-      : this._(status: NotificationsStatus.error);
+  const NotificationsState.error() : this._(status: NotificationsStatus.error);
 
   final NotificationsStatus status;
   final List<AppNotification> notifications;
@@ -56,6 +55,11 @@ final class NotificationsState extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [status, notifications, hasMore, offset, isPaginating];
+  List<Object?> get props => [
+    status,
+    notifications,
+    hasMore,
+    offset,
+    isPaginating,
+  ];
 }

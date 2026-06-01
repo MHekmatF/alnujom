@@ -4048,20 +4048,28 @@ final class _DebugAppLocalizations extends AppLocalizations {
   // ── Phase 22 — Notification center + bell + push listener ────────────────
 
   @override
-  String get notification_center_title =>
-      _resolve('notification_center_title', (loc) => loc.notification_center_title);
+  String get notification_center_title => _resolve(
+    'notification_center_title',
+    (loc) => loc.notification_center_title,
+  );
 
   @override
-  String get notification_bell_tooltip =>
-      _resolve('notification_bell_tooltip', (loc) => loc.notification_bell_tooltip);
+  String get notification_bell_tooltip => _resolve(
+    'notification_bell_tooltip',
+    (loc) => loc.notification_bell_tooltip,
+  );
 
   @override
-  String get notification_mark_all_read =>
-      _resolve('notification_mark_all_read', (loc) => loc.notification_mark_all_read);
+  String get notification_mark_all_read => _resolve(
+    'notification_mark_all_read',
+    (loc) => loc.notification_mark_all_read,
+  );
 
   @override
-  String get notification_empty_state =>
-      _resolve('notification_empty_state', (loc) => loc.notification_empty_state);
+  String get notification_empty_state => _resolve(
+    'notification_empty_state',
+    (loc) => loc.notification_empty_state,
+  );
 
   @override
   String get notification_load_error =>
@@ -4072,8 +4080,10 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('notification_retry', (loc) => loc.notification_retry);
 
   @override
-  String get notification_time_just_now =>
-      _resolve('notification_time_just_now', (loc) => loc.notification_time_just_now);
+  String get notification_time_just_now => _resolve(
+    'notification_time_just_now',
+    (loc) => loc.notification_time_just_now,
+  );
 
   @override
   String notification_time_minutes(int n) => _resolve(
@@ -4106,8 +4116,10 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
-  String get notification_foreground_view =>
-      _resolve('notification_foreground_view', (loc) => loc.notification_foreground_view);
+  String get notification_foreground_view => _resolve(
+    'notification_foreground_view',
+    (loc) => loc.notification_foreground_view,
+  );
 
   @override
   String get notification_type_account_approved => _resolve(

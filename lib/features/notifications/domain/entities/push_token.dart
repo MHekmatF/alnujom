@@ -24,6 +24,5 @@ class PushToken {
   final DateTime lastSeenAt;
 
   @override
-  String toString() =>
-      'PushToken(platform: $platform, isActive: $isActive)';
+  String toString() => 'PushToken(platform: $platform, isActive: $isActive)';
 }

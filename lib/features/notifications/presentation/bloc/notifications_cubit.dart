@@ -21,11 +21,8 @@ const int _kPageSize = 20;
 
 @injectable
 class NotificationsCubit extends Cubit<NotificationsState> {
-  NotificationsCubit(
-    this._loadNotifications,
-    this._markRead,
-    this._markAllRead,
-  ) : super(const NotificationsState.initial());
+  NotificationsCubit(this._loadNotifications, this._markRead, this._markAllRead)
+    : super(const NotificationsState.initial());
 
   final LoadNotifications _loadNotifications;
   final MarkNotificationRead _markRead;
@@ -41,11 +38,13 @@ class NotificationsCubit extends Cubit<NotificationsState> {
     final result = await _loadNotifications(limit: _kPageSize, offset: 0);
     switch (result) {
       case Success(:final value):
-        emit(NotificationsState.list(
-          notifications: value,
-          hasMore: value.length == _kPageSize,
-          offset: value.length,
-        ));
+        emit(
+          NotificationsState.list(
+            notifications: value,
+            hasMore: value.length == _kPageSize,
+            offset: value.length,
+          ),
+        );
       case FailureResult():
         emit(const NotificationsState.error());
     }
@@ -65,12 +64,14 @@ class NotificationsCubit extends Cubit<NotificationsState> {
     );
     switch (result) {
       case Success(:final value):
-        emit(current.copyWith(
-          notifications: [...current.notifications, ...value],
-          hasMore: value.length == _kPageSize,
-          offset: current.offset + value.length,
-          isPaginating: false,
-        ));
+        emit(
+          current.copyWith(
+            notifications: [...current.notifications, ...value],
+            hasMore: value.length == _kPageSize,
+            offset: current.offset + value.length,
+            isPaginating: false,
+          ),
+        );
       case FailureResult():
         // Keep existing list; pagination failure is silent (no full error state).
         emit(current.copyWith(isPaginating: false));

@@ -16,7 +16,7 @@ part 'notification_badge_state.dart';
 @lazySingleton
 class NotificationBadgeCubit extends Cubit<NotificationBadgeState> {
   NotificationBadgeCubit(this._loadUnreadCount)
-      : super(const NotificationBadgeState(count: 0));
+    : super(const NotificationBadgeState(count: 0));
 
   final LoadUnreadCount _loadUnreadCount;
 
