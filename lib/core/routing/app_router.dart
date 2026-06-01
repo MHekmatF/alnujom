@@ -49,6 +49,7 @@ import '../../features/agency/presentation/pages/agency_edit_profile_page.dart';
 import '../../features/agency/domain/entities/agency.dart';
 import '../../features/admin/agencies/presentation/pages/agency_queue_page.dart';
 import '../../features/admin/audit_logs/presentation/pages/audit_logs_viewer_page.dart';
+import '../../features/ads/admin/presentation/pages/ads_list_page.dart';
 import '../../features/inquiries/presentation/pages/admin_inquiry_oversight_page.dart';
 import '../../features/inquiries/presentation/pages/inquiry_detail_page.dart';
 import '../../features/inquiries/presentation/pages/inquiry_inbox_page.dart';
@@ -132,6 +133,8 @@ abstract final class AppRoutes {
   static const adminAgencies = '/admin/agencies';
   // Phase 20: admin read-only audit-log viewer route.
   static const adminAuditLogs = '/admin/audit-logs';
+  // Phase 21: admin ads CRUD surface route.
+  static const adminAds = '/admin/ads';
   static const themeGallery = '/_debug/theme-gallery';
   static const debugMoneyFormatter = '/debug/money-formatter';
 
@@ -213,6 +216,8 @@ abstract final class AppRouteNames {
   static const adminAgencies = 'admin-agencies';
   // Phase 20: admin read-only audit-log viewer route name.
   static const adminAuditLogs = 'admin-audit-logs';
+  // Phase 21: admin ads CRUD surface route name.
+  static const adminAds = 'admin-ads';
   static const themeGallery = 'theme-gallery';
 }
 
@@ -410,6 +415,14 @@ GoRouter buildAppRouter({
             redirect: requireAuditLogsViewRedirect,
             builder: (context, state) => const AuditLogsViewerPage(),
           ),
+          // ─── Phase 21 — admin ads CRUD surface ───
+          // Gated by `ads.manage` permission (FR-022).
+          GoRoute(
+            path: 'ads',
+            name: AppRouteNames.adminAds,
+            redirect: requireAdsManageRedirect,
+            builder: (context, state) => const AdsListPage(),
+          ),
         ],
       ),
       GoRoute(
@@ -578,7 +591,9 @@ GoRouter buildAppRouter({
       GoRoute(
         path: AppRoutes.agencyListings,
         name: AppRouteNames.agencyListings,
-        redirect: (context, state) => authBloc.state is Unauthenticated // B-5
+        redirect: (context, state) =>
+            authBloc.state
+                is Unauthenticated // B-5
             ? AppRoutes.login
             : (state.extra == null ? AppRoutes.agency : null),
         builder: (context, state) =>
@@ -587,7 +602,9 @@ GoRouter buildAppRouter({
       GoRoute(
         path: AppRoutes.agencyAnalytics,
         name: AppRouteNames.agencyAnalytics,
-        redirect: (context, state) => authBloc.state is Unauthenticated // B-5
+        redirect: (context, state) =>
+            authBloc.state
+                is Unauthenticated // B-5
             ? AppRoutes.login
             : (state.extra == null ? AppRoutes.agency : null),
         builder: (context, state) =>
@@ -596,7 +613,9 @@ GoRouter buildAppRouter({
       GoRoute(
         path: AppRoutes.agencyVerify,
         name: AppRouteNames.agencyVerify,
-        redirect: (context, state) => authBloc.state is Unauthenticated // B-5
+        redirect: (context, state) =>
+            authBloc.state
+                is Unauthenticated // B-5
             ? AppRoutes.login
             : (state.extra == null ? AppRoutes.agency : null),
         builder: (context, state) =>

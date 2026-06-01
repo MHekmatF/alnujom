@@ -96,11 +96,12 @@ const List<DashboardSection> kDashboardSections = [
     route: AppRoutes.adminAuditLogs,
     icon: Icons.history_outlined,
   ),
-  // ── Ads (coming soon) ──────────────────────────────────────────────────────
+  // ── Ads ────────────────────────────────────────────────────────────────────
+  // Phase 21: ads admin surface is now live; flip from comingSoon → enabled.
   DashboardSection(
     labelKey: 'dashboardTileAds',
     permissionKeys: [PermissionKeys.adsManage],
-    state: DashboardSectionState.comingSoon,
+    route: AppRoutes.adminAds,
     icon: Icons.campaign_outlined,
   ),
   // ── Settings (coming soon) ─────────────────────────────────────────────────
