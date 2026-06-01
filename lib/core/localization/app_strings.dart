@@ -3641,4 +3641,48 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String get agency_action_failed =>
       _resolve('agency_action_failed', (loc) => loc.agency_action_failed);
+
+  @override
+  String get auditLogsTitle =>
+      _resolve('auditLogsTitle', (loc) => loc.auditLogsTitle);
+
+  @override
+  String get auditLogsEmpty =>
+      _resolve('auditLogsEmpty', (loc) => loc.auditLogsEmpty);
+
+  @override
+  String get auditLogsActorLabel =>
+      _resolve('auditLogsActorLabel', (loc) => loc.auditLogsActorLabel);
+
+  @override
+  String get auditLogsActorSystem =>
+      _resolve('auditLogsActorSystem', (loc) => loc.auditLogsActorSystem);
+
+  @override
+  String get auditLogsActionLabel =>
+      _resolve('auditLogsActionLabel', (loc) => loc.auditLogsActionLabel);
+
+  @override
+  String get auditLogsTargetLabel =>
+      _resolve('auditLogsTargetLabel', (loc) => loc.auditLogsTargetLabel);
+
+  @override
+  String get auditLogsTimestampLabel =>
+      _resolve('auditLogsTimestampLabel', (loc) => loc.auditLogsTimestampLabel);
+
+  @override
+  String get auditLogsBeforeLabel =>
+      _resolve('auditLogsBeforeLabel', (loc) => loc.auditLogsBeforeLabel);
+
+  @override
+  String get auditLogsAfterLabel =>
+      _resolve('auditLogsAfterLabel', (loc) => loc.auditLogsAfterLabel);
+
+  @override
+  String get auditLogsNoData =>
+      _resolve('auditLogsNoData', (loc) => loc.auditLogsNoData);
+
+  @override
+  String get auditLogsAccessDenied =>
+      _resolve('auditLogsAccessDenied', (loc) => loc.auditLogsAccessDenied);
 }

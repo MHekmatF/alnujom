@@ -48,6 +48,7 @@ import '../../features/agency/presentation/pages/agency_verification_page.dart';
 import '../../features/agency/presentation/pages/agency_edit_profile_page.dart';
 import '../../features/agency/domain/entities/agency.dart';
 import '../../features/admin/agencies/presentation/pages/agency_queue_page.dart';
+import '../../features/admin/audit_logs/presentation/pages/audit_logs_viewer_page.dart';
 import '../../features/inquiries/presentation/pages/admin_inquiry_oversight_page.dart';
 import '../../features/inquiries/presentation/pages/inquiry_detail_page.dart';
 import '../../features/inquiries/presentation/pages/inquiry_inbox_page.dart';
@@ -129,6 +130,8 @@ abstract final class AppRoutes {
   static const agencyProfile = '/agency/:id';
   // Phase 19: admin agency verification queue route.
   static const adminAgencies = '/admin/agencies';
+  // Phase 20: admin read-only audit-log viewer route.
+  static const adminAuditLogs = '/admin/audit-logs';
   static const themeGallery = '/_debug/theme-gallery';
   static const debugMoneyFormatter = '/debug/money-formatter';
 
@@ -208,6 +211,8 @@ abstract final class AppRouteNames {
   static const agencyProfile = 'agency-profile';
   // Phase 19: admin agency verification queue route name.
   static const adminAgencies = 'admin-agencies';
+  // Phase 20: admin read-only audit-log viewer route name.
+  static const adminAuditLogs = 'admin-audit-logs';
   static const themeGallery = 'theme-gallery';
 }
 
@@ -395,6 +400,15 @@ GoRouter buildAppRouter({
             name: AppRouteNames.adminAgencies,
             redirect: requireAgenciesManageRedirect,
             builder: (context, state) => const AgencyQueuePage(),
+          ),
+          // ─── Phase 20 — admin read-only audit-log viewer ───
+          // Gated by `audit_logs.view` permission (FR-021); the swapped
+          // audit_logs RLS policy (20260601120004) re-checks at the wire.
+          GoRoute(
+            path: 'audit-logs',
+            name: AppRouteNames.adminAuditLogs,
+            redirect: requireAuditLogsViewRedirect,
+            builder: (context, state) => const AuditLogsViewerPage(),
           ),
         ],
       ),
