@@ -12,6 +12,7 @@
 //   - ads bucket uploadBinary + getPublicUrl (R-174 / R-180)
 //   - orphan-cleanup: delete uploaded object if RPC fails after upload
 
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:injectable/injectable.dart';
@@ -203,17 +204,20 @@ class SupabaseAdsAdminDatasource {
   // Private helpers
   // ---------------------------------------------------------------------------
 
-  /// Generates a UUID v4 string for the storage path prefix.
+  /// Generates a random UUID v4 string for the storage path prefix.
+  ///
+  /// Uses `dart:math`'s [Random] (no `uuid` package — FR-025) to produce 16
+  /// genuinely random bytes with the v4 version/variant bits set. A per-byte
+  /// `DateTime.now()` scheme was rejected: 16 rapid clock reads yield near-zero
+  /// entropy, so concurrent/rapid uploads would collide on the same `{prefix}/`
+  /// path (`uploadBinary` is non-upsert → 409 Duplicate, or cross-ad overlap).
+  /// The output matches the `ads` bucket's `{8-4-4-4-12 hex}/…` policy regex.
   String _generateUuid() {
-    // Use Dart's built-in random + formatting to avoid adding the `uuid` package.
-    final random = List<int>.generate(16, (_) {
-      // Use DateTime + hashCode for a simple unique prefix; not cryptographic
-      // but sufficient for a storage path prefix. The real uniqueness guarantee
-      // is the RPC-assigned ad UUID on create.
-      return DateTime.now().microsecondsSinceEpoch.hashCode & 0xFF;
-    });
-    // Format as 8-4-4-4-12 hex UUID string.
-    final hex = random.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
+    final rnd = Random();
+    final bytes = List<int>.generate(16, (_) => rnd.nextInt(256));
+    bytes[6] = (bytes[6] & 0x0f) | 0x40; // version 4
+    bytes[8] = (bytes[8] & 0x3f) | 0x80; // variant 10xx
+    final hex = bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
     return '${hex.substring(0, 8)}-${hex.substring(8, 12)}-'
         '${hex.substring(12, 16)}-${hex.substring(16, 20)}-'
         '${hex.substring(20, 32)}';
