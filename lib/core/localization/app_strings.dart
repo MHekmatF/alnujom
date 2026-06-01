@@ -4021,4 +4021,13 @@ final class _DebugAppLocalizations extends AppLocalizations {
 
   @override
   String get cancelLabel => _resolve('cancelLabel', (loc) => loc.cancelLabel);
+
+  // Phase 21 — AdSlot l10n keys
+  @override
+  String get adSlotUnavailable =>
+      _resolve('adSlotUnavailable', (loc) => loc.adSlotUnavailable);
+
+  @override
+  String get adSlotTargetNotFound =>
+      _resolve('adSlotTargetNotFound', (loc) => loc.adSlotTargetNotFound);
 }

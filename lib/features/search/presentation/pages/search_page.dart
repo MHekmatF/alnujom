@@ -34,6 +34,8 @@ import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
 import '../../../../features/map/domain/entities/map_entry_context.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../ads/domain/entities/ad_placement.dart';
+import '../../../ads/presentation/widgets/ad_slot.dart';
 import '../../../listing_form/domain/entities/listing.dart';
 import '../../domain/entities/filter_state.dart';
 import '../bloc/search_bloc.dart';
@@ -401,15 +403,26 @@ class _ResultsListView extends StatelessWidget {
     final showArabicHint = state.isArabicQuery && state.results.length < 3;
     final pagingTrail = state.hasNextPage ? 1 : 0;
     final hintTrail = showArabicHint ? 1 : 0;
+    // Phase 21: search-results banner slot (always one item; AdSlot collapses
+    // to SizedBox.shrink when no eligible ads — FR-012).
+    const adTrail = 1;
 
     return ListView.builder(
       padding: const EdgeInsetsDirectional.symmetric(
         horizontal: AppSpacing.md,
         vertical: AppSpacing.sm,
       ),
-      itemCount: state.results.length + pagingTrail + hintTrail,
+      itemCount: state.results.length + pagingTrail + hintTrail + adTrail,
       itemBuilder: (context, index) {
-        if (showArabicHint && index == 0) {
+        // Phase 21: search results banner at the very top (index 0).
+        if (index == 0) {
+          return const Padding(
+            padding: EdgeInsetsDirectional.only(bottom: AppSpacing.sm),
+            child: AdSlot(placement: AdPlacement.searchResultsBanner),
+          );
+        }
+        final offsetIndex = index - adTrail;
+        if (showArabicHint && offsetIndex == 0) {
           return Container(
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
             padding: const EdgeInsetsDirectional.symmetric(
@@ -425,7 +438,7 @@ class _ResultsListView extends StatelessWidget {
             ),
           );
         }
-        final itemIndex = index - hintTrail;
+        final itemIndex = offsetIndex - hintTrail;
         if (itemIndex == state.results.length) {
           return const _PaginationSentinel();
         }

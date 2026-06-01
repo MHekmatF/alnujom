@@ -92,15 +92,15 @@ Phases here are the plan's **implementation/wave phases** (PB / PD / PA / PS —
 
 **Independent test**: an active `home_top_banner` ad shows on home; ≥2 rotate by priority; tap opens target + records one click; empty placement collapses with no reflow.
 
-- [ ] T031 [P] [US2] `lib/features/ads/presentation/bloc/ad_slot_cubit.dart` — loads `LoadServingAds(placement)`; states empty/single/carousel/error.
-- [ ] T032 [P] [US2] [US5] `lib/features/ads/presentation/widgets/ad_banner_card.dart` — `CachedNetworkImage` from `getPublicUrl(image_path)` + optional locale-matched caption (themed, Phase 2 tokens).
-- [ ] T033 [US2] `lib/features/ads/presentation/widgets/ad_carousel.dart` — `PageView` + auto-advance `Timer` (~5 s) + manual swipe + page indicator, order `priority DESC`; single ad → static (no timer). (Depends on T032.)
-- [ ] T034 [US2] [US3] `lib/features/ads/presentation/widgets/ad_slot.dart` — collapses to `SizedBox.shrink()` when empty (FR-012); renders single/carousel; tap → `RecordAdClick` (best-effort, non-blocking) then open target (`launchUrl` external / `context.push` listing `/listings/:id`, search, category, agency `/agency/:id`); graceful fallback on unresolved target. (Depends on T031, T032, T033.)
-- [ ] T035 [US2] [US3] Insert into `lib/features/home/presentation/pages/home_page.dart` — `AdSlot(home_top_banner)` `SliverToBoxAdapter` after `MapEntryTile`; `AdSlot(home_middle_banner)` single slot after the first feed page (R-176). (Depends on T034.)
-- [ ] T036 [P] [US2] [US3] Insert `AdSlot(search_results_banner)` into `lib/features/search/presentation/pages/search_page.dart` — item before result cards (offset the `ListView.builder` index, like the Arabic-hint row). (Depends on T034.)
-- [ ] T037 [P] [US2] [US3] Insert `AdSlot(listing_details_banner)` into `lib/features/listing_details/presentation/pages/listing_details_page.dart` — after `ReporterStatusBanner`, before the title. (Depends on T034.)
-- [ ] T038 [P] [US2] [US5] Add AdSlot l10n keys (`adSlot*` — fallback/unavailable messages) to BOTH `lib/l10n/app_ar.arb` + `lib/l10n/app_en.arb`.
-- [ ] T039 [US2] DI regen (`dart run build_runner build --delete-conflicting-outputs`) for `AdSlotCubit`; `flutter analyze` + l10n-parity clean. (Depends on T031–T038.)
+- [X] T031 [P] [US2] `lib/features/ads/presentation/bloc/ad_slot_cubit.dart` — loads `LoadServingAds(placement)`; states empty/single/carousel/error.
+- [X] T032 [P] [US2] [US5] `lib/features/ads/presentation/widgets/ad_banner_card.dart` — `CachedNetworkImage` from `getPublicUrl(image_path)` + optional locale-matched caption (themed, Phase 2 tokens).
+- [X] T033 [US2] `lib/features/ads/presentation/widgets/ad_carousel.dart` — `PageView` + auto-advance `Timer` (~5 s) + manual swipe + page indicator, order `priority DESC`; single ad → static (no timer). (Depends on T032.)
+- [X] T034 [US2] [US3] `lib/features/ads/presentation/widgets/ad_slot.dart` — collapses to `SizedBox.shrink()` when empty (FR-012); renders single/carousel; tap → `RecordAdClick` (best-effort, non-blocking) then open target (`launchUrl` external / `context.push` listing `/listings/:id`, search, category, agency `/agency/:id`); graceful fallback on unresolved target. (Depends on T031, T032, T033.)
+- [X] T035 [US2] [US3] Insert into `lib/features/home/presentation/pages/home_page.dart` — `AdSlot(home_top_banner)` `SliverToBoxAdapter` after `MapEntryTile`; `AdSlot(home_middle_banner)` single slot after the first feed page (R-176). (Depends on T034.)
+- [X] T036 [P] [US2] [US3] Insert `AdSlot(search_results_banner)` into `lib/features/search/presentation/pages/search_page.dart` — item before result cards (offset the `ListView.builder` index, like the Arabic-hint row). (Depends on T034.)
+- [X] T037 [P] [US2] [US3] Insert `AdSlot(listing_details_banner)` into `lib/features/listing_details/presentation/pages/listing_details_page.dart` — after `ReporterStatusBanner`, before the title. (Depends on T034.)
+- [X] T038 [P] [US2] [US5] Add AdSlot l10n keys (`adSlot*` — fallback/unavailable messages) to BOTH `lib/l10n/app_ar.arb` + `lib/l10n/app_en.arb`.
+- [X] T039 [US2] DI regen (`dart run build_runner build --delete-conflicting-outputs`) for `AdSlotCubit`; `flutter analyze` + l10n-parity clean. (Depends on T031–T038.)
 
 **Checkpoint**: ads render + rotate + tap-through + record clicks on all three surfaces.
 

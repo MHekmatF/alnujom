@@ -1283,5 +1283,9 @@
   "saveLabel": "حفظ",
   "@saveLabel": { "description": "Phase 21 PA — Generic save action label used in the ad editor AppBar." },
   "cancelLabel": "إلغاء",
-  "@cancelLabel": { "description": "Phase 21 PA — Generic cancel action label used in confirm dialogs." }
+  "@cancelLabel": { "description": "Phase 21 PA — Generic cancel action label used in confirm dialogs." },
+  "adSlotUnavailable": "الإعلان غير متاح",
+  "@adSlotUnavailable": { "description": "Phase 21 — Fallback message when an ad cannot be loaded or displayed." },
+  "adSlotTargetNotFound": "الرابط غير متاح",
+  "@adSlotTargetNotFound": { "description": "Phase 21 — Snackbar message when an ad tap target cannot be resolved (FR-018)." }
 }
