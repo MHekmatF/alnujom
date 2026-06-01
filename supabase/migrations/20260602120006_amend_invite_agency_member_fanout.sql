@@ -3,15 +3,19 @@
 -- (base 20260531120008). Additive ONLY: every existing line of THIS function preserved
 -- verbatim (signature, search_path, admin gate, role check, target resolution, idempotent
 -- INSERT … ON CONFLICT DO NOTHING). Inserts exactly ONE PERFORM
--- public.enqueue_notification(...) addressed to the resolved invitee v_target after the
--- agency_members INSERT. The OTHER agency RPCs in 20260531120008 are NOT re-created here
+-- public.enqueue_notification(...) addressed to the resolved invitee v_target — but ONLY
+-- when the agency_members INSERT actually added a row (ROW_COUNT > 0), mirroring the
+-- listing-decision guard in 20260602120007 so a re-invite of an existing member is a no-op
+-- and does NOT re-notify (exactly-once, SC-009/FR-003). The OTHER agency RPCs in 20260531120008 are NOT re-created here
 -- (no edit to them). Grants for invite_agency_member re-asserted unchanged.
 -- Idempotent: create-or-replace + re-asserted grants; safely re-runnable.
 
 CREATE OR REPLACE FUNCTION public.invite_agency_member(
   p_agency_id UUID, p_phone TEXT, p_role TEXT DEFAULT 'agent'
 ) RETURNS UUID LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp AS $$
-DECLARE v_target UUID;
+DECLARE
+  v_target UUID;
+  v_inserted INTEGER;
 BEGIN
   IF NOT public.is_agency_admin(p_agency_id) THEN RAISE EXCEPTION 'permission_denied' USING ERRCODE='42501'; END IF;
   IF p_role NOT IN ('admin','agent') THEN RAISE EXCEPTION 'invalid_role' USING ERRCODE='22023'; END IF;
@@ -20,11 +24,16 @@ BEGIN
   INSERT INTO public.agency_members (agency_id, user_id, member_role, status, invited_by)
   VALUES (p_agency_id, v_target, p_role, 'pending', auth.uid())
   ON CONFLICT (agency_id, user_id) DO NOTHING;                                 -- idempotent (already member/invited)
+  GET DIAGNOSTICS v_inserted = ROW_COUNT;
 
   -- Phase 22 fan-out: notify the resolved invitee (server-resolved recipient — FR-002);
   -- params carry the agency_id for the /agency deep link (FR-004). v_target already in scope.
-  PERFORM public.enqueue_notification(
-    v_target, 'agency_invitation', jsonb_build_object('agency_id', p_agency_id));
+  -- Guarded on a REAL new invite (ROW_COUNT > 0) so re-inviting an existing member does not
+  -- re-notify — exactly-once per transition (SC-009/FR-003), mirroring 20260602120007.
+  IF v_inserted > 0 THEN
+    PERFORM public.enqueue_notification(
+      v_target, 'agency_invitation', jsonb_build_object('agency_id', p_agency_id));
+  END IF;
 
   RETURN v_target;
 END;
