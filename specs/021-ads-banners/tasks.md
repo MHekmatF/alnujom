@@ -20,8 +20,8 @@ Phases here are the plan's **implementation/wave phases** (PB / PD / PA / PS —
 
 **Purpose**: feature-tree skeleton + dependency confirmation. Folds into Wave 1 (PD creates the files).
 
-- [ ] T001 [P] Create the `lib/features/ads/` Clean-Arch tree per `plan.md` § Project Structure: `domain/{entities,repositories,usecases}/`, `data/{datasources,dtos,repositories}/`, `admin/presentation/{bloc,pages,widgets}/`, `presentation/{bloc,widgets}/`.
-- [ ] T002 [P] Confirm ZERO `pubspec.yaml` changes are needed (`url_launcher`, `go_router`, `image_picker`, `image`, `flutter_image_compress`, `cached_network_image` all already present) — record `git diff pubspec.yaml pubspec.lock` is empty (FR-025).
+- [X] T001 [P] Create the `lib/features/ads/` Clean-Arch tree per `plan.md` § Project Structure: `domain/{entities,repositories,usecases}/`, `data/{datasources,dtos,repositories}/`, `admin/presentation/{bloc,pages,widgets}/`, `presentation/{bloc,widgets}/`.
+- [X] T002 [P] Confirm ZERO `pubspec.yaml` changes are needed (`url_launcher`, `go_router`, `image_picker`, `image`, `flutter_image_compress`, `cached_network_image` all already present) — record `git diff pubspec.yaml pubspec.lock` is empty (FR-025).
 
 ---
 
@@ -52,16 +52,16 @@ Phases here are the plan's **implementation/wave phases** (PB / PD / PA / PS —
 
 **Independent test**: `flutter analyze` clean; `injection.config.dart` contains the new registrations.
 
-- [ ] T013 [P] [US2] Entities `lib/features/ads/domain/entities/ad_link.dart` (`AdLinkKind`), `ad_placement.dart` (`AdPlacement` + wire-key mapping), `ad_status.dart` (`AdStatus`).
-- [ ] T014 [P] [US1] Entities `lib/features/ads/domain/entities/ad.dart` (`Ad` + derived-`AdStatus` getter, R-171), `ad_placement_assignment.dart` (`AdPlacementAssignment`), `serving_ad.dart` (`ServingAd`).
-- [ ] T015 [P] [US1] [US2] Abstract repos `lib/features/ads/domain/repositories/ads_admin_repository.dart` + `ads_serving_repository.dart` (return `Result<T>`/`Failure`).
-- [ ] T016 [P] [US1] Admin use cases `lib/features/ads/domain/usecases/`: `create_ad.dart`, `update_ad.dart`, `set_ad_active.dart`, `archive_ad.dart`, `load_ads.dart`, `upload_ad_image.dart`.
-- [ ] T017 [P] [US2] [US3] Serving use cases `lib/features/ads/domain/usecases/`: `load_serving_ads.dart`, `record_ad_click.dart`.
-- [ ] T018 [P] [US1] [US2] DTOs `lib/features/ads/data/dtos/ad_dto.dart` (↔ `ads` + placements) + `serving_ad_dto.dart` (↔ `v_ads_serving`).
-- [ ] T019 [US1] Datasource `lib/features/ads/data/datasources/supabase_ads_admin_datasource.dart` — `rpc('create_ad'|'update_ad'|'set_ad_active'|'archive_ad')`, admin `ads` select, `ads` bucket `uploadBinary` + `getPublicUrl` + orphan cleanup on failure. (Depends on T013–T018.)
-- [ ] T020 [US2] [US3] Datasource `lib/features/ads/data/datasources/supabase_ads_serving_datasource.dart` — `from('v_ads_serving').eq('placement_key',…).order('priority',desc)`, `rpc('record_ad_event')`. (Depends on T013–T018.)
-- [ ] T021 [US1] [US2] Repo impls `lib/features/ads/data/repositories/ads_admin_repository_impl.dart` + `ads_serving_repository_impl.dart` (`@LazySingleton(as:)`; map errors 42501→permission, 23514→ineligible, 23503→not-found → `Failure`). (Depends on T019, T020.)
-- [ ] T022 [US1] Regenerate DI: `dart run build_runner build --delete-conflicting-outputs`; confirm `lib/core/di/injection.config.dart` registers the new repos/datasources; `flutter analyze` clean. (Depends on T021.)
+- [X] T013 [P] [US2] Entities `lib/features/ads/domain/entities/ad_link.dart` (`AdLinkKind`), `ad_placement.dart` (`AdPlacement` + wire-key mapping), `ad_status.dart` (`AdStatus`).
+- [X] T014 [P] [US1] Entities `lib/features/ads/domain/entities/ad.dart` (`Ad` + derived-`AdStatus` getter, R-171), `ad_placement_assignment.dart` (`AdPlacementAssignment`), `serving_ad.dart` (`ServingAd`).
+- [X] T015 [P] [US1] [US2] Abstract repos `lib/features/ads/domain/repositories/ads_admin_repository.dart` + `ads_serving_repository.dart` (return `Result<T>`/`Failure`).
+- [X] T016 [P] [US1] Admin use cases `lib/features/ads/domain/usecases/`: `create_ad.dart`, `update_ad.dart`, `set_ad_active.dart`, `archive_ad.dart`, `load_ads.dart`, `upload_ad_image.dart`.
+- [X] T017 [P] [US2] [US3] Serving use cases `lib/features/ads/domain/usecases/`: `load_serving_ads.dart`, `record_ad_click.dart`.
+- [X] T018 [P] [US1] [US2] DTOs `lib/features/ads/data/dtos/ad_dto.dart` (↔ `ads` + placements) + `serving_ad_dto.dart` (↔ `v_ads_serving`).
+- [X] T019 [US1] Datasource `lib/features/ads/data/datasources/supabase_ads_admin_datasource.dart` — `rpc('create_ad'|'update_ad'|'set_ad_active'|'archive_ad')`, admin `ads` select, `ads` bucket `uploadBinary` + `getPublicUrl` + orphan cleanup on failure. (Depends on T013–T018.)
+- [X] T020 [US2] [US3] Datasource `lib/features/ads/data/datasources/supabase_ads_serving_datasource.dart` — `from('v_ads_serving').eq('placement_key',…).order('priority',desc)`, `rpc('record_ad_event')`. (Depends on T013–T018.)
+- [X] T021 [US1] [US2] Repo impls `lib/features/ads/data/repositories/ads_admin_repository_impl.dart` + `ads_serving_repository_impl.dart` (`@LazySingleton(as:)`; map errors 42501→permission, 23514→ineligible, 23503→not-found → `Failure`). (Depends on T019, T020.)
+- [X] T022 [US1] Regenerate DI: `dart run build_runner build --delete-conflicting-outputs`; confirm `lib/core/di/injection.config.dart` registers the new repos/datasources; `flutter analyze` clean. (Depends on T021.)
 
 **Checkpoint**: ads domain/data layer compiles + is DI-wired; ready for UI phases to import.
 
