@@ -97,23 +97,26 @@ class _AdsListView extends StatelessWidget {
               ),
             );
           }
-          if (state is AdsAdminSaving) {
-            return const Center(child: CircularProgressIndicator());
+          if (state is AdsAdminError) {
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(l10n.errorGeneric),
+                  const SizedBox(height: AppSpacing.md),
+                  FilledButton(
+                    onPressed: () => ctx.read<AdsAdminCubit>().loadAds(),
+                    child: Text(l10n.errorRetryAction),
+                  ),
+                ],
+              ),
+            );
           }
-          // Error / initial
-          return Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(l10n.errorGeneric),
-                const SizedBox(height: AppSpacing.md),
-                FilledButton(
-                  onPressed: () => ctx.read<AdsAdminCubit>().loadAds(),
-                  child: Text(l10n.errorRetryAction),
-                ),
-              ],
-            ),
-          );
+          // AdsAdminSaving / AdsAdminSaveSuccess / AdsAdminImageUploaded /
+          // initial — transient states, often driven by the shared editor
+          // cubit. Show a spinner instead of a spurious error screen (review
+          // Bug 1); the editor-return reload in _openEditor restores the list.
+          return const Center(child: CircularProgressIndicator());
         },
       ),
       floatingActionButton: FloatingActionButton(
@@ -125,13 +128,22 @@ class _AdsListView extends StatelessWidget {
   }
 
   void _openEditor(BuildContext context, {Ad? ad}) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => BlocProvider<AdsAdminCubit>.value(
-          value: context.read<AdsAdminCubit>(),
-          child: AdEditorPage(ad: ad),
+    final cubit = context.read<AdsAdminCubit>();
+    final state = cubit.state;
+    final includeArchived =
+        state is AdsAdminList && state.includeArchived;
+    // Reload on return so backing out mid-edit (cubit left in a transient
+    // upload/save state by the shared instance) restores the list, preserving
+    // the archived filter (review Bug 1 + Gap 2).
+    unawaited(
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => BlocProvider<AdsAdminCubit>.value(
+            value: cubit,
+            child: AdEditorPage(ad: ad),
+          ),
         ),
-      ),
+      ).then((_) => cubit.loadAds(includeArchived: includeArchived)),
     );
   }
 }

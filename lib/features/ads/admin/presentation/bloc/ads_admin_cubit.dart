@@ -89,10 +89,16 @@ class AdsAdminCubit extends Cubit<AdsAdminState> {
   final ArchiveAd _archiveAd;
   final UploadAdImage _uploadAdImage;
 
+  /// The archived-filter the list was last loaded with. Preserved across
+  /// create/update/activate/archive reloads so an action doesn't silently
+  /// reset the admin's "show archived" view (review Gap 2).
+  bool _includeArchived = false;
+
   // ── Load ─────────────────────────────────────────────────────────────────
 
   /// Loads all ads. Pass [includeArchived] = true to show soft-deleted ads.
   Future<void> loadAds({bool includeArchived = false}) async {
+    _includeArchived = includeArchived;
     emit(const AdsAdminLoading());
     final result = await _loadAds(includeArchived: includeArchived);
     _emitListResult(result, includeArchived: includeArchived);
@@ -129,7 +135,7 @@ class AdsAdminCubit extends Cubit<AdsAdminState> {
     switch (result) {
       case Success():
         emit(const AdsAdminSaveSuccess());
-        await loadAds();
+        await loadAds(includeArchived: _includeArchived);
       case FailureResult(:final failure):
         emit(AdsAdminError(failure));
     }
@@ -168,7 +174,7 @@ class AdsAdminCubit extends Cubit<AdsAdminState> {
     switch (result) {
       case Success():
         emit(const AdsAdminSaveSuccess());
-        await loadAds();
+        await loadAds(includeArchived: _includeArchived);
       case FailureResult(:final failure):
         emit(AdsAdminError(failure));
     }
@@ -183,7 +189,7 @@ class AdsAdminCubit extends Cubit<AdsAdminState> {
     switch (result) {
       case Success():
         emit(const AdsAdminSaveSuccess());
-        await loadAds();
+        await loadAds(includeArchived: _includeArchived);
       case FailureResult(:final failure):
         emit(AdsAdminError(failure));
     }
@@ -198,7 +204,7 @@ class AdsAdminCubit extends Cubit<AdsAdminState> {
     switch (result) {
       case Success():
         emit(const AdsAdminSaveSuccess());
-        await loadAds();
+        await loadAds(includeArchived: _includeArchived);
       case FailureResult(:final failure):
         emit(AdsAdminError(failure));
     }
