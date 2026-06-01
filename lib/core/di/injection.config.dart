@@ -381,6 +381,10 @@ import '../../features/notifications/domain/usecases/mark_notification_read.dart
     as _i29;
 import '../../features/notifications/domain/usecases/register_push_token.dart'
     as _i397;
+import '../../features/notifications/presentation/bloc/notification_badge_cubit.dart'
+    as _i558;
+import '../../features/notifications/presentation/bloc/notifications_cubit.dart'
+    as _i66;
 import '../../features/onboarding/data/datasources/onboarding_seen_storage.dart'
     as _i144;
 import '../../features/onboarding/data/repositories/onboarding_repository_impl.dart'
@@ -1203,6 +1207,9 @@ _i174.GetIt $initGetIt(
       gh<_i358.ListAreasForCity>(),
     ),
   );
+  gh.lazySingleton<_i558.NotificationBadgeCubit>(
+    () => _i558.NotificationBadgeCubit(gh<_i873.LoadUnreadCount>()),
+  );
   gh.factory<_i371.AdSlotCubit>(
     () => _i371.AdSlotCubit(gh<_i180.LoadServingAds>()),
   );
@@ -1316,6 +1323,13 @@ _i174.GetIt $initGetIt(
       gh<_i797.AuthBloc>(),
     ),
     dispose: (i) => i.dispose(),
+  );
+  gh.factory<_i66.NotificationsCubit>(
+    () => _i66.NotificationsCubit(
+      gh<_i1019.LoadNotifications>(),
+      gh<_i29.MarkNotificationRead>(),
+      gh<_i852.MarkAllNotificationsRead>(),
+    ),
   );
   gh.factory<_i1007.ListingReportStatusCubit>(
     () => _i1007.ListingReportStatusCubit(gh<_i682.LoadMyReportForListing>()),
