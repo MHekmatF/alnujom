@@ -23,11 +23,12 @@ On banner tap: call `RecordAdClick(adId, placement)` (best-effort, non-blocking 
 | link_kind | open |
 |-----------|------|
 | external | `launchUrl(Uri.parse(link_value), mode: LaunchMode.externalApplication)` |
-| listing | `context.push(AppRoutes.listingDetailsFor(link_value))` → `/listings/:id` |
-| agency | `context.push('/agency/${link_value}')` |
-| search | `context.push(AppRoutes.search, extra: <decoded filters/query>)` |
-| category | `context.push(AppRoutes.search, extra: <PropertyType from link_value>)` |
-Unresolved target (deleted listing, bad URL, no handler) → localized message / safe fallback, no crash (FR-018).
+| listing | `context.push(AppRoutes.listingDetailsFor(link_value))` → `/listings/:id` (link_value = listing UUID) |
+| agency | `context.push('/agency/${link_value}')` (link_value = agency UUID) |
+| search | `context.push(AppRoutes.search, extra: <text query from link_value>)` (link_value = free-text query; v1 = text only) |
+| category | `context.push(AppRoutes.search, extra: <PropertyType parsed from link_value>)` (link_value = property-type key) |
+
+`link_value` encoding per `link_kind` is fixed by **R-179** (external→URL · listing/agency→UUID · category→property-type key ∈ apartment/villa/land/shop/office/farm/warehouse/other · search→free-text query; complex multi-facet filter serialization deferred). Unresolved target (deleted listing, bad URL, no handler) → localized message / safe fallback, no crash (FR-018).
 
 ## Admin surface (PA · `lib/features/ads/admin/presentation/`)
 - `AdsListPage` — list of ads with derived `AdStatus` chips (active/scheduled/expired/inactive/archived) + an **archived** filter; tap → editor; create FAB; soft-delete + activate/deactivate actions.

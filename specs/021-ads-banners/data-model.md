@@ -457,6 +457,18 @@ class ServingAd extends Equatable {
 - `AdsAdminRepository`: `createAd(...)`, `updateAd(...)`, `setAdActive(id, active)`, `archiveAd(id)`, `loadAds({includeArchived})`, `uploadAdImage(bytes, contentType) → imagePath`.
 - `AdsServingRepository`: `loadServingAds(AdPlacement) → List<ServingAd>`, `recordClick(adId, AdPlacement)`.
 
+**Link-target encoding (`link_kind` → `link_value`, R-179)**:
+
+| `link_kind` | `link_value` holds | opens |
+|-------------|--------------------|-------|
+| `external` | absolute web URL | external browser/handler |
+| `listing` | listing UUID | `/listings/:id` |
+| `agency` | agency UUID | `/agency/:id` |
+| `category` | property-type key (apartment/villa/land/shop/office/farm/warehouse/other) | search filtered to that type |
+| `search` | free-text query string | search pre-filled with the text (v1 = text only; full filter serialization deferred) |
+
+`image_path` (R-180) is a Storage path in the `ads` bucket — NOT a URL; the client resolves the display URL via `getPublicUrl(image_path)`.
+
 ---
 
 ## Per-FR verification map

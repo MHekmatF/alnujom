@@ -10,7 +10,7 @@
 | image_path | TEXT NOT NULL | `ads` bucket path |
 | caption_ar / caption_en | TEXT NULL | both-or-neither CHECK (R-172) |
 | link_kind | TEXT NOT NULL | CHECK ∈ (external,listing,search,category,agency) |
-| link_value | TEXT NOT NULL | URL or id/key/token |
+| link_value | TEXT NOT NULL | per `link_kind` (R-179): external→URL · listing→listing UUID · agency→agency UUID · category→property-type key · search→free-text query |
 | start_at / end_at | TIMESTAMPTZ NULL | window CHECK `start<end` |
 | is_active | BOOLEAN NOT NULL DEFAULT true | |
 | archived_at | TIMESTAMPTZ NULL | soft-delete marker (R-170) |

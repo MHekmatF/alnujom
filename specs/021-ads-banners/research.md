@@ -94,6 +94,18 @@ Locked plan-time decisions **R-164 .. R-178** (continuing the project's R-series
 **Rationale**: Continues the established series + apply discipline.
 **Alternatives**: a new `20260602` day series (rejected — same calendar day; contiguous numbering is clearer).
 
+### R-179 — `link_value` encoding per `link_kind` (resolves analysis U1)
+
+**Decision**: The single `link_value` column carries, per `link_kind`: `external` → an absolute web URL; `listing` → the listing UUID (→ `/listings/:id`); `agency` → the agency UUID (→ `/agency/:id`); `category` → a **property-type key** ∈ {apartment, villa, land, shop, office, farm, warehouse, other} (opens the search surface filtered to that property type, reusing the Phase 13 property-type-shortcut → search flow); `search` → a **free-text query string** (opens the search surface pre-filled with that text, reusing the hero-search text path).
+**Rationale**: Pins the previously-open `search`/`category` payload so the editor (`link_target_picker`, T026) and the tap handler (`ad_slot.dart`, T034) are unambiguous. `category` reuses the §6.3 property-type enum; `search` reuses the existing text-search entry. v1 deliberately scopes `search` to a single text query — a banner's marketing target rarely needs a full multi-facet filter set.
+**Alternatives**: serialize a complete `SearchFilterState` into `link_value` (rejected for v1 — fragile to encode/version, over-scoped; deferred to a future phase if a real need appears). The admin form validates `link_value` per kind (URL shape / a real UUID / a valid property-type key / non-empty text).
+
+### R-180 — `ads.image_path` (not the §6.2 `image_url`) — records analysis C1
+
+**Decision**: The ads image column is **`image_path`** (a Storage object path in the `ads` bucket), NOT the IMPLEMENTATION_PLAN §6.2 `image_url`. The client derives the display URL at read time via `getPublicUrl(image_path)`.
+**Rationale**: Aligns with the project's established storage idiom (`listing_media.storage_path`, `agencies.logo_path`) — the codebase stores paths and resolves URLs at read time, never a baked host/CDN URL. Pure naming alignment; no behavior change. Recorded here per Principle XII (the parallel `link_url`→`link_kind`+`link_value` split is R-169; this rename had been left implicit).
+**Alternatives**: store a full `image_url` per §6.2 (rejected — couples the row to a host/CDN, unlike every other media column in the schema).
+
 ---
 
 **Open items deferred to `/speckit-tasks` / implementation** (low-impact, recorded per Principle XII): exact carousel auto-advance interval (~5 s default); per-placement recommended image aspect ratios (a design detail — the form may guide/crop); concurrent-admin edit conflict handling (last-writer-wins is acceptable for an admin-only table). None blocks the data model or the wave decomposition.
