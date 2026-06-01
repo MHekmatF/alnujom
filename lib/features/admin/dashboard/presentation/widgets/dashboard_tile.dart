@@ -15,6 +15,8 @@ class DashboardTile extends StatelessWidget {
     required this.label,
     required this.route,
     this.counter,
+    this.secondaryCounter,
+    this.secondaryCounterLabel,
   });
 
   final IconData icon;
@@ -24,6 +26,12 @@ class DashboardTile extends StatelessWidget {
   /// The counter badge value; null means not permitted (omit badge entirely).
   /// 0 means permitted but nothing pending (render badge distinctly).
   final int? counter;
+
+  /// Optional secondary, informational counter (e.g. active listings) rendered
+  /// as a caption under the label. null = omit; 0 = render "0 <label>".
+  /// Requires [secondaryCounterLabel] to be non-null to display.
+  final int? secondaryCounter;
+  final String? secondaryCounterLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +68,18 @@ class DashboardTile extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
+              if (secondaryCounter != null && secondaryCounterLabel != null) ...[
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  '$secondaryCounter $secondaryCounterLabel',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ],
           ),
         ),

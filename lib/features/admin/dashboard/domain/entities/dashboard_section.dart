@@ -22,6 +22,7 @@ class DashboardSection {
     this.route,
     this.state = DashboardSectionState.enabled,
     this.counterKey,
+    this.secondaryCounterKey,
     required this.icon,
   });
 
@@ -34,6 +35,12 @@ class DashboardSection {
   /// 'pendingUsers' | 'pendingListings' | 'openReports' |
   /// 'newInquiries24h' | 'activeListings'
   final String? counterKey;
+
+  /// Optional secondary, informational (non-deep-linking) counter field on
+  /// [DashboardCounts]. Per the contract, the Listings tile carries
+  /// pending_listings as its primary badge AND active_listings as a secondary
+  /// caption. Same null/0 semantics: null = not permitted → omit; 0 = render.
+  final String? secondaryCounterKey;
 
   final IconData icon;
 }

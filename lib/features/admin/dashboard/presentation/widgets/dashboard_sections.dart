@@ -31,6 +31,7 @@ const List<DashboardSection> kDashboardSections = [
     ],
     route: AppRoutes.adminListingReviewPending,
     counterKey: 'pendingListings',
+    secondaryCounterKey: 'activeListings',
     icon: Icons.fact_check_outlined,
   ),
   // ── Reports ────────────────────────────────────────────────────────────────

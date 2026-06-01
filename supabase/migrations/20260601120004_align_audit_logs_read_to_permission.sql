@@ -12,4 +12,6 @@ CREATE POLICY audit_logs_select_admin
   TO authenticated
   USING (current_user_has_permission('audit_logs.view'));
 
--- Reuses existing idx_audit_logs_created_at (created_at DESC) for newest-first pagination.
+-- Newest-first pagination is served by idx_audit_logs_created_at (created_at DESC),
+-- which is created in the companion migration 20260601120005 (it did NOT exist
+-- prior to Phase 20 — only the PK on id was indexed).

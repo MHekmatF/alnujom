@@ -175,6 +175,15 @@ class _AdminHomeViewState extends State<_AdminHomeView> with RouteAware {
     final counter =
         counts != null ? _resolveCounter(section.counterKey, counts) : null;
 
+    // Secondary informational counter (contract: the Listings tile carries
+    // pending_listings as its badge AND active_listings as a caption).
+    final secondaryCounter = counts != null
+        ? _resolveCounter(section.secondaryCounterKey, counts)
+        : null;
+    final secondaryCounterLabel = section.secondaryCounterKey == 'activeListings'
+        ? l10n.dashboardCounterActiveListings
+        : null;
+
     // Quick-action deep-link: counter tiles route to the filtered queue (FR-009).
     final quickRoute =
         _quickActionRoute(section.counterKey) ?? section.route!;
@@ -184,6 +193,8 @@ class _AdminHomeViewState extends State<_AdminHomeView> with RouteAware {
       label: label,
       route: quickRoute,
       counter: counter,
+      secondaryCounter: secondaryCounter,
+      secondaryCounterLabel: secondaryCounterLabel,
     );
   }
 
