@@ -214,6 +214,7 @@ Deno.serve(async (req: Request) => {
     }
     const recipientId = typeof body.recipient_user_id === "string" ? body.recipient_user_id : null;
     const type = typeof body.type === "string" ? (body.type as NotificationType) : null;
+    const notificationId = typeof body.notification_id === "string" ? body.notification_id : null;
     const params = (body.params && typeof body.params === "object")
       ? (body.params as Record<string, unknown>)
       : {};
@@ -284,6 +285,9 @@ Deno.serve(async (req: Request) => {
     }
 
     const dataMap = toDataMap(type, params);
+    // Carry the notification row id so the app's deep-link resolver can mark
+    // exactly this row read on tap (SC-002 / FR-012).
+    if (notificationId) dataMap.notification_id = notificationId;
     const fcmUrl = `https://fcm.googleapis.com/v1/projects/${sa.project_id}/messages:send`;
     let sent = 0;
     const stale: string[] = [];

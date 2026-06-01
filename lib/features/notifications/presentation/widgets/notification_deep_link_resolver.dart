@@ -17,6 +17,7 @@ import '../../../../core/localization/app_strings.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../domain/entities/app_notification.dart';
 import '../../domain/entities/notification_type.dart';
+import '../../domain/usecases/mark_notification_read.dart';
 import '../bloc/notification_badge_cubit.dart';
 import '../bloc/notifications_cubit.dart';
 
@@ -83,7 +84,13 @@ abstract final class NotificationDeepLinkResolver {
       _showFallback(context);
       return;
     }
-    // Decrement badge.
+    // Push-tap path: no live center cubit, so mark the tapped row read directly
+    // via the use case (fire-and-forget) so SC-002's "tap → marked read" holds
+    // and the next badge fetch-on-resume reconciles to the correct count.
+    if (notificationId.isNotEmpty) {
+      unawaited(getIt<MarkNotificationRead>().call(notificationId));
+    }
+    // Decrement badge optimistically.
     if (isUnread) getIt<NotificationBadgeCubit>().decrement();
 
     final fakeNotification = AppNotification(

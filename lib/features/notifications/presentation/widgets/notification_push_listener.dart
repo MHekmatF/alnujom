@@ -22,7 +22,6 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/localization/app_strings.dart';
 import '../../../../core/messaging/push_messaging_service.dart';
 import '../bloc/notification_badge_cubit.dart';
-import '../bloc/notifications_cubit.dart';
 import 'notification_deep_link_resolver.dart';
 
 class NotificationPushListener extends StatefulWidget {
@@ -51,13 +50,11 @@ class _NotificationPushListenerState extends State<NotificationPushListener> {
   void _subscribeStreams() {
     // Foreground push: refresh badge + center, optional snackbar (FR-014).
     _onMessageSub = _push.onMessage().listen((payload) {
+      // Refresh the unread badge — it is a @lazySingleton, the live user-visible
+      // indicator. The center page owns a BlocProvider-scoped NotificationsCubit
+      // and reloads on open / pull-to-refresh, so we deliberately do NOT poke a
+      // throwaway factory NotificationsCubit here (it would refresh nothing).
       getIt<NotificationBadgeCubit>().refresh();
-      // Also refresh the center if it is currently mounted.
-      try {
-        getIt<NotificationsCubit>().refresh();
-      } catch (_) {
-        // Not registered / not open — safe to ignore.
-      }
       _showForegroundSnackbar(payload);
     });
 
@@ -84,9 +81,8 @@ class _NotificationPushListenerState extends State<NotificationPushListener> {
     final type = payload.type;
     final params = payload.params;
 
-    // We don't have a notification id from the push payload alone; the
-    // resolver will still mark it read when the center loads via refresh.
-    // Deep-link routing is the priority here.
+    // dispatch_push puts the row id in data['notification_id'] (FCM v1 data
+    // payload), so the resolver can mark this exact row read on tap (SC-002).
     NotificationDeepLinkResolver.navigate(
       context: context,
       typeKey: type,
