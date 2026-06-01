@@ -22,6 +22,8 @@ import '../../domain/entities/listing_details_aggregate.dart';
 import '../bloc/listing_details_bloc.dart';
 import '../widgets/contact_block.dart';
 import '../widgets/per_listing_action_block.dart';
+import '../../../ads/domain/entities/ad_placement.dart';
+import '../../../ads/presentation/widgets/ad_slot.dart';
 import '../../../reports/presentation/widgets/reporter_status_banner.dart';
 import '../../../agency/presentation/widgets/listing_agency_badge.dart';
 import '../../data/listing_details_video_launcher.dart';
@@ -148,6 +150,9 @@ class _SuccessBody extends StatelessWidget {
                 // Phase 18: Reporter status banner (renders nothing for non-
                 // reporters / anon). Self-contained: hosts its own cubit.
                 ReporterStatusBanner(listingId: aggregate.listing.id),
+                // Phase 21: listing details banner (collapses to zero height
+                // when no eligible ads — FR-012; no reflow on the details layout).
+                const AdSlot(placement: AdPlacement.listingDetailsBanner),
                 // 3. Listing title
                 Text(
                   aggregate.listing.title,

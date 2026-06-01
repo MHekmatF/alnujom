@@ -1235,5 +1235,9 @@
   "dashboardCountersError": "Counters unavailable",
   "@dashboardCountersError": { "description": "Phase 20 — Error label shown when the dashboard counts RPC fails." },
   "dashboardCountersRetry": "Retry",
-  "@dashboardCountersRetry": { "description": "Phase 20 — Retry action label on the dashboard counts error state." }
+  "@dashboardCountersRetry": { "description": "Phase 20 — Retry action label on the dashboard counts error state." },
+  "adSlotUnavailable": "Ad unavailable",
+  "@adSlotUnavailable": { "description": "Phase 21 — Fallback message when an ad cannot be loaded or displayed." },
+  "adSlotTargetNotFound": "Link unavailable",
+  "@adSlotTargetNotFound": { "description": "Phase 21 — Snackbar message when an ad tap target cannot be resolved (FR-018)." }
 }

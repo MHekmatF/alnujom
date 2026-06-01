@@ -1159,5 +1159,9 @@
   "dashboardCountersError": "الأرقام غير متاحة",
   "@dashboardCountersError": { "description": "Phase 20 — Error label shown when the dashboard counts RPC fails." },
   "dashboardCountersRetry": "إعادة المحاولة",
-  "@dashboardCountersRetry": { "description": "Phase 20 — Retry action label on the dashboard counts error state." }
+  "@dashboardCountersRetry": { "description": "Phase 20 — Retry action label on the dashboard counts error state." },
+  "adSlotUnavailable": "الإعلان غير متاح",
+  "@adSlotUnavailable": { "description": "Phase 21 — Fallback message when an ad cannot be loaded or displayed." },
+  "adSlotTargetNotFound": "الرابط غير متاح",
+  "@adSlotTargetNotFound": { "description": "Phase 21 — Snackbar message when an ad tap target cannot be resolved (FR-018)." }
 }

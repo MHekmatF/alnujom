@@ -20,6 +20,8 @@ import '../../../inquiries/presentation/bloc/inquiries_unread_cubit.dart';
 import '../bloc/home_bloc.dart';
 import '../bloc/home_event.dart';
 import '../bloc/home_state.dart';
+import '../../../ads/domain/entities/ad_placement.dart';
+import '../../../ads/presentation/widgets/ad_slot.dart';
 import '../widgets/hero_search_bar.dart';
 import '../widgets/home_listing_card.dart';
 import '../widgets/inquiries_app_bar_action.dart';
@@ -223,6 +225,10 @@ class _HomeViewState extends State<_HomeView> {
         const SliverToBoxAdapter(child: PropertyTypeShortcutRow()),
         // Phase 15 G1: Map entry tile — R-91 slot (between shortcut row and header).
         const SliverToBoxAdapter(child: MapEntryTile()),
+        // Phase 21: home top banner (collapses to zero height when no ads — FR-012).
+        const SliverToBoxAdapter(
+          child: AdSlot(placement: AdPlacement.homeTopBanner),
+        ),
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsetsDirectional.fromSTEB(
@@ -293,6 +299,11 @@ class _HomeViewState extends State<_HomeView> {
                 displayCurrencyCode: null,
               );
             },
+          ),
+          // Phase 21: home middle banner — once after the first feed page
+          // (R-176; not repeated on scroll).
+          const SliverToBoxAdapter(
+            child: AdSlot(placement: AdPlacement.homeMiddleBanner),
           ),
           SliverToBoxAdapter(
             child: _FeedFooter(state: state, l10n: l10n),

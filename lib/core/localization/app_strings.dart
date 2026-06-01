@@ -3749,4 +3749,13 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String get dashboardCountersRetry =>
       _resolve('dashboardCountersRetry', (loc) => loc.dashboardCountersRetry);
+
+  // Phase 21 — AdSlot l10n keys
+  @override
+  String get adSlotUnavailable =>
+      _resolve('adSlotUnavailable', (loc) => loc.adSlotUnavailable);
+
+  @override
+  String get adSlotTargetNotFound =>
+      _resolve('adSlotTargetNotFound', (loc) => loc.adSlotTargetNotFound);
 }
