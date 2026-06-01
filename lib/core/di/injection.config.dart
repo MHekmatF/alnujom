@@ -50,6 +50,16 @@ import '../../features/admin/agencies/presentation/bloc/agency_moderation_cubit.
     as _i664;
 import '../../features/admin/agencies/presentation/bloc/agency_queue_bloc.dart'
     as _i916;
+import '../../features/admin/audit_logs/data/datasources/audit_logs_datasource.dart'
+    as _i617;
+import '../../features/admin/audit_logs/data/repositories/audit_log_repository_impl.dart'
+    as _i373;
+import '../../features/admin/audit_logs/domain/repositories/audit_log_repository.dart'
+    as _i881;
+import '../../features/admin/audit_logs/domain/usecases/load_audit_log_page.dart'
+    as _i365;
+import '../../features/admin/audit_logs/presentation/bloc/audit_log_cubit.dart'
+    as _i48;
 import '../../features/admin/listing_review/data/datasources/supabase_listing_review_datasource.dart'
     as _i530;
 import '../../features/admin/listing_review/data/repositories/listing_review_repository_impl.dart'
@@ -475,45 +485,54 @@ _i174.GetIt $initGetIt(
     () => _i650.PermissionChecker(gh<_i1015.PermissionCatalogRepository>()),
   );
   gh.lazySingleton<_i354.AppLogger>(() => _i1026.ConsoleLogger());
+  gh.factory<_i185.SupabaseAgenciesAdminDatasource>(
+    () => _i185.SupabaseAgenciesAdminDatasource(gh<_i454.SupabaseClient>()),
+  );
+  gh.factory<_i617.AuditLogsDatasource>(
+    () => _i617.AuditLogsDatasource(gh<_i454.SupabaseClient>()),
+  );
   gh.factory<_i530.SupabaseListingReviewDatasource>(
     () => _i530.SupabaseListingReviewDatasource(gh<_i454.SupabaseClient>()),
+  );
+  gh.factory<_i433.SupabaseReportsAdminDatasource>(
+    () => _i433.SupabaseReportsAdminDatasource(gh<_i454.SupabaseClient>()),
+  );
+  gh.factory<_i514.SupabaseAgencyDatasource>(
+    () => _i514.SupabaseAgencyDatasource(gh<_i454.SupabaseClient>()),
   );
   gh.factory<_i311.SupabaseCurrenciesDatasource>(
     () => _i311.SupabaseCurrenciesDatasource(gh<_i454.SupabaseClient>()),
   );
+  gh.factory<_i8.SupabaseFavoritesDatasource>(
+    () => _i8.SupabaseFavoritesDatasource(gh<_i454.SupabaseClient>()),
+  );
   gh.factory<_i732.SupabaseHomeFeedDatasource>(
     () => _i732.SupabaseHomeFeedDatasource(gh<_i454.SupabaseClient>()),
   );
+  gh.factory<_i1043.SupabaseInquiriesDatasource>(
+    () => _i1043.SupabaseInquiriesDatasource(gh<_i454.SupabaseClient>()),
+  );
   gh.factory<_i1006.SupabaseListingDetailsDatasource>(
     () => _i1006.SupabaseListingDetailsDatasource(gh<_i454.SupabaseClient>()),
+  );
+  gh.factory<_i245.SupabaseMapDatasource>(
+    () => _i245.SupabaseMapDatasource(gh<_i454.SupabaseClient>()),
   );
   gh.factory<_i333.SupabasePublisherDashboardDatasource>(
     () =>
         _i333.SupabasePublisherDashboardDatasource(gh<_i454.SupabaseClient>()),
   );
-  gh.factory<_i713.SupabaseSearchDatasource>(
-    () => _i713.SupabaseSearchDatasource(gh<_i454.SupabaseClient>()),
-  );
-  gh.factory<_i245.SupabaseMapDatasource>(
-    () => _i245.SupabaseMapDatasource(gh<_i454.SupabaseClient>()),
-  );
-  gh.factory<_i1043.SupabaseInquiriesDatasource>(
-    () => _i1043.SupabaseInquiriesDatasource(gh<_i454.SupabaseClient>()),
-  );
-  gh.factory<_i8.SupabaseFavoritesDatasource>(
-    () => _i8.SupabaseFavoritesDatasource(gh<_i454.SupabaseClient>()),
-  );
-  gh.factory<_i433.SupabaseReportsAdminDatasource>(
-    () => _i433.SupabaseReportsAdminDatasource(gh<_i454.SupabaseClient>()),
-  );
   gh.factory<_i231.SupabaseReportsDatasource>(
     () => _i231.SupabaseReportsDatasource(gh<_i454.SupabaseClient>()),
   );
-  gh.factory<_i185.SupabaseAgenciesAdminDatasource>(
-    () => _i185.SupabaseAgenciesAdminDatasource(gh<_i454.SupabaseClient>()),
+  gh.factory<_i713.SupabaseSearchDatasource>(
+    () => _i713.SupabaseSearchDatasource(gh<_i454.SupabaseClient>()),
   );
-  gh.factory<_i514.SupabaseAgencyDatasource>(
-    () => _i514.SupabaseAgencyDatasource(gh<_i454.SupabaseClient>()),
+  gh.lazySingleton<_i881.AuditLogRepository>(
+    () => _i373.AuditLogRepositoryImpl(
+      gh<_i617.AuditLogsDatasource>(),
+      gh<_i354.AppLogger>(),
+    ),
   );
   gh.factory<_i272.InquiryRepository>(
     () => _i614.InquiryRepositoryImpl(gh<_i1043.SupabaseInquiriesDatasource>()),
@@ -616,17 +635,26 @@ _i174.GetIt $initGetIt(
   gh.factory<_i570.LoadAgencyAnalytics>(
     () => _i570.LoadAgencyAnalytics(gh<_i1006.AgencyRepository>()),
   );
+  gh.factory<_i686.LoadAgencyById>(
+    () => _i686.LoadAgencyById(gh<_i1006.AgencyRepository>()),
+  );
   gh.factory<_i1048.LoadAgencyListings>(
     () => _i1048.LoadAgencyListings(gh<_i1006.AgencyRepository>()),
   );
   gh.factory<_i144.LoadAgencyMembers>(
     () => _i144.LoadAgencyMembers(gh<_i1006.AgencyRepository>()),
   );
+  gh.factory<_i611.LoadMyActiveAgencies>(
+    () => _i611.LoadMyActiveAgencies(gh<_i1006.AgencyRepository>()),
+  );
   gh.factory<_i324.LoadMyAgency>(
     () => _i324.LoadMyAgency(gh<_i1006.AgencyRepository>()),
   );
   gh.factory<_i470.LoadMyAgencyInvitations>(
     () => _i470.LoadMyAgencyInvitations(gh<_i1006.AgencyRepository>()),
+  );
+  gh.factory<_i977.LoadMyVerificationRequest>(
+    () => _i977.LoadMyVerificationRequest(gh<_i1006.AgencyRepository>()),
   );
   gh.factory<_i262.RemoveAgencyMember>(
     () => _i262.RemoveAgencyMember(gh<_i1006.AgencyRepository>()),
@@ -642,15 +670,6 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i609.UpdateAgencyProfile>(
     () => _i609.UpdateAgencyProfile(gh<_i1006.AgencyRepository>()),
-  );
-  gh.factory<_i686.LoadAgencyById>(
-    () => _i686.LoadAgencyById(gh<_i1006.AgencyRepository>()),
-  );
-  gh.factory<_i611.LoadMyActiveAgencies>(
-    () => _i611.LoadMyActiveAgencies(gh<_i1006.AgencyRepository>()),
-  );
-  gh.factory<_i977.LoadMyVerificationRequest>(
-    () => _i977.LoadMyVerificationRequest(gh<_i1006.AgencyRepository>()),
   );
   gh.lazySingleton<_i752.SupabaseClientWrapper>(
     () => _i748.SupabaseClientWrapperImpl(gh<_i354.AppLogger>()),
@@ -671,6 +690,9 @@ _i174.GetIt $initGetIt(
       gh<_i975.SetAgencyMemberRole>(),
       gh<_i262.RemoveAgencyMember>(),
     ),
+  );
+  gh.factory<_i365.LoadAuditLogPage>(
+    () => _i365.LoadAuditLogPage(gh<_i881.AuditLogRepository>()),
   );
   gh.lazySingleton<_i430.OnboardingRepository>(
     () => _i452.OnboardingRepositoryImpl(gh<_i144.OnboardingSeenStorage>()),
@@ -790,6 +812,9 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i433.HomeFeedRepository>(
     () => _i857.HomeFeedRepositoryImpl(gh<_i732.SupabaseHomeFeedDatasource>()),
   );
+  gh.factory<_i48.AuditLogCubit>(
+    () => _i48.AuditLogCubit(gh<_i365.LoadAuditLogPage>()),
+  );
   gh.lazySingleton<_i895.ListingDetailsRepository>(
     () => _i677.ListingDetailsRepositoryImpl(
       gh<_i1006.SupabaseListingDetailsDatasource>(),
@@ -798,6 +823,9 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i840.AgencyAnalyticsCubit>(
     () => _i840.AgencyAnalyticsCubit(gh<_i570.LoadAgencyAnalytics>()),
+  );
+  gh.factory<_i704.CheckOwnsApprovedListing>(
+    () => _i704.CheckOwnsApprovedListing(gh<_i272.InquiryRepository>()),
   );
   gh.factory<_i868.LoadInboxUnreadCount>(
     () => _i868.LoadInboxUnreadCount(gh<_i272.InquiryRepository>()),
@@ -813,9 +841,6 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i684.UpdateInquiryStatus>(
     () => _i684.UpdateInquiryStatus(gh<_i272.InquiryRepository>()),
-  );
-  gh.factory<_i704.CheckOwnsApprovedListing>(
-    () => _i704.CheckOwnsApprovedListing(gh<_i272.InquiryRepository>()),
   );
   gh.factory<_i891.ListMyListings>(
     () => _i891.ListMyListings(gh<_i754.PublisherDashboardRepository>()),

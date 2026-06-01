@@ -137,6 +137,21 @@ String? requireReportsManageRedirect(
   return null;
 }
 
+/// Phase 20 — gate for `/admin/audit-logs` route. Requires the data-driven
+/// `audit_logs.view` permission; redirects to `/admin?denied=audit_logs`
+/// otherwise. Mirrors [requireReportsManageRedirect]. The swapped audit_logs
+/// RLS policy (20260601120004) re-checks the same gate at the wire.
+String? requireAuditLogsViewRedirect(
+  BuildContext context,
+  GoRouterState state,
+) {
+  final checker = getIt<PermissionChecker>();
+  if (!checker.has(PermissionKeys.auditLogsView)) {
+    return '/admin?denied=audit_logs';
+  }
+  return null;
+}
+
 /// Phase 19 — gate for `/admin/agencies` route. Requires any of
 /// `agencies.view`, `agencies.approve`, or `agencies.suspend`; redirects to
 /// `/admin?denied=agencies` otherwise.
