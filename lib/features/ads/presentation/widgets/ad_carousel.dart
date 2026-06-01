@@ -74,19 +74,26 @@ class _AdCarouselState extends State<AdCarousel> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        PageView.builder(
-          controller: _pageController,
-          onPageChanged: _onPageChanged,
-          itemCount: widget.ads.length,
-          itemBuilder: (context, index) {
-            final ad = widget.ads[index];
-            return Padding(
-              padding: const EdgeInsetsDirectional.symmetric(
-                horizontal: AppSpacing.xs,
-              ),
-              child: AdBannerCard(ad: ad, onTap: () => widget.onAdTap(ad)),
-            );
-          },
+        // A PageView has no intrinsic height; inside a Column in a
+        // SliverToBoxAdapter (unbounded height) it would collapse to zero.
+        // Bound it to the banner's 16:5 aspect ratio so the carousel matches
+        // the single-ad AdBannerCard height.
+        AspectRatio(
+          aspectRatio: 16 / 5,
+          child: PageView.builder(
+            controller: _pageController,
+            onPageChanged: _onPageChanged,
+            itemCount: widget.ads.length,
+            itemBuilder: (context, index) {
+              final ad = widget.ads[index];
+              return Padding(
+                padding: const EdgeInsetsDirectional.symmetric(
+                  horizontal: AppSpacing.xs,
+                ),
+                child: AdBannerCard(ad: ad, onTap: () => widget.onAdTap(ad)),
+              );
+            },
+          ),
         ),
         const SizedBox(height: AppSpacing.xs),
         _PageIndicator(count: widget.ads.length, current: _currentPage),
