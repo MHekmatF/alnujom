@@ -4044,4 +4044,104 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String get adSlotTargetNotFound =>
       _resolve('adSlotTargetNotFound', (loc) => loc.adSlotTargetNotFound);
+
+  // ── Phase 22 — Notification center + bell + push listener ────────────────
+
+  @override
+  String get notification_center_title =>
+      _resolve('notification_center_title', (loc) => loc.notification_center_title);
+
+  @override
+  String get notification_bell_tooltip =>
+      _resolve('notification_bell_tooltip', (loc) => loc.notification_bell_tooltip);
+
+  @override
+  String get notification_mark_all_read =>
+      _resolve('notification_mark_all_read', (loc) => loc.notification_mark_all_read);
+
+  @override
+  String get notification_empty_state =>
+      _resolve('notification_empty_state', (loc) => loc.notification_empty_state);
+
+  @override
+  String get notification_load_error =>
+      _resolve('notification_load_error', (loc) => loc.notification_load_error);
+
+  @override
+  String get notification_retry =>
+      _resolve('notification_retry', (loc) => loc.notification_retry);
+
+  @override
+  String get notification_time_just_now =>
+      _resolve('notification_time_just_now', (loc) => loc.notification_time_just_now);
+
+  @override
+  String notification_time_minutes(int n) => _resolve(
+    'notification_time_minutes',
+    (loc) => loc.notification_time_minutes(n),
+  );
+
+  @override
+  String notification_time_hours(int n) => _resolve(
+    'notification_time_hours',
+    (loc) => loc.notification_time_hours(n),
+  );
+
+  @override
+  String notification_time_days(int n) => _resolve(
+    'notification_time_days',
+    (loc) => loc.notification_time_days(n),
+  );
+
+  @override
+  String get notification_content_unavailable => _resolve(
+    'notification_content_unavailable',
+    (loc) => loc.notification_content_unavailable,
+  );
+
+  @override
+  String get notification_foreground_received => _resolve(
+    'notification_foreground_received',
+    (loc) => loc.notification_foreground_received,
+  );
+
+  @override
+  String get notification_foreground_view =>
+      _resolve('notification_foreground_view', (loc) => loc.notification_foreground_view);
+
+  @override
+  String get notification_type_account_approved => _resolve(
+    'notification_type_account_approved',
+    (loc) => loc.notification_type_account_approved,
+  );
+
+  @override
+  String get notification_type_account_rejected => _resolve(
+    'notification_type_account_rejected',
+    (loc) => loc.notification_type_account_rejected,
+  );
+
+  @override
+  String get notification_type_listing_approved => _resolve(
+    'notification_type_listing_approved',
+    (loc) => loc.notification_type_listing_approved,
+  );
+
+  @override
+  String get notification_type_listing_rejected => _resolve(
+    'notification_type_listing_rejected',
+    (loc) => loc.notification_type_listing_rejected,
+  );
+
+  @override
+  String get notification_type_inquiry_received => _resolve(
+    'notification_type_inquiry_received',
+    (loc) => loc.notification_type_inquiry_received,
+  );
+
+  @override
+  String get notification_type_agency_invitation => _resolve(
+    'notification_type_agency_invitation',
+    (loc) => loc.notification_type_agency_invitation,
+  );
 }

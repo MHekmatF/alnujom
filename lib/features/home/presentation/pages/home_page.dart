@@ -17,6 +17,7 @@ import '../../../currencies/domain/entities/currency.dart';
 import '../../../currencies/domain/usecases/list_currencies.dart';
 import '../../../favorites/presentation/bloc/favorites_cubit.dart';
 import '../../../inquiries/presentation/bloc/inquiries_unread_cubit.dart';
+import '../../../notifications/presentation/bloc/notification_badge_cubit.dart';
 import '../bloc/home_bloc.dart';
 import '../bloc/home_event.dart';
 import '../bloc/home_state.dart';
@@ -25,6 +26,7 @@ import '../../../ads/presentation/widgets/ad_slot.dart';
 import '../widgets/hero_search_bar.dart';
 import '../widgets/home_listing_card.dart';
 import '../widgets/inquiries_app_bar_action.dart';
+import '../../../notifications/presentation/widgets/notification_bell_action.dart';
 import '../widgets/map_entry_tile.dart';
 import '../widgets/property_type_shortcut_row.dart';
 
@@ -90,8 +92,14 @@ class _HomeViewState extends State<_HomeView> {
     // Phase 16 FR-019a: refresh unread inquiry count on cold launch and on
     // every app foreground-resume (AppLifecycleState.resumed).
     getIt<InquiriesUnreadCubit>().refresh();
+    // Phase 22 R-193: refresh notification badge on cold launch + resume.
+    getIt<NotificationBadgeCubit>().refresh();
     _lifecycleListener = AppLifecycleListener(
-      onResume: () => getIt<InquiriesUnreadCubit>().refresh(),
+      onResume: () {
+        getIt<InquiriesUnreadCubit>().refresh();
+        // Phase 22 R-193: badge refresh on foreground-resume (NOT Realtime).
+        getIt<NotificationBadgeCubit>().refresh();
+      },
     );
   }
 
@@ -125,6 +133,8 @@ class _HomeViewState extends State<_HomeView> {
           const LocaleToggleAction(),
           // Phase 16 FR-019: inbox badge action (hidden for non-publishers).
           const InquiriesAppBarAction(),
+          // Phase 22 R-192: notification bell + badge (between inquiries and admin panel).
+          const NotificationBellAction(),
           // Admin-panel entry — visible only to users holding any admin-family
           // permission. Provides the sole in-app route to the admin home
           // (and from there, the Admin: Inquiries oversight screen).

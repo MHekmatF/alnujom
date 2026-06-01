@@ -11,6 +11,7 @@ import 'core/theme/palette_cubit.dart';
 import 'core/theme/theme_cubit.dart';
 import 'debug/palette_tester.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/notifications/presentation/widgets/notification_push_listener.dart';
 import 'l10n/app_localizations.dart';
 
 class App extends StatelessWidget {
@@ -70,11 +71,16 @@ class App extends StatelessWidget {
                       final showPaletteTester =
                           kDesignToolsEnabled &&
                           currentPath != '/_debug/theme-gallery';
-                      return Stack(
-                        children: [
-                          child ?? const SizedBox.shrink(),
-                          if (showPaletteTester) const PaletteTester(),
-                        ],
+                      // Phase 22 PN — wrap the app shell with the push listener
+                      // so it is live app-wide (T036).  Inert when the no-op
+                      // push adapter is bound (push unconfigured — FR-013).
+                      return NotificationPushListener(
+                        child: Stack(
+                          children: [
+                            child ?? const SizedBox.shrink(),
+                            if (showPaletteTester) const PaletteTester(),
+                          ],
+                        ),
                       );
                     },
                   );
