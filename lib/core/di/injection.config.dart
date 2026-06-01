@@ -484,6 +484,9 @@ import '../data/repositories/permission_catalog_repository_impl.dart' as _i739;
 import '../localization/locale_cubit.dart' as _i960;
 import '../logging/app_logger.dart' as _i354;
 import '../logging/console_logger.dart' as _i1026;
+import '../messaging/push_messaging_service.dart' as _i563;
+import '../network/realtime_signals.dart' as _i591;
+import '../network/realtime_signals_impl.dart' as _i854;
 import '../network/supabase_client_wrapper.dart' as _i752;
 import '../network/supabase_client_wrapper_impl.dart' as _i748;
 import '../security/permission_catalog_repository.dart' as _i1015;
@@ -542,6 +545,9 @@ _i174.GetIt $initGetIt(
     () => _i650.PermissionChecker(gh<_i1015.PermissionCatalogRepository>()),
   );
   gh.lazySingleton<_i354.AppLogger>(() => _i1026.ConsoleLogger());
+  gh.lazySingleton<_i591.RealtimeSignals>(
+    () => _i854.RealtimeSignalsImpl(gh<_i354.AppLogger>()),
+  );
   gh.factory<_i185.SupabaseAgenciesAdminDatasource>(
     () => _i185.SupabaseAgenciesAdminDatasource(gh<_i454.SupabaseClient>()),
   );
@@ -892,14 +898,6 @@ _i174.GetIt $initGetIt(
       gh<_i354.AppLogger>(),
     ),
   );
-  gh.lazySingleton<_i797.AuthBloc>(
-    () => _i797.AuthBloc(
-      gh<_i787.AuthRepository>(),
-      gh<_i894.ProfileRepository>(),
-      gh<_i650.PermissionChecker>(),
-    ),
-    dispose: (i) => i.dispose(),
-  );
   gh.factory<_i988.AgencyHomeCubit>(
     () => _i988.AgencyHomeCubit(
       gh<_i324.LoadMyAgency>(),
@@ -1123,6 +1121,18 @@ _i174.GetIt $initGetIt(
       initialLocale,
     ),
   );
+  gh.lazySingleton<_i797.AuthBloc>(
+    () => _i797.AuthBloc(
+      gh<_i787.AuthRepository>(),
+      gh<_i894.ProfileRepository>(),
+      gh<_i650.PermissionChecker>(),
+      gh<_i397.RegisterPushToken>(),
+      gh<_i181.DeregisterPushToken>(),
+      gh<_i563.PushMessagingService>(),
+      gh<_i591.RealtimeSignals>(),
+    ),
+    dispose: (i) => i.dispose(),
+  );
   gh.factory<_i552.SearchBloc>(
     () => _i552.SearchBloc(gh<_i190.SearchListingsUseCase>()),
   );
@@ -1184,6 +1194,12 @@ _i174.GetIt $initGetIt(
   gh.factory<_i171.FavoritesPageBloc>(
     () => _i171.FavoritesPageBloc(gh<_i1041.LoadFavorites>()),
   );
+  gh.factory<_i616.DashboardCubit>(
+    () => _i616.DashboardCubit(
+      gh<_i670.LoadDashboardCounts>(),
+      gh<_i591.RealtimeSignals>(),
+    ),
+  );
   gh.factory<_i906.DeriveAreaCentroid>(
     () => _i906.DeriveAreaCentroid(gh<_i704.LocationsRepository>()),
   );
@@ -1214,9 +1230,6 @@ _i174.GetIt $initGetIt(
       gh<_i950.RevokeRoleFromUser>(),
       gh<_i1018.ListRoles>(),
     ),
-  );
-  gh.factory<_i616.DashboardCubit>(
-    () => _i616.DashboardCubit(gh<_i670.LoadDashboardCounts>()),
   );
   gh.factory<_i419.LocationFormBloc>(
     () => _i419.LocationFormBloc(
