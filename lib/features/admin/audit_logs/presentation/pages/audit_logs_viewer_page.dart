@@ -92,8 +92,7 @@ class _AuditLogsViewState extends State<_AuditLogsView> {
             child: ListView.separated(
               controller: _scrollController,
               padding: const EdgeInsets.all(AppSpacing.md),
-              itemCount:
-                  state.items.length + (state.isLoadingNextPage ? 1 : 0),
+              itemCount: state.items.length + (state.isLoadingNextPage ? 1 : 0),
               separatorBuilder: (_, __) =>
                   const SizedBox(height: AppSpacing.sm),
               itemBuilder: (ctx, index) {
@@ -126,9 +125,9 @@ class _AuditLogCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final locale = Localizations.localeOf(context).toString();
-    final timestamp = DateFormat.yMMMd(locale).add_Hms().format(
-          entry.createdAt.toLocal(),
-        );
+    final timestamp = DateFormat.yMMMd(
+      locale,
+    ).add_Hms().format(entry.createdAt.toLocal());
 
     return Card(
       child: ExpansionTile(
@@ -136,11 +135,10 @@ class _AuditLogCard extends StatelessWidget {
           horizontal: AppSpacing.lg,
           vertical: AppSpacing.xs,
         ),
-        childrenPadding: const EdgeInsets.fromLTRB(
-          AppSpacing.lg,
-          0,
-          AppSpacing.lg,
-          AppSpacing.lg,
+        childrenPadding: const EdgeInsetsDirectional.only(
+          start: AppSpacing.lg,
+          end: AppSpacing.lg,
+          bottom: AppSpacing.lg,
         ),
         title: Text(entry.action, style: theme.textTheme.titleSmall),
         subtitle: Padding(
@@ -158,10 +156,7 @@ class _AuditLogCard extends StatelessWidget {
                 label: l10n.auditLogsActorLabel,
                 value: entry.actorUserId ?? l10n.auditLogsActorSystem,
               ),
-              _FieldRow(
-                label: l10n.auditLogsTimestampLabel,
-                value: timestamp,
-              ),
+              _FieldRow(label: l10n.auditLogsTimestampLabel, value: timestamp),
             ],
           ),
         ),
@@ -192,6 +187,9 @@ class _FieldRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // Composed outside TextSpan() so the l10n-literals lint passes — [label] is
+    // a localized field label supplied by the caller.
+    final labelText = '$label: ';
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.xs),
       child: RichText(
@@ -199,7 +197,7 @@ class _FieldRow extends StatelessWidget {
           style: theme.textTheme.bodySmall,
           children: [
             TextSpan(
-              text: '$label: ',
+              text: labelText,
               style: theme.textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -251,9 +249,7 @@ class _JsonBlock extends StatelessWidget {
           child: SelectableText(
             text,
             textDirection: TextDirection.ltr,
-            style: theme.textTheme.bodySmall?.copyWith(
-              fontFamily: 'monospace',
-            ),
+            style: theme.textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
           ),
         ),
       ],

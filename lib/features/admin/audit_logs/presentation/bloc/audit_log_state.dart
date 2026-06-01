@@ -55,11 +55,11 @@ class AuditLogState extends Equatable {
 
   @override
   List<Object?> get props => [
-        items,
-        nextCursor,
-        isLoadingFirstPage,
-        isLoadingNextPage,
-        failure,
-        endReached,
-      ];
+    items,
+    nextCursor,
+    isLoadingFirstPage,
+    isLoadingNextPage,
+    failure,
+    endReached,
+  ];
 }

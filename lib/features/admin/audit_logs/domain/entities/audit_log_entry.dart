@@ -1,6 +1,6 @@
 // Phase 20 (spec/020-admin-dashboard) — T021
 // AuditLogEntry: pure-Dart domain entity for one public.audit_logs row
-// (data-model §2.3). No package:supabase_flutter import (Constitution IX).
+// (data-model §2.3). No Supabase SDK import (Constitution IX — domain purity).
 //
 // Note: audit_logs.id is UUID (Phase 4 20260506120004:
 //   id UUID PRIMARY KEY DEFAULT gen_random_uuid()), not an int — the
@@ -45,13 +45,13 @@ class AuditLogEntry extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        actorUserId,
-        action,
-        targetType,
-        targetId,
-        beforeState,
-        afterState,
-        createdAt,
-      ];
+    id,
+    actorUserId,
+    action,
+    targetType,
+    targetId,
+    beforeState,
+    afterState,
+    createdAt,
+  ];
 }

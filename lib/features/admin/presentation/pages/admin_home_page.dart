@@ -99,8 +99,7 @@ class _AdminHomeViewState extends State<_AdminHomeView> with RouteAware {
           ? _EmptyState(l10n: l10n)
           : BlocBuilder<DashboardCubit, DashboardState>(
               builder: (context, state) {
-                final counts =
-                    state is DashboardLoaded ? state.counts : null;
+                final counts = state is DashboardLoaded ? state.counts : null;
                 final isLoading = state is DashboardLoading;
                 final isError = state is DashboardError;
 
@@ -126,11 +125,11 @@ class _AdminHomeViewState extends State<_AdminHomeView> with RouteAware {
                         sliver: SliverGrid(
                           gridDelegate:
                               const SliverGridDelegateWithMaxCrossAxisExtent(
-                            maxCrossAxisExtent: 180,
-                            mainAxisSpacing: AppSpacing.sm,
-                            crossAxisSpacing: AppSpacing.sm,
-                            childAspectRatio: 1.0,
-                          ),
+                                maxCrossAxisExtent: 180,
+                                mainAxisSpacing: AppSpacing.sm,
+                                crossAxisSpacing: AppSpacing.sm,
+                                childAspectRatio: 1.0,
+                              ),
                           delegate: SliverChildBuilderDelegate(
                             (context, index) => _buildSectionTile(
                               context,
@@ -172,21 +171,22 @@ class _AdminHomeViewState extends State<_AdminHomeView> with RouteAware {
     }
 
     // Counter: null = not permitted → omit badge; 0 = permitted, nothing pending.
-    final counter =
-        counts != null ? _resolveCounter(section.counterKey, counts) : null;
+    final counter = counts != null
+        ? _resolveCounter(section.counterKey, counts)
+        : null;
 
     // Secondary informational counter (contract: the Listings tile carries
     // pending_listings as its badge AND active_listings as a caption).
     final secondaryCounter = counts != null
         ? _resolveCounter(section.secondaryCounterKey, counts)
         : null;
-    final secondaryCounterLabel = section.secondaryCounterKey == 'activeListings'
+    final secondaryCounterLabel =
+        section.secondaryCounterKey == 'activeListings'
         ? l10n.dashboardCounterActiveListings
         : null;
 
     // Quick-action deep-link: counter tiles route to the filtered queue (FR-009).
-    final quickRoute =
-        _quickActionRoute(section.counterKey) ?? section.route!;
+    final quickRoute = _quickActionRoute(section.counterKey) ?? section.route!;
 
     return DashboardTile(
       icon: section.icon,

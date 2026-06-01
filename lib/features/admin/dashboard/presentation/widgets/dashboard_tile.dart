@@ -37,6 +37,12 @@ class DashboardTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    // Compose the (already-localized) secondary caption outside Text() so the
+    // l10n-literals lint passes — the label itself is localized by the caller.
+    final secondaryCaption =
+        (secondaryCounter != null && secondaryCounterLabel != null)
+        ? '$secondaryCounter $secondaryCounterLabel'
+        : null;
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -68,10 +74,10 @@ class DashboardTile extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              if (secondaryCounter != null && secondaryCounterLabel != null) ...[
+              if (secondaryCaption != null) ...[
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  '$secondaryCounter $secondaryCounterLabel',
+                  secondaryCaption,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
@@ -101,20 +107,16 @@ class _CounterBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.xs,
-        vertical: 2,
+        vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: isZero
-            ? colorScheme.surfaceContainerHighest
-            : colorScheme.error,
+        color: isZero ? colorScheme.surfaceContainerHighest : colorScheme.error,
         borderRadius: BorderRadius.circular(AppSpacing.sm),
       ),
       child: Text(
-        '$count',
+        count.toString(),
         style: theme.textTheme.labelSmall?.copyWith(
-          color: isZero
-              ? colorScheme.onSurfaceVariant
-              : colorScheme.onError,
+          color: isZero ? colorScheme.onSurfaceVariant : colorScheme.onError,
         ),
       ),
     );

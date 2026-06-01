@@ -25,7 +25,9 @@ class AuditLogsDatasource {
     String? cursor,
     int limit = 30,
   }) async {
-    var query = _client.from('audit_logs').select(
+    var query = _client
+        .from('audit_logs')
+        .select(
           'id,actor_user_id,action,target_type,target_id,'
           'before_state,after_state,created_at',
         );
@@ -34,15 +36,11 @@ class AuditLogsDatasource {
       query = query.lt('created_at', cursor);
     }
 
-    final rows = await query
-        .order('created_at', ascending: false)
-        .limit(limit);
+    final rows = await query.order('created_at', ascending: false).limit(limit);
 
     return (rows as List<dynamic>)
         .map(
-          (r) => AuditLogEntryDto.fromJson(
-            Map<String, dynamic>.from(r as Map),
-          ),
+          (r) => AuditLogEntryDto.fromJson(Map<String, dynamic>.from(r as Map)),
         )
         .toList(growable: false);
   }

@@ -13,10 +13,7 @@ class LoadAuditLogPage {
 
   final AuditLogRepository _repository;
 
-  Future<Result<List<AuditLogEntry>>> call({
-    String? cursor,
-    int limit = 30,
-  }) {
+  Future<Result<List<AuditLogEntry>>> call({String? cursor, int limit = 30}) {
     return _repository.loadPage(cursor: cursor, limit: limit);
   }
 }
