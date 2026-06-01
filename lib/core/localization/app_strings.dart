@@ -3749,4 +3749,276 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String get dashboardCountersRetry =>
       _resolve('dashboardCountersRetry', (loc) => loc.dashboardCountersRetry);
+
+  // ── Phase 21 PA — Ads admin ───────────────────────────────────────────────
+
+  @override
+  String get adsAdminListTitle =>
+      _resolve('adsAdminListTitle', (loc) => loc.adsAdminListTitle);
+
+  @override
+  String get adsAdminCreateTitle =>
+      _resolve('adsAdminCreateTitle', (loc) => loc.adsAdminCreateTitle);
+
+  @override
+  String get adsAdminEditTitle =>
+      _resolve('adsAdminEditTitle', (loc) => loc.adsAdminEditTitle);
+
+  @override
+  String get adsAdminEmptyList =>
+      _resolve('adsAdminEmptyList', (loc) => loc.adsAdminEmptyList);
+
+  @override
+  String get adsAdminArchivedFilterTooltip => _resolve(
+    'adsAdminArchivedFilterTooltip',
+    (loc) => loc.adsAdminArchivedFilterTooltip,
+  );
+
+  @override
+  String get adsAdminCreateTooltip =>
+      _resolve('adsAdminCreateTooltip', (loc) => loc.adsAdminCreateTooltip);
+
+  @override
+  String get adsAdminActivateTooltip =>
+      _resolve('adsAdminActivateTooltip', (loc) => loc.adsAdminActivateTooltip);
+
+  @override
+  String get adsAdminDeactivateTooltip => _resolve(
+    'adsAdminDeactivateTooltip',
+    (loc) => loc.adsAdminDeactivateTooltip,
+  );
+
+  @override
+  String get adsAdminArchiveTooltip =>
+      _resolve('adsAdminArchiveTooltip', (loc) => loc.adsAdminArchiveTooltip);
+
+  @override
+  String get adsAdminArchiveConfirmTitle => _resolve(
+    'adsAdminArchiveConfirmTitle',
+    (loc) => loc.adsAdminArchiveConfirmTitle,
+  );
+
+  @override
+  String adsAdminArchiveConfirmBody(String title) =>
+      _resolve('adsAdminArchiveConfirmBody', (loc) => loc.adsAdminArchiveConfirmBody(title));
+
+  @override
+  String get adsAdminArchiveAction =>
+      _resolve('adsAdminArchiveAction', (loc) => loc.adsAdminArchiveAction);
+
+  @override
+  String get adsAdminTitleFieldLabel =>
+      _resolve('adsAdminTitleFieldLabel', (loc) => loc.adsAdminTitleFieldLabel);
+
+  @override
+  String get adsAdminTitleRequired =>
+      _resolve('adsAdminTitleRequired', (loc) => loc.adsAdminTitleRequired);
+
+  @override
+  String get adsAdminImageLabel =>
+      _resolve('adsAdminImageLabel', (loc) => loc.adsAdminImageLabel);
+
+  @override
+  String get adsAdminImagePickLabel =>
+      _resolve('adsAdminImagePickLabel', (loc) => loc.adsAdminImagePickLabel);
+
+  @override
+  String get adsAdminImageReplaceLabel => _resolve(
+    'adsAdminImageReplaceLabel',
+    (loc) => loc.adsAdminImageReplaceLabel,
+  );
+
+  @override
+  String get adsAdminImageRequired =>
+      _resolve('adsAdminImageRequired', (loc) => loc.adsAdminImageRequired);
+
+  @override
+  String get adsAdminCaptionLabel =>
+      _resolve('adsAdminCaptionLabel', (loc) => loc.adsAdminCaptionLabel);
+
+  @override
+  String get adsAdminCaptionBothOrNeitherHint => _resolve(
+    'adsAdminCaptionBothOrNeitherHint',
+    (loc) => loc.adsAdminCaptionBothOrNeitherHint,
+  );
+
+  @override
+  String get adsAdminCaptionArLabel =>
+      _resolve('adsAdminCaptionArLabel', (loc) => loc.adsAdminCaptionArLabel);
+
+  @override
+  String get adsAdminCaptionEnLabel =>
+      _resolve('adsAdminCaptionEnLabel', (loc) => loc.adsAdminCaptionEnLabel);
+
+  @override
+  String get adsAdminCaptionBothOrNeither => _resolve(
+    'adsAdminCaptionBothOrNeither',
+    (loc) => loc.adsAdminCaptionBothOrNeither,
+  );
+
+  @override
+  String get adsAdminLinkLabel =>
+      _resolve('adsAdminLinkLabel', (loc) => loc.adsAdminLinkLabel);
+
+  @override
+  String get adsAdminPlacementsLabel =>
+      _resolve('adsAdminPlacementsLabel', (loc) => loc.adsAdminPlacementsLabel);
+
+  @override
+  String get adsAdminPriorityLabel =>
+      _resolve('adsAdminPriorityLabel', (loc) => loc.adsAdminPriorityLabel);
+
+  @override
+  String get adsAdminScheduleLabel =>
+      _resolve('adsAdminScheduleLabel', (loc) => loc.adsAdminScheduleLabel);
+
+  @override
+  String get adsAdminActiveToggleLabel => _resolve(
+    'adsAdminActiveToggleLabel',
+    (loc) => loc.adsAdminActiveToggleLabel,
+  );
+
+  @override
+  String get adStatusActive =>
+      _resolve('adStatusActive', (loc) => loc.adStatusActive);
+
+  @override
+  String get adStatusScheduled =>
+      _resolve('adStatusScheduled', (loc) => loc.adStatusScheduled);
+
+  @override
+  String get adStatusExpired =>
+      _resolve('adStatusExpired', (loc) => loc.adStatusExpired);
+
+  @override
+  String get adStatusInactive =>
+      _resolve('adStatusInactive', (loc) => loc.adStatusInactive);
+
+  @override
+  String get adStatusArchived =>
+      _resolve('adStatusArchived', (loc) => loc.adStatusArchived);
+
+  @override
+  String get adLinkKindLabel =>
+      _resolve('adLinkKindLabel', (loc) => loc.adLinkKindLabel);
+
+  @override
+  String get adLinkKindExternal =>
+      _resolve('adLinkKindExternal', (loc) => loc.adLinkKindExternal);
+
+  @override
+  String get adLinkKindListing =>
+      _resolve('adLinkKindListing', (loc) => loc.adLinkKindListing);
+
+  @override
+  String get adLinkKindAgency =>
+      _resolve('adLinkKindAgency', (loc) => loc.adLinkKindAgency);
+
+  @override
+  String get adLinkKindCategory =>
+      _resolve('adLinkKindCategory', (loc) => loc.adLinkKindCategory);
+
+  @override
+  String get adLinkKindSearch =>
+      _resolve('adLinkKindSearch', (loc) => loc.adLinkKindSearch);
+
+  @override
+  String get adLinkValueHintUrl =>
+      _resolve('adLinkValueHintUrl', (loc) => loc.adLinkValueHintUrl);
+
+  @override
+  String get adLinkValueHintUuid =>
+      _resolve('adLinkValueHintUuid', (loc) => loc.adLinkValueHintUuid);
+
+  @override
+  String get adLinkValueHintCategoryKey => _resolve(
+    'adLinkValueHintCategoryKey',
+    (loc) => loc.adLinkValueHintCategoryKey,
+  );
+
+  @override
+  String get adLinkValueHintSearch =>
+      _resolve('adLinkValueHintSearch', (loc) => loc.adLinkValueHintSearch);
+
+  @override
+  String get adLinkValueRequired =>
+      _resolve('adLinkValueRequired', (loc) => loc.adLinkValueRequired);
+
+  @override
+  String get adLinkValueInvalidUrl =>
+      _resolve('adLinkValueInvalidUrl', (loc) => loc.adLinkValueInvalidUrl);
+
+  @override
+  String get adLinkValueInvalidUuid =>
+      _resolve('adLinkValueInvalidUuid', (loc) => loc.adLinkValueInvalidUuid);
+
+  @override
+  String get adLinkValueInvalidCategoryKey => _resolve(
+    'adLinkValueInvalidCategoryKey',
+    (loc) => loc.adLinkValueInvalidCategoryKey,
+  );
+
+  @override
+  String get adPlacementHomeTopBanner => _resolve(
+    'adPlacementHomeTopBanner',
+    (loc) => loc.adPlacementHomeTopBanner,
+  );
+
+  @override
+  String get adPlacementHomeMiddleBanner => _resolve(
+    'adPlacementHomeMiddleBanner',
+    (loc) => loc.adPlacementHomeMiddleBanner,
+  );
+
+  @override
+  String get adPlacementSearchResultsBanner => _resolve(
+    'adPlacementSearchResultsBanner',
+    (loc) => loc.adPlacementSearchResultsBanner,
+  );
+
+  @override
+  String get adPlacementListingDetailsBanner => _resolve(
+    'adPlacementListingDetailsBanner',
+    (loc) => loc.adPlacementListingDetailsBanner,
+  );
+
+  @override
+  String get adPlacementCategoryBanner => _resolve(
+    'adPlacementCategoryBanner',
+    (loc) => loc.adPlacementCategoryBanner,
+  );
+
+  @override
+  String get adPlacementCategoryBannerNotYetLive => _resolve(
+    'adPlacementCategoryBannerNotYetLive',
+    (loc) => loc.adPlacementCategoryBannerNotYetLive,
+  );
+
+  @override
+  String get scheduleStartLabel =>
+      _resolve('scheduleStartLabel', (loc) => loc.scheduleStartLabel);
+
+  @override
+  String get scheduleEndLabel =>
+      _resolve('scheduleEndLabel', (loc) => loc.scheduleEndLabel);
+
+  @override
+  String get scheduleNotSet =>
+      _resolve('scheduleNotSet', (loc) => loc.scheduleNotSet);
+
+  @override
+  String get scheduleClearTooltip =>
+      _resolve('scheduleClearTooltip', (loc) => loc.scheduleClearTooltip);
+
+  @override
+  String get scheduleStartMustBeforeEnd => _resolve(
+    'scheduleStartMustBeforeEnd',
+    (loc) => loc.scheduleStartMustBeforeEnd,
+  );
+
+  @override
+  String get saveLabel => _resolve('saveLabel', (loc) => loc.saveLabel);
+
+  @override
+  String get cancelLabel => _resolve('cancelLabel', (loc) => loc.cancelLabel);
 }
