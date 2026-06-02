@@ -63,11 +63,11 @@
 **Goal**: A signed `1.0.0` build with the final icon + light/dark splash that boots on a fresh device; release signing **fails closed**. **No Dart symbol.**
 **Independent Test**: signed APK installs + boots on a wiped device (icon + splash correct light/dark); a release build with no keystore **fails** (no debug-signed artifact).
 
-- [ ] T020 [P] [US1] Add `flutter_launcher_icons` + `flutter_native_splash` to `dev_dependencies` + their config blocks in `pubspec.yaml`; add source art under `assets/branding/` (icon + light/dark splash) (R-212)
-- [ ] T021 [US1] Run `dart run flutter_launcher_icons` → generates `mipmap-*` + the Android adaptive icon into `android/app/src/main/res/**` (depends on T020)
-- [ ] T022 [US1] [US6] Run `dart run flutter_native_splash:create` with **light + dark** config → generates splash drawables + `values`/`values-night` (depends on T020)
-- [ ] T023 [P] [US1] Replace the `release` `signingConfig` in `android/app/build.gradle.kts` with a real config reading gitignored `android/key.properties` (keystore outside the repo); **fail closed** when absent (remove the `signingConfigs.getByName("debug")` fallback + TODO); add `key.properties` + `*.jks`/`*.keystore` to `android/.gitignore` (R-213, FR-003)
-- [ ] T024 [US1] Confirm `pubspec.yaml` version `1.0.0+N`; confirm `debugShowCheckedModeBanner: false` (already set) + `kDesignToolsEnabled` off in release — **acceptance (record outcome)**: signed release boots on a fresh device, icon + splash correct light/dark; a no-keystore release build fails closed (SC-001). **⚠️ PARTIAL —** signed-build-on-fresh-device deferred to QV (needs the keystore + device). (depends on T021, T022, T023)
+- [X] T020 [P] [US1] Add `flutter_launcher_icons` + `flutter_native_splash` to `dev_dependencies` + their config blocks in `pubspec.yaml`; add source art under `assets/branding/` (icon + light/dark splash) (R-212)
+- [X] T021 [US1] Run `dart run flutter_launcher_icons` → generates `mipmap-*` + the Android adaptive icon into `android/app/src/main/res/**` (depends on T020)
+- [X] T022 [US1] [US6] Run `dart run flutter_native_splash:create` with **light + dark** config → generates splash drawables + `values`/`values-night` (depends on T020)
+- [X] T023 [P] [US1] Replace the `release` `signingConfig` in `android/app/build.gradle.kts` with a real config reading gitignored `android/key.properties` (keystore outside the repo); **fail closed** when absent (remove the `signingConfigs.getByName("debug")` fallback + TODO); add `key.properties` + `*.jks`/`*.keystore` to `android/.gitignore` (R-213, FR-003)
+- [ ] T024 [US1] **⚠️ PARTIAL —** `pubspec.yaml` version confirmed `1.0.0+1`; `debugShowCheckedModeBanner: false` confirmed; `kDesignToolsEnabled` is `bool.fromEnvironment('DESIGN_TOOLS', defaultValue: false)` — OFF in release (no dart-define). Signed-build-on-fresh-device deferred to QV (needs keystore + device). (depends on T021, T022, T023)
 
 **Checkpoint**: a shippable, properly-signed `1.0.0` artifact with final branding.
 

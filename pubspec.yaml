@@ -48,12 +48,15 @@ dev_dependencies:
   flutter_lints: 5.0.0
   injectable_generator: 2.8.1
   mockito: 5.5.0
+  flutter_launcher_icons: 0.14.4
+  flutter_native_splash: 2.4.7
 
 flutter:
   generate: true
   uses-material-design: true
   assets:
     - assets/images/watermark/
+    - assets/branding/
   fonts:
     - family: Cairo
       fonts:
@@ -78,3 +81,28 @@ flutter:
           weight: 600
         - asset: assets/fonts/Inter-Bold.ttf
           weight: 700
+
+# Phase 24 RB — flutter_launcher_icons config (R-212)
+# Generates mipmap-* + adaptive icon into android/app/src/main/res/**
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: false
+  image_path: "assets/branding/icon.png"
+  adaptive_icon_background: "#1D4ED8"
+  adaptive_icon_foreground: "assets/branding/icon.png"
+  min_sdk_android: 24
+
+# Phase 24 RB — flutter_native_splash config (R-212; light + dark)
+# Generates splash drawables + values/values-night
+flutter_native_splash:
+  color: "#FFFFFF"
+  image: assets/branding/splash_light.png
+  color_dark: "#0B1220"
+  image_dark: assets/branding/splash_dark.png
+  android: true
+  ios: false
+  android_12:
+    color: "#1D4ED8"
+    image: assets/branding/icon.png
+    color_dark: "#0B1220"
+    image_dark: assets/branding/icon.png
