@@ -40,13 +40,13 @@
 **Goal**: The Supabase-free `AppSettingsRepository` + entities + use cases + datasource — the symbol set FA & FC import. Compiles + analyzes **without** the DB applied.
 **Independent Test**: `flutter analyze` clean; `getIt<AppSettingsRepository>()` resolves; a unit-free smoke (manual) of `LoadPublicSettings` against the live DB returns the snapshot.
 
-- [ ] T007 [P] Create domain entities in `lib/features/settings/domain/entities/`: `app_setting.dart` (`AppSetting`), `app_setting_key.dart` (`AppSettingKey` enum + wire `key`), `app_settings.dart` (`AppSettings` aggregate + typed getters + `const AppSettings.safeDefaults()`), `maintenance_state.dart` (`MaintenanceState`), `support_contact.dart` (`SupportContact` + `hasAny`), `localized_text.dart` (`LocalizedText` + `forLocale`)
-- [ ] T008 [P] Create abstract `AppSettingsRepository` in `lib/features/settings/domain/repositories/app_settings_repository.dart` (`loadPublicSettings`, `loadAllSettings`, `updateSetting` → all `Future<Result<…>>`)
-- [ ] T009 Create use cases in `lib/features/settings/domain/usecases/`: `load_public_settings.dart`, `load_all_settings.dart`, `update_setting.dart` (depends on T008)
-- [ ] T010 [P] Create `AppSettingDto` (+ per-key value decoders) in `lib/features/settings/data/dtos/app_setting_dto.dart`
-- [ ] T011 Create `SupabaseAppSettingsDatasource` in `lib/features/settings/data/datasources/supabase_app_settings_datasource.dart` — `_client.from('app_settings').select()` for reads, `_client.rpc('set_app_setting', params: {'p_key':…, 'p_value':…})` for writes (depends on T010; matches the Phase 9 currencies-datasource idiom)
-- [ ] T012 Create `AppSettingsRepositoryImpl` `@LazySingleton(as: AppSettingsRepository)` in `lib/features/settings/data/repositories/app_settings_repository_impl.dart` — DTO↔entity, exception→`Failure`, `Result<T>` (depends on T008, T011)
-- [ ] T013 Run `dart run build_runner build --delete-conflicting-outputs`; `flutter analyze` clean; confirm no `package:supabase_flutter` import under `lib/features/settings/domain/` — **acceptance (record outcome)**
+- [X] T007 [P] Create domain entities in `lib/features/settings/domain/entities/`: `app_setting.dart` (`AppSetting`), `app_setting_key.dart` (`AppSettingKey` enum + wire `key`), `app_settings.dart` (`AppSettings` aggregate + typed getters + `const AppSettings.safeDefaults()`), `maintenance_state.dart` (`MaintenanceState`), `support_contact.dart` (`SupportContact` + `hasAny`), `localized_text.dart` (`LocalizedText` + `forLocale`)
+- [X] T008 [P] Create abstract `AppSettingsRepository` in `lib/features/settings/domain/repositories/app_settings_repository.dart` (`loadPublicSettings`, `loadAllSettings`, `updateSetting` → all `Future<Result<…>>`)
+- [X] T009 Create use cases in `lib/features/settings/domain/usecases/`: `load_public_settings.dart`, `load_all_settings.dart`, `update_setting.dart` (depends on T008)
+- [X] T010 [P] Create `AppSettingDto` (+ per-key value decoders) in `lib/features/settings/data/dtos/app_setting_dto.dart`
+- [X] T011 Create `SupabaseAppSettingsDatasource` in `lib/features/settings/data/datasources/supabase_app_settings_datasource.dart` — `_client.from('app_settings').select()` for reads, `_client.rpc('set_app_setting', params: {'p_key':…, 'p_value':…})` for writes (depends on T010; matches the Phase 9 currencies-datasource idiom)
+- [X] T012 Create `AppSettingsRepositoryImpl` `@LazySingleton(as: AppSettingsRepository)` in `lib/features/settings/data/repositories/app_settings_repository_impl.dart` — DTO↔entity, exception→`Failure`, `Result<T>` (depends on T008, T011)
+- [X] T013 Run `dart run build_runner build --delete-conflicting-outputs`; `flutter analyze` clean; confirm no `package:supabase_flutter` import under `lib/features/settings/domain/` — **acceptance (record outcome)**: build_runner SUCCESS (57s, 245 outputs); `flutter analyze --fatal-infos` → No issues found; domain-purity grep → zero matches.
 
 **Checkpoint**: FD symbols exist; FA & FC can compile against them.
 
