@@ -40,6 +40,7 @@ final class PaletteCubit extends Cubit<ColorPalette> {
     }
 
     final result = await _store.readPaletteName();
+    if (isClosed) return;
     final palette = switch (result) {
       Success(:final value) => _paletteFromStoredName(value),
       FailureResult(:final failure) => _warnAndReturnModern(

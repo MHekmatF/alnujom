@@ -24,6 +24,7 @@ class NotificationBadgeCubit extends Cubit<NotificationBadgeState> {
   /// when the push listener delivers a foreground message (FR-014 / R-193).
   Future<void> refresh() async {
     final result = await _loadUnreadCount();
+    if (isClosed) return;
     if (result is Success) {
       emit(NotificationBadgeState(count: (result as Success).value.value));
     }

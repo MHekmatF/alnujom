@@ -35,6 +35,7 @@ class AdSlotCubit extends Cubit<AdSlotState> {
   /// Loads eligible ads for [placement]. Called once from [AdSlot]'s initState.
   Future<void> load(AdPlacement placement) async {
     final result = await _loadServingAds(placement);
+    if (isClosed) return;
     if (result is Success<List<ServingAd>>) {
       final ads = result.value;
       if (ads.isEmpty) {

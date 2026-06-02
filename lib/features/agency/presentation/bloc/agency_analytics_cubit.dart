@@ -36,6 +36,7 @@ class AgencyAnalyticsCubit extends Cubit<AgencyAnalyticsState> {
   Future<void> load(String agencyId) async {
     emit(const AgencyAnalyticsLoading());
     final result = await _loadAnalytics(agencyId);
+    if (isClosed) return;
     switch (result) {
       case Success<AgencyAnalytics>(:final value):
         emit(AgencyAnalyticsLoaded(value));

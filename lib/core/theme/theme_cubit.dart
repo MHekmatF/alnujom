@@ -26,6 +26,7 @@ final class ThemeCubit extends Cubit<AppThemeMode> {
 
   Future<void> initialize() async {
     final result = await _store.readThemeMode();
+    if (isClosed) return;
     final mode = switch (result) {
       Success(:final value) => value ?? AppThemeMode.auto,
       FailureResult() => _warnAndReturnAuto(),

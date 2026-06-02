@@ -81,6 +81,7 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     } else {
       result = await _addFavorite(listingId);
     }
+    if (isClosed) return;
 
     // Revert on failure and surface the error flag so UI can show the
     // `favorite_toggle_failed` snackbar (FR-006).
@@ -108,6 +109,7 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     // Any other state (Authenticated, PendingApproval, Rejected, Suspended)
     // represents a live session — hydrate the set.
     final result = await _loadFavoriteIds();
+    if (isClosed) return;
     if (result is Success<List<String>>) {
       emit(
         FavoritesState(

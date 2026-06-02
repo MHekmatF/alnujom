@@ -34,6 +34,7 @@ class AuditLogCubit extends Cubit<AuditLogState> {
       ),
     );
     final result = await _loadAuditLogPage(limit: _pageSize);
+    if (isClosed) return;
     switch (result) {
       case Success<List<AuditLogEntry>>(:final value):
         emit(
@@ -63,6 +64,7 @@ class AuditLogCubit extends Cubit<AuditLogState> {
       cursor: state.nextCursor,
       limit: _pageSize,
     );
+    if (isClosed) return;
     switch (result) {
       case Success<List<AuditLogEntry>>(:final value):
         emit(
