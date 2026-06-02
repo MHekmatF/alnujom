@@ -51,6 +51,7 @@ import '../../features/admin/agencies/presentation/pages/agency_queue_page.dart'
 import '../../features/notifications/presentation/pages/notification_center_page.dart';
 import '../../features/admin/audit_logs/presentation/pages/audit_logs_viewer_page.dart';
 import '../../features/ads/admin/presentation/pages/ads_list_page.dart';
+import '../../features/settings/admin/presentation/pages/app_settings_editor_page.dart';
 import '../../features/inquiries/presentation/pages/admin_inquiry_oversight_page.dart';
 import '../../features/inquiries/presentation/pages/inquiry_detail_page.dart';
 import '../../features/inquiries/presentation/pages/inquiry_inbox_page.dart';
@@ -138,6 +139,8 @@ abstract final class AppRoutes {
   static const adminAds = '/admin/ads';
   // Phase 22: notification center route (authenticated).
   static const notifications = '/notifications';
+  // Phase 23: admin settings editor route.
+  static const adminSettings = '/admin/settings';
   static const themeGallery = '/_debug/theme-gallery';
   static const debugMoneyFormatter = '/debug/money-formatter';
 
@@ -223,6 +226,8 @@ abstract final class AppRouteNames {
   static const adminAds = 'admin-ads';
   // Phase 22: notification center route name.
   static const notifications = 'notifications';
+  // Phase 23: admin settings editor route name.
+  static const adminSettings = 'admin-settings';
   static const themeGallery = 'theme-gallery';
 }
 
@@ -427,6 +432,14 @@ GoRouter buildAppRouter({
             name: AppRouteNames.adminAds,
             redirect: requireAdsManageRedirect,
             builder: (context, state) => const AdsListPage(),
+          ),
+          // ─── Phase 23 — admin settings editor ───
+          // Gated by `settings.manage` permission (FR-001).
+          GoRoute(
+            path: 'settings',
+            name: AppRouteNames.adminSettings,
+            redirect: requireSettingsManageRedirect,
+            builder: (context, state) => const AppSettingsEditorPage(),
           ),
         ],
       ),

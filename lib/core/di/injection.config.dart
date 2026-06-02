@@ -447,6 +447,8 @@ import '../../features/search/domain/repositories/search_repository.dart'
 import '../../features/search/domain/usecases/search_listings_usecase.dart'
     as _i190;
 import '../../features/search/presentation/bloc/search_bloc.dart' as _i552;
+import '../../features/settings/admin/presentation/bloc/app_settings_editor_cubit.dart'
+    as _i676;
 import '../../features/settings/data/datasources/supabase_app_settings_datasource.dart'
     as _i835;
 import '../../features/settings/data/repositories/app_settings_repository_impl.dart'
@@ -1391,6 +1393,12 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i281.LoadListingDetails>(
     () => _i281.LoadListingDetails(gh<_i895.ListingDetailsRepository>()),
+  );
+  gh.factory<_i676.AppSettingsEditorCubit>(
+    () => _i676.AppSettingsEditorCubit(
+      gh<_i415.LoadAllSettings>(),
+      gh<_i349.UpdateSetting>(),
+    ),
   );
   gh.factory<_i669.LocationsListBloc>(
     () => _i669.LocationsListBloc(gh<_i533.ListGovernorates>()),

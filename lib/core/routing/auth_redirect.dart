@@ -182,6 +182,20 @@ String? requireAdsManageRedirect(BuildContext context, GoRouterState state) {
   return null;
 }
 
+/// Phase 23 — gate for `/admin/settings` route. Requires the data-driven
+/// `settings.manage` permission; redirects to `/admin?denied=settings` otherwise.
+/// Mirrors [requireAuditLogsViewRedirect].
+String? requireSettingsManageRedirect(
+  BuildContext context,
+  GoRouterState state,
+) {
+  final checker = getIt<PermissionChecker>();
+  if (!checker.has(PermissionKeys.settingsManage)) {
+    return '/admin?denied=settings';
+  }
+  return null;
+}
+
 /// Phase 12 / US6 — login-only gate for the publisher moderation history page.
 /// Owner-only access is enforced server-side; no publisher-status check needed.
 String? requirePublisherLoginRedirect(

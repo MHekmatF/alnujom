@@ -104,11 +104,12 @@ const List<DashboardSection> kDashboardSections = [
     route: AppRoutes.adminAds,
     icon: Icons.campaign_outlined,
   ),
-  // ── Settings (coming soon) ─────────────────────────────────────────────────
+  // ── Settings ───────────────────────────────────────────────────────────────
+  // Phase 23: settings editor is now live; flip from comingSoon → enabled.
   DashboardSection(
     labelKey: 'dashboardTileSettings',
     permissionKeys: [PermissionKeys.settingsManage],
-    state: DashboardSectionState.comingSoon,
+    route: AppRoutes.adminSettings,
     icon: Icons.settings_outlined,
   ),
 ];

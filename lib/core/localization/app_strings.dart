@@ -4156,4 +4156,192 @@ final class _DebugAppLocalizations extends AppLocalizations {
     'notification_type_agency_invitation',
     (loc) => loc.notification_type_agency_invitation,
   );
+
+  // ── Phase 23 FA — settings editor ─────────────────────────────────────────
+
+  @override
+  String get settingsEditorTitle =>
+      _resolve('settingsEditorTitle', (loc) => loc.settingsEditorTitle);
+
+  @override
+  String get settingsEditorSaveButton =>
+      _resolve('settingsEditorSaveButton', (loc) => loc.settingsEditorSaveButton);
+
+  @override
+  String get settingsEditorSavedSnackbar => _resolve(
+    'settingsEditorSavedSnackbar',
+    (loc) => loc.settingsEditorSavedSnackbar,
+  );
+
+  @override
+  String get settingsEditorLoadError => _resolve(
+    'settingsEditorLoadError',
+    (loc) => loc.settingsEditorLoadError,
+  );
+
+  @override
+  String get settingsEditorSaveError => _resolve(
+    'settingsEditorSaveError',
+    (loc) => loc.settingsEditorSaveError,
+  );
+
+  @override
+  String get settingsEditorRetry =>
+      _resolve('settingsEditorRetry', (loc) => loc.settingsEditorRetry);
+
+  @override
+  String get settingsEditorSectionGeneral => _resolve(
+    'settingsEditorSectionGeneral',
+    (loc) => loc.settingsEditorSectionGeneral,
+  );
+
+  @override
+  String get settingsEditorSectionListingDefaults => _resolve(
+    'settingsEditorSectionListingDefaults',
+    (loc) => loc.settingsEditorSectionListingDefaults,
+  );
+
+  @override
+  String get settingsEditorSectionMaintenance => _resolve(
+    'settingsEditorSectionMaintenance',
+    (loc) => loc.settingsEditorSectionMaintenance,
+  );
+
+  @override
+  String get settingsEditorSectionSupport => _resolve(
+    'settingsEditorSectionSupport',
+    (loc) => loc.settingsEditorSectionSupport,
+  );
+
+  @override
+  String get settingsEditorSectionLegal => _resolve(
+    'settingsEditorSectionLegal',
+    (loc) => loc.settingsEditorSectionLegal,
+  );
+
+  @override
+  String get settingsEditorDefaultLanguageLabel => _resolve(
+    'settingsEditorDefaultLanguageLabel',
+    (loc) => loc.settingsEditorDefaultLanguageLabel,
+  );
+
+  @override
+  String get settingsEditorDefaultCurrencyLabel => _resolve(
+    'settingsEditorDefaultCurrencyLabel',
+    (loc) => loc.settingsEditorDefaultCurrencyLabel,
+  );
+
+  @override
+  String get settingsEditorDefaultPublisherNameVisibilityLabel => _resolve(
+    'settingsEditorDefaultPublisherNameVisibilityLabel',
+    (loc) => loc.settingsEditorDefaultPublisherNameVisibilityLabel,
+  );
+
+  @override
+  String get settingsEditorDefaultLocationVisibilityLabel => _resolve(
+    'settingsEditorDefaultLocationVisibilityLabel',
+    (loc) => loc.settingsEditorDefaultLocationVisibilityLabel,
+  );
+
+  @override
+  String get settingsEditorMaintenanceToggle => _resolve(
+    'settingsEditorMaintenanceToggle',
+    (loc) => loc.settingsEditorMaintenanceToggle,
+  );
+
+  @override
+  String get settingsEditorMaintenanceMessageArLabel => _resolve(
+    'settingsEditorMaintenanceMessageArLabel',
+    (loc) => loc.settingsEditorMaintenanceMessageArLabel,
+  );
+
+  @override
+  String get settingsEditorMaintenanceMessageEnLabel => _resolve(
+    'settingsEditorMaintenanceMessageEnLabel',
+    (loc) => loc.settingsEditorMaintenanceMessageEnLabel,
+  );
+
+  @override
+  String get settingsEditorSupportPhoneLabel => _resolve(
+    'settingsEditorSupportPhoneLabel',
+    (loc) => loc.settingsEditorSupportPhoneLabel,
+  );
+
+  @override
+  String get settingsEditorSupportWhatsappLabel => _resolve(
+    'settingsEditorSupportWhatsappLabel',
+    (loc) => loc.settingsEditorSupportWhatsappLabel,
+  );
+
+  @override
+  String get settingsEditorSupportEmailLabel => _resolve(
+    'settingsEditorSupportEmailLabel',
+    (loc) => loc.settingsEditorSupportEmailLabel,
+  );
+
+  @override
+  String get settingsEditorTermsUrlLabel => _resolve(
+    'settingsEditorTermsUrlLabel',
+    (loc) => loc.settingsEditorTermsUrlLabel,
+  );
+
+  @override
+  String get settingsEditorPrivacyUrlLabel => _resolve(
+    'settingsEditorPrivacyUrlLabel',
+    (loc) => loc.settingsEditorPrivacyUrlLabel,
+  );
+
+  @override
+  String get settingsEditorUrlValidationError => _resolve(
+    'settingsEditorUrlValidationError',
+    (loc) => loc.settingsEditorUrlValidationError,
+  );
+
+  @override
+  String get settingsEditorSupportAtLeastOneError => _resolve(
+    'settingsEditorSupportAtLeastOneError',
+    (loc) => loc.settingsEditorSupportAtLeastOneError,
+  );
+
+  @override
+  String get settingsEditorLanguageAr => _resolve(
+    'settingsEditorLanguageAr',
+    (loc) => loc.settingsEditorLanguageAr,
+  );
+
+  @override
+  String get settingsEditorLanguageEn => _resolve(
+    'settingsEditorLanguageEn',
+    (loc) => loc.settingsEditorLanguageEn,
+  );
+
+  @override
+  String get settingsEditorVisibilityPublic => _resolve(
+    'settingsEditorVisibilityPublic',
+    (loc) => loc.settingsEditorVisibilityPublic,
+  );
+
+  @override
+  String get settingsEditorVisibilityAdminOnly => _resolve(
+    'settingsEditorVisibilityAdminOnly',
+    (loc) => loc.settingsEditorVisibilityAdminOnly,
+  );
+
+  @override
+  String get settingsEditorLocationVisibilityHidden => _resolve(
+    'settingsEditorLocationVisibilityHidden',
+    (loc) => loc.settingsEditorLocationVisibilityHidden,
+  );
+
+  @override
+  String get settingsEditorLocationVisibilityApproximate => _resolve(
+    'settingsEditorLocationVisibilityApproximate',
+    (loc) => loc.settingsEditorLocationVisibilityApproximate,
+  );
+
+  @override
+  String get settingsEditorLocationVisibilityExact => _resolve(
+    'settingsEditorLocationVisibilityExact',
+    (loc) => loc.settingsEditorLocationVisibilityExact,
+  );
 }
