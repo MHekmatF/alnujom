@@ -447,6 +447,21 @@ import '../../features/search/domain/repositories/search_repository.dart'
 import '../../features/search/domain/usecases/search_listings_usecase.dart'
     as _i190;
 import '../../features/search/presentation/bloc/search_bloc.dart' as _i552;
+import '../../features/settings/admin/presentation/bloc/app_settings_editor_cubit.dart'
+    as _i676;
+import '../../features/settings/data/datasources/supabase_app_settings_datasource.dart'
+    as _i835;
+import '../../features/settings/data/repositories/app_settings_repository_impl.dart'
+    as _i1061;
+import '../../features/settings/domain/repositories/app_settings_repository.dart'
+    as _i673;
+import '../../features/settings/domain/usecases/load_all_settings.dart'
+    as _i415;
+import '../../features/settings/domain/usecases/load_public_settings.dart'
+    as _i838;
+import '../../features/settings/domain/usecases/update_setting.dart' as _i349;
+import '../../features/settings/presentation/bloc/app_settings_cubit.dart'
+    as _i557;
 import '../../features/super_admin/data/datasources/supabase_role_catalog_datasource.dart'
     as _i1064;
 import '../../features/super_admin/data/datasources/supabase_user_search_datasource.dart'
@@ -610,6 +625,9 @@ _i174.GetIt $initGetIt(
   gh.factory<_i713.SupabaseSearchDatasource>(
     () => _i713.SupabaseSearchDatasource(gh<_i454.SupabaseClient>()),
   );
+  gh.factory<_i835.SupabaseAppSettingsDatasource>(
+    () => _i835.SupabaseAppSettingsDatasource(gh<_i454.SupabaseClient>()),
+  );
   gh.lazySingleton<_i881.AuditLogRepository>(
     () => _i373.AuditLogRepositoryImpl(
       gh<_i617.AuditLogsDatasource>(),
@@ -708,6 +726,12 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i808.ReportsRepository>(
     () => _i227.ReportsRepositoryImpl(gh<_i231.SupabaseReportsDatasource>()),
+  );
+  gh.lazySingleton<_i673.AppSettingsRepository>(
+    () => _i1061.AppSettingsRepositoryImpl(
+      gh<_i835.SupabaseAppSettingsDatasource>(),
+      gh<_i354.AppLogger>(),
+    ),
   );
   gh.lazySingleton<_i1006.AgencyRepository>(
     () => _i246.AgencyRepositoryImpl(gh<_i514.SupabaseAgencyDatasource>()),
@@ -841,14 +865,6 @@ _i174.GetIt $initGetIt(
       gh<_i686.LoadAgencyById>(),
       gh<_i552.RespondAgencyInvitation>(),
     ),
-  );
-  gh.lazySingleton<_i787.AuthRepository>(
-    () => _i153.AuthRepositoryImpl(
-      gh<_i76.SupabaseAuthDataSource>(),
-      gh<_i894.ProfileRepository>(),
-      gh<_i354.AppLogger>(),
-    ),
-    dispose: (i) => i.dispose(),
   );
   gh.lazySingleton<_i6.PushTokenRepository>(
     () =>
@@ -1125,18 +1141,6 @@ _i174.GetIt $initGetIt(
       initialLocale,
     ),
   );
-  gh.lazySingleton<_i797.AuthBloc>(
-    () => _i797.AuthBloc(
-      gh<_i787.AuthRepository>(),
-      gh<_i894.ProfileRepository>(),
-      gh<_i650.PermissionChecker>(),
-      gh<_i397.RegisterPushToken>(),
-      gh<_i181.DeregisterPushToken>(),
-      gh<_i563.PushMessagingService>(),
-      gh<_i591.RealtimeSignals>(),
-    ),
-    dispose: (i) => i.dispose(),
-  );
   gh.factory<_i552.SearchBloc>(
     () => _i552.SearchBloc(gh<_i190.SearchListingsUseCase>()),
   );
@@ -1216,12 +1220,31 @@ _i174.GetIt $initGetIt(
       gh<_i941.LoadAssignedRoles>(),
     ),
   );
+  gh.factory<_i415.LoadAllSettings>(
+    () => _i415.LoadAllSettings(gh<_i673.AppSettingsRepository>()),
+  );
+  gh.factory<_i838.LoadPublicSettings>(
+    () => _i838.LoadPublicSettings(gh<_i673.AppSettingsRepository>()),
+  );
+  gh.factory<_i349.UpdateSetting>(
+    () => _i349.UpdateSetting(gh<_i673.AppSettingsRepository>()),
+  );
   gh.factory<_i1073.CityDetailBloc>(
     () => _i1073.CityDetailBloc(
       gh<_i645.LoadCityDetail>(),
       gh<_i441.LoadGovernorateDetail>(),
       gh<_i358.ListAreasForCity>(),
     ),
+  );
+  gh.lazySingleton<_i787.AuthRepository>(
+    () => _i153.AuthRepositoryImpl(
+      gh<_i76.SupabaseAuthDataSource>(),
+      gh<_i894.ProfileRepository>(),
+      gh<_i354.AppLogger>(),
+      gh<_i838.LoadPublicSettings>(),
+      gh<_i505.CurrenciesRepository>(),
+    ),
+    dispose: (i) => i.dispose(),
   );
   gh.lazySingleton<_i558.NotificationBadgeCubit>(
     () => _i558.NotificationBadgeCubit(gh<_i873.LoadUnreadCount>()),
@@ -1275,9 +1298,6 @@ _i174.GetIt $initGetIt(
       gh<_i957.LoadLatestRatesForBase>(),
     ),
   );
-  gh.lazySingleton<_i583.GoRouter>(
-    () => routerModule.router(gh<_i354.AppLogger>(), gh<_i797.AuthBloc>()),
-  );
   gh.factory<_i293.SetExchangeRateBloc>(
     () => _i293.SetExchangeRateBloc(gh<_i488.SetExchangeRate>()),
   );
@@ -1328,14 +1348,8 @@ _i174.GetIt $initGetIt(
   gh.factory<_i949.ExchangeRateHistoryBloc>(
     () => _i949.ExchangeRateHistoryBloc(gh<_i776.ListExchangeRateHistory>()),
   );
-  gh.lazySingleton<_i991.FavoritesCubit>(
-    () => _i991.FavoritesCubit(
-      gh<_i896.LoadFavoriteIds>(),
-      gh<_i705.AddFavorite>(),
-      gh<_i828.RemoveFavorite>(),
-      gh<_i797.AuthBloc>(),
-    ),
-    dispose: (i) => i.dispose(),
+  gh.lazySingleton<_i557.AppSettingsCubit>(
+    () => _i557.AppSettingsCubit(gh<_i838.LoadPublicSettings>()),
   );
   gh.factory<_i66.NotificationsCubit>(
     () => _i66.NotificationsCubit(
@@ -1363,6 +1377,12 @@ _i174.GetIt $initGetIt(
   gh.factory<_i281.LoadListingDetails>(
     () => _i281.LoadListingDetails(gh<_i895.ListingDetailsRepository>()),
   );
+  gh.factory<_i676.AppSettingsEditorCubit>(
+    () => _i676.AppSettingsEditorCubit(
+      gh<_i415.LoadAllSettings>(),
+      gh<_i349.UpdateSetting>(),
+    ),
+  );
   gh.factory<_i669.LocationsListBloc>(
     () => _i669.LocationsListBloc(gh<_i533.ListGovernorates>()),
   );
@@ -1379,12 +1399,6 @@ _i174.GetIt $initGetIt(
   gh.factory<_i916.AgencyQueueBloc>(
     () => _i916.AgencyQueueBloc(gh<_i998.LoadAgencyVerificationQueue>()),
   );
-  gh.factory<_i935.ListingDetailsBloc>(
-    () => _i935.ListingDetailsBloc(
-      gh<_i281.LoadListingDetails>(),
-      gh<_i797.AuthBloc>(),
-    ),
-  );
   gh.factory<_i682.AdsAdminCubit>(
     () => _i682.AdsAdminCubit(
       gh<_i347.LoadAds>(),
@@ -1399,9 +1413,20 @@ _i174.GetIt $initGetIt(
     () => _i980.ReportSubmissionCubit(gh<_i684.SubmitReport>()),
   );
   gh.factory<_i202.HomeBloc>(() => _i202.HomeBloc(gh<_i321.LoadHomeFeed>()));
+  gh.lazySingleton<_i797.AuthBloc>(
+    () => _i797.AuthBloc(
+      gh<_i787.AuthRepository>(),
+      gh<_i894.ProfileRepository>(),
+      gh<_i650.PermissionChecker>(),
+      gh<_i397.RegisterPushToken>(),
+      gh<_i181.DeregisterPushToken>(),
+      gh<_i563.PushMessagingService>(),
+      gh<_i591.RealtimeSignals>(),
+    ),
+    dispose: (i) => i.dispose(),
+  );
   gh.factory<_i315.ListingFormBloc>(
     () => _i315.ListingFormBloc(
-      gh<_i802.LoadOrCreateDraft>(),
       gh<_i874.SaveFormStep>(),
       gh<_i829.SubmitListing>(),
       gh<_i814.DeleteDraft>(),
@@ -1415,6 +1440,25 @@ _i174.GetIt $initGetIt(
       gh<_i732.DeleteMedia>(),
       gh<_i406.LoadMediaForListing>(),
       gh<_i611.LoadMyActiveAgencies>(),
+      gh<_i557.AppSettingsCubit>(),
+    ),
+  );
+  gh.lazySingleton<_i583.GoRouter>(
+    () => routerModule.router(gh<_i354.AppLogger>(), gh<_i797.AuthBloc>()),
+  );
+  gh.lazySingleton<_i991.FavoritesCubit>(
+    () => _i991.FavoritesCubit(
+      gh<_i896.LoadFavoriteIds>(),
+      gh<_i705.AddFavorite>(),
+      gh<_i828.RemoveFavorite>(),
+      gh<_i797.AuthBloc>(),
+    ),
+    dispose: (i) => i.dispose(),
+  );
+  gh.factory<_i935.ListingDetailsBloc>(
+    () => _i935.ListingDetailsBloc(
+      gh<_i281.LoadListingDetails>(),
+      gh<_i797.AuthBloc>(),
     ),
   );
   return getIt;

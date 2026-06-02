@@ -12,6 +12,7 @@ import '../../../../core/errors/result.dart';
 import '../../../../core/validators/video_file_validator.dart';
 import '../../../agency/domain/entities/agency.dart';
 import '../../../agency/domain/usecases/load_my_active_agencies.dart';
+import '../../../settings/presentation/bloc/app_settings_cubit.dart';
 import '../../data/datasources/supabase_listing_media_datasource.dart'
     show MediaDeleteException;
 import '../../domain/entities/listing.dart';
@@ -26,7 +27,6 @@ import '../../domain/usecases/delete_draft.dart';
 import '../../domain/usecases/delete_media.dart';
 import '../../domain/usecases/derive_area_centroid.dart';
 import '../../domain/usecases/load_media_for_listing.dart';
-import '../../domain/usecases/load_or_create_draft.dart';
 import '../../domain/usecases/reorder_media.dart';
 import '../../domain/usecases/save_form_step.dart';
 import '../../domain/usecases/set_main_image.dart';
@@ -41,7 +41,6 @@ import 'listing_form_event.dart';
 @injectable
 class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
   ListingFormBloc(
-    this._loadOrCreateDraft,
     this._saveFormStep,
     this._submitListing,
     this._deleteDraft,
@@ -55,6 +54,7 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
     this._deleteMedia,
     this._loadMediaForListing,
     this._loadMyActiveAgencies,
+    this._appSettingsCubit,
   ) : super(
         const ListingFormState(
           mode: ListingFormMode.create,
@@ -79,7 +79,6 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
     on<MediaUploadDismissed>(_onMediaUploadDismissed);
   }
 
-  final LoadOrCreateDraft _loadOrCreateDraft;
   final SaveFormStep _saveFormStep;
   final SubmitListing _submitListing;
   final DeleteDraft _deleteDraft;
@@ -93,6 +92,11 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
   final DeleteMedia _deleteMedia;
   final LoadMediaForListing _loadMediaForListing;
   final LoadMyActiveAgencies _loadMyActiveAgencies;
+  // Phase 23 (FC / T027) — source of the admin-tuned new-listing visibility
+  // defaults (default_publisher_name_visibility / default_location_visibility).
+  // Holds the already-loaded snapshot (app-start/resume); safe defaults on the
+  // fail-open path. Read-only here.
+  final AppSettingsCubit _appSettingsCubit;
 
   // Phase 11 — lazily-instantiated isolate worker per R-25 (one per BLoC
   // lifecycle, processes images sequentially).
@@ -177,9 +181,17 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
           ),
         );
       } else {
-        final listing = await _loadOrCreateDraft(publisherUserId);
+        // Phase 23 (FC / T027) — distinguish a freshly-inserted draft from an
+        // existing one so the admin-tuned visibility defaults are applied ONLY
+        // to brand-new listings (FR-008, forward-only). An existing draft keeps
+        // its persisted visibility untouched.
+        var listing = await _repository.findDraftForPublisher(publisherUserId);
+        if (listing == null) {
+          final fresh = await _repository.insertDraft(publisherUserId);
+          listing = _applyNewListingVisibilityDefaults(fresh);
+        }
         // Fresh-create path — also load any existing media (empty for new
-        // drafts; non-empty when LoadOrCreateDraft returned an existing draft).
+        // drafts; non-empty when an existing draft was returned).
         List<ListingMedia> media = const <ListingMedia>[];
         try {
           media = await _loadMediaForListing(listingId: listing.id);
@@ -206,9 +218,7 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
   Future<List<Agency>> _loadEligibleAgencies() async {
     final result = await _loadMyActiveAgencies();
     if (result is Success<List<Agency>>) {
-      return result.value
-          .where((a) => a.status.canPublishUnder)
-          .toList();
+      return result.value.where((a) => a.status.canPublishUnder).toList();
     }
     return const <Agency>[];
   }
@@ -826,6 +836,19 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
     _imageWorker?.stop();
     _imageWorker = null;
     return super.close();
+  }
+
+  /// Phase 23 (FC / T027) — pre-selects a brand-new listing's visibility from
+  /// the admin-tuned `app_settings` defaults (FR-008). Applied ONLY to a
+  /// freshly-inserted draft; existing drafts/listings are never touched
+  /// (forward-only). Reads the already-loaded snapshot (safe defaults on the
+  /// fail-open path).
+  Listing _applyNewListingVisibilityDefaults(Listing fresh) {
+    final settings = _appSettingsCubit.current;
+    return fresh.copyWith(
+      locationVisibility: settings.defaultLocationVisibility,
+      contactNameVisibility: settings.defaultPublisherNameVisibility,
+    );
   }
 
   static ListingDetails _ensureDetails(

@@ -8,7 +8,9 @@ import '../../../../core/errors/failure.dart';
 import '../../../../core/errors/result.dart';
 import '../../../../core/logging/app_logger.dart';
 import '../../../../shared/domain/value_objects/phone_number.dart';
+import '../../../currencies/domain/repositories/currencies_repository.dart';
 import '../../../profile/domain/repositories/profile_repository.dart';
+import '../../../settings/domain/usecases/load_public_settings.dart';
 import '../../domain/entities/auth_failure.dart';
 import '../../domain/entities/session.dart';
 import '../../domain/repositories/auth_repository.dart';
@@ -17,7 +19,13 @@ import '../dtos/session_dto.dart';
 
 @LazySingleton(as: AuthRepository)
 class AuthRepositoryImpl implements AuthRepository {
-  AuthRepositoryImpl(this._authDs, this._profileRepository, this._logger) {
+  AuthRepositoryImpl(
+    this._authDs,
+    this._profileRepository,
+    this._logger,
+    this._loadPublicSettings,
+    this._currenciesRepository,
+  ) {
     // Bridge Supabase's auth-state stream into the domain-shaped session stream.
     _sub = _authDs.authStateChanges.listen(
       (state) {
@@ -42,6 +50,10 @@ class AuthRepositoryImpl implements AuthRepository {
   final SupabaseAuthDataSource _authDs;
   final ProfileRepository _profileRepository;
   final AppLogger _logger;
+  // Phase 23 (FC / T026) — registration seeding: read the public settings
+  // snapshot for the new user's default language + display currency (R-203).
+  final LoadPublicSettings _loadPublicSettings;
+  final CurrenciesRepository _currenciesRepository;
 
   final _sessionController = StreamController<Session?>.broadcast();
   StreamSubscription<supabase.AuthState>? _sub;
@@ -90,10 +102,26 @@ class AuthRepositoryImpl implements AuthRepository {
               email: cleanEmail,
             )
             .timeout(const Duration(seconds: 12));
-        // Phase 5 R-11 first-sign-in locale handoff.
+        // Phase 23 (FC / T026) — forward-only new-user seeding (R-203, FR-007).
+        // Seed the new user's locale + display currency from the admin-tuned
+        // app_settings defaults. Fail-open: if the settings fetch fails, fall
+        // back to the device locale (Phase 5 R-11 first-sign-in handoff) and
+        // skip the currency seed. Only runs on this registration path; existing
+        // users are never rewritten.
+        final settingsResult = await _loadPublicSettings();
+        final defaults = switch (settingsResult) {
+          Success(:final value) => value,
+          FailureResult() => null,
+        };
+        final seedLocale = defaults?.defaultLocale ?? deviceLocale;
         await _profileRepository
-            .updateLocale(deviceLocale)
+            .updateLocale(seedLocale)
             .timeout(const Duration(seconds: 8));
+        if (defaults != null) {
+          await _currenciesRepository
+              .writeUserDisplayCurrency(defaults.defaultCurrency)
+              .timeout(const Duration(seconds: 8));
+        }
       } on Object catch (e, st) {
         _logger.warning(
           'Post-register profile fill failed (non-fatal); user is registered.',
