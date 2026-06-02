@@ -1417,5 +1417,15 @@
   "about_privacy": "سياسة الخصوصية",
   "@about_privacy": { "description": "Phase 23 FC — Label for the privacy-policy link (FR-013)." },
   "about_no_info": "لا تتوفر معلومات دعم في الوقت الحالي.",
-  "@about_no_info": { "description": "Phase 23 FC — Empty-state copy when no support channels or legal links are configured." }
+  "@about_no_info": { "description": "Phase 23 FC — Empty-state copy when no support channels or legal links are configured." },
+  "updatePromptTitle": "تحديث متاح",
+  "@updatePromptTitle": { "description": "Phase 24 UP — Title of the in-app update prompt dialog (FR-009)." },
+  "updatePromptBody": "إصدار جديد من النجوم متاح الآن. قم بالتحديث للحصول على أحدث الميزات والتحسينات.",
+  "@updatePromptBody": { "description": "Phase 24 UP — Body text of the update prompt dialog (FR-009)." },
+  "updatePromptUpdate": "تحديث",
+  "@updatePromptUpdate": { "description": "Phase 24 UP — Primary action button label: opens the download URL (FR-009)." },
+  "updatePromptLater": "لاحقاً",
+  "@updatePromptLater": { "description": "Phase 24 UP — Dismiss button label: dismisses the dialog for the current session (FR-009 / R-211)." },
+  "updatePromptReleaseNotesLabel": "الجديد في هذا الإصدار",
+  "@updatePromptReleaseNotesLabel": { "description": "Phase 24 UP — Heading shown above the optional release-note text in the prompt (FR-009)." }
 }
