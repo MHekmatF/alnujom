@@ -447,6 +447,17 @@ import '../../features/search/domain/repositories/search_repository.dart'
 import '../../features/search/domain/usecases/search_listings_usecase.dart'
     as _i190;
 import '../../features/search/presentation/bloc/search_bloc.dart' as _i552;
+import '../../features/settings/data/datasources/supabase_app_settings_datasource.dart'
+    as _i835;
+import '../../features/settings/data/repositories/app_settings_repository_impl.dart'
+    as _i1061;
+import '../../features/settings/domain/repositories/app_settings_repository.dart'
+    as _i673;
+import '../../features/settings/domain/usecases/load_all_settings.dart'
+    as _i415;
+import '../../features/settings/domain/usecases/load_public_settings.dart'
+    as _i838;
+import '../../features/settings/domain/usecases/update_setting.dart' as _i349;
 import '../../features/super_admin/data/datasources/supabase_role_catalog_datasource.dart'
     as _i1064;
 import '../../features/super_admin/data/datasources/supabase_user_search_datasource.dart'
@@ -610,6 +621,9 @@ _i174.GetIt $initGetIt(
   gh.factory<_i713.SupabaseSearchDatasource>(
     () => _i713.SupabaseSearchDatasource(gh<_i454.SupabaseClient>()),
   );
+  gh.factory<_i835.SupabaseAppSettingsDatasource>(
+    () => _i835.SupabaseAppSettingsDatasource(gh<_i454.SupabaseClient>()),
+  );
   gh.lazySingleton<_i881.AuditLogRepository>(
     () => _i373.AuditLogRepositoryImpl(
       gh<_i617.AuditLogsDatasource>(),
@@ -708,6 +722,12 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i808.ReportsRepository>(
     () => _i227.ReportsRepositoryImpl(gh<_i231.SupabaseReportsDatasource>()),
+  );
+  gh.lazySingleton<_i673.AppSettingsRepository>(
+    () => _i1061.AppSettingsRepositoryImpl(
+      gh<_i835.SupabaseAppSettingsDatasource>(),
+      gh<_i354.AppLogger>(),
+    ),
   );
   gh.lazySingleton<_i1006.AgencyRepository>(
     () => _i246.AgencyRepositoryImpl(gh<_i514.SupabaseAgencyDatasource>()),
@@ -1215,6 +1235,15 @@ _i174.GetIt $initGetIt(
       gh<_i281.UpdatePii>(),
       gh<_i941.LoadAssignedRoles>(),
     ),
+  );
+  gh.factory<_i415.LoadAllSettings>(
+    () => _i415.LoadAllSettings(gh<_i673.AppSettingsRepository>()),
+  );
+  gh.factory<_i838.LoadPublicSettings>(
+    () => _i838.LoadPublicSettings(gh<_i673.AppSettingsRepository>()),
+  );
+  gh.factory<_i349.UpdateSetting>(
+    () => _i349.UpdateSetting(gh<_i673.AppSettingsRepository>()),
   );
   gh.factory<_i1073.CityDetailBloc>(
     () => _i1073.CityDetailBloc(
