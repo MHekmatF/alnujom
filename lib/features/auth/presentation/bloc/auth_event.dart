@@ -59,3 +59,12 @@ final class ProfileRefreshed extends AuthEvent {
 final class AppResumedRefresh extends AuthEvent {
   const AppResumedRefresh();
 }
+
+/// Phase 22 (T040): the signed-in user's `user_roles` changed (live grant/revoke
+/// delivered via the Realtime channel). Triggers a permission-cache refresh AND a
+/// state re-emit so permission-gated widgets rebuild — the cache update alone is
+/// invisible to the UI because [PermissionChecker] is not [Listenable] and
+/// [AuthState] carries no permission data (FR-017/SC-005).
+final class PermissionsChanged extends AuthEvent {
+  const PermissionsChanged();
+}

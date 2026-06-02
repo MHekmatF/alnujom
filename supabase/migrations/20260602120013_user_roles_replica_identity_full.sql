@@ -1,0 +1,11 @@
+-- Phase 22 (spec/022-notifications-realtime) — Migration 13 (post-QA fix).
+-- The user_roles Realtime subscription (4th PermissionChecker observation point, T040)
+-- filters server-side on user_id. With REPLICA IDENTITY DEFAULT the WAL old-row for a
+-- DELETE/UPDATE carries only the PK, so the user_id filter can NEVER match a role REVOKE
+-- (or role change) -> the event is silently dropped -> live permission REVOKE did not reach
+-- the client (SC-005/FR-017 half-broken; grants worked because INSERT carries the full new row).
+-- FULL makes the entire old row (incl. user_id) available so the filter matches DELETE/UPDATE.
+-- listings/reports stay DEFAULT -- their dashboard subscription is UNFILTERED, so DELETE events
+-- (PK only) still deliver and trigger a debounced refetch. Idempotent (re-runnable).
+-- Found in on-device QA (2026-06-02): live role GRANT updated the UI but REVOKE did not.
+alter table public.user_roles replica identity full;

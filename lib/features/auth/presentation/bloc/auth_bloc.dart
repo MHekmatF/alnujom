@@ -42,6 +42,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> with WidgetsBindingObserver {
     on<SessionRefreshed>(_onSessionRefreshed);
     on<ProfileRefreshed>(_onProfileRefreshed);
     on<AppResumedRefresh>(_onAppResumedRefresh);
+    on<PermissionsChanged>(_onPermissionsChanged);
 
     _sessionSub = _authRepository.sessionStream.listen(
       (session) => add(SessionRefreshed(session)),
@@ -207,9 +208,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> with WidgetsBindingObserver {
     // 4th PermissionChecker observation point: live role changes for THIS user.
     _userRolesChannel = _realtimeSignals.subscribeUserRoles(
       userId: userId,
-      onChange: () => unawaited(_permissionChecker.refresh()),
+      // Route through an event so the handler can refresh the cache AND re-emit a
+      // state — permission-gated BlocSelector widgets only rebuild on an AuthBloc
+      // emit, so a silent cache refresh alone never reaches the UI (T040).
+      onChange: () => add(const PermissionsChanged()),
       // Reconcile on (re)subscribe so a change missed during a drop self-heals.
-      onResubscribe: () => unawaited(_permissionChecker.refresh()),
+      onResubscribe: () => add(const PermissionsChanged()),
     );
 
     // Register this device's push token (no-op under the no-op adapter — FR-013).
@@ -257,6 +261,30 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> with WidgetsBindingObserver {
       emit(await _stateFromProfile(result.value));
     }
   }
+
+  /// 4th observation-point follow-through (T040): a live `user_roles` change
+  /// refreshes the permission cache AND re-emits the current profile's state so
+  /// permission-gated widgets (a `BlocSelector` on [AuthState]) rebuild. The
+  /// cache update alone is invisible to the UI — [PermissionChecker] is not
+  /// [Listenable] and [AuthState] carries no permission data (FR-017/SC-005).
+  Future<void> _onPermissionsChanged(
+    PermissionsChanged event,
+    Emitter<AuthState> emit,
+  ) async {
+    final profile = _currentProfile;
+    if (profile == null) return; // not in a profile-bearing state
+    await _permissionChecker.refresh();
+    emit(await _stateFromProfile(profile));
+  }
+
+  /// The profile carried by the current state, or null for states without one.
+  Profile? get _currentProfile => switch (state) {
+    Authenticated(:final profile) => profile,
+    PendingApproval(:final profile) => profile,
+    Rejected(:final profile) => profile,
+    Suspended(:final profile) => profile,
+    _ => null,
+  };
 
   Future<AuthState> _stateFromProfile(Profile profile) async {
     switch (profile.accountStatus) {
