@@ -21,16 +21,30 @@ about/support surface. It holds **app-wide** settings only — per-user preferen
 
 ## RLS posture
 
-RLS is **enabled**. A single SELECT policy `app_settings_select` enforces per-key read:
+RLS is **enabled**. Per-key read is enforced by **two permissive SELECT policies**
+(OR-combined by Postgres), introduced by migration `…019`:
 
 ```sql
-USING (is_public OR public.current_user_has_permission('settings.manage'))
+-- (1) everyone (anon + authenticated), no permission-function call:
+CREATE POLICY app_settings_select_public ... USING (is_public);
+-- (2) authenticated only:
+CREATE POLICY app_settings_select_admin  ... TO authenticated
+  USING (public.current_user_has_permission('settings.manage'));
 ```
 
-- A non-admin client (including anonymous) reads **only `is_public = true` rows**; a
-  sensitive (`is_public = false`) row is invisible to it at the wire level.
-- A `settings.manage` holder reads **all** rows.
+- A non-admin client (including anonymous) reads **only `is_public = true` rows** via
+  policy (1); a sensitive (`is_public = false`) row is invisible to it at the wire level.
+- A `settings.manage` holder reads **all** rows (policy (1) ∪ policy (2)).
 - `GRANT SELECT TO anon, authenticated`; `REVOKE ALL FROM PUBLIC` (hardening …017).
+
+> **Why two policies, not one** (`…019` fix): the original single policy
+> `USING (is_public OR current_user_has_permission('settings.manage'))` was granted to
+> PUBLIC. But `current_user_has_permission` is `SECURITY DEFINER` with EXECUTE granted to
+> `authenticated`/`service_role` only (Phase 6/22 hardening revoked it from anon/PUBLIC).
+> Postgres does not short-circuit `is_public OR f()` past the function's EXECUTE-privilege
+> check, so a logged-out (anon) app session loading public settings failed with
+> `42501: permission denied for function current_user_has_permission`. Splitting keeps the
+> predicate `authenticated`-only — matching every other policy that references it.
 
 There are **no** INSERT / UPDATE / DELETE policies by design. All direct client writes are
 REVOKEd from `anon` and `authenticated`. The **only** mutation path is the
@@ -94,9 +108,10 @@ All keys are seeded `is_public = true`. There is **no `supported_currencies` key
   deactivated in Phase 9, an already-stored default is not auto-corrected.
 - **Sensitive keys**: the `is_public` column exists for forward use, but **no
   `is_public = false` key is seeded in v1** (R-197). The SELECT policy already handles them.
-- **Idempotency**: all four migrations are safe to re-apply (the Supabase MCP
-  `apply_migration` re-runs SQL on a name collision): `CREATE TABLE IF NOT EXISTS`,
-  `CREATE OR REPLACE FUNCTION`, `DROP TRIGGER/POLICY IF EXISTS`, seed `ON CONFLICT DO NOTHING`.
+- **Idempotency**: all Phase 23 migrations (`…014`–`…019`) are safe to re-apply (the
+  Supabase MCP `apply_migration` re-runs SQL on a name collision): `CREATE TABLE IF NOT
+  EXISTS`, `CREATE OR REPLACE FUNCTION`, `DROP TRIGGER/POLICY IF EXISTS`, seed `ON CONFLICT
+  DO NOTHING`, `CREATE INDEX IF NOT EXISTS` (…018 FK index), policy split (…019).
 - **Reuses, never redefines**: `set_updated_at()` (Phase 4), `current_user_has_permission()`
   (Phase 6), and `log_audit()` (Phase 4). No new permission key (reuses `settings.manage`),
   no new extension, no new dependency.
