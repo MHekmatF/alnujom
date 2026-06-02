@@ -13,6 +13,18 @@ if (file("google-services.json").exists()) {
     apply(plugin = "com.google.gms.google-services")
 }
 
+// Phase 24 RB — Fail-closed release signing (R-213, FR-003).
+// Reads android/key.properties (gitignored; keystore stored outside the repo).
+// If the file is absent the release build FAILS — there is NO debug-signed fallback.
+// (Mirrors the existing google-services.json conditional-on-gitignored-file pattern above,
+// but inverted: absent key.properties is an ERROR, not a degraded-mode path.)
+val keystorePropertiesFile = rootProject.file("app/key.properties")
+val keystoreProperties = java.util.Properties().also { props ->
+    if (keystorePropertiesFile.exists()) {
+        keystorePropertiesFile.inputStream().use { props.load(it) }
+    }
+}
+
 android {
     namespace = "com.alnujom.app"
     compileSdk = flutter.compileSdkVersion
@@ -35,11 +47,29 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("release") {
+            // Fail closed: each property access throws if key.properties is absent
+            // or the key is missing — the release build will not proceed unsigned.
+            storeFile = file(
+                keystoreProperties.getProperty("storeFile")
+                    ?: error("Release signing: 'storeFile' not found in android/key.properties")
+            )
+            storePassword = keystoreProperties.getProperty("storePassword")
+                ?: error("Release signing: 'storePassword' not found in android/key.properties")
+            keyAlias = keystoreProperties.getProperty("keyAlias")
+                ?: error("Release signing: 'keyAlias' not found in android/key.properties")
+            keyPassword = keystoreProperties.getProperty("keyPassword")
+                ?: error("Release signing: 'keyPassword' not found in android/key.properties")
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            // Phase 24 RB: fail-closed signing — no debug fallback (R-213, FR-003).
+            // A release build WITHOUT a valid android/key.properties (and keystore)
+            // will fail at configuration time (see signingConfigs above).
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 }
