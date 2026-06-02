@@ -48,6 +48,7 @@ import '../../features/agency/presentation/pages/agency_verification_page.dart';
 import '../../features/agency/presentation/pages/agency_edit_profile_page.dart';
 import '../../features/agency/domain/entities/agency.dart';
 import '../../features/admin/agencies/presentation/pages/agency_queue_page.dart';
+import '../../features/notifications/presentation/pages/notification_center_page.dart';
 import '../../features/admin/audit_logs/presentation/pages/audit_logs_viewer_page.dart';
 import '../../features/ads/admin/presentation/pages/ads_list_page.dart';
 import '../../features/inquiries/presentation/pages/admin_inquiry_oversight_page.dart';
@@ -135,6 +136,8 @@ abstract final class AppRoutes {
   static const adminAuditLogs = '/admin/audit-logs';
   // Phase 21: admin ads CRUD surface route.
   static const adminAds = '/admin/ads';
+  // Phase 22: notification center route (authenticated).
+  static const notifications = '/notifications';
   static const themeGallery = '/_debug/theme-gallery';
   static const debugMoneyFormatter = '/debug/money-formatter';
 
@@ -218,6 +221,8 @@ abstract final class AppRouteNames {
   static const adminAuditLogs = 'admin-audit-logs';
   // Phase 21: admin ads CRUD surface route name.
   static const adminAds = 'admin-ads';
+  // Phase 22: notification center route name.
+  static const notifications = 'notifications';
   static const themeGallery = 'theme-gallery';
 }
 
@@ -635,6 +640,16 @@ GoRouter buildAppRouter({
         name: AppRouteNames.agencyProfile,
         builder: (context, state) =>
             AgencyProfilePage(agencyId: state.pathParameters['id']!),
+      ),
+
+      // ─── Phase 22 — notification center ───
+      // Requires sign-in; anonymous deep-links redirect to /login (FR-006).
+      GoRoute(
+        path: AppRoutes.notifications,
+        name: AppRouteNames.notifications,
+        redirect: (context, state) =>
+            authBloc.state is Unauthenticated ? AppRoutes.login : null,
+        builder: (context, state) => const NotificationCenterPage(),
       ),
 
       if (kDesignToolsEnabled)

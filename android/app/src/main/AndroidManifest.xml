@@ -5,6 +5,9 @@
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- Phase 22: Android 13+ (API 33) requires this for the runtime push-notification prompt
+         and to display FCM banners; harmless on older APIs. App still builds/runs without push. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <application
         android:label="alnujom"
         android:name="${applicationName}"
@@ -36,6 +39,12 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- Phase 22: FCM default notification channel for Android 8.0+.
+             Required by firebase_messaging for background messages.
+             The app builds and runs without google-services.json (SC-003). -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="alnujom_notifications" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
