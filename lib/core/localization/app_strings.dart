@@ -4156,4 +4156,61 @@ final class _DebugAppLocalizations extends AppLocalizations {
     'notification_type_agency_invitation',
     (loc) => loc.notification_type_agency_invitation,
   );
+
+  // ─── Phase 23 FC — maintenance gate + about/support ───
+  @override
+  String get maintenance_title =>
+      _resolve('maintenance_title', (loc) => loc.maintenance_title);
+
+  @override
+  String get maintenance_default_message => _resolve(
+    'maintenance_default_message',
+    (loc) => loc.maintenance_default_message,
+  );
+
+  @override
+  String get maintenance_retry =>
+      _resolve('maintenance_retry', (loc) => loc.maintenance_retry);
+
+  @override
+  String get maintenance_support_heading => _resolve(
+    'maintenance_support_heading',
+    (loc) => loc.maintenance_support_heading,
+  );
+
+  @override
+  String get support_channel_phone =>
+      _resolve('support_channel_phone', (loc) => loc.support_channel_phone);
+
+  @override
+  String get support_channel_whatsapp => _resolve(
+    'support_channel_whatsapp',
+    (loc) => loc.support_channel_whatsapp,
+  );
+
+  @override
+  String get support_channel_email =>
+      _resolve('support_channel_email', (loc) => loc.support_channel_email);
+
+  @override
+  String get about_title => _resolve('about_title', (loc) => loc.about_title);
+
+  @override
+  String get about_support_heading =>
+      _resolve('about_support_heading', (loc) => loc.about_support_heading);
+
+  @override
+  String get about_legal_heading =>
+      _resolve('about_legal_heading', (loc) => loc.about_legal_heading);
+
+  @override
+  String get about_terms => _resolve('about_terms', (loc) => loc.about_terms);
+
+  @override
+  String get about_privacy =>
+      _resolve('about_privacy', (loc) => loc.about_privacy);
+
+  @override
+  String get about_no_info =>
+      _resolve('about_no_info', (loc) => loc.about_no_info);
 }
