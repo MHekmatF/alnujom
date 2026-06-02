@@ -17,6 +17,14 @@ import '../bloc/app_settings_cubit.dart';
 ///   who flipped it on is never locked out). This is the ONLY bypass.
 /// - maintenance ON + anyone else (incl. anonymous) → [maintenanceRoute].
 ///
+/// INVARIANT 1b — the bypass requires being AUTHENTICATED (permissions resolve
+/// from the signed-in user), so the staff-authentication routes
+/// ([_maintenanceExemptPaths]) stay reachable while maintenance is active.
+/// Otherwise an operator who is logged out (or on a fresh device) can never
+/// reach `/login` to sign in and pass the gate — a permanent lockout. After
+/// signing in, the gate re-evaluates: admins bypass, everyone else is sent to
+/// the maintenance screen. (Found in Phase-23 on-device QA.)
+///
 /// INVARIANT 2 — fail-open: when the settings fetch failed, the cubit serves
 /// [AppSettings.safeDefaults] (maintenance OFF), so `maintenanceActive` is
 /// `false` and this returns `null`. A fetch error never produces a redirect.
@@ -32,11 +40,22 @@ String? maintenanceRedirect(String currentPath) {
     return null;
   }
 
-  // Already on the maintenance screen — do not redirect onto itself.
-  if (currentPath == maintenanceRoute) return null;
+  // The maintenance screen itself, and the staff-auth routes, stay reachable
+  // (avoid a redirect loop on the former; avoid a lockout on the latter).
+  if (currentPath == maintenanceRoute ||
+      _maintenanceExemptPaths.contains(currentPath)) {
+    return null;
+  }
 
   return maintenanceRoute;
 }
 
 /// The route path for the full-screen maintenance gate.
 const String maintenanceRoute = '/maintenance';
+
+/// Routes that remain reachable while maintenance is active so an operator can
+/// authenticate and then pass the `settings.manage` bypass (INVARIANT 1b).
+/// `/login` + `/reset-password` cover sign-in and credential recovery; new-user
+/// `/register` is intentionally NOT here (a brand-new account can never hold
+/// `settings.manage`, so it should see the maintenance screen like any visitor).
+const Set<String> _maintenanceExemptPaths = {'/login', '/reset-password'};

@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/di/injection.dart';
+import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../domain/entities/support_contact.dart';
 import '../bloc/app_settings_cubit.dart';
 import '../widgets/support_contact_row.dart';
@@ -35,6 +40,13 @@ class MaintenanceScreen extends StatelessWidget {
             ? customMessage
             : l10n.maintenance_default_message;
         final isRetrying = state.status == AppSettingsStatus.loading;
+        // Staff-sign-in affordance: only the `settings.manage` bypass gets past
+        // the gate, and that requires being signed in. A logged-out operator
+        // landing here needs a way to reach /login (which the gate keeps
+        // reachable during maintenance — see maintenance_gate.dart).
+        final authState = getIt<AuthBloc>().state;
+        final showSignIn =
+            authState is Unauthenticated || authState is AuthError;
 
         return Scaffold(
           body: SafeArea(
@@ -78,6 +90,14 @@ class MaintenanceScreen extends StatelessWidget {
                           : const Icon(Icons.refresh),
                       label: Text(l10n.maintenance_retry),
                     ),
+                    if (showSignIn) ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      TextButton.icon(
+                        onPressed: () => context.go(AppRoutes.login),
+                        icon: const Icon(Icons.login),
+                        label: Text(l10n.auth_required_sign_in_action),
+                      ),
+                    ],
                     if (contact.hasAny) ...[
                       const SizedBox(height: AppSpacing.xl),
                       Divider(color: theme.colorScheme.outlineVariant),
