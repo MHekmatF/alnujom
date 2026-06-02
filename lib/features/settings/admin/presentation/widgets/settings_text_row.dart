@@ -1,0 +1,123 @@
+// Phase 23 (spec/023-app-settings) — T016
+// SettingsTextRow: a validated text field + Save button row.
+// Used for support_contact channels, terms_url, privacy_url, and bilingual
+// maintenance messages.
+// Constitution IX: zero Supabase imports.
+import 'package:flutter/material.dart';
+
+import '../../../../../../core/theme/spacing.dart';
+
+/// A single-row validated text field with an inline Save button.
+///
+/// [label]         — localised field label.
+/// [initialValue]  — the current persisted value.
+/// [isSaving]      — shows a spinner in place of the Save button while saving.
+/// [onSave]        — called with the new value string; must return null on
+///                   success or an error message string on failure.
+/// [keyboardType]  — optional keyboard type (e.g. emailAddress, url).
+/// [maxLines]      — optional maximum line count (default 1).
+class SettingsTextRow extends StatefulWidget {
+  const SettingsTextRow({
+    super.key,
+    required this.label,
+    required this.initialValue,
+    required this.isSaving,
+    required this.onSave,
+    this.keyboardType,
+    this.maxLines = 1,
+    this.saveLabel = 'Save',
+  });
+
+  final String label;
+  final String initialValue;
+  final bool isSaving;
+  final Future<String?> Function(String) onSave;
+  final TextInputType? keyboardType;
+  final int maxLines;
+  final String saveLabel;
+
+  @override
+  State<SettingsTextRow> createState() => _SettingsTextRowState();
+}
+
+class _SettingsTextRowState extends State<SettingsTextRow> {
+  late final TextEditingController _controller;
+  final _formKey = GlobalKey<FormState>();
+  String? _errorText;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialValue);
+  }
+
+  @override
+  void didUpdateWidget(SettingsTextRow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Sync if the persisted value changed from outside (e.g. after reload).
+    if (oldWidget.initialValue != widget.initialValue &&
+        _controller.text == oldWidget.initialValue) {
+      _controller.text = widget.initialValue;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleSave() async {
+    // Clear previous remote error on re-submit.
+    setState(() => _errorText = null);
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+
+    final error = await widget.onSave(_controller.text.trim());
+    if (error != null && mounted) {
+      setState(() => _errorText = error);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+      child: Form(
+        key: _formKey,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: _controller,
+                enabled: !widget.isSaving,
+                keyboardType: widget.keyboardType,
+                maxLines: widget.maxLines,
+                decoration: InputDecoration(
+                  labelText: widget.label,
+                  border: const OutlineInputBorder(),
+                  isDense: true,
+                  errorText: _errorText,
+                ),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            widget.isSaving
+                ? const Padding(
+                    padding: EdgeInsets.only(top: AppSpacing.xs),
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  )
+                : TextButton(
+                    onPressed: _handleSave,
+                    child: Text(widget.saveLabel),
+                  ),
+          ],
+        ),
+      ),
+    );
+  }
+}
