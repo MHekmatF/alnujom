@@ -12,12 +12,48 @@ import 'core/theme/theme_cubit.dart';
 import 'debug/palette_tester.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/notifications/presentation/widgets/notification_push_listener.dart';
+import 'features/settings/presentation/bloc/app_settings_cubit.dart';
 import 'l10n/app_localizations.dart';
 
-class App extends StatelessWidget {
+class App extends StatefulWidget {
   const App({super.key, this.initialLocale = LocaleCubit.defaultLocale});
 
   final Locale initialLocale;
+
+  @override
+  State<App> createState() => _AppState();
+}
+
+class _AppState extends State<App> with WidgetsBindingObserver {
+  // Phase 23 (FC / T025) — the singleton settings cubit. Fetched on app-start
+  // (initState) and re-fetched on foreground-resume so the maintenance gate +
+  // about surface react to admin changes (fetch-on-load + foreground-resume;
+  // NOT Realtime — R-201). The same singleton instance is read synchronously
+  // by the global redirect via getIt<AppSettingsCubit>().
+  late final AppSettingsCubit _appSettingsCubit;
+
+  @override
+  void initState() {
+    super.initState();
+    _appSettingsCubit = getIt<AppSettingsCubit>();
+    WidgetsBinding.instance.addObserver(this);
+    // Initial load (fail-open on failure — never blocks app start).
+    _appSettingsCubit.load();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      _appSettingsCubit.load();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,9 +66,10 @@ class App extends StatelessWidget {
           create: (_) => getIt<PaletteCubit>()..initialize(),
         ),
         BlocProvider<LocaleCubit>(
-          create: (_) => getIt<LocaleCubit>(param1: initialLocale),
+          create: (_) => getIt<LocaleCubit>(param1: widget.initialLocale),
         ),
         BlocProvider<AuthBloc>.value(value: getIt<AuthBloc>()),
+        BlocProvider<AppSettingsCubit>.value(value: _appSettingsCubit),
       ],
       child: BlocBuilder<ThemeCubit, AppThemeMode>(
         builder: (context, appThemeMode) {

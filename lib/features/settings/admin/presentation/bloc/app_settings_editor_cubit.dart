@@ -72,10 +72,10 @@ class AppSettingsEditorLoaded extends AppSettingsEditorState {
     return AppSettingsEditorLoaded(
       settings: settings ?? this.settings,
       savingKey: clearSavingKey ? null : (savingKey ?? this.savingKey),
-      lastSavedKey:
-          clearLastSavedKey ? null : (lastSavedKey ?? this.lastSavedKey),
-      saveFailure:
-          clearSaveFailure ? null : (saveFailure ?? this.saveFailure),
+      lastSavedKey: clearLastSavedKey
+          ? null
+          : (lastSavedKey ?? this.lastSavedKey),
+      saveFailure: clearSaveFailure ? null : (saveFailure ?? this.saveFailure),
     );
   }
 
@@ -97,10 +97,8 @@ class AppSettingsEditorError extends AppSettingsEditorState {
 
 @injectable
 class AppSettingsEditorCubit extends Cubit<AppSettingsEditorState> {
-  AppSettingsEditorCubit(
-    this._loadAllSettings,
-    this._updateSetting,
-  ) : super(const AppSettingsEditorLoading());
+  AppSettingsEditorCubit(this._loadAllSettings, this._updateSetting)
+    : super(const AppSettingsEditorLoading());
 
   final LoadAllSettings _loadAllSettings;
   final UpdateSetting _updateSetting;
@@ -132,11 +130,13 @@ class AppSettingsEditorCubit extends Cubit<AppSettingsEditorState> {
     final current = state;
     if (current is! AppSettingsEditorLoaded) return null;
 
-    emit(current.copyWith(
-      savingKey: key,
-      clearSaveFailure: true,
-      clearLastSavedKey: true,
-    ));
+    emit(
+      current.copyWith(
+        savingKey: key,
+        clearSaveFailure: true,
+        clearLastSavedKey: true,
+      ),
+    );
 
     final result = await _updateSetting(key, value);
     switch (result) {
@@ -146,17 +146,10 @@ class AppSettingsEditorCubit extends Cubit<AppSettingsEditorState> {
           for (final s in current.settings)
             if (s.key == value.key) value else s,
         ];
-        emit(
-          AppSettingsEditorLoaded(
-            settings: updated,
-            lastSavedKey: key,
-          ),
-        );
+        emit(AppSettingsEditorLoaded(settings: updated, lastSavedKey: key));
         return null;
       case FailureResult<AppSetting>(:final failure):
-        emit(
-          current.copyWith(clearSavingKey: true, saveFailure: failure),
-        );
+        emit(current.copyWith(clearSavingKey: true, saveFailure: failure));
         return failure.message;
     }
   }

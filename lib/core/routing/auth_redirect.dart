@@ -31,6 +31,25 @@ class AuthBlocListenable extends ChangeNotifier {
   }
 }
 
+/// Phase 23 (FC) — a [ChangeNotifier] that fires on every emission of an
+/// arbitrary [Stream]. Merged into [GoRouter.refreshListenable] so the router
+/// re-evaluates the maintenance gate when the [AppSettingsCubit] state changes
+/// (e.g. maintenance flips on/off after a foreground-resume fetch), navigating
+/// gated users to — or away from — the maintenance screen automatically.
+class StreamRefreshListenable extends ChangeNotifier {
+  StreamRefreshListenable(Stream<dynamic> stream) {
+    _sub = stream.listen((_) => notifyListeners());
+  }
+
+  late final StreamSubscription<dynamic> _sub;
+
+  @override
+  void dispose() {
+    _sub.cancel();
+    super.dispose();
+  }
+}
+
 /// go_router redirect function driven by [AuthBloc] state.
 ///
 /// Called on every navigation. Returns the redirect path or null (no redirect).
@@ -57,7 +76,9 @@ const _authOnlyPaths = {'/login', '/register', '/reset-password'};
 // Phase 13 FR-008 + FR-010: `/` (HomePage) and `/listings/:id`
 // (ListingDetailsPage) are anonymous-readable per US1/US2/US4. The `/listings/`
 // prefix check covers the deep-link entry case per Q4=D.
-const _publicPaths = {'/', '/onboarding', '/splash'};
+// Phase 23 FC: `/maintenance` (the gate target) and `/about` (the public
+// about/support surface) are anonymous-readable — never bounce them to /login.
+const _publicPaths = {'/', '/onboarding', '/splash', '/maintenance', '/about'};
 
 String? _redirectIfProtected(String path) {
   if (_authOnlyPaths.contains(path) || _publicPaths.contains(path)) return null;

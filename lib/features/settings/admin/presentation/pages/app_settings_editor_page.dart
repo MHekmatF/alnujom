@@ -51,9 +51,7 @@ class _AppSettingsEditorView extends StatelessWidget {
             if (state.saveFailure != null) {
               ScaffoldMessenger.of(ctx).showSnackBar(
                 SnackBar(
-                  content: Text(
-                    '${l10n.settingsEditorSaveError}: ${state.saveFailure!.message}',
-                  ),
+                  content: Text(l10n.settingsEditorSaveError),
                   backgroundColor: Theme.of(ctx).colorScheme.error,
                 ),
               );
@@ -72,8 +70,7 @@ class _AppSettingsEditorView extends StatelessWidget {
                   Text(l10n.settingsEditorLoadError),
                   const SizedBox(height: AppSpacing.md),
                   FilledButton(
-                    onPressed: () =>
-                        ctx.read<AppSettingsEditorCubit>().load(),
+                    onPressed: () => ctx.read<AppSettingsEditorCubit>().load(),
                     child: Text(l10n.settingsEditorRetry),
                   ),
                 ],
@@ -115,7 +112,11 @@ class _SettingsForm extends StatelessWidget {
 
           // ── Listing Defaults ───────────────────────────────────────────────
           SettingsSectionHeader(l10n.settingsEditorSectionListingDefaults),
-          _PublisherNameVisibilityPicker(state: state, l10n: l10n, cubit: cubit),
+          _PublisherNameVisibilityPicker(
+            state: state,
+            l10n: l10n,
+            cubit: cubit,
+          ),
           const SizedBox(height: AppSpacing.sm),
           _LocationVisibilityPicker(state: state, l10n: l10n, cubit: cubit),
 
@@ -233,18 +234,15 @@ class _CurrencyPickerState extends State<_CurrencyPicker> {
     final currentValue = setting?.value is String
         ? setting!.value as String
         : null;
-    final isSaving =
-        widget.state.savingKey == AppSettingKey.defaultCurrency;
+    final isSaving = widget.state.savingKey == AppSettingKey.defaultCurrency;
     final currencies = _currencies ?? [];
     // Locale for currency name — use current context locale.
     final locale = Localizations.localeOf(context);
 
     final items = currencies
         .map(
-          (c) => (
-            value: c.code,
-            label: '${c.localizedName(locale)} (${c.code})',
-          ),
+          (c) =>
+              (value: c.code, label: '${c.localizedName(locale)} (${c.code})'),
         )
         .toList();
 
@@ -283,8 +281,9 @@ class _PublisherNameVisibilityPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final setting =
-        state.settingFor(AppSettingKey.defaultPublisherNameVisibility);
+    final setting = state.settingFor(
+      AppSettingKey.defaultPublisherNameVisibility,
+    );
     final currentValue = setting?.value is String
         ? setting!.value as String
         : ContactNameVisibility.public.name;
@@ -307,10 +306,7 @@ class _PublisherNameVisibilityPicker extends StatelessWidget {
       ],
       onSave: (newValue) {
         if (newValue != null) {
-          cubit.save(
-            AppSettingKey.defaultPublisherNameVisibility,
-            newValue,
-          );
+          cubit.save(AppSettingKey.defaultPublisherNameVisibility, newValue);
         }
       },
     );
@@ -332,13 +328,11 @@ class _LocationVisibilityPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final setting =
-        state.settingFor(AppSettingKey.defaultLocationVisibility);
+    final setting = state.settingFor(AppSettingKey.defaultLocationVisibility);
     final currentValue = setting?.value is String
         ? setting!.value as String
         : LocationVisibility.approximate.name;
-    final isSaving =
-        state.savingKey == AppSettingKey.defaultLocationVisibility;
+    final isSaving = state.savingKey == AppSettingKey.defaultLocationVisibility;
 
     return SettingsDropdownRow(
       label: l10n.settingsEditorDefaultLocationVisibilityLabel,
@@ -389,7 +383,10 @@ class _MaintenanceModeSection extends StatelessWidget {
     if (setting?.value is Map) {
       return Map<String, dynamic>.from(setting!.value as Map);
     }
-    return {'on': false, 'message': <String, dynamic>{'ar': '', 'en': ''}};
+    return {
+      'on': false,
+      'message': <String, dynamic>{'ar': '', 'en': ''},
+    };
   }
 
   @override
@@ -397,8 +394,12 @@ class _MaintenanceModeSection extends StatelessWidget {
     final currentMap = _currentMap();
     final isOn = currentMap['on'] as bool? ?? false;
     final messageMap = currentMap['message'];
-    final messageAr = messageMap is Map ? (messageMap['ar'] as String? ?? '') : '';
-    final messageEn = messageMap is Map ? (messageMap['en'] as String? ?? '') : '';
+    final messageAr = messageMap is Map
+        ? (messageMap['ar'] as String? ?? '')
+        : '';
+    final messageEn = messageMap is Map
+        ? (messageMap['en'] as String? ?? '')
+        : '';
     final isSaving = state.savingKey == AppSettingKey.maintenanceMode;
 
     return Column(
@@ -409,10 +410,7 @@ class _MaintenanceModeSection extends StatelessWidget {
           value: isOn,
           isSaving: isSaving,
           onChanged: (newValue) {
-            final newMap = {
-              ...currentMap,
-              'on': newValue,
-            };
+            final newMap = {...currentMap, 'on': newValue};
             cubit.save(AppSettingKey.maintenanceMode, newMap);
           },
         ),
@@ -425,10 +423,7 @@ class _MaintenanceModeSection extends StatelessWidget {
           onSave: (newText) async {
             final newMap = {
               ...currentMap,
-              'message': {
-                'ar': newText,
-                'en': messageEn,
-              },
+              'message': {'ar': newText, 'en': messageEn},
             };
             return cubit.save(AppSettingKey.maintenanceMode, newMap);
           },
@@ -442,10 +437,7 @@ class _MaintenanceModeSection extends StatelessWidget {
           onSave: (newText) async {
             final newMap = {
               ...currentMap,
-              'message': {
-                'ar': messageAr,
-                'en': newText,
-              },
+              'message': {'ar': messageAr, 'en': newText},
             };
             return cubit.save(AppSettingKey.maintenanceMode, newMap);
           },

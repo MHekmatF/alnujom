@@ -66,7 +66,8 @@ class AppSettings {
   final String? privacyUrl;
 
   @override
-  String toString() => 'AppSettings('
+  String toString() =>
+      'AppSettings('
       'defaultLocale: $defaultLocale, '
       'defaultCurrency: $defaultCurrency, '
       'maintenance: $maintenance'

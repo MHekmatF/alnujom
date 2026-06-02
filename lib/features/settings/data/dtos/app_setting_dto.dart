@@ -133,9 +133,7 @@ class AppSettingDto {
     final byKey = {for (final dto in dtos) dto.key: dto.value};
 
     return AppSettings(
-      defaultLocale: _decodeLocale(
-        byKey[AppSettingKey.defaultLanguage.key],
-      ),
+      defaultLocale: _decodeLocale(byKey[AppSettingKey.defaultLanguage.key]),
       defaultCurrency: _decodeCurrencyCode(
         byKey[AppSettingKey.defaultCurrency.key],
       ),

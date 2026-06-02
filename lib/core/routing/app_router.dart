@@ -58,6 +58,10 @@ import '../../features/inquiries/presentation/pages/inquiry_inbox_page.dart';
 import '../../features/map/domain/entities/map_entry_context.dart';
 import '../../features/map/presentation/pages/map_page.dart';
 import '../../features/search/presentation/pages/search_page.dart';
+import '../../features/settings/presentation/bloc/app_settings_cubit.dart';
+import '../../features/settings/presentation/pages/about_support_page.dart';
+import '../../features/settings/presentation/pages/maintenance_screen.dart';
+import '../../features/settings/presentation/widgets/maintenance_gate.dart';
 import '../../features/publisher_dashboard/presentation/pages/listing_moderation_history_page.dart';
 import '../../features/publisher_dashboard/presentation/pages/my_listings_page.dart';
 import '../../features/super_admin/presentation/pages/assign_role_page.dart';
@@ -141,6 +145,10 @@ abstract final class AppRoutes {
   static const notifications = '/notifications';
   // Phase 23: admin settings editor route.
   static const adminSettings = '/admin/settings';
+  // Phase 23 FC — full-screen maintenance gate target (settings.manage bypass).
+  static const maintenance = maintenanceRoute;
+  // Phase 23 FC — public about/support surface (FR-013).
+  static const about = '/about';
   static const themeGallery = '/_debug/theme-gallery';
   static const debugMoneyFormatter = '/debug/money-formatter';
 
@@ -228,6 +236,9 @@ abstract final class AppRouteNames {
   static const notifications = 'notifications';
   // Phase 23: admin settings editor route name.
   static const adminSettings = 'admin-settings';
+  // Phase 23 FC — maintenance gate + about/support route names.
+  static const maintenance = 'maintenance';
+  static const about = 'about';
   static const themeGallery = 'theme-gallery';
 }
 
@@ -235,13 +246,28 @@ GoRouter buildAppRouter({
   required AppLogger logger,
   required AuthBloc authBloc,
 }) {
-  final refreshListenable = AuthBlocListenable(authBloc);
+  // Phase 23 (FC) — re-evaluate redirects on BOTH auth changes AND settings
+  // changes, so the maintenance gate reacts when maintenance flips on/off.
+  final refreshListenable = Listenable.merge([
+    AuthBlocListenable(authBloc),
+    StreamRefreshListenable(getIt<AppSettingsCubit>().stream),
+  ]);
 
   return GoRouter(
     initialLocation: AppRoutes.splash,
     debugLogDiagnostics: kDebugMode,
     refreshListenable: refreshListenable,
-    redirect: (context, state) => authRedirect(authBloc, context, state),
+    // Phase 23 (FC / T024) — maintenance gate runs FIRST. When maintenance is
+    // active it sends everyone to MaintenanceScreen EXCEPT `settings.manage`
+    // holders (the only bypass — INVARIANT 1). Reads the cached AppSettings
+    // snapshot synchronously (no fetch here). On a settings fetch failure the
+    // cubit serves safe defaults (maintenance OFF), so this returns null —
+    // fail-open (INVARIANT 2). Auth redirects run only when the gate allows.
+    redirect: (context, state) {
+      final gated = maintenanceRedirect(state.uri.path);
+      if (gated != null) return gated;
+      return authRedirect(authBloc, context, state);
+    },
     routes: [
       // ─── Phase 5 auth routes ───
       GoRoute(
@@ -663,6 +689,23 @@ GoRouter buildAppRouter({
         redirect: (context, state) =>
             authBloc.state is Unauthenticated ? AppRoutes.login : null,
         builder: (context, state) => const NotificationCenterPage(),
+      ),
+
+      // ─── Phase 23 — maintenance gate target ───
+      // Anonymous-accessible; the global redirect routes non-`settings.manage`
+      // users here while maintenance is active (FR-009/FR-011).
+      GoRoute(
+        path: AppRoutes.maintenance,
+        name: AppRouteNames.maintenance,
+        builder: (context, state) => const MaintenanceScreen(),
+      ),
+
+      // ─── Phase 23 — public about/support surface ───
+      // Anonymous-accessible (FR-013); renders only configured channels/links.
+      GoRoute(
+        path: AppRoutes.about,
+        name: AppRouteNames.about,
+        builder: (context, state) => const AboutSupportPage(),
       ),
 
       if (kDesignToolsEnabled)

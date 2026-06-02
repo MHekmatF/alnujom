@@ -16,10 +16,7 @@ class SettingsSectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(
-        top: AppSpacing.xl,
-        bottom: AppSpacing.sm,
-      ),
+      padding: const EdgeInsets.only(top: AppSpacing.xl, bottom: AppSpacing.sm),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

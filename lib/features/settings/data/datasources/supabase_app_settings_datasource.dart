@@ -47,10 +47,7 @@ class SupabaseAppSettingsDatasource {
   Future<AppSettingDto> updateSetting(AppSettingKey key, Object value) async {
     final result = await _client.rpc(
       'set_app_setting',
-      params: {
-        'p_key': key.key,
-        'p_value': jsonDecode(jsonEncode(value)),
-      },
+      params: {'p_key': key.key, 'p_value': jsonDecode(jsonEncode(value))},
     );
     // The RPC returns the updated row as a single object.
     final row = Map<String, dynamic>.from(result as Map);
