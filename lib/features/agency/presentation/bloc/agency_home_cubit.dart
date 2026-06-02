@@ -189,6 +189,9 @@ class AgencyHomeCubit extends Cubit<AgencyHomeState> {
       whatsapp: whatsapp,
       address: address,
     );
+    // The create RPC is awaited above; if the form was disposed mid-flight,
+    // bail before emitting (load() on the success branch is itself guarded).
+    if (isClosed) return;
     switch (result) {
       case Success<String>():
         await load();

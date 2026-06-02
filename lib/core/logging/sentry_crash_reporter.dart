@@ -122,6 +122,9 @@ class SentryCrashReporter implements CrashReporter {
         breadcrumbs: _scrubBreadcrumbs(event.breadcrumbs),
         message: _scrubMessage(event.message),
         exceptions: _scrubExceptions(event.exceptions),
+        // Threads carry their own stack traces; clear frame-local `vars` (the
+        // only PII surface) while keeping file/function/line for debugging.
+        threads: _scrubThreads(event.threads),
       );
     } catch (_) {
       // If scrubbing fails for any reason, fail CLOSED on PII: drop the event
@@ -133,16 +136,26 @@ class SentryCrashReporter implements CrashReporter {
   static SentryRequest? _scrubRequest(SentryRequest? request) {
     if (request == null) return null;
     // Rebuild with only url + method; everything else (headers, cookies,
-    // queryString, data, env) is dropped.
-    return SentryRequest(url: request.url, method: request.method);
+    // queryString, data, env) is dropped. The url itself is redacted because a
+    // synthetic `<phone>@alnujom.local`, a token, or a query string can be
+    // embedded in the path/query.
+    return SentryRequest(
+      url: request.url == null ? null : _redactString(request.url!),
+      method: request.method,
+    );
   }
 
   static SentryUser? _scrubUser(SentryUser? user) {
     if (user == null) return null;
-    final id = user.id;
-    if (id == null) return null;
-    // Keep only a non-PII stable id; drop username/email/ip/name/geo/data.
-    return SentryUser(id: id);
+    // ALWAYS rebuild with an id-only user. Returning `null` here would be a PII
+    // leak: `SentryEvent.copyWith` coalesces `user ?? this.user`, so a null
+    // return KEEPS the original user untouched (email / phone / ipAddress /
+    // geo / data). Keep only the non-PII stable id (data-model §2); when it is
+    // absent (anonymous), fall back to a constant so the original is still
+    // overwritten and the SentryUser assert (>=1 non-null field) holds in every
+    // build mode. The id is NOT run through `_redactString` — that would mangle
+    // a legitimate UUID id (its digit runs match the phone pattern).
+    return SentryUser(id: user.id ?? _redacted);
   }
 
   static SentryMessage? _scrubMessage(SentryMessage? message) {
@@ -165,9 +178,32 @@ class SentryCrashReporter implements CrashReporter {
         .map(
           (e) => e.copyWith(
             value: e.value == null ? null : _redactString(e.value!),
+            // Strip frame-local variable values from the exception's stack
+            // trace; keep the frames themselves (file/function/line).
+            stackTrace: _scrubStackTrace(e.stackTrace),
           ),
         )
         .toList(growable: false);
+  }
+
+  static List<SentryThread>? _scrubThreads(List<SentryThread>? threads) {
+    if (threads == null) return null;
+    return threads
+        .map((t) => t.copyWith(stacktrace: _scrubStackTrace(t.stacktrace)))
+        .toList(growable: false);
+  }
+
+  /// Clears frame-local variable maps (`vars`) from every frame while keeping
+  /// the frame's code location (file / function / line / col), which carries no
+  /// PII and is what makes a crash actionable. Returns `null` for a `null`
+  /// input so the SDK's `?? this.X` coalescing is a no-op (nothing to scrub).
+  static SentryStackTrace? _scrubStackTrace(SentryStackTrace? stackTrace) {
+    if (stackTrace == null) return null;
+    return stackTrace.copyWith(
+      frames: stackTrace.frames
+          .map((f) => f.copyWith(vars: const <String, String>{}))
+          .toList(growable: false),
+    );
   }
 
   static List<Breadcrumb>? _scrubBreadcrumbs(List<Breadcrumb>? breadcrumbs) {

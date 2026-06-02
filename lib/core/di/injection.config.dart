@@ -568,13 +568,6 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i24.SupabaseUserSearchDataSource>(
     () => _i24.SupabaseUserSearchDataSource(),
   );
-  gh.factory<_i523.SupabaseManifestDatasource>(
-    () => _i523.SupabaseManifestDatasource(
-      gh<_i454.SupabaseClient>(),
-      bucket: gh<String>(),
-      path: gh<String>(),
-    ),
-  );
   gh.lazySingleton<_i1015.PermissionCatalogRepository>(
     () => _i739.PermissionCatalogRepositoryImpl(),
   );
@@ -615,6 +608,9 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i514.SupabaseAgencyDatasource>(
     () => _i514.SupabaseAgencyDatasource(gh<_i454.SupabaseClient>()),
+  );
+  gh.factory<_i523.SupabaseManifestDatasource>(
+    () => _i523.SupabaseManifestDatasource(gh<_i454.SupabaseClient>()),
   );
   gh.factory<_i311.SupabaseCurrenciesDatasource>(
     () => _i311.SupabaseCurrenciesDatasource(gh<_i454.SupabaseClient>()),

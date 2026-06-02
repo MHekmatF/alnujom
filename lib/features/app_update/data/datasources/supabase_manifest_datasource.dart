@@ -11,20 +11,21 @@ import '../dtos/version_manifest_dto.dart';
 /// This datasource is the SOLE importer of `supabase_flutter` for the
 /// `app_update` feature — `domain/` has zero platform-SDK imports (Principle IX).
 ///
-/// [bucket] and [path] are configurable so the operator can reorganise the
-/// Storage layout without changing Dart code (defaulted to the spec values).
+/// The bucket/path are fixed `static const`s, NOT constructor params: `@injectable`
+/// does not honor primitive constructor defaults — it would emit `gh<String>()`
+/// for each, and since no `String` is registered in the DI container that throws
+/// at resolution time and bricks cold start (resolving `AppUpdateCubit` in
+/// `app.dart` initState, outside the repository's fail-silent guard). The
+/// operator reorganises the Storage layout by changing the uploaded object's
+/// location convention, not the Dart-side path.
 @injectable
 class SupabaseManifestDatasource {
-  SupabaseManifestDatasource(
-    this._client, {
-    String bucket = 'app-release',
-    String path = 'android/latest.json',
-  })  : _bucket = bucket,
-        _path = path;
+  SupabaseManifestDatasource(this._client);
+
+  static const String _bucket = 'app-release';
+  static const String _path = 'android/latest.json';
 
   final supabase.SupabaseClient _client;
-  final String _bucket;
-  final String _path;
 
   /// Download and decode the version manifest.
   ///
