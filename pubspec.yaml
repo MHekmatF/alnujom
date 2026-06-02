@@ -36,6 +36,10 @@ dependencies:
   flutter_map_marker_cluster: ^1.4.0
   geolocator: ^13.0.0
   permission_handler: ^11.3.0
+  # Phase 24 (CR) — crash & error reporting via a self-hosted/EU Sentry instance
+  # (R-206). Behind the core/ CrashReporter seam; DSN supplied via dart-define;
+  # NoopCrashReporter is bound when the DSN is empty (no init, no send).
+  sentry_flutter: 8.14.2
 
 dev_dependencies:
   flutter_test:

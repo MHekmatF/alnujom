@@ -503,6 +503,8 @@ import '../data/repositories/permission_catalog_repository_impl.dart' as _i739;
 import '../localization/locale_cubit.dart' as _i960;
 import '../logging/app_logger.dart' as _i354;
 import '../logging/console_logger.dart' as _i1026;
+import '../logging/crash_reporter.dart' as _i237;
+import '../logging/sentry_crash_reporter.dart' as _i889;
 import '../messaging/push_messaging_service.dart' as _i563;
 import '../network/realtime_signals.dart' as _i591;
 import '../network/realtime_signals_impl.dart' as _i854;
@@ -563,6 +565,7 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i650.PermissionChecker>(
     () => _i650.PermissionChecker(gh<_i1015.PermissionCatalogRepository>()),
   );
+  gh.lazySingleton<_i237.CrashReporter>(() => _i889.SentryCrashReporter());
   gh.lazySingleton<_i354.AppLogger>(() => _i1026.ConsoleLogger());
   gh.lazySingleton<_i591.RealtimeSignals>(
     () => _i854.RealtimeSignalsImpl(gh<_i354.AppLogger>()),

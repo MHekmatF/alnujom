@@ -1,9 +1,15 @@
+import 'dart:async';
+import 'dart:ui';
+
 import 'app.dart';
 import 'core/config/env_config.dart';
 import 'core/di/injection.dart';
 import 'core/errors/result.dart';
 import 'core/localization/locale_cubit.dart';
 import 'core/logging/app_logger.dart';
+import 'core/logging/crash_reporter.dart';
+import 'core/logging/noop_crash_reporter.dart';
+import 'core/logging/sentry_crash_reporter.dart';
 import 'core/messaging/push_messaging_service.dart';
 import 'core/network/supabase_client_wrapper.dart';
 import 'core/storage/preferences_store.dart';
@@ -12,7 +18,17 @@ import 'features/notifications/data/datasources/noop_push_messaging_service.dart
 import 'l10n/app_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
+// Phase 24 (CR) — crash & error reporting (R-206, R-208, R-217).
+//
+// The Sentry DSN is supplied at compile time via a `--dart-define`d
+// `SENTRY_DSN` (`--dart-define-from-file=.env.json`). An EMPTY DSN ⇒ the
+// NoopCrashReporter is bound (no init, no network). Reporting is enabled only
+// in release/profile builds; debug builds stay console-only (the seam is inert
+// in debug regardless of DSN).
+const _sentryDsn = String.fromEnvironment('SENTRY_DSN');
 
 // Phase 22 — top-level background-message handler required by firebase_messaging.
 //
@@ -27,6 +43,61 @@ Future<void> _firebaseBackgroundHandler(RemoteMessage message) async {
 }
 
 Future<void> main() async {
+  // Phase 24 (CR) — choose + guard-init the crash reporter, then run the
+  // existing bootstrap inside `runZonedGuarded` so async errors are captured.
+  //
+  // Enablement (R-217): release/profile only AND a non-empty DSN. Otherwise
+  // the NoopCrashReporter is bound — no init, no network, fully inert. Init is
+  // wrapped in try/catch (the Phase 22 Firebase-guard pattern) so a throw or
+  // timeout NEVER blocks `runApp` (FR-007); on failure we fall back to Noop.
+  final bool crashEnabled =
+      _sentryDsn.isNotEmpty && (kReleaseMode || kProfileMode);
+
+  CrashReporter reporter = const NoopCrashReporter();
+  if (crashEnabled) {
+    final sentry = SentryCrashReporter();
+    try {
+      await sentry.init(
+        dsn: _sentryDsn,
+        environment: kReleaseMode ? 'release' : 'profile',
+      );
+      reporter = sentry;
+    } catch (_) {
+      // Sentry failed to initialize (unreachable endpoint, bad DSN, etc.).
+      // The app must run normally regardless — fall back to the no-op adapter.
+      reporter = const NoopCrashReporter();
+    }
+  }
+
+  // Route framework + platform uncaught errors to the reporter. In debug these
+  // forward to the Noop (inert) and Flutter still prints them to the console.
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    unawaited(
+      reporter.recordError(
+        details.exception,
+        details.stack,
+        context: {'flutter_error': details.context?.toString()},
+      ),
+    );
+  };
+  PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
+    unawaited(reporter.recordError(error, stack));
+    return true;
+  };
+
+  // Run the bootstrap inside a guarded zone so uncaught async errors (outside
+  // the framework/platform handlers above) are also forwarded.
+  unawaited(
+    runZonedGuarded(_bootstrap, (error, stack) {
+      unawaited(reporter.recordError(error, stack));
+    }),
+  );
+}
+
+/// The original bootstrap sequence (DI, Supabase, locale) — unchanged behavior,
+/// now invoked from inside `runZonedGuarded`.
+Future<void> _bootstrap() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Phase 22 — guarded Firebase init (R-195, SC-003).
