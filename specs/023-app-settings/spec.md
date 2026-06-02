@@ -138,7 +138,7 @@ Every admin using the settings editor and every user seeing the maintenance scre
 #### Admin management
 
 - **FR-004**: A user holding **`settings.manage`** MUST be able to **view and edit** every catalog setting through a **typed editor** — booleans as toggles, enumerated values (language, currency, visibility) as pickers constrained to valid choices, URLs/contacts as validated text — and each value MUST be **validated to its type/domain** before it is saved (an invalid URL, an unsupported locale, or an unknown/inactive currency code is rejected).
-- **FR-005**: Writes to `app_settings` MUST be restricted to **`settings.manage`**, enforced at **both ends** — the editor is reachable only to holders of the permission (UI gating) AND the server denies any write from a client lacking it (RLS / permission check). No new permission key is introduced — this reuses the existing §9.1 `settings.manage` (Principles III, VII, XII).
+- **FR-005**: The **write mechanism** for `app_settings` MUST deny all direct client writes (no table-level INSERT/UPDATE/DELETE granted to clients) and route every mutation through a server-side path that re-checks **`settings.manage`** — this is the write half that, together with FR-015's RLS read/write posture and the FR-004 UI gate, gives checks-at-both-ends. No new permission key is introduced — this reuses the existing §9.1 `settings.manage` (Principles III, VII, XII).
 - **FR-006**: Every change to a setting MUST write an **`audit_logs`** row capturing the **actor**, the **key**, and the **before/after** values, via the Phase 4 `log_audit()` mechanism — this is the §9.4 "App settings changes (Phase 23)" audited action.
 
 #### Defaults applied to new users & listings (forward-only)

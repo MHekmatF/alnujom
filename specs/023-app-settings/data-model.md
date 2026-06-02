@@ -93,7 +93,7 @@ INSERT INTO public.app_settings (key, value, description, is_public) VALUES
 ON CONFLICT (key) DO NOTHING;
 ```
 
-> **Seed defaults note**: `default_currency = "SYP"` and `default_language = "ar"` keep the Arabic-first / Syria-first posture; `default_currency` MUST be an **active** `currencies` row (Phase 9). `default_publisher_name_visibility = "public"` and `default_location_visibility = "approximate"` match the existing listing-form defaults; both are values in the Phase 10 enums (`contact_name_visibility ∈ public/admin_only`, `location_visibility ∈ hidden/approximate/exact/admin_only`).
+> **Seed defaults note**: `default_currency = "SYP"` and `default_language = "ar"` keep the Arabic-first / Syria-first posture; `default_currency` MUST be an **active** `currencies` row (Phase 9). `default_publisher_name_visibility = "public"` is intentional (the plan's "public-publisher-name default" — this is the listing *contact display name*, not a private legal-identity field, so it is **not** a Principle VIII concern). `default_location_visibility = "approximate"` is a deliberate **privacy-first** default (admins may raise it to `exact`). Both are values in the Phase 10 enums (`contact_name_visibility ∈ public/admin_only`, `location_visibility ∈ hidden/approximate/exact/admin_only`).
 
 ### 1.4 `20260602120017_app_settings_advisor_hardening.sql` — privilege tightening
 
@@ -174,8 +174,8 @@ abstract class AppSettingsRepository {
 | FR-004 settings.manage write at both ends | UI gate (FA) + `set_app_setting` re-check (§1.2) | Non-`settings.manage` `rpc('set_app_setting',…)` → `42501` denied |
 | FR-005 writes restricted server-side | REVOKE writes + definer RPC (§1.1/1.2) | Direct `UPDATE app_settings` as `authenticated` → permission denied |
 | FR-006 audit every change | `trg_app_settings_audit` → `log_audit` (§1.2) | After a save, `SELECT * FROM audit_logs WHERE action='settings.updated' ORDER BY created_at DESC LIMIT 1` shows actor + before/after |
-| FR-007 default lang/currency seed new users, client-side | FC registration seeding via `LoadPublicSettings` (R-203) | New account's `user_preferences` = current defaults; an existing user's preference unchanged after a default change |
-| FR-008 visibility defaults pre-select new listings | new listing form reads defaults (FC/consumer) | New listing form pre-selects current defaults; existing listing visibility unchanged |
+| FR-007 default lang/currency seed new users, client-side | FC seeds at registration — `ProfileRepository.updateLocale` (lang) + Phase 9 `CurrenciesRepository.writeUserDisplayCurrency` (currency), values from `LoadPublicSettings` (R-203) | New account's `user_preferences` = current defaults; an existing user's preference unchanged after a default change |
+| FR-008 visibility defaults pre-select new listings | new-listing initial state in `listing_form_bloc.dart` reads `AppSettings` defaults (FC) | New listing form pre-selects current defaults; existing listing visibility unchanged |
 | FR-009 maintenance screen on all clients ~1 min | FC gate + foreground re-fetch (R-201) | Toggle on A → B shows screen on next foreground (≤~1 min) |
 | FR-010 settings.manage bypass | `maintenance_gate.dart` checks `PermissionChecker.has('settings.manage')` (R-202) | settings.manage user keeps access; regular/other-admin/anon see the screen |
 | FR-011 localized maintenance message | bilingual `message` + `LocalizedText.forLocale` (R-204) | ar viewer sees ar message; en viewer sees en; unset → built-in copy |

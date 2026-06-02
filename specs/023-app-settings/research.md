@@ -42,7 +42,7 @@ All Technical-Context unknowns resolved. Each decision is locked with rationale 
 
 ### R-203 — New-user default seeding is client-side at registration
 
-**Decision**: At registration the client reads `LoadPublicSettings()` and seeds the new user's `user_preferences.locale` (from `default_language`) and `display_currency` (from `default_currency`) via the existing `ProfileRepository` preferences path — replacing the current `updateLocale(deviceLocale)`-only seed in `auth_repository_impl.dart`. Forward-only: existing users are never re-defaulted. (User-resolved 2026-06-02 — spec FR-007.)
+**Decision**: At registration the client reads `LoadPublicSettings()` and seeds the new user's `locale` (from `default_language`) via `ProfileRepository.updateLocale` and `display_currency` (from `default_currency`) via the Phase 9 `CurrenciesRepository.writeUserDisplayCurrency` — amending the post-sign-in `updateLocale(deviceLocale)` block in `auth_repository_impl.dart` (~L94). Forward-only: existing users are never re-defaulted. (User-resolved 2026-06-02 — spec FR-007.)
 **Rationale**: The user chose the client-side mechanism; it reuses the existing registration preferences write and needs no server trigger reading `app_settings`.
 **Alternatives rejected**: A server-side trigger seeding `user_preferences` from `app_settings` at profile creation — not chosen by the user; would couple the auth trigger to the settings table.
 **Note**: the admin-set default language now wins over the raw device locale for a new account (per FR-007). If device-locale preference is later desired, that is a separate future tweak (recorded so the change to the existing `updateLocale(deviceLocale)` call is intentional, not accidental — Principle XII).
