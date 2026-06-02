@@ -40,6 +40,8 @@ dependencies:
   # (R-206). Behind the core/ CrashReporter seam; DSN supplied via dart-define;
   # NoopCrashReporter is bound when the DSN is empty (no init, no send).
   sentry_flutter: 8.14.2
+  # Phase 24 UP — in-app update prompt (Android-only; R-210).
+  package_info_plus: 9.0.1
 
 dev_dependencies:
   flutter_test:

@@ -4398,4 +4398,28 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String get about_no_info =>
       _resolve('about_no_info', (loc) => loc.about_no_info);
+
+  // ── Phase 24 UP — in-app update prompt ───────────────────────────────────
+
+  @override
+  String get updatePromptTitle =>
+      _resolve('updatePromptTitle', (loc) => loc.updatePromptTitle);
+
+  @override
+  String get updatePromptBody =>
+      _resolve('updatePromptBody', (loc) => loc.updatePromptBody);
+
+  @override
+  String get updatePromptUpdate =>
+      _resolve('updatePromptUpdate', (loc) => loc.updatePromptUpdate);
+
+  @override
+  String get updatePromptLater =>
+      _resolve('updatePromptLater', (loc) => loc.updatePromptLater);
+
+  @override
+  String get updatePromptReleaseNotesLabel => _resolve(
+    'updatePromptReleaseNotesLabel',
+    (loc) => loc.updatePromptReleaseNotesLabel,
+  );
 }
