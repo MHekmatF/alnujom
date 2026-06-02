@@ -30,7 +30,7 @@
 - [ ] T004 [P] [US2] Create `NoopCrashReporter` (`implements CrashReporter`, all no-ops) in `lib/core/logging/noop_crash_reporter.dart` — bound when the DSN is empty (mirrors `NoopPushMessagingService`) (depends on T002)
 - [ ] T005 [US2] Amend `lib/main.dart` — read `SENTRY_DSN` (dart-define); **guard-init** Sentry in `try/catch` (Phase 22 Firebase-guard pattern), wrap the bootstrap in `runZonedGuarded`, route `FlutterError.onError` + `PlatformDispatcher.onError` → `CrashReporter.recordError`; bind `NoopCrashReporter` when the DSN is empty; init MUST NOT block `runApp` (FR-007); release/profile only (depends on T003, T004)
 - [ ] T006 [P] [US2] Add a `SENTRY_DSN` key to `.env.example.json` (committed) + a one-line doc note; do **NOT** commit a real DSN (R-217, ADR-0001)
-- [ ] T007 [US2] Run `dart run build_runner build --delete-conflicting-outputs` + `flutter analyze`; grep-confirm **no** `package:sentry_flutter` import under any `domain/` — **acceptance (record outcome)**: profile build with DSN → forced exception on the dashboard, payload inspected (no secrets/PII); unreachable dashboard → app runs (SC-002). **⚠️ PARTIAL —** dashboard verification needs a profile build + real DSN on-device (deferred to QV).
+- [ ] T007 [US2] Run `dart run build_runner build --delete-conflicting-outputs` + `flutter analyze`; grep-confirm **no** `package:sentry_flutter` import under any `domain/` — **acceptance (record outcome)**: in a **profile build with the DSN set**, force an uncaught exception via a **`--dart-define`-gated debug-only "throw test error" affordance** (inert/removed in the shipped release) → confirm it lands on the dashboard; payload inspected (no secrets/PII); unreachable dashboard → app runs (SC-002). **⚠️ PARTIAL —** dashboard verification needs a profile build + real DSN on-device (deferred to QV).
 
 **Checkpoint**: production crashes are captured + scrubbed; the app never blocks/crashes on reporter failure.
 
@@ -45,7 +45,7 @@
 - [ ] T009 [P] [US4] Create domain entities in `lib/features/app_update/domain/entities/`: `app_version.dart` (`AppVersion` {major,minor,patch,build} + `compareTo` semver-first/build-tiebreaker + `parse`), `version_manifest.dart` (`VersionManifest`), `update_availability.dart` (sealed `UpdateAvailability`: `UpdateAvailable`/`UpToDate`/`CheckFailed`) per data-model §3
 - [ ] T010 [P] [US4] Create abstract `AppUpdateRepository` in `lib/features/app_update/domain/repositories/app_update_repository.dart` (`Future<Result<UpdateAvailability>> checkForUpdate()` — never throws)
 - [ ] T011 [US4] Create the `CheckForUpdate` use case in `lib/features/app_update/domain/usecases/check_for_update.dart` (depends on T010)
-- [ ] T012 [P] [US4] Create `VersionManifestDto` (+ tolerant JSON decode) in `lib/features/app_update/data/dtos/version_manifest_dto.dart` (data-model §1)
+- [ ] T012 [P] [US4] Create `VersionManifestDto` (+ tolerant JSON decode) in `lib/features/app_update/data/dtos/version_manifest_dto.dart` (data-model §1); **also commit the checked-in canonical schema template** `docs/release/version-manifest.example.json` (Principle II/XII — the operator uploads the live copy to Supabase Storage; the DTO MUST decode this example) — satisfies the plan's "manifest content checked-in" claim
 - [ ] T013 [US4] Create `SupabaseManifestDatasource` (Storage GET of the public manifest via the existing `SupabaseClientWrapper`) + `PackageInfoVersionSource` (installed version via `package_info_plus`) in `lib/features/app_update/data/datasources/` (depends on T008, T012)
 - [ ] T014 [US4] Create `AppUpdateRepositoryImpl` (`@LazySingleton(as: AppUpdateRepository)`) in `lib/features/app_update/data/repositories/app_update_repository_impl.dart` — **fail-silent** (`CheckFailed`) on unreachable/malformed (FR-010) (depends on T010, T013)
 - [ ] T015 [US4] Create `AppUpdateCubit` in `lib/features/app_update/presentation/bloc/app_update_cubit.dart` — `check()` → emits `UpdateAvailable`/`UpToDate`/`CheckFailed` (depends on T011)
@@ -94,16 +94,17 @@
 **Goal**: Prove the whole product end-to-end on the signed build, ship the artifact + docs. (Verification-ordering: needs CR+UP+RB+CF merged + a signed build.)
 **Independent Test**: all six golden paths pass; the automated test is green; the APK carries no secret; `docs/release/v1.0.0.md` exists and is complete.
 
-- [ ] T031 [US3] Write `integration_test/primary_publish_path_test.dart` — the one automated test: register → admin-approve → publish → admin-approve → public view → inquiry (drives pre-existing Phase 5/10/12/13/16 surfaces; seeds/uses test accounts)
+- [ ] T031 [US3] Write `integration_test/primary_publish_path_test.dart` — the one automated test: register → admin-approve → publish → admin-approve → public view → inquiry (drives pre-existing Phase 5/10/12/13/16 surfaces). **Include a SETUP/teardown that establishes the test fixture**: a fresh registerable phone (the synthetic-email pattern), a **pre-seeded admin** holding `users.approve` + `listings.approve` (the admin-side approvals driven via service-role/SQL between UI steps), deterministic listing data, and a reset so the test is **re-runnable** (idempotent against the live/staging backend)
 - [ ] T032 [US3] Run `flutter test integration_test/primary_publish_path_test.dart --dart-define-from-file=.env.json` on the Pixel 8 Pro AVD — **acceptance (record outcome)**: green (depends on T031, Wave 1 merged). **⚠️ PARTIAL —** needs the merged build + a seeded backend.
 - [ ] T033 [US3] Run the **six manual golden-path walks** (Infinix Note 8 + Pixel 8 Pro AVD): (1) primary publish; (2) anonymous browse+filter+map; (3) admin reports-queue resolution; (4) super-admin role create+assign+revoke; (5) currency switch + exchange-rate update; (6) **maintenance mode + recovery (two-device)**; record each — **acceptance (SC-004)**. **⚠️ PARTIAL —** on-device.
 - [ ] T034 [US5] Build the signed release APK and run a **binary secret-scan** of it (Phase 22 T046) — confirm **no** DSN / keystore / Vault / FCM-service-account material shipped — **acceptance (record outcome)**. **⚠️ PARTIAL —** needs the signed APK (RB + keystore).
 - [ ] T035 [US3] Measure + record the **cold-start baseline** on the Infinix Note 8 vs the §15 < 3 s budget — **advisory, not a gate** (clarify Q2) — **acceptance (record value)**. **⚠️ PARTIAL —** on-device.
-- [ ] T036 [US5] Author `docs/release/v1.0.0.md` — the six golden-path results, install/update instructions, the **no-email account-recovery support flow** (admin issues a temp password via the super-admin UI, §15), the cold-start baseline, the APK secret-scan result, and the distribution checklist (FR-012; depends on T032–T035)
+- [ ] T036 [US5] Author `docs/release/v1.0.0.md` — the six golden-path results, install/update instructions, the **no-email account-recovery support flow** (admin issues a temp password via the super-admin UI, §15), the cold-start baseline, the APK secret-scan result, the distribution checklist, **and the operator prerequisites that gate the release** (the Sentry self/EU instance + DSN, the release keystore, the Telegram channel) (FR-012; depends on T032–T035)
 - [ ] T037 [US5] **Distribution ops** (R-216): upload the signed APK + the version manifest JSON to Supabase Storage; post the APK to the Telegram channel; configure the Play Store internal testing track (QA-only) — **acceptance (SC-005)**. **⚠️ PARTIAL —** operator step.
 - [ ] T038 [US3] Run the **full verify suite** (`flutter analyze` + format + design-tokens + l10n-parity + l10n-literals + SDK-boundary — memory `project_wave_run_full_verify_suite`) + the **structural gate** (quickstart §G: version `1.0.0`; **no** new table/RPC/permission/migration; **no** `supabase_flutter`/`sentry_flutter`/`package_info_plus` import under any `domain/`; **no** iOS/Web; carried-over buckets closed, FE-1 left future); record any **new** out-of-scope finding in `specs/024-release-polish/DEFERRED.md` with a rationale (no silent drop) — **acceptance (SC-008)**
+- [ ] T039 [US3] Verify the **Phase 22 carried-over QA residual** (FR-013 / R-215 — beyond the T034 APK secret-scan): **(a) T044** — admin counters move ≤5 s + reconcile after a forced network drop on a 2nd device (the live role grant/revoke half is already VERIFIED PASS — re-confirm on the release build); **(b) T045** — all six in-app notification events deliver (center + badge) with push **blocked**, no crash; **(c) T046** — cross-user RLS-denial from a **real user-X JWT session** + non-admin Realtime delivers **no** admin rows — record each — **acceptance (SC-004; closes the FR-013 "fix all" mandate)**. **⚠️ PARTIAL —** two-device / on-device + a real user-X session.
 
-**Checkpoint**: v1.0.0 is verified, signed, distributed, and documented.
+**Checkpoint**: v1.0.0 is verified, signed, distributed, and documented; the Phase 22 carried-over QA residual is closed.
 
 ---
 
@@ -118,7 +119,7 @@
 - UP: T008/T009/T010/T012 [P]; T011 after T010; T013 after T008+T012; T014 after T010+T013; T015 after T011; T016 [P]; T017 after T015+T016; T018 after T015+T017; T019 last.
 - RB: T020 first; T021/T022 after T020; T023 [P] (independent of T020); T024 after T021+T022+T023.
 - CF: T025/T026/T027/T028 [P]; T029 after T026+T027+T028; T030 last.
-- QV: T031 first; T032 after T031; T033/T034/T035 [P] after Wave 1 merged; T036 after T032–T035; T037 after T036; T038 anytime after Wave 1 merged.
+- QV: T031 first; T032 after T031; T033/T034/T035/T039 [P] after Wave 1 merged; T036 after T032–T035; T037 after T036; T038 anytime after Wave 1 merged.
 
 ### Build edges (Dart symbols — see Dependency Audit below)
 - **None.** (CR/UP/RB/CF/QV: zero inter-phase Dart-symbol edges.)
@@ -135,7 +136,7 @@ Agent C (RB): T020–T024  (icon + splash + fail-closed signing)
 Agent D (CF): T025–T030  (agency-logo fix + isClosed sweep)
 
 # Wave 2 — after Wave 1 merges + a signed build exists, dispatch QV:
-Agent E (QV): T031–T038  (integration test + 6-path walk + secret-scan + release notes + distribution)
+Agent E (QV): T031–T039  (integration test + 6-path walk + Phase 22 residual verify + secret-scan + release notes + distribution)
 
 # Within UP, launch the independent creators in parallel:
 T009 entities  ‖  T010 repo interface  ‖  T012 DTO  ‖  T016 l10n
@@ -161,7 +162,7 @@ The three P1 stories are US1 (signed build boots), US2 (crash reporting), US3 (s
 Shared / contention-prone files each phase modifies (the `/wave` orchestrator uses this to warn sub-agents up front and to pick merge order least-touch-first). New, phase-private files (e.g. `lib/features/app_update/**`, the new `lib/core/logging/*crash*` files) are omitted.
 
 - **CR**: `pubspec.yaml` (adds `sentry_flutter`), `lib/main.dart`, `lib/core/di/injection.config.dart` (codegen), `.env.example.json`.
-- **UP**: `pubspec.yaml` (adds `package_info_plus`), `lib/app.dart`, `lib/l10n/app_ar.arb`, `lib/l10n/app_en.arb`, `lib/core/localization/app_strings.dart`, `lib/l10n/app_localizations*.dart` (gen), `lib/core/di/injection.config.dart` (codegen).
+- **UP**: `pubspec.yaml` (adds `package_info_plus`), `lib/app.dart`, `lib/l10n/app_ar.arb`, `lib/l10n/app_en.arb`, `lib/core/localization/app_strings.dart`, `lib/l10n/app_localizations*.dart` (gen), `lib/core/di/injection.config.dart` (codegen), `docs/release/version-manifest.example.json` (new, UP-owned).
 - **RB**: `pubspec.yaml` (dev deps + `flutter_launcher_icons`/`flutter_native_splash` config), `android/app/build.gradle.kts`, `android/key.properties` (new, gitignored), `android/.gitignore`, `android/app/src/main/res/**` (generated), `assets/branding/**` (new).
 - **CF**: `lib/features/agency/data/datasources/supabase_agency_datasource.dart`, `lib/features/agency/presentation/widgets/agency_badge.dart`, `lib/features/ads/presentation/bloc/ad_slot_cubit.dart`, `lib/features/agency/presentation/bloc/agency_verification_cubit.dart`, `lib/features/profile/presentation/cubit/profile_cubit.dart` (+ any sweep-discovered cubit). **No shared codegen/ARB/pubspec edit.**
 - **QV**: `integration_test/primary_publish_path_test.dart` (new), `docs/release/v1.0.0.md` (new), `specs/024-release-polish/DEFERRED.md` (new, if needed). **No `lib/` edit.**
@@ -212,6 +213,7 @@ Run via `/wave all --auto`. Wave 1 is exactly at the 4-phase cap; QV follows as 
 - **Flip checkboxes in the same commit as the code** — never defer to a cleanup pass; acceptance/verification tasks stay unchecked (or `**⚠️ PARTIAL —**`) until actually run on-device/build and recorded (memory `feedback_strict_task_completion`).
 - Run every `flutter run`/`build` with `--dart-define-from-file=.env.json` (memory `project_dart_defines`); crash testing additionally needs a non-empty `SENTRY_DSN` in `.env.json`.
 - `/wave` sub-agents: `git reset --hard origin/024-release-polish` first, verify ancestry before merge, re-anchor orchestrator CWD to repo root before each merge (memories `project_wave_worktree_base`, `project_wave_merge_cascade_gotchas`); run the full verify suite after each merge (`project_wave_run_full_verify_suite`).
-- **New deps**: after any phase that edits `pubspec.yaml` (CR/UP/RB), run `flutter pub get` before `build_runner`/`analyze`.
+- **New deps**: pin each to an **exact resolved version (no caret)** per the `pubspec.yaml` convention (e.g. `equatable: 2.0.8`, `go_router: 17.2.2`); after any phase that edits `pubspec.yaml` (CR/UP/RB), run `flutter pub get` before `build_runner`/`analyze`.
+- **Operator prerequisites (not code — gate QV)**: a **Sentry self/EU instance + DSN** (CR/T006-T007), the **release keystore** (RB/T023), and the **Telegram channel** (QV/T037) must be provisioned by the operator before the corresponding acceptance can be recorded; document them in `docs/release/v1.0.0.md` (T036) and, if any is unavailable at QA time, record it in `specs/024-release-polish/DEFERRED.md` rather than blocking silently (the Phase 22 Vault/Firebase precedent).
 
-**Total tasks**: 38 (CR 7, UP 12, RB 5, CF 6, QV 8). **Per story**: US1 ≈ T020–T024 (+ QV verify); US2 ≈ T001–T007; US3 ≈ T031–T033/T038; US4 ≈ T008–T019; US5 ≈ T034/T036/T037; US6 ≈ T016/T022/T025–T030.
+**Total tasks**: 39 (CR 7, UP 12, RB 5, CF 6, QV 9). **Per story**: US1 ≈ T020–T024 (+ QV verify); US2 ≈ T001–T007; US3 ≈ T031–T033/T038/T039; US4 ≈ T008–T019; US5 ≈ T034/T036/T037; US6 ≈ T016/T022/T025–T030.

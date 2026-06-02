@@ -1,0 +1,14 @@
+{
+  "_comment": "Canonical schema for the in-app update check (Phase 24 / R-209). The operator uploads the LIVE copy to Supabase Storage (public bucket, e.g. app-release/android/latest.json); this checked-in example is the source-of-truth schema (Principle II/XII). The app reads it on cold start and compares semver-first (build number tiebreaker). A missing/unreachable/malformed object is a silent no-op (FR-010).",
+  "latest_version": "1.0.0",
+  "latest_build": 1,
+  "min_supported_version": null,
+  "download": {
+    "telegram_url": "https://t.me/REPLACE_WITH_CHANNEL",
+    "website_url": null
+  },
+  "release_notes": {
+    "ar": null,
+    "en": null
+  }
+}
