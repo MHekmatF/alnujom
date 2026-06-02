@@ -58,9 +58,12 @@ class _NotificationPushListenerState extends State<NotificationPushListener> {
       _showForegroundSnackbar(payload);
     });
 
-    // Background tap: route via deep-link resolver.
+    // Background tap: route via deep-link resolver. Defer to post-frame so the
+    // navigation runs AFTER any resume-triggered redirect settles (FR-012/SC-002).
     _onOpenedSub = _push.onMessageOpenedApp().listen((payload) {
-      if (mounted) _routeFromPayload(payload);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _routeFromPayload(payload);
+      });
     });
   }
 

@@ -105,11 +105,15 @@ abstract final class NotificationDeepLinkResolver {
       _showFallback(context);
       return;
     }
+    // Push-tap path: the listener lives in MaterialApp.router's `builder`, which
+    // is ABOVE the GoRouter InheritedWidget, so `context.go*` throws "No GoRouter
+    // found in context". Navigate via the DI router instance instead (FR-012/SC-002).
+    final router = getIt<GoRouter>();
     switch (target) {
       case _NavRoute(:final path):
-        context.go(path);
+        router.go(path);
       case _NavNamedRoute(:final name, :final pathParams):
-        context.goNamed(name, pathParameters: pathParams);
+        router.goNamed(name, pathParameters: pathParams);
     }
   }
 
