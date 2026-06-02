@@ -10,6 +10,9 @@
 .env.json
 .env.*
 !.env.example
+# Phase 24 (CR/T006) — the committed dart-define TEMPLATE (placeholder values
+# only; NEVER a real DSN/secret). The real `.env.json` stays gitignored above.
+!.env.example.json
 *.env
 secrets/
 *.pem
