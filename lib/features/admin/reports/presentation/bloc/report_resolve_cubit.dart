@@ -57,6 +57,7 @@ class ReportResolveCubit extends Cubit<ReportResolveState> {
   Future<void> startReview(String reportId) async {
     emit(const ReportResolveLoading());
     final result = await _startReportReview(reportId);
+    if (isClosed) return;
     switch (result) {
       case Success():
         emit(const ReportResolveSuccess());
@@ -73,6 +74,7 @@ class ReportResolveCubit extends Cubit<ReportResolveState> {
   }) async {
     emit(const ReportResolveLoading());
     final result = await _resolveReport(reportId, action, note: note);
+    if (isClosed) return;
     switch (result) {
       case Success():
         emit(const ReportResolveSuccess());

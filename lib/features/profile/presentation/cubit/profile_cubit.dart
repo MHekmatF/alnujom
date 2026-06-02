@@ -33,6 +33,7 @@ class ProfileCubit extends Cubit<ProfileState> {
   Future<void> load() async {
     emit(state.profileLoading());
     final result = await _load();
+    if (isClosed) return;
     if (result is Success<Profile>) {
       emit(state.profileLoaded(result.value));
     } else {
@@ -79,6 +80,7 @@ class ProfileCubit extends Cubit<ProfileState> {
       email: d.email,
       avatarUrl: d.avatarUrl,
     );
+    if (isClosed) return;
     if (result is Success<Profile>) {
       emit(state.profileLoaded(result.value));
     } else {
@@ -100,6 +102,7 @@ class ProfileCubit extends Cubit<ProfileState> {
 
   Future<void> loadRoles(String localeCode) async {
     final roles = await _loadAssignedRoles(localeCode);
+    if (isClosed) return;
     emit(state.withRoles(roles));
   }
 
@@ -108,6 +111,7 @@ class ProfileCubit extends Cubit<ProfileState> {
   Future<void> loadPii() async {
     emit(state.piiLoading());
     final result = await _loadPii();
+    if (isClosed) return;
     if (result is Success<PiiBundle>) {
       emit(state.piiLoaded(result.value));
     } else {
@@ -125,6 +129,7 @@ class ProfileCubit extends Cubit<ProfileState> {
     if (pii == null) return;
     emit(state.piiSaving());
     final result = await _updatePii.saveLegalName(name);
+    if (isClosed) return;
     if (result is Success<void>) {
       emit(
         state.piiLoaded(
@@ -150,6 +155,7 @@ class ProfileCubit extends Cubit<ProfileState> {
     if (pii == null) return;
     emit(state.piiSaving());
     final result = await _updatePii.saveNationalId(id);
+    if (isClosed) return;
     if (result is Success<void>) {
       emit(
         state.piiLoaded(
@@ -175,6 +181,7 @@ class ProfileCubit extends Cubit<ProfileState> {
     if (pii == null) return;
     emit(state.piiSaving());
     final result = await _updatePii.saveContactMethods(methods);
+    if (isClosed) return;
     if (result is Success<void>) {
       emit(
         state.piiLoaded(

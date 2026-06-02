@@ -109,6 +109,7 @@ class AppSettingsEditorCubit extends Cubit<AppSettingsEditorState> {
   Future<void> load() async {
     emit(const AppSettingsEditorLoading());
     final result = await _loadAllSettings();
+    if (isClosed) return;
     switch (result) {
       case Success<List<AppSetting>>(:final value):
         emit(AppSettingsEditorLoaded(settings: value));
@@ -139,6 +140,7 @@ class AppSettingsEditorCubit extends Cubit<AppSettingsEditorState> {
     );
 
     final result = await _updateSetting(key, value);
+    if (isClosed) return null;
     switch (result) {
       case Success<AppSetting>(:final value):
         // Update just the changed row in the local list, then clear saving state.

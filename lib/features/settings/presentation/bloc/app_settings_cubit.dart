@@ -47,6 +47,7 @@ class AppSettingsCubit extends Cubit<AppSettingsState> {
   Future<void> load() async {
     emit(state.copyWith(status: AppSettingsStatus.loading));
     final result = await _loadPublicSettings();
+    if (isClosed) return;
     switch (result) {
       case Success(:final value):
         emit(

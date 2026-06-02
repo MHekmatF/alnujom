@@ -88,10 +88,14 @@ class SupabaseHomeFeedDatasource {
         Map<String, dynamic>.from(r as Map),
       );
       // Resolve the agency logo public URL (agency-assets bucket) when present.
+      // Guard against double-prefix: logo_path may already be a full public URL
+      // (stored by uploadAgencyAsset which calls getPublicUrl at upload time).
+      // When it starts with 'http', use it as-is; otherwise call getPublicUrl.
       final logoPath = dto.agencyLogoPath;
       if (logoPath != null && logoPath.isNotEmpty) {
-        final logoUrl =
-            _client.storage.from('agency-assets').getPublicUrl(logoPath);
+        final logoUrl = logoPath.startsWith('http')
+            ? logoPath
+            : _client.storage.from('agency-assets').getPublicUrl(logoPath);
         dto = dto.copyWithAgencyLogoUrl(logoUrl);
       }
       final path = dto.mainImage?.storagePath;

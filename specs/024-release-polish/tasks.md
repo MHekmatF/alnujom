@@ -78,11 +78,11 @@
 **Goal**: Fix the named carried-over items so the golden paths + crash stream are clean (R-215). Phase 19 D-1/2/3 are **already done** (verify only); FE-1 stays a **future spec**.
 **Independent Test**: fast back-navigation mid-load shows **no** "emit after close" errors; an approved agency's logo renders (no broken-image placeholder).
 
-- [ ] T025 [P] [US6] Fix the **agency-logo double-prefix**: amend `lib/features/agency/data/datasources/supabase_agency_datasource.dart` to store only the object **path** (not the full public URL) and/or amend `lib/features/agency/presentation/widgets/agency_badge.dart` to detect an already-absolute URL and skip re-prefixing — **read-time fix, no migration/backfill** (R-215)
-- [ ] T026 [P] [US6] Add `if (isClosed) return;` before `emit` in `AdSlotCubit.load` (`lib/features/ads/presentation/bloc/ad_slot_cubit.dart:41`)
-- [ ] T027 [P] [US6] Add the same guard in `AgencyVerificationCubit.load` (`lib/features/agency/presentation/bloc/agency_verification_cubit.dart:101`)
-- [ ] T028 [P] [US6] Add the same guard in `ProfileCubit.load` (`lib/features/profile/presentation/cubit/profile_cubit.dart:37`)
-- [ ] T029 [US6] **Sweep** the codebase for the same async-cubit-load-then-`emit` pattern (cubits/blocs that `await` then `emit` without an `isClosed` guard); add the guard where found; record the list in the commit message (depends on T026, T027, T028)
+- [X] T025 [P] [US6] Fix the **agency-logo double-prefix**: amend `lib/features/agency/data/datasources/supabase_agency_datasource.dart` to store only the object **path** (not the full public URL) and/or amend `lib/features/agency/presentation/widgets/agency_badge.dart` to detect an already-absolute URL and skip re-prefixing — **read-time fix, no migration/backfill** (R-215)
+- [X] T026 [P] [US6] Add `if (isClosed) return;` before `emit` in `AdSlotCubit.load` (`lib/features/ads/presentation/bloc/ad_slot_cubit.dart:41`)
+- [X] T027 [P] [US6] Add the same guard in `AgencyVerificationCubit.load` (`lib/features/agency/presentation/bloc/agency_verification_cubit.dart:101`)
+- [X] T028 [P] [US6] Add the same guard in `ProfileCubit.load` (`lib/features/profile/presentation/cubit/profile_cubit.dart:37`)
+- [X] T029 [US6] **Sweep** the codebase for the same async-cubit-load-then-`emit` pattern (cubits/blocs that `await` then `emit` without an `isClosed` guard); add the guard where found; record the list in the commit message (depends on T026, T027, T028)
 - [ ] T030 [US6] Run `flutter analyze` — **acceptance (record outcome)**: exercise the AdSlot / AgencyVerification / Profile navigations with fast back-nav → **no** "emit after close"; open an approved agency → logo renders (SC-009). **⚠️ PARTIAL —** on-device exercise deferred to QV. (depends on T025–T029)
 
 **Checkpoint**: the recurring async-cubit noise is gone and agency logos render — the crash stream (CR) will show real problems only.

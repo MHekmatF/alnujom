@@ -87,6 +87,7 @@ class AgencyVerificationCubit extends Cubit<AgencyVerificationState> {
   Future<void> load(String agencyId) async {
     emit(const AgencyVerificationLoading());
     final result = await _loadAgencyById(agencyId);
+    if (isClosed) return;
     switch (result) {
       case Success<Agency?>(:final value):
         if (value == null) {
@@ -95,6 +96,7 @@ class AgencyVerificationCubit extends Cubit<AgencyVerificationState> {
           // Also load the latest verification request (best-effort) so a
           // rejected agency can surface its rejection reason (D-3).
           final reqResult = await _loadRequest(agencyId);
+          if (isClosed) return;
           final request = reqResult is Success<AgencyVerificationRequest?>
               ? reqResult.value
               : null;
@@ -121,6 +123,7 @@ class AgencyVerificationCubit extends Cubit<AgencyVerificationState> {
       registrationNumber: registrationNumber,
       evidenceUrls: evidenceUrls,
     );
+    if (isClosed) return;
     switch (result) {
       case Success<String>():
         emit(current.copyWith(submitting: false, submitted: true));

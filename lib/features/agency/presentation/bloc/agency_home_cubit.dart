@@ -109,6 +109,7 @@ class AgencyHomeCubit extends Cubit<AgencyHomeState> {
     emit(const AgencyHomeLoading());
 
     final ownedResult = await _loadMyAgency();
+    if (isClosed) return;
     if (ownedResult is Success<Agency?> && ownedResult.value != null) {
       emit(AgencyHomeOwner(ownedResult.value!));
       return;
@@ -120,6 +121,7 @@ class AgencyHomeCubit extends Cubit<AgencyHomeState> {
 
     // No owned agency — check for an ACTIVE membership in someone else's agency.
     final memberResult = await _loadMyActiveAgencies();
+    if (isClosed) return;
     if (memberResult is Success<List<Agency>> && memberResult.value.isNotEmpty) {
       emit(AgencyHomeMember(memberResult.value.first));
       return;
@@ -134,10 +136,12 @@ class AgencyHomeCubit extends Cubit<AgencyHomeState> {
     // them with no path to Accept). Invitation read failure is non-fatal: fall
     // back to the plain create form.
     final invResult = await _loadInvitations();
+    if (isClosed) return;
     if (invResult is Success<List<AgencyMember>> && invResult.value.isNotEmpty) {
       final enriched = <AgencyInvitation>[];
       for (final m in invResult.value) {
         final agencyResult = await _loadAgencyById(m.agencyId);
+        if (isClosed) return;
         final agency =
             agencyResult is Success<Agency?> ? agencyResult.value : null;
         enriched.add(
