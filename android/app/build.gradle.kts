@@ -18,7 +18,7 @@ if (file("google-services.json").exists()) {
 // If the file is absent the release build FAILS — there is NO debug-signed fallback.
 // (Mirrors the existing google-services.json conditional-on-gitignored-file pattern above,
 // but inverted: absent key.properties is an ERROR, not a degraded-mode path.)
-val keystorePropertiesFile = rootProject.file("app/key.properties")
+val keystorePropertiesFile = rootProject.file("key.properties")
 val keystoreProperties = java.util.Properties().also { props ->
     if (keystorePropertiesFile.exists()) {
         keystorePropertiesFile.inputStream().use { props.load(it) }

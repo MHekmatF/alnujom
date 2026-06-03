@@ -1,0 +1,20 @@
+# android/key.properties.example — RELEASE SIGNING TEMPLATE (Phase 24 / R-213)
+#
+# Copy this file to `android/key.properties` (that real file is gitignored — NEVER commit it)
+# and fill in your REAL values. The release build FAILS CLOSED if this file or any key is missing
+# (there is no debug-signed fallback). The keystore (.jks) MUST live OUTSIDE the repository.
+#
+# 1) Generate the keystore ONCE (keep the passwords safe; you need the SAME key for every future update):
+#      keytool -genkey -v -keystore C:/Users/<you>/alnujom-release.jks \
+#        -keyalg RSA -keysize 2048 -validity 10000 -alias alnujom
+#
+# 2) Copy this file:  android/key.properties.example  ->  android/key.properties
+#
+# 3) Fill in the four values below. Use an ABSOLUTE path for storeFile
+#    (forward slashes work on Windows). Then build:
+#      flutter build apk --release --dart-define-from-file=.env.json
+
+storeFile=C:/Users/Hekmat/alnujom-release.jks
+storePassword=CHANGE_ME
+keyAlias=alnujom
+keyPassword=CHANGE_ME
