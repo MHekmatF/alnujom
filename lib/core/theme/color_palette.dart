@@ -61,50 +61,54 @@ final class ModernPalette extends ColorPalette {
   @override
   String get name => 'modern';
 
+  // Phase 25 restyle — "keep & refine the blue": trustworthy royal-blue primary
+  // (the established identity) kept, with a warm coral accent (Airbnb/VRBO warmth)
+  // for highlights, cleaner cool-neutral surfaces (Zillow), and deeper ink/muted
+  // text for stronger contrast (WCAG AA; avoids the washed-out-gray trap).
   @override
   AppPaletteTokens get _lightTokens => const AppPaletteTokens(
     primary: Color(0xFF1D4ED8),
     onPrimary: Color(0xFFFFFFFF),
-    primaryContainer: Color(0xFFDBEAFE),
-    onPrimaryContainer: Color(0xFF0B2354),
-    accent: Color(0xFF06B6D4),
+    primaryContainer: Color(0xFFE4ECFD),
+    onPrimaryContainer: Color(0xFF0A234F),
+    accent: Color(0xFFEF7C46),
     secondary: Color(0xFF0F172A),
     onSecondary: Color(0xFFFFFFFF),
     tertiary: Color(0xFFF57C00),
-    success: Color(0xFF16A34A),
-    warning: Color(0xFFF59E0B),
+    success: Color(0xFF15803D),
+    warning: Color(0xFFD97706),
     error: Color(0xFFDC2626),
-    surface: Color(0xFFF8FAFC),
-    surfaceVariant: Color(0xFFE1E5EE),
+    surface: Color(0xFFF6F8FC),
+    surfaceVariant: Color(0xFFEDF1F8),
     card: Color(0xFFFFFFFF),
-    outline: Color(0xFFE2E8F0),
-    outlineStrong: Color(0xFF74777F),
-    onSurface: Color(0xFF111827),
-    onSurfaceVariant: Color(0xFF64748B),
-    textMuted: Color(0xFF94A3B8),
+    outline: Color(0xFFE3E9F1),
+    outlineStrong: Color(0xFF64748B),
+    onSurface: Color(0xFF0F1A2E),
+    onSurfaceVariant: Color(0xFF566276),
+    textMuted: Color(0xFF7C8AA0),
   );
 
   @override
   AppPaletteTokens get _darkTokens => const AppPaletteTokens(
-    primary: Color(0xFF60A5FA),
-    onPrimary: Color(0xFF0B1220),
-    primaryContainer: Color(0xFF1E3A8A),
-    onPrimaryContainer: Color(0xFFDBEAFE),
-    accent: Color(0xFF22D3EE),
+    primary: Color(0xFF7DB0FF),
+    onPrimary: Color(0xFF0A1A33),
+    primaryContainer: Color(0xFF1E3A78),
+    onPrimaryContainer: Color(0xFFDCE8FF),
+    accent: Color(0xFFFF9E6B),
     secondary: Color(0xFFE2E8F0),
     onSecondary: Color(0xFF0B1220),
     tertiary: Color(0xFFFFB74D),
-    success: Color(0xFF22C55E),
+    success: Color(0xFF4ADE80),
     warning: Color(0xFFFBBF24),
     error: Color(0xFFF87171),
-    surface: Color(0xFF0B1220),
-    surfaceVariant: Color(0xFF3E4856),
-    card: Color(0xFF0F172A),
-    outline: Color(0xFF1E293B),
-    outlineStrong: Color(0xFF8E9099),
-    onSurface: Color(0xFFF8FAFC),
-    onSurfaceVariant: Color(0xFF94A3B8),
-    textMuted: Color(0xFF64748B),
+    surface: Color(0xFF0B111E),
+    surfaceVariant: Color(0xFF1B2433),
+    card: Color(0xFF131C2B),
+    outline: Color(0xFF26303F),
+    outlineStrong: Color(0xFF94A3B8),
+    onSurface: Color(0xFFF1F5FB),
+    onSurfaceVariant: Color(0xFFA7B4C7),
+    textMuted: Color(0xFF7E8DA3),
   );
 }
 
