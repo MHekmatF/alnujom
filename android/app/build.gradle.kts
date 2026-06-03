@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -19,7 +21,7 @@ if (file("google-services.json").exists()) {
 // (Mirrors the existing google-services.json conditional-on-gitignored-file pattern above,
 // but inverted: absent key.properties is an ERROR, not a degraded-mode path.)
 val keystorePropertiesFile = rootProject.file("key.properties")
-val keystoreProperties = java.util.Properties().also { props ->
+val keystoreProperties = Properties().also { props ->
     if (keystorePropertiesFile.exists()) {
         keystorePropertiesFile.inputStream().use { props.load(it) }
     }
