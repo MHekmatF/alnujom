@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'core/di/injection.dart';
 import 'core/flags/app_flags.dart';
 import 'core/localization/locale_cubit.dart';
+import 'core/routing/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/color_palette.dart';
 import 'core/theme/palette_cubit.dart';
@@ -136,7 +137,15 @@ class _AppState extends State<App> with WidgetsBindingObserver {
                             current.status == AppUpdateStatus.updateAvailable &&
                             current.manifest != null,
                         listener: (listenerContext, state) {
-                          showUpdatePrompt(listenerContext, state.manifest!);
+                          // NOTE: `listenerContext` here is the MaterialApp.router
+                          // `builder` context, which sits ABOVE the GoRouter
+                          // Navigator — showDialog with it finds no Navigator and
+                          // silently fails. Use the root navigator context so the
+                          // dialog attaches correctly (Phase 24 UP live-QA fix).
+                          final navContext = rootNavigatorKey.currentContext;
+                          if (navContext != null) {
+                            showUpdatePrompt(navContext, state.manifest!);
+                          }
                         },
                         child: NotificationPushListener(
                           child: Stack(

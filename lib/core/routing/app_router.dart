@@ -242,6 +242,16 @@ abstract final class AppRouteNames {
   static const themeGallery = 'theme-gallery';
 }
 
+/// Root navigator key for the app's [GoRouter].
+///
+/// Needed to show app-wide dialogs/overlays from a context that sits ABOVE the
+/// route Navigator — e.g. the Phase 24 update prompt, which is triggered from
+/// the `MaterialApp.router` `builder` (whose context has no Navigator below it).
+/// `rootNavigatorKey.currentContext` resolves to the GoRouter root Navigator,
+/// so `showDialog` can attach correctly.
+final GlobalKey<NavigatorState> rootNavigatorKey =
+    GlobalKey<NavigatorState>(debugLabel: 'rootNavigator');
+
 GoRouter buildAppRouter({
   required AppLogger logger,
   required AuthBloc authBloc,
@@ -254,6 +264,7 @@ GoRouter buildAppRouter({
   ]);
 
   return GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: AppRoutes.splash,
     debugLogDiagnostics: kDebugMode,
     refreshListenable: refreshListenable,
