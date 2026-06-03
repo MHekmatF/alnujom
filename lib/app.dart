@@ -51,6 +51,18 @@ class _AppState extends State<App> with WidgetsBindingObserver {
     // Cold-start update check — fail-silent (FR-010); dialog shown from the
     // BlocListener in [build] when [UpdateAvailable] is emitted.
     _appUpdateCubit.check();
+    // Phase 24 (CR / T007) — QA-only forced-crash affordance, gated by the
+    // `SENTRY_TEST_CRASH` dart-define. INERT in the shipped release (the flag
+    // defaults false and is never set in a release build). Throws an uncaught
+    // async error so the runZonedGuarded / PlatformDispatcher.onError path
+    // routes it to CrashReporter.recordError — used to verify (a) a forced
+    // crash reaches the Sentry dashboard and (b) an unreachable DSN never
+    // blocks or crashes the app (FR-007).
+    if (const bool.fromEnvironment('SENTRY_TEST_CRASH')) {
+      Future<void>.delayed(const Duration(seconds: 3), () {
+        throw StateError('SENTRY_TEST_CRASH — forced test exception (CR/T007)');
+      });
+    }
   }
 
   @override
