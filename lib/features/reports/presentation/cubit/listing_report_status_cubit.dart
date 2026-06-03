@@ -51,6 +51,7 @@ class ListingReportStatusCubit
   Future<void> load(String listingId) async {
     emit(const ListingReportStatusLoading());
     final result = await _loadMyReportForListing(listingId);
+    if (isClosed) return;
     switch (result) {
       case Success<Report?>(:final value):
         emit(ListingReportStatusLoaded(value));

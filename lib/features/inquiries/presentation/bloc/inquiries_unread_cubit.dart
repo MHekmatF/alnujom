@@ -33,6 +33,7 @@ class InquiriesUnreadCubit extends Cubit<InquiriesUnreadState> {
   Future<void> refresh() async {
     final ownsResult = await _checkOwnsApprovedListing();
     final countResult = await _loadUnreadCount();
+    if (isClosed) return;
 
     final canShowEntry = ownsResult is Success<bool>
         ? ownsResult.value

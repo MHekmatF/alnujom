@@ -49,6 +49,7 @@ class ReportSubmissionCubit extends Cubit<ReportSubmissionState> {
     emit(state.copyWith(isSubmitting: true, clearError: true));
 
     final result = await _submitReport(listingId, reason, state.note);
+    if (isClosed) return;
 
     switch (result) {
       case Success<String>():

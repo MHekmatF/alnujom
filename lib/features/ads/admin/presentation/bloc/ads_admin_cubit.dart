@@ -101,6 +101,7 @@ class AdsAdminCubit extends Cubit<AdsAdminState> {
     _includeArchived = includeArchived;
     emit(const AdsAdminLoading());
     final result = await _loadAds(includeArchived: includeArchived);
+    if (isClosed) return;
     _emitListResult(result, includeArchived: includeArchived);
   }
 
@@ -132,6 +133,7 @@ class AdsAdminCubit extends Cubit<AdsAdminState> {
       isActive: isActive,
       placements: placements,
     );
+    if (isClosed) return;
     switch (result) {
       case Success():
         emit(const AdsAdminSaveSuccess());
@@ -171,6 +173,7 @@ class AdsAdminCubit extends Cubit<AdsAdminState> {
       isActive: isActive,
       placements: placements,
     );
+    if (isClosed) return;
     switch (result) {
       case Success():
         emit(const AdsAdminSaveSuccess());
@@ -186,6 +189,7 @@ class AdsAdminCubit extends Cubit<AdsAdminState> {
   Future<void> setAdActive(String adId, {required bool isActive}) async {
     emit(const AdsAdminSaving());
     final result = await _setAdActive(adId: adId, isActive: isActive);
+    if (isClosed) return;
     switch (result) {
       case Success():
         emit(const AdsAdminSaveSuccess());
@@ -201,6 +205,7 @@ class AdsAdminCubit extends Cubit<AdsAdminState> {
   Future<void> archiveAd(String adId) async {
     emit(const AdsAdminSaving());
     final result = await _archiveAd(adId);
+    if (isClosed) return;
     switch (result) {
       case Success():
         emit(const AdsAdminSaveSuccess());
@@ -221,6 +226,7 @@ class AdsAdminCubit extends Cubit<AdsAdminState> {
   }) async {
     emit(const AdsAdminSaving());
     final result = await _uploadAdImage(bytes: bytes, contentType: contentType);
+    if (isClosed) return;
     switch (result) {
       case Success(:final value):
         emit(AdsAdminImageUploaded(value));

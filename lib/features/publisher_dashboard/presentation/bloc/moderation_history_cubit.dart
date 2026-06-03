@@ -25,6 +25,7 @@ class ModerationHistoryCubit extends Cubit<ModerationHistoryState> {
   Future<void> load(String listingId) async {
     emit(const ModerationHistoryLoading());
     final result = await _loadHistory(listingId);
+    if (isClosed) return;
     switch (result) {
       case Success<List<ModerationHistoryEntry>>(:final value):
         emit(ModerationHistoryLoaded(value));

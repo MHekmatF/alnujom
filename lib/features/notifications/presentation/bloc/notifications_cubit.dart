@@ -36,6 +36,7 @@ class NotificationsCubit extends Cubit<NotificationsState> {
   Future<void> load() async {
     emit(const NotificationsState.loading());
     final result = await _loadNotifications(limit: _kPageSize, offset: 0);
+    if (isClosed) return;
     switch (result) {
       case Success(:final value):
         emit(
@@ -62,6 +63,7 @@ class NotificationsCubit extends Cubit<NotificationsState> {
       limit: _kPageSize,
       offset: current.offset,
     );
+    if (isClosed) return;
     switch (result) {
       case Success(:final value):
         emit(

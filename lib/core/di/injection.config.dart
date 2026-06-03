@@ -172,6 +172,18 @@ import '../../features/agency/presentation/bloc/agency_members_bloc.dart'
     as _i71;
 import '../../features/agency/presentation/bloc/agency_verification_cubit.dart'
     as _i524;
+import '../../features/app_update/data/datasources/package_info_version_source.dart'
+    as _i736;
+import '../../features/app_update/data/datasources/supabase_manifest_datasource.dart'
+    as _i523;
+import '../../features/app_update/data/repositories/app_update_repository_impl.dart'
+    as _i201;
+import '../../features/app_update/domain/repositories/app_update_repository.dart'
+    as _i756;
+import '../../features/app_update/domain/usecases/check_for_update.dart'
+    as _i933;
+import '../../features/app_update/presentation/bloc/app_update_cubit.dart'
+    as _i1067;
 import '../../features/auth/data/datasources/supabase_auth_datasource.dart'
     as _i76;
 import '../../features/auth/data/repositories/auth_repository_impl.dart'
@@ -503,6 +515,8 @@ import '../data/repositories/permission_catalog_repository_impl.dart' as _i739;
 import '../localization/locale_cubit.dart' as _i960;
 import '../logging/app_logger.dart' as _i354;
 import '../logging/console_logger.dart' as _i1026;
+import '../logging/crash_reporter.dart' as _i237;
+import '../logging/sentry_crash_reporter.dart' as _i889;
 import '../messaging/push_messaging_service.dart' as _i563;
 import '../network/realtime_signals.dart' as _i591;
 import '../network/realtime_signals_impl.dart' as _i854;
@@ -525,6 +539,9 @@ _i174.GetIt $initGetIt(
   final gh = _i526.GetItHelper(getIt, environment, environmentFilter);
   final supabaseModule = _$SupabaseModule();
   final routerModule = _$RouterModule();
+  gh.factory<_i736.PackageInfoVersionSource>(
+    () => const _i736.PackageInfoVersionSource(),
+  );
   gh.factory<_i207.SupabaseListingsDatasource>(
     () => _i207.SupabaseListingsDatasource(),
   );
@@ -563,6 +580,7 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i650.PermissionChecker>(
     () => _i650.PermissionChecker(gh<_i1015.PermissionCatalogRepository>()),
   );
+  gh.lazySingleton<_i237.CrashReporter>(() => _i889.SentryCrashReporter());
   gh.lazySingleton<_i354.AppLogger>(() => _i1026.ConsoleLogger());
   gh.lazySingleton<_i591.RealtimeSignals>(
     () => _i854.RealtimeSignalsImpl(gh<_i354.AppLogger>()),
@@ -590,6 +608,9 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i514.SupabaseAgencyDatasource>(
     () => _i514.SupabaseAgencyDatasource(gh<_i454.SupabaseClient>()),
+  );
+  gh.factory<_i523.SupabaseManifestDatasource>(
+    () => _i523.SupabaseManifestDatasource(gh<_i454.SupabaseClient>()),
   );
   gh.factory<_i311.SupabaseCurrenciesDatasource>(
     () => _i311.SupabaseCurrenciesDatasource(gh<_i454.SupabaseClient>()),
@@ -639,6 +660,13 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i973.MapRepository>(
     () => _i457.MapRepositoryImpl(gh<_i245.SupabaseMapDatasource>()),
+  );
+  gh.lazySingleton<_i756.AppUpdateRepository>(
+    () => _i201.AppUpdateRepositoryImpl(
+      gh<_i523.SupabaseManifestDatasource>(),
+      gh<_i736.PackageInfoVersionSource>(),
+      gh<_i354.AppLogger>(),
+    ),
   );
   gh.lazySingleton<_i155.ListingReviewRepository>(
     () => _i1072.ListingReviewRepositoryImpl(
@@ -747,6 +775,9 @@ _i174.GetIt $initGetIt(
   );
   gh.lazySingleton<_i144.OnboardingSeenStorage>(
     () => _i144.OnboardingSeenStorage(gh<_i354.AppLogger>()),
+  );
+  gh.factory<_i933.CheckForUpdate>(
+    () => _i933.CheckForUpdate(gh<_i756.AppUpdateRepository>()),
   );
   gh.factory<_i195.CreateAgency>(
     () => _i195.CreateAgency(gh<_i1006.AgencyRepository>()),
@@ -1273,6 +1304,9 @@ _i174.GetIt $initGetIt(
       gh<_i880.CreateArea>(),
       gh<_i188.UpdateArea>(),
     ),
+  );
+  gh.lazySingleton<_i1067.AppUpdateCubit>(
+    () => _i1067.AppUpdateCubit(gh<_i933.CheckForUpdate>()),
   );
   gh.factory<_i807.OnboardingCubit>(
     () => _i807.OnboardingCubit(gh<_i430.OnboardingRepository>()),

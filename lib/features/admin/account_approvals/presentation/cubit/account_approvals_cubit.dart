@@ -23,6 +23,7 @@ class AccountApprovalsCubit extends Cubit<AccountApprovalsState> {
   Future<void> loadPending() async {
     emit(const AccountApprovalsLoading());
     final result = await _loadPendingQueue();
+    if (isClosed) return;
     switch (result) {
       case Success<List<AccountApprovalRequest>>(:final value):
         emit(AccountApprovalsLoaded(value));
@@ -36,6 +37,7 @@ class AccountApprovalsCubit extends Cubit<AccountApprovalsState> {
     if (current == null) return;
     emit(AccountApprovalsMutating(current));
     final result = await _approveAccount(userId: userId);
+    if (isClosed) return;
     if (result is FailureResult<void>) {
       emit(AccountApprovalsError(result.failure));
       return;
@@ -48,6 +50,7 @@ class AccountApprovalsCubit extends Cubit<AccountApprovalsState> {
     if (current == null) return;
     emit(AccountApprovalsMutating(current));
     final result = await _rejectAccount(userId: userId, reason: reason);
+    if (isClosed) return;
     if (result is FailureResult<void>) {
       emit(AccountApprovalsError(result.failure));
       return;

@@ -61,6 +61,7 @@ class AgencyModerationCubit extends Cubit<AgencyModerationState> {
   Future<void> approve(String agencyId) async {
     emit(const AgencyModerationLoading());
     final result = await _approveAgency(agencyId);
+    if (isClosed) return;
     _handleResult(result);
   }
 
@@ -73,6 +74,7 @@ class AgencyModerationCubit extends Cubit<AgencyModerationState> {
     emit(const AgencyModerationLoading());
     final result =
         await _rejectAgency(agencyId, preset: preset, detail: detail);
+    if (isClosed) return;
     _handleResult(result);
   }
 
@@ -80,6 +82,7 @@ class AgencyModerationCubit extends Cubit<AgencyModerationState> {
   Future<void> suspend(String agencyId, {String? reason}) async {
     emit(const AgencyModerationLoading());
     final result = await _suspendAgency(agencyId, reason: reason);
+    if (isClosed) return;
     _handleResult(result);
   }
 
@@ -87,6 +90,7 @@ class AgencyModerationCubit extends Cubit<AgencyModerationState> {
   Future<void> reinstate(String agencyId) async {
     emit(const AgencyModerationLoading());
     final result = await _reinstateAgency(agencyId);
+    if (isClosed) return;
     _handleResult(result);
   }
 

@@ -68,11 +68,13 @@ class AgencyInvitationsCubit extends Cubit<AgencyInvitationsState> {
   Future<void> load() async {
     emit(const AgencyInvitationsLoading());
     final result = await _loadInvitations();
+    if (isClosed) return;
     switch (result) {
       case Success<List<AgencyMember>>(:final value):
         final enriched = <AgencyInvitation>[];
         for (final m in value) {
           final agencyResult = await _loadAgencyById(m.agencyId);
+          if (isClosed) return;
           final Agency? agency =
               agencyResult is Success<Agency?> ? agencyResult.value : null;
           enriched.add(
