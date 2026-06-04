@@ -34,7 +34,8 @@ class HeroSearchBar extends StatelessWidget {
               borderRadius: appRadius(AppRadii.pill),
               child: InkWell(
                 borderRadius: appRadius(AppRadii.pill),
-                onTap: () => context.go(AppRoutes.search),
+                // Typing intent → open Search with the keyboard focused.
+                onTap: () => context.go('${AppRoutes.search}?focus=1'),
                 child: Padding(
                   padding: const EdgeInsetsDirectional.symmetric(
                     horizontal: AppSpacing.lg,

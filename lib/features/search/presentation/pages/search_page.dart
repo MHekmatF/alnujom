@@ -47,11 +47,21 @@ import '../widgets/search_filter_sheet.dart';
 import '../widgets/search_result_card.dart';
 
 class SearchPage extends StatelessWidget {
-  const SearchPage({super.key, this.initialPropertyType});
+  const SearchPage({
+    super.key,
+    this.initialPropertyType,
+    this.autofocus = false,
+  });
 
   /// Set by [GoRouterState.extra] when the user enters via a property-type
-  /// chip on Home. Null when entered via the hero search bar (autofocus).
+  /// chip on Home (pre-filters by type).
   final PropertyType? initialPropertyType;
+
+  /// Phase 25 — only auto-open the keyboard when the user entered with a clear
+  /// typing intent (the Home hero search pill, via `?focus=1`). Browse-intent
+  /// entries (the Search bottom-nav tab, the filter button, ads, category
+  /// chips) leave the keyboard closed so results/filters stay visible.
+  final bool autofocus;
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +73,7 @@ class SearchPage extends StatelessWidget {
       create: (_) =>
           getIt<SearchBloc>()
             ..add(SearchFiltersApplied(filters: initialFilters)),
-      child: _SearchPageView(autofocusSearchBar: initialPropertyType == null),
+      child: _SearchPageView(autofocusSearchBar: autofocus),
     );
   }
 }

@@ -554,8 +554,12 @@ GoRouter buildAppRouter({
       GoRoute(
         path: AppRoutes.search,
         name: AppRouteNames.search,
-        builder: (context, state) =>
-            SearchPage(initialPropertyType: state.extra as PropertyType?),
+        builder: (context, state) => SearchPage(
+          initialPropertyType: state.extra as PropertyType?,
+          // Phase 25: only the Home hero search pill requests keyboard focus
+          // (via `?focus=1`); tab/filter/ad/chip entries browse without it.
+          autofocus: state.uri.queryParameters['focus'] == '1',
+        ),
       ),
 
       // ─── Phase 15 — public map view ───
