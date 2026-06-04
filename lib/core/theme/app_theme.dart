@@ -140,7 +140,7 @@ ThemeData buildAppTheme({
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: colors.card,
+      fillColor: colors.surfaceVariant,
       hintStyle: textStyles.bodyMedium.copyWith(color: colors.textMuted),
       contentPadding: const EdgeInsetsDirectional.symmetric(
         horizontal: AppSpacing.lg,
@@ -201,9 +201,7 @@ ThemeData buildAppTheme({
         borderRadius: BorderRadius.circular(AppRadii.lg),
       ),
       titleTextStyle: textStyles.headlineMedium,
-      contentTextStyle: textStyles.bodyMedium.copyWith(
-        color: colors.onSurface,
-      ),
+      contentTextStyle: textStyles.bodyMedium.copyWith(color: colors.onSurface),
     ),
     dividerTheme: DividerThemeData(
       color: colors.divider,
@@ -219,6 +217,16 @@ ThemeData buildAppTheme({
       actionTextColor: colors.accent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadii.md),
+      ),
+    ),
+    bottomSheetTheme: BottomSheetThemeData(
+      backgroundColor: colors.card,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      showDragHandle: true,
+      dragHandleColor: colors.outlineStrong,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadii.xl)),
       ),
     ),
   );

@@ -239,6 +239,10 @@ node_modules/
 # Local-only override file (developer-specific tweaks)
 .gitignore.local
 
+# Phase 25 UI/UX design reference (Figma Make + Claude design exports) — kept
+# locally as a visual/token reference; not part of the Flutter build.
+UiUX/
+
 # Phase 12 plan-time scratch files (gitignored per tasks.md T005/T006)
 specs/012-listing-approval/.phase10-trigger-bodies.sql
 specs/012-listing-approval/.phase4-log-audit-body.sql
