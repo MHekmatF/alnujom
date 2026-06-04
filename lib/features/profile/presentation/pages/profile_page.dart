@@ -91,10 +91,42 @@ class _ProfileView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _StatusBadge(profile.accountStatus),
-                const SizedBox(height: 16),
-                if (profile.fullName != null)
-                  _InfoRow(l10n.profile_full_name_label, profile.fullName!),
+                // Phase 25 (Claude Design) — identity header: avatar initials +
+                // name + account-status badge.
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 32,
+                      backgroundColor: theme.colorScheme.primaryContainer,
+                      child: Text(
+                        _initials(profile.fullName ?? profile.username ?? '؟'),
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          color: theme.colorScheme.onPrimaryContainer,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.lg),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            profile.fullName ??
+                                (profile.username != null
+                                    ? '@${profile.username}'
+                                    : (profile.phone ?? '')),
+                            style: theme.textTheme.titleLarge,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          _StatusBadge(profile.accountStatus),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.xl),
                 if (profile.username != null)
                   _InfoRow(l10n.profile_username_label, '@${profile.username}'),
                 if (profile.phone != null)
@@ -260,4 +292,18 @@ class _InfoRow extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Up-to-two-character avatar initials from a display name.
+String _initials(String name) {
+  final parts = name
+      .trim()
+      .split(RegExp(r'\s+'))
+      .where((p) => p.isNotEmpty)
+      .toList();
+  if (parts.isEmpty) return '؟';
+  if (parts.length == 1) {
+    return parts.first.substring(0, parts.first.length >= 2 ? 2 : 1);
+  }
+  return parts.first.substring(0, 1) + parts.last.substring(0, 1);
 }
