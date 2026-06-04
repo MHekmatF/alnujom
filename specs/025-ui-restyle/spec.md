@@ -28,6 +28,15 @@ A cohesive new visual identity applied across the app: refreshed tokens + compon
 ## Design direction (anchor prompt)
 > "Modern, trustworthy mobile UI for **AlNujom (النجوم — 'the stars')**, an **Arabic-first (RTL) Syrian real-estate marketplace**. Mood: trustworthy, calm, premium-but-accessible — not flashy. Cohesive palette (confident primary + neutral surfaces + clear semantic colors), clean type scale, generous spacing, soft rounded cards, subtle depth. Full **light + dark** and **RTL Arabic** support. Avoid AI-slop clichés (purple gradients, glassmorphism overload, generic SaaS look). Output color/type/spacing tokens."
 
+## Implemented design decision (2026-06)
+Two full UI/UX designs were generated (Figma Make + Claude design, kept under `UiUX/`). The user chose the **Claude Design** language as AlNujom's identity, with the genuinely-better Figma idea grafted in:
+- **Primary:** deep, trustworthy blue `#13507D` (light) / `#6BB0E6` (dark) — supersedes the earlier "keep the bright royal blue" note.
+- **Accent:** warm coral `#F4795B` / `#FF8E72` (favorites, CTAs, brand companion star).
+- **Trust signal:** a distinct **green** verified-agency badge (`#1F7A4D` / `#57C48C`).
+- **Graft from Figma Make:** visually distinct **sale (blue) vs rent (green)** purpose pills.
+- **Branding:** a hand-authored two-tone star ("sparkle") mark (`branding/*.svg` → adaptive icon + light/dark splash), matching the in-app `BrandMark`.
+- Full token set + the rationale are documented in `DESIGN.md` at the repo root.
+
 ## Execution order (token-first → components → screens)
 1. **Branding** — logo / adaptive icon / light+dark splash → replace placeholder.
 2. **Foundation tokens** — palette, type scale, spacing, radii, shadows, motion (`lib/core/theme/*`).
