@@ -93,22 +93,26 @@ flutter:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: false
-  image_path: "assets/branding/icon.png"
-  adaptive_icon_background: "#1D4ED8"
+  # Legacy (non-adaptive) icon: the white star mark on the deep-blue brand
+  # background (opaque). The adaptive icon composes the transparent white mark
+  # over the same brand background.
+  image_path: "assets/branding/icon_legacy.png"
+  adaptive_icon_background: "#13507D"
   adaptive_icon_foreground: "assets/branding/icon.png"
   min_sdk_android: 24
 
 # Phase 24 RB — flutter_native_splash config (R-212; light + dark)
+# Phase 25 — repalette to the Claude Design brand (deep blue + dark navy).
 # Generates splash drawables + values/values-night
 flutter_native_splash:
   color: "#FFFFFF"
   image: assets/branding/splash_light.png
-  color_dark: "#0B1220"
+  color_dark: "#0E141A"
   image_dark: assets/branding/splash_dark.png
   android: true
   ios: false
   android_12:
-    color: "#1D4ED8"
+    color: "#13507D"
     image: assets/branding/icon.png
-    color_dark: "#0B1220"
+    color_dark: "#0E141A"
     image_dark: assets/branding/icon.png

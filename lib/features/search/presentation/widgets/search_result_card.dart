@@ -15,7 +15,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../agency/presentation/widgets/agency_badge.dart';
 import '../../../favorites/presentation/widgets/favorite_heart_button.dart';
@@ -29,6 +33,8 @@ class SearchResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     final isAr = Localizations.localeOf(context).languageCode == 'ar';
     final governorateName = isAr
         ? item.governorateNameAr
@@ -42,6 +48,10 @@ class SearchResultCard extends StatelessWidget {
     return Card(
       clipBehavior: Clip.antiAlias,
       margin: const EdgeInsetsDirectional.only(bottom: AppSpacing.sm),
+      shape: RoundedRectangleBorder(
+        borderRadius: appRadius(AppRadii.lg),
+        side: BorderSide(color: colors.outline),
+      ),
       child: InkWell(
         // context.push (not context.go) so SearchPage stays in the stack and
         // SearchBloc survives the back-navigation (R-77 / SC-005).
@@ -66,7 +76,10 @@ class SearchResultCard extends StatelessWidget {
                     PositionedDirectional(
                       top: AppSpacing.xs,
                       end: AppSpacing.xs,
-                      child: FavoriteHeartButton(listingId: item.id),
+                      child: FavoriteHeartButton(
+                        listingId: item.id,
+                        style: FavoriteHeartStyle.onImage,
+                      ),
                     ),
                     // Phase 19 D-1: verified-agency badge (compact overlay).
                     // agencyName is non-null only for approved agencies.
@@ -122,11 +135,9 @@ class SearchResultCard extends StatelessWidget {
                             item.primaryAmount.toStringAsFixed(0),
                             item.primaryCurrency,
                           ),
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
+                          style: styles.priceMedium.copyWith(
+                            color: colors.onSurface,
+                          ),
                           textAlign: TextAlign.start,
                         ),
                       ),

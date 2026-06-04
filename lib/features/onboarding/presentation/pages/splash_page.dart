@@ -4,6 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/brand_mark.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
@@ -59,7 +63,10 @@ class _SplashPageState extends State<SplashPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    // Branded splash on the primary surface — matches the native splash so the
+    // hand-off is seamless (white star mark + coral companion + wordmark).
     return BlocListener<AuthBloc, AuthState>(
       listenWhen: (_, curr) => curr is! Authenticating,
       listener: (context, state) {
@@ -67,8 +74,26 @@ class _SplashPageState extends State<SplashPage> {
         _tryNavigate();
       },
       child: Scaffold(
+        backgroundColor: colors.primary,
         body: Center(
-          child: Text(l10n.appTitle, style: theme.textTheme.displayLarge),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              BrandMark(
+                size: 88,
+                color: colors.onPrimary,
+                accentColor: colors.accent,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              Text(
+                l10n.appTitle,
+                style: styles.displayMedium.copyWith(
+                  color: colors.onPrimary,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

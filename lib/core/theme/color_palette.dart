@@ -61,50 +61,62 @@ final class ModernPalette extends ColorPalette {
   @override
   String get name => 'modern';
 
+  // Phase 25 restyle — "Claude Design" language (user-chosen): a deep, calm,
+  // trustworthy blue primary, a warm coral accent (favorites/CTAs), clean
+  // cool-neutral surfaces, and a distinct GREEN verified-agency badge (trust is
+  // the product). Values ported 1:1 from UiUX/CLaude Design/tokens.css. WCAG AA.
   @override
   AppPaletteTokens get _lightTokens => const AppPaletteTokens(
-    primary: Color(0xFF1D4ED8),
+    primary: Color(0xFF13507D),
     onPrimary: Color(0xFFFFFFFF),
-    primaryContainer: Color(0xFFDBEAFE),
-    onPrimaryContainer: Color(0xFF0B2354),
-    accent: Color(0xFF06B6D4),
+    primaryContainer: Color(0xFFD7E6F3),
+    onPrimaryContainer: Color(0xFF082B44),
+    accent: Color(0xFFF4795B),
+    onAccent: Color(0xFFFFFFFF),
+    accentContainer: Color(0xFFFBE2DA),
     secondary: Color(0xFF0F172A),
     onSecondary: Color(0xFFFFFFFF),
-    tertiary: Color(0xFFF57C00),
-    success: Color(0xFF16A34A),
-    warning: Color(0xFFF59E0B),
-    error: Color(0xFFDC2626),
-    surface: Color(0xFFF8FAFC),
-    surfaceVariant: Color(0xFFE1E5EE),
+    tertiary: Color(0xFFC8842F),
+    success: Color(0xFF2E9E6B),
+    warning: Color(0xFFC98318),
+    error: Color(0xFFD23F3F),
+    surface: Color(0xFFF6F8FB),
+    surfaceVariant: Color(0xFFECF1F6),
     card: Color(0xFFFFFFFF),
-    outline: Color(0xFFE2E8F0),
-    outlineStrong: Color(0xFF74777F),
-    onSurface: Color(0xFF111827),
-    onSurfaceVariant: Color(0xFF64748B),
-    textMuted: Color(0xFF94A3B8),
+    outline: Color(0xFFD8E0E8),
+    outlineStrong: Color(0xFF64748B),
+    onSurface: Color(0xFF14202B),
+    onSurfaceVariant: Color(0xFF475663),
+    textMuted: Color(0xFF74838F),
+    verified: Color(0xFF1F7A4D),
+    verifiedContainer: Color(0xFFDCF0E5),
   );
 
   @override
   AppPaletteTokens get _darkTokens => const AppPaletteTokens(
-    primary: Color(0xFF60A5FA),
-    onPrimary: Color(0xFF0B1220),
-    primaryContainer: Color(0xFF1E3A8A),
-    onPrimaryContainer: Color(0xFFDBEAFE),
-    accent: Color(0xFF22D3EE),
+    primary: Color(0xFF6BB0E6),
+    onPrimary: Color(0xFF062339),
+    primaryContainer: Color(0xFF15466B),
+    onPrimaryContainer: Color(0xFFCFE6F8),
+    accent: Color(0xFFFF8E72),
+    onAccent: Color(0xFF3A1207),
+    accentContainer: Color(0xFF5A271A),
     secondary: Color(0xFFE2E8F0),
     onSecondary: Color(0xFF0B1220),
-    tertiary: Color(0xFFFFB74D),
-    success: Color(0xFF22C55E),
-    warning: Color(0xFFFBBF24),
-    error: Color(0xFFF87171),
-    surface: Color(0xFF0B1220),
-    surfaceVariant: Color(0xFF3E4856),
-    card: Color(0xFF0F172A),
-    outline: Color(0xFF1E293B),
-    outlineStrong: Color(0xFF8E9099),
-    onSurface: Color(0xFFF8FAFC),
-    onSurfaceVariant: Color(0xFF94A3B8),
-    textMuted: Color(0xFF64748B),
+    tertiary: Color(0xFFE2A856),
+    success: Color(0xFF4CB587),
+    warning: Color(0xFFE2B25A),
+    error: Color(0xFFF0706E),
+    surface: Color(0xFF0E141A),
+    surfaceVariant: Color(0xFF1A222B),
+    card: Color(0xFF161E26),
+    outline: Color(0xFF2B3640),
+    outlineStrong: Color(0xFF94A3B8),
+    onSurface: Color(0xFFE9EFF4),
+    onSurfaceVariant: Color(0xFFAAB7C2),
+    textMuted: Color(0xFF7E8C98),
+    verified: Color(0xFF57C48C),
+    verifiedContainer: Color(0xFF163A2A),
   );
 }
 
@@ -121,6 +133,8 @@ final class TrustPalette extends ColorPalette {
     primaryContainer: Color(0xFFD9E5FF),
     onPrimaryContainer: Color(0xFF001A41),
     accent: Color(0xFF00897B),
+    onAccent: Color(0xFFFFFFFF),
+    accentContainer: Color(0xFFCCE8E4),
     secondary: Color(0xFF0F172A),
     onSecondary: Color(0xFFFFFFFF),
     tertiary: Color(0xFFF57C00),
@@ -135,6 +149,8 @@ final class TrustPalette extends ColorPalette {
     onSurface: Color(0xFF111827),
     onSurfaceVariant: Color(0xFF64748B),
     textMuted: Color(0xFF94A3B8),
+    verified: Color(0xFF1F7A4D),
+    verifiedContainer: Color(0xFFDCF0E5),
   );
 
   @override
@@ -144,6 +160,8 @@ final class TrustPalette extends ColorPalette {
     primaryContainer: Color(0xFF1F4488),
     onPrimaryContainer: Color(0xFFD9E5FF),
     accent: Color(0xFF4DB6AC),
+    onAccent: Color(0xFF04231F),
+    accentContainer: Color(0xFF134E48),
     secondary: Color(0xFFE2E8F0),
     onSecondary: Color(0xFF0B1220),
     tertiary: Color(0xFFFFB74D),
@@ -158,6 +176,8 @@ final class TrustPalette extends ColorPalette {
     onSurface: Color(0xFFF8FAFC),
     onSurfaceVariant: Color(0xFF94A3B8),
     textMuted: Color(0xFF64748B),
+    verified: Color(0xFF57C48C),
+    verifiedContainer: Color(0xFF163A2A),
   );
 }
 
@@ -169,6 +189,8 @@ final class AppPaletteTokens {
     required this.primaryContainer,
     required this.onPrimaryContainer,
     required this.accent,
+    required this.onAccent,
+    required this.accentContainer,
     required this.secondary,
     required this.onSecondary,
     required this.tertiary,
@@ -183,6 +205,8 @@ final class AppPaletteTokens {
     required this.onSurface,
     required this.onSurfaceVariant,
     required this.textMuted,
+    required this.verified,
+    required this.verifiedContainer,
   });
 
   final Color primary;
@@ -190,6 +214,8 @@ final class AppPaletteTokens {
   final Color primaryContainer;
   final Color onPrimaryContainer;
   final Color accent;
+  final Color onAccent;
+  final Color accentContainer;
   final Color secondary;
   final Color onSecondary;
   final Color tertiary;
@@ -204,4 +230,10 @@ final class AppPaletteTokens {
   final Color onSurface;
   final Color onSurfaceVariant;
   final Color textMuted;
+
+  /// Trust signal — verified-agency badge foreground (green across palettes).
+  final Color verified;
+
+  /// Trust signal — verified-agency badge container/background.
+  final Color verifiedContainer;
 }
