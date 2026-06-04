@@ -1,10 +1,17 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/elevation.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/glass_pill.dart';
+import '../../../../core/widgets/status_pill.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/money.dart';
 import '../../../../shared/presentation/money_formatter.dart';
@@ -14,27 +21,11 @@ import '../../../favorites/presentation/widgets/favorite_heart_button.dart';
 import '../../../listing_form/domain/entities/listing.dart';
 import '../../domain/entities/home_listing_card.dart';
 
-/// Phase 13 — one card on HomePage feed per FR-017 + R-65 (Phase-13-
-/// specific; not reusing Phase 2's generic `ListingCard`).
-///
-/// Layout (top-to-bottom):
-/// - 16:9 hero image via [CachedNetworkImage] against the Phase 11
-///   `listing-images` Storage bucket. Defensive: zero-image listings render
-///   the Phase 2 placeholder (FR-031).
-/// - Title (max 2 lines + ellipsis).
-/// - Type + purpose badges.
-/// - Governorate / city joined per Phase 8 conventions.
-/// - Primary price via [MoneyFormatter] in the user's display currency.
-/// - Time-since-publish (Phase 3 `intl` dependency consumed for the first
-///   time per R-67).
-///
-/// Tap → `context.go('/listings/${card.id}')`. The route is added by Phase
-/// 13 Sub-Phase F (`app_router.dart` rewire); the path string is forward-
-/// stated here per R-69.
-///
-/// The image URL is pre-resolved by [SupabaseHomeFeedDatasource] via
-/// `getPublicUrl()` so this widget remains Constitution IX-clean (no
-/// supabase_flutter import per FR-030 + SC-013).
+/// Phase 13 home-feed card, restyled in Phase 25 to the Claude Design
+/// `an-card`: a photo-forward (16:10) hero with a frosted type pill and a
+/// semantic sale/rent status pill over the image, a coral favorite chip, then
+/// a body with a prominent price, title, location, and a green verified-agency
+/// footer. No data / routing / logic change — purely visual.
 class HomeListingCardTile extends StatelessWidget {
   const HomeListingCardTile({
     super.key,
@@ -58,91 +49,126 @@ class HomeListingCardTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    final elevation = AppElevation.of(context);
     final locale = Localizations.localeOf(context);
 
-    return Card(
-      clipBehavior: Clip.antiAlias,
+    return Container(
       margin: const EdgeInsetsDirectional.symmetric(
         horizontal: AppSpacing.lg,
         vertical: AppSpacing.sm,
       ),
-      child: InkWell(
-        onTap: () => context.go(AppRoutes.listingDetailsFor(card.id)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _Hero(
-              imageUrl: card.mainImageUrl,
-              l10n: l10n,
-              scheme: scheme,
-              listingId: card.id,
-            ),
-            Padding(
-              padding: const EdgeInsetsDirectional.all(AppSpacing.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    card.title.isEmpty ? '—' : card.title,
-                    style: theme.textTheme.titleMedium,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Wrap(
-                    spacing: AppSpacing.xs,
-                    runSpacing: AppSpacing.xs,
+      decoration: BoxDecoration(
+        color: colors.card,
+        borderRadius: appRadius(AppRadii.lg),
+        border: Border.all(color: colors.outline),
+        boxShadow: elevation.level2,
+      ),
+      child: ClipRRect(
+        borderRadius: appRadius(AppRadii.lg),
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            onTap: () => context.go(AppRoutes.listingDetailsFor(card.id)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _Hero(
+                  imageUrl: card.mainImageUrl,
+                  l10n: l10n,
+                  colors: colors,
+                  listingId: card.id,
+                  typeLabel: _propertyTypeLabel(l10n, card.propertyType),
+                  purposeLabel: _purposeLabel(l10n, card.purpose),
+                  purposeColor: _purposeColor(colors, card.purpose),
+                ),
+                Padding(
+                  padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _Badge(
-                        label: _propertyTypeLabel(l10n, card.propertyType),
+                      Text(
+                        _formatPrice(locale),
+                        textDirection: TextDirection.ltr,
+                        textAlign: TextAlign.start,
+                        style: styles.priceLarge.copyWith(
+                          color: colors.onSurface,
+                        ),
                       ),
-                      _Badge(label: _purposeLabel(l10n, card.purpose)),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        card.title.isEmpty ? '—' : card.title,
+                        style: styles.titleLarge,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      Row(
+                        children: [
+                          Icon(
+                            LucideIcons.map_pin,
+                            size: AppSpacing.lg,
+                            color: colors.textMuted,
+                          ),
+                          const SizedBox(width: AppSpacing.xs),
+                          Expanded(
+                            child: Text(
+                              _locationLabel(card),
+                              style: styles.bodyMedium.copyWith(
+                                color: colors.textMuted,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      // Phase 19 (FR-022) — verified-agency footer; rendered
+                      // only for approved agencies (no reflow otherwise per
+                      // FR-023), separated by a hairline divider.
+                      if (card.agencyId != null && card.agencyName != null) ...[
+                        const SizedBox(height: AppSpacing.md),
+                        Divider(height: 1, color: colors.outline),
+                        const SizedBox(height: AppSpacing.md),
+                        Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: AgencyBadge(
+                            agencyId: card.agencyId!,
+                            agencyName: card.agencyName!,
+                            logoUrl: card.agencyLogoUrl,
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        _formatTimeSince(l10n, card.publishedAt),
+                        style: styles.labelMedium.copyWith(
+                          color: colors.textMuted,
+                        ),
+                      ),
                     ],
                   ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    _locationLabel(card),
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    _formatPrice(locale),
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    _formatTimeSince(l10n, card.publishedAt),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
-                  ),
-                  // Phase 19 (FR-022) — verified-agency badge; rendered only
-                  // when the listing is under an approved agency (no reflow
-                  // otherwise per FR-023).
-                  if (card.agencyId != null && card.agencyName != null) ...[
-                    const SizedBox(height: AppSpacing.sm),
-                    Align(
-                      alignment: AlignmentDirectional.centerStart,
-                      child: AgencyBadge(
-                        agencyId: card.agencyId!,
-                        agencyName: card.agencyName!,
-                        logoUrl: card.agencyLogoUrl,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
+  }
+
+  Color _purposeColor(AppColors colors, ListingPurpose purpose) {
+    switch (purpose) {
+      case ListingPurpose.sale:
+        return colors.primary;
+      case ListingPurpose.rent:
+        return colors.verified;
+      case ListingPurpose.dailyRent:
+        return colors.accent;
+      case ListingPurpose.investment:
+        return colors.tertiary;
+    }
   }
 
   String _locationLabel(HomeListingCard c) {
@@ -225,44 +251,50 @@ class _Hero extends StatelessWidget {
   const _Hero({
     required this.imageUrl,
     required this.l10n,
-    required this.scheme,
+    required this.colors,
     required this.listingId,
+    required this.typeLabel,
+    required this.purposeLabel,
+    required this.purposeColor,
   });
 
   final String? imageUrl;
   final AppLocalizations l10n;
-  final ColorScheme scheme;
+  final AppColors colors;
   final String listingId;
+  final String typeLabel;
+  final String purposeLabel;
+  final Color purposeColor;
 
   @override
   Widget build(BuildContext context) {
     final image = imageUrl == null
         ? AspectRatio(
-            aspectRatio: 16 / 9,
+            aspectRatio: 16 / 10,
             child: ColoredBox(
-              color: scheme.surfaceContainerHighest,
+              color: colors.surfaceVariant,
               child: Center(
                 child: Icon(
                   Icons.image_not_supported_outlined,
-                  color: scheme.onSurfaceVariant,
+                  color: colors.onSurfaceVariant,
                   semanticLabel: l10n.image_unavailable,
                 ),
               ),
             ),
           )
         : AspectRatio(
-            aspectRatio: 16 / 9,
+            aspectRatio: 16 / 10,
             child: CachedNetworkImage(
               imageUrl: imageUrl!,
               fit: BoxFit.cover,
               placeholder: (context, _) =>
-                  ColoredBox(color: scheme.surfaceContainerHighest),
+                  ColoredBox(color: colors.surfaceVariant),
               errorWidget: (context, _, __) => ColoredBox(
-                color: scheme.surfaceContainerHighest,
+                color: colors.surfaceVariant,
                 child: Center(
                   child: Icon(
                     Icons.broken_image_outlined,
-                    color: scheme.onSurfaceVariant,
+                    color: colors.onSurfaceVariant,
                     semanticLabel: l10n.image_unavailable,
                   ),
                 ),
@@ -276,37 +308,24 @@ class _Hero extends StatelessWidget {
         PositionedDirectional(
           top: AppSpacing.sm,
           end: AppSpacing.sm,
-          child: FavoriteHeartButton(listingId: listingId),
+          child: FavoriteHeartButton(
+            listingId: listingId,
+            style: FavoriteHeartStyle.onImage,
+          ),
+        ),
+        PositionedDirectional(
+          bottom: AppSpacing.sm,
+          start: AppSpacing.sm,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              StatusPill(label: purposeLabel, color: purposeColor),
+              const SizedBox(width: AppSpacing.xs),
+              GlassPill(label: typeLabel),
+            ],
+          ),
         ),
       ],
-    );
-  }
-}
-
-class _Badge extends StatelessWidget {
-  const _Badge({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    return Container(
-      padding: const EdgeInsetsDirectional.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: scheme.secondaryContainer,
-        borderRadius: BorderRadius.circular(AppRadii.sm),
-      ),
-      child: Text(
-        label,
-        style: theme.textTheme.bodySmall?.copyWith(
-          color: scheme.onSecondaryContainer,
-        ),
-      ),
     );
   }
 }

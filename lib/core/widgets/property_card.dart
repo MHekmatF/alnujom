@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 
 import '../theme/colors.dart';
+import '../theme/elevation.dart';
 import '../theme/radii.dart';
 import '../theme/spacing.dart';
 import '../theme/typography.dart';
@@ -116,7 +117,7 @@ class PropertyCard extends StatelessWidget {
           title,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: styles.titleMedium,
+          style: styles.titleLarge,
         ),
         const SizedBox(height: AppSpacing.sm),
         PriceTag(amount: price, currency: currency),
@@ -179,15 +180,49 @@ class PropertyCard extends StatelessWidget {
             PositionedDirectional(
               top: AppSpacing.sm,
               end: AppSpacing.sm,
-              child: IconButton(
-                onPressed: onFavoritePressed,
-                icon: Icon(
-                  favorite ? Icons.favorite : Icons.favorite_border,
-                  color: favorite ? colors.error : colors.onPrimary,
-                ),
+              child: _FavoriteChip(
+                favorite: favorite,
+                onPressed: onFavoritePressed!,
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// White over-photo heart chip for the generic [PropertyCard] (callback-based;
+/// mirrors the cubit-backed `FavoriteHeartButton` over-image treatment).
+class _FavoriteChip extends StatelessWidget {
+  const _FavoriteChip({required this.favorite, required this.onPressed});
+
+  final bool favorite;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final elevation = AppElevation.of(context);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        boxShadow: elevation.level1,
+      ),
+      child: Material(
+        color: Colors.white.withValues(alpha: 0.92),
+        shape: const CircleBorder(),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onPressed,
+          child: Padding(
+            padding: const EdgeInsetsDirectional.all(AppSpacing.md),
+            child: Icon(
+              favorite ? Icons.favorite : Icons.favorite_border,
+              size: AppSpacing.xl,
+              color: favorite ? colors.accent : Colors.black54,
+            ),
+          ),
+        ),
       ),
     );
   }
