@@ -32,6 +32,7 @@ import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
+import '../../../../core/widgets/main_bottom_nav.dart';
 import '../../../../features/map/domain/entities/map_entry_context.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../ads/domain/entities/ad_placement.dart';
@@ -86,6 +87,7 @@ class _SearchPageView extends StatelessWidget {
           Expanded(child: _ResultsArea()),
         ],
       ),
+      bottomNavigationBar: const MainBottomNav(current: MainTab.search),
     );
   }
 }

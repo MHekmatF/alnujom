@@ -11,6 +11,7 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
+import '../../../../core/widgets/main_bottom_nav.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/favorite_listing.dart';
 import '../bloc/favorites_page_bloc.dart';
@@ -59,6 +60,7 @@ class _FavoritesView extends StatelessWidget {
           };
         },
       ),
+      bottomNavigationBar: const MainBottomNav(current: MainTab.favorites),
     );
   }
 }
