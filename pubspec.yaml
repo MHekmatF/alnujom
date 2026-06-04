@@ -63,6 +63,7 @@ flutter:
   assets:
     - assets/images/watermark/
     - assets/branding/
+    - assets/onboarding/
   fonts:
     - family: Cairo
       fonts:

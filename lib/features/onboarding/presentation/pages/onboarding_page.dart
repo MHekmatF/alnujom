@@ -7,6 +7,7 @@ import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/brand_mark.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../cubit/onboarding_cubit.dart';
@@ -34,6 +35,13 @@ class _OnboardingView extends StatefulWidget {
 class _OnboardingViewState extends State<_OnboardingView> {
   final _pageController = PageController();
 
+  // Phase 25 — full-bleed hero imagery per slide (Claude Design welcome).
+  static const _images = <String>[
+    'assets/onboarding/slide1.jpg',
+    'assets/onboarding/slide2.jpg',
+    'assets/onboarding/slide3.jpg',
+  ];
+
   @override
   void dispose() {
     _pageController.dispose();
@@ -43,8 +51,8 @@ class _OnboardingViewState extends State<_OnboardingView> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
     final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
 
     return BlocListener<OnboardingCubit, OnboardingState>(
       listener: (context, state) {
@@ -77,95 +85,136 @@ class _OnboardingViewState extends State<_OnboardingView> {
               body: l10n.onboarding_step_3_body,
             ),
           ];
+          final current = steps[step.clamp(0, steps.length - 1)];
 
           return Scaffold(
-            body: SafeArea(
-              child: Column(
-                children: [
-                  Padding(
+            body: Stack(
+              children: [
+                // Full-bleed slide imagery + scrim.
+                Positioned.fill(
+                  child: PageView.builder(
+                    controller: _pageController,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: _images.length,
+                    itemBuilder: (context, index) =>
+                        _SlideBackground(image: _images[index]),
+                  ),
+                ),
+                // Foreground content over the scrim.
+                SafeArea(
+                  child: Padding(
                     padding: const EdgeInsetsDirectional.symmetric(
                       horizontal: AppSpacing.lg,
-                      vertical: AppSpacing.sm,
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const BrandMark(withWordmark: true, size: 24),
-                        TextButton(
-                          onPressed: () =>
-                              context.read<OnboardingCubit>().markSeen(),
-                          child: Text(l10n.onboarding_skip),
+                        const SizedBox(height: AppSpacing.sm),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            BrandMark(
+                              withWordmark: true,
+                              size: 24,
+                              color: Colors.white,
+                              accentColor: colors.accent,
+                            ),
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.white,
+                              ),
+                              onPressed: () =>
+                                  context.read<OnboardingCubit>().markSeen(),
+                              child: Text(l10n.onboarding_skip),
+                            ),
+                          ],
                         ),
+                        const Spacer(),
+                        Text(
+                          current.title,
+                          style: styles.displayMedium.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        Text(
+                          current.body,
+                          style: styles.bodyLarge.copyWith(color: Colors.white),
+                        ),
+                        const SizedBox(height: AppSpacing.xl),
+                        Row(
+                          children: List.generate(total, (i) {
+                            return Container(
+                              margin: const EdgeInsetsDirectional.only(
+                                end: AppSpacing.xs,
+                              ),
+                              width: i == step ? 24 : 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: i == step ? colors.accent : Colors.white54,
+                                borderRadius: BorderRadius.circular(
+                                  AppRadii.pill,
+                                ),
+                              ),
+                            );
+                          }),
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton(
+                            onPressed: () =>
+                                context.read<OnboardingCubit>().nextStep(),
+                            child: Text(
+                              step + 1 >= total
+                                  ? l10n.onboarding_get_started
+                                  : l10n.onboarding_get_started,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.xl),
                       ],
                     ),
                   ),
-                  Expanded(
-                    child: PageView.builder(
-                      controller: _pageController,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: steps.length,
-                      itemBuilder: (context, index) {
-                        final s = steps[index];
-                        return Padding(
-                          padding: const EdgeInsets.all(AppSpacing.xxl),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                s.title,
-                                style: theme.textTheme.headlineMedium,
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                s.body,
-                                style: theme.textTheme.bodyLarge,
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  // Step indicator dots
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(total, (i) {
-                      return Container(
-                        margin: const EdgeInsets.all(AppSpacing.xs),
-                        width: i == step ? 24 : 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: i == step ? colors.accent : colors.outline,
-                          borderRadius: BorderRadius.circular(AppRadii.pill),
-                        ),
-                      );
-                    }),
-                  ),
-                  const SizedBox(height: 16),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      left: AppSpacing.xl,
-                      right: AppSpacing.xl,
-                      bottom: AppSpacing.xl,
-                    ),
-                    child: FilledButton(
-                      onPressed: () =>
-                          context.read<OnboardingCubit>().nextStep(),
-                      child: Text(
-                        step + 1 >= total
-                            ? l10n.onboarding_get_started
-                            : l10n.onboarding_get_started,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           );
         },
       ),
+    );
+  }
+}
+
+/// A single onboarding slide background: a full-bleed photo with a dark scrim
+/// for legibility of the white brand bar (top) and headline/CTA (bottom).
+class _SlideBackground extends StatelessWidget {
+  const _SlideBackground({required this.image});
+
+  final String image;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Image.asset(image, fit: BoxFit.cover),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.black.withValues(alpha: 0.45),
+                Colors.black.withValues(alpha: 0.15),
+                Colors.black.withValues(alpha: 0.88),
+              ],
+              stops: const [0.0, 0.35, 1.0],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
