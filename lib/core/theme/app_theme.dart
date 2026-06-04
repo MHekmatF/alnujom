@@ -50,14 +50,27 @@ ThemeData buildAppTheme({
     textTheme: TextTheme(
       displayLarge: textStyles.displayLarge,
       displayMedium: textStyles.displayMedium,
+      displaySmall: textStyles.displayMedium,
       headlineLarge: textStyles.headlineLarge,
       headlineMedium: textStyles.headlineMedium,
+      // The "Small" slots are unset by default and fall back to the non-Arabic
+      // Material font; derive them from our locale-aware tokens (Phase 25).
+      headlineSmall: textStyles.headlineMedium,
       titleLarge: textStyles.titleLarge,
       titleMedium: textStyles.titleMedium,
+      titleSmall: textStyles.titleMedium.copyWith(
+        fontSize: 14,
+        height: 20 / 14,
+      ),
       bodyLarge: textStyles.bodyLarge,
       bodyMedium: textStyles.bodyMedium,
+      bodySmall: textStyles.bodyMedium.copyWith(fontSize: 12, height: 16 / 12),
       labelLarge: textStyles.labelLarge,
       labelMedium: textStyles.labelMedium,
+      labelSmall: textStyles.labelMedium.copyWith(
+        fontSize: 11,
+        height: 14 / 11,
+      ),
     ),
     iconTheme: IconThemeData(color: colors.onSurface, size: AppSpacing.xl),
     appBarTheme: AppBarTheme(
