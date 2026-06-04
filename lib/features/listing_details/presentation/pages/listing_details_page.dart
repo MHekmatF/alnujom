@@ -153,10 +153,12 @@ class _SuccessBody extends StatelessWidget {
                 // Phase 21: listing details banner (collapses to zero height
                 // when no eligible ads — FR-012; no reflow on the details layout).
                 const AdSlot(placement: AdPlacement.listingDetailsBanner),
-                // 3. Listing title
+                // 3. Listing title — headlineMedium is a theme-set Cairo slot
+                // (headlineSmall is unset and would fall back to the default
+                // non-Arabic font).
                 Text(
                   aggregate.listing.title,
-                  style: theme.textTheme.headlineSmall,
+                  style: theme.textTheme.headlineMedium,
                 ),
                 if (aggregate.publisher.fullName.isNotEmpty) ...[
                   const SizedBox(height: AppSpacing.xs),
