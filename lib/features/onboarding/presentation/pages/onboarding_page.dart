@@ -4,8 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/brand_mark.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../cubit/onboarding_cubit.dart';
 import '../cubit/onboarding_state.dart';
@@ -42,6 +44,7 @@ class _OnboardingViewState extends State<_OnboardingView> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
+    final colors = AppColors.of(context);
 
     return BlocListener<OnboardingCubit, OnboardingState>(
       listener: (context, state) {
@@ -79,12 +82,21 @@ class _OnboardingViewState extends State<_OnboardingView> {
             body: SafeArea(
               child: Column(
                 children: [
-                  Align(
-                    alignment: AlignmentDirectional.topEnd,
-                    child: TextButton(
-                      onPressed: () =>
-                          context.read<OnboardingCubit>().markSeen(),
-                      child: Text(l10n.onboarding_skip),
+                  Padding(
+                    padding: const EdgeInsetsDirectional.symmetric(
+                      horizontal: AppSpacing.lg,
+                      vertical: AppSpacing.sm,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const BrandMark(withWordmark: true, size: 24),
+                        TextButton(
+                          onPressed: () =>
+                              context.read<OnboardingCubit>().markSeen(),
+                          child: Text(l10n.onboarding_skip),
+                        ),
+                      ],
                     ),
                   ),
                   Expanded(
@@ -122,12 +134,10 @@ class _OnboardingViewState extends State<_OnboardingView> {
                     children: List.generate(total, (i) {
                       return Container(
                         margin: const EdgeInsets.all(AppSpacing.xs),
-                        width: i == step ? 16 : 8,
+                        width: i == step ? 24 : 8,
                         height: 8,
                         decoration: BoxDecoration(
-                          color: i == step
-                              ? theme.colorScheme.primary
-                              : theme.colorScheme.outline,
+                          color: i == step ? colors.accent : colors.outline,
                           borderRadius: BorderRadius.circular(AppRadii.pill),
                         ),
                       );
