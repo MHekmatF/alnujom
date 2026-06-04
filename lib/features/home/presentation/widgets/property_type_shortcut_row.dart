@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../listing_form/domain/entities/listing.dart';
 
@@ -25,7 +27,8 @@ class PropertyTypeShortcutRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
 
     return SizedBox(
       height: 48,
@@ -39,10 +42,15 @@ class PropertyTypeShortcutRow extends StatelessWidget {
         itemBuilder: (context, index) {
           final type = _types[index];
           final label = _label(l10n, type);
+          // Phase 25 (Claude Design) — clean filled pill (recessed surface,
+          // borderless); navigation shortcut, so no selected state on home.
           return ActionChip(
-            avatar: Icon(_icon(type), size: 18),
+            avatar: Icon(_icon(type), size: 18, color: colors.onSurfaceVariant),
             label: Text(label),
-            backgroundColor: theme.colorScheme.secondaryContainer,
+            labelStyle: styles.labelLarge.copyWith(color: colors.onSurface),
+            backgroundColor: colors.surfaceVariant,
+            side: BorderSide.none,
+            shape: const StadiumBorder(),
             onPressed: () => context.go(AppRoutes.search, extra: type),
           );
         },

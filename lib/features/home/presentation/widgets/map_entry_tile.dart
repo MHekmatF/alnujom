@@ -7,22 +7,27 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
 import '../../../../features/map/domain/entities/map_entry_context.dart';
 import '../../../../l10n/app_localizations.dart';
 
 /// Card-styled tappable tile that navigates to the MapPage with a
 /// [MapEntryFromHome] context.
 ///
-/// Inserted between [PropertyTypeShortcutRow] and the "Latest listings" header
-/// sliver per R-91. Directionally-aware chevron per the contract.
+/// Phase 25 (Claude Design) — a distinct primary-tinted "browse on map" card
+/// with a warm accent pin. Inserted between [PropertyTypeShortcutRow] and the
+/// "Latest listings" header sliver per R-91. Directionally-aware chevron.
 class MapEntryTile extends StatelessWidget {
   const MapEntryTile({super.key});
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     return Padding(
       padding: const EdgeInsetsDirectional.fromSTEB(
         AppSpacing.lg,
@@ -30,11 +35,10 @@ class MapEntryTile extends StatelessWidget {
         AppSpacing.lg,
         AppSpacing.md,
       ),
-      child: Card(
+      child: Material(
+        color: colors.primaryContainer,
+        borderRadius: BorderRadius.circular(AppRadii.lg),
         clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadii.md),
-        ),
         child: InkWell(
           onTap: () =>
               context.go(AppRoutes.map, extra: const MapEntryFromHome()),
@@ -42,11 +46,7 @@ class MapEntryTile extends StatelessWidget {
             padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
             child: Row(
               children: [
-                Icon(
-                  Icons.map_outlined,
-                  size: 32,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+                Icon(Icons.map_outlined, size: 32, color: colors.accent),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(
@@ -54,12 +54,16 @@ class MapEntryTile extends StatelessWidget {
                     children: [
                       Text(
                         l10n.home_map_tile_title,
-                        style: Theme.of(context).textTheme.titleMedium,
+                        style: styles.titleMedium.copyWith(
+                          color: colors.onPrimaryContainer,
+                        ),
                       ),
                       const SizedBox(height: AppSpacing.xs),
                       Text(
                         l10n.home_map_tile_subtitle,
-                        style: Theme.of(context).textTheme.bodySmall,
+                        style: styles.bodyMedium.copyWith(
+                          color: colors.onPrimaryContainer,
+                        ),
                       ),
                     ],
                   ),
@@ -69,6 +73,7 @@ class MapEntryTile extends StatelessWidget {
                       ? Icons.arrow_back_ios
                       : Icons.arrow_forward_ios,
                   size: 16,
+                  color: colors.onPrimaryContainer,
                 ),
               ],
             ),
