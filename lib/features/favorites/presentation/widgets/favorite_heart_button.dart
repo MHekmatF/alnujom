@@ -9,8 +9,21 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/elevation.dart';
+import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../bloc/favorites_cubit.dart';
+
+/// Visual treatment for [FavoriteHeartButton].
+enum FavoriteHeartStyle {
+  /// Plain icon button (app bars, list rows, details body).
+  plain,
+
+  /// A white circular chip with a soft shadow, for placing over a photo
+  /// (the hero listing card / gallery).
+  onImage,
+}
 
 /// A filled/outlined heart icon that reflects the current favorite state for
 /// [listingId] and handles the authenticated toggle + anonymous sign-in prompt.
@@ -22,9 +35,16 @@ import '../bloc/favorites_cubit.dart';
 ///
 /// Tokens only — no inline hex, font-size, or padding (FR-029).
 class FavoriteHeartButton extends StatelessWidget {
-  const FavoriteHeartButton({super.key, required this.listingId});
+  const FavoriteHeartButton({
+    super.key,
+    required this.listingId,
+    this.style = FavoriteHeartStyle.plain,
+  });
 
   final String listingId;
+
+  /// Visual treatment — plain icon button, or a white over-photo chip.
+  final FavoriteHeartStyle style;
 
   @override
   Widget build(BuildContext context) {
@@ -51,16 +71,27 @@ class FavoriteHeartButton extends StatelessWidget {
       builder: (context, state) {
         final isFavorited = state.favoritedIds.contains(listingId);
         final l10n = AppLocalizations.of(context)!;
-        final scheme = Theme.of(context).colorScheme;
+        final colors = AppColors.of(context);
+        final tooltip = isFavorited
+            ? l10n.favorite_unsave_label
+            : l10n.favorite_heart_label;
+
+        // Phase 25 (Claude Design) — a favorited heart fills with the warm
+        // coral accent on every surface.
+        if (style == FavoriteHeartStyle.onImage) {
+          return _OnImageChip(
+            isFavorited: isFavorited,
+            tooltip: tooltip,
+            onPressed: () => _onTap(context, state),
+          );
+        }
 
         return IconButton(
           icon: Icon(
             isFavorited ? Icons.favorite : Icons.favorite_border,
-            color: isFavorited ? scheme.error : null,
+            color: isFavorited ? colors.accent : null,
           ),
-          tooltip: isFavorited
-              ? l10n.favorite_unsave_label
-              : l10n.favorite_heart_label,
+          tooltip: tooltip,
           onPressed: () => _onTap(context, state),
         );
       },
@@ -81,5 +112,52 @@ class FavoriteHeartButton extends StatelessWidget {
 
     // Authenticated branch: optimistic toggle via the shared singleton.
     getIt<FavoritesCubit>().toggle(listingId);
+  }
+}
+
+/// The white circular over-photo treatment (Claude `an-heart`): a soft-shadowed
+/// white chip whose heart fills with the coral accent when saved. The white
+/// chip is theme-independent since it sits on imagery.
+class _OnImageChip extends StatelessWidget {
+  const _OnImageChip({
+    required this.isFavorited,
+    required this.tooltip,
+    required this.onPressed,
+  });
+
+  final bool isFavorited;
+  final String tooltip;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final elevation = AppElevation.of(context);
+    return Tooltip(
+      message: tooltip,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: elevation.level1,
+        ),
+        child: Material(
+          color: Colors.white.withValues(alpha: 0.92),
+          shape: const CircleBorder(),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onPressed,
+            child: Padding(
+              padding: const EdgeInsetsDirectional.all(AppSpacing.md),
+              child: Icon(
+                isFavorited ? Icons.favorite : Icons.favorite_border,
+                size: AppSpacing.xl,
+                color: isFavorited ? colors.accent : Colors.black54,
+                semanticLabel: tooltip,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

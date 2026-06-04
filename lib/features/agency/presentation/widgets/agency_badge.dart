@@ -8,6 +8,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -35,7 +36,7 @@ class AgencyBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final colors = AppColors.of(context);
 
     final logo = ClipRRect(
       borderRadius: BorderRadius.circular(AppRadii.sm),
@@ -47,15 +48,18 @@ class AgencyBadge extends StatelessWidget {
                 imageUrl: logoUrl!,
                 fit: BoxFit.cover,
                 placeholder: (_, __) =>
-                    ColoredBox(color: scheme.surfaceContainerHighest),
-                errorWidget: (_, __, ___) => _fallbackLogo(scheme),
+                    ColoredBox(color: colors.surfaceVariant),
+                errorWidget: (_, __, ___) => _fallbackLogo(colors),
               )
-            : _fallbackLogo(scheme),
+            : _fallbackLogo(colors),
       ),
     );
 
+    // Phase 25 (Claude Design) — the verified-agency badge carries the trust
+    // signal: a soft green container with a green check; the agency name stays
+    // high-contrast (onSurface) for readability.
     return Material(
-      color: scheme.primaryContainer,
+      color: colors.verifiedContainer,
       borderRadius: BorderRadius.circular(AppRadii.lg),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppRadii.lg),
@@ -77,7 +81,7 @@ class AgencyBadge extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.labelLarge?.copyWith(
-                      color: scheme.onPrimaryContainer,
+                      color: colors.onSurface,
                     ),
                   ),
                 ),
@@ -86,7 +90,7 @@ class AgencyBadge extends StatelessWidget {
               Icon(
                 Icons.verified,
                 size: AppSpacing.lg,
-                color: scheme.primary,
+                color: colors.verified,
                 semanticLabel: l10n.agency_verified_badge,
               ),
             ],
@@ -96,13 +100,13 @@ class AgencyBadge extends StatelessWidget {
     );
   }
 
-  Widget _fallbackLogo(ColorScheme scheme) {
+  Widget _fallbackLogo(AppColors colors) {
     return ColoredBox(
-      color: scheme.surfaceContainerHighest,
+      color: colors.surfaceVariant,
       child: Icon(
         Icons.business_outlined,
         size: AppSpacing.lg,
-        color: scheme.onSurfaceVariant,
+        color: colors.onSurfaceVariant,
       ),
     );
   }
