@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/brand_mark.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/phone_number.dart';
 import '../../../../core/routing/app_router.dart';
@@ -92,6 +93,9 @@ class _LoginPageState extends State<LoginPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    const SizedBox(height: AppSpacing.md),
+                    const Center(child: BrandMark(size: 64)),
+                    const SizedBox(height: AppSpacing.xl),
                     TextFormField(
                       controller: _phoneController,
                       keyboardType: TextInputType.phone,
