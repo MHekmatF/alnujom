@@ -5,11 +5,15 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/localization/locale_cubit.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/security/permission_checker.dart';
+import '../../../../core/security/permission_keys.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/main_bottom_nav.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/account_status.dart';
+import '../../../../shared/domain/value_objects/publisher_status.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
 import '../../../currencies/presentation/widgets/preferred_currency_toggle.dart';
@@ -45,6 +49,7 @@ class _ProfileView extends StatelessWidget {
           return Scaffold(
             appBar: AppBar(title: Text(l10n.profile_title)),
             body: const Center(child: CircularProgressIndicator()),
+            bottomNavigationBar: const MainBottomNav(current: MainTab.profile),
           );
         }
 
@@ -52,6 +57,7 @@ class _ProfileView extends StatelessWidget {
         if (profile == null) {
           return Scaffold(
             appBar: AppBar(title: Text(l10n.profile_title)),
+            bottomNavigationBar: const MainBottomNav(current: MainTab.profile),
             body: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -77,6 +83,7 @@ class _ProfileView extends StatelessWidget {
         final theme = Theme.of(context);
 
         return Scaffold(
+          bottomNavigationBar: const MainBottomNav(current: MainTab.profile),
           appBar: AppBar(
             title: Text(l10n.profile_title),
             actions: [
@@ -191,6 +198,36 @@ class _ProfileView extends StatelessWidget {
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push(AppRoutes.reports),
                 ),
+                // Phase 25 — relocated from the Home AppBar (which the bottom-nav
+                // restyle slimmed down) so they stay reachable.
+                // Publisher-only: inquiries inbox + my listings.
+                if (profile.publisherStatus == PublisherStatus.approved) ...[
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.inbox_outlined),
+                    title: Text(l10n.home_inquiries_action_tooltip),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.push(AppRoutes.inquiries),
+                  ),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.list_alt_outlined),
+                    title: Text(l10n.myListingsPageTitle),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.push(AppRoutes.publisherMyListings),
+                  ),
+                ],
+                // Admin-only: the sole in-app entry to the admin home.
+                if (getIt<PermissionChecker>().any(
+                  PermissionKeys.adminCategoryKeys,
+                ))
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.admin_panel_settings_outlined),
+                    title: Text(l10n.admin_home_title),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.push(AppRoutes.admin),
+                  ),
                 const Divider(height: AppSpacing.xl),
                 ListTile(
                   contentPadding: EdgeInsets.zero,

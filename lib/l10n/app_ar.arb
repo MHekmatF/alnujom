@@ -1427,5 +1427,9 @@
   "updatePromptLater": "لاحقاً",
   "@updatePromptLater": { "description": "Phase 24 UP — Dismiss button label: dismisses the dialog for the current session (FR-009 / R-211)." },
   "updatePromptReleaseNotesLabel": "الجديد في هذا الإصدار",
-  "@updatePromptReleaseNotesLabel": { "description": "Phase 24 UP — Heading shown above the optional release-note text in the prompt (FR-009)." }
+  "@updatePromptReleaseNotesLabel": { "description": "Phase 24 UP — Heading shown above the optional release-note text in the prompt (FR-009)." },
+  "nav_search": "البحث",
+  "@nav_search": { "description": "Phase 25 — Bottom navigation bar label for the Search tab." },
+  "nav_publish": "نشر",
+  "@nav_publish": { "description": "Phase 25 — Bottom navigation bar label for the Publish (create listing) action; shown only to approved publishers." }
 }

@@ -4422,4 +4422,10 @@ final class _DebugAppLocalizations extends AppLocalizations {
     'updatePromptReleaseNotesLabel',
     (loc) => loc.updatePromptReleaseNotesLabel,
   );
+
+  @override
+  String get nav_search => _resolve('nav_search', (loc) => loc.nav_search);
+
+  @override
+  String get nav_publish => _resolve('nav_publish', (loc) => loc.nav_publish);
 }

@@ -4,11 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
-import '../../../../core/security/permission_checker.dart';
-import '../../../../core/security/permission_keys.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/brand_mark.dart';
 import '../../../../core/widgets/locale_toggle_action.dart';
+import '../../../../core/widgets/main_bottom_nav.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/account_status.dart';
 import '../../../../shared/domain/value_objects/publisher_status.dart';
@@ -26,7 +25,6 @@ import '../../../ads/domain/entities/ad_placement.dart';
 import '../../../ads/presentation/widgets/ad_slot.dart';
 import '../widgets/hero_search_bar.dart';
 import '../widgets/home_listing_card.dart';
-import '../widgets/inquiries_app_bar_action.dart';
 import '../../../notifications/presentation/widgets/notification_bell_action.dart';
 import '../widgets/map_entry_tile.dart';
 import '../widgets/property_type_shortcut_row.dart';
@@ -130,54 +128,12 @@ class _HomeViewState extends State<_HomeView> {
     return Scaffold(
       appBar: AppBar(
         title: const BrandMark(withWordmark: true, size: 24),
-        actions: [
-          const LocaleToggleAction(),
-          // Phase 16 FR-019: inbox badge action (hidden for non-publishers).
-          const InquiriesAppBarAction(),
-          // Phase 22 R-192: notification bell + badge (between inquiries and admin panel).
-          const NotificationBellAction(),
-          // Admin-panel entry — visible only to users holding any admin-family
-          // permission. Provides the sole in-app route to the admin home
-          // (and from there, the Admin: Inquiries oversight screen).
-          BlocSelector<AuthBloc, AuthState, bool>(
-            selector: (state) =>
-                state is Authenticated &&
-                getIt<PermissionChecker>().any(
-                  PermissionKeys.adminCategoryKeys,
-                ),
-            builder: (context, isAdmin) {
-              if (!isAdmin) return const SizedBox.shrink();
-              return IconButton(
-                tooltip: l10n.admin_home_title,
-                icon: const Icon(Icons.admin_panel_settings_outlined),
-                onPressed: () => context.push(AppRoutes.admin),
-              );
-            },
-          ),
-          BlocSelector<AuthBloc, AuthState, bool>(
-            selector: (state) =>
-                state is Authenticated ||
-                state is PendingApproval ||
-                state is Rejected ||
-                state is Suspended,
-            builder: (context, isSignedIn) {
-              return IconButton(
-                tooltip: l10n.home_sign_in_icon_tooltip,
-                icon: Icon(
-                  isSignedIn
-                      ? Icons.account_circle_outlined
-                      : Icons.login_outlined,
-                ),
-                onPressed: () {
-                  if (isSignedIn) {
-                    context.push(AppRoutes.profile);
-                  } else {
-                    context.go(AppRoutes.login);
-                  }
-                },
-              );
-            },
-          ),
+        actions: const [
+          // Phase 25 — slimmed Home chrome: only locale/theme + notifications
+          // remain in the bar. Profile/sign-in is now the Profile tab, and the
+          // inquiries-inbox + admin-panel entries moved into the Profile menu.
+          LocaleToggleAction(),
+          NotificationBellAction(),
         ],
       ),
       body: FutureBuilder<List<Currency>>(
@@ -200,24 +156,10 @@ class _HomeViewState extends State<_HomeView> {
           );
         },
       ),
-      // Persistent publish entry for approved publishers — the empty-state
-      // button only shows when the feed is empty, leaving no way to create a
-      // second listing once the public feed is populated.
-      floatingActionButton: BlocSelector<AuthBloc, AuthState, bool>(
-        selector: (state) =>
-            state is Authenticated &&
-            state.profile.accountStatus == AccountStatus.approved &&
-            state.profile.publisherStatus == PublisherStatus.approved,
-        builder: (context, isApprovedPublisher) {
-          if (!isApprovedPublisher) return const SizedBox.shrink();
-          return FloatingActionButton(
-            tooltip: l10n.home_empty_publish_first_listing,
-            onPressed: () =>
-                context.pushNamed(AppRouteNames.publisherListingsCreate),
-            child: const Icon(Icons.add_home_outlined),
-          );
-        },
-      ),
+      // Phase 25 — the publish entry now lives in the persistent bottom nav
+      // (a prominent accent action for approved publishers) instead of a
+      // floating action button.
+      bottomNavigationBar: const MainBottomNav(current: MainTab.home),
     );
   }
 
