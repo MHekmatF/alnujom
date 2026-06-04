@@ -43,7 +43,12 @@ class _FavoritesView extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        leading: const DeepLinkAwareBackButton(),
+        // No back arrow when opened as the Favorites bottom-nav tab root
+        // (nothing to pop — the bottom nav returns to Home); keep it when
+        // pushed (e.g. from the Profile menu or a deep-link).
+        leading: Navigator.canPop(context)
+            ? const DeepLinkAwareBackButton()
+            : null,
         title: Text(l10n.favorites_page_title),
       ),
       body: BlocBuilder<FavoritesPageBloc, FavoritesPageState>(

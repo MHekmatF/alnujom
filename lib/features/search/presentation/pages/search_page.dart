@@ -77,7 +77,12 @@ class _SearchPageView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: const DeepLinkAwareBackButton(),
+        // No back arrow when opened as the Search bottom-nav tab root (nothing
+        // to pop — the bottom nav returns to Home); keep it when pushed (hero
+        // search / property-type chip / deep-link).
+        leading: Navigator.canPop(context)
+            ? const DeepLinkAwareBackButton()
+            : null,
         title: _SearchBar(autofocus: autofocusSearchBar),
         titleSpacing: 0,
       ),

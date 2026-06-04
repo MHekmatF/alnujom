@@ -1431,5 +1431,11 @@
   "nav_search": "البحث",
   "@nav_search": { "description": "Phase 25 — Bottom navigation bar label for the Search tab." },
   "nav_publish": "نشر",
-  "@nav_publish": { "description": "Phase 25 — Bottom navigation bar label for the Publish (create listing) action; shown only to approved publishers." }
+  "@nav_publish": { "description": "Phase 25 — Bottom navigation bar label for the Publish (create listing) action; shown only to approved publishers." },
+  "home_greeting_welcome": "أهلاً بك،",
+  "@home_greeting_welcome": { "description": "Phase 25 — Home hero greeting for anonymous (signed-out) users." },
+  "home_greeting_named": "أهلاً {name}،",
+  "@home_greeting_named": { "description": "Phase 25 — Home hero greeting for a signed-in user.", "placeholders": { "name": { "type": "String" } } },
+  "home_greeting_subtitle": "ابحث عن عقارك المثالي في سوريا",
+  "@home_greeting_subtitle": { "description": "Phase 25 — Home hero greeting subtitle beneath the welcome line." }
 }
