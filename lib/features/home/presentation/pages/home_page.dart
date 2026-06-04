@@ -174,6 +174,8 @@ class _HomeViewState extends State<_HomeView> {
     return CustomScrollView(
       controller: _scrollController,
       slivers: [
+        // Phase 25 (Claude Design) — personalized welcome above the search bar.
+        const SliverToBoxAdapter(child: _HomeGreeting()),
         const SliverToBoxAdapter(child: HeroSearchBar()),
         const SliverToBoxAdapter(child: PropertyTypeShortcutRow()),
         // Phase 15 G1: Map entry tile — R-91 slot (between shortcut row and header).
@@ -263,6 +265,63 @@ class _HomeViewState extends State<_HomeView> {
           ),
         ];
     }
+  }
+}
+
+/// Phase 25 (Claude Design) — personalized home hero greeting. Renders the
+/// signed-in user's first name when available, otherwise an anonymous welcome,
+/// with a fixed subtitle. Purely presentational (no navigation/logic).
+class _HomeGreeting extends StatelessWidget {
+  const _HomeGreeting();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        final name = switch (state) {
+          Authenticated(:final profile) => _firstName(
+            profile.fullName ?? profile.username ?? '',
+          ),
+          _ => null,
+        };
+        final greeting = (name != null && name.isNotEmpty)
+            ? l10n.home_greeting_named(name)
+            : l10n.home_greeting_welcome;
+
+        return Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(
+            AppSpacing.lg,
+            AppSpacing.lg,
+            AppSpacing.lg,
+            AppSpacing.xs,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(greeting, style: theme.textTheme.headlineSmall),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                l10n.home_greeting_subtitle,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// First whitespace-delimited token of a display name (the design shows just
+  /// the given name); null/empty when there's nothing to show.
+  static String? _firstName(String full) {
+    final trimmed = full.trim();
+    if (trimmed.isEmpty) return null;
+    return trimmed.split(RegExp(r'\s+')).first;
   }
 }
 

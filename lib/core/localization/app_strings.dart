@@ -4428,4 +4428,18 @@ final class _DebugAppLocalizations extends AppLocalizations {
 
   @override
   String get nav_publish => _resolve('nav_publish', (loc) => loc.nav_publish);
+
+  @override
+  String get home_greeting_welcome =>
+      _resolve('home_greeting_welcome', (loc) => loc.home_greeting_welcome);
+
+  @override
+  String home_greeting_named(String name) => _resolve(
+    'home_greeting_named',
+    (loc) => loc.home_greeting_named(name),
+  );
+
+  @override
+  String get home_greeting_subtitle =>
+      _resolve('home_greeting_subtitle', (loc) => loc.home_greeting_subtitle);
 }
