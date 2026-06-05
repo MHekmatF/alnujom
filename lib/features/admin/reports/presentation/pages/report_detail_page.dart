@@ -197,7 +197,7 @@ class _ReportDetailView extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.xs),
             _InfoRow(
-              label: 'Listing status',
+              label: l10n.admin_report_listing_status_label,
               value: item.listingStatus,
             ),
             const SizedBox(height: AppSpacing.md),
