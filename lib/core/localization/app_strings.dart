@@ -4451,4 +4451,16 @@ final class _DebugAppLocalizations extends AppLocalizations {
     'admin_report_listing_status_label',
     (loc) => loc.admin_report_listing_status_label,
   );
+
+  @override
+  String get action_browse_listings =>
+      _resolve('action_browse_listings', (loc) => loc.action_browse_listings);
+
+  @override
+  String get favorites_empty_body =>
+      _resolve('favorites_empty_body', (loc) => loc.favorites_empty_body);
+
+  @override
+  String get reports_my_empty_body =>
+      _resolve('reports_my_empty_body', (loc) => loc.reports_my_empty_body);
 }
