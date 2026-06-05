@@ -8,6 +8,7 @@ import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/brand_mark.dart';
+import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
@@ -76,23 +77,26 @@ class _SplashPageState extends State<SplashPage> {
       child: Scaffold(
         backgroundColor: colors.primary,
         body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              BrandMark(
-                size: 88,
-                color: colors.onPrimary,
-                accentColor: colors.accent,
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              Text(
-                l10n.appTitle,
-                style: styles.displayMedium.copyWith(
+          child: StaggeredListItem(
+            index: 0,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                BrandMark(
+                  size: 88,
                   color: colors.onPrimary,
-                  fontWeight: FontWeight.w800,
+                  accentColor: colors.accent,
                 ),
-              ),
-            ],
+                const SizedBox(height: AppSpacing.lg),
+                Text(
+                  l10n.appTitle,
+                  style: styles.displayMedium.copyWith(
+                    color: colors.onPrimary,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme/spacing.dart';
 import '../theme/typography.dart';
 import 'app_button.dart';
+import 'staggered_list_item.dart';
 
 class EmptyState extends StatelessWidget {
   const EmptyState({
@@ -26,31 +27,34 @@ class EmptyState extends StatelessWidget {
     return Center(
       child: Padding(
         padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (illustration != null) ...[
-              illustration!,
-              const SizedBox(height: AppSpacing.lg),
-            ],
-            Text(
-              headline,
-              textAlign: TextAlign.center,
-              style: styles.titleLarge,
-            ),
-            if (body != null) ...[
-              const SizedBox(height: AppSpacing.sm),
+        child: StaggeredListItem(
+          index: 0,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (illustration != null) ...[
+                illustration!,
+                const SizedBox(height: AppSpacing.lg),
+              ],
               Text(
-                body!,
+                headline,
                 textAlign: TextAlign.center,
-                style: styles.bodyMedium,
+                style: styles.titleLarge,
               ),
+              if (body != null) ...[
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  body!,
+                  textAlign: TextAlign.center,
+                  style: styles.bodyMedium,
+                ),
+              ],
+              if (ctaLabel != null && onCtaPressed != null) ...[
+                const SizedBox(height: AppSpacing.lg),
+                AppButton(label: ctaLabel!, onPressed: onCtaPressed),
+              ],
             ],
-            if (ctaLabel != null && onCtaPressed != null) ...[
-              const SizedBox(height: AppSpacing.lg),
-              AppButton(label: ctaLabel!, onPressed: onCtaPressed),
-            ],
-          ],
+          ),
         ),
       ),
     );

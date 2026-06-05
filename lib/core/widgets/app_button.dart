@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 
 import '../theme/colors.dart';
@@ -7,6 +8,7 @@ import '../theme/spacing.dart';
 import '../theme/typography.dart';
 import '_widget_support.dart';
 import 'dimens.dart';
+import 'press_scale.dart';
 
 enum AppButtonVariant {
   filledPrimary,
@@ -92,10 +94,23 @@ class AppButton extends StatelessWidget {
         : AppSpacing.xxxl;
     final enabled = onPressed != null && !loading;
 
+    // Consequential actions get a light haptic tick on tap.
+    final usesHaptic =
+        variant == AppButtonVariant.filledPrimary ||
+        variant == AppButtonVariant.filledSuccess ||
+        variant == AppButtonVariant.destructive ||
+        variant == AppButtonVariant.fab;
+    void handleTap() {
+      if (usesHaptic) HapticFeedback.selectionClick();
+      onPressed?.call();
+    }
+
+    final effectiveOnPressed = enabled ? handleTap : null;
+
     if (variant == AppButtonVariant.iconButton) {
       return AppTapTarget(
         child: IconButton(
-          onPressed: enabled ? onPressed : null,
+          onPressed: effectiveOnPressed,
           icon: loading
               ? appInlineSpinner(context, color: colors.primary)
               : Icon(icon ?? LucideIcons.circle),
@@ -108,7 +123,7 @@ class AppButton extends StatelessWidget {
     if (variant == AppButtonVariant.fab) {
       return AppTapTarget(
         child: FloatingActionButton(
-          onPressed: enabled ? onPressed : null,
+          onPressed: effectiveOnPressed,
           backgroundColor: colors.primary,
           foregroundColor: colors.onPrimary,
           child: loading
@@ -136,27 +151,30 @@ class AppButton extends StatelessWidget {
             ],
           );
 
-    return AppTapTarget(
-      child: TextButton(
-        onPressed: enabled ? onPressed : null,
-        style: ButtonStyle(
-          minimumSize: WidgetStatePropertyAll(
-            Size(AppSpacing.xxxl, visualHeight),
-          ),
-          padding: WidgetStatePropertyAll(
-            appPadding(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
-          ),
-          backgroundColor: WidgetStatePropertyAll(background),
-          foregroundColor: WidgetStatePropertyAll(foreground),
-          textStyle: WidgetStatePropertyAll(styles.labelLarge),
-          shape: WidgetStatePropertyAll(
-            RoundedRectangleBorder(
-              borderRadius: appRadius(AppRadii.md),
-              side: border,
+    return PressScale(
+      enabled: enabled,
+      child: AppTapTarget(
+        child: TextButton(
+          onPressed: effectiveOnPressed,
+          style: ButtonStyle(
+            minimumSize: WidgetStatePropertyAll(
+              Size(AppSpacing.xxxl, visualHeight),
+            ),
+            padding: WidgetStatePropertyAll(
+              appPadding(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+            ),
+            backgroundColor: WidgetStatePropertyAll(background),
+            foregroundColor: WidgetStatePropertyAll(foreground),
+            textStyle: WidgetStatePropertyAll(styles.labelLarge),
+            shape: WidgetStatePropertyAll(
+              RoundedRectangleBorder(
+                borderRadius: appRadius(AppRadii.md),
+                side: border,
+              ),
             ),
           ),
+          child: child,
         ),
-        child: child,
       ),
     );
   }
