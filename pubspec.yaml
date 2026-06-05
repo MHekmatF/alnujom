@@ -16,6 +16,10 @@ dependencies:
   decimal: ^3.0.0
   equatable: 2.0.8
   flutter_bloc: 9.1.1
+  # Phase polish — declarative motion (entrances, shimmer, micro-interactions).
+  # Pure-Dart, no platform channels; takes Duration/Curve so AppMotion stays the
+  # source of truth. Reduce-motion is guarded by the app (it ignores the flag).
+  flutter_animate: ^4.5.0
   flutter_lucide: 1.11.0
   flutter_secure_storage: 10.0.0
   get_it: 8.2.0
