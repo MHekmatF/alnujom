@@ -4,8 +4,14 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/motion.dart';
+import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
+import '../../../../core/widgets/hero_tags.dart';
+import '../../../../core/widgets/loading_state.dart';
+import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../features/listing_form/domain/entities/listing.dart'
     show Listing, LocationVisibility;
 import '../../../../features/map/domain/entities/map_entry_context.dart';
@@ -86,34 +92,41 @@ class _ListingDetailsView extends StatelessWidget {
           }
         }
       },
-      child: Scaffold(
-        appBar: AppBar(leading: const DeepLinkAwareBackButton()),
-        body: BlocBuilder<ListingDetailsBloc, ListingDetailsState>(
-          builder: (context, state) {
-            switch (state.status) {
-              case ListingDetailsStatus.initial:
-              case ListingDetailsStatus.loading:
-                return const Center(child: CircularProgressIndicator());
-              case ListingDetailsStatus.notFound:
-                return const _NotFoundView();
-              case ListingDetailsStatus.error:
-                return _ErrorView(
+      child: BlocBuilder<ListingDetailsBloc, ListingDetailsState>(
+        builder: (context, state) {
+          switch (state.status) {
+            case ListingDetailsStatus.initial:
+            case ListingDetailsStatus.loading:
+              return _chromeScaffold(const _DetailLoadingView());
+            case ListingDetailsStatus.notFound:
+              return _chromeScaffold(const _NotFoundView());
+            case ListingDetailsStatus.error:
+              return _chromeScaffold(
+                _ErrorView(
                   onRetry: () => context.read<ListingDetailsBloc>().add(
                     const ListingDetailsRetryRequested(),
                   ),
-                );
-              case ListingDetailsStatus.success:
-                final aggregate = state.aggregate;
-                if (aggregate == null) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                return _SuccessBody(aggregate: aggregate);
-            }
-          },
-        ),
+                ),
+              );
+            case ListingDetailsStatus.success:
+              final aggregate = state.aggregate;
+              if (aggregate == null) {
+                return _chromeScaffold(const _DetailLoadingView());
+              }
+              // Success owns its own Scaffold whose SliverAppBar IS the bar
+              // (a parallax collapsing gallery), so no top-level AppBar here.
+              return _SuccessBody(aggregate: aggregate);
+          }
+        },
       ),
     );
   }
+
+  /// Plain-chrome scaffold (back-button AppBar) for the non-success states.
+  Widget _chromeScaffold(Widget body) => Scaffold(
+    appBar: AppBar(leading: const DeepLinkAwareBackButton()),
+    body: body,
+  );
 }
 
 // ─── Success body ─────────────────────────────────────────────────────────────
@@ -135,112 +148,134 @@ class _SuccessBody extends StatelessWidget {
         ? _buildDisplayCurrency(aggregate)
         : null;
 
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 2. Gallery + FR-027 video-tap overlay.
-          //    Phase 12 Q8=A ListingGallery imported VERBATIM (SC-016).
-          _GalleryWithVideoTap(media: aggregate.media),
-          Padding(
-            padding: const EdgeInsetsDirectional.all(AppSpacing.md),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Phase 18: Reporter status banner (renders nothing for non-
-                // reporters / anon). Self-contained: hosts its own cubit.
-                ReporterStatusBanner(listingId: aggregate.listing.id),
-                // Phase 21: listing details banner (collapses to zero height
-                // when no eligible ads — FR-012; no reflow on the details layout).
-                const AdSlot(placement: AdPlacement.listingDetailsBanner),
-                // 3. Listing title — headlineMedium is a theme-set Cairo slot
-                // (headlineSmall is unset and would fall back to the default
-                // non-Arabic font).
-                Text(
-                  aggregate.listing.title,
-                  style: theme.textTheme.headlineMedium,
-                ),
-                if (aggregate.publisher.fullName.isNotEmpty) ...[
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    l10n.listing_details_publisher_label(
-                      aggregate.publisher.fullName,
+    final galleryHeight = MediaQuery.sizeOf(context).width * 9 / 16;
+    return Scaffold(
+      body: CustomScrollView(
+        slivers: [
+          // 2. Parallax collapsing gallery + FR-027 video-tap overlay.
+          //    Phase 12 Q8=A ListingGallery wrapped (not edited) per SC-016;
+          //    it also owns the Hero destination flown from the home card.
+          SliverAppBar(
+            pinned: true,
+            expandedHeight: galleryHeight,
+            leading: const DeepLinkAwareBackButton(),
+            flexibleSpace: FlexibleSpaceBar(
+              collapseMode: CollapseMode.parallax,
+              background: _GalleryWithVideoTap(
+                media: aggregate.media,
+                heroTag: listingImageHeroTag(aggregate.listing.id),
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: StaggeredListItem(
+              index: 1,
+              child: Padding(
+                padding: const EdgeInsetsDirectional.all(AppSpacing.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Phase 18: Reporter status banner (renders nothing for non-
+                    // reporters / anon). Self-contained: hosts its own cubit.
+                    ReporterStatusBanner(listingId: aggregate.listing.id),
+                    // Phase 21: listing details banner (collapses to zero height
+                    // when no eligible ads — FR-012; no reflow on the details layout).
+                    const AdSlot(placement: AdPlacement.listingDetailsBanner),
+                    // 3. Listing title — headlineMedium is a theme-set Cairo slot
+                    // (headlineSmall is unset and would fall back to the default
+                    // non-Arabic font).
+                    Text(
+                      aggregate.listing.title,
+                      style: theme.textTheme.headlineMedium,
                     ),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+                    if (aggregate.publisher.fullName.isNotEmpty) ...[
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        l10n.listing_details_publisher_label(
+                          aggregate.publisher.fullName,
+                        ),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                    // Phase 19 (FR-022/T061): verified-agency badge. Renders
+                    // nothing unless the listing's agency is approved. Does NOT
+                    // alter the Phase 13/17/18 Favorite/Share/Report CTAs.
+                    if (aggregate.listing.agencyId != null)
+                      ListingAgencyBadge(agencyId: aggregate.listing.agencyId!),
+                    const SizedBox(height: AppSpacing.md),
+                    // 4. Price block — Phase 12 Q8=A VERBATIM
+                    if (displayCurrency != null &&
+                        aggregate.prices.isNotEmpty) ...[
+                      ListingPriceBlock(
+                        prices: aggregate.prices,
+                        displayCurrency: displayCurrency,
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                    ],
+                    // 5. Location block — Phase 12 Q8=A VERBATIM (widget itself unmodified)
+                    ListingLocationBlock(
+                      governorate: aggregate.governorate,
+                      city: aggregate.city,
+                      area: aggregate.area,
+                      addressText: aggregate.listing.addressText,
                     ),
-                  ),
-                ],
-                // Phase 19 (FR-022/T061): verified-agency badge. Renders
-                // nothing unless the listing's agency is approved. Does NOT
-                // alter the Phase 13/17/18 Favorite/Share/Report CTAs.
-                if (aggregate.listing.agencyId != null)
-                  ListingAgencyBadge(agencyId: aggregate.listing.agencyId!),
-                const SizedBox(height: AppSpacing.md),
-                // 4. Price block — Phase 12 Q8=A VERBATIM
-                if (displayCurrency != null && aggregate.prices.isNotEmpty) ...[
-                  ListingPriceBlock(
-                    prices: aggregate.prices,
-                    displayCurrency: displayCurrency,
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                ],
-                // 5. Location block — Phase 12 Q8=A VERBATIM (widget itself unmodified)
-                ListingLocationBlock(
-                  governorate: aggregate.governorate,
-                  city: aggregate.city,
-                  area: aggregate.area,
-                  addressText: aggregate.listing.addressText,
-                ),
-                // 5b. Phase 15 G2: "View on map" affordance — consumer wrap.
-                //     Only rendered when location_visibility permits map presence.
-                //     ListingLocationBlock itself is NOT modified (Phase 12 Q8=A purity).
-                if (_canShowOnMap(aggregate.listing))
-                  Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(
-                      AppSpacing.lg,
-                      AppSpacing.xs,
-                      AppSpacing.lg,
-                      AppSpacing.md,
-                    ),
-                    child: Align(
-                      alignment: AlignmentDirectional.centerStart,
-                      child: TextButton.icon(
-                        onPressed: () => context.go(
-                          AppRoutes.map,
-                          extra: MapEntryFromListing(
-                            listingId: aggregate.listing.id,
-                            position: MarkerCoordinates(
-                              latitude: aggregate.listing.latitude!,
-                              longitude: aggregate.listing.longitude!,
+                    // 5b. Phase 15 G2: "View on map" affordance — consumer wrap.
+                    //     Only rendered when location_visibility permits map presence.
+                    //     ListingLocationBlock itself is NOT modified (Phase 12 Q8=A purity).
+                    if (_canShowOnMap(aggregate.listing))
+                      Padding(
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                          AppSpacing.lg,
+                          AppSpacing.xs,
+                          AppSpacing.lg,
+                          AppSpacing.md,
+                        ),
+                        child: Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: TextButton.icon(
+                            onPressed: () => context.go(
+                              AppRoutes.map,
+                              extra: MapEntryFromListing(
+                                listingId: aggregate.listing.id,
+                                position: MarkerCoordinates(
+                                  latitude: aggregate.listing.latitude!,
+                                  longitude: aggregate.listing.longitude!,
+                                ),
+                              ),
+                            ),
+                            icon: const Icon(Icons.map_outlined),
+                            label: Text(
+                              l10n.listing_details_view_on_map_action,
                             ),
                           ),
                         ),
-                        icon: const Icon(Icons.map_outlined),
-                        label: Text(l10n.listing_details_view_on_map_action),
                       ),
+                    const SizedBox(height: AppSpacing.md),
+                    // 6. Contact block — Phase 16 rewired (listing passed for ContactCtaCubit)
+                    ContactBlock(listing: aggregate.listing),
+                    const SizedBox(height: AppSpacing.md),
+                    // 7. Amenities block — Phase 12 Q8=A VERBATIM
+                    ListingAmenitiesBlock(
+                      amenities: aggregate.details.amenities,
                     ),
-                  ),
-                const SizedBox(height: AppSpacing.md),
-                // 6. Contact block — Phase 16 rewired (listing passed for ContactCtaCubit)
-                ContactBlock(listing: aggregate.listing),
-                const SizedBox(height: AppSpacing.md),
-                // 7. Amenities block — Phase 12 Q8=A VERBATIM
-                ListingAmenitiesBlock(amenities: aggregate.details.amenities),
-                if (aggregate.details.amenities.isNotEmpty)
-                  const SizedBox(height: AppSpacing.md),
-                // 8. Description block — Phase 12 Q8=A VERBATIM
-                if (aggregate.details.description != null &&
-                    aggregate.details.description!.trim().isNotEmpty) ...[
-                  ListingDescriptionBlock(
-                    description: aggregate.details.description!,
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                ],
-                // 9. Per-listing action block — Phase 17 Favorite live; Share/Report stubs
-                PerListingActionBlock(listingId: aggregate.listing.id),
-                const SizedBox(height: AppSpacing.lg),
-              ],
+                    if (aggregate.details.amenities.isNotEmpty)
+                      const SizedBox(height: AppSpacing.md),
+                    // 8. Description block — Phase 12 Q8=A VERBATIM
+                    if (aggregate.details.description != null &&
+                        aggregate.details.description!.trim().isNotEmpty) ...[
+                      ListingDescriptionBlock(
+                        description: aggregate.details.description!,
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                    ],
+                    // 9. Per-listing action block — Phase 17 Favorite live; Share/Report stubs
+                    PerListingActionBlock(listingId: aggregate.listing.id),
+                    const SizedBox(height: AppSpacing.lg),
+                  ],
+                ),
+              ),
             ),
           ),
         ],
@@ -291,9 +326,12 @@ bool _canShowOnMap(Listing listing) {
 /// in the data layer (lib/features/listing_details/data/) to maintain FR-030
 /// isolation — the page itself imports zero `package:supabase_flutter`.
 class _GalleryWithVideoTap extends StatefulWidget {
-  const _GalleryWithVideoTap({required this.media});
+  const _GalleryWithVideoTap({required this.media, this.heroTag});
 
   final List<ListingMedia> media;
+
+  /// When set, the gallery owns the Hero flight from the listing card's image.
+  final Object? heroTag;
 
   @override
   State<_GalleryWithVideoTap> createState() => _GalleryWithVideoTapState();
@@ -326,11 +364,18 @@ class _GalleryWithVideoTapState extends State<_GalleryWithVideoTap> {
   @override
   Widget build(BuildContext context) {
     final videoMedia = _currentVideoMedia;
+    final sorted = _sortedMedia;
+
+    // Phase 12 Q8=A ListingGallery wrapped (not edited) per SC-016. When a
+    // heroTag is supplied, it owns the Hero flight from the listing card image.
+    Widget gallery = ListingGallery(media: widget.media);
+    if (widget.heroTag != null) {
+      gallery = Hero(tag: widget.heroTag!, child: gallery);
+    }
 
     return NotificationListener<ScrollNotification>(
       onNotification: (notification) {
         if (notification is ScrollEndNotification) {
-          final sorted = _sortedMedia;
           if (sorted.length > 1) {
             final pageWidth = notification.metrics.viewportDimension;
             if (pageWidth > 0) {
@@ -345,13 +390,86 @@ class _GalleryWithVideoTapState extends State<_GalleryWithVideoTap> {
         }
         return false;
       },
-      child: GestureDetector(
-        // FR-027: only intercept taps when the visible item is a video.
-        onTap: videoMedia != null
-            ? () => ListingDetailsVideoLauncher.launch(videoMedia)
-            : null,
-        child: ListingGallery(media: widget.media),
+      child: Stack(
+        alignment: AlignmentDirectional.bottomCenter,
+        children: [
+          GestureDetector(
+            // FR-027: only intercept taps when the visible item is a video.
+            onTap: videoMedia != null
+                ? () => ListingDetailsVideoLauncher.launch(videoMedia)
+                : null,
+            child: gallery,
+          ),
+          if (sorted.length > 1)
+            PositionedDirectional(
+              bottom: AppSpacing.md,
+              child: _GalleryDots(
+                count: sorted.length,
+                current: _currentPage.clamp(0, sorted.length - 1),
+              ),
+            ),
+        ],
       ),
+    );
+  }
+}
+
+/// Animated page indicator over the gallery: the active dot widens. White on
+/// imagery, so theme-independent by design.
+class _GalleryDots extends StatelessWidget {
+  const _GalleryDots({required this.count, required this.current});
+
+  final int count;
+  final int current;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(count, (i) {
+        final active = i == current;
+        return AnimatedContainer(
+          duration: AppMotion.base,
+          curve: AppMotion.curve,
+          margin: const EdgeInsetsDirectional.symmetric(
+            horizontal: AppSpacing.xs,
+          ),
+          width: active ? AppSpacing.lg : AppSpacing.sm,
+          height: AppSpacing.sm,
+          decoration: BoxDecoration(
+            color: active ? Colors.white : Colors.white.withValues(alpha: 0.5),
+            borderRadius: appRadius(AppRadii.pill),
+          ),
+        );
+      }),
+    );
+  }
+}
+
+// ─── Loading skeleton ─────────────────────────────────────────────────────────
+
+/// Shimmer placeholder for the detail page while it loads: a 16:9 gallery
+/// block, a title + sub line, and a content block — mirroring the real layout.
+class _DetailLoadingView extends StatelessWidget {
+  const _DetailLoadingView();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsetsDirectional.all(AppSpacing.md),
+      children: const [
+        AspectRatio(aspectRatio: 16 / 9, child: LoadingState.card()),
+        SizedBox(height: AppSpacing.lg),
+        SizedBox(height: AppSpacing.xl, child: LoadingState.row()),
+        SizedBox(height: AppSpacing.md),
+        FractionallySizedBox(
+          alignment: AlignmentDirectional.centerStart,
+          widthFactor: 0.5,
+          child: SizedBox(height: AppSpacing.lg, child: LoadingState.row()),
+        ),
+        SizedBox(height: AppSpacing.xl),
+        LoadingState.card(),
+      ],
     );
   }
 }
