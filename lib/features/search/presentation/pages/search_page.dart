@@ -32,7 +32,9 @@ import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
+import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/main_bottom_nav.dart';
+import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../features/map/domain/entities/map_entry_context.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../ads/domain/entities/ad_placement.dart';
@@ -303,7 +305,7 @@ class _ResultsArea extends StatelessWidget {
             return Center(child: Text(l10n.search_placeholder));
           case SearchStatus.loading:
             if (state.results.isEmpty) {
-              return const Center(child: CircularProgressIndicator());
+              return const _SearchSkeleton();
             }
             return _ResultsListView(state: state);
           case SearchStatus.failure:
@@ -459,8 +461,32 @@ class _ResultsListView extends StatelessWidget {
         if (itemIndex == state.results.length) {
           return const _PaginationSentinel();
         }
-        return SearchResultCard(item: state.results[itemIndex]);
+        return StaggeredListItem(
+          index: itemIndex,
+          child: SearchResultCard(item: state.results[itemIndex]),
+        );
       },
+    );
+  }
+}
+
+/// Shimmer placeholder rows (116dp, matching [SearchResultCard]) shown while the
+/// first search page loads.
+class _SearchSkeleton extends StatelessWidget {
+  const _SearchSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      itemCount: 6,
+      itemBuilder: (_, __) => const Padding(
+        padding: EdgeInsetsDirectional.only(bottom: AppSpacing.sm),
+        child: SizedBox(height: 116, child: LoadingState.card()),
+      ),
     );
   }
 }

@@ -2,7 +2,6 @@
 //
 // Phase 17 Sub-Phase F (T033) — REPLACES the Sub-Phase A stub.
 // Full composition per contracts/phase17-favorites-page-and-entry-points.md.
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -10,8 +9,12 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
+import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/main_bottom_nav.dart';
+import '../../../../core/widgets/press_scale.dart';
+import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/favorite_listing.dart';
 import '../bloc/favorites_page_bloc.dart';
@@ -54,9 +57,7 @@ class _FavoritesView extends StatelessWidget {
       body: BlocBuilder<FavoritesPageBloc, FavoritesPageState>(
         builder: (context, state) {
           return switch (state) {
-            FavoritesPageLoading() => const Center(
-              child: CircularProgressIndicator(),
-            ),
+            FavoritesPageLoading() => const _FavoritesSkeleton(),
             FavoritesPageError(:final failure) => _ErrorBody(failure: failure),
             FavoritesPageLoaded(:final items, :final hasMore) =>
               items.isEmpty
@@ -140,8 +141,43 @@ class _LoadedBody extends StatelessWidget {
             );
           }
 
-          return _FavoriteCard(item: items[index]);
+          return StaggeredListItem(
+            index: index,
+            child: _FavoriteCard(item: items[index]),
+          );
         },
+      ),
+    );
+  }
+}
+
+/// Shimmer placeholder cards (16:9 image + lines) shown while favorites load.
+class _FavoritesSkeleton extends StatelessWidget {
+  const _FavoritesSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemCount: 4,
+      itemBuilder: (_, __) => const Padding(
+        padding: EdgeInsetsDirectional.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.sm,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AspectRatio(aspectRatio: 16 / 9, child: LoadingState.card()),
+            SizedBox(height: AppSpacing.md),
+            SizedBox(height: AppSpacing.lg, child: LoadingState.row()),
+            SizedBox(height: AppSpacing.sm),
+            FractionallySizedBox(
+              alignment: AlignmentDirectional.centerStart,
+              widthFactor: 0.6,
+              child: SizedBox(height: AppSpacing.lg, child: LoadingState.row()),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -162,96 +198,100 @@ class _FavoriteCard extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
 
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      margin: const EdgeInsetsDirectional.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.sm,
-      ),
-      child: InkWell(
-        // Available AND unavailable cards tap to the details page (Q4=A).
-        onTap: () => context.push(AppRoutes.listingDetailsFor(item.id)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Hero image + heart overlay.
-            Stack(
-              children: [
-                _CardImage(
-                  imagePath: item.isAvailable ? item.mainImagePath : null,
-                  scheme: scheme,
-                  l10n: l10n,
-                ),
-                PositionedDirectional(
-                  top: AppSpacing.xs,
-                  end: AppSpacing.xs,
-                  child: FavoriteHeartButton(listingId: item.id),
-                ),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsetsDirectional.all(AppSpacing.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    return PressScale(
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        margin: const EdgeInsetsDirectional.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.sm,
+        ),
+        child: InkWell(
+          // Available AND unavailable cards tap to the details page (Q4=A).
+          onTap: () => context.push(AppRoutes.listingDetailsFor(item.id)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Hero image + heart overlay.
+              Stack(
                 children: [
-                  // Unavailable indicator badge.
-                  if (!item.isAvailable)
-                    Container(
-                      margin: const EdgeInsetsDirectional.only(
-                        bottom: AppSpacing.xs,
-                      ),
-                      padding: const EdgeInsetsDirectional.symmetric(
-                        horizontal: AppSpacing.sm,
-                        vertical: AppSpacing.xs,
-                      ),
-                      decoration: BoxDecoration(
-                        color: scheme.errorContainer,
-                        borderRadius: BorderRadius.circular(AppSpacing.xs),
-                      ),
-                      child: Text(
-                        l10n.favorite_unavailable_indicator,
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: scheme.onErrorContainer,
-                        ),
-                      ),
+                  AspectRatio(
+                    aspectRatio: 16 / 9,
+                    child: AppNetworkImage(
+                      url: item.isAvailable ? item.mainImagePath : null,
+                      semanticLabel: l10n.image_unavailable,
                     ),
-                  // Title (blank for unavailable rows — isAvailable=false gives
-                  // empty string from DTO null-coalesce per FR-025 contract).
-                  if (item.title.isNotEmpty)
-                    Text(
-                      item.title,
-                      style: theme.textTheme.titleMedium,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  // Price (null for unavailable rows).
-                  if (item.primaryAmount != null &&
-                      item.primaryCurrency != null) ...[
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      l10n.priceWithCurrency(
-                        item.primaryAmount!.toStringAsFixed(0),
-                        item.primaryCurrency!,
-                      ),
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                  // Location (null for unavailable rows).
-                  if (_locationLabel(item).isNotEmpty) ...[
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      _locationLabel(item),
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
+                  ),
+                  PositionedDirectional(
+                    top: AppSpacing.xs,
+                    end: AppSpacing.xs,
+                    child: FavoriteHeartButton(listingId: item.id),
+                  ),
                 ],
               ),
-            ),
-          ],
+              Padding(
+                padding: const EdgeInsetsDirectional.all(AppSpacing.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Unavailable indicator badge.
+                    if (!item.isAvailable)
+                      Container(
+                        margin: const EdgeInsetsDirectional.only(
+                          bottom: AppSpacing.xs,
+                        ),
+                        padding: const EdgeInsetsDirectional.symmetric(
+                          horizontal: AppSpacing.sm,
+                          vertical: AppSpacing.xs,
+                        ),
+                        decoration: BoxDecoration(
+                          color: scheme.errorContainer,
+                          borderRadius: BorderRadius.circular(AppSpacing.xs),
+                        ),
+                        child: Text(
+                          l10n.favorite_unavailable_indicator,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: scheme.onErrorContainer,
+                          ),
+                        ),
+                      ),
+                    // Title (blank for unavailable rows — isAvailable=false gives
+                    // empty string from DTO null-coalesce per FR-025 contract).
+                    if (item.title.isNotEmpty)
+                      Text(
+                        item.title,
+                        style: theme.textTheme.titleMedium,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    // Price (null for unavailable rows).
+                    if (item.primaryAmount != null &&
+                        item.primaryCurrency != null) ...[
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        l10n.priceWithCurrency(
+                          item.primaryAmount!.toStringAsFixed(0),
+                          item.primaryCurrency!,
+                        ),
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                    // Location (null for unavailable rows).
+                    if (_locationLabel(item).isNotEmpty) ...[
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        _locationLabel(item),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -265,54 +305,5 @@ class _FavoriteCard extends StatelessWidget {
     final city = item.cityNameAr ?? item.cityNameEn ?? '';
     final parts = [if (gov.isNotEmpty) gov, if (city.isNotEmpty) city];
     return parts.join(' • ');
-  }
-}
-
-class _CardImage extends StatelessWidget {
-  const _CardImage({
-    required this.imagePath,
-    required this.scheme,
-    required this.l10n,
-  });
-
-  final String? imagePath;
-  final ColorScheme scheme;
-  final AppLocalizations l10n;
-
-  @override
-  Widget build(BuildContext context) {
-    if (imagePath == null) {
-      return AspectRatio(
-        aspectRatio: 16 / 9,
-        child: ColoredBox(
-          color: scheme.surfaceContainerHighest,
-          child: Center(
-            child: Icon(
-              Icons.image_not_supported_outlined,
-              color: scheme.onSurfaceVariant,
-            ),
-          ),
-        ),
-      );
-    }
-
-    return AspectRatio(
-      aspectRatio: 16 / 9,
-      child: CachedNetworkImage(
-        imageUrl: imagePath!,
-        fit: BoxFit.cover,
-        placeholder: (_, __) =>
-            ColoredBox(color: scheme.surfaceContainerHighest),
-        errorWidget: (_, __, ___) => ColoredBox(
-          color: scheme.surfaceContainerHighest,
-          child: Center(
-            child: Icon(
-              Icons.broken_image_outlined,
-              color: scheme.onSurfaceVariant,
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }
