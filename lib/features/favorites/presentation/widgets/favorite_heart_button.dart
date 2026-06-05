@@ -4,6 +4,7 @@
 // four listing surfaces (home feed, search results, map preview, listing
 // details). Per contract phase17-favorite-heart-toggle.md and R-118.
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
@@ -11,7 +12,9 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/elevation.dart';
+import '../../../../core/theme/motion.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/reduce_motion.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../bloc/favorites_cubit.dart';
 
@@ -87,9 +90,12 @@ class FavoriteHeartButton extends StatelessWidget {
         }
 
         return IconButton(
-          icon: Icon(
-            isFavorited ? Icons.favorite : Icons.favorite_border,
-            color: isFavorited ? colors.accent : null,
+          icon: _HeartPop(
+            favorited: isFavorited,
+            child: Icon(
+              isFavorited ? Icons.favorite : Icons.favorite_border,
+              color: isFavorited ? colors.accent : null,
+            ),
           ),
           tooltip: tooltip,
           onPressed: () => _onTap(context, state),
@@ -110,9 +116,65 @@ class FavoriteHeartButton extends StatelessWidget {
       return;
     }
 
-    // Authenticated branch: optimistic toggle via the shared singleton.
+    // Authenticated branch: a light haptic tick, then the optimistic toggle.
+    HapticFeedback.lightImpact();
     getIt<FavoritesCubit>().toggle(listingId);
   }
+}
+
+/// A one-shot "pop" (1.0 → 1.3 → 1.0) played only when [favorited] transitions
+/// false→true (a user save) — never on first mount or on un-favorite, and
+/// skipped under reduced motion.
+class _HeartPop extends StatefulWidget {
+  const _HeartPop({required this.favorited, required this.child});
+
+  final bool favorited;
+  final Widget child;
+
+  @override
+  State<_HeartPop> createState() => _HeartPopState();
+}
+
+class _HeartPopState extends State<_HeartPop>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: AppMotion.fast,
+  );
+  late final Animation<double> _scale = TweenSequence<double>([
+    TweenSequenceItem(
+      tween: Tween<double>(
+        begin: 1.0,
+        end: 1.3,
+      ).chain(CurveTween(curve: AppMotion.curve)),
+      weight: 1,
+    ),
+    TweenSequenceItem(
+      tween: Tween<double>(
+        begin: 1.3,
+        end: 1.0,
+      ).chain(CurveTween(curve: AppMotion.curve)),
+      weight: 1,
+    ),
+  ]).animate(_controller);
+
+  @override
+  void didUpdateWidget(_HeartPop oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.favorited && !oldWidget.favorited && !reduceMotion(context)) {
+      _controller.forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      ScaleTransition(scale: _scale, child: widget.child);
 }
 
 /// The white circular over-photo treatment (Claude `an-heart`): a soft-shadowed
@@ -148,11 +210,14 @@ class _OnImageChip extends StatelessWidget {
             onTap: onPressed,
             child: Padding(
               padding: const EdgeInsetsDirectional.all(AppSpacing.md),
-              child: Icon(
-                isFavorited ? Icons.favorite : Icons.favorite_border,
-                size: AppSpacing.xl,
-                color: isFavorited ? colors.accent : Colors.black54,
-                semanticLabel: tooltip,
+              child: _HeartPop(
+                favorited: isFavorited,
+                child: Icon(
+                  isFavorited ? Icons.favorite : Icons.favorite_border,
+                  size: AppSpacing.xl,
+                  color: isFavorited ? colors.accent : Colors.black54,
+                  semanticLabel: tooltip,
+                ),
               ),
             ),
           ),
