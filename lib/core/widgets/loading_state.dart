@@ -77,19 +77,46 @@ class _LoadingStateState extends State<LoadingState>
         ),
       );
     }
+    // A highlight that reads in both themes: the base nudged toward the
+    // foreground tint (never a hardcoded white, which vanishes in light mode).
+    final base = colors.surfaceVariant;
+    final highlight = Color.alphaBlend(
+      colors.onSurfaceVariant.withValues(alpha: 0.14),
+      base,
+    );
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
-        final alpha = 0x80 + (_controller.value * 0x40).round();
         return Container(
           width: widget.width,
           height: widget.height,
           decoration: BoxDecoration(
-            color: colors.surfaceVariant.withAlpha(alpha),
             borderRadius: appRadius(widget.radius),
+            gradient: LinearGradient(
+              colors: [base, highlight, base],
+              stops: const [0.30, 0.5, 0.70],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              transform: _SweepGradientTransform(_controller.value),
+            ),
           ),
         );
       },
     );
+  }
+}
+
+/// Translates a [LinearGradient] horizontally across its bounds so the bright
+/// band sweeps left→right (value 0→1 maps the highlight from off-left to
+/// off-right).
+class _SweepGradientTransform extends GradientTransform {
+  const _SweepGradientTransform(this.value);
+
+  final double value;
+
+  @override
+  Matrix4? transform(Rect bounds, {TextDirection? textDirection}) {
+    final dx = bounds.width * (value * 2 - 1);
+    return Matrix4.translationValues(dx, 0, 0);
   }
 }

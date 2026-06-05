@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'color_palette.dart';
 import 'colors.dart';
+import 'motion.dart';
 import 'radii.dart';
 import 'spacing.dart';
 import 'typography.dart';
@@ -43,6 +44,15 @@ ThemeData buildAppTheme({
     useMaterial3: true,
     brightness: brightness,
     colorScheme: palette.scheme(brightness),
+    // Phase polish — a single subtle fade + 2% vertical-slide route transition
+    // applied app-wide (go_router's MaterialPage honours it). Vertical slide is
+    // RTL-agnostic; reduce-motion is honoured inside the builder.
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: <TargetPlatform, PageTransitionsBuilder>{
+        TargetPlatform.android: _AppPageTransitionsBuilder(),
+        TargetPlatform.iOS: _AppPageTransitionsBuilder(),
+      },
+    ),
     scaffoldBackgroundColor: colors.surface,
     cardColor: colors.card,
     dividerColor: colors.divider,
@@ -243,4 +253,34 @@ ThemeData buildAppTheme({
       ),
     ),
   );
+}
+
+/// App-wide page transition: a restrained fade combined with a 2% upward slide,
+/// eased on [AppMotion.curve]. Vertical motion is direction-agnostic (no RTL
+/// mirroring needed), and the whole effect collapses to an instant cut when the
+/// platform requests reduced motion.
+class _AppPageTransitionsBuilder extends PageTransitionsBuilder {
+  const _AppPageTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    if (MediaQuery.of(context).disableAnimations) return child;
+    final curved = CurvedAnimation(parent: animation, curve: AppMotion.curve);
+    return FadeTransition(
+      opacity: curved,
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 0.02),
+          end: Offset.zero,
+        ).animate(curved),
+        child: child,
+      ),
+    );
+  }
 }
