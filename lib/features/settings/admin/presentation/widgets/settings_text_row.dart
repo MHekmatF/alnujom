@@ -5,6 +5,7 @@
 // Constitution IX: zero Supabase imports.
 import 'package:flutter/material.dart';
 
+import '../../../../../../core/localization/app_strings.dart';
 import '../../../../../../core/theme/spacing.dart';
 
 /// A single-row validated text field with an inline Save button.
@@ -25,7 +26,7 @@ class SettingsTextRow extends StatefulWidget {
     required this.onSave,
     this.keyboardType,
     this.maxLines = 1,
-    this.saveLabel = 'Save',
+    this.saveLabel,
   });
 
   final String label;
@@ -34,7 +35,7 @@ class SettingsTextRow extends StatefulWidget {
   final Future<String?> Function(String) onSave;
   final TextInputType? keyboardType;
   final int maxLines;
-  final String saveLabel;
+  final String? saveLabel;
 
   @override
   State<SettingsTextRow> createState() => _SettingsTextRowState();
@@ -113,7 +114,9 @@ class _SettingsTextRowState extends State<SettingsTextRow> {
                   )
                 : TextButton(
                     onPressed: _handleSave,
-                    child: Text(widget.saveLabel),
+                    child: Text(
+                      widget.saveLabel ?? AppStrings.of(context).loc.action_save,
+                    ),
                   ),
           ],
         ),

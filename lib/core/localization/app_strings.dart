@@ -4442,4 +4442,13 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String get home_greeting_subtitle =>
       _resolve('home_greeting_subtitle', (loc) => loc.home_greeting_subtitle);
+
+  @override
+  String get action_save => _resolve('action_save', (loc) => loc.action_save);
+
+  @override
+  String get admin_report_listing_status_label => _resolve(
+    'admin_report_listing_status_label',
+    (loc) => loc.admin_report_listing_status_label,
+  );
 }

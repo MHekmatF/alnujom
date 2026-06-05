@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../localization/app_strings.dart';
 import '../theme/spacing.dart';
 import '../theme/typography.dart';
 import 'app_button.dart';
@@ -12,7 +13,7 @@ class AppDialog extends StatelessWidget {
     required this.actionLabel,
     required this.onAction,
     this.message,
-    this.cancelLabel = 'Cancel',
+    this.cancelLabel,
     this.variant = AppDialogVariant.confirm,
     super.key,
   });
@@ -20,7 +21,8 @@ class AppDialog extends StatelessWidget {
   final String title;
   final String? message;
   final String actionLabel;
-  final String cancelLabel;
+  // Null → the localized generic "Cancel" (Arabic-first; no English default).
+  final String? cancelLabel;
   final AppDialogVariant variant;
   final VoidCallback onAction;
 
@@ -34,7 +36,7 @@ class AppDialog extends StatelessWidget {
           : Text(message!, style: styles.bodyMedium),
       actions: [
         AppButton(
-          label: cancelLabel,
+          label: cancelLabel ?? AppStrings.of(context).loc.actionCancel,
           variant: AppButtonVariant.text,
           onPressed: () => Navigator.of(context).maybePop(),
         ),

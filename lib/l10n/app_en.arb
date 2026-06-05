@@ -1513,5 +1513,9 @@
   "home_greeting_named": "Hi {name},",
   "@home_greeting_named": { "description": "Phase 25 — Home hero greeting for a signed-in user.", "placeholders": { "name": { "type": "String" } } },
   "home_greeting_subtitle": "Find your ideal property in Syria",
-  "@home_greeting_subtitle": { "description": "Phase 25 — Home hero greeting subtitle beneath the welcome line." }
+  "@home_greeting_subtitle": { "description": "Phase 25 — Home hero greeting subtitle beneath the welcome line." },
+  "action_save": "Save",
+  "@action_save": { "description": "Generic Save action label (admin settings rows)." },
+  "admin_report_listing_status_label": "Listing status",
+  "@admin_report_listing_status_label": { "description": "Label for the reported listing's status on the admin report detail page." }
 }
