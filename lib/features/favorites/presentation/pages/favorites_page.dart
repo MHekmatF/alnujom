@@ -11,6 +11,7 @@ import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
+import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/main_bottom_nav.dart';
 import '../../../../core/widgets/press_scale.dart';
@@ -58,7 +59,7 @@ class _FavoritesView extends StatelessWidget {
         builder: (context, state) {
           return switch (state) {
             FavoritesPageLoading() => const _FavoritesSkeleton(),
-            FavoritesPageError(:final failure) => _ErrorBody(failure: failure),
+            FavoritesPageError() => const _ErrorBody(),
             FavoritesPageLoaded(:final items, :final hasMore) =>
               items.isEmpty
                   ? const FavoritesEmptyState()
@@ -76,28 +77,14 @@ class _FavoritesView extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _ErrorBody extends StatelessWidget {
-  const _ErrorBody({required this.failure});
-
-  final Object failure;
+  const _ErrorBody();
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.error_outline, size: AppSpacing.xxxl),
-          const SizedBox(height: AppSpacing.lg),
-          ElevatedButton.icon(
-            icon: const Icon(Icons.refresh),
-            label: Text(
-              MaterialLocalizations.of(context).refreshIndicatorSemanticLabel,
-            ),
-            onPressed: () => context.read<FavoritesPageBloc>().add(
-              const FavoritesPageRefreshRequested(),
-            ),
-          ),
-        ],
+    return ErrorState(
+      title: AppLocalizations.of(context)!.error_could_not_load_listings,
+      onRetry: () => context.read<FavoritesPageBloc>().add(
+        const FavoritesPageRefreshRequested(),
       ),
     );
   }
