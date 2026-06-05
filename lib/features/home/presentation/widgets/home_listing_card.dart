@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
@@ -10,7 +9,10 @@ import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/glass_pill.dart';
+import '../../../../core/widgets/hero_tags.dart';
+import '../../../../core/widgets/press_scale.dart';
 import '../../../../core/widgets/status_pill.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/money.dart';
@@ -54,7 +56,8 @@ class HomeListingCardTile extends StatelessWidget {
     final elevation = AppElevation.of(context);
     final locale = Localizations.localeOf(context);
 
-    return Container(
+    return PressScale(
+      child: Container(
       margin: const EdgeInsetsDirectional.symmetric(
         horizontal: AppSpacing.lg,
         vertical: AppSpacing.sm,
@@ -77,7 +80,6 @@ class HomeListingCardTile extends StatelessWidget {
                 _Hero(
                   imageUrl: card.mainImageUrl,
                   l10n: l10n,
-                  colors: colors,
                   listingId: card.id,
                   typeLabel: _propertyTypeLabel(l10n, card.propertyType),
                   purposeLabel: _purposeLabel(l10n, card.purpose),
@@ -154,6 +156,7 @@ class HomeListingCardTile extends StatelessWidget {
             ),
           ),
         ),
+      ),
       ),
     );
   }
@@ -251,7 +254,6 @@ class _Hero extends StatelessWidget {
   const _Hero({
     required this.imageUrl,
     required this.l10n,
-    required this.colors,
     required this.listingId,
     required this.typeLabel,
     required this.purposeLabel,
@@ -260,7 +262,6 @@ class _Hero extends StatelessWidget {
 
   final String? imageUrl;
   final AppLocalizations l10n;
-  final AppColors colors;
   final String listingId;
   final String typeLabel;
   final String purposeLabel;
@@ -268,39 +269,16 @@ class _Hero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final image = imageUrl == null
-        ? AspectRatio(
-            aspectRatio: 16 / 10,
-            child: ColoredBox(
-              color: colors.surfaceVariant,
-              child: Center(
-                child: Icon(
-                  Icons.image_not_supported_outlined,
-                  color: colors.onSurfaceVariant,
-                  semanticLabel: l10n.image_unavailable,
-                ),
-              ),
-            ),
-          )
-        : AspectRatio(
-            aspectRatio: 16 / 10,
-            child: CachedNetworkImage(
-              imageUrl: imageUrl!,
-              fit: BoxFit.cover,
-              placeholder: (context, _) =>
-                  ColoredBox(color: colors.surfaceVariant),
-              errorWidget: (context, _, __) => ColoredBox(
-                color: colors.surfaceVariant,
-                child: Center(
-                  child: Icon(
-                    Icons.broken_image_outlined,
-                    color: colors.onSurfaceVariant,
-                    semanticLabel: l10n.image_unavailable,
-                  ),
-                ),
-              ),
-            ),
-          );
+    // Phase polish — AppNetworkImage handles the fade-in + null/error fallback,
+    // and owns the Hero flight that morphs this image into the detail gallery.
+    final image = AspectRatio(
+      aspectRatio: 16 / 10,
+      child: AppNetworkImage(
+        url: imageUrl,
+        heroTag: listingImageHeroTag(listingId),
+        semanticLabel: l10n.image_unavailable,
+      ),
+    );
 
     return Stack(
       children: [

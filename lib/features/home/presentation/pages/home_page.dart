@@ -6,8 +6,10 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/brand_mark.dart';
+import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/locale_toggle_action.dart';
 import '../../../../core/widgets/main_bottom_nav.dart';
+import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/account_status.dart';
 import '../../../../shared/domain/value_objects/publisher_status.dart';
@@ -212,10 +214,12 @@ class _HomeViewState extends State<_HomeView> {
     switch (state.status) {
       case HomeFeedStatus.initial:
       case HomeFeedStatus.loading:
+        // Phase polish — card-shaped shimmer skeletons instead of a bare
+        // spinner, so the feed's shape is visible while it loads.
         return [
-          const SliverFillRemaining(
-            hasScrollBody: false,
-            child: Center(child: CircularProgressIndicator()),
+          SliverList.builder(
+            itemCount: 4,
+            itemBuilder: (_, __) => const _HomeCardSkeleton(),
           ),
         ];
       case HomeFeedStatus.error:
@@ -248,10 +252,16 @@ class _HomeViewState extends State<_HomeView> {
             separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.xs),
             itemBuilder: (context, index) {
               final card = state.listings[index];
-              return HomeListingCardTile(
-                card: card,
-                currenciesByCode: currenciesByCode,
-                displayCurrencyCode: null,
+              return StaggeredListItem(
+                index: index,
+                // Don't replay the entrance cascade on a pull-to-refresh
+                // rebuild; first load + appended pages still animate.
+                enabled: state.status != HomeFeedStatus.refreshing,
+                child: HomeListingCardTile(
+                  card: card,
+                  currenciesByCode: currenciesByCode,
+                  displayCurrencyCode: null,
+                ),
               );
             },
           ),
@@ -265,6 +275,36 @@ class _HomeViewState extends State<_HomeView> {
           ),
         ];
     }
+  }
+}
+
+/// Card-shaped shimmer placeholder shown while the first feed page loads —
+/// an image block plus a price and title line, mirroring [HomeListingCardTile].
+class _HomeCardSkeleton extends StatelessWidget {
+  const _HomeCardSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsetsDirectional.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.sm,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          LoadingState.card(),
+          SizedBox(height: AppSpacing.md),
+          SizedBox(height: AppSpacing.lg, child: LoadingState.row()),
+          SizedBox(height: AppSpacing.sm),
+          FractionallySizedBox(
+            alignment: AlignmentDirectional.centerStart,
+            widthFactor: 0.65,
+            child: SizedBox(height: AppSpacing.lg, child: LoadingState.row()),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -291,25 +331,28 @@ class _HomeGreeting extends StatelessWidget {
             ? l10n.home_greeting_named(name)
             : l10n.home_greeting_welcome;
 
-        return Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(
-            AppSpacing.lg,
-            AppSpacing.lg,
-            AppSpacing.lg,
-            AppSpacing.xs,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(greeting, style: theme.textTheme.headlineSmall),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                l10n.home_greeting_subtitle,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+        return StaggeredListItem(
+          index: 0,
+          child: Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(
+              AppSpacing.lg,
+              AppSpacing.lg,
+              AppSpacing.lg,
+              AppSpacing.xs,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(greeting, style: theme.textTheme.headlineSmall),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  l10n.home_greeting_subtitle,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
