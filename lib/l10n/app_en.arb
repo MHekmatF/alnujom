@@ -1517,5 +1517,11 @@
   "action_save": "Save",
   "@action_save": { "description": "Generic Save action label (admin settings rows)." },
   "admin_report_listing_status_label": "Listing status",
-  "@admin_report_listing_status_label": { "description": "Label for the reported listing's status on the admin report detail page." }
+  "@admin_report_listing_status_label": { "description": "Label for the reported listing's status on the admin report detail page." },
+  "action_browse_listings": "Browse listings",
+  "@action_browse_listings": { "description": "CTA to go to the home feed from an empty state." },
+  "favorites_empty_body": "Tap the heart on any listing to save it here.",
+  "@favorites_empty_body": { "description": "Guiding subtext on the empty Favorites state." },
+  "reports_my_empty_body": "Reports you submit will appear here.",
+  "@reports_my_empty_body": { "description": "Guiding subtext on the empty My Reports state." }
 }
