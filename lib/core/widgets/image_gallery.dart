@@ -7,6 +7,7 @@ import '../theme/radii.dart';
 import '../theme/spacing.dart';
 import '../theme/typography.dart';
 import '_widget_support.dart';
+import 'app_network_image.dart';
 import 'dimens.dart';
 import 'loading_state.dart';
 
@@ -65,10 +66,7 @@ class _ImageGalleryState extends State<ImageGallery> {
                     ),
                   ),
                 ),
-                child: CachedNetworkImage(
-                  imageUrl: widget.imageUrls[index],
-                  fit: BoxFit.cover,
-                ),
+                child: AppNetworkImage(url: widget.imageUrls[index]),
               ),
             ),
           ),
