@@ -87,7 +87,11 @@ final class ModernPalette extends ColorPalette {
     outlineStrong: Color(0xFF64748B),
     onSurface: Color(0xFF14202B),
     onSurfaceVariant: Color(0xFF475663),
-    textMuted: Color(0xFF74838F),
+    // Phase polish (Impeccable) — was #74838F (3.66:1 on surface, below the AA
+    // 4.5:1 body minimum); darkened to #5F6C78 (5.06:1) so muted text
+    // (timestamps, location, placeholders) is legible. Stays clearly lighter
+    // than onSurfaceVariant (#475663, 7.1:1) to preserve the text hierarchy.
+    textMuted: Color(0xFF5F6C78),
     verified: Color(0xFF1F7A4D),
     verifiedContainer: Color(0xFFDCF0E5),
   );
