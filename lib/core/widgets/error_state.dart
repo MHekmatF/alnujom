@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 
+import '../localization/app_strings.dart';
 import '../theme/colors.dart';
 import '../theme/spacing.dart';
 import '../theme/typography.dart';
@@ -27,6 +28,7 @@ class ErrorState extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
+    final loc = AppStrings.of(context).loc;
     return Center(
       child: Padding(
         padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
@@ -57,7 +59,7 @@ class ErrorState extends StatelessWidget {
               ],
               const SizedBox(height: AppSpacing.lg),
               AppButton(
-                label: 'Retry',
+                label: loc.errorRetryAction,
                 variant: AppButtonVariant.outlined,
                 onPressed: onRetry,
               ),

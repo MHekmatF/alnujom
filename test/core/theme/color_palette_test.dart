@@ -47,7 +47,7 @@ void main() {
       'onSurfaceVariant',
       () => expect(tokens.onSurfaceVariant, const Color(0xFF475663)),
     );
-    test('textMuted', () => expect(tokens.textMuted, const Color(0xFF74838F)));
+    test('textMuted', () => expect(tokens.textMuted, const Color(0xFF5F6C78)));
     test('verified', () => expect(tokens.verified, const Color(0xFF1F7A4D)));
     test(
       'verifiedContainer',
