@@ -40,14 +40,17 @@
 // `_controller.fitCamera(...)`. flutter_map's `initialCameraFit` is only
 // honored on first build, so a controller-driven update is required.
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:latlong2/latlong.dart' show LatLng;
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/theme/motion.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
+import '../../../../core/widgets/reduce_motion.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/map_entry_context.dart';
 import '../../domain/entities/map_marker.dart';
@@ -188,6 +191,35 @@ class _LoadedBodyState extends State<_LoadedBody> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final state = widget.state;
+
+    Widget clusterLayer = MarkerClusterLayerWidget(
+      options: MarkerClusterLayerOptions(
+        maxClusterRadius: 80,
+        // Defaults: spiderfyCluster=true, disableClusteringAtZoom=20,
+        // so at max-zoom (18) co-located markers still cluster but a
+        // tap spiderfies them — matches R-93 conditional behavior.
+        zoomToBoundsOnClick: true,
+        centerMarkerOnClick: true,
+        showPolygon: false,
+        size: const Size(40, 40),
+        padding: const EdgeInsets.all(
+          AppSpacing.xxl + AppSpacing.sm,
+        ), // 32+8=40
+        maxZoom: 18,
+        markers: state.markers
+            .map((m) => _buildMarker(context, m))
+            .toList(growable: false),
+        builder: (context, markers) => ClusterBadge(count: markers.length),
+      ),
+    );
+    // One-shot reveal of the pins as the dataset first lands. `_LoadedBody`
+    // only rebuilds on state changes (camera fit, selection, refresh) — never
+    // on pan/zoom — and flutter_animate's State persists across those rebuilds,
+    // so the fade plays once and never re-triggers while panning.
+    if (!reduceMotion(context)) {
+      clusterLayer = clusterLayer.animate().fadeIn(duration: AppMotion.slow);
+    }
+
     return Stack(
       children: [
         FlutterMap(
@@ -218,27 +250,7 @@ class _LoadedBodyState extends State<_LoadedBody> {
                 // placeholder).
               },
             ),
-            MarkerClusterLayerWidget(
-              options: MarkerClusterLayerOptions(
-                maxClusterRadius: 80,
-                // Defaults: spiderfyCluster=true, disableClusteringAtZoom=20,
-                // so at max-zoom (18) co-located markers still cluster but a
-                // tap spiderfies them — matches R-93 conditional behavior.
-                zoomToBoundsOnClick: true,
-                centerMarkerOnClick: true,
-                showPolygon: false,
-                size: const Size(40, 40),
-                padding: const EdgeInsets.all(
-                  AppSpacing.xxl + AppSpacing.sm,
-                ), // 32+8=40
-                maxZoom: 18,
-                markers: state.markers
-                    .map((m) => _buildMarker(context, m))
-                    .toList(growable: false),
-                builder: (context, markers) =>
-                    ClusterBadge(count: markers.length),
-              ),
-            ),
+            clusterLayer,
           ],
         ),
         const PositionedDirectional(
