@@ -42,6 +42,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../ads/domain/entities/ad_placement.dart';
 import '../../../ads/presentation/widgets/ad_slot.dart';
 import '../../../listing_form/domain/entities/listing.dart';
+import '../../domain/entities/count_filter_mode.dart';
 import '../../domain/entities/filter_state.dart';
 import '../bloc/search_bloc.dart';
 import '../bloc/search_event.dart';
@@ -103,6 +104,7 @@ class _SearchPageView extends StatelessWidget {
       body: const Column(
         children: [
           _SortAndFiltersRow(),
+          _ActiveFilterChips(),
           Expanded(child: _ResultsArea()),
         ],
       ),
@@ -291,6 +293,153 @@ class _SortAndFiltersRow extends StatelessWidget {
         onApply: (f) => bloc.add(SearchFiltersApplied(filters: f)),
       ),
     );
+  }
+}
+
+/// A scrollable row of removable chips, one per active filter dimension, shown
+/// below the sort/filters row. Tapping a chip's ✕ clears that dimension and
+/// re-runs the search; a trailing "clear filters" chip clears them all (the
+/// free-text query is left alone — it has its own clear control in the bar).
+///
+/// Location, price and area collapse to a single category chip (the search
+/// state carries IDs/ranges, not display names) — tapping ✕ clears the whole
+/// dimension. Purpose, type, rooms and bathrooms show their value.
+class _ActiveFilterChips extends StatelessWidget {
+  const _ActiveFilterChips();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return BlocBuilder<SearchBloc, SearchState>(
+      buildWhen: (p, c) => p.filters != c.filters,
+      builder: (context, state) {
+        final f = state.filters;
+        final bloc = context.read<SearchBloc>();
+        final chips = <Widget>[];
+
+        void addChip(String label, FilterState cleared) {
+          chips.add(
+            Padding(
+              padding: const EdgeInsetsDirectional.only(end: AppSpacing.sm),
+              child: InputChip(
+                label: Text(label),
+                onDeleted: () =>
+                    bloc.add(SearchFiltersApplied(filters: cleared)),
+              ),
+            ),
+          );
+        }
+
+        if (f.purpose != null) {
+          addChip(
+            _purposeLabel(f.purpose!, l10n),
+            f.copyWith(clearPurpose: true),
+          );
+        }
+        if (f.propertyType != null) {
+          addChip(
+            _propertyTypeLabel(f.propertyType!, l10n),
+            f.copyWith(clearPropertyType: true),
+          );
+        }
+        if (f.governorateId != null || f.cityId != null || f.areaId != null) {
+          addChip(
+            l10n.search_filter_location_label,
+            f.copyWith(
+              clearGovernorateId: true,
+              clearCityId: true,
+              clearAreaId: true,
+            ),
+          );
+        }
+        if (f.priceMin != null || f.priceMax != null) {
+          addChip(
+            l10n.search_filter_price_range_label,
+            f.copyWith(
+              clearPriceMin: true,
+              clearPriceMax: true,
+              clearPriceCurrency: true,
+            ),
+          );
+        }
+        if (f.rooms != null) {
+          final suffix = f.roomsMode == CountFilterMode.atLeast ? '+' : '';
+          addChip(
+            '${l10n.search_filter_rooms_label}: ${f.rooms}$suffix',
+            f.copyWith(clearRooms: true),
+          );
+        }
+        if (f.bathrooms != null) {
+          addChip(
+            '${l10n.search_filter_bathrooms_label}: ${f.bathrooms}',
+            f.copyWith(clearBathrooms: true),
+          );
+        }
+        if (f.areaSizeMin != null || f.areaSizeMax != null) {
+          addChip(
+            l10n.search_filter_area_size_label,
+            f.copyWith(clearAreaSize: true),
+          );
+        }
+
+        if (chips.isEmpty) return const SizedBox.shrink();
+
+        // Trailing "clear all" — keeps the query (bar owns its own clear).
+        chips.add(
+          ActionChip(
+            label: Text(l10n.search_empty_clear_filters),
+            onPressed: () => bloc.add(
+              SearchFiltersApplied(filters: FilterState(query: f.query)),
+            ),
+          ),
+        );
+
+        return SizedBox(
+          height: 44,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: AppSpacing.md,
+            ),
+            children: chips,
+          ),
+        );
+      },
+    );
+  }
+}
+
+String _purposeLabel(ListingPurpose p, AppLocalizations l10n) {
+  switch (p) {
+    case ListingPurpose.sale:
+      return l10n.listingPurposeSale;
+    case ListingPurpose.rent:
+      return l10n.listingPurposeRent;
+    case ListingPurpose.dailyRent:
+      return l10n.listingPurposeDailyRent;
+    case ListingPurpose.investment:
+      return l10n.listingPurposeInvestment;
+  }
+}
+
+String _propertyTypeLabel(PropertyType t, AppLocalizations l10n) {
+  switch (t) {
+    case PropertyType.apartment:
+      return l10n.propertyTypeApartment;
+    case PropertyType.villa:
+      return l10n.propertyTypeVilla;
+    case PropertyType.land:
+      return l10n.propertyTypeLand;
+    case PropertyType.shop:
+      return l10n.propertyTypeShop;
+    case PropertyType.office:
+      return l10n.propertyTypeOffice;
+    case PropertyType.farm:
+      return l10n.propertyTypeFarm;
+    case PropertyType.warehouse:
+      return l10n.propertyTypeWarehouse;
+    case PropertyType.other:
+      return l10n.propertyTypeOther;
   }
 }
 
