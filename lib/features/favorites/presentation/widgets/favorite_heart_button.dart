@@ -118,7 +118,25 @@ class FavoriteHeartButton extends StatelessWidget {
 
     // Authenticated branch: a light haptic tick, then the optimistic toggle.
     HapticFeedback.lightImpact();
+    final wasFavorited = state.favoritedIds.contains(listingId);
     getIt<FavoritesCubit>().toggle(listingId);
+
+    // On removal, offer a quick Undo (re-toggling re-adds). Saves are obvious
+    // (the heart fills + pops), so they don't need a confirmation snackbar.
+    if (wasFavorited) {
+      final l10n = AppLocalizations.of(context)!;
+      final messenger = ScaffoldMessenger.of(context)
+        ..clearSnackBars();
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(l10n.favorite_removed_snackbar),
+          action: SnackBarAction(
+            label: l10n.action_undo,
+            onPressed: () => getIt<FavoritesCubit>().toggle(listingId),
+          ),
+        ),
+      );
+    }
   }
 }
 

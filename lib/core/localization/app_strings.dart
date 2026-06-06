@@ -3119,6 +3119,16 @@ final class _DebugAppLocalizations extends AppLocalizations {
   String get favorite_toggle_failed =>
       _resolve('favorite_toggle_failed', (loc) => loc.favorite_toggle_failed);
 
+  @override
+  String get favorite_removed_snackbar => _resolve(
+    'favorite_removed_snackbar',
+    (loc) => loc.favorite_removed_snackbar,
+  );
+
+  @override
+  String get action_undo =>
+      _resolve('action_undo', (loc) => loc.action_undo);
+
   // ── Phase 18 Reports & Moderation ────────────────────────────────────────
 
   @override
