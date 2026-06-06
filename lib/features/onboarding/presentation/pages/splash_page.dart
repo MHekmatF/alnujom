@@ -86,6 +86,7 @@ class _SplashPageState extends State<SplashPage> {
                   size: 88,
                   color: colors.onPrimary,
                   accentColor: colors.accent,
+                  animated: true,
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 Text(
