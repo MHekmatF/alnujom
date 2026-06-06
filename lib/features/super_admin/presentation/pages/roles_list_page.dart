@@ -55,7 +55,8 @@ class _RolesListView extends StatelessWidget {
             IconButton(
               icon: const Icon(Icons.person_add_outlined),
               tooltip: l10n.superAdminAssignRoleTitle,
-              onPressed: () => context.go(AppRoutes.superAdminAssign),
+              // push (not go) so the back stack to the admin dashboard is kept.
+              onPressed: () => context.push(AppRoutes.superAdminAssign),
             ),
         ],
       ),
@@ -93,9 +94,16 @@ class _RolesListView extends StatelessWidget {
                   final role = roles[index];
                   return RoleCard(
                     role: role,
-                    onTap: () => context.go(
-                      '${AppRoutes.superAdminRoles}/${role.roleId}',
-                    ),
+                    // push (not go) so back returns here / to the admin
+                    // dashboard; refresh on return to reflect any edits.
+                    onTap: () async {
+                      await context.push(
+                        '${AppRoutes.superAdminRoles}/${role.roleId}',
+                      );
+                      if (context.mounted) {
+                        context.read<RolesListBloc>().add(const RefreshRoles());
+                      }
+                    },
                     onLongPress: canDelete && !role.isSystem
                         ? () => _deleteRole(context, role)
                         : null,
