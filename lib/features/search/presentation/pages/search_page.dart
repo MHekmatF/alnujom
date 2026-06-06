@@ -29,11 +29,13 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/motion.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/main_bottom_nav.dart';
+import '../../../../core/widgets/reduce_motion.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../features/map/domain/entities/map_entry_context.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -300,32 +302,37 @@ class _ResultsArea extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     return BlocBuilder<SearchBloc, SearchState>(
       builder: (context, state) {
-        switch (state.status) {
-          case SearchStatus.initial:
-            return Center(child: Text(l10n.search_placeholder));
-          case SearchStatus.loading:
-            if (state.results.isEmpty) {
-              return const _SearchSkeleton();
-            }
-            return _ResultsListView(state: state);
-          case SearchStatus.failure:
-            if (state.results.isEmpty) {
-              return _ErrorView(
-                message: l10n.search_error_message,
-                retryLabel: l10n.search_error_retry,
-                onRetry: () => context.read<SearchBloc>().add(
-                  const SearchRefreshRequested(),
-                ),
-              );
-            }
-            // Failure during pagination — keep showing existing results.
-            return _ResultsListView(state: state);
-          case SearchStatus.success:
-            if (state.results.isEmpty) {
-              return _EmptyView(state: state);
-            }
-            return _ResultsListView(state: state);
-        }
+        // Distinct widget types per phase → AnimatedSwitcher crossfades the
+        // skeleton into results (or empty/error), but list→list during
+        // pagination is the same type, so it updates in place without a fade.
+        final child = switch (state.status) {
+          SearchStatus.initial => Center(
+            child: Text(l10n.search_placeholder),
+          ),
+          SearchStatus.loading =>
+            state.results.isEmpty
+                ? const _SearchSkeleton()
+                : _ResultsListView(state: state),
+          SearchStatus.failure =>
+            state.results.isEmpty
+                ? _ErrorView(
+                    message: l10n.search_error_message,
+                    retryLabel: l10n.search_error_retry,
+                    onRetry: () => context.read<SearchBloc>().add(
+                      const SearchRefreshRequested(),
+                    ),
+                  )
+                // Failure during pagination — keep showing existing results.
+                : _ResultsListView(state: state),
+          SearchStatus.success =>
+            state.results.isEmpty
+                ? _EmptyView(state: state)
+                : _ResultsListView(state: state),
+        };
+        return AnimatedSwitcher(
+          duration: reduceMotion(context) ? Duration.zero : AppMotion.base,
+          child: child,
+        );
       },
     );
   }
