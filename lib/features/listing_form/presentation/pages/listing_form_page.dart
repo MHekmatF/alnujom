@@ -18,6 +18,7 @@ import '../widgets/step_media.dart';
 import '../widgets/step_prices.dart';
 import '../widgets/step_progress_indicator.dart';
 import '../widgets/step_review.dart';
+import '../widgets/publish_success_dialog.dart';
 import '../widgets/step_visibility.dart';
 import '../widgets/submit_failure_dialog.dart';
 
@@ -71,11 +72,10 @@ class _ListingFormBody extends StatelessWidget {
           );
         }
         if (state.submitSucceeded) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.listingFormSubmitSuccess)),
-          );
-          // Return to home; T100 wires the my-listings tile separately.
-          context.go(AppRoutes.shellHome);
+          // Celebrate the publish (confetti + animated check), then return home.
+          showPublishSuccess(context).then((_) {
+            if (context.mounted) context.go(AppRoutes.shellHome);
+          });
         }
         if (state.savedAndExited) {
           context.go(AppRoutes.shellHome);

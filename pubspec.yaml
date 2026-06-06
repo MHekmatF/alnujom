@@ -13,6 +13,8 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   cached_network_image: 3.4.1
+  # Phase polish — confetti burst for the listing-publish success celebration.
+  confetti: ^0.8.0
   # Phase polish — fully custom pull-to-refresh (branded star indicator) over
   # any scrollable, without restructuring each feed's scroll view.
   custom_refresh_indicator: ^4.0.1
