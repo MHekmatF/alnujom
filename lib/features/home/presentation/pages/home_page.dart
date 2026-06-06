@@ -10,6 +10,7 @@ import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/locale_toggle_action.dart';
 import '../../../../core/widgets/main_bottom_nav.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
+import '../../../../core/widgets/star_refresh_indicator.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/account_status.dart';
 import '../../../../shared/domain/value_objects/publisher_status.dart';
@@ -146,7 +147,7 @@ class _HomeViewState extends State<_HomeView> {
           };
           return BlocBuilder<HomeBloc, HomeState>(
             builder: (context, state) {
-              return RefreshIndicator(
+              return StarRefreshIndicator(
                 onRefresh: () async {
                   context.read<HomeBloc>().add(
                     HomeFeedRefreshRequested(locale: locale),
