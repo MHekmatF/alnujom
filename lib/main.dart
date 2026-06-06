@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui';
 
 import 'app.dart';
 import 'core/config/env_config.dart';
@@ -15,7 +14,6 @@ import 'core/network/supabase_client_wrapper.dart';
 import 'core/storage/preferences_store.dart';
 import 'features/notifications/data/datasources/fcm_push_messaging_service.dart';
 import 'features/notifications/data/datasources/noop_push_messaging_service.dart';
-import 'l10n/app_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -157,28 +155,16 @@ Future<void> _bootstrap() async {
 
   final preferencesStore = getIt<PreferencesStore>();
 
-  // Resolution: stored preference > device system locale (if supported) > Arabic.
-  // Constitution V: Arabic-first remains the final fallback when the device
-  // locale isn't a supported one.
-  Locale defaultFromDevice() {
-    final supported = AppLocalizations.supportedLocales
-        .map((l) => l.languageCode)
-        .toSet();
-    final systemLocale = WidgetsBinding.instance.platformDispatcher.locale;
-    if (supported.contains(systemLocale.languageCode)) {
-      return Locale(systemLocale.languageCode);
-    }
-    return LocaleCubit.defaultLocale;
-  }
-
-  var initialLocale = defaultFromDevice();
+  // Arabic-first (Constitution V): default to Arabic on first launch regardless
+  // of the device's system locale. A stored user preference still wins.
+  var initialLocale = LocaleCubit.defaultLocale;
   final localeResult = await preferencesStore.readLocale();
   switch (localeResult) {
     case Success(:final value):
       if (value != null) initialLocale = value;
     case FailureResult(:final failure):
       logger.warning(
-        'Failed to read locale preference; using device locale fallback.',
+        'Failed to read locale preference; defaulting to Arabic.',
         error: failure.cause,
         stackTrace: failure.stackTrace,
         tag: 'Bootstrap',
