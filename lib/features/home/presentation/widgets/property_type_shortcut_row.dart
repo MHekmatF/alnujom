@@ -37,7 +37,9 @@ class PropertyTypeShortcutRow extends StatelessWidget {
     final reduce = reduceMotion(context);
 
     return SizedBox(
-      height: 48,
+      // Scale the row height with the text scale so chips don't clip at large
+      // font sizes (a11y / large-text resilience).
+      height: MediaQuery.textScalerOf(context).scale(48),
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsetsDirectional.symmetric(

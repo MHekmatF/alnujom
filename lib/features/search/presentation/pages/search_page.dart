@@ -394,14 +394,18 @@ class _ActiveFilterChips extends StatelessWidget {
           ),
         );
 
-        return SizedBox(
-          height: 44,
-          child: ListView(
+        // Intrinsic height (not a fixed SizedBox) so the row grows with the
+        // text scale instead of clipping the chips at large font sizes.
+        return Padding(
+          padding: const EdgeInsetsDirectional.symmetric(
+            vertical: AppSpacing.xs,
+          ),
+          child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsetsDirectional.symmetric(
               horizontal: AppSpacing.md,
             ),
-            children: chips,
+            child: Row(children: chips),
           ),
         );
       },
