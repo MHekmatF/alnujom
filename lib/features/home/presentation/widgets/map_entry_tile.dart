@@ -4,6 +4,7 @@
 // contracts/phase15-home-map-tile.md (R-91 slot: between PropertyTypeShortcutRow
 // and the Latest Listings header).
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_router.dart';
@@ -11,6 +12,7 @@ import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/press_scale.dart';
 import '../../../../features/map/domain/entities/map_entry_context.dart';
 import '../../../../l10n/app_localizations.dart';
 
@@ -35,47 +37,51 @@ class MapEntryTile extends StatelessWidget {
         AppSpacing.lg,
         AppSpacing.md,
       ),
-      child: Material(
-        color: colors.primaryContainer,
-        borderRadius: BorderRadius.circular(AppRadii.lg),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: () =>
-              context.go(AppRoutes.map, extra: const MapEntryFromHome()),
-          child: Padding(
-            padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
-            child: Row(
-              children: [
-                Icon(Icons.map_outlined, size: 32, color: colors.accent),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.home_map_tile_title,
-                        style: styles.titleMedium.copyWith(
-                          color: colors.onPrimaryContainer,
+      child: PressScale(
+        child: Material(
+          color: colors.primaryContainer,
+          borderRadius: BorderRadius.circular(AppRadii.lg),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: () {
+              HapticFeedback.selectionClick();
+              context.go(AppRoutes.map, extra: const MapEntryFromHome());
+            },
+            child: Padding(
+              padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+              child: Row(
+                children: [
+                  Icon(Icons.map_outlined, size: 32, color: colors.accent),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.home_map_tile_title,
+                          style: styles.titleMedium.copyWith(
+                            color: colors.onPrimaryContainer,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        l10n.home_map_tile_subtitle,
-                        style: styles.bodyMedium.copyWith(
-                          color: colors.onPrimaryContainer,
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          l10n.home_map_tile_subtitle,
+                          style: styles.bodyMedium.copyWith(
+                            color: colors.onPrimaryContainer,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                Icon(
-                  Directionality.of(context) == TextDirection.rtl
-                      ? Icons.arrow_back_ios
-                      : Icons.arrow_forward_ios,
-                  size: 16,
-                  color: colors.onPrimaryContainer,
-                ),
-              ],
+                  Icon(
+                    Directionality.of(context) == TextDirection.rtl
+                        ? Icons.arrow_back_ios
+                        : Icons.arrow_forward_ios,
+                    size: 16,
+                    color: colors.onPrimaryContainer,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

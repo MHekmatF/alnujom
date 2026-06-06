@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/motion.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/press_scale.dart';
+import '../../../../core/widgets/reduce_motion.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../listing_form/domain/entities/listing.dart';
 
@@ -29,6 +34,7 @@ class PropertyTypeShortcutRow extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
+    final reduce = reduceMotion(context);
 
     return SizedBox(
       height: 48,
@@ -44,15 +50,37 @@ class PropertyTypeShortcutRow extends StatelessWidget {
           final label = _label(l10n, type);
           // Phase 25 (Claude Design) — clean filled pill (recessed surface,
           // borderless); navigation shortcut, so no selected state on home.
-          return ActionChip(
-            avatar: Icon(_icon(type), size: 18, color: colors.onSurfaceVariant),
-            label: Text(label),
-            labelStyle: styles.labelLarge.copyWith(color: colors.onSurface),
-            backgroundColor: colors.surfaceVariant,
-            side: BorderSide.none,
-            shape: const StadiumBorder(),
-            onPressed: () => context.go(AppRoutes.search, extra: type),
+          final chip = PressScale(
+            child: ActionChip(
+              avatar: Icon(
+                _icon(type),
+                size: 18,
+                color: colors.onSurfaceVariant,
+              ),
+              label: Text(label),
+              labelStyle: styles.labelLarge.copyWith(color: colors.onSurface),
+              backgroundColor: colors.surfaceVariant,
+              side: BorderSide.none,
+              shape: const StadiumBorder(),
+              onPressed: () {
+                HapticFeedback.selectionClick();
+                context.go(AppRoutes.search, extra: type);
+              },
+            ),
           );
+          if (reduce) return chip;
+          // Subtle cascade as the row appears (delay capped so later chips
+          // don't lag); slides in from the inline-start edge.
+          final step = index.clamp(0, 6);
+          return chip
+              .animate()
+              .fadeIn(duration: AppMotion.base, delay: AppMotion.stagger * step)
+              .slideX(
+                begin: 0.12,
+                end: 0,
+                duration: AppMotion.entrance,
+                curve: AppMotion.curve,
+              );
         },
       ),
     );
