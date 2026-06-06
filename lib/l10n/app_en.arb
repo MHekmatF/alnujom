@@ -926,6 +926,10 @@
   "@profile_favorites_tile": { "description": "Phase 17 — ListTile label on the ProfilePage that navigates to FavoritesPage." },
   "favorite_toggle_failed": "Couldn't update favorites. Try again.",
   "@favorite_toggle_failed": { "description": "Phase 17 — Snackbar shown when the optimistic toggle reverts due to a backend error." },
+  "favorite_removed_snackbar": "Removed from favorites.",
+  "@favorite_removed_snackbar": { "description": "Phase polish — Snackbar shown when a listing is unfavorited; pairs with an Undo action." },
+  "action_undo": "Undo",
+  "@action_undo": { "description": "Phase polish — generic Undo action label (e.g. undo an unfavorite)." },
 
   "report_reason_fake_listing": "Fake listing",
   "@report_reason_fake_listing": { "description": "Phase 18 — Report reason label: the listing is fake or fraudulent." },
