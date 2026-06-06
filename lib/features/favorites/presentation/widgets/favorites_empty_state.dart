@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/empty_state.dart';
+import '../../../../core/widgets/lottie_illustration.dart';
 import '../../../../l10n/app_localizations.dart';
 
 /// Shown when the user has no favorited listings (FR-026 / SC-012): an
@@ -23,10 +24,15 @@ class FavoritesEmptyState extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
 
     return EmptyState(
-      illustration: Icon(
-        Icons.favorite_border,
-        size: AppSpacing.xxxl * 2,
+      illustration: LottieIllustration(
+        asset: 'assets/lottie/empty_stars.json',
+        size: AppSpacing.xxxl * 2.5,
         color: scheme.onSurfaceVariant,
+        fallback: Icon(
+          Icons.favorite_border,
+          size: AppSpacing.xxxl * 2,
+          color: scheme.onSurfaceVariant,
+        ),
       ),
       headline: l10n.favorites_empty_state,
       body: l10n.favorites_empty_body,
