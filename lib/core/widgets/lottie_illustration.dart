@@ -26,19 +26,23 @@ class LottieIllustration extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (reduceMotion(context)) return fallback;
-    return Lottie.asset(
-      asset,
-      width: size,
-      height: size,
-      repeat: true,
-      delegates: LottieDelegates(
-        values: [
-          ValueDelegate.color(const ['**'], value: color),
-          ValueDelegate.strokeColor(const ['**'], value: color),
-        ],
-      ),
-      errorBuilder: (context, error, stackTrace) => fallback,
-    );
+    final Widget child = reduceMotion(context)
+        ? fallback
+        : Lottie.asset(
+            asset,
+            width: size,
+            height: size,
+            repeat: true,
+            delegates: LottieDelegates(
+              values: [
+                ValueDelegate.color(const ['**'], value: color),
+                ValueDelegate.strokeColor(const ['**'], value: color),
+              ],
+            ),
+            errorBuilder: (context, error, stackTrace) => fallback,
+          );
+    // Purely decorative — the empty-state headline + body carry the meaning,
+    // so keep the illustration out of the screen-reader tree.
+    return ExcludeSemantics(child: child);
   }
 }

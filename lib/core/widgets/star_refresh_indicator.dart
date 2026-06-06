@@ -49,9 +49,13 @@ class StarRefreshIndicator extends StatelessWidget {
                         opacity: reveal,
                         child: Transform.scale(
                           scale: 0.6 + 0.4 * reveal,
-                          child: BrandMark(
-                            size: 36,
-                            animated: !reduce && controller.isLoading,
+                          // Decorative pull affordance — the refresh action is
+                          // conveyed by the gesture, not the mark.
+                          child: ExcludeSemantics(
+                            child: BrandMark(
+                              size: 36,
+                              animated: !reduce && controller.isLoading,
+                            ),
                           ),
                         ),
                       ),
