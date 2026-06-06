@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/motion.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
@@ -15,6 +16,7 @@ import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/main_bottom_nav.dart';
 import '../../../../core/widgets/press_scale.dart';
+import '../../../../core/widgets/reduce_motion.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../core/widgets/star_refresh_indicator.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -58,7 +60,9 @@ class _FavoritesView extends StatelessWidget {
       ),
       body: BlocBuilder<FavoritesPageBloc, FavoritesPageState>(
         builder: (context, state) {
-          return switch (state) {
+          // Distinct types per phase → the skeleton crossfades into the list
+          // (or empty/error); list→list during pagination updates in place.
+          final child = switch (state) {
             FavoritesPageLoading() => const _FavoritesSkeleton(),
             FavoritesPageError() => const _ErrorBody(),
             FavoritesPageLoaded(:final items, :final hasMore) =>
@@ -66,6 +70,10 @@ class _FavoritesView extends StatelessWidget {
                   ? const FavoritesEmptyState()
                   : _LoadedBody(items: items, hasMore: hasMore),
           };
+          return AnimatedSwitcher(
+            duration: reduceMotion(context) ? Duration.zero : AppMotion.base,
+            child: child,
+          );
         },
       ),
       bottomNavigationBar: const MainBottomNav(current: MainTab.favorites),
