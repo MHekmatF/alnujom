@@ -11,6 +11,7 @@ import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
 import '../../../../core/widgets/hero_tags.dart';
 import '../../../../core/widgets/loading_state.dart';
+import '../../../../core/widgets/reduce_motion.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../features/listing_form/domain/entities/listing.dart'
     show Listing, LocationVisibility;
@@ -366,9 +367,13 @@ class _GalleryWithVideoTapState extends State<_GalleryWithVideoTap> {
     final videoMedia = _currentVideoMedia;
     final sorted = _sortedMedia;
 
-    // Phase 12 Q8=A ListingGallery wrapped (not edited) per SC-016. When a
-    // heroTag is supplied, it owns the Hero flight from the listing card image.
+    // Phase 12 Q8=A ListingGallery wrapped (not edited) per SC-016. A slow
+    // Ken Burns zoom/pan is layered on via the wrapper (clipped by the header),
+    // then the Hero flight from the listing card image.
     Widget gallery = ListingGallery(media: widget.media);
+    if (!reduceMotion(context)) {
+      gallery = ClipRect(child: _KenBurns(child: gallery));
+    }
     if (widget.heroTag != null) {
       gallery = Hero(tag: widget.heroTag!, child: gallery);
     }
@@ -442,6 +447,48 @@ class _GalleryDots extends StatelessWidget {
           ),
         );
       }),
+    );
+  }
+}
+
+/// A slow, breathing Ken Burns effect (zoom + gentle horizontal pan) applied to
+/// the gallery image. Reverses every ~18s so it never jumps. Clipped by the
+/// caller so the zoom stays within the header frame.
+class _KenBurns extends StatefulWidget {
+  const _KenBurns({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_KenBurns> createState() => _KenBurnsState();
+}
+
+class _KenBurnsState extends State<_KenBurns>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 18),
+  )..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        final t = Curves.easeInOut.transform(_controller.value);
+        return Transform.scale(
+          scale: 1.0 + 0.12 * t,
+          alignment: Alignment(-0.18 + 0.36 * t, 0),
+          child: child,
+        );
+      },
+      child: widget.child,
     );
   }
 }
