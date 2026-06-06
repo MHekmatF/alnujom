@@ -47,13 +47,18 @@ class BrandMark extends StatelessWidget {
             size: Size.square(size),
             painter: _StarMarkPainter(primary: primary, accent: accent),
           );
-    if (!withWordmark) return mark;
+    // Standalone (no wordmark, e.g. the app bar): announce the brand name as a
+    // single image. With the wordmark, the Text below is the label, so the mark
+    // is excluded to avoid a duplicate announcement.
+    if (!withWordmark) {
+      return Semantics(label: wordmark, image: true, child: mark);
+    }
 
     final styles = AppTextStyles.of(context);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        mark,
+        ExcludeSemantics(child: mark),
         const SizedBox(width: AppSpacing.sm),
         Text(
           wordmark,
