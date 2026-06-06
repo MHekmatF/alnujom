@@ -16,6 +16,7 @@ import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/main_bottom_nav.dart';
 import '../../../../core/widgets/press_scale.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
+import '../../../../core/widgets/star_refresh_indicator.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/favorite_listing.dart';
 import '../bloc/favorites_page_bloc.dart';
@@ -102,7 +103,7 @@ class _LoadedBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
+    return StarRefreshIndicator(
       onRefresh: () async {
         context.read<FavoritesPageBloc>().add(
           const FavoritesPageRefreshRequested(),
