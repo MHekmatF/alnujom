@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
@@ -9,8 +10,10 @@ import '../../shared/domain/value_objects/account_status.dart';
 import '../../shared/domain/value_objects/publisher_status.dart';
 import '../routing/app_router.dart';
 import '../theme/colors.dart';
+import '../theme/motion.dart';
 import '../theme/spacing.dart';
 import '../theme/typography.dart';
+import 'reduce_motion.dart';
 
 /// The four primary destinations of the public app shell.
 enum MainTab { home, search, favorites, profile }
@@ -37,6 +40,23 @@ class MainBottomNav extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
+    final reduce = reduceMotion(context);
+
+    // The selected icon for the *current* tab gets a one-shot scale-bounce when
+    // the destination page mounts (i.e. right after the user taps that tab).
+    // Gated by `current` because NavigationBar builds every selectedIcon.
+    Widget selectedIcon(IconData icon, MainTab tab) {
+      final widget = Icon(icon);
+      if (reduce || tab != current) return widget;
+      return widget
+          .animate()
+          .scaleXY(
+            begin: 0.8,
+            end: 1.0,
+            duration: AppMotion.slow,
+            curve: Curves.easeOutBack,
+          );
+    }
 
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, authState) {
@@ -55,12 +75,12 @@ class MainBottomNav extends StatelessWidget {
         final destinations = <Widget>[
           NavigationDestination(
             icon: const Icon(Icons.home_outlined),
-            selectedIcon: const Icon(Icons.home_rounded),
+            selectedIcon: selectedIcon(Icons.home_rounded, MainTab.home),
             label: l10n.home_title,
           ),
           NavigationDestination(
             icon: const Icon(Icons.search_outlined),
-            selectedIcon: const Icon(Icons.search_rounded),
+            selectedIcon: selectedIcon(Icons.search_rounded, MainTab.search),
             label: l10n.nav_search,
           ),
         ];
@@ -86,12 +106,12 @@ class MainBottomNav extends StatelessWidget {
         destinations.addAll([
           NavigationDestination(
             icon: const Icon(Icons.favorite_border),
-            selectedIcon: const Icon(Icons.favorite),
+            selectedIcon: selectedIcon(Icons.favorite, MainTab.favorites),
             label: l10n.favorites_page_title,
           ),
           NavigationDestination(
             icon: const Icon(Icons.person_outline),
-            selectedIcon: const Icon(Icons.person),
+            selectedIcon: selectedIcon(Icons.person, MainTab.profile),
             label: l10n.profile_title,
           ),
         ]);

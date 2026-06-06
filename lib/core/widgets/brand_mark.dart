@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../theme/spacing.dart';
 import '../theme/typography.dart';
+import 'reduce_motion.dart';
 
 /// Phase 25 (Claude Design) — the AlNujom brand mark: a refined two-tone
 /// sparkle (النجوم = "the stars"), a large primary-blue star with a smaller
@@ -21,6 +22,7 @@ class BrandMark extends StatelessWidget {
     this.accentColor,
     this.withWordmark = false,
     this.wordmark = 'النجوم',
+    this.animated = false,
   });
 
   final double size;
@@ -29,16 +31,22 @@ class BrandMark extends StatelessWidget {
   final bool withWordmark;
   final String wordmark;
 
+  /// When true (and reduced motion is off), the coral companion star gently
+  /// twinkles. Reserve for transient brand moments (splash, onboarding) — not
+  /// the always-on app bar, where persistent decorative motion would distract.
+  final bool animated;
+
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    final mark = CustomPaint(
-      size: Size.square(size),
-      painter: _StarMarkPainter(
-        primary: color ?? colors.primary,
-        accent: accentColor ?? colors.accent,
-      ),
-    );
+    final primary = color ?? colors.primary;
+    final accent = accentColor ?? colors.accent;
+    final mark = (animated && !reduceMotion(context))
+        ? _TwinklingMark(size: size, primary: primary, accent: accent)
+        : CustomPaint(
+            size: Size.square(size),
+            painter: _StarMarkPainter(primary: primary, accent: accent),
+          );
     if (!withWordmark) return mark;
 
     final styles = AppTextStyles.of(context);
@@ -59,11 +67,67 @@ class BrandMark extends StatelessWidget {
   }
 }
 
+/// Hosts the gentle twinkle: a repeating controller drives a 0→1 sine that the
+/// painter maps onto the companion star's size + opacity.
+class _TwinklingMark extends StatefulWidget {
+  const _TwinklingMark({
+    required this.size,
+    required this.primary,
+    required this.accent,
+  });
+
+  final double size;
+  final Color primary;
+  final Color accent;
+
+  @override
+  State<_TwinklingMark> createState() => _TwinklingMarkState();
+}
+
+class _TwinklingMarkState extends State<_TwinklingMark>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 2600),
+  )..repeat();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) {
+        final t = (math.sin(_controller.value * 2 * math.pi) + 1) / 2;
+        return CustomPaint(
+          size: Size.square(widget.size),
+          painter: _StarMarkPainter(
+            primary: widget.primary,
+            accent: widget.accent,
+            twinkle: t,
+          ),
+        );
+      },
+    );
+  }
+}
+
 class _StarMarkPainter extends CustomPainter {
-  _StarMarkPainter({required this.primary, required this.accent});
+  _StarMarkPainter({
+    required this.primary,
+    required this.accent,
+    this.twinkle = 1.0,
+  });
 
   final Color primary;
   final Color accent;
+
+  /// 0..1 — modulates the companion star's size and opacity (1.0 = static/full).
+  final double twinkle;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -71,8 +135,14 @@ class _StarMarkPainter extends CustomPainter {
     final h = size.height;
     // Large primary star, slightly lower-leading.
     _drawStar(canvas, Offset(w * 0.42, h * 0.57), w * 0.40, 0.42, primary);
-    // Smaller coral companion, upper-trailing.
-    _drawStar(canvas, Offset(w * 0.79, h * 0.24), w * 0.19, 0.44, accent);
+    // Smaller coral companion, upper-trailing — twinkles when animated.
+    _drawStar(
+      canvas,
+      Offset(w * 0.79, h * 0.24),
+      w * 0.19 * (0.82 + 0.24 * twinkle),
+      0.44,
+      accent.withValues(alpha: 0.6 + 0.4 * twinkle),
+    );
   }
 
   void _drawStar(
@@ -108,5 +178,5 @@ class _StarMarkPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _StarMarkPainter old) =>
-      old.primary != primary || old.accent != accent;
+      old.primary != primary || old.accent != accent || old.twinkle != twinkle;
 }
