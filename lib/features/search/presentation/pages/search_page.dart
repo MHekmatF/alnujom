@@ -534,16 +534,30 @@ class _EmptyView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.search_off, size: 48),
-            const SizedBox(height: 8),
+            Container(
+              width: AppSpacing.xxxl + AppSpacing.lg,
+              height: AppSpacing.xxxl + AppSpacing.lg,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.10),
+              ),
+              child: Icon(
+                Icons.search_off,
+                size: AppSpacing.xxl,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
             Text(
               l10n.search_empty_title,
-              style: Theme.of(context).textTheme.titleMedium,
+              style: Theme.of(context).textTheme.titleLarge,
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: AppSpacing.xs),
             Text(l10n.search_empty_subtitle, textAlign: TextAlign.center),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             TextButton(
               onPressed: () => context.read<SearchBloc>().add(
                 const SearchFiltersApplied(filters: FilterState.empty),
