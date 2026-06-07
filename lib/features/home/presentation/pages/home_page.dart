@@ -4,7 +4,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/brand_mark.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
@@ -191,20 +195,7 @@ class _HomeViewState extends State<_HomeView> {
         const SliverToBoxAdapter(
           child: AdSlot(placement: AdPlacement.homeTopBanner),
         ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(
-              AppSpacing.lg,
-              AppSpacing.md,
-              AppSpacing.lg,
-              AppSpacing.sm,
-            ),
-            child: Text(
-              l10n.home_latest_listings_header,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-          ),
-        ),
+        SliverToBoxAdapter(child: _SectionHeader(title: l10n.home_latest_listings_header)),
         ..._buildFeedSlivers(context, state, currenciesByCode, l10n),
       ],
     );
@@ -313,6 +304,46 @@ class _HomeCardSkeleton extends StatelessWidget {
   }
 }
 
+/// Premium feed section header — a bold title preceded by a short accent rule
+/// so the "Latest listings" block reads as a deliberate section start rather
+/// than a stray line of text. Purely presentational.
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.sm,
+      ),
+      child: Row(
+        children: [
+          // Short brand-accent rule anchoring the section start.
+          Container(
+            width: AppSpacing.xs,
+            height: AppSpacing.xl,
+            decoration: BoxDecoration(
+              color: colors.primary,
+              borderRadius: appRadius(AppRadii.pill),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Text(title, style: styles.titleLarge),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// Phase 25 (Claude Design) — personalized home hero greeting. Renders the
 /// signed-in user's first name when available, otherwise an anonymous welcome,
 /// with a fixed subtitle. Purely presentational (no navigation/logic).
@@ -322,7 +353,8 @@ class _HomeGreeting extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
 
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
@@ -341,20 +373,19 @@ class _HomeGreeting extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsetsDirectional.fromSTEB(
               AppSpacing.lg,
-              AppSpacing.lg,
+              AppSpacing.xl,
               AppSpacing.lg,
               AppSpacing.xs,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(greeting, style: theme.textTheme.headlineSmall),
+                // Bold display-scale welcome — the loudest line on first paint.
+                Text(greeting, style: styles.displayMedium),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   l10n.home_greeting_subtitle,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
+                  style: styles.bodyLarge.copyWith(color: colors.textMuted),
                 ),
               ],
             ),

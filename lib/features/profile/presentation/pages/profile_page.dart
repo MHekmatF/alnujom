@@ -198,6 +198,19 @@ class _ProfileView extends StatelessWidget {
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push(AppRoutes.reports),
                 ),
+                // Phase 25 uplift v2 — role-aware Dashboard entry (publisher KPIs
+                // or admin console, resolved inside DashboardEntryPage).
+                if (profile.publisherStatus == PublisherStatus.approved ||
+                    getIt<PermissionChecker>().any(
+                      PermissionKeys.adminCategoryKeys,
+                    ))
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.dashboard_outlined),
+                    title: Text(l10n.dashboardEntryTitle),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.push(AppRoutes.dashboard),
+                  ),
                 // Phase 25 — relocated from the Home AppBar (which the bottom-nav
                 // restyle slimmed down) so they stay reachable.
                 // Publisher-only: inquiries inbox + my listings.

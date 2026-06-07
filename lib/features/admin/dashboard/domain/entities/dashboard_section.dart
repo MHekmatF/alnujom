@@ -6,6 +6,14 @@ import 'package:flutter/material.dart';
 /// Whether a dashboard section tile is navigable or shown as coming-soon.
 enum DashboardSectionState { enabled, comingSoon }
 
+/// Phase 25 uplift v2 — the logical group a section belongs to. Sections are
+/// rendered under a localized group header so the admin hub reads as a clean
+/// multi-section surface rather than a flat tile grid.
+///
+/// Declared in display order: Moderation → Configuration → Insights →
+/// Super Admin.
+enum DashboardSectionGroup { moderation, configuration, insights, superAdmin }
+
 /// Describes one tile in the admin dashboard grid.
 ///
 /// - [labelKey]       — resolved via AppLocalizations at render time.
@@ -19,10 +27,12 @@ class DashboardSection {
   const DashboardSection({
     required this.labelKey,
     required this.permissionKeys,
+    required this.group,
     this.route,
     this.state = DashboardSectionState.enabled,
     this.counterKey,
     this.secondaryCounterKey,
+    this.subtitleKey,
     required this.icon,
   });
 
@@ -30,6 +40,13 @@ class DashboardSection {
   final List<String> permissionKeys;
   final String? route;
   final DashboardSectionState state;
+
+  /// Phase 25 uplift v2 — the group header this section renders under.
+  final DashboardSectionGroup group;
+
+  /// Phase 25 uplift v2 — optional symbolic key for a short descriptive
+  /// subtitle shown beneath the tile title (resolved via AppLocalizations).
+  final String? subtitleKey;
 
   /// Symbolic name for the counter field on [DashboardCounts]:
   /// 'pendingUsers' | 'pendingListings' | 'openReports' |

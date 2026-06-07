@@ -58,6 +58,12 @@ class HomeListingCardTile extends StatelessWidget {
     final elevation = AppElevation.of(context);
     final locale = Localizations.localeOf(context);
 
+    final hasSpecs = PropertySpecsRow.hasAnyOf(
+      rooms: card.rooms,
+      bathrooms: card.bathrooms,
+      areaSize: card.areaSize,
+    );
+
     return PressScale(
       child: Container(
       margin: const EdgeInsetsDirectional.symmetric(
@@ -66,12 +72,12 @@ class HomeListingCardTile extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: colors.card,
-        borderRadius: appRadius(AppRadii.lg),
+        borderRadius: appRadius(AppRadii.xl),
         border: Border.all(color: colors.outline),
         boxShadow: elevation.level2,
       ),
       child: ClipRRect(
-        borderRadius: appRadius(AppRadii.lg),
+        borderRadius: appRadius(AppRadii.xl),
         child: Material(
           type: MaterialType.transparency,
           child: InkWell(
@@ -88,17 +94,20 @@ class HomeListingCardTile extends StatelessWidget {
                   purposeColor: _purposeColor(colors, card.purpose),
                 ),
                 Padding(
-                  padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+                  padding: const EdgeInsetsDirectional.fromSTEB(
+                    AppSpacing.lg,
+                    AppSpacing.lg,
+                    AppSpacing.lg,
+                    AppSpacing.md,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        _formatPrice(locale),
-                        textDirection: TextDirection.ltr,
-                        textAlign: TextAlign.start,
-                        // Brand-blue price (priceLarge defaults to primary) so
-                        // the hero number reads as money, not body text.
-                        style: styles.priceLarge,
+                      // Price leads the body — the largest, boldest line on the
+                      // card. Currency suffix is lighter so the amount carries.
+                      _PriceLine(
+                        text: _formatPrice(locale),
+                        styles: styles,
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
@@ -108,18 +117,6 @@ class HomeListingCardTile extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: AppSpacing.sm),
-                      if (PropertySpecsRow.hasAnyOf(
-                        rooms: card.rooms,
-                        bathrooms: card.bathrooms,
-                        areaSize: card.areaSize,
-                      )) ...[
-                        PropertySpecsRow(
-                          rooms: card.rooms,
-                          bathrooms: card.bathrooms,
-                          areaSize: card.areaSize,
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                      ],
                       Row(
                         children: [
                           Icon(
@@ -140,6 +137,28 @@ class HomeListingCardTile extends StatelessWidget {
                           ),
                         ],
                       ),
+                      // Key facts sit in a recessed strip so the beds/baths/area
+                      // read as a distinct, scannable block under the location.
+                      if (hasSpecs) ...[
+                        const SizedBox(height: AppSpacing.md),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsetsDirectional.symmetric(
+                            horizontal: AppSpacing.md,
+                            vertical: AppSpacing.sm,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colors.surfaceVariant,
+                            borderRadius: appRadius(AppRadii.md),
+                          ),
+                          child: PropertySpecsRow(
+                            rooms: card.rooms,
+                            bathrooms: card.bathrooms,
+                            areaSize: card.areaSize,
+                            color: colors.onSurface,
+                          ),
+                        ),
+                      ],
                       // Phase 19 (FR-022) — verified-agency footer; rendered
                       // only for approved agencies (no reflow otherwise per
                       // FR-023), separated by a hairline divider.
@@ -147,22 +166,33 @@ class HomeListingCardTile extends StatelessWidget {
                         const SizedBox(height: AppSpacing.md),
                         Divider(height: 1, color: colors.outline),
                         const SizedBox(height: AppSpacing.md),
-                        Align(
-                          alignment: AlignmentDirectional.centerStart,
-                          child: AgencyBadge(
-                            agencyId: card.agencyId!,
-                            agencyName: card.agencyName!,
-                            logoUrl: card.agencyLogoUrl,
+                        Row(
+                          children: [
+                            Expanded(
+                              child: AgencyBadge(
+                                agencyId: card.agencyId!,
+                                agencyName: card.agencyName!,
+                                logoUrl: card.agencyLogoUrl,
+                              ),
+                            ),
+                            const SizedBox(width: AppSpacing.sm),
+                            Text(
+                              _formatTimeSince(l10n, card.publishedAt),
+                              style: styles.labelMedium.copyWith(
+                                color: colors.textMuted,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ] else ...[
+                        const SizedBox(height: AppSpacing.md),
+                        Text(
+                          _formatTimeSince(l10n, card.publishedAt),
+                          style: styles.labelMedium.copyWith(
+                            color: colors.textMuted,
                           ),
                         ),
                       ],
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(
-                        _formatTimeSince(l10n, card.publishedAt),
-                        style: styles.labelMedium.copyWith(
-                          color: colors.textMuted,
-                        ),
-                      ),
                     ],
                   ),
                 ),
@@ -264,6 +294,30 @@ class HomeListingCardTile extends StatelessWidget {
   }
 }
 
+/// The card's headline price. Rendered LTR (numerals + currency symbol read
+/// left-to-right even in RTL) at the bold [AppTextStyles.priceLarge] scale so
+/// the money is unmistakably the loudest element in the card body.
+class _PriceLine extends StatelessWidget {
+  const _PriceLine({required this.text, required this.styles});
+
+  final String text;
+  final AppTextStyles styles;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.start,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      // priceLarge defaults to the brand-primary colour so the amount reads as
+      // money, not body text.
+      style: styles.priceLarge,
+    );
+  }
+}
+
 class _Hero extends StatelessWidget {
   const _Hero({
     required this.imageUrl,
@@ -285,14 +339,17 @@ class _Hero extends StatelessWidget {
   Widget build(BuildContext context) {
     // Phase polish — AppNetworkImage handles the fade-in + null/error fallback,
     // and owns the Hero flight that morphs this image into the detail gallery.
+    // A cinematic 16:9 hero reads more premium than the old 16:10 crop.
     final image = AspectRatio(
-      aspectRatio: 16 / 10,
+      aspectRatio: 16 / 9,
       child: AppNetworkImage(
         url: imageUrl,
         heroTag: listingImageHeroTag(listingId),
         semanticLabel: l10n.image_unavailable,
       ),
     );
+
+    final gradients = AppGradients.of(context);
 
     return Stack(
       children: [
@@ -301,22 +358,27 @@ class _Hero extends StatelessWidget {
         // bright imagery (token gradient; transparent over the top half).
         Positioned.fill(
           child: DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: AppGradients.of(context).photoScrim,
-            ),
+            decoration: BoxDecoration(gradient: gradients.photoScrim),
+          ),
+        ),
+        // Lighter top scrim so the favorite chip keeps contrast against a
+        // bright sky in the photo.
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(gradient: gradients.photoTopScrim),
           ),
         ),
         PositionedDirectional(
-          top: AppSpacing.sm,
-          end: AppSpacing.sm,
+          top: AppSpacing.md,
+          end: AppSpacing.md,
           child: FavoriteHeartButton(
             listingId: listingId,
             style: FavoriteHeartStyle.onImage,
           ),
         ),
         PositionedDirectional(
-          bottom: AppSpacing.sm,
-          start: AppSpacing.sm,
+          bottom: AppSpacing.md,
+          start: AppSpacing.md,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [

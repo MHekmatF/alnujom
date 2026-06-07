@@ -22,3 +22,11 @@ final class FavoritesPageRefreshRequested extends FavoritesPageEvent {
 final class FavoritesPageMoreLoaded extends FavoritesPageEvent {
   const FavoritesPageMoreLoaded();
 }
+
+/// Fired when the user picks a new sort order from the inline sort control
+/// (Phase 25 uplift v2). Re-orders the already-loaded items client-side.
+final class FavoritesPageSortChanged extends FavoritesPageEvent {
+  const FavoritesPageSortChanged(this.sort);
+
+  final FavoritesSort sort;
+}

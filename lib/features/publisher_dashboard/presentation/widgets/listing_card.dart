@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/property_specs.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/money.dart';
 import '../../../../shared/presentation/money_formatter.dart';
@@ -94,6 +96,19 @@ class ListingCard extends StatelessWidget {
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
+              if (PropertySpecsRow.hasAnyOf(
+                rooms: listing.rooms,
+                bathrooms: listing.bathrooms,
+                areaSize: listing.areaSize,
+              )) ...[
+                const SizedBox(height: AppSpacing.sm),
+                PropertySpecsRow(
+                  rooms: listing.rooms,
+                  bathrooms: listing.bathrooms,
+                  areaSize: listing.areaSize,
+                  color: AppColors.of(context).textMuted,
+                ),
+              ],
               const SizedBox(height: AppSpacing.xs),
               Text(
                 _formatDate(listing.createdAt),

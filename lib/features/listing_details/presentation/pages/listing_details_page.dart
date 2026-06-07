@@ -21,7 +21,7 @@ import '../../../inquiries/presentation/sheets/inquiry_form_sheet.dart';
 import '../../../../core/widgets/reduce_motion.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../features/listing_form/domain/entities/listing.dart'
-    show Listing, LocationVisibility;
+    show Listing, LocationVisibility, PropertyTypeDb;
 import '../../../../features/map/domain/entities/map_entry_context.dart';
 import '../../../../features/map/domain/entities/marker_coordinates.dart';
 import '../../../../features/currencies/domain/entities/currency.dart';
@@ -35,7 +35,11 @@ import '../../../../shared/presentation/widgets/listing_display/listing_price_bl
 import '../../domain/entities/listing_details_aggregate.dart';
 import '../bloc/listing_details_bloc.dart';
 import '../widgets/contact_block.dart';
+import '../widgets/listing_facts_block.dart';
 import '../widgets/per_listing_action_block.dart';
+import '../widgets/similar_listings_carousel.dart';
+import '../../../../shared/domain/value_objects/money.dart';
+import '../../../../shared/presentation/money_formatter.dart';
 import '../../../ads/domain/entities/ad_placement.dart';
 import '../../../ads/presentation/widgets/ad_slot.dart';
 import '../../../reports/presentation/widgets/reporter_status_banner.dart';
@@ -225,6 +229,11 @@ class _SuccessBody extends StatelessWidget {
                       ),
                       const SizedBox(height: AppSpacing.md),
                     ],
+                    // 4b. Premium uplift v2 — key facts grid (beds·baths·area·
+                    //     floor·type) right under the title/price. Collapses to
+                    //     nothing when the listing has none of these.
+                    ListingFactsBlock(listing: aggregate.listing),
+                    const SizedBox(height: AppSpacing.md),
                     // 5. Location block — Phase 12 Q8=A VERBATIM (widget itself unmodified)
                     ListingLocationBlock(
                       governorate: aggregate.governorate,
@@ -264,8 +273,21 @@ class _SuccessBody extends StatelessWidget {
                         ),
                       ),
                     const SizedBox(height: AppSpacing.md),
-                    // 6. Contact block — Phase 16 rewired (listing passed for ContactCtaCubit)
-                    ContactBlock(listing: aggregate.listing),
+                    // 6. Contact block — Phase 16 rewired (listing passed for
+                    //    ContactCtaCubit). Premium uplift v2: richer AgentCard
+                    //    surface seeded with the publisher's name + username.
+                    ContactBlock(
+                      listing: aggregate.listing,
+                      contactName: aggregate.publisher.fullName.isNotEmpty
+                          ? aggregate.publisher.fullName
+                          : null,
+                      subtitle: aggregate.publisher.username != null &&
+                              aggregate.publisher.username!.isNotEmpty
+                          ? l10n.listing_details_contact_username(
+                              aggregate.publisher.username!,
+                            )
+                          : null,
+                    ),
                     const SizedBox(height: AppSpacing.md),
                     // 7. Amenities block — Phase 12 Q8=A VERBATIM
                     ListingAmenitiesBlock(
@@ -281,16 +303,58 @@ class _SuccessBody extends StatelessWidget {
                       ),
                       const SizedBox(height: AppSpacing.md),
                     ],
-                    // 9. Per-listing action block — Phase 17 Favorite live; Share/Report stubs
-                    PerListingActionBlock(listingId: aggregate.listing.id),
+                    // 9. Per-listing action block — Favorite + Report live;
+                    //    Share now live (premium uplift v2) with title + price.
+                    PerListingActionBlock(
+                      listingId: aggregate.listing.id,
+                      shareTitle: aggregate.listing.title,
+                      sharePrice: _sharePriceText(
+                        context,
+                        aggregate,
+                        displayCurrency,
+                      ),
+                    ),
                     const SizedBox(height: AppSpacing.lg),
                   ],
                 ),
               ),
             ),
           ),
+          // 10. Premium uplift v2 — "similar listings" carousel: same property
+          //     type + governorate, excluding this listing. Self-contained
+          //     (hosts its own cubit); collapses when the pool is empty.
+          SliverToBoxAdapter(
+            child: SimilarListingsCarousel(
+              listingId: aggregate.listing.id,
+              propertyType: aggregate.listing.propertyType.toDbValue(),
+              governorateId: aggregate.listing.governorateId,
+              staggerIndex: 2,
+            ),
+          ),
+          const SliverToBoxAdapter(
+            child: SizedBox(height: AppSpacing.lg),
+          ),
         ],
       ),
+    );
+  }
+
+  /// Builds the localized primary-price string for the share payload, or null
+  /// when no price / currency is available.
+  String? _sharePriceText(
+    BuildContext context,
+    ListingDetailsAggregate aggregate,
+    Currency? displayCurrency,
+  ) {
+    if (displayCurrency == null || aggregate.prices.isEmpty) return null;
+    final primary = aggregate.prices.firstWhere(
+      (p) => p.isPrimary,
+      orElse: () => aggregate.prices.first,
+    );
+    return MoneyFormatter.format(
+      Money(amount: primary.amount, currencyCode: primary.currencyCode),
+      locale: Localizations.localeOf(context),
+      currency: displayCurrency,
     );
   }
 
