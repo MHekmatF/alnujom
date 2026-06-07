@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/theme/spacing.dart';
-import '../../../../core/widgets/brand_mark.dart';
+import '../../../../core/widgets/app_logo.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/phone_number.dart';
 import '../bloc/auth_bloc.dart';
@@ -85,7 +85,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           const SizedBox(height: AppSpacing.md),
-                          const Center(child: BrandMark(size: 64)),
+                          const Center(child: AppLogo()),
                           const SizedBox(height: AppSpacing.xl),
                           TextFormField(
                             controller: _phoneController,
