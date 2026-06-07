@@ -9,6 +9,7 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../../core/errors/failure.dart';
 import '../../../../../core/errors/result.dart';
+import '../../../../../l10n/app_localizations.dart';
 import '../../../domain/entities/app_setting.dart';
 import '../../../domain/entities/app_setting_key.dart';
 import '../../../domain/usecases/load_all_settings.dart';
@@ -124,8 +125,12 @@ class AppSettingsEditorCubit extends Cubit<AppSettingsEditorState> {
   ///
   /// Returns null on success, or an error message string on validation failure
   /// (the editor widget displays this inline instead of calling save).
-  Future<String?> save(AppSettingKey key, Object value) async {
-    final validationError = _validate(key, value);
+  Future<String?> save(
+    AppSettingKey key,
+    Object value,
+    AppLocalizations l10n,
+  ) async {
+    final validationError = _validate(key, value, l10n);
     if (validationError != null) return validationError;
 
     final current = state;
@@ -163,34 +168,34 @@ class AppSettingsEditorCubit extends Cubit<AppSettingsEditorState> {
   ///
   /// The RPC does authoritative validation on the backend; this is a
   /// client-side fast-fail for obvious structural errors only.
-  String? _validate(AppSettingKey key, Object value) {
+  String? _validate(AppSettingKey key, Object value, AppLocalizations l10n) {
     switch (key) {
       case AppSettingKey.defaultLanguage:
         if (value is! String || !{'ar', 'en'}.contains(value)) {
-          return 'Language must be "ar" or "en"';
+          return l10n.settingsValidationLanguage;
         }
       case AppSettingKey.defaultCurrency:
         if (value is! String || (value).trim().isEmpty) {
-          return 'Currency code is required';
+          return l10n.settingsValidationCurrencyRequired;
         }
       case AppSettingKey.defaultPublisherNameVisibility:
         if (value is! String || (value).trim().isEmpty) {
-          return 'Publisher name visibility is required';
+          return l10n.settingsValidationPublisherVisibilityRequired;
         }
       case AppSettingKey.defaultLocationVisibility:
         if (value is! String || (value).trim().isEmpty) {
-          return 'Location visibility is required';
+          return l10n.settingsValidationLocationVisibilityRequired;
         }
       case AppSettingKey.maintenanceMode:
         if (value is! Map) {
-          return 'Maintenance mode must be a map';
+          return l10n.settingsValidationMaintenanceMap;
         }
         if (value['on'] is! bool) {
-          return 'Maintenance mode "on" must be a boolean';
+          return l10n.settingsValidationMaintenanceOnBool;
         }
       case AppSettingKey.supportContact:
         if (value is! Map) {
-          return 'Support contact must be a map';
+          return l10n.settingsValidationSupportMap;
         }
         // At least one channel should be set (warn but do not block)
         final phone = value['phone'];
@@ -201,18 +206,18 @@ class AppSettingsEditorCubit extends Cubit<AppSettingsEditorState> {
             (whatsapp is String && whatsapp.isNotEmpty) ||
             (email is String && email.isNotEmpty);
         if (!hasAny) {
-          return 'At least one support channel is required';
+          return l10n.settingsEditorSupportAtLeastOneError;
         }
       case AppSettingKey.termsUrl:
       case AppSettingKey.privacyUrl:
         // Nullable — empty string is accepted (treated as "unset").
         if (value is! String) {
-          return 'URL must be a text value';
+          return l10n.settingsValidationUrlText;
         }
         if (value.isNotEmpty &&
             !value.startsWith('http://') &&
             !value.startsWith('https://')) {
-          return 'URL must start with http:// or https://';
+          return l10n.settingsEditorUrlValidationError;
         }
     }
     return null;

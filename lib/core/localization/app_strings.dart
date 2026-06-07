@@ -3126,8 +3126,7 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
-  String get action_undo =>
-      _resolve('action_undo', (loc) => loc.action_undo);
+  String get action_undo => _resolve('action_undo', (loc) => loc.action_undo);
 
   // ── Phase 18 Reports & Moderation ────────────────────────────────────────
 
@@ -4198,6 +4197,54 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('settingsEditorRetry', (loc) => loc.settingsEditorRetry);
 
   @override
+  String get settingsValidationLanguage => _resolve(
+    'settingsValidationLanguage',
+    (loc) => loc.settingsValidationLanguage,
+  );
+
+  @override
+  String get settingsValidationCurrencyRequired => _resolve(
+    'settingsValidationCurrencyRequired',
+    (loc) => loc.settingsValidationCurrencyRequired,
+  );
+
+  @override
+  String get settingsValidationPublisherVisibilityRequired => _resolve(
+    'settingsValidationPublisherVisibilityRequired',
+    (loc) => loc.settingsValidationPublisherVisibilityRequired,
+  );
+
+  @override
+  String get settingsValidationLocationVisibilityRequired => _resolve(
+    'settingsValidationLocationVisibilityRequired',
+    (loc) => loc.settingsValidationLocationVisibilityRequired,
+  );
+
+  @override
+  String get settingsValidationMaintenanceMap => _resolve(
+    'settingsValidationMaintenanceMap',
+    (loc) => loc.settingsValidationMaintenanceMap,
+  );
+
+  @override
+  String get settingsValidationMaintenanceOnBool => _resolve(
+    'settingsValidationMaintenanceOnBool',
+    (loc) => loc.settingsValidationMaintenanceOnBool,
+  );
+
+  @override
+  String get settingsValidationSupportMap => _resolve(
+    'settingsValidationSupportMap',
+    (loc) => loc.settingsValidationSupportMap,
+  );
+
+  @override
+  String get settingsValidationUrlText => _resolve(
+    'settingsValidationUrlText',
+    (loc) => loc.settingsValidationUrlText,
+  );
+
+  @override
   String get settingsEditorSectionGeneral => _resolve(
     'settingsEditorSectionGeneral',
     (loc) => loc.settingsEditorSectionGeneral,
@@ -4444,10 +4491,8 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('home_greeting_welcome', (loc) => loc.home_greeting_welcome);
 
   @override
-  String home_greeting_named(String name) => _resolve(
-    'home_greeting_named',
-    (loc) => loc.home_greeting_named(name),
-  );
+  String home_greeting_named(String name) =>
+      _resolve('home_greeting_named', (loc) => loc.home_greeting_named(name));
 
   @override
   String get home_greeting_subtitle =>
