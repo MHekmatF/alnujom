@@ -47,6 +47,8 @@ sealed class ColorPalette {
       onSecondary: tokens.onSecondary,
       tertiary: tokens.tertiary,
       error: tokens.error,
+      onError: tokens.onError,
+      scrim: tokens.scrim,
       surface: tokens.surface,
       onSurface: tokens.onSurface,
       onSurfaceVariant: tokens.onSurfaceVariant,
@@ -94,6 +96,14 @@ final class ModernPalette extends ColorPalette {
     textMuted: Color(0xFF5F6C78),
     verified: Color(0xFF1F7A4D),
     verifiedContainer: Color(0xFFDCF0E5),
+    // Phase 25 premium uplift — explicit semantic foregrounds + over-photo /
+    // modal overlay tokens (close the "filledSuccess assumes white" gap and the
+    // 6 hardcoded Colors.white/black over-photo violations).
+    onError: Color(0xFFFFFFFF),
+    onSuccess: Color(0xFFFFFFFF),
+    onPhoto: Color(0xFFFFFFFF),
+    photoOverlay: Color(0x8C0B1118),
+    scrim: Color(0x66000000),
   );
 
   @override
@@ -121,6 +131,13 @@ final class ModernPalette extends ColorPalette {
     textMuted: Color(0xFF7E8C98),
     verified: Color(0xFF57C48C),
     verifiedContainer: Color(0xFF163A2A),
+    // Phase 25 premium uplift — dark-mode semantic foregrounds read on the
+    // lighter dark success/error fills; over-photo tokens stay theme-independent.
+    onError: Color(0xFF420A0A),
+    onSuccess: Color(0xFF04231A),
+    onPhoto: Color(0xFFFFFFFF),
+    photoOverlay: Color(0x8C0B1118),
+    scrim: Color(0x99000000),
   );
 }
 
@@ -155,6 +172,11 @@ final class TrustPalette extends ColorPalette {
     textMuted: Color(0xFF94A3B8),
     verified: Color(0xFF1F7A4D),
     verifiedContainer: Color(0xFFDCF0E5),
+    onError: Color(0xFFFFFFFF),
+    onSuccess: Color(0xFFFFFFFF),
+    onPhoto: Color(0xFFFFFFFF),
+    photoOverlay: Color(0x8C0B1118),
+    scrim: Color(0x66000000),
   );
 
   @override
@@ -182,6 +204,11 @@ final class TrustPalette extends ColorPalette {
     textMuted: Color(0xFF64748B),
     verified: Color(0xFF57C48C),
     verifiedContainer: Color(0xFF163A2A),
+    onError: Color(0xFF420A0A),
+    onSuccess: Color(0xFF04231A),
+    onPhoto: Color(0xFFFFFFFF),
+    photoOverlay: Color(0x8C0B1118),
+    scrim: Color(0x99000000),
   );
 }
 
@@ -211,6 +238,11 @@ final class AppPaletteTokens {
     required this.textMuted,
     required this.verified,
     required this.verifiedContainer,
+    required this.onError,
+    required this.onSuccess,
+    required this.onPhoto,
+    required this.photoOverlay,
+    required this.scrim,
   });
 
   final Color primary;
@@ -240,4 +272,21 @@ final class AppPaletteTokens {
 
   /// Trust signal — verified-agency badge container/background.
   final Color verifiedContainer;
+
+  /// Foreground on the [error] fill (alerts, destructive buttons).
+  final Color onError;
+
+  /// Foreground on the [success] fill (confirmation buttons, success toasts).
+  final Color onSuccess;
+
+  /// Foreground (text/icons) placed directly over photography. Theme-
+  /// independent — imagery reads the same in light and dark.
+  final Color onPhoto;
+
+  /// Translucent dark base for over-photo chips and the bottom image scrim
+  /// gradient. Theme-independent.
+  final Color photoOverlay;
+
+  /// Modal/backdrop scrim overlay (dialogs, bottom sheets).
+  final Color scrim;
 }

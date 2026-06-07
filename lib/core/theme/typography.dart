@@ -17,6 +17,7 @@ final class AppTextStyles {
     required this.labelMedium,
     required this.priceLarge,
     required this.priceMedium,
+    required this.priceCurrency,
   });
 
   factory AppTextStyles.of(BuildContext context) {
@@ -132,6 +133,16 @@ final class AppTextStyles {
         weight: FontWeight.w700,
         color: primary,
       ),
+      // Currency suffix beside a price — smaller + lighter than the number so
+      // the amount leads and the unit (ل.س / USD) supports it.
+      priceCurrency: _style(
+        family: displayFamily,
+        size: 14,
+        lineHeight: 20,
+        weight: FontWeight.w600,
+        color: primary,
+        letterSpacing: 0.2,
+      ),
     );
   }
 
@@ -147,6 +158,7 @@ final class AppTextStyles {
   final TextStyle labelMedium;
   final TextStyle priceLarge;
   final TextStyle priceMedium;
+  final TextStyle priceCurrency;
 
   static TextStyle _style({
     required String family,

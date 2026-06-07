@@ -37,6 +37,7 @@ const Set<String> _defaultAllowedFiles = {
   'lib/core/theme/elevation.dart',
   'lib/core/theme/color_palette.dart',
   'lib/core/theme/app_theme.dart',
+  'lib/core/theme/gradients.dart',
 };
 
 final RegExp _rawColor = RegExp(r'\bColor\(\s*0x[0-9A-Fa-f]+');

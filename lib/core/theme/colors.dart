@@ -28,6 +28,11 @@ final class AppColors {
     required this.textMuted,
     required this.verified,
     required this.verifiedContainer,
+    required this.onError,
+    required this.onSuccess,
+    required this.onPhoto,
+    required this.photoOverlay,
+    required this.scrim,
     required this.divider,
     required this.disabledOverlay,
   });
@@ -56,6 +61,11 @@ final class AppColors {
     textMuted: tokens.textMuted,
     verified: tokens.verified,
     verifiedContainer: tokens.verifiedContainer,
+    onError: tokens.onError,
+    onSuccess: tokens.onSuccess,
+    onPhoto: tokens.onPhoto,
+    photoOverlay: tokens.photoOverlay,
+    scrim: tokens.scrim,
     divider: tokens.outline,
     disabledOverlay: tokens.onSurface.withAlpha(0x61),
   );
@@ -89,6 +99,11 @@ final class AppColors {
       verified: tokens?.verified ?? scheme.tertiary,
       verifiedContainer:
           tokens?.verifiedContainer ?? scheme.surfaceContainerHighest,
+      onError: scheme.onError,
+      onSuccess: tokens?.onSuccess ?? scheme.onPrimary,
+      onPhoto: tokens?.onPhoto ?? Colors.white,
+      photoOverlay: tokens?.photoOverlay ?? scheme.scrim,
+      scrim: tokens?.scrim ?? scheme.scrim,
       divider: scheme.outline,
       disabledOverlay: scheme.onSurface.withAlpha(0x61),
     );
@@ -117,6 +132,11 @@ final class AppColors {
   final Color textMuted;
   final Color verified;
   final Color verifiedContainer;
+  final Color onError;
+  final Color onSuccess;
+  final Color onPhoto;
+  final Color photoOverlay;
+  final Color scrim;
   final Color divider;
   final Color disabledOverlay;
 
@@ -147,6 +167,11 @@ final class AppColors {
           textMuted == other.textMuted &&
           verified == other.verified &&
           verifiedContainer == other.verifiedContainer &&
+          onError == other.onError &&
+          onSuccess == other.onSuccess &&
+          onPhoto == other.onPhoto &&
+          photoOverlay == other.photoOverlay &&
+          scrim == other.scrim &&
           divider == other.divider &&
           disabledOverlay == other.disabledOverlay;
 
@@ -175,6 +200,11 @@ final class AppColors {
     textMuted,
     verified,
     verifiedContainer,
+    onError,
+    onSuccess,
+    onPhoto,
+    photoOverlay,
+    scrim,
     divider,
     disabledOverlay,
   ]);
@@ -194,6 +224,10 @@ final class AppColorTokens extends ThemeExtension<AppColorTokens> {
     required this.textMuted,
     required this.verified,
     required this.verifiedContainer,
+    required this.onSuccess,
+    required this.onPhoto,
+    required this.photoOverlay,
+    required this.scrim,
   });
 
   factory AppColorTokens.fromPalette(AppPaletteTokens tokens) => AppColorTokens(
@@ -208,6 +242,10 @@ final class AppColorTokens extends ThemeExtension<AppColorTokens> {
     textMuted: tokens.textMuted,
     verified: tokens.verified,
     verifiedContainer: tokens.verifiedContainer,
+    onSuccess: tokens.onSuccess,
+    onPhoto: tokens.onPhoto,
+    photoOverlay: tokens.photoOverlay,
+    scrim: tokens.scrim,
   );
 
   final Color accent;
@@ -221,6 +259,10 @@ final class AppColorTokens extends ThemeExtension<AppColorTokens> {
   final Color textMuted;
   final Color verified;
   final Color verifiedContainer;
+  final Color onSuccess;
+  final Color onPhoto;
+  final Color photoOverlay;
+  final Color scrim;
 
   @override
   AppColorTokens copyWith({
@@ -235,6 +277,10 @@ final class AppColorTokens extends ThemeExtension<AppColorTokens> {
     Color? textMuted,
     Color? verified,
     Color? verifiedContainer,
+    Color? onSuccess,
+    Color? onPhoto,
+    Color? photoOverlay,
+    Color? scrim,
   }) {
     return AppColorTokens(
       accent: accent ?? this.accent,
@@ -248,6 +294,10 @@ final class AppColorTokens extends ThemeExtension<AppColorTokens> {
       textMuted: textMuted ?? this.textMuted,
       verified: verified ?? this.verified,
       verifiedContainer: verifiedContainer ?? this.verifiedContainer,
+      onSuccess: onSuccess ?? this.onSuccess,
+      onPhoto: onPhoto ?? this.onPhoto,
+      photoOverlay: photoOverlay ?? this.photoOverlay,
+      scrim: scrim ?? this.scrim,
     );
   }
 
@@ -273,6 +323,10 @@ final class AppColorTokens extends ThemeExtension<AppColorTokens> {
         other.verifiedContainer,
         t,
       )!,
+      onSuccess: Color.lerp(onSuccess, other.onSuccess, t)!,
+      onPhoto: Color.lerp(onPhoto, other.onPhoto, t)!,
+      photoOverlay: Color.lerp(photoOverlay, other.photoOverlay, t)!,
+      scrim: Color.lerp(scrim, other.scrim, t)!,
     );
   }
 }

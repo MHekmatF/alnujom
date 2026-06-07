@@ -322,7 +322,9 @@ class _ActionButtons extends StatelessWidget {
             ),
             label: Text(
               l10n.agency_action_reject,
-              style: TextStyle(color: theme.colorScheme.error),
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: theme.colorScheme.error,
+              ),
             ),
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: theme.colorScheme.error),
@@ -351,7 +353,9 @@ class _ActionButtons extends StatelessWidget {
             ),
             label: Text(
               l10n.agency_action_suspend,
-              style: TextStyle(color: theme.colorScheme.error),
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: theme.colorScheme.error,
+              ),
             ),
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: theme.colorScheme.error),
