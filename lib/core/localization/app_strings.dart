@@ -4499,6 +4499,26 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('home_greeting_subtitle', (loc) => loc.home_greeting_subtitle);
 
   @override
+  String get auth_login_headline =>
+      _resolve('auth_login_headline', (loc) => loc.auth_login_headline);
+
+  @override
+  String get auth_login_subtitle =>
+      _resolve('auth_login_subtitle', (loc) => loc.auth_login_subtitle);
+
+  @override
+  String get auth_register_headline =>
+      _resolve('auth_register_headline', (loc) => loc.auth_register_headline);
+
+  @override
+  String get auth_register_subtitle =>
+      _resolve('auth_register_subtitle', (loc) => loc.auth_register_subtitle);
+
+  @override
+  String get auth_trust_note =>
+      _resolve('auth_trust_note', (loc) => loc.auth_trust_note);
+
+  @override
   String get action_save => _resolve('action_save', (loc) => loc.action_save);
 
   @override

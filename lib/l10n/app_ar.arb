@@ -59,6 +59,11 @@
   "login_submit": "دخول",
   "login_forgot_password": "نسيت كلمة المرور؟",
   "login_no_account": "ليس لديك حساب؟ سجّل",
+  "auth_login_headline": "مرحباً بعودتك",
+  "auth_login_subtitle": "سجّل دخولك لمتابعة عقاراتك المحفوظة ومحادثاتك.",
+  "auth_register_headline": "أنشئ حسابك",
+  "auth_register_subtitle": "انضمّ إلى النّجوم للعثور على عقارك أو نشر إعلاناتك بثقة.",
+  "auth_trust_note": "بياناتك محمية ولا تُشارك مع أي طرف خارجي.",
 
   "pending_approval_title": "الحساب قيد المراجعة",
   "pending_approval_body": "حسابك بانتظار موافقة المسؤول. رح نعلمك بعد المراجعة.",

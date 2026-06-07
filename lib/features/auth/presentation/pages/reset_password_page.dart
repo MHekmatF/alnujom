@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_logo.dart';
+import '../widgets/auth_trust_note.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/phone_number.dart';
 import '../bloc/auth_bloc.dart';
@@ -105,20 +107,13 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                             onChanged: (_) =>
                                 setState(() => _submitted = false),
                           ),
-                          const SizedBox(height: 24),
-                          FilledButton(
+                          const SizedBox(height: AppSpacing.xl),
+                          AppButton.filledPrimary(
+                            label: l10n.reset_password_submit,
+                            loading: isLoading,
                             onPressed: isLoading ? null : _submit,
-                            child: isLoading
-                                ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : Text(l10n.reset_password_submit),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: AppSpacing.sm),
                           if (state is AuthError)
                             Padding(
                               padding: const EdgeInsets.only(
@@ -132,6 +127,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                                 textAlign: TextAlign.center,
                               ),
                             ),
+                          const SizedBox(height: AppSpacing.lg),
+                          AuthTrustNote(text: l10n.auth_trust_note),
                         ],
                       ),
                     ),
@@ -154,13 +151,21 @@ class _GenericResponse extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const SizedBox(height: 32),
-        Icon(
-          Icons.mark_email_read_outlined,
-          size: 64,
-          color: theme.colorScheme.primary,
+        const SizedBox(height: AppSpacing.xxxl),
+        Container(
+          width: AppSpacing.xxxl + AppSpacing.lg,
+          height: AppSpacing.xxxl + AppSpacing.lg,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: theme.colorScheme.primary.withValues(alpha: 0.10),
+          ),
+          child: Icon(
+            Icons.mark_email_read_outlined,
+            size: AppSpacing.xxl,
+            color: theme.colorScheme.primary,
+          ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: AppSpacing.lg),
         Text(
           message,
           style: theme.textTheme.bodyLarge,

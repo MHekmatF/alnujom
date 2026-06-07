@@ -59,6 +59,11 @@
   "login_submit": "Sign In",
   "login_forgot_password": "Forgot password?",
   "login_no_account": "Don't have an account? Register",
+  "auth_login_headline": "Welcome back",
+  "auth_login_subtitle": "Sign in to pick up your saved properties and conversations.",
+  "auth_register_headline": "Create your account",
+  "auth_register_subtitle": "Join AlNujom to find your property or publish with confidence.",
+  "auth_trust_note": "Your data is protected and never shared.",
 
   "pending_approval_title": "Account Pending Approval",
   "pending_approval_body": "Your account is awaiting admin approval. You will be notified once it is reviewed.",

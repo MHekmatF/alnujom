@@ -3,7 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_logo.dart';
+import '../widgets/auth_trust_note.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/phone_number.dart';
 import '../../../../core/routing/app_router.dart';
@@ -96,6 +98,20 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: AppSpacing.md),
                     const Center(child: AppLogo()),
                     const SizedBox(height: AppSpacing.xl),
+                    Text(
+                      l10n.auth_login_headline,
+                      style: theme.textTheme.headlineMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      l10n.auth_login_subtitle,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: AppSpacing.xl),
                     TextFormField(
                       controller: _phoneController,
                       keyboardType: TextInputType.phone,
@@ -113,7 +129,7 @@ class _LoginPageState extends State<LoginPage> {
                       },
                       onChanged: (_) => setState(() => _errorText = null),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.lg),
                     TextFormField(
                       controller: _passwordController,
                       obscureText: true,
@@ -128,7 +144,7 @@ class _LoginPageState extends State<LoginPage> {
                       },
                       onChanged: (_) => setState(() => _errorText = null),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.sm),
                     Align(
                       alignment: AlignmentDirectional.centerEnd,
                       child: TextButton(
@@ -136,31 +152,29 @@ class _LoginPageState extends State<LoginPage> {
                         child: Text(l10n.login_forgot_password),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.md),
                     if (_errorText != null) ...[
                       Text(
                         _errorText!,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.error,
                         ),
+                        textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: AppSpacing.sm),
                     ],
-                    FilledButton(
+                    AppButton.filledPrimary(
+                      label: l10n.login_submit,
+                      loading: isLoading,
                       onPressed: isLoading ? null : () => _submit(l10n),
-                      child: isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text(l10n.login_submit),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.sm),
                     TextButton(
                       onPressed: () => context.push(AppRoutes.register),
                       child: Text(l10n.login_no_account),
                     ),
+                    const SizedBox(height: AppSpacing.lg),
+                    AuthTrustNote(text: l10n.auth_trust_note),
                   ],
                 ),
               ),
