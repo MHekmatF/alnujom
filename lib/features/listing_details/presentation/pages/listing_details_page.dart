@@ -4,11 +4,14 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/motion.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
+import '../../../../core/widgets/empty_state.dart';
+import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/hero_tags.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/reduce_motion.dart';
@@ -433,6 +436,7 @@ class _GalleryDots extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: List.generate(count, (i) {
         final active = i == current;
+        final onPhoto = AppColors.of(context).onPhoto;
         return AnimatedContainer(
           duration: AppMotion.base,
           curve: AppMotion.curve,
@@ -442,7 +446,7 @@ class _GalleryDots extends StatelessWidget {
           width: active ? AppSpacing.lg : AppSpacing.sm,
           height: AppSpacing.sm,
           decoration: BoxDecoration(
-            color: active ? Colors.white : Colors.white.withValues(alpha: 0.5),
+            color: active ? onPhoto : onPhoto.withValues(alpha: 0.5),
             borderRadius: appRadius(AppRadii.pill),
           ),
         );
@@ -529,33 +533,11 @@ class _NotFoundView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.search_off_rounded,
-              size: 64,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              l10n.listing_details_not_found_title,
-              style: theme.textTheme.titleLarge,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            FilledButton(
-              onPressed: () => context.go(AppRoutes.home),
-              child: Text(l10n.listing_details_not_found_return_home),
-            ),
-          ],
-        ),
-      ),
+    return EmptyState(
+      icon: Icons.search_off_rounded,
+      headline: l10n.listing_details_not_found_title,
+      ctaLabel: l10n.listing_details_not_found_return_home,
+      onCtaPressed: () => context.go(AppRoutes.home),
     );
   }
 }
@@ -570,26 +552,10 @@ class _ErrorView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 64, color: theme.colorScheme.error),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              l10n.error_could_not_load_listing,
-              style: theme.textTheme.titleMedium,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            OutlinedButton(onPressed: onRetry, child: Text(l10n.action_retry)),
-          ],
-        ),
-      ),
+    return ErrorState(
+      title: l10n.error_could_not_load_listing,
+      variant: ErrorStateVariant.network,
+      onRetry: onRetry,
     );
   }
 }
