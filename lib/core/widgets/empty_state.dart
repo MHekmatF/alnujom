@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../theme/colors.dart';
-import '../theme/motion.dart';
 import '../theme/spacing.dart';
 import '../theme/typography.dart';
 import 'app_button.dart';
-import 'reduce_motion.dart';
 import 'staggered_list_item.dart';
 
 class EmptyState extends StatelessWidget {
@@ -78,9 +76,9 @@ class EmptyState extends StatelessWidget {
   }
 }
 
-/// A glyph in a soft tinted circle with a one-shot scale-in pop (collapses to a
-/// static icon under reduced motion). Shared premium treatment for empty/list
-/// surfaces.
+/// A glyph in a soft tinted circle — the shared premium treatment for
+/// empty/list surfaces. The whole [EmptyState] fades + slides in via
+/// [StaggeredListItem], so the glyph itself stays static.
 class _EmptyStateIcon extends StatelessWidget {
   const _EmptyStateIcon({required this.icon, required this.color});
 
@@ -89,7 +87,7 @@ class _EmptyStateIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final circle = Container(
+    return Container(
       width: AppSpacing.xxxl + AppSpacing.lg,
       height: AppSpacing.xxxl + AppSpacing.lg,
       decoration: BoxDecoration(
@@ -97,15 +95,6 @@ class _EmptyStateIcon extends StatelessWidget {
         color: color.withValues(alpha: 0.10),
       ),
       child: Icon(icon, color: color, size: AppSpacing.xxl),
-    );
-    if (reduceMotion(context)) return circle;
-    return TweenAnimationBuilder<double>(
-      tween: Tween<double>(begin: 0.7, end: 1),
-      duration: AppMotion.slow,
-      curve: AppMotion.emphasized,
-      builder: (context, value, child) =>
-          Transform.scale(scale: value, child: child),
-      child: circle,
     );
   }
 }
