@@ -3,9 +3,11 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 
 import '../localization/app_strings.dart';
 import '../theme/colors.dart';
+import '../theme/motion.dart';
 import '../theme/spacing.dart';
 import '../theme/typography.dart';
 import 'app_button.dart';
+import 'reduce_motion.dart';
 import 'staggered_list_item.dart';
 
 enum ErrorStateVariant { defaultState, network }
@@ -37,8 +39,8 @@ class ErrorState extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                variant == ErrorStateVariant.network
+              _PoppingIcon(
+                icon: variant == ErrorStateVariant.network
                     ? LucideIcons.wifi_off
                     : LucideIcons.circle_alert,
                 color: colors.error,
@@ -67,6 +69,37 @@ class ErrorState extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// The error glyph in a soft tinted circle, with a one-shot scale-in pop that
+/// collapses to a static icon when the platform requests reduced motion.
+class _PoppingIcon extends StatelessWidget {
+  const _PoppingIcon({required this.icon, required this.color});
+
+  final IconData icon;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final circle = Container(
+      width: AppSpacing.xxxl + AppSpacing.lg,
+      height: AppSpacing.xxxl + AppSpacing.lg,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color.withValues(alpha: 0.12),
+      ),
+      child: Icon(icon, color: color, size: AppSpacing.xxl),
+    );
+    if (reduceMotion(context)) return circle;
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0.7, end: 1),
+      duration: AppMotion.slow,
+      curve: AppMotion.emphasized,
+      builder: (context, value, child) =>
+          Transform.scale(scale: value, child: child),
+      child: circle,
     );
   }
 }

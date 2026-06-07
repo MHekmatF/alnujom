@@ -209,7 +209,7 @@ class _FavoriteChip extends StatelessWidget {
         boxShadow: elevation.level1,
       ),
       child: Material(
-        color: Colors.white.withValues(alpha: 0.92),
+        color: colors.onPhoto.withValues(alpha: 0.92),
         shape: const CircleBorder(),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
@@ -219,7 +219,7 @@ class _FavoriteChip extends StatelessWidget {
             child: Icon(
               favorite ? Icons.favorite : Icons.favorite_border,
               size: AppSpacing.xl,
-              color: favorite ? colors.accent : Colors.black54,
+              color: favorite ? colors.accent : colors.photoOverlay,
             ),
           ),
         ),

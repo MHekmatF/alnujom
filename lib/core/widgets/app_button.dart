@@ -181,11 +181,11 @@ class AppButton extends StatelessWidget {
 
   Color _foreground(AppColors colors) => switch (variant) {
     AppButtonVariant.filledPrimary => colors.onPrimary,
-    AppButtonVariant.filledSuccess => colors.onPrimary,
+    AppButtonVariant.filledSuccess => colors.onSuccess,
     AppButtonVariant.outlined => colors.primary,
     AppButtonVariant.tonal => colors.onPrimaryContainer,
     AppButtonVariant.text => colors.primary,
-    AppButtonVariant.destructive => colors.onPrimary,
+    AppButtonVariant.destructive => colors.onError,
     AppButtonVariant.iconButton => colors.primary,
     AppButtonVariant.fab => colors.onPrimary,
   };

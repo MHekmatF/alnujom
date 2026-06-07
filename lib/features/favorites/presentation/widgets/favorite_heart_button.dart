@@ -221,7 +221,7 @@ class _OnImageChip extends StatelessWidget {
           boxShadow: elevation.level1,
         ),
         child: Material(
-          color: Colors.white.withValues(alpha: 0.92),
+          color: colors.onPhoto.withValues(alpha: 0.92),
           shape: const CircleBorder(),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
@@ -233,7 +233,7 @@ class _OnImageChip extends StatelessWidget {
                 child: Icon(
                   isFavorited ? Icons.favorite : Icons.favorite_border,
                   size: AppSpacing.xl,
-                  color: isFavorited ? colors.accent : Colors.black54,
+                  color: isFavorited ? colors.accent : colors.photoOverlay,
                   semanticLabel: tooltip,
                 ),
               ),
