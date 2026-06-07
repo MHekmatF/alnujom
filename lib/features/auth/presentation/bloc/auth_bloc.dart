@@ -33,7 +33,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> with WidgetsBindingObserver {
     this._deregisterPushToken,
     this._pushMessaging,
     this._realtimeSignals,
-  ) : super(const Unauthenticated()) {
+    // Cold-start: begin in [Authenticating] (not [Unauthenticated]) so the
+    // splash HOLDS while Supabase asynchronously restores the persisted session
+    // (the `INITIAL_SESSION` event arrives ~seconds later). The splash + the
+    // router redirect both treat [Authenticating] as "wait" (no navigation), so
+    // a logged-in user goes splash→home without a login-screen flash. Genuinely
+    // signed-out users get `SessionRefreshed(null)` → [Unauthenticated] and
+    // route to login as before; the seed emit guarantees this always fires.
+  ) : super(const Authenticating()) {
     WidgetsBinding.instance.addObserver(this);
     on<RegisterRequested>(_onRegisterRequested);
     on<LoginRequested>(_onLoginRequested);
