@@ -133,7 +133,7 @@ class _HomeViewState extends State<_HomeView> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const BrandMark(withWordmark: true, size: 24),
+        title: const BrandMark(withWordmark: true, size: 30),
         actions: const [
           // Phase 25 — slimmed Home chrome: only locale/theme + notifications
           // remain in the bar. Profile/sign-in is now the Profile tab, and the

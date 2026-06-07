@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 
 import '../theme/colors.dart';
@@ -7,49 +5,59 @@ import '../theme/spacing.dart';
 import '../theme/typography.dart';
 import 'reduce_motion.dart';
 
-/// Phase 25 (Claude Design) — the AlNujom brand mark: a refined two-tone
-/// sparkle (النجوم = "the stars"), a large primary-blue star with a smaller
-/// warm-coral companion. Used in the app bar, onboarding, splash and auth.
+/// Phase 25 premium uplift — the AlNujom brand mark, unified to the shipped
+/// **N-logo** identity (`assets/branding/logo_mark.png`) so the in-app mark
+/// matches the launcher icon / splash / auth logo (no more two-mark drift).
 ///
-/// A logo is not mirrored for RTL — the composition is fixed in both
-/// directions. Colours default to the active palette (primary + accent) but
-/// can be overridden for on-colour surfaces (e.g. white-on-blue splash).
+/// The emblem is the full-colour N by default. When [color] is supplied (e.g.
+/// a white mark over a photo / coloured splash) it is rendered as a tinted
+/// silhouette via [ColorFiltered] so it stays legible on any surface. A logo is
+/// never mirrored for RTL — the composition is fixed in both directions.
 class BrandMark extends StatelessWidget {
   const BrandMark({
     super.key,
     this.size = 28,
     this.color,
-    this.accentColor,
     this.withWordmark = false,
     this.wordmark = 'النجوم',
     this.animated = false,
   });
 
   final double size;
+
+  /// When set, the emblem renders as a solid-colour silhouette (for on-photo /
+  /// on-colour surfaces). When null, the full-colour N-logo is shown.
   final Color? color;
-  final Color? accentColor;
   final bool withWordmark;
   final String wordmark;
 
-  /// When true (and reduced motion is off), the coral companion star gently
-  /// twinkles. Reserve for transient brand moments (splash, onboarding) — not
-  /// the always-on app bar, where persistent decorative motion would distract.
+  /// When true (and reduced motion is off), the emblem gently rotates — used by
+  /// the pull-to-refresh indicator as a branded spinner. Reserve for transient
+  /// moments, not the always-on app bar.
   final bool animated;
 
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    final primary = color ?? colors.primary;
-    final accent = accentColor ?? colors.accent;
-    final mark = (animated && !reduceMotion(context))
-        ? _TwinklingMark(size: size, primary: primary, accent: accent)
-        : CustomPaint(
-            size: Size.square(size),
-            painter: _StarMarkPainter(primary: primary, accent: accent),
-          );
-    // Standalone (no wordmark, e.g. the app bar): announce the brand name as a
-    // single image. With the wordmark, the Text below is the label, so the mark
-    // is excluded to avoid a duplicate announcement.
+
+    Widget mark = Image.asset(
+      'assets/branding/logo_mark.png',
+      width: size,
+      height: size,
+      fit: BoxFit.contain,
+      filterQuality: FilterQuality.high,
+    );
+    if (color != null) {
+      mark = ColorFiltered(
+        colorFilter: ColorFilter.mode(color!, BlendMode.srcIn),
+        child: mark,
+      );
+    }
+    if (animated && !reduceMotion(context)) {
+      mark = _SpinningMark(size: size, child: mark);
+    }
+
+    // Standalone (no wordmark): announce the brand name as a single image.
     if (!withWordmark) {
       return Semantics(label: wordmark, image: true, child: mark);
     }
@@ -72,28 +80,22 @@ class BrandMark extends StatelessWidget {
   }
 }
 
-/// Hosts the gentle twinkle: a repeating controller drives a 0→1 sine that the
-/// painter maps onto the companion star's size + opacity.
-class _TwinklingMark extends StatefulWidget {
-  const _TwinklingMark({
-    required this.size,
-    required this.primary,
-    required this.accent,
-  });
+/// A continuous, gentle rotation for the emblem — a branded loading spinner.
+class _SpinningMark extends StatefulWidget {
+  const _SpinningMark({required this.size, required this.child});
 
   final double size;
-  final Color primary;
-  final Color accent;
+  final Widget child;
 
   @override
-  State<_TwinklingMark> createState() => _TwinklingMarkState();
+  State<_SpinningMark> createState() => _SpinningMarkState();
 }
 
-class _TwinklingMarkState extends State<_TwinklingMark>
+class _SpinningMarkState extends State<_SpinningMark>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 2600),
+    duration: const Duration(milliseconds: 1400),
   )..repeat();
 
   @override
@@ -104,84 +106,6 @@ class _TwinklingMarkState extends State<_TwinklingMark>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, _) {
-        final t = (math.sin(_controller.value * 2 * math.pi) + 1) / 2;
-        return CustomPaint(
-          size: Size.square(widget.size),
-          painter: _StarMarkPainter(
-            primary: widget.primary,
-            accent: widget.accent,
-            twinkle: t,
-          ),
-        );
-      },
-    );
+    return RotationTransition(turns: _controller, child: widget.child);
   }
-}
-
-class _StarMarkPainter extends CustomPainter {
-  _StarMarkPainter({
-    required this.primary,
-    required this.accent,
-    this.twinkle = 1.0,
-  });
-
-  final Color primary;
-  final Color accent;
-
-  /// 0..1 — modulates the companion star's size and opacity (1.0 = static/full).
-  final double twinkle;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width;
-    final h = size.height;
-    // Large primary star, slightly lower-leading.
-    _drawStar(canvas, Offset(w * 0.42, h * 0.57), w * 0.40, 0.42, primary);
-    // Smaller coral companion, upper-trailing — twinkles when animated.
-    _drawStar(
-      canvas,
-      Offset(w * 0.79, h * 0.24),
-      w * 0.19 * (0.82 + 0.24 * twinkle),
-      0.44,
-      accent.withValues(alpha: 0.6 + 0.4 * twinkle),
-    );
-  }
-
-  void _drawStar(
-    Canvas canvas,
-    Offset center,
-    double rOuter,
-    double innerRatio,
-    Color color,
-  ) {
-    final rInner = rOuter * innerRatio;
-    final path = Path();
-    for (var i = 0; i < 8; i += 1) {
-      final r = i.isEven ? rOuter : rInner;
-      final angle = -math.pi / 2 + i * math.pi / 4; // top, step 45°
-      final point = Offset(
-        center.dx + r * math.cos(angle),
-        center.dy + r * math.sin(angle),
-      );
-      if (i == 0) {
-        path.moveTo(point.dx, point.dy);
-      } else {
-        path.lineTo(point.dx, point.dy);
-      }
-    }
-    path.close();
-    canvas.drawPath(
-      path,
-      Paint()
-        ..color = color
-        ..isAntiAlias = true,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _StarMarkPainter old) =>
-      old.primary != primary || old.accent != accent || old.twinkle != twinkle;
 }
