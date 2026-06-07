@@ -345,15 +345,21 @@ class _StickyContactBar extends StatelessWidget {
               top: false,
               child: Padding(
                 padding: const EdgeInsetsDirectional.all(AppSpacing.md),
-                child: AppButton(
-                  label: l10n.cta_send_inquiry,
-                  variant: AppButtonVariant.filledPrimary,
-                  icon: Icons.email_outlined,
-                  expanded: true,
-                  onPressed: () => showModalBottomSheet<void>(
-                    context: context,
-                    isScrollControlled: true,
-                    builder: (_) => InquiryFormSheet(listingId: listing.id),
+                // Bounded height: a Scaffold gives bottomNavigationBar a
+                // full-height max constraint, and AppButton's internal Center
+                // would otherwise expand to fill it. Pin it to the button height.
+                child: SizedBox(
+                  height: AppSpacing.xxxl,
+                  child: AppButton(
+                    label: l10n.cta_send_inquiry,
+                    variant: AppButtonVariant.filledPrimary,
+                    icon: Icons.email_outlined,
+                    expanded: true,
+                    onPressed: () => showModalBottomSheet<void>(
+                      context: context,
+                      isScrollControlled: true,
+                      builder: (_) => InquiryFormSheet(listingId: listing.id),
+                    ),
                   ),
                 ),
               ),
