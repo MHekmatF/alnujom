@@ -170,7 +170,7 @@ class _LanguagePicker extends StatelessWidget {
       ],
       onSave: (newValue) {
         if (newValue != null) {
-          cubit.save(AppSettingKey.defaultLanguage, newValue);
+          cubit.save(AppSettingKey.defaultLanguage, newValue, l10n);
         }
       },
     );
@@ -259,7 +259,11 @@ class _CurrencyPickerState extends State<_CurrencyPicker> {
       items: items,
       onSave: (newValue) {
         if (newValue != null) {
-          widget.cubit.save(AppSettingKey.defaultCurrency, newValue);
+          widget.cubit.save(
+            AppSettingKey.defaultCurrency,
+            newValue,
+            widget.l10n,
+          );
         }
       },
     );
@@ -306,7 +310,11 @@ class _PublisherNameVisibilityPicker extends StatelessWidget {
       ],
       onSave: (newValue) {
         if (newValue != null) {
-          cubit.save(AppSettingKey.defaultPublisherNameVisibility, newValue);
+          cubit.save(
+            AppSettingKey.defaultPublisherNameVisibility,
+            newValue,
+            l10n,
+          );
         }
       },
     );
@@ -358,7 +366,7 @@ class _LocationVisibilityPicker extends StatelessWidget {
       ],
       onSave: (newValue) {
         if (newValue != null) {
-          cubit.save(AppSettingKey.defaultLocationVisibility, newValue);
+          cubit.save(AppSettingKey.defaultLocationVisibility, newValue, l10n);
         }
       },
     );
@@ -411,7 +419,7 @@ class _MaintenanceModeSection extends StatelessWidget {
           isSaving: isSaving,
           onChanged: (newValue) {
             final newMap = {...currentMap, 'on': newValue};
-            cubit.save(AppSettingKey.maintenanceMode, newMap);
+            cubit.save(AppSettingKey.maintenanceMode, newMap, l10n);
           },
         ),
         SettingsTextRow(
@@ -425,7 +433,7 @@ class _MaintenanceModeSection extends StatelessWidget {
               ...currentMap,
               'message': {'ar': newText, 'en': messageEn},
             };
-            return cubit.save(AppSettingKey.maintenanceMode, newMap);
+            return cubit.save(AppSettingKey.maintenanceMode, newMap, l10n);
           },
         ),
         SettingsTextRow(
@@ -439,7 +447,7 @@ class _MaintenanceModeSection extends StatelessWidget {
               ...currentMap,
               'message': {'ar': messageAr, 'en': newText},
             };
-            return cubit.save(AppSettingKey.maintenanceMode, newMap);
+            return cubit.save(AppSettingKey.maintenanceMode, newMap, l10n);
           },
         ),
       ],
@@ -487,7 +495,7 @@ class _SupportContactSection extends StatelessWidget {
           keyboardType: TextInputType.phone,
           onSave: (newPhone) async {
             final newMap = {...currentMap, 'phone': newPhone};
-            return cubit.save(AppSettingKey.supportContact, newMap);
+            return cubit.save(AppSettingKey.supportContact, newMap, l10n);
           },
         ),
         SettingsTextRow(
@@ -498,7 +506,7 @@ class _SupportContactSection extends StatelessWidget {
           keyboardType: TextInputType.phone,
           onSave: (newWhatsapp) async {
             final newMap = {...currentMap, 'whatsapp': newWhatsapp};
-            return cubit.save(AppSettingKey.supportContact, newMap);
+            return cubit.save(AppSettingKey.supportContact, newMap, l10n);
           },
         ),
         SettingsTextRow(
@@ -509,7 +517,7 @@ class _SupportContactSection extends StatelessWidget {
           keyboardType: TextInputType.emailAddress,
           onSave: (newEmail) async {
             final newMap = {...currentMap, 'email': newEmail};
-            return cubit.save(AppSettingKey.supportContact, newMap);
+            return cubit.save(AppSettingKey.supportContact, newMap, l10n);
           },
         ),
       ],
@@ -553,7 +561,7 @@ class _LegalUrlsSection extends StatelessWidget {
           saveLabel: l10n.settingsEditorSaveButton,
           keyboardType: TextInputType.url,
           onSave: (newUrl) async {
-            return cubit.save(AppSettingKey.termsUrl, newUrl);
+            return cubit.save(AppSettingKey.termsUrl, newUrl, l10n);
           },
         ),
         SettingsTextRow(
@@ -563,7 +571,7 @@ class _LegalUrlsSection extends StatelessWidget {
           saveLabel: l10n.settingsEditorSaveButton,
           keyboardType: TextInputType.url,
           onSave: (newUrl) async {
-            return cubit.save(AppSettingKey.privacyUrl, newUrl);
+            return cubit.save(AppSettingKey.privacyUrl, newUrl, l10n);
           },
         ),
       ],
