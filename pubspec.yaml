@@ -1,7 +1,7 @@
 name: alnujom
 description: AlNujom Android app foundation.
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.1.0+2
 
 environment:
   sdk: ^3.9.0
@@ -112,7 +112,9 @@ flutter_launcher_icons:
   # background (opaque). The adaptive icon composes the transparent white mark
   # over the same brand background.
   image_path: "assets/branding/icon_legacy.png"
-  adaptive_icon_background: "#13507D"
+  # Phase 26 rebrand — the blue "N" emblem reads on a white field (the logo is
+  # designed on white); the transparent emblem composes over it.
+  adaptive_icon_background: "#FFFFFF"
   adaptive_icon_foreground: "assets/branding/icon.png"
   min_sdk_android: 24
 
@@ -120,14 +122,17 @@ flutter_launcher_icons:
 # Phase 25 — repalette to the Claude Design brand (deep blue + dark navy).
 # Generates splash drawables + values/values-night
 flutter_native_splash:
+  # Phase 26 rebrand — the full logo (emblem + النجوم wordmark + tagline) on
+  # white in both modes; the artwork carries its own white field, so the splash
+  # background is white in light and dark.
   color: "#FFFFFF"
-  image: assets/branding/splash_light.png
-  color_dark: "#0E141A"
-  image_dark: assets/branding/splash_dark.png
+  image: assets/branding/splash_full.png
+  color_dark: "#FFFFFF"
+  image_dark: assets/branding/splash_full.png
   android: true
   ios: false
   android_12:
-    color: "#13507D"
+    color: "#FFFFFF"
     image: assets/branding/icon.png
-    color_dark: "#0E141A"
+    color_dark: "#FFFFFF"
     image_dark: assets/branding/icon.png

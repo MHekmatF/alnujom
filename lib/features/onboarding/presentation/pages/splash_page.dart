@@ -4,12 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
-import '../../../../core/theme/colors.dart';
-import '../../../../core/theme/spacing.dart';
-import '../../../../core/theme/typography.dart';
-import '../../../../core/widgets/brand_mark.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
-import '../../../../l10n/app_localizations.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../domain/repositories/onboarding_repository.dart';
@@ -63,11 +58,9 @@ class _SplashPageState extends State<SplashPage> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final colors = AppColors.of(context);
-    final styles = AppTextStyles.of(context);
-    // Branded splash on the primary surface — matches the native splash so the
-    // hand-off is seamless (white star mark + coral companion + wordmark).
+    // Phase 26 rebrand — the full logo artwork (emblem + النجوم wordmark +
+    // tagline) on white, matching the native splash for a seamless hand-off.
+    // No extra text: the wordmark is part of the artwork.
     return BlocListener<AuthBloc, AuthState>(
       listenWhen: (_, curr) => curr is! Authenticating,
       listener: (context, state) {
@@ -75,28 +68,14 @@ class _SplashPageState extends State<SplashPage> {
         _tryNavigate();
       },
       child: Scaffold(
-        backgroundColor: colors.primary,
+        backgroundColor: Colors.white,
         body: Center(
           child: StaggeredListItem(
             index: 0,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                BrandMark(
-                  size: 88,
-                  color: colors.onPrimary,
-                  accentColor: colors.accent,
-                  animated: true,
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                Text(
-                  l10n.appTitle,
-                  style: styles.displayMedium.copyWith(
-                    color: colors.onPrimary,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
+            child: Image.asset(
+              'assets/branding/splash_full.png',
+              width: MediaQuery.sizeOf(context).width * 0.78,
+              fit: BoxFit.contain,
             ),
           ),
         ),
