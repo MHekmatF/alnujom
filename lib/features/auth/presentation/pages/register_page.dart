@@ -191,6 +191,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     AppButton.filledPrimary(
                       label: l10n.register_submit,
                       loading: isLoading,
+                      expanded: true,
                       onPressed: isLoading ? null : () => _submit(l10n),
                     ),
                     const SizedBox(height: AppSpacing.sm),

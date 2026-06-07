@@ -30,6 +30,7 @@ class AppButton extends StatelessWidget {
     this.variant = AppButtonVariant.filledPrimary,
     this.size = AppButtonSize.regular,
     this.loading = false,
+    this.expanded = false,
     this.icon,
     super.key,
   });
@@ -39,6 +40,7 @@ class AppButton extends StatelessWidget {
     required VoidCallback? onPressed,
     AppButtonSize size = AppButtonSize.regular,
     bool loading = false,
+    bool expanded = false,
     Key? key,
   }) : this(
          key: key,
@@ -46,6 +48,7 @@ class AppButton extends StatelessWidget {
          onPressed: onPressed,
          size: size,
          loading: loading,
+         expanded: expanded,
        );
 
   const AppButton.iconButton({
@@ -83,6 +86,11 @@ class AppButton extends StatelessWidget {
   final AppButtonVariant variant;
   final AppButtonSize size;
   final bool loading;
+
+  /// When true the button fills the available width (the premium pattern for
+  /// form / auth primary CTAs). Default false keeps the content-width pill used
+  /// inline (empty states, dialogs).
+  final bool expanded;
   final IconData? icon;
 
   @override
@@ -158,7 +166,7 @@ class AppButton extends StatelessWidget {
           onPressed: effectiveOnPressed,
           style: ButtonStyle(
             minimumSize: WidgetStatePropertyAll(
-              Size(AppSpacing.xxxl, visualHeight),
+              Size(expanded ? double.infinity : AppSpacing.xxxl, visualHeight),
             ),
             padding: WidgetStatePropertyAll(
               appPadding(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),

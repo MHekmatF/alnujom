@@ -111,6 +111,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                           AppButton.filledPrimary(
                             label: l10n.reset_password_submit,
                             loading: isLoading,
+                            expanded: true,
                             onPressed: isLoading ? null : _submit,
                           ),
                           const SizedBox(height: AppSpacing.sm),

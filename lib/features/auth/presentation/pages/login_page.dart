@@ -166,6 +166,7 @@ class _LoginPageState extends State<LoginPage> {
                     AppButton.filledPrimary(
                       label: l10n.login_submit,
                       loading: isLoading,
+                      expanded: true,
                       onPressed: isLoading ? null : () => _submit(l10n),
                     ),
                     const SizedBox(height: AppSpacing.sm),
