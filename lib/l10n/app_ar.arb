@@ -64,6 +64,11 @@
   "auth_register_headline": "أنشئ حسابك",
   "auth_register_subtitle": "انضمّ إلى النّجوم للعثور على عقارك أو نشر إعلاناتك بثقة.",
   "auth_trust_note": "بياناتك محمية ولا تُشارك مع أي طرف خارجي.",
+  "spec_rooms_label": "غرف",
+  "spec_baths_label": "حمّامات",
+  "spec_area_label": "المساحة",
+  "spec_floor_label": "الطابق",
+  "spec_area_unit": "م²",
 
   "pending_approval_title": "الحساب قيد المراجعة",
   "pending_approval_body": "حسابك بانتظار موافقة المسؤول. رح نعلمك بعد المراجعة.",

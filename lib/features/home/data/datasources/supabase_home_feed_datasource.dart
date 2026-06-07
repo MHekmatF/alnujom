@@ -42,6 +42,9 @@ class SupabaseHomeFeedDatasource {
         .from('listings')
         .select(
           'id, title, property_type, purpose, governorate_id, city_id, published_at, '
+          // Phase 25 uplift v2 — surface the key facts (beds·baths·area) on the
+          // card. Columns live directly on `listings`; no migration needed.
+          'rooms, bathrooms, area_size, floor, '
           'listing_prices!inner(currency_code, amount, is_primary), '
           'listing_media(storage_path, ordering, is_main, kind), '
           'governorate:governorates(display_name), '

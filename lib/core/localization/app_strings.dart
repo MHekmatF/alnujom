@@ -4519,6 +4519,26 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('auth_trust_note', (loc) => loc.auth_trust_note);
 
   @override
+  String get spec_rooms_label =>
+      _resolve('spec_rooms_label', (loc) => loc.spec_rooms_label);
+
+  @override
+  String get spec_baths_label =>
+      _resolve('spec_baths_label', (loc) => loc.spec_baths_label);
+
+  @override
+  String get spec_area_label =>
+      _resolve('spec_area_label', (loc) => loc.spec_area_label);
+
+  @override
+  String get spec_floor_label =>
+      _resolve('spec_floor_label', (loc) => loc.spec_floor_label);
+
+  @override
+  String get spec_area_unit =>
+      _resolve('spec_area_unit', (loc) => loc.spec_area_unit);
+
+  @override
   String get action_save => _resolve('action_save', (loc) => loc.action_save);
 
   @override

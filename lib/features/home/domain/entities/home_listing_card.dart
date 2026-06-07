@@ -34,6 +34,10 @@ class HomeListingCard extends Equatable {
     this.agencyId,
     this.agencyName,
     this.agencyLogoUrl,
+    this.rooms,
+    this.bathrooms,
+    this.areaSize,
+    this.floor,
   });
 
   final String id;
@@ -67,6 +71,13 @@ class HomeListingCard extends Equatable {
   /// null even when [agencyId] is set (agency has no logo).
   final String? agencyLogoUrl;
 
+  /// Phase 25 uplift v2 — key facts (columns on `listings`). Nullable: land has
+  /// no rooms/bathrooms, etc. The card renders only the present ones.
+  final int? rooms;
+  final int? bathrooms;
+  final double? areaSize;
+  final int? floor;
+
   @override
   List<Object?> get props => [
     id,
@@ -82,5 +93,9 @@ class HomeListingCard extends Equatable {
     agencyId,
     agencyName,
     agencyLogoUrl,
+    rooms,
+    bathrooms,
+    areaSize,
+    floor,
   ];
 }

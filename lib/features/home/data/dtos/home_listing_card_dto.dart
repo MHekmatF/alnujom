@@ -29,6 +29,10 @@ class HomeListingCardDto {
     this.agencyName,
     this.agencyLogoPath,
     this.agencyLogoUrl,
+    this.rooms,
+    this.bathrooms,
+    this.areaSize,
+    this.floor,
   });
 
   final String id;
@@ -63,6 +67,13 @@ class HomeListingCardDto {
 
   /// Resolved public URL for the agency logo (agency-assets bucket).
   final String? agencyLogoUrl;
+
+  /// Phase 25 uplift v2 — key facts (columns on `listings`). All nullable;
+  /// the card renders only the ones present.
+  final int? rooms;
+  final int? bathrooms;
+  final double? areaSize;
+  final int? floor;
 
   /// Parses the embedded-selects projection shape from
   /// `SupabaseHomeFeedDatasource.fetchPage`. Defensive against missing
@@ -148,6 +159,10 @@ class HomeListingCardDto {
       agencyId: agencyId,
       agencyName: agencyName,
       agencyLogoPath: agencyLogoPath,
+      rooms: _toInt(row['rooms']),
+      bathrooms: _toInt(row['bathrooms']),
+      areaSize: _toDouble(row['area_size']),
+      floor: _toInt(row['floor']),
     );
   }
 
@@ -169,6 +184,10 @@ class HomeListingCardDto {
       agencyName: agencyName,
       agencyLogoPath: agencyLogoPath,
       agencyLogoUrl: agencyLogoUrl,
+      rooms: rooms,
+      bathrooms: bathrooms,
+      areaSize: areaSize,
+      floor: floor,
     );
   }
 
@@ -189,6 +208,10 @@ class HomeListingCardDto {
       agencyName: agencyName,
       agencyLogoPath: agencyLogoPath,
       agencyLogoUrl: url,
+      rooms: rooms,
+      bathrooms: bathrooms,
+      areaSize: areaSize,
+      floor: floor,
     );
   }
 
@@ -227,6 +250,10 @@ class HomeListingCardDto {
       agencyId: agencyId,
       agencyName: agencyName,
       agencyLogoUrl: agencyLogoUrl,
+      rooms: rooms,
+      bathrooms: bathrooms,
+      areaSize: areaSize,
+      floor: floor,
     );
   }
 }
@@ -280,4 +307,16 @@ Decimal _decimal(Object? raw) {
   if (raw is num) return Decimal.parse(raw.toString());
   if (raw is String) return Decimal.parse(raw);
   throw StateError('home-feed row has non-numeric price amount: $raw');
+}
+
+int? _toInt(Object? raw) {
+  if (raw is num) return raw.toInt();
+  if (raw is String) return int.tryParse(raw);
+  return null;
+}
+
+double? _toDouble(Object? raw) {
+  if (raw is num) return raw.toDouble();
+  if (raw is String) return double.tryParse(raw);
+  return null;
 }

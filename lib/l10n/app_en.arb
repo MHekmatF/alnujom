@@ -64,6 +64,11 @@
   "auth_register_headline": "Create your account",
   "auth_register_subtitle": "Join AlNujom to find your property or publish with confidence.",
   "auth_trust_note": "Your data is protected and never shared.",
+  "spec_rooms_label": "Rooms",
+  "spec_baths_label": "Bathrooms",
+  "spec_area_label": "Area",
+  "spec_floor_label": "Floor",
+  "spec_area_unit": "m²",
 
   "pending_approval_title": "Account Pending Approval",
   "pending_approval_body": "Your account is awaiting admin approval. You will be notified once it is reviewed.",

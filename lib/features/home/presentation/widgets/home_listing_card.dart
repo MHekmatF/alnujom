@@ -14,6 +14,7 @@ import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/glass_pill.dart';
 import '../../../../core/widgets/hero_tags.dart';
 import '../../../../core/widgets/press_scale.dart';
+import '../../../../core/widgets/property_specs.dart';
 import '../../../../core/widgets/status_pill.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/money.dart';
@@ -107,6 +108,18 @@ class HomeListingCardTile extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: AppSpacing.sm),
+                      if (PropertySpecsRow.hasAnyOf(
+                        rooms: card.rooms,
+                        bathrooms: card.bathrooms,
+                        areaSize: card.areaSize,
+                      )) ...[
+                        PropertySpecsRow(
+                          rooms: card.rooms,
+                          bathrooms: card.bathrooms,
+                          areaSize: card.areaSize,
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                      ],
                       Row(
                         children: [
                           Icon(
