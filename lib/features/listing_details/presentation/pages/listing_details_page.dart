@@ -5,15 +5,19 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/elevation.dart';
 import '../../../../core/theme/motion.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/hero_tags.dart';
 import '../../../../core/widgets/loading_state.dart';
+import '../../../inquiries/presentation/bloc/contact_cta_cubit.dart';
+import '../../../inquiries/presentation/sheets/inquiry_form_sheet.dart';
 import '../../../../core/widgets/reduce_motion.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../features/listing_form/domain/entities/listing.dart'
@@ -154,6 +158,9 @@ class _SuccessBody extends StatelessWidget {
 
     final galleryHeight = MediaQuery.sizeOf(context).width * 9 / 16;
     return Scaffold(
+      // Phase 25 — sticky primary contact CTA so the conversion action never
+      // scrolls off (reuses the existing inquiry flow; hidden for self-contact).
+      bottomNavigationBar: _StickyContactBar(listing: aggregate.listing),
       body: CustomScrollView(
         slivers: [
           // 2. Parallax collapsing gallery + FR-027 video-tap overlay.
@@ -303,6 +310,57 @@ class _SuccessBody extends StatelessWidget {
       displayDecimals: 0,
       createdAt: DateTime.fromMillisecondsSinceEpoch(0),
       updatedAt: DateTime.fromMillisecondsSinceEpoch(0),
+    );
+  }
+}
+
+// ─── Sticky contact CTA ───────────────────────────────────────────────────────
+
+/// Phase 25 — pinned bottom contact bar: a prominent primary "Send inquiry"
+/// CTA that stays on-screen as the detail scrolls (the conversion action no
+/// longer scrolls off). Reuses the Phase-16 [ContactCtaCubit] (hides entirely
+/// for self-contact) and the existing [InquiryFormSheet] — no new contact logic.
+class _StickyContactBar extends StatelessWidget {
+  const _StickyContactBar({required this.listing});
+
+  final Listing listing;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider<ContactCtaCubit>(
+      create: (_) => getIt<ContactCtaCubit>(param1: listing),
+      child: BlocBuilder<ContactCtaCubit, ContactCtaState>(
+        builder: (context, state) {
+          if (state.isSelfContact) return const SizedBox.shrink();
+          final l10n = AppLocalizations.of(context)!;
+          final colors = AppColors.of(context);
+          final elevation = AppElevation.of(context);
+          return Container(
+            decoration: BoxDecoration(
+              color: colors.card,
+              border: Border(top: BorderSide(color: colors.outline)),
+              boxShadow: elevation.level2,
+            ),
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsetsDirectional.all(AppSpacing.md),
+                child: AppButton(
+                  label: l10n.cta_send_inquiry,
+                  variant: AppButtonVariant.filledPrimary,
+                  icon: Icons.email_outlined,
+                  expanded: true,
+                  onPressed: () => showModalBottomSheet<void>(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (_) => InquiryFormSheet(listingId: listing.id),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }
