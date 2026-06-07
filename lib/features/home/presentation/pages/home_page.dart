@@ -6,6 +6,8 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/brand_mark.dart';
+import '../../../../core/widgets/empty_state.dart';
+import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/locale_toggle_action.dart';
 import '../../../../core/widgets/main_bottom_nav.dart';
@@ -229,9 +231,9 @@ class _HomeViewState extends State<_HomeView> {
         return [
           SliverFillRemaining(
             hasScrollBody: false,
-            child: _ErrorView(
-              message: l10n.error_could_not_load_listings,
-              retryLabel: l10n.action_retry,
+            child: ErrorState(
+              title: l10n.error_could_not_load_listings,
+              variant: ErrorStateVariant.network,
               onRetry: () => context.read<HomeBloc>().add(
                 HomeFeedLoadRequested(locale: Localizations.localeOf(context)),
               ),
@@ -409,7 +411,6 @@ class _EmptyView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, authState) {
         final profile = switch (authState) {
@@ -421,77 +422,18 @@ class _EmptyView extends StatelessWidget {
             profile.accountStatus == AccountStatus.approved &&
             profile.publisherStatus == PublisherStatus.approved;
 
-        return Padding(
-          padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.home_outlined,
-                size: 64,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                l10n.home_no_listings_yet,
-                style: theme.textTheme.bodyLarge,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              if (isApprovedPublisher)
-                OutlinedButton.icon(
-                  icon: const Icon(Icons.add_home_outlined),
-                  label: Text(l10n.home_empty_publish_first_listing),
-                  onPressed: () =>
-                      context.pushNamed(AppRouteNames.publisherListingsCreate),
-                )
-              else
-                OutlinedButton.icon(
-                  icon: const Icon(Icons.login_outlined),
-                  label: Text(l10n.home_empty_sign_in_to_publish),
-                  onPressed: () => context.go(AppRoutes.login),
-                ),
-            ],
-          ),
+        return EmptyState(
+          icon: Icons.home_outlined,
+          headline: l10n.home_no_listings_yet,
+          ctaLabel: isApprovedPublisher
+              ? l10n.home_empty_publish_first_listing
+              : l10n.home_empty_sign_in_to_publish,
+          onCtaPressed: isApprovedPublisher
+              ? () => context.pushNamed(AppRouteNames.publisherListingsCreate)
+              : () => context.go(AppRoutes.login),
         );
       },
     );
   }
 }
 
-class _ErrorView extends StatelessWidget {
-  const _ErrorView({
-    required this.message,
-    required this.retryLabel,
-    required this.onRetry,
-  });
-
-  final String message;
-  final String retryLabel;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.error_outline,
-            size: 48,
-            color: Theme.of(context).colorScheme.error,
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            message,
-            style: Theme.of(context).textTheme.bodyLarge,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          OutlinedButton(onPressed: onRetry, child: Text(retryLabel)),
-        ],
-      ),
-    );
-  }
-}

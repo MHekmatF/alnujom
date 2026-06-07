@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/elevation.dart';
+import '../../../../core/theme/gradients.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
@@ -94,11 +95,11 @@ class HomeListingCardTile extends StatelessWidget {
                         _formatPrice(locale),
                         textDirection: TextDirection.ltr,
                         textAlign: TextAlign.start,
-                        style: styles.priceLarge.copyWith(
-                          color: colors.onSurface,
-                        ),
+                        // Brand-blue price (priceLarge defaults to primary) so
+                        // the hero number reads as money, not body text.
+                        style: styles.priceLarge,
                       ),
-                      const SizedBox(height: AppSpacing.xs),
+                      const SizedBox(height: AppSpacing.sm),
                       Text(
                         card.title.isEmpty ? '—' : card.title,
                         style: styles.titleLarge,
@@ -283,6 +284,15 @@ class _Hero extends StatelessWidget {
     return Stack(
       children: [
         image,
+        // Bottom-anchored scrim so the purpose/type pills stay legible on
+        // bright imagery (token gradient; transparent over the top half).
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: AppGradients.of(context).photoScrim,
+            ),
+          ),
+        ),
         PositionedDirectional(
           top: AppSpacing.sm,
           end: AppSpacing.sm,
