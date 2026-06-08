@@ -8,8 +8,10 @@ import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../listing_form/domain/entities/listing.dart';
 import '../bloc/similar_listings_cubit.dart';
 import 'similar_listing_card_tile.dart';
+import 'similar_listings_empty.dart';
 
 /// Premium uplift v2 — the "similar listings" section at the bottom of the
 /// listing-detail page: a localized section header + a horizontal carousel of
@@ -23,6 +25,7 @@ class SimilarListingsCarousel extends StatelessWidget {
     super.key,
     required this.listingId,
     required this.propertyType,
+    required this.propertyTypeEnum,
     this.governorateId,
     this.staggerIndex = 0,
   });
@@ -32,6 +35,10 @@ class SimilarListingsCarousel extends StatelessWidget {
 
   /// Source listing's property type as the DB enum string (e.g. 'apartment').
   final String propertyType;
+
+  /// Source listing's property type as the enum — used to seed the empty-pool
+  /// recovery card's search filter.
+  final PropertyType propertyTypeEnum;
 
   /// Source listing's governorate id (null → property-type pool only).
   final String? governorateId;
@@ -52,15 +59,25 @@ class SimilarListingsCarousel extends StatelessWidget {
         );
         return cubit;
       },
-      child: _SimilarListingsBody(staggerIndex: staggerIndex),
+      child: _SimilarListingsBody(
+        staggerIndex: staggerIndex,
+        propertyTypeEnum: propertyTypeEnum,
+        governorateId: governorateId,
+      ),
     );
   }
 }
 
 class _SimilarListingsBody extends StatelessWidget {
-  const _SimilarListingsBody({required this.staggerIndex});
+  const _SimilarListingsBody({
+    required this.staggerIndex,
+    required this.propertyTypeEnum,
+    required this.governorateId,
+  });
 
   final int staggerIndex;
+  final PropertyType propertyTypeEnum;
+  final String? governorateId;
 
   /// Card footprint: a portion of the viewport so the next card peeks in,
   /// inviting the horizontal scroll.
@@ -70,9 +87,19 @@ class _SimilarListingsBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<SimilarListingsCubit, SimilarListingsState>(
       builder: (context, state) {
-        // Collapse entirely for empty / error / initial — no reflow noise.
-        if (state.status == SimilarListingsStatus.empty ||
-            state.status == SimilarListingsStatus.error ||
+        // Premium uplift — instead of collapsing on an empty pool, offer a
+        // recovery card that routes to a seeded search ("browse similar in this
+        // area"). Error / initial still collapse silently (no reflow noise).
+        if (state.status == SimilarListingsStatus.empty) {
+          return StaggeredListItem(
+            index: staggerIndex,
+            child: SimilarListingsEmpty(
+              propertyType: propertyTypeEnum,
+              governorateId: governorateId,
+            ),
+          );
+        }
+        if (state.status == SimilarListingsStatus.error ||
             state.status == SimilarListingsStatus.initial) {
           return const SizedBox.shrink();
         }

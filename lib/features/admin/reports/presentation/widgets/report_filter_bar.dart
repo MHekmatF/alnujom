@@ -103,10 +103,10 @@ class _StatusDropdown extends StatelessWidget {
         ),
       ),
       items: [
-        const DropdownMenuItem<ReportStatus?>(
+        DropdownMenuItem<ReportStatus?>(
           value: null,
           child: Text(
-            '—',
+            l10n.report_filter_any_dash,
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -175,10 +175,10 @@ class _ReasonDropdown extends StatelessWidget {
         ),
       ),
       items: [
-        const DropdownMenuItem<ReportReason?>(
+        DropdownMenuItem<ReportReason?>(
           value: null,
           child: Text(
-            '—',
+            l10n.report_filter_any_dash,
             overflow: TextOverflow.ellipsis,
           ),
         ),

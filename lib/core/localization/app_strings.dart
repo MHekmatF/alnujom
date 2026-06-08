@@ -4869,4 +4869,93 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String get reports_my_empty_body =>
       _resolve('reports_my_empty_body', (loc) => loc.reports_my_empty_body);
+
+  // ── Phase 25 uplift v3 (Wave A) ──────────────────────────────────────────
+  @override
+  String get listing_details_buyer_safety_note => _resolve(
+    'listing_details_buyer_safety_note',
+    (loc) => loc.listing_details_buyer_safety_note,
+  );
+
+  @override
+  String get listing_details_similar_empty_title => _resolve(
+    'listing_details_similar_empty_title',
+    (loc) => loc.listing_details_similar_empty_title,
+  );
+
+  @override
+  String get listing_details_similar_empty_action => _resolve(
+    'listing_details_similar_empty_action',
+    (loc) => loc.listing_details_similar_empty_action,
+  );
+
+  @override
+  String get listing_details_affordability_title => _resolve(
+    'listing_details_affordability_title',
+    (loc) => loc.listing_details_affordability_title,
+  );
+
+  @override
+  String get listing_details_affordability_monthly_label => _resolve(
+    'listing_details_affordability_monthly_label',
+    (loc) => loc.listing_details_affordability_monthly_label,
+  );
+
+  @override
+  String get listing_details_affordability_down_label => _resolve(
+    'listing_details_affordability_down_label',
+    (loc) => loc.listing_details_affordability_down_label,
+  );
+
+  @override
+  String get listing_details_affordability_term_label => _resolve(
+    'listing_details_affordability_term_label',
+    (loc) => loc.listing_details_affordability_term_label,
+  );
+
+  @override
+  String get listing_details_affordability_rate_label => _resolve(
+    'listing_details_affordability_rate_label',
+    (loc) => loc.listing_details_affordability_rate_label,
+  );
+
+  @override
+  String get listing_details_affordability_disclaimer => _resolve(
+    'listing_details_affordability_disclaimer',
+    (loc) => loc.listing_details_affordability_disclaimer,
+  );
+
+  @override
+  String listing_details_affordability_years(String years) => _resolve(
+    'listing_details_affordability_years',
+    (loc) => loc.listing_details_affordability_years(years),
+  );
+
+  @override
+  String listing_details_affordability_percent_value(String value) => _resolve(
+    'listing_details_affordability_percent_value',
+    (loc) => loc.listing_details_affordability_percent_value(value),
+  );
+
+  @override
+  String agency_reject_reason_with_value(String reason) => _resolve(
+    'agency_reject_reason_with_value',
+    (loc) => loc.agency_reject_reason_with_value(reason),
+  );
+
+  @override
+  String label_colon_prefix(String label) =>
+      _resolve('label_colon_prefix', (loc) => loc.label_colon_prefix(label));
+
+  @override
+  String get report_filter_any_dash => _resolve(
+    'report_filter_any_dash',
+    (loc) => loc.report_filter_any_dash,
+  );
+
+  @override
+  String admin_report_reporter_with_id(String id) => _resolve(
+    'admin_report_reporter_with_id',
+    (loc) => loc.admin_report_reporter_with_id(id),
+  );
 }

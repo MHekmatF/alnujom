@@ -208,8 +208,9 @@ class _VerificationFormState extends State<_VerificationForm> {
                 if (isRejected) ...[
                   const SizedBox(height: AppSpacing.sm),
                   Text(
-                    '${l10n.agency_reject_reason_label}: '
-                    '${rejectionReason ?? l10n.agency_status_rejected}',
+                    l10n.agency_reject_reason_with_value(
+                      rejectionReason ?? l10n.agency_status_rejected,
+                    ),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: scheme.error,
                     ),

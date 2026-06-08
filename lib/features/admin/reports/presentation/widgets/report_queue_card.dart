@@ -118,7 +118,7 @@ class ReportQueueCard extends StatelessWidget {
               const SizedBox(height: AppSpacing.xs),
               // ── Reporter ID (admin-visible) + reviewer soft-lock notice ──
               Text(
-                'Reporter: ${item.reporterUserId}',
+                l10n.admin_report_reporter_with_id(item.reporterUserId),
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: theme.colorScheme.outline,
                 ),

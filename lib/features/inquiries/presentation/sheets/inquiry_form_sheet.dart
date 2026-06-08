@@ -13,6 +13,7 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
+import '../../data/local/last_inquiry_phone_store.dart';
 import '../bloc/inquiry_form_bloc.dart';
 
 /// Modal bottom sheet for sending an inquiry on a listing.
@@ -41,6 +42,10 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
   late final TextEditingController _phoneCtrl;
   late final TextEditingController _messageCtrl;
 
+  /// True when the sheet was opened by a non-authenticated user. Drives the
+  /// anonymous-only "remember last phone" prefill (async) + persist (on success).
+  bool _isAnonymous = false;
+
   @override
   void initState() {
     super.initState();
@@ -53,11 +58,20 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
     if (authState is Authenticated) {
       prefillName = authState.profile.fullName ?? '';
       prefillPhone = authState.profile.phone ?? '';
+    } else {
+      _isAnonymous = true;
     }
 
     _nameCtrl = TextEditingController(text: prefillName);
     _phoneCtrl = TextEditingController(text: prefillPhone);
     _messageCtrl = TextEditingController();
+
+    // Anonymous-only: remember the last phone this device submitted and pre-fill
+    // it (async; logged-in users already get their profile phone above and are
+    // never overwritten by this path).
+    if (_isAnonymous) {
+      _prefillLastAnonymousPhone();
+    }
 
     // Dispatch initial prefill values into the BLoC.
     if (prefillName.isNotEmpty) {
@@ -104,6 +118,20 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
     });
   }
 
+  /// Loads the last anonymous phone from local storage and pre-fills the phone
+  /// field — but only while the field is still empty (so it never clobbers a
+  /// value the user has already started typing during the async read).
+  Future<void> _prefillLastAnonymousPhone() async {
+    final stored = await LastInquiryPhoneStore.read();
+    if (!mounted || stored == null || stored.isEmpty) return;
+    if (_phoneCtrl.text.isNotEmpty) return;
+    _phoneCtrl.text = stored;
+    // Sync the BLoC so validation / submit-enable reflect the prefilled value.
+    _bloc.add(
+      InquiryFormFieldChanged(field: InquiryFormField.phone, value: stored),
+    );
+  }
+
   @override
   void dispose() {
     _bloc.close();
@@ -120,6 +148,11 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
       child: BlocListener<InquiryFormBloc, InquiryFormState>(
         listener: (context, state) {
           if (state is InquiryFormSubmittedSuccess) {
+            // Anonymous-only: remember this phone for the next sheet open.
+            // Fire-and-forget — never block the pop on a storage write.
+            if (_isAnonymous) {
+              LastInquiryPhoneStore.save(_phoneCtrl.text);
+            }
             Navigator.of(context).pop(true);
           } else if (state is InquiryFormFailed) {
             final l10n = AppLocalizations.of(context)!;

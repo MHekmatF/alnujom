@@ -13,7 +13,6 @@ import '../../../../core/widgets/deep_link_aware_back_button.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/hero_tags.dart';
-import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/reduce_motion.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../features/listing_form/domain/entities/listing.dart'
@@ -22,6 +21,7 @@ import '../../../../features/map/domain/entities/map_entry_context.dart';
 import '../../../../features/map/domain/entities/marker_coordinates.dart';
 import '../../../../features/currencies/domain/entities/currency.dart';
 import '../../../../features/listing_form/domain/entities/listing_media.dart';
+import '../../../../features/listing_form/domain/entities/listing_price.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/presentation/widgets/listing_display/listing_amenities_block.dart';
 import '../../../../shared/presentation/widgets/listing_display/listing_description_block.dart';
@@ -30,7 +30,10 @@ import '../../../../shared/presentation/widgets/listing_display/listing_location
 import '../../../../shared/presentation/widgets/listing_display/listing_price_block.dart';
 import '../../domain/entities/listing_details_aggregate.dart';
 import '../bloc/listing_details_bloc.dart';
+import '../widgets/affordability_calculator.dart';
+import '../widgets/buyer_safety_banner.dart';
 import '../widgets/contact_block.dart';
+import '../widgets/listing_details_skeleton.dart';
 import '../widgets/listing_facts_block.dart';
 import '../widgets/per_listing_action_block.dart';
 import '../widgets/similar_listings_carousel.dart';
@@ -105,7 +108,7 @@ class _ListingDetailsView extends StatelessWidget {
           switch (state.status) {
             case ListingDetailsStatus.initial:
             case ListingDetailsStatus.loading:
-              return _chromeScaffold(const _DetailLoadingView());
+              return _chromeScaffold(const ListingDetailsSkeleton());
             case ListingDetailsStatus.notFound:
               return _chromeScaffold(const _NotFoundView());
             case ListingDetailsStatus.error:
@@ -119,7 +122,7 @@ class _ListingDetailsView extends StatelessWidget {
             case ListingDetailsStatus.success:
               final aggregate = state.aggregate;
               if (aggregate == null) {
-                return _chromeScaffold(const _DetailLoadingView());
+                return _chromeScaffold(const ListingDetailsSkeleton());
               }
               // Success owns its own Scaffold whose SliverAppBar IS the bar
               // (a parallax collapsing gallery), so no top-level AppBar here.
@@ -227,6 +230,17 @@ class _SuccessBody extends StatelessWidget {
                     //     nothing when the listing has none of these.
                     ListingFactsBlock(listing: aggregate.listing),
                     const SizedBox(height: AppSpacing.md),
+                    // 4c. Premium uplift — financing ("حاسبة التمويل")
+                    //     calculator, expandable, seeded with the primary price.
+                    //     Indicative only; no currency conversion, no network.
+                    if (displayCurrency != null &&
+                        aggregate.prices.isNotEmpty) ...[
+                      AffordabilityCalculator(
+                        price: _primaryPrice(aggregate).amount,
+                        currencyCode: _primaryPrice(aggregate).currencyCode,
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                    ],
                     // 5. Location block — Phase 12 Q8=A VERBATIM (widget itself unmodified)
                     ListingLocationBlock(
                       governorate: aggregate.governorate,
@@ -265,6 +279,11 @@ class _SuccessBody extends StatelessWidget {
                           ),
                         ),
                       ),
+                    const SizedBox(height: AppSpacing.md),
+                    // 5c. Premium uplift — buyer-safety reassurance banner,
+                    //     placed just above the contact section so the buyer
+                    //     reads it before reaching out. Informational only.
+                    const BuyerSafetyBanner(),
                     const SizedBox(height: AppSpacing.md),
                     // 6. Contact block — Phase 16 rewired (listing passed for
                     //    ContactCtaCubit). Premium uplift v2: richer AgentCard
@@ -320,6 +339,7 @@ class _SuccessBody extends StatelessWidget {
             child: SimilarListingsCarousel(
               listingId: aggregate.listing.id,
               propertyType: aggregate.listing.propertyType.toDbValue(),
+              propertyTypeEnum: aggregate.listing.propertyType,
               governorateId: aggregate.listing.governorateId,
               staggerIndex: 2,
             ),
@@ -348,6 +368,15 @@ class _SuccessBody extends StatelessWidget {
       Money(amount: primary.amount, currencyCode: primary.currencyCode),
       locale: Localizations.localeOf(context),
       currency: displayCurrency,
+    );
+  }
+
+  /// The listing's primary price (isPrimary first, else the first available).
+  /// Caller must guard on `aggregate.prices.isNotEmpty`.
+  ListingPrice _primaryPrice(ListingDetailsAggregate aggregate) {
+    return aggregate.prices.firstWhere(
+      (p) => p.isPrimary,
+      orElse: () => aggregate.prices.first,
     );
   }
 
@@ -557,34 +586,6 @@ class _KenBurnsState extends State<_KenBurns>
         );
       },
       child: widget.child,
-    );
-  }
-}
-
-// ─── Loading skeleton ─────────────────────────────────────────────────────────
-
-/// Shimmer placeholder for the detail page while it loads: a 16:9 gallery
-/// block, a title + sub line, and a content block — mirroring the real layout.
-class _DetailLoadingView extends StatelessWidget {
-  const _DetailLoadingView();
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsetsDirectional.all(AppSpacing.md),
-      children: const [
-        AspectRatio(aspectRatio: 16 / 9, child: LoadingState.card()),
-        SizedBox(height: AppSpacing.lg),
-        SizedBox(height: AppSpacing.xl, child: LoadingState.row()),
-        SizedBox(height: AppSpacing.md),
-        FractionallySizedBox(
-          alignment: AlignmentDirectional.centerStart,
-          widthFactor: 0.5,
-          child: SizedBox(height: AppSpacing.lg, child: LoadingState.row()),
-        ),
-        SizedBox(height: AppSpacing.xl),
-        LoadingState.card(),
-      ],
     );
   }
 }
