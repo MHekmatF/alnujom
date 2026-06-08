@@ -43,6 +43,8 @@ import '../../../ads/domain/entities/ad_placement.dart';
 import '../../../ads/presentation/widgets/ad_slot.dart';
 import '../../../reports/presentation/widgets/reporter_status_banner.dart';
 import '../../../agency/presentation/widgets/listing_agency_badge.dart';
+import '../../../reviews/presentation/bloc/seller_trust_cubit.dart';
+import '../../../reviews/presentation/widgets/seller_reviews_section.dart';
 import '../../data/listing_details_video_launcher.dart';
 
 /// Phase 13 (spec/013-home-and-details) — listing details page.
@@ -160,9 +162,15 @@ class _SuccessBody extends StatelessWidget {
         : null;
 
     final galleryHeight = MediaQuery.sizeOf(context).width * 9 / 16;
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
+    // Seller-trust layer: one cubit for the whole success body, seeded with the
+    // seller's user id. The contact card's rating/response summary and the
+    // Reviews section both read it, so loading happens once here.
+    return BlocProvider<SellerTrustCubit>(
+      create: (_) =>
+          getIt<SellerTrustCubit>()..load(aggregate.listing.publisherUserId),
+      child: Scaffold(
+        body: CustomScrollView(
+          slivers: [
           // 2. Parallax collapsing gallery + FR-027 video-tap overlay.
           //    Phase 12 Q8=A ListingGallery wrapped (not edited) per SC-016;
           //    it also owns the Hero destination flown from the home card.
@@ -301,6 +309,15 @@ class _SuccessBody extends StatelessWidget {
                           : null,
                     ),
                     const SizedBox(height: AppSpacing.md),
+                    // 6b. Seller-trust "Reviews" section — header (avg + count),
+                    //     recent reviews, and a context-aware write affordance.
+                    //     Reads the page-level SellerTrustCubit; collapses when
+                    //     there's nothing to show and the viewer can't write.
+                    SellerReviewsSection(
+                      sellerId: aggregate.listing.publisherUserId,
+                      listingId: aggregate.listing.id,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
                     // 7. Amenities block — Phase 12 Q8=A VERBATIM
                     ListingAmenitiesBlock(
                       amenities: aggregate.details.amenities,
@@ -347,7 +364,8 @@ class _SuccessBody extends StatelessWidget {
           const SliverToBoxAdapter(
             child: SizedBox(height: AppSpacing.lg),
           ),
-        ],
+          ],
+        ),
       ),
     );
   }

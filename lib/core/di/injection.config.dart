@@ -490,6 +490,16 @@ import '../../features/reports/presentation/cubit/my_reports_bloc.dart'
     as _i749;
 import '../../features/reports/presentation/cubit/report_submission_cubit.dart'
     as _i980;
+import '../../features/reviews/data/datasources/supabase_reviews_datasource.dart'
+    as _i638;
+import '../../features/reviews/data/repositories/reviews_repository_impl.dart'
+    as _i388;
+import '../../features/reviews/domain/repositories/reviews_repository.dart'
+    as _i412;
+import '../../features/reviews/domain/usecases/load_seller_trust.dart' as _i557;
+import '../../features/reviews/domain/usecases/submit_review.dart' as _i225;
+import '../../features/reviews/presentation/bloc/seller_trust_cubit.dart'
+    as _i49;
 import '../../features/search/data/datasources/recent_searches_storage.dart'
     as _i193;
 import '../../features/search/data/datasources/supabase_saved_searches_datasource.dart'
@@ -718,6 +728,9 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i855.PublisherAnalyticsDatasource>(
     () => _i855.PublisherAnalyticsDatasource(gh<_i454.SupabaseClient>()),
+  );
+  gh.factory<_i638.SupabaseReviewsDatasource>(
+    () => _i638.SupabaseReviewsDatasource(gh<_i454.SupabaseClient>()),
   );
   gh.lazySingleton<_i881.AuditLogRepository>(
     () => _i373.AuditLogRepositoryImpl(
@@ -1031,6 +1044,12 @@ _i174.GetIt $initGetIt(
       gh<_i977.LoadMyVerificationRequest>(),
     ),
   );
+  gh.lazySingleton<_i412.ReviewsRepository>(
+    () => _i388.ReviewsRepositoryImpl(
+      gh<_i638.SupabaseReviewsDatasource>(),
+      gh<_i354.AppLogger>(),
+    ),
+  );
   gh.lazySingleton<_i888.SimilarListingsRepository>(
     () => _i474.SimilarListingsRepositoryImpl(
       gh<_i913.SupabaseSimilarListingsDatasource>(),
@@ -1324,6 +1343,12 @@ _i174.GetIt $initGetIt(
     (_listingId, _) =>
         _i193.InquiryFormBloc(gh<_i73.SubmitInquiry>(), _listingId),
   );
+  gh.factory<_i557.LoadSellerTrust>(
+    () => _i557.LoadSellerTrust(gh<_i412.ReviewsRepository>()),
+  );
+  gh.factory<_i225.SubmitReview>(
+    () => _i225.SubmitReview(gh<_i412.ReviewsRepository>()),
+  );
   gh.factory<_i230.ArchiveAd>(
     () => _i230.ArchiveAd(gh<_i241.AdsAdminRepository>()),
   );
@@ -1341,6 +1366,12 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i831.UploadAdImage>(
     () => _i831.UploadAdImage(gh<_i241.AdsAdminRepository>()),
+  );
+  gh.factory<_i49.SellerTrustCubit>(
+    () => _i49.SellerTrustCubit(
+      gh<_i557.LoadSellerTrust>(),
+      gh<_i225.SubmitReview>(),
+    ),
   );
   gh.factory<_i295.AccountApprovalsCubit>(
     () => _i295.AccountApprovalsCubit(

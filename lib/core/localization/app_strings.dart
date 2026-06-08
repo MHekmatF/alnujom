@@ -5119,4 +5119,107 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String get leadAnalyticsEmptyBody =>
       _resolve('leadAnalyticsEmptyBody', (loc) => loc.leadAnalyticsEmptyBody);
+
+  // ── Phase 25 uplift v3 (Wave D — reviews / seller trust) ─────────────────
+  @override
+  String get reviews_section_title =>
+      _resolve('reviews_section_title', (loc) => loc.reviews_section_title);
+
+  @override
+  String reviews_count(int count) =>
+      _resolve('reviews_count', (loc) => loc.reviews_count(count));
+
+  @override
+  String reviews_rating_with_count(double rating, int count) => _resolve(
+    'reviews_rating_with_count',
+    (loc) => loc.reviews_rating_with_count(rating, count),
+  );
+
+  @override
+  String reviews_response_rate(int pct) =>
+      _resolve('reviews_response_rate', (loc) => loc.reviews_response_rate(pct));
+
+  @override
+  String reviews_response_hours(int hours) => _resolve(
+    'reviews_response_hours',
+    (loc) => loc.reviews_response_hours(hours),
+  );
+
+  @override
+  String get reviews_empty_hint =>
+      _resolve('reviews_empty_hint', (loc) => loc.reviews_empty_hint);
+
+  @override
+  String get reviews_anonymous_reviewer => _resolve(
+    'reviews_anonymous_reviewer',
+    (loc) => loc.reviews_anonymous_reviewer,
+  );
+
+  @override
+  String get reviews_write_button =>
+      _resolve('reviews_write_button', (loc) => loc.reviews_write_button);
+
+  @override
+  String get reviews_sign_in_hint =>
+      _resolve('reviews_sign_in_hint', (loc) => loc.reviews_sign_in_hint);
+
+  @override
+  String get reviews_write_sheet_title => _resolve(
+    'reviews_write_sheet_title',
+    (loc) => loc.reviews_write_sheet_title,
+  );
+
+  @override
+  String get reviews_write_rating_label => _resolve(
+    'reviews_write_rating_label',
+    (loc) => loc.reviews_write_rating_label,
+  );
+
+  @override
+  String get reviews_write_comment_label => _resolve(
+    'reviews_write_comment_label',
+    (loc) => loc.reviews_write_comment_label,
+  );
+
+  @override
+  String get reviews_write_comment_hint => _resolve(
+    'reviews_write_comment_hint',
+    (loc) => loc.reviews_write_comment_hint,
+  );
+
+  @override
+  String get reviews_write_submit =>
+      _resolve('reviews_write_submit', (loc) => loc.reviews_write_submit);
+
+  @override
+  String get reviews_submit_success =>
+      _resolve('reviews_submit_success', (loc) => loc.reviews_submit_success);
+
+  @override
+  String get reviews_submit_already_reviewed => _resolve(
+    'reviews_submit_already_reviewed',
+    (loc) => loc.reviews_submit_already_reviewed,
+  );
+
+  @override
+  String get reviews_submit_error =>
+      _resolve('reviews_submit_error', (loc) => loc.reviews_submit_error);
+
+  @override
+  String get reviews_time_just_now =>
+      _resolve('reviews_time_just_now', (loc) => loc.reviews_time_just_now);
+
+  @override
+  String reviews_time_minutes(int minutes) => _resolve(
+    'reviews_time_minutes',
+    (loc) => loc.reviews_time_minutes(minutes),
+  );
+
+  @override
+  String reviews_time_hours(int hours) =>
+      _resolve('reviews_time_hours', (loc) => loc.reviews_time_hours(hours));
+
+  @override
+  String reviews_time_days(int days) =>
+      _resolve('reviews_time_days', (loc) => loc.reviews_time_days(days));
 }

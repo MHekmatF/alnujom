@@ -13,6 +13,7 @@ import '../../../../features/inquiries/domain/usecases/record_lead_event.dart';
 import '../../../../features/inquiries/presentation/bloc/contact_cta_cubit.dart';
 import '../../../../features/inquiries/presentation/sheets/inquiry_form_sheet.dart';
 import '../../../../features/listing_form/domain/entities/listing.dart';
+import '../../../../features/reviews/presentation/widgets/seller_trust_summary.dart';
 import '../../../../l10n/app_localizations.dart';
 
 /// Phase 16 (spec/016-contact-inquiries) — Contact CTA block.
@@ -111,11 +112,14 @@ class ContactBlock extends StatelessWidget {
                 )
               : null;
 
-          // Stack the primary inquiry over the Call/WhatsApp pair.
+          // Stack the seller-trust summary (rating + response badge) above the
+          // primary inquiry over the Call/WhatsApp pair. The summary reads the
+          // page-provided SellerTrustCubit and collapses when no data.
           final actionStack = Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
             children: [
+              const SellerTrustSummary(),
               if (primary != null) primary,
               if (primary != null && secondary.isNotEmpty)
                 const SizedBox(height: AppSpacing.sm),
