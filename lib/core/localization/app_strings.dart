@@ -5326,4 +5326,81 @@ final class _DebugAppLocalizations extends AppLocalizations {
     'profile_data_saver_subtitle',
     (loc) => loc.profile_data_saver_subtitle,
   );
+
+  // ── Growth (Wave G1 — in-app chat) ───────────────────────────────────────
+  @override
+  String get chatConversationsTitle =>
+      _resolve('chatConversationsTitle', (loc) => loc.chatConversationsTitle);
+
+  @override
+  String get chatConversationsEmptyTitle => _resolve(
+    'chatConversationsEmptyTitle',
+    (loc) => loc.chatConversationsEmptyTitle,
+  );
+
+  @override
+  String get chatConversationsEmptyBody => _resolve(
+    'chatConversationsEmptyBody',
+    (loc) => loc.chatConversationsEmptyBody,
+  );
+
+  @override
+  String get chatConversationsErrorTitle => _resolve(
+    'chatConversationsErrorTitle',
+    (loc) => loc.chatConversationsErrorTitle,
+  );
+
+  @override
+  String get chatThreadTitleFallback => _resolve(
+    'chatThreadTitleFallback',
+    (loc) => loc.chatThreadTitleFallback,
+  );
+
+  @override
+  String get chatThreadEmptyTitle =>
+      _resolve('chatThreadEmptyTitle', (loc) => loc.chatThreadEmptyTitle);
+
+  @override
+  String get chatThreadEmptyBody =>
+      _resolve('chatThreadEmptyBody', (loc) => loc.chatThreadEmptyBody);
+
+  @override
+  String get chatThreadErrorTitle =>
+      _resolve('chatThreadErrorTitle', (loc) => loc.chatThreadErrorTitle);
+
+  @override
+  String get chatComposerHint =>
+      _resolve('chatComposerHint', (loc) => loc.chatComposerHint);
+
+  @override
+  String get chatComposerSend =>
+      _resolve('chatComposerSend', (loc) => loc.chatComposerSend);
+
+  @override
+  String get chatContactAction =>
+      _resolve('chatContactAction', (loc) => loc.chatContactAction);
+
+  @override
+  String get chatSignInPrompt =>
+      _resolve('chatSignInPrompt', (loc) => loc.chatSignInPrompt);
+
+  @override
+  String get chatOpenError =>
+      _resolve('chatOpenError', (loc) => loc.chatOpenError);
+
+  @override
+  String get chatMessagesTile =>
+      _resolve('chatMessagesTile', (loc) => loc.chatMessagesTile);
+
+  @override
+  String get chatRolePublisher =>
+      _resolve('chatRolePublisher', (loc) => loc.chatRolePublisher);
+
+  @override
+  String get chatRoleBuyer =>
+      _resolve('chatRoleBuyer', (loc) => loc.chatRoleBuyer);
+
+  @override
+  String get chatListingUnavailable =>
+      _resolve('chatListingUnavailable', (loc) => loc.chatListingUnavailable);
 }

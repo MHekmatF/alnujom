@@ -17,6 +17,8 @@ import '../../../../shared/domain/value_objects/account_status.dart';
 import '../../../../shared/domain/value_objects/publisher_status.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
+import '../../../chat/presentation/bloc/conversations_cubit.dart';
+import '../../../chat/presentation/pages/conversations_list_page.dart';
 import '../../../currencies/presentation/widgets/preferred_currency_toggle.dart';
 import '../cubit/profile_cubit.dart';
 import '../cubit/profile_state.dart';
@@ -198,6 +200,23 @@ class _ProfileView extends StatelessWidget {
                   title: Text(l10n.profile_favorites_tile),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push(AppRoutes.favorites),
+                ),
+                // In-app chat — conversations inbox (signed-in only; this page
+                // renders solely for an authenticated profile). Pushed via a
+                // MaterialPageRoute since chat has no go_router route.
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.forum_outlined),
+                  title: Text(l10n.chatMessagesTile),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => BlocProvider<ConversationsCubit>(
+                        create: (_) => getIt<ConversationsCubit>(),
+                        child: const ConversationsListPage(),
+                      ),
+                    ),
+                  ),
                 ),
                 // Phase 19 — My Agency tile (T059)
                 ListTile(
