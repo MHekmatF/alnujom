@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/analytics/analytics_service.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
@@ -112,6 +113,9 @@ class _HomeViewState extends State<_HomeView> {
     super.initState();
     _scrollController = ScrollController()..addListener(_onScroll);
     _currenciesFuture = getIt<ListCurrencies>().call(activeOnly: false);
+
+    // Product analytics — screen view (best-effort; no-op when telemetry off).
+    getIt<AnalyticsService>().logScreen('home');
 
     // Phase 17: instantiate FavoritesCubit so its AuthBloc subscription
     // hydrates the session favorited-id set on first signed-in build

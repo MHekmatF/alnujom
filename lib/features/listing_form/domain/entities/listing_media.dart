@@ -37,11 +37,21 @@ enum ListingMediaKind {
   }
 }
 
+/// The raw DB `kind` string written for a 360°/virtual-tour panorama row.
+///
+/// `listing_media.kind` is free text at the DB layer. A panorama is an
+/// equirectangular image (so [ListingMediaKind.fromDbValue] maps it to
+/// [ListingMediaKind.image] — it renders normally in the gallery), but the
+/// original token is preserved in [ListingMedia.rawKind] so the listing-details
+/// gallery can offer a 360° viewer affordance and the media picker can toggle it.
+const String kListingMediaKindPanorama = 'panorama';
+
 class ListingMedia extends Equatable {
   const ListingMedia({
     required this.id,
     required this.listingId,
     required this.kind,
+    this.rawKind,
     this.storagePath,
     this.externalUrl,
     required this.ordering,
@@ -54,6 +64,14 @@ class ListingMedia extends Equatable {
   final String id;
   final String listingId;
   final ListingMediaKind kind;
+
+  /// The original free-text `kind` string from the DB row, preserved verbatim.
+  ///
+  /// Defaults to null when constructed outside the DTO mapping. Used to detect
+  /// kinds the closed [ListingMediaKind] enum cannot represent (notably
+  /// [kListingMediaKindPanorama]); [kind] still collapses such rows to
+  /// [ListingMediaKind.image] for backward-compatible rendering.
+  final String? rawKind;
   final String? storagePath;
   final String? externalUrl;
   final int ordering;
@@ -62,10 +80,16 @@ class ListingMedia extends Equatable {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  /// True when this row is a 360°/virtual-tour panorama (an equirectangular
+  /// image) — detected from the preserved free-text [rawKind], not the enum.
+  bool get isPanorama =>
+      rawKind == kListingMediaKindPanorama && storagePath != null;
+
   ListingMedia copyWith({
     String? id,
     String? listingId,
     ListingMediaKind? kind,
+    String? rawKind,
     String? storagePath,
     String? externalUrl,
     int? ordering,
@@ -78,6 +102,7 @@ class ListingMedia extends Equatable {
       id: id ?? this.id,
       listingId: listingId ?? this.listingId,
       kind: kind ?? this.kind,
+      rawKind: rawKind ?? this.rawKind,
       storagePath: storagePath ?? this.storagePath,
       externalUrl: externalUrl ?? this.externalUrl,
       ordering: ordering ?? this.ordering,
@@ -93,6 +118,7 @@ class ListingMedia extends Equatable {
     id,
     listingId,
     kind,
+    rawKind,
     storagePath,
     externalUrl,
     ordering,

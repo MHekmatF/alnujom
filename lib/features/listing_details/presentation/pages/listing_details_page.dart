@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/analytics/analytics_service.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
@@ -48,6 +49,8 @@ import '../../../reviews/presentation/widgets/seller_reviews_section.dart';
 import '../../../recently_viewed/domain/entities/recently_viewed_listing.dart';
 import '../../../recently_viewed/presentation/bloc/recently_viewed_cubit.dart';
 import '../../data/listing_details_video_launcher.dart';
+import 'panorama_tour_page.dart';
+import '../../../../core/widgets/glass_pill.dart';
 
 /// Phase 13 (spec/013-home-and-details) — listing details page.
 ///
@@ -166,6 +169,13 @@ class _SuccessBodyState extends State<_SuccessBody> {
       if (!mounted) return;
       _recordRecentlyViewed(Localizations.localeOf(context));
     });
+
+    // Product analytics — a listing loaded (the success body mounts only once
+    // the aggregate is available). Best-effort; no-op when telemetry is off.
+    getIt<AnalyticsService>().logEvent(
+      'listing_viewed',
+      props: {'id': widget.aggregate.listing.id},
+    );
   }
 
   /// Captures a small snapshot of the loaded aggregate into the shared
@@ -540,9 +550,23 @@ class _GalleryWithVideoTapState extends State<_GalleryWithVideoTap> {
     return null;
   }
 
+  /// The first 360°/virtual-tour panorama row in the listing's media, or null
+  /// when the listing has none. Detected from the preserved free-text
+  /// [ListingMedia.rawKind] (`kind='panorama'`) — the closed [ListingMediaKind]
+  /// enum collapses panoramas to `image`, so the entity exposes [ListingMedia
+  /// .isPanorama] for this purpose. Used both to gate the 360° affordance and to
+  /// pick which equirectangular image to open in the [PanoramaTourPage].
+  ListingMedia? get _firstPanorama {
+    for (final m in _sortedMedia) {
+      if (m.isPanorama) return m;
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final videoMedia = _currentVideoMedia;
+    final panorama = _firstPanorama;
     final sorted = _sortedMedia;
 
     // Phase 12 Q8=A ListingGallery wrapped (not edited) per SC-016. A slow
@@ -583,6 +607,25 @@ class _GalleryWithVideoTapState extends State<_GalleryWithVideoTap> {
                 : null,
             child: gallery,
           ),
+          // Spec 026 — 360°/virtual-tour affordance. When the listing has any
+          // panorama row, a frosted "360°" pill sits at the top-END (the
+          // top-start is reserved for the back button): it both BADGES the
+          // presence of a virtual tour and, on tap, opens the first panorama
+          // full-screen in [PanoramaTourPage]. Mirrors the video-tap wrapper
+          // approach (overlay on the locked ListingGallery), so the Phase 12
+          // Q8=A gallery itself is never edited.
+          if (panorama != null)
+            PositionedDirectional(
+              top: AppSpacing.md,
+              end: AppSpacing.md,
+              child: _PanoramaPillButton(
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => PanoramaTourPage.fromMedia(panorama),
+                  ),
+                ),
+              ),
+            ),
           if (sorted.length > 1)
             PositionedDirectional(
               bottom: AppSpacing.md,
@@ -592,6 +635,33 @@ class _GalleryWithVideoTapState extends State<_GalleryWithVideoTap> {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// Spec 026 — the gallery's "360°" affordance: a frosted [GlassPill] that
+/// both signals a virtual tour exists AND opens it on tap. Wrapped in a
+/// transparent [InkWell] so the visual stays the shared [GlassPill] (token-
+/// clean) while gaining tap + ripple + a button semantic.
+class _PanoramaPillButton extends StatelessWidget {
+  const _PanoramaPillButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Semantics(
+      label: l10n.panoramaTourOpen,
+      button: true,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: appRadius(AppRadii.pill),
+        child: GlassPill(
+          label: l10n.panoramaTourBadge,
+          icon: Icons.threesixty,
+        ),
       ),
     );
   }

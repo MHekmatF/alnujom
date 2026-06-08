@@ -192,6 +192,21 @@ import '../../features/auth/data/repositories/auth_repository_impl.dart'
     as _i153;
 import '../../features/auth/domain/repositories/auth_repository.dart' as _i787;
 import '../../features/auth/presentation/bloc/auth_bloc.dart' as _i797;
+import '../../features/chat/data/datasources/supabase_chat_datasource.dart'
+    as _i572;
+import '../../features/chat/data/repositories/chat_repository_impl.dart'
+    as _i504;
+import '../../features/chat/domain/repositories/chat_repository.dart' as _i420;
+import '../../features/chat/domain/usecases/get_or_create_conversation.dart'
+    as _i714;
+import '../../features/chat/domain/usecases/list_conversations.dart' as _i929;
+import '../../features/chat/domain/usecases/mark_conversation_read.dart'
+    as _i211;
+import '../../features/chat/domain/usecases/send_message.dart' as _i76;
+import '../../features/chat/domain/usecases/watch_messages.dart' as _i929;
+import '../../features/chat/presentation/bloc/chat_thread_cubit.dart' as _i968;
+import '../../features/chat/presentation/bloc/conversations_cubit.dart'
+    as _i665;
 import '../../features/comparison/presentation/cubit/comparison_cubit.dart'
     as _i430;
 import '../../features/currencies/data/datasources/supabase_currencies_datasource.dart'
@@ -584,6 +599,20 @@ import '../../features/super_admin/presentation/bloc/role_editor_bloc.dart'
     as _i885;
 import '../../features/super_admin/presentation/bloc/roles_list_bloc.dart'
     as _i329;
+import '../../features/viewings/data/datasources/supabase_viewings_datasource.dart'
+    as _i222;
+import '../../features/viewings/data/repositories/viewings_repository_impl.dart'
+    as _i495;
+import '../../features/viewings/domain/repositories/viewings_repository.dart'
+    as _i503;
+import '../../features/viewings/domain/usecases/load_my_viewings.dart' as _i644;
+import '../../features/viewings/domain/usecases/request_viewing.dart' as _i285;
+import '../../features/viewings/domain/usecases/update_viewing_status.dart'
+    as _i725;
+import '../../features/viewings/presentation/cubit/viewings_cubit.dart'
+    as _i812;
+import '../analytics/analytics_service.dart' as _i726;
+import '../analytics/sentry_analytics_service.dart' as _i172;
 import '../config/env_config.dart' as _i373;
 import '../data/repositories/permission_catalog_repository_impl.dart' as _i739;
 import '../localization/locale_cubit.dart' as _i960;
@@ -643,6 +672,9 @@ _i174.GetIt $initGetIt(
     () => _i24.SupabaseUserSearchDataSource(),
   );
   gh.lazySingleton<_i430.ComparisonCubit>(() => _i430.ComparisonCubit());
+  gh.lazySingleton<_i726.AnalyticsService>(
+    () => _i172.SentryAnalyticsService(),
+  );
   gh.lazySingleton<_i1015.PermissionCatalogRepository>(
     () => _i739.PermissionCatalogRepositoryImpl(),
   );
@@ -738,6 +770,12 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i638.SupabaseReviewsDatasource>(
     () => _i638.SupabaseReviewsDatasource(gh<_i454.SupabaseClient>()),
+  );
+  gh.factory<_i572.SupabaseChatDatasource>(
+    () => _i572.SupabaseChatDatasource(gh<_i454.SupabaseClient>()),
+  );
+  gh.factory<_i222.SupabaseViewingsDatasource>(
+    () => _i222.SupabaseViewingsDatasource(gh<_i454.SupabaseClient>()),
   );
   gh.lazySingleton<_i881.AuditLogRepository>(
     () => _i373.AuditLogRepositoryImpl(
@@ -935,6 +973,9 @@ _i174.GetIt $initGetIt(
       gh<_i354.AppLogger>(),
     ),
   );
+  gh.lazySingleton<_i420.ChatRepository>(
+    () => _i504.ChatRepositoryImpl(gh<_i572.SupabaseChatDatasource>()),
+  );
   gh.factory<_i842.LoadMapMarkers>(
     () => _i842.LoadMapMarkers(gh<_i973.MapRepository>()),
   );
@@ -951,6 +992,9 @@ _i174.GetIt $initGetIt(
       gh<_i975.SetAgencyMemberRole>(),
       gh<_i262.RemoveAgencyMember>(),
     ),
+  );
+  gh.lazySingleton<_i503.ViewingsRepository>(
+    () => _i495.ViewingsRepositoryImpl(gh<_i222.SupabaseViewingsDatasource>()),
   );
   gh.factory<_i365.LoadAuditLogPage>(
     () => _i365.LoadAuditLogPage(gh<_i881.AuditLogRepository>()),
@@ -1236,6 +1280,15 @@ _i174.GetIt $initGetIt(
     () =>
         _i711.ModerationHistoryCubit(gh<_i919.LoadModerationHistoryUseCase>()),
   );
+  gh.factory<_i644.LoadMyViewings>(
+    () => _i644.LoadMyViewings(gh<_i503.ViewingsRepository>()),
+  );
+  gh.factory<_i285.RequestViewing>(
+    () => _i285.RequestViewing(gh<_i503.ViewingsRepository>()),
+  );
+  gh.factory<_i725.UpdateViewingStatus>(
+    () => _i725.UpdateViewingStatus(gh<_i503.ViewingsRepository>()),
+  );
   gh.factory<_i905.CountDependentExchangeRates>(
     () => _i905.CountDependentExchangeRates(gh<_i505.CurrenciesRepository>()),
   );
@@ -1313,6 +1366,21 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i771.StartReportReview>(
     () => _i771.StartReportReview(gh<_i973.ReportsAdminRepository>()),
+  );
+  gh.factory<_i714.GetOrCreateConversation>(
+    () => _i714.GetOrCreateConversation(gh<_i420.ChatRepository>()),
+  );
+  gh.factory<_i929.ListConversations>(
+    () => _i929.ListConversations(gh<_i420.ChatRepository>()),
+  );
+  gh.factory<_i211.MarkConversationRead>(
+    () => _i211.MarkConversationRead(gh<_i420.ChatRepository>()),
+  );
+  gh.factory<_i76.SendMessage>(
+    () => _i76.SendMessage(gh<_i420.ChatRepository>()),
+  );
+  gh.factory<_i929.WatchMessages>(
+    () => _i929.WatchMessages(gh<_i420.ChatRepository>()),
   );
   gh.factoryParam<_i960.LocaleCubit, _i264.Locale?, dynamic>(
     (initialLocale, _) => _i960.LocaleCubit(
@@ -1470,6 +1538,13 @@ _i174.GetIt $initGetIt(
       gh<_i1018.ListRoles>(),
     ),
   );
+  gh.factory<_i968.ChatThreadCubit>(
+    () => _i968.ChatThreadCubit(
+      gh<_i929.WatchMessages>(),
+      gh<_i76.SendMessage>(),
+      gh<_i211.MarkConversationRead>(),
+    ),
+  );
   gh.factory<_i419.LocationFormBloc>(
     () => _i419.LocationFormBloc(
       gh<_i441.LoadGovernorateDetail>(),
@@ -1540,6 +1615,13 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i1051.ReportsQueueBloc>(
     () => _i1051.ReportsQueueBloc(gh<_i911.LoadReportsQueue>()),
+  );
+  gh.factory<_i812.ViewingsCubit>(
+    () => _i812.ViewingsCubit(
+      gh<_i644.LoadMyViewings>(),
+      gh<_i285.RequestViewing>(),
+      gh<_i725.UpdateViewingStatus>(),
+    ),
   );
   gh.factory<_i437.MapBloc>(() => _i437.MapBloc(gh<_i842.LoadMapMarkers>()));
   gh.factory<_i885.RoleEditorBloc>(
@@ -1653,6 +1735,9 @@ _i174.GetIt $initGetIt(
       gh<_i230.ArchiveAd>(),
       gh<_i831.UploadAdImage>(),
     ),
+  );
+  gh.factory<_i665.ConversationsCubit>(
+    () => _i665.ConversationsCubit(gh<_i929.ListConversations>()),
   );
   gh.factory<_i980.ReportSubmissionCubit>(
     () => _i980.ReportSubmissionCubit(gh<_i684.SubmitReport>()),

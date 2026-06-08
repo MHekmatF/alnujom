@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'app.dart';
+import 'core/analytics/analytics_service.dart';
 import 'core/config/env_config.dart';
 import 'core/di/injection.dart';
 import 'core/errors/result.dart';
@@ -41,6 +42,11 @@ Future<void> _firebaseBackgroundHandler(RemoteMessage message) async {
 }
 
 Future<void> main() async {
+  // Product analytics / telemetry — cold-start trace. Start the clock at the
+  // very top of bootstrap; we stop it after the first frame is rendered (see
+  // `_bootstrap`) and forward the elapsed time to the AnalyticsService.
+  final coldStartWatch = Stopwatch()..start();
+
   // Phase 24 (CR) — choose + guard-init the crash reporter, then run the
   // existing bootstrap inside `runZonedGuarded` so async errors are captured.
   //
@@ -87,15 +93,22 @@ Future<void> main() async {
   // Run the bootstrap inside a guarded zone so uncaught async errors (outside
   // the framework/platform handlers above) are also forwarded.
   unawaited(
-    runZonedGuarded(_bootstrap, (error, stack) {
-      unawaited(reporter.recordError(error, stack));
-    }),
+    runZonedGuarded(
+      () => _bootstrap(coldStartWatch),
+      (error, stack) {
+        unawaited(reporter.recordError(error, stack));
+      },
+    ),
   );
 }
 
 /// The original bootstrap sequence (DI, Supabase, locale) — unchanged behavior,
 /// now invoked from inside `runZonedGuarded`.
-Future<void> _bootstrap() async {
+///
+/// [coldStartWatch] is started at the top of `main()`; after the first frame
+/// renders we stop it and forward the elapsed time + an `app_open` event to the
+/// AnalyticsService (best-effort, never blocks startup).
+Future<void> _bootstrap(Stopwatch coldStartWatch) async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Phase 22 — guarded Firebase init (R-195, SC-003).
@@ -172,4 +185,20 @@ Future<void> _bootstrap() async {
   }
 
   runApp(App(initialLocale: initialLocale));
+
+  // Product analytics / telemetry — emit the cold-start trace + `app_open`
+  // event after the first frame is rendered. Resolved through DI (the Sentry-
+  // backed binding when telemetry is configured, else a no-op). Wrapped so a
+  // throw here never affects the running app, and read AFTER `runApp` so the
+  // DI graph is fully populated.
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    coldStartWatch.stop();
+    try {
+      final analytics = getIt<AnalyticsService>();
+      analytics.logColdStart(coldStartWatch.elapsed);
+      analytics.logEvent('app_open');
+    } catch (_) {
+      // Telemetry is strictly best-effort — never disrupt the app.
+    }
+  });
 }

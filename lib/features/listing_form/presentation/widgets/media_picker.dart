@@ -67,6 +67,14 @@ class MediaPicker extends StatelessWidget {
                         MediaSetMain(m.id),
                       )
                     : null,
+                // Spec 026 — 360°/virtual-tour toggle (image rows only; a
+                // panorama is an equirectangular image). Editable drafts only.
+                onTogglePanorama:
+                    (isEditable && m.kind == ListingMediaKind.image)
+                    ? () => context.read<ListingFormBloc>().add(
+                        MediaSetPanorama(m.id, makePanorama: !m.isPanorama),
+                      )
+                    : null,
                 onDelete: () => _confirmDelete(context, m),
                 onMoveUp: index > 0
                     ? () => _moveTo(context, media, index, index - 1)

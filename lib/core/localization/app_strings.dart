@@ -5289,4 +5289,254 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String get comparisonValueNone =>
       _resolve('comparisonValueNone', (loc) => loc.comparisonValueNone);
+
+  // ── Growth (Batch 1 — alerts + data saver) ───────────────────────────────
+  @override
+  String get notification_type_saved_search_match => _resolve(
+    'notification_type_saved_search_match',
+    (loc) => loc.notification_type_saved_search_match,
+  );
+
+  @override
+  String notification_body_saved_search_match(
+    String listingTitle,
+    String savedSearchLabel,
+  ) => _resolve(
+    'notification_body_saved_search_match',
+    (loc) => loc.notification_body_saved_search_match(
+      listingTitle,
+      savedSearchLabel,
+    ),
+  );
+
+  @override
+  String get search_saved_searches_alerts_hint => _resolve(
+    'search_saved_searches_alerts_hint',
+    (loc) => loc.search_saved_searches_alerts_hint,
+  );
+
+  @override
+  String get profile_data_saver_title => _resolve(
+    'profile_data_saver_title',
+    (loc) => loc.profile_data_saver_title,
+  );
+
+  @override
+  String get profile_data_saver_subtitle => _resolve(
+    'profile_data_saver_subtitle',
+    (loc) => loc.profile_data_saver_subtitle,
+  );
+
+  // ── Growth (Wave G1 — in-app chat) ───────────────────────────────────────
+  @override
+  String get chatConversationsTitle =>
+      _resolve('chatConversationsTitle', (loc) => loc.chatConversationsTitle);
+
+  @override
+  String get chatConversationsEmptyTitle => _resolve(
+    'chatConversationsEmptyTitle',
+    (loc) => loc.chatConversationsEmptyTitle,
+  );
+
+  @override
+  String get chatConversationsEmptyBody => _resolve(
+    'chatConversationsEmptyBody',
+    (loc) => loc.chatConversationsEmptyBody,
+  );
+
+  @override
+  String get chatConversationsErrorTitle => _resolve(
+    'chatConversationsErrorTitle',
+    (loc) => loc.chatConversationsErrorTitle,
+  );
+
+  @override
+  String get chatThreadTitleFallback => _resolve(
+    'chatThreadTitleFallback',
+    (loc) => loc.chatThreadTitleFallback,
+  );
+
+  @override
+  String get chatThreadEmptyTitle =>
+      _resolve('chatThreadEmptyTitle', (loc) => loc.chatThreadEmptyTitle);
+
+  @override
+  String get chatThreadEmptyBody =>
+      _resolve('chatThreadEmptyBody', (loc) => loc.chatThreadEmptyBody);
+
+  @override
+  String get chatThreadErrorTitle =>
+      _resolve('chatThreadErrorTitle', (loc) => loc.chatThreadErrorTitle);
+
+  @override
+  String get chatComposerHint =>
+      _resolve('chatComposerHint', (loc) => loc.chatComposerHint);
+
+  @override
+  String get chatComposerSend =>
+      _resolve('chatComposerSend', (loc) => loc.chatComposerSend);
+
+  @override
+  String get chatContactAction =>
+      _resolve('chatContactAction', (loc) => loc.chatContactAction);
+
+  @override
+  String get chatSignInPrompt =>
+      _resolve('chatSignInPrompt', (loc) => loc.chatSignInPrompt);
+
+  @override
+  String get chatOpenError =>
+      _resolve('chatOpenError', (loc) => loc.chatOpenError);
+
+  @override
+  String get chatMessagesTile =>
+      _resolve('chatMessagesTile', (loc) => loc.chatMessagesTile);
+
+  @override
+  String get chatRolePublisher =>
+      _resolve('chatRolePublisher', (loc) => loc.chatRolePublisher);
+
+  @override
+  String get chatRoleBuyer =>
+      _resolve('chatRoleBuyer', (loc) => loc.chatRoleBuyer);
+
+  @override
+  String get chatListingUnavailable =>
+      _resolve('chatListingUnavailable', (loc) => loc.chatListingUnavailable);
+
+  // ── Growth (Wave G3 — viewing scheduler) ─────────────────────────────────
+  @override
+  String get viewingRequestAction =>
+      _resolve('viewingRequestAction', (loc) => loc.viewingRequestAction);
+  @override
+  String get viewingsTile => _resolve('viewingsTile', (loc) => loc.viewingsTile);
+  @override
+  String get viewingRequestTitle =>
+      _resolve('viewingRequestTitle', (loc) => loc.viewingRequestTitle);
+  @override
+  String get viewingPickDate =>
+      _resolve('viewingPickDate', (loc) => loc.viewingPickDate);
+  @override
+  String get viewingPickTime =>
+      _resolve('viewingPickTime', (loc) => loc.viewingPickTime);
+  @override
+  String get viewingNoteLabel =>
+      _resolve('viewingNoteLabel', (loc) => loc.viewingNoteLabel);
+  @override
+  String get viewingNotePlaceholder =>
+      _resolve('viewingNotePlaceholder', (loc) => loc.viewingNotePlaceholder);
+  @override
+  String get viewingPastError =>
+      _resolve('viewingPastError', (loc) => loc.viewingPastError);
+  @override
+  String get viewingSubmitButton =>
+      _resolve('viewingSubmitButton', (loc) => loc.viewingSubmitButton);
+  @override
+  String get viewingRequestSuccess =>
+      _resolve('viewingRequestSuccess', (loc) => loc.viewingRequestSuccess);
+  @override
+  String get viewingRequestError =>
+      _resolve('viewingRequestError', (loc) => loc.viewingRequestError);
+  @override
+  String get viewingsListTitle =>
+      _resolve('viewingsListTitle', (loc) => loc.viewingsListTitle);
+  @override
+  String get viewingsListEmptyTitle =>
+      _resolve('viewingsListEmptyTitle', (loc) => loc.viewingsListEmptyTitle);
+  @override
+  String get viewingsListEmptyBody =>
+      _resolve('viewingsListEmptyBody', (loc) => loc.viewingsListEmptyBody);
+  @override
+  String get viewingsListErrorTitle =>
+      _resolve('viewingsListErrorTitle', (loc) => loc.viewingsListErrorTitle);
+  @override
+  String get viewingListingUnavailable => _resolve(
+    'viewingListingUnavailable',
+    (loc) => loc.viewingListingUnavailable,
+  );
+  @override
+  String get viewingStatusRequested =>
+      _resolve('viewingStatusRequested', (loc) => loc.viewingStatusRequested);
+  @override
+  String get viewingStatusConfirmed =>
+      _resolve('viewingStatusConfirmed', (loc) => loc.viewingStatusConfirmed);
+  @override
+  String get viewingStatusDeclined =>
+      _resolve('viewingStatusDeclined', (loc) => loc.viewingStatusDeclined);
+  @override
+  String get viewingStatusCancelled =>
+      _resolve('viewingStatusCancelled', (loc) => loc.viewingStatusCancelled);
+  @override
+  String get viewingConfirmAction =>
+      _resolve('viewingConfirmAction', (loc) => loc.viewingConfirmAction);
+  @override
+  String get viewingDeclineAction =>
+      _resolve('viewingDeclineAction', (loc) => loc.viewingDeclineAction);
+  @override
+  String get viewingCancelAction =>
+      _resolve('viewingCancelAction', (loc) => loc.viewingCancelAction);
+  @override
+  String get viewingConfirmedSuccess =>
+      _resolve('viewingConfirmedSuccess', (loc) => loc.viewingConfirmedSuccess);
+  @override
+  String get viewingDeclinedSuccess =>
+      _resolve('viewingDeclinedSuccess', (loc) => loc.viewingDeclinedSuccess);
+  @override
+  String get viewingCancelledSuccess =>
+      _resolve('viewingCancelledSuccess', (loc) => loc.viewingCancelledSuccess);
+  @override
+  String get viewingUpdateError =>
+      _resolve('viewingUpdateError', (loc) => loc.viewingUpdateError);
+
+  // ── Growth (Wave G6 — owner/agent filter + G7 — 360 tours) ───────────────
+  @override
+  String get search_filter_lister_type_label => _resolve(
+    'search_filter_lister_type_label',
+    (loc) => loc.search_filter_lister_type_label,
+  );
+  @override
+  String get search_filter_lister_type_all => _resolve(
+    'search_filter_lister_type_all',
+    (loc) => loc.search_filter_lister_type_all,
+  );
+  @override
+  String get search_filter_lister_type_owner => _resolve(
+    'search_filter_lister_type_owner',
+    (loc) => loc.search_filter_lister_type_owner,
+  );
+  @override
+  String get search_filter_lister_type_agency => _resolve(
+    'search_filter_lister_type_agency',
+    (loc) => loc.search_filter_lister_type_agency,
+  );
+  @override
+  String get search_result_by_owner =>
+      _resolve('search_result_by_owner', (loc) => loc.search_result_by_owner);
+  @override
+  String get panoramaTourTitle =>
+      _resolve('panoramaTourTitle', (loc) => loc.panoramaTourTitle);
+  @override
+  String get panoramaTourClose =>
+      _resolve('panoramaTourClose', (loc) => loc.panoramaTourClose);
+  @override
+  String get panoramaTourBadge =>
+      _resolve('panoramaTourBadge', (loc) => loc.panoramaTourBadge);
+  @override
+  String get panoramaTourOpen =>
+      _resolve('panoramaTourOpen', (loc) => loc.panoramaTourOpen);
+  @override
+  String get mediaActionMarkPanorama => _resolve(
+    'mediaActionMarkPanorama',
+    (loc) => loc.mediaActionMarkPanorama,
+  );
+  @override
+  String get mediaActionUnmarkPanorama => _resolve(
+    'mediaActionUnmarkPanorama',
+    (loc) => loc.mediaActionUnmarkPanorama,
+  );
+  @override
+  String get mediaThumbnailPanoramaBadge => _resolve(
+    'mediaThumbnailPanoramaBadge',
+    (loc) => loc.mediaThumbnailPanoramaBadge,
+  );
 }

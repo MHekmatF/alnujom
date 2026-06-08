@@ -224,4 +224,13 @@ class ListingsRepositoryImpl implements ListingsRepository {
   String getMediaPublicUrl({required String bucket, required String path}) {
     return _mediaDs.getPublicUrl(bucket: bucket, path: path);
   }
+
+  @override
+  Future<ListingMedia> setMediaKind({
+    required String mediaId,
+    required String kind,
+  }) async {
+    final dto = await _mediaDs.setKind(mediaId: mediaId, kind: kind);
+    return dto.toEntity();
+  }
 }

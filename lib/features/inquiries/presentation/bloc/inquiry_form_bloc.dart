@@ -10,6 +10,8 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/analytics/analytics_service.dart';
+import '../../../../core/di/injection.dart';
 import '../../../../core/errors/failure.dart';
 import '../../../../core/errors/result.dart';
 import '../../domain/entities/inquiry_submission.dart';
@@ -77,6 +79,12 @@ class InquiryFormBloc extends Bloc<InquiryFormEvent, InquiryFormState> {
 
     switch (result) {
       case Success<String>(:final value):
+        // Product analytics — inquiry submitted (best-effort; no-op when
+        // telemetry is off). Only the listing id is recorded (non-PII).
+        getIt<AnalyticsService>().logEvent(
+          'inquiry_submitted',
+          props: {'listingId': _listingId},
+        );
         emit(InquiryFormSubmittedSuccess(inquiryId: value));
       case FailureResult<String>(:final failure):
         emit(InquiryFormFailed(failure: failure));

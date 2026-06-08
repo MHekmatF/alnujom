@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/localization/locale_cubit.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/settings/lite_mode.dart';
 import '../../../../core/security/permission_checker.dart';
 import '../../../../core/security/permission_keys.dart';
 import '../../../../core/theme/radii.dart';
@@ -16,7 +17,11 @@ import '../../../../shared/domain/value_objects/account_status.dart';
 import '../../../../shared/domain/value_objects/publisher_status.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
+import '../../../chat/presentation/bloc/conversations_cubit.dart';
+import '../../../chat/presentation/pages/conversations_list_page.dart';
 import '../../../currencies/presentation/widgets/preferred_currency_toggle.dart';
+import '../../../viewings/presentation/cubit/viewings_cubit.dart';
+import '../../../viewings/presentation/pages/viewings_list_page.dart';
 import '../cubit/profile_cubit.dart';
 import '../cubit/profile_state.dart';
 
@@ -26,6 +31,8 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localeCode = context.read<LocaleCubit>().state.languageCode;
+    // Warm the Data saver flag so its SwitchListTile reflects the saved state.
+    LiteMode.load();
     return BlocProvider<ProfileCubit>(
       create: (_) => getIt<ProfileCubit>()
         ..load()
@@ -168,6 +175,20 @@ class _ProfileView extends StatelessWidget {
                 ],
                 const PreferredCurrencyToggle(),
                 const SizedBox(height: AppSpacing.lg),
+                // Data saver (lite / low-data) mode — reduces image resolution
+                // and map tile cost for low-bandwidth connections.
+                ValueListenableBuilder<bool>(
+                  valueListenable: LiteMode.notifier,
+                  builder: (context, lite, _) => SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    secondary: const Icon(Icons.data_saver_on_outlined),
+                    title: Text(l10n.profile_data_saver_title),
+                    subtitle: Text(l10n.profile_data_saver_subtitle),
+                    value: lite,
+                    onChanged: (value) => LiteMode.set(value),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.lock_outline),
@@ -181,6 +202,41 @@ class _ProfileView extends StatelessWidget {
                   title: Text(l10n.profile_favorites_tile),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push(AppRoutes.favorites),
+                ),
+                // In-app chat — conversations inbox (signed-in only; this page
+                // renders solely for an authenticated profile). Pushed via a
+                // MaterialPageRoute since chat has no go_router route.
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.forum_outlined),
+                  title: Text(l10n.chatMessagesTile),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => BlocProvider<ConversationsCubit>(
+                        create: (_) => getIt<ConversationsCubit>(),
+                        child: const ConversationsListPage(),
+                      ),
+                    ),
+                  ),
+                ),
+                // Viewing scheduler — the user's scheduled viewings (signed-in
+                // only; this page renders solely for an authenticated profile).
+                // Pushed via a MaterialPageRoute since viewings has no
+                // go_router route.
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.calendar_today_outlined),
+                  title: Text(l10n.viewingsTile),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => BlocProvider<ViewingsCubit>(
+                        create: (_) => getIt<ViewingsCubit>(),
+                        child: const ViewingsListPage(),
+                      ),
+                    ),
+                  ),
                 ),
                 // Phase 19 — My Agency tile (T059)
                 ListTile(

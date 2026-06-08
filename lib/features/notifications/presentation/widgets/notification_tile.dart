@@ -5,6 +5,7 @@
 // Direction-aware via EdgeInsetsDirectional.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 import '../../../../core/localization/app_strings.dart';
 import '../../../../core/theme/colors.dart';
@@ -60,7 +61,7 @@ class NotificationTile extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.md),
-            // Title + relative time
+            // Title + optional body + relative time
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,6 +74,18 @@ class NotificationTile extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  if (_bodyForType(notification.type, notification.params, l10n)
+                      case final body?) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      body,
+                      style: textStyles.bodyMedium.copyWith(
+                        color: colors.textMuted,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     _relativeTime(notification.createdAt, l10n),
@@ -117,6 +130,9 @@ class NotificationTile extends StatelessWidget {
         return Icons.mail_outline;
       case NotificationType.agencyInvitation:
         return Icons.group_add_outlined;
+      case NotificationType.savedSearchMatch:
+        // Phase 25 — bell/search-style mark for a saved-search match alert.
+        return LucideIcons.bell_ring;
     }
   }
 
@@ -134,6 +150,36 @@ class NotificationTile extends StatelessWidget {
         return l10n.notification_type_inquiry_received;
       case NotificationType.agencyInvitation:
         return l10n.notification_type_agency_invitation;
+      case NotificationType.savedSearchMatch:
+        return l10n.notification_type_saved_search_match;
+    }
+  }
+
+  /// Optional secondary line built from `params` for types that carry
+  /// human-readable context. Returns `null` for types with no body so the
+  /// tile stays single-line (matches existing behaviour).
+  String? _bodyForType(
+    NotificationType type,
+    Map<String, dynamic> params,
+    dynamic l10n,
+  ) {
+    switch (type) {
+      case NotificationType.savedSearchMatch:
+        // Phase 25 — built from the trigger's params (UUIDs + display labels).
+        final listingTitle = params['listing_title'] as String?;
+        final savedSearchLabel = params['saved_search_label'] as String?;
+        if (listingTitle == null || savedSearchLabel == null) return null;
+        return l10n.notification_body_saved_search_match(
+          listingTitle,
+          savedSearchLabel,
+        );
+      case NotificationType.accountApproved:
+      case NotificationType.accountRejected:
+      case NotificationType.listingApproved:
+      case NotificationType.listingRejected:
+      case NotificationType.inquiryReceived:
+      case NotificationType.agencyInvitation:
+        return null;
     }
   }
 
