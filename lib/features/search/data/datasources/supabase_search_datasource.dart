@@ -146,6 +146,10 @@ class SupabaseSearchDatasource {
     if (filters.areaSizeMax != null) {
       params['p_area_size_max'] = filters.areaSizeMax;
     }
+    // Owner-vs-agency lister filter (DEFAULT NULL ⇒ all listers).
+    if (filters.isAgency != null) {
+      params['p_is_agency'] = filters.isAgency;
+    }
 
     params['p_sort'] = _sortToRpc(sort);
 

@@ -21,6 +21,12 @@ class FilterState extends Equatable {
   final double? areaSizeMin;
   final double? areaSizeMax;
 
+  /// Owner-vs-agency lister filter. `null` ⇒ any (both owner- and
+  /// agency-listed), `true` ⇒ only agency-listed, `false` ⇒ only owner-listed.
+  /// Serialized to the RPC's `p_is_agency` param (only when non-null) and to
+  /// the `saved_searches.filters` JSONB under key `is_agency`.
+  final bool? isAgency;
+
   /// Phase 25 — list vs. embedded-map presentation of the results. Purely a
   /// view concern: it is NOT sent to the search RPC, NOT counted as an active
   /// filter, and NOT persisted in [toJson] (saved searches restore filters,
@@ -43,6 +49,7 @@ class FilterState extends Equatable {
     this.bathroomsMode = CountFilterMode.exactly,
     this.areaSizeMin,
     this.areaSizeMax,
+    this.isAgency,
     this.displayMode = DisplayMode.list,
   });
 
@@ -60,7 +67,8 @@ class FilterState extends Equatable {
       rooms == null &&
       bathrooms == null &&
       areaSizeMin == null &&
-      areaSizeMax == null;
+      areaSizeMax == null &&
+      isAgency == null;
 
   /// Phase 15 G3: true when at least one filter dimension is active.
   /// Consumed by [MapEntryFromSearch.showFilterAlert] to show the
@@ -77,6 +85,7 @@ class FilterState extends Equatable {
       bathrooms != null ||
       areaSizeMin != null ||
       areaSizeMax != null ||
+      isAgency != null ||
       (query != null && query!.isNotEmpty);
 
   FilterState copyWith({
@@ -95,6 +104,7 @@ class FilterState extends Equatable {
     CountFilterMode? bathroomsMode,
     double? areaSizeMin,
     double? areaSizeMax,
+    bool? isAgency,
     DisplayMode? displayMode,
     // Sentinel for clearing nullable fields
     bool clearQuery = false,
@@ -109,6 +119,7 @@ class FilterState extends Equatable {
     bool clearRooms = false,
     bool clearBathrooms = false,
     bool clearAreaSize = false,
+    bool clearIsAgency = false,
   }) {
     return FilterState(
       query: clearQuery ? null : (query ?? this.query),
@@ -132,6 +143,7 @@ class FilterState extends Equatable {
       bathroomsMode: bathroomsMode ?? this.bathroomsMode,
       areaSizeMin: clearAreaSize ? null : (areaSizeMin ?? this.areaSizeMin),
       areaSizeMax: clearAreaSize ? null : (areaSizeMax ?? this.areaSizeMax),
+      isAgency: clearIsAgency ? null : (isAgency ?? this.isAgency),
       displayMode: displayMode ?? this.displayMode,
     );
   }
@@ -163,6 +175,7 @@ class FilterState extends Equatable {
     }
     if (areaSizeMin != null) json['area_size_min'] = areaSizeMin;
     if (areaSizeMax != null) json['area_size_max'] = areaSizeMax;
+    if (isAgency != null) json['is_agency'] = isAgency;
     return json;
   }
 
@@ -211,6 +224,7 @@ class FilterState extends Equatable {
       bathroomsMode: readMode(json['bathrooms_mode']),
       areaSizeMin: readDouble(json['area_size_min']),
       areaSizeMax: readDouble(json['area_size_max']),
+      isAgency: json['is_agency'] is bool ? json['is_agency'] as bool : null,
     );
   }
 
@@ -231,6 +245,7 @@ class FilterState extends Equatable {
     bathroomsMode,
     areaSizeMin,
     areaSizeMax,
+    isAgency,
     displayMode,
   ];
 }

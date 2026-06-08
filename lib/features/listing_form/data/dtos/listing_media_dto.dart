@@ -48,6 +48,9 @@ class ListingMediaDto {
     id: id,
     listingId: listingId,
     kind: ListingMediaKind.fromDbValue(kind),
+    // Preserve the raw free-text kind so the listing-details gallery can
+    // detect a 360° panorama (which the closed enum collapses to `image`).
+    rawKind: kind,
     storagePath: storagePath,
     externalUrl: externalUrl,
     ordering: ordering,

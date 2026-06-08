@@ -58,6 +58,9 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
   CountFilterMode _bathroomsMode = CountFilterMode.exactly;
   RangeValues _areaRange = const RangeValues(0, _kAreaMax);
 
+  // Owner-vs-agency lister filter: null = all, false = owner, true = agency.
+  bool? _isAgency;
+
   // Location data
   List<GovernorateWithCityCount> _governorates = [];
   List<CityWithAreaCount> _cities = [];
@@ -91,6 +94,7 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
       widget.initialFilters.areaSizeMax,
       _kAreaMax,
     );
+    _isAgency = widget.initialFilters.isAgency;
 
     _loadGovernorates();
     _loadCurrencies();
@@ -193,6 +197,8 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                 const SizedBox(height: 16),
                 _buildPropertyTypeSection(context),
                 const SizedBox(height: 16),
+                _buildListerTypeSection(context),
+                const SizedBox(height: 16),
                 _buildLocationSection(context),
                 const SizedBox(height: 16),
                 _buildPriceRangeSection(context),
@@ -284,6 +290,46 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
               onSelected: (v) => setState(() => _propertyType = v ? t : null),
             );
           }).toList(),
+        ),
+      ],
+    );
+  }
+
+  /// Owner-vs-agency lister filter. A three-way segmented toggle bound to
+  /// [_isAgency] (null = all · false = owner · true = agency). Reuses the
+  /// Phase-25 [AppSegmentedControl] idiom (same control the beds/baths
+  /// exactly/at-least toggle uses).
+  Widget _buildListerTypeSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.search_filter_lister_type_label,
+          style: Theme.of(context).textTheme.labelLarge,
+          textAlign: TextAlign.start,
+        ),
+        const SizedBox(height: 8),
+        AppSegmentedControl<bool?>(
+          value: _isAgency,
+          onChanged: (v) => setState(() => _isAgency = v),
+          segments: [
+            AppSegmentedSegment<bool?>(
+              icon: Icons.apps,
+              label: l10n.search_filter_lister_type_all,
+              value: null,
+            ),
+            AppSegmentedSegment<bool?>(
+              icon: Icons.person_outline,
+              label: l10n.search_filter_lister_type_owner,
+              value: false,
+            ),
+            AppSegmentedSegment<bool?>(
+              icon: Icons.business_outlined,
+              label: l10n.search_filter_lister_type_agency,
+              value: true,
+            ),
+          ],
         ),
       ],
     );
@@ -582,6 +628,7 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
             _bathrooms = null;
             _bathroomsMode = CountFilterMode.exactly;
             _areaRange = const RangeValues(0, _kAreaMax);
+            _isAgency = null;
           }),
           child: Text(l10n.search_filter_reset),
         ),
@@ -616,6 +663,7 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
               bathroomsMode: _bathroomsMode,
               areaSizeMin: areaMin,
               areaSizeMax: areaMax,
+              isAgency: _isAgency,
             );
             widget.onApply(newFilters);
             Navigator.of(context).pop();

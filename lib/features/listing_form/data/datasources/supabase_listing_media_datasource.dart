@@ -273,4 +273,23 @@ class SupabaseListingMediaDatasource {
   String getPublicUrl({required String bucket, required String path}) {
     return _client.storage.from(bucket).getPublicUrl(path);
   }
+
+  /// Spec 026 — sets the free-text `kind` on an existing media row.
+  ///
+  /// Used to (un)mark an already-uploaded image as a 360°/virtual-tour
+  /// panorama (a panorama is just an equirectangular image with `kind` flipped
+  /// from `'image'` to `'panorama'` and back). The storage object is untouched —
+  /// only the DB column changes. Returns the updated row.
+  Future<ListingMediaDto> setKind({
+    required String mediaId,
+    required String kind,
+  }) async {
+    final row = await _client
+        .from('listing_media')
+        .update(<String, dynamic>{'kind': kind})
+        .eq('id', mediaId)
+        .select()
+        .single();
+    return ListingMediaDto.fromJson(Map<String, dynamic>.from(row));
+  }
 }

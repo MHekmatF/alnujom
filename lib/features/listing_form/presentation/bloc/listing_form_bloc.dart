@@ -75,6 +75,7 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
     on<VideoPicked>(_onVideoPicked);
     on<MediaReordered>(_onMediaReordered);
     on<MediaSetMain>(_onMediaSetMain);
+    on<MediaSetPanorama>(_onMediaSetPanorama);
     on<MediaDeleted>(_onMediaDeleted);
     on<MediaUploadDismissed>(_onMediaUploadDismissed);
   }
@@ -785,6 +786,42 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
       emit(state.copyWith(media: reloaded));
     } catch (_) {
       // No-op on failure — widget can re-trigger.
+    }
+  }
+
+  Future<void> _onMediaSetPanorama(
+    MediaSetPanorama event,
+    Emitter<ListingFormState> emit,
+  ) async {
+    final listing = state.draftListing;
+    if (listing == null) return;
+    // A panorama is an equirectangular image with the free-text `kind` flipped
+    // to 'panorama' (and back to 'image' to unmark). Optimistically reflect the
+    // new rawKind locally, then persist; reload from the server on failure.
+    final targetKind = event.makePanorama
+        ? kListingMediaKindPanorama
+        : ListingMediaKind.image.toDbValue();
+    final optimistic = state.media
+        .map(
+          (m) => m.id == event.mediaId ? m.copyWith(rawKind: targetKind) : m,
+        )
+        .toList();
+    emit(state.copyWith(media: optimistic));
+    try {
+      await _repository.setMediaKind(
+        mediaId: event.mediaId,
+        kind: targetKind,
+      );
+      final reloaded = await _loadMediaForListing(listingId: listing.id);
+      emit(state.copyWith(media: reloaded));
+    } catch (_) {
+      // Revert the optimistic update from the server's authoritative state.
+      try {
+        final reloaded = await _loadMediaForListing(listingId: listing.id);
+        emit(state.copyWith(media: reloaded));
+      } catch (_) {
+        /* nothing more to do */
+      }
     }
   }
 

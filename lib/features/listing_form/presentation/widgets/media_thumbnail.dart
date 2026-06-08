@@ -29,6 +29,7 @@ class MediaThumbnail extends StatelessWidget {
     required this.media,
     required this.isEditable,
     this.onSetMain,
+    this.onTogglePanorama,
     this.onDelete,
     this.onMoveUp,
     this.onMoveDown,
@@ -46,6 +47,7 @@ class MediaThumbnail extends StatelessWidget {
   }) : media = null,
        isEditable = false,
        onSetMain = null,
+       onTogglePanorama = null,
        onDelete = null,
        onMoveUp = null,
        onMoveDown = null,
@@ -54,6 +56,10 @@ class MediaThumbnail extends StatelessWidget {
   final ListingMedia? media;
   final bool isEditable;
   final VoidCallback? onSetMain;
+
+  /// Spec 026 — toggles this image's 360°/virtual-tour panorama mark. Wired
+  /// only for image rows (videos can't be panoramas); null hides the action.
+  final VoidCallback? onTogglePanorama;
   final VoidCallback? onDelete;
   final VoidCallback? onMoveUp;
   final VoidCallback? onMoveDown;
@@ -87,6 +93,14 @@ class MediaThumbnail extends StatelessWidget {
                 top: AppSpacing.sm,
                 left: AppSpacing.sm,
                 child: _OrderingBadge(ordering: media!.ordering),
+              ),
+            // Spec 026 — 360°/virtual-tour mark on the thumbnail (bottom-start)
+            // so the publisher can see which image is the panorama.
+            if (!_isGhost && media!.isPanorama)
+              PositionedDirectional(
+                bottom: AppSpacing.sm,
+                start: AppSpacing.sm,
+                child: _PanoramaBadge(),
               ),
             if (_isGhost)
               _GhostOverlay(progress: _ghostProgress!, onDismiss: onDismiss),
@@ -156,6 +170,20 @@ class MediaThumbnail extends StatelessWidget {
                     onSetMain!();
                   },
                 ),
+              // Spec 026 — (un)mark this image as a 360°/virtual-tour panorama.
+              if (onTogglePanorama != null)
+                ListTile(
+                  leading: const Icon(Icons.threesixty),
+                  title: Text(
+                    (media?.isPanorama ?? false)
+                        ? l10n.mediaActionUnmarkPanorama
+                        : l10n.mediaActionMarkPanorama,
+                  ),
+                  onTap: () {
+                    Navigator.of(sheetCtx).pop();
+                    onTogglePanorama!();
+                  },
+                ),
               if (onMoveUp != null)
                 ListTile(
                   leading: const Icon(Icons.arrow_upward),
@@ -219,6 +247,43 @@ class _MainBadge extends StatelessWidget {
           color: scheme.onPrimary,
           fontWeight: FontWeight.bold,
         ),
+      ),
+    );
+  }
+}
+
+/// Spec 026 — small "360°" chip on a panorama thumbnail in the media picker.
+class _PanoramaBadge extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: scheme.tertiaryContainer,
+        borderRadius: BorderRadius.circular(AppRadii.pill),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.threesixty,
+            size: AppSpacing.md,
+            color: scheme.onTertiaryContainer,
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          Text(
+            l10n.mediaThumbnailPanoramaBadge,
+            style: AppTextStyles.of(context).labelMedium.copyWith(
+              color: scheme.onTertiaryContainer,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
       ),
     );
   }

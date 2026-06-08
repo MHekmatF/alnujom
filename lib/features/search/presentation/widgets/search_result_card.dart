@@ -97,6 +97,15 @@ class SearchResultCard extends StatelessWidget {
                             logoUrl: item.agencyLogoUrl,
                             compact: true,
                           ),
+                        )
+                      // Owner-listed: no agency on the listing → a subtle
+                      // "By owner" pill so the lister distinction reads at a
+                      // glance opposite the agency badge.
+                      else if (item.agencyId == null)
+                        PositionedDirectional(
+                          bottom: AppSpacing.xs,
+                          start: AppSpacing.xs,
+                          child: _ByOwnerPill(label: l10n.search_result_by_owner),
                         ),
                     ],
                   ),
@@ -151,6 +160,47 @@ class SearchResultCard extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Subtle "By owner" overlay pill — the owner-listed counterpart to the
+/// [AgencyBadge] (occupies the same bottom-start slot). Quiet by design
+/// (surfaceVariant container, muted text) so an agency badge still reads as
+/// the louder trust signal. Token-only; RTL-safe.
+class _ByOwnerPill extends StatelessWidget {
+  const _ByOwnerPill({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    return Container(
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: colors.surfaceVariant,
+        borderRadius: appRadius(AppRadii.pill),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.person_outline,
+            size: AppSpacing.md,
+            color: colors.onSurfaceVariant,
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          Text(
+            label,
+            style: styles.labelMedium.copyWith(color: colors.onSurfaceVariant),
+          ),
+        ],
       ),
     );
   }

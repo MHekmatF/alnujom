@@ -5487,4 +5487,56 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String get viewingUpdateError =>
       _resolve('viewingUpdateError', (loc) => loc.viewingUpdateError);
+
+  // ── Growth (Wave G6 — owner/agent filter + G7 — 360 tours) ───────────────
+  @override
+  String get search_filter_lister_type_label => _resolve(
+    'search_filter_lister_type_label',
+    (loc) => loc.search_filter_lister_type_label,
+  );
+  @override
+  String get search_filter_lister_type_all => _resolve(
+    'search_filter_lister_type_all',
+    (loc) => loc.search_filter_lister_type_all,
+  );
+  @override
+  String get search_filter_lister_type_owner => _resolve(
+    'search_filter_lister_type_owner',
+    (loc) => loc.search_filter_lister_type_owner,
+  );
+  @override
+  String get search_filter_lister_type_agency => _resolve(
+    'search_filter_lister_type_agency',
+    (loc) => loc.search_filter_lister_type_agency,
+  );
+  @override
+  String get search_result_by_owner =>
+      _resolve('search_result_by_owner', (loc) => loc.search_result_by_owner);
+  @override
+  String get panoramaTourTitle =>
+      _resolve('panoramaTourTitle', (loc) => loc.panoramaTourTitle);
+  @override
+  String get panoramaTourClose =>
+      _resolve('panoramaTourClose', (loc) => loc.panoramaTourClose);
+  @override
+  String get panoramaTourBadge =>
+      _resolve('panoramaTourBadge', (loc) => loc.panoramaTourBadge);
+  @override
+  String get panoramaTourOpen =>
+      _resolve('panoramaTourOpen', (loc) => loc.panoramaTourOpen);
+  @override
+  String get mediaActionMarkPanorama => _resolve(
+    'mediaActionMarkPanorama',
+    (loc) => loc.mediaActionMarkPanorama,
+  );
+  @override
+  String get mediaActionUnmarkPanorama => _resolve(
+    'mediaActionUnmarkPanorama',
+    (loc) => loc.mediaActionUnmarkPanorama,
+  );
+  @override
+  String get mediaThumbnailPanoramaBadge => _resolve(
+    'mediaThumbnailPanoramaBadge',
+    (loc) => loc.mediaThumbnailPanoramaBadge,
+  );
 }

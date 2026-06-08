@@ -225,6 +225,20 @@ class MediaDeleted extends ListingFormEvent {
   List<Object?> get props => [mediaId];
 }
 
+/// Spec 026 — (un)mark an already-uploaded image as a 360°/virtual-tour
+/// panorama. Flips the row's free-text `kind` between `'panorama'` and
+/// `'image'`; [makePanorama] true sets panorama, false reverts to image.
+/// Image-only at the call site (videos can't be panoramas).
+class MediaSetPanorama extends ListingFormEvent {
+  const MediaSetPanorama(this.mediaId, {required this.makePanorama});
+
+  final String mediaId;
+  final bool makePanorama;
+
+  @override
+  List<Object?> get props => [mediaId, makePanorama];
+}
+
 /// Dismiss an in-flight upload entry from `state.uploadInFlight`. Used by
 /// the error tile's X button to clear an orphaned upload-fail after the
 /// publisher acknowledges it. The original file reference is lost — true

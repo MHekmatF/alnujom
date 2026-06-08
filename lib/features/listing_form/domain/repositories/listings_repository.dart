@@ -132,4 +132,12 @@ abstract class ListingsRepository {
 
   /// Returns a stable public URL for a bucket object (Q8=A consumer hook).
   String getMediaPublicUrl({required String bucket, required String path});
+
+  /// Spec 026 — sets the free-text `kind` on an existing media row and returns
+  /// the updated entity. Used to (un)mark an uploaded image as a 360°/virtual-
+  /// tour panorama (`'panorama'` ⇄ `'image'`); the storage object is untouched.
+  Future<ListingMedia> setMediaKind({
+    required String mediaId,
+    required String kind,
+  });
 }
