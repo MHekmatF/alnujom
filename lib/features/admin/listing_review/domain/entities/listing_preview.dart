@@ -27,6 +27,7 @@ class ListingPreview extends Equatable {
     this.city,
     this.area,
     required this.publisherDisplayName,
+    this.featuredUntil,
   });
 
   final Listing listing;
@@ -43,6 +44,16 @@ class ListingPreview extends Equatable {
 
   final String publisherDisplayName;
 
+  /// Phase 25 — `listings.featured_until` snapshot at preview-load time.
+  /// A listing is FEATURED when this is non-null AND in the future; the
+  /// preview page shows the current state + offers the feature/unfeature
+  /// action (gated on `listings.edit_any`).
+  final DateTime? featuredUntil;
+
+  /// True when the listing is currently featured (non-null + future).
+  bool get isFeatured =>
+      featuredUntil != null && featuredUntil!.isAfter(DateTime.now());
+
   @override
   List<Object?> get props => [
     listing,
@@ -53,5 +64,6 @@ class ListingPreview extends Equatable {
     city,
     area,
     publisherDisplayName,
+    featuredUntil,
   ];
 }

@@ -38,6 +38,7 @@ class HomeListingCard extends Equatable {
     this.bathrooms,
     this.areaSize,
     this.floor,
+    this.isFeatured = false,
   });
 
   final String id;
@@ -78,6 +79,14 @@ class HomeListingCard extends Equatable {
   final double? areaSize;
   final int? floor;
 
+  /// Featured-listings treatment — true when the listing's `featured_until`
+  /// timestamp is in the future (an admin has promoted it via the
+  /// `set_listing_featured` RPC). Drives the "مميّز / Featured" badge on the
+  /// card and the home "✨ عقارات مميّزة" carousel section. Rows returned by the
+  /// dedicated featured query are always `true`; rows in the regular feed are
+  /// `true` only when their (newly-projected) `featured_until` is still active.
+  final bool isFeatured;
+
   @override
   List<Object?> get props => [
     id,
@@ -97,5 +106,6 @@ class HomeListingCard extends Equatable {
     bathrooms,
     areaSize,
     floor,
+    isFeatured,
   ];
 }

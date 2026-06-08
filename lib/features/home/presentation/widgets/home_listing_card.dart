@@ -92,6 +92,7 @@ class HomeListingCardTile extends StatelessWidget {
                   typeLabel: _propertyTypeLabel(l10n, card.propertyType),
                   purposeLabel: _purposeLabel(l10n, card.purpose),
                   purposeColor: _purposeColor(colors, card.purpose),
+                  isFeatured: card.isFeatured,
                 ),
                 Padding(
                   padding: const EdgeInsetsDirectional.fromSTEB(
@@ -326,6 +327,7 @@ class _Hero extends StatelessWidget {
     required this.typeLabel,
     required this.purposeLabel,
     required this.purposeColor,
+    required this.isFeatured,
   });
 
   final String? imageUrl;
@@ -334,6 +336,7 @@ class _Hero extends StatelessWidget {
   final String typeLabel;
   final String purposeLabel;
   final Color purposeColor;
+  final bool isFeatured;
 
   @override
   Widget build(BuildContext context) {
@@ -376,6 +379,19 @@ class _Hero extends StatelessWidget {
             style: FavoriteHeartStyle.onImage,
           ),
         ),
+        // Featured-listings treatment — a small brand-tinted "مميّز / Featured"
+        // pill at the top-start of the photo (opposite the favorite chip), so a
+        // promoted listing reads as special even within the regular feed.
+        if (isFeatured)
+          PositionedDirectional(
+            top: AppSpacing.md,
+            start: AppSpacing.md,
+            child: StatusPill(
+              label: l10n.home_featured_badge,
+              color: AppColors.of(context).primary,
+              icon: LucideIcons.sparkles,
+            ),
+          ),
         PositionedDirectional(
           bottom: AppSpacing.md,
           start: AppSpacing.md,

@@ -4958,4 +4958,65 @@ final class _DebugAppLocalizations extends AppLocalizations {
     'admin_report_reporter_with_id',
     (loc) => loc.admin_report_reporter_with_id(id),
   );
+
+  // ── Phase 25 uplift v3 (Wave B — featured listings) ──────────────────────
+  @override
+  String get home_featured_badge =>
+      _resolve('home_featured_badge', (loc) => loc.home_featured_badge);
+
+  @override
+  String get home_featured_section_title => _resolve(
+    'home_featured_section_title',
+    (loc) => loc.home_featured_section_title,
+  );
+
+  @override
+  String get adminPreviewActionFeature => _resolve(
+    'adminPreviewActionFeature',
+    (loc) => loc.adminPreviewActionFeature,
+  );
+
+  @override
+  String get adminFeatureDialogTitle => _resolve(
+    'adminFeatureDialogTitle',
+    (loc) => loc.adminFeatureDialogTitle,
+  );
+
+  @override
+  String get adminFeatureDialogBody =>
+      _resolve('adminFeatureDialogBody', (loc) => loc.adminFeatureDialogBody);
+
+  @override
+  String adminFeatureDialogOptionDays(int days) => _resolve(
+    'adminFeatureDialogOptionDays',
+    (loc) => loc.adminFeatureDialogOptionDays(days),
+  );
+
+  @override
+  String get adminFeatureDialogRemove => _resolve(
+    'adminFeatureDialogRemove',
+    (loc) => loc.adminFeatureDialogRemove,
+  );
+
+  @override
+  String get adminFeatureDialogCancel => _resolve(
+    'adminFeatureDialogCancel',
+    (loc) => loc.adminFeatureDialogCancel,
+  );
+
+  @override
+  String adminFeaturedUntil(String date) =>
+      _resolve('adminFeaturedUntil', (loc) => loc.adminFeaturedUntil(date));
+
+  @override
+  String get adminToastFeatureSuccess => _resolve(
+    'adminToastFeatureSuccess',
+    (loc) => loc.adminToastFeatureSuccess,
+  );
+
+  @override
+  String get adminToastUnfeatureSuccess => _resolve(
+    'adminToastUnfeatureSuccess',
+    (loc) => loc.adminToastUnfeatureSuccess,
+  );
 }

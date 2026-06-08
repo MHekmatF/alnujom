@@ -33,6 +33,7 @@ class HomeListingCardDto {
     this.bathrooms,
     this.areaSize,
     this.floor,
+    this.isFeatured = false,
   });
 
   final String id;
@@ -74,6 +75,12 @@ class HomeListingCardDto {
   final int? bathrooms;
   final double? areaSize;
   final int? floor;
+
+  /// Featured-listings treatment — true when the row's `featured_until`
+  /// timestamp is still in the future. Parsed from the (newly-projected)
+  /// `featured_until` column on the feed, or forced `true` by the dedicated
+  /// featured datasource query (`SupabaseHomeFeedDatasource.fetchFeatured`).
+  final bool isFeatured;
 
   /// Parses the embedded-selects projection shape from
   /// `SupabaseHomeFeedDatasource.fetchPage`. Defensive against missing
@@ -163,6 +170,7 @@ class HomeListingCardDto {
       bathrooms: _toInt(row['bathrooms']),
       areaSize: _toDouble(row['area_size']),
       floor: _toInt(row['floor']),
+      isFeatured: _parseFeatured(row['featured_until']),
     );
   }
 
@@ -188,6 +196,7 @@ class HomeListingCardDto {
       bathrooms: bathrooms,
       areaSize: areaSize,
       floor: floor,
+      isFeatured: isFeatured,
     );
   }
 
@@ -212,6 +221,7 @@ class HomeListingCardDto {
       bathrooms: bathrooms,
       areaSize: areaSize,
       floor: floor,
+      isFeatured: isFeatured,
     );
   }
 
@@ -254,6 +264,34 @@ class HomeListingCardDto {
       bathrooms: bathrooms,
       areaSize: areaSize,
       floor: floor,
+      isFeatured: isFeatured,
+    );
+  }
+
+  /// Returns a copy with [isFeatured] forced to [value]. Used by the dedicated
+  /// featured query (`SupabaseHomeFeedDatasource.fetchFeatured`) whose rows are
+  /// featured by construction.
+  HomeListingCardDto copyWithIsFeatured(bool value) {
+    return HomeListingCardDto(
+      id: id,
+      title: title,
+      propertyType: propertyType,
+      purpose: purpose,
+      publishedAt: publishedAt,
+      primaryPrice: primaryPrice,
+      mainImage: mainImage,
+      mainImageUrl: mainImageUrl,
+      governorate: governorate,
+      city: city,
+      agencyId: agencyId,
+      agencyName: agencyName,
+      agencyLogoPath: agencyLogoPath,
+      agencyLogoUrl: agencyLogoUrl,
+      rooms: rooms,
+      bathrooms: bathrooms,
+      areaSize: areaSize,
+      floor: floor,
+      isFeatured: value,
     );
   }
 }
@@ -313,6 +351,16 @@ int? _toInt(Object? raw) {
   if (raw is num) return raw.toInt();
   if (raw is String) return int.tryParse(raw);
   return null;
+}
+
+/// Resolves the FEATURED flag from a raw `featured_until` timestamp: a listing
+/// is featured when the value is non-null AND strictly in the future (UTC
+/// compare). Defensive against an unparseable value (treated as not featured).
+bool _parseFeatured(Object? raw) {
+  if (raw is! String || raw.isEmpty) return false;
+  final until = DateTime.tryParse(raw);
+  if (until == null) return false;
+  return until.isAfter(DateTime.now().toUtc());
 }
 
 double? _toDouble(Object? raw) {

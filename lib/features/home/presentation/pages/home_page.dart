@@ -28,11 +28,13 @@ import '../../../currencies/domain/usecases/list_currencies.dart';
 import '../../../favorites/presentation/bloc/favorites_cubit.dart';
 import '../../../inquiries/presentation/bloc/inquiries_unread_cubit.dart';
 import '../../../notifications/presentation/bloc/notification_badge_cubit.dart';
+import '../bloc/featured_listings_cubit.dart';
 import '../bloc/home_bloc.dart';
 import '../bloc/home_event.dart';
 import '../bloc/home_state.dart';
 import '../../../ads/domain/entities/ad_placement.dart';
 import '../../../ads/presentation/widgets/ad_slot.dart';
+import '../widgets/featured_listings_carousel.dart';
 import '../widgets/hero_search_bar.dart';
 import '../widgets/home_listing_card.dart';
 import '../../../notifications/presentation/widgets/notification_bell_action.dart';
@@ -62,9 +64,20 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context);
-    return BlocProvider<HomeBloc>(
-      create: (_) =>
-          getIt<HomeBloc>()..add(HomeFeedLoadRequested(locale: locale)),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<HomeBloc>(
+          create: (_) =>
+              getIt<HomeBloc>()..add(HomeFeedLoadRequested(locale: locale)),
+        ),
+        // Featured-listings treatment — load the "✨ عقارات مميّزة" carousel when
+        // Home opens. Page-scoped (mirrors HomeBloc); the section hides itself
+        // on empty / failure.
+        BlocProvider<FeaturedListingsCubit>(
+          create: (_) =>
+              getIt<FeaturedListingsCubit>()..load(locale: locale),
+        ),
+      ],
       child: const _HomeView(),
     );
   }
@@ -160,6 +173,9 @@ class _HomeViewState extends State<_HomeView> {
                   context.read<HomeBloc>().add(
                     HomeFeedRefreshRequested(locale: locale),
                   );
+                  // Featured-listings treatment — pull-to-refresh also reloads
+                  // the "✨ عقارات مميّزة" carousel.
+                  await context.read<FeaturedListingsCubit>().load(locale: locale);
                 },
                 child: _buildBody(context, state, currenciesByCode, l10n),
               );
@@ -194,6 +210,12 @@ class _HomeViewState extends State<_HomeView> {
         // Phase 21: home top banner (collapses to zero height when no ads — FR-012).
         const SliverToBoxAdapter(
           child: AdSlot(placement: AdPlacement.homeTopBanner),
+        ),
+        // Featured-listings treatment — the "✨ عقارات مميّزة" carousel sits at the
+        // TOP of the feed (above the regular list). Hides itself entirely when
+        // there are no active featured listings or the load failed.
+        SliverToBoxAdapter(
+          child: FeaturedListingsCarousel(currenciesByCode: currenciesByCode),
         ),
         SliverToBoxAdapter(child: _SectionHeader(title: l10n.home_latest_listings_header)),
         ..._buildFeedSlivers(context, state, currenciesByCode, l10n),

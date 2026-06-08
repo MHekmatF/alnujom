@@ -78,6 +78,8 @@ import '../../features/admin/listing_review/domain/repositories/listing_review_r
     as _i155;
 import '../../features/admin/listing_review/domain/usecases/approve_listing.dart'
     as _i404;
+import '../../features/admin/listing_review/domain/usecases/feature_listing.dart'
+    as _i542;
 import '../../features/admin/listing_review/domain/usecases/load_listing_preview.dart'
     as _i96;
 import '../../features/admin/listing_review/domain/usecases/load_pending_queue.dart'
@@ -242,7 +244,11 @@ import '../../features/home/data/repositories/home_feed_repository_impl.dart'
     as _i857;
 import '../../features/home/domain/repositories/home_feed_repository.dart'
     as _i433;
+import '../../features/home/domain/usecases/load_featured_listings.dart'
+    as _i240;
 import '../../features/home/domain/usecases/load_home_feed.dart' as _i321;
+import '../../features/home/presentation/bloc/featured_listings_cubit.dart'
+    as _i665;
 import '../../features/home/presentation/bloc/home_bloc.dart' as _i202;
 import '../../features/inquiries/data/datasources/supabase_inquiries_datasource.dart'
     as _i1043;
@@ -982,6 +988,9 @@ _i174.GetIt $initGetIt(
   gh.factory<_i880.RejectListingUseCase>(
     () => _i880.RejectListingUseCase(gh<_i155.ListingReviewRepository>()),
   );
+  gh.factory<_i542.FeatureListingUseCase>(
+    () => _i542.FeatureListingUseCase(gh<_i155.ListingReviewRepository>()),
+  );
   gh.factory<_i524.AgencyVerificationCubit>(
     () => _i524.AgencyVerificationCubit(
       gh<_i686.LoadAgencyById>(),
@@ -1262,13 +1271,6 @@ _i174.GetIt $initGetIt(
   gh.factory<_i29.MarkNotificationRead>(
     () => _i29.MarkNotificationRead(gh<_i563.NotificationsRepository>()),
   );
-  gh.factory<_i778.ListingPreviewBloc>(
-    () => _i778.ListingPreviewBloc(
-      gh<_i96.LoadListingPreviewUseCase>(),
-      gh<_i404.ApproveListingUseCase>(),
-      gh<_i880.RejectListingUseCase>(),
-    ),
-  );
   gh.factory<_i394.PaletteCubit>(
     () =>
         _i394.PaletteCubit(gh<_i753.PreferencesStore>(), gh<_i354.AppLogger>()),
@@ -1478,6 +1480,17 @@ _i174.GetIt $initGetIt(
   gh.factory<_i321.LoadHomeFeed>(
     () => _i321.LoadHomeFeed(gh<_i433.HomeFeedRepository>()),
   );
+  gh.factory<_i240.LoadFeaturedListings>(
+    () => _i240.LoadFeaturedListings(gh<_i433.HomeFeedRepository>()),
+  );
+  gh.factory<_i778.ListingPreviewBloc>(
+    () => _i778.ListingPreviewBloc(
+      gh<_i96.LoadListingPreviewUseCase>(),
+      gh<_i404.ApproveListingUseCase>(),
+      gh<_i880.RejectListingUseCase>(),
+      gh<_i542.FeatureListingUseCase>(),
+    ),
+  );
   gh.factory<_i949.ExchangeRateHistoryBloc>(
     () => _i949.ExchangeRateHistoryBloc(gh<_i776.ListExchangeRateHistory>()),
   );
@@ -1522,6 +1535,9 @@ _i174.GetIt $initGetIt(
       gh<_i415.LoadAllSettings>(),
       gh<_i349.UpdateSetting>(),
     ),
+  );
+  gh.factory<_i665.FeaturedListingsCubit>(
+    () => _i665.FeaturedListingsCubit(gh<_i240.LoadFeaturedListings>()),
   );
   gh.factory<_i669.LocationsListBloc>(
     () => _i669.LocationsListBloc(gh<_i533.ListGovernorates>()),

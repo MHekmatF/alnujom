@@ -28,4 +28,19 @@ abstract class HomeFeedRepository {
     Cursor? cursor,
     required Locale locale,
   });
+
+  /// Fetches up to [limit] currently-FEATURED listings for the home carousel.
+  ///
+  /// Returns:
+  /// - `Success([])` → no active featured listings (the section is hidden).
+  /// - `Success(rows)` → each row has `isFeatured == true` by construction.
+  /// - `FailureResult(NetworkFailure(...))` → transport error (the section is
+  ///   hidden — featured is a non-blocking enhancement to the home feed).
+  ///
+  /// `locale` is consumed at DTO→entity mapping to resolve the localized
+  /// governorate/city names per the user's active locale.
+  Future<Result<List<HomeListingCard>>> fetchFeatured({
+    int limit = 10,
+    required Locale locale,
+  });
 }
