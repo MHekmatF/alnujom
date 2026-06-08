@@ -47,6 +47,11 @@ class _MyListingsView extends StatefulWidget {
 class _MyListingsViewState extends State<_MyListingsView> {
   late final Future<List<Currency>> _currenciesFuture;
 
+  // Last-seen one-shot renew tokens, so the BlocListener can tell whether the
+  // success or the error token advanced and show the matching snackbar.
+  int _lastRenewSuccessToken = 0;
+  int _lastRenewErrorToken = 0;
+
   @override
   void initState() {
     super.initState();
@@ -68,8 +73,32 @@ class _MyListingsViewState extends State<_MyListingsView> {
             children: [
               const StatusFilterChipRow(),
               Expanded(
-                child: BlocBuilder<MyListingsBloc, MyListingsState>(
-                  builder: (context, state) {
+                child: BlocListener<MyListingsBloc, MyListingsState>(
+                  listenWhen: (prev, curr) =>
+                      prev.renewSuccessToken != curr.renewSuccessToken ||
+                      prev.renewErrorToken != curr.renewErrorToken,
+                  listener: (context, state) {
+                    final messenger = ScaffoldMessenger.of(context);
+                    final succeeded =
+                        state.renewSuccessToken != _lastRenewSuccessToken;
+                    final failed =
+                        state.renewErrorToken != _lastRenewErrorToken;
+                    _lastRenewSuccessToken = state.renewSuccessToken;
+                    _lastRenewErrorToken = state.renewErrorToken;
+                    if (!succeeded && !failed) return;
+                    messenger.hideCurrentSnackBar();
+                    messenger.showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          succeeded
+                              ? l10n.myListingsRenewSuccess
+                              : l10n.myListingsRenewError,
+                        ),
+                      ),
+                    );
+                  },
+                  child: BlocBuilder<MyListingsBloc, MyListingsState>(
+                    builder: (context, state) {
                     if (state.loading && state.listings.isEmpty) {
                       return const Center(child: CircularProgressIndicator());
                     }
@@ -116,7 +145,8 @@ class _MyListingsViewState extends State<_MyListingsView> {
                         );
                       },
                     );
-                  },
+                    },
+                  ),
                 ),
               ),
             ],

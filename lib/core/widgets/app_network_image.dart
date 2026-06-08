@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../theme/motion.dart';
 import 'loading_state.dart';
+import 'reduce_motion.dart';
 
 /// Placeholder strategy while a network image loads.
 ///
@@ -38,6 +39,10 @@ class AppNetworkImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
+    // Honour "Remove animations": when reduced motion is on, the image and its
+    // placeholder snap in instantly (no cross-fade).
+    final reduce = reduceMotion(context);
+    final fade = reduce ? Duration.zero : AppMotion.base;
 
     Widget result;
     if (url == null || url!.isEmpty) {
@@ -46,8 +51,9 @@ class AppNetworkImage extends StatelessWidget {
       result = CachedNetworkImage(
         imageUrl: url!,
         fit: fit,
-        fadeInDuration: AppMotion.base,
+        fadeInDuration: fade,
         fadeInCurve: AppMotion.curve,
+        placeholderFadeInDuration: fade,
         placeholder: (context, _) => placeholderStyle == AppImagePlaceholder.skeleton
             ? const LoadingState.card()
             : ColoredBox(color: colors.surfaceVariant),

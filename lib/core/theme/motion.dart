@@ -22,4 +22,11 @@ abstract final class AppMotion {
 
   /// Shared easing curve (`cubic-bezier(.2, .7, .3, 1)`).
   static const Curve curve = Cubic(0.2, 0.7, 0.3, 1);
+
+  /// Emphasized entrance — a confident decelerate for sheets/dialogs appearing
+  /// and hero elements settling in (Material-3 "emphasized decelerate").
+  static const Curve emphasized = Cubic(0.05, 0.7, 0.1, 1.0);
+
+  /// Exit/dismiss — an accelerate so dismissals feel snappy, not draggy.
+  static const Curve exit = Cubic(0.3, 0.0, 0.8, 0.15);
 }

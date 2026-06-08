@@ -22,6 +22,18 @@ class LoadingState extends StatefulWidget {
       height = AppSpacing.xxxl,
       radius = AppRadii.pill;
 
+  /// A single text-line shimmer (body height) — for skeletoning copy lines.
+  const LoadingState.line({super.key})
+    : width = double.infinity,
+      height = AppSpacing.lg,
+      radius = AppRadii.sm;
+
+  /// A taller heading/title-line shimmer.
+  const LoadingState.heading({super.key})
+    : width = double.infinity,
+      height = AppSpacing.xl,
+      radius = AppRadii.sm;
+
   final double width;
   final double height;
   final double radius;

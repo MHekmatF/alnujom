@@ -1,9 +1,13 @@
 // lib/features/search/presentation/widgets/search_filter_sheet.dart
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/range_slider_field.dart';
+import '../../../../core/widgets/segmented_control.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../currencies/domain/entities/currency.dart';
 import '../../../currencies/domain/repositories/currencies_repository.dart';
@@ -14,7 +18,6 @@ import '../../../locations/domain/entities/governorate_with_city_count.dart';
 import '../../../locations/domain/repositories/locations_repository.dart';
 import '../../domain/entities/count_filter_mode.dart';
 import '../../domain/entities/filter_state.dart';
-import 'price_range_input.dart';
 
 class SearchFilterSheet extends StatefulWidget {
   const SearchFilterSheet({
@@ -31,22 +34,29 @@ class SearchFilterSheet extends StatefulWidget {
 }
 
 class _SearchFilterSheetState extends State<SearchFilterSheet> {
+  // ── Range-slider bounds (Phase 25) ──────────────────────────────────────
+  // Price slider domain: 0 → [_kPriceMax]. When `end` sits at the cap we treat
+  // it as "no upper bound" (null priceMax) so the slider can express open-ended
+  // ranges. The selected currency only labels the values — conversion to
+  // USD/SYP happens in the datasource (R-75).
+  static const double _kPriceMax = 1000000;
+  static const double _kAreaMax = 1000;
+  static const int _kBedsBathsMax = 5;
+
   // Local mutable state mirroring FilterState fields
   ListingPurpose? _purpose;
   PropertyType? _propertyType;
   String? _governorateId;
   String? _cityId;
   String? _areaId;
-  final TextEditingController _priceMinController = TextEditingController();
-  final TextEditingController _priceMaxController = TextEditingController();
+  RangeValues _priceRange = const RangeValues(0, _kPriceMax);
   String? _priceCurrency;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   int? _rooms;
   CountFilterMode _roomsMode = CountFilterMode.exactly;
   int? _bathrooms;
   CountFilterMode _bathroomsMode = CountFilterMode.exactly;
-  final TextEditingController _areaSizeMinController = TextEditingController();
-  final TextEditingController _areaSizeMaxController = TextEditingController();
+  RangeValues _areaRange = const RangeValues(0, _kAreaMax);
 
   // Location data
   List<GovernorateWithCityCount> _governorates = [];
@@ -66,37 +76,24 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
     _governorateId = widget.initialFilters.governorateId;
     _cityId = widget.initialFilters.cityId;
     _areaId = widget.initialFilters.areaId;
-    if (widget.initialFilters.priceMin != null) {
-      _priceMinController.text = widget.initialFilters.priceMin!.toString();
-    }
-    if (widget.initialFilters.priceMax != null) {
-      _priceMaxController.text = widget.initialFilters.priceMax!.toString();
-    }
+    _priceRange = _safeRange(
+      widget.initialFilters.priceMin,
+      widget.initialFilters.priceMax,
+      _kPriceMax,
+    );
     _priceCurrency = widget.initialFilters.priceCurrency;
     _rooms = widget.initialFilters.rooms;
     _roomsMode = widget.initialFilters.roomsMode;
     _bathrooms = widget.initialFilters.bathrooms;
     _bathroomsMode = widget.initialFilters.bathroomsMode;
-    if (widget.initialFilters.areaSizeMin != null) {
-      _areaSizeMinController.text = widget.initialFilters.areaSizeMin!
-          .toString();
-    }
-    if (widget.initialFilters.areaSizeMax != null) {
-      _areaSizeMaxController.text = widget.initialFilters.areaSizeMax!
-          .toString();
-    }
+    _areaRange = _safeRange(
+      widget.initialFilters.areaSizeMin,
+      widget.initialFilters.areaSizeMax,
+      _kAreaMax,
+    );
 
     _loadGovernorates();
     _loadCurrencies();
-  }
-
-  @override
-  void dispose() {
-    _priceMinController.dispose();
-    _priceMaxController.dispose();
-    _areaSizeMinController.dispose();
-    _areaSizeMaxController.dispose();
-    super.dispose();
   }
 
   Future<void> _loadGovernorates() async {
@@ -411,132 +408,125 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
           onChanged: (code) => setState(() => _priceCurrency = code),
         ),
         const SizedBox(height: 8),
-        PriceRangeInput(
-          minController: _priceMinController,
-          maxController: _priceMaxController,
-          formKey: _formKey,
+        RangeSliderField(
+          label: l10n.search_filter_price_range_label,
+          min: 0,
+          max: _kPriceMax,
+          divisions: 100,
+          values: _priceRange,
+          formatValue: (v) => _formatPrice(v, atCap: v >= _kPriceMax),
+          onChanged: (range) => setState(() => _priceRange = range),
         ),
       ],
     );
   }
 
+  /// Builds a valid [RangeValues] from optional min/max bounds, clamped into
+  /// [0, cap] and normalized so start ≤ end (tolerates malformed saved data).
+  static RangeValues _safeRange(double? min, double? max, double cap) {
+    var start = (min ?? 0).clamp(0.0, cap);
+    var end = (max ?? cap).clamp(0.0, cap);
+    if (start > end) {
+      final tmp = start;
+      start = end;
+      end = tmp;
+    }
+    return RangeValues(start, end);
+  }
+
+  /// Compact, locale-aware money label. When [atCap] the upper-bound reads as
+  /// "no max" (the slider's max position expresses an open-ended range).
+  String _formatPrice(double value, {bool atCap = false}) {
+    final l10n = AppLocalizations.of(context)!;
+    if (atCap) return l10n.search_filter_range_no_max;
+    final locale = Localizations.localeOf(context).toString();
+    return NumberFormat.compact(locale: locale).format(value.round());
+  }
+
   Widget _buildRoomsSection(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.search_filter_rooms_label,
-          style: Theme.of(context).textTheme.labelLarge,
-          textAlign: TextAlign.start,
-        ),
-        const SizedBox(height: 8),
-        SegmentedButton<CountFilterMode>(
-          segments: [
-            ButtonSegment(
-              value: CountFilterMode.exactly,
-              label: Text(l10n.search_filter_rooms_exactly),
-            ),
-            ButtonSegment(
-              value: CountFilterMode.atLeast,
-              label: Text(l10n.search_filter_rooms_at_least),
-            ),
-          ],
-          selected: {_roomsMode},
-          onSelectionChanged: (s) => setState(() => _roomsMode = s.first),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.remove),
-              onPressed: _rooms != null && _rooms! > 0
-                  ? () => setState(() {
-                      if (_rooms! <= 1) {
-                        _rooms = null;
-                      } else {
-                        _rooms = _rooms! - 1;
-                      }
-                    })
-                  : null,
-            ),
-            Padding(
-              padding: const EdgeInsetsDirectional.symmetric(
-                horizontal: AppSpacing.lg,
-              ),
-              child: Text(
-                _rooms?.toString() ?? '—',
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: () => setState(() => _rooms = (_rooms ?? 0) + 1),
-            ),
-          ],
-        ),
-      ],
+    return _buildCountSection(
+      context,
+      label: l10n.search_filter_rooms_label,
+      value: _rooms,
+      mode: _roomsMode,
+      onValueChanged: (v) => setState(() => _rooms = v),
+      onModeChanged: (m) => setState(() => _roomsMode = m),
     );
   }
 
   Widget _buildBathroomsSection(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    return _buildCountSection(
+      context,
+      label: l10n.search_filter_bathrooms_label,
+      value: _bathrooms,
+      mode: _bathroomsMode,
+      onValueChanged: (v) => setState(() => _bathrooms = v),
+      onModeChanged: (m) => setState(() => _bathroomsMode = m),
+    );
+  }
+
+  /// Shared beds/baths selector: a row of count chips (Any · 1 · 2 · 3 · 4 ·
+  /// 5+) plus an exactly/at-least mode toggle (shown only when a count is set).
+  Widget _buildCountSection(
+    BuildContext context, {
+    required String label,
+    required int? value,
+    required CountFilterMode mode,
+    required ValueChanged<int?> onValueChanged,
+    required ValueChanged<CountFilterMode> onModeChanged,
+  }) {
+    final l10n = AppLocalizations.of(context)!;
+    final styles = AppTextStyles.of(context);
+    final locale = Localizations.localeOf(context).toString();
+    final numberFmt = NumberFormat.decimalPattern(locale);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          l10n.search_filter_bathrooms_label,
-          style: Theme.of(context).textTheme.labelLarge,
-          textAlign: TextAlign.start,
-        ),
-        const SizedBox(height: 8),
-        SegmentedButton<CountFilterMode>(
-          segments: [
-            ButtonSegment(
-              value: CountFilterMode.exactly,
-              label: Text(l10n.search_filter_rooms_exactly),
-            ),
-            ButtonSegment(
-              value: CountFilterMode.atLeast,
-              label: Text(l10n.search_filter_rooms_at_least),
-            ),
-          ],
-          selected: {_bathroomsMode},
-          onSelectionChanged: (s) => setState(() => _bathroomsMode = s.first),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        Text(label, style: styles.labelLarge, textAlign: TextAlign.start),
+        const SizedBox(height: AppSpacing.sm),
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
           children: [
-            IconButton(
-              icon: const Icon(Icons.remove),
-              onPressed: _bathrooms != null && _bathrooms! > 0
-                  ? () => setState(() {
-                      if (_bathrooms! <= 1) {
-                        _bathrooms = null;
-                      } else {
-                        _bathrooms = _bathrooms! - 1;
-                      }
-                    })
-                  : null,
+            ChoiceChip(
+              label: Text(l10n.search_filter_count_any),
+              selected: value == null,
+              onSelected: (_) => onValueChanged(null),
             ),
-            Padding(
-              padding: const EdgeInsetsDirectional.symmetric(
-                horizontal: AppSpacing.lg,
+            for (var n = 1; n <= _kBedsBathsMax; n++)
+              ChoiceChip(
+                label: Text(
+                  n == _kBedsBathsMax
+                      ? '${numberFmt.format(n)}+'
+                      : numberFmt.format(n),
+                ),
+                selected: value == n,
+                onSelected: (_) => onValueChanged(n),
               ),
-              child: Text(
-                _bathrooms?.toString() ?? '—',
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: () =>
-                  setState(() => _bathrooms = (_bathrooms ?? 0) + 1),
-            ),
           ],
         ),
+        if (value != null) ...[
+          const SizedBox(height: AppSpacing.sm),
+          AppSegmentedControl<CountFilterMode>(
+            value: mode,
+            onChanged: onModeChanged,
+            segments: [
+              AppSegmentedSegment(
+                icon: Icons.drag_handle,
+                label: l10n.search_filter_rooms_exactly,
+                value: CountFilterMode.exactly,
+              ),
+              AppSegmentedSegment(
+                icon: Icons.add,
+                label: l10n.search_filter_rooms_at_least,
+                value: CountFilterMode.atLeast,
+              ),
+            ],
+          ),
+        ],
       ],
     );
   }
@@ -552,38 +542,20 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
           textAlign: TextAlign.start,
         ),
         const SizedBox(height: 8),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsetsDirectional.only(end: AppSpacing.sm),
-                child: TextFormField(
-                  controller: _areaSizeMinController,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: l10n.search_filter_price_min_hint,
-                  ),
+        RangeSliderField(
+          label: l10n.search_filter_area_size_label,
+          min: 0,
+          max: _kAreaMax,
+          divisions: 100,
+          values: _areaRange,
+          formatValue: (v) => v >= _kAreaMax
+              ? l10n.search_filter_range_no_max
+              : l10n.search_filter_area_size_value(
+                  NumberFormat.decimalPattern(
+                    Localizations.localeOf(context).toString(),
+                  ).format(v.round()),
                 ),
-              ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsetsDirectional.only(start: AppSpacing.sm),
-                child: TextFormField(
-                  controller: _areaSizeMaxController,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: l10n.search_filter_price_max_hint,
-                  ),
-                ),
-              ),
-            ),
-          ],
+          onChanged: (range) => setState(() => _areaRange = range),
         ),
       ],
     );
@@ -603,44 +575,47 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
             _areaId = null;
             _cities = [];
             _areas = [];
-            _priceMinController.clear();
-            _priceMaxController.clear();
+            _priceRange = const RangeValues(0, _kPriceMax);
             _priceCurrency = null;
             _rooms = null;
             _roomsMode = CountFilterMode.exactly;
             _bathrooms = null;
             _bathroomsMode = CountFilterMode.exactly;
-            _areaSizeMinController.clear();
-            _areaSizeMaxController.clear();
+            _areaRange = const RangeValues(0, _kAreaMax);
           }),
           child: Text(l10n.search_filter_reset),
         ),
         ElevatedButton(
           onPressed: () {
             if (!_formKey.currentState!.validate()) return;
+            // Slider sentinels: a `start` of 0 ⇒ no minimum; an `end` at the
+            // cap ⇒ no maximum (open-ended). Either way the bound is null so
+            // the RPC treats that direction as unfiltered.
+            final priceMin = _priceRange.start > 0 ? _priceRange.start : null;
+            final priceMax = _priceRange.end < _kPriceMax
+                ? _priceRange.end
+                : null;
+            final areaMin = _areaRange.start > 0 ? _areaRange.start : null;
+            final areaMax = _areaRange.end < _kAreaMax ? _areaRange.end : null;
             final newFilters = FilterState(
               purpose: _purpose,
               propertyType: _propertyType,
               governorateId: _governorateId,
               cityId: _cityId,
               areaId: _areaId,
-              priceMin: _priceMinController.text.isNotEmpty
-                  ? double.tryParse(_priceMinController.text)
+              priceMin: priceMin,
+              priceMax: priceMax,
+              // Only carry a currency when a price bound is active — the
+              // datasource needs it for USD/SYP conversion (R-75).
+              priceCurrency: (priceMin != null || priceMax != null)
+                  ? _priceCurrency
                   : null,
-              priceMax: _priceMaxController.text.isNotEmpty
-                  ? double.tryParse(_priceMaxController.text)
-                  : null,
-              priceCurrency: _priceCurrency,
               rooms: _rooms,
               roomsMode: _roomsMode,
               bathrooms: _bathrooms,
               bathroomsMode: _bathroomsMode,
-              areaSizeMin: _areaSizeMinController.text.isNotEmpty
-                  ? double.tryParse(_areaSizeMinController.text)
-                  : null,
-              areaSizeMax: _areaSizeMaxController.text.isNotEmpty
-                  ? double.tryParse(_areaSizeMaxController.text)
-                  : null,
+              areaSizeMin: areaMin,
+              areaSizeMax: areaMax,
             );
             widget.onApply(newFilters);
             Navigator.of(context).pop();

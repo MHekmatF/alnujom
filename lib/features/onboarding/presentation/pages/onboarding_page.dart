@@ -8,6 +8,7 @@ import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/brand_mark.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../cubit/onboarding_cubit.dart';
@@ -116,12 +117,11 @@ class _OnboardingViewState extends State<_OnboardingView> {
                             BrandMark(
                               withWordmark: true,
                               size: 24,
-                              color: Colors.white,
-                              accentColor: colors.accent,
+                              color: colors.onPhoto,
                             ),
                             TextButton(
                               style: TextButton.styleFrom(
-                                foregroundColor: Colors.white,
+                                foregroundColor: colors.onPhoto,
                               ),
                               onPressed: () =>
                                   context.read<OnboardingCubit>().markSeen(),
@@ -133,14 +133,16 @@ class _OnboardingViewState extends State<_OnboardingView> {
                         Text(
                           current.title,
                           style: styles.displayMedium.copyWith(
-                            color: Colors.white,
+                            color: colors.onPhoto,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
                         const SizedBox(height: AppSpacing.md),
                         Text(
                           current.body,
-                          style: styles.bodyLarge.copyWith(color: Colors.white),
+                          style: styles.bodyLarge.copyWith(
+                            color: colors.onPhoto,
+                          ),
                         ),
                         const SizedBox(height: AppSpacing.xl),
                         Row(
@@ -149,10 +151,12 @@ class _OnboardingViewState extends State<_OnboardingView> {
                               margin: const EdgeInsetsDirectional.only(
                                 end: AppSpacing.xs,
                               ),
-                              width: i == step ? 24 : 8,
-                              height: 8,
+                              width: i == step ? AppSpacing.xl : AppSpacing.sm,
+                              height: AppSpacing.sm,
                               decoration: BoxDecoration(
-                                color: i == step ? colors.accent : Colors.white54,
+                                color: i == step
+                                    ? colors.accent
+                                    : colors.onPhoto.withValues(alpha: 0.5),
                                 borderRadius: BorderRadius.circular(
                                   AppRadii.pill,
                                 ),
@@ -161,17 +165,11 @@ class _OnboardingViewState extends State<_OnboardingView> {
                           }),
                         ),
                         const SizedBox(height: AppSpacing.lg),
-                        SizedBox(
-                          width: double.infinity,
-                          child: FilledButton(
-                            onPressed: () =>
-                                context.read<OnboardingCubit>().nextStep(),
-                            child: Text(
-                              step + 1 >= total
-                                  ? l10n.onboarding_get_started
-                                  : l10n.onboarding_get_started,
-                            ),
-                          ),
+                        AppButton.filledPrimary(
+                          label: l10n.onboarding_get_started,
+                          expanded: true,
+                          onPressed: () =>
+                              context.read<OnboardingCubit>().nextStep(),
                         ),
                         const SizedBox(height: AppSpacing.xl),
                       ],

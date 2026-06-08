@@ -4499,6 +4499,357 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('home_greeting_subtitle', (loc) => loc.home_greeting_subtitle);
 
   @override
+  String get auth_login_headline =>
+      _resolve('auth_login_headline', (loc) => loc.auth_login_headline);
+
+  @override
+  String get auth_login_subtitle =>
+      _resolve('auth_login_subtitle', (loc) => loc.auth_login_subtitle);
+
+  @override
+  String get auth_register_headline =>
+      _resolve('auth_register_headline', (loc) => loc.auth_register_headline);
+
+  @override
+  String get auth_register_subtitle =>
+      _resolve('auth_register_subtitle', (loc) => loc.auth_register_subtitle);
+
+  @override
+  String get auth_trust_note =>
+      _resolve('auth_trust_note', (loc) => loc.auth_trust_note);
+
+  @override
+  String get spec_rooms_label =>
+      _resolve('spec_rooms_label', (loc) => loc.spec_rooms_label);
+
+  @override
+  String get spec_baths_label =>
+      _resolve('spec_baths_label', (loc) => loc.spec_baths_label);
+
+  @override
+  String get spec_area_label =>
+      _resolve('spec_area_label', (loc) => loc.spec_area_label);
+
+  @override
+  String get spec_floor_label =>
+      _resolve('spec_floor_label', (loc) => loc.spec_floor_label);
+
+  @override
+  String get spec_area_unit =>
+      _resolve('spec_area_unit', (loc) => loc.spec_area_unit);
+  @override
+  String get listing_details_similar_title =>
+      _resolve('listing_details_similar_title', (loc) => loc.listing_details_similar_title);
+
+  @override
+  String get listing_details_facts_type_label =>
+      _resolve('listing_details_facts_type_label', (loc) => loc.listing_details_facts_type_label);
+
+  @override
+  String listing_details_contact_username(String username) =>
+      _resolve('listing_details_contact_username', (loc) => loc.listing_details_contact_username(username));
+
+  @override
+  String get listing_details_share_subject =>
+      _resolve('listing_details_share_subject', (loc) => loc.listing_details_share_subject);
+
+  @override
+  String get search_display_mode_list =>
+      _resolve('search_display_mode_list', (loc) => loc.search_display_mode_list);
+
+  @override
+  String get search_display_mode_map =>
+      _resolve('search_display_mode_map', (loc) => loc.search_display_mode_map);
+
+  @override
+  String get search_filter_count_any =>
+      _resolve('search_filter_count_any', (loc) => loc.search_filter_count_any);
+
+  @override
+  String get search_filter_range_no_max =>
+      _resolve('search_filter_range_no_max', (loc) => loc.search_filter_range_no_max);
+
+  @override
+  String search_filter_area_size_value(String value) =>
+      _resolve('search_filter_area_size_value', (loc) => loc.search_filter_area_size_value(value));
+
+  @override
+  String get search_recent_title =>
+      _resolve('search_recent_title', (loc) => loc.search_recent_title);
+
+  @override
+  String get search_recent_clear_all =>
+      _resolve('search_recent_clear_all', (loc) => loc.search_recent_clear_all);
+
+  @override
+  String get search_recent_empty_title =>
+      _resolve('search_recent_empty_title', (loc) => loc.search_recent_empty_title);
+
+  @override
+  String get search_recent_empty_subtitle =>
+      _resolve('search_recent_empty_subtitle', (loc) => loc.search_recent_empty_subtitle);
+
+  @override
+  String get search_save_this_search_action =>
+      _resolve('search_save_this_search_action', (loc) => loc.search_save_this_search_action);
+
+  @override
+  String get search_save_search_dialog_title =>
+      _resolve('search_save_search_dialog_title', (loc) => loc.search_save_search_dialog_title);
+
+  @override
+  String get search_save_search_label_hint =>
+      _resolve('search_save_search_label_hint', (loc) => loc.search_save_search_label_hint);
+
+  @override
+  String get search_save_search_confirm =>
+      _resolve('search_save_search_confirm', (loc) => loc.search_save_search_confirm);
+
+  @override
+  String get search_save_search_cancel =>
+      _resolve('search_save_search_cancel', (loc) => loc.search_save_search_cancel);
+
+  @override
+  String get search_save_search_success =>
+      _resolve('search_save_search_success', (loc) => loc.search_save_search_success);
+
+  @override
+  String get search_save_search_auth_required =>
+      _resolve('search_save_search_auth_required', (loc) => loc.search_save_search_auth_required);
+
+  @override
+  String get search_save_search_error =>
+      _resolve('search_save_search_error', (loc) => loc.search_save_search_error);
+
+  @override
+  String get search_saved_searches_title =>
+      _resolve('search_saved_searches_title', (loc) => loc.search_saved_searches_title);
+
+  @override
+  String get search_saved_searches_empty_title =>
+      _resolve('search_saved_searches_empty_title', (loc) => loc.search_saved_searches_empty_title);
+
+  @override
+  String get search_saved_searches_empty_subtitle =>
+      _resolve('search_saved_searches_empty_subtitle', (loc) => loc.search_saved_searches_empty_subtitle);
+
+  @override
+  String get search_saved_searches_error_title =>
+      _resolve('search_saved_searches_error_title', (loc) => loc.search_saved_searches_error_title);
+
+  @override
+  String get search_saved_searches_all_listings =>
+      _resolve('search_saved_searches_all_listings', (loc) => loc.search_saved_searches_all_listings);
+
+  @override
+  String get search_saved_searches_delete =>
+      _resolve('search_saved_searches_delete', (loc) => loc.search_saved_searches_delete);
+
+  @override
+  String get search_saved_searches_delete_title =>
+      _resolve('search_saved_searches_delete_title', (loc) => loc.search_saved_searches_delete_title);
+
+  @override
+  String get search_saved_searches_delete_body =>
+      _resolve('search_saved_searches_delete_body', (loc) => loc.search_saved_searches_delete_body);
+
+  @override
+  String get search_view_full_map =>
+      _resolve('search_view_full_map', (loc) => loc.search_view_full_map);
+
+  @override
+  String get favorites_sort_label =>
+      _resolve('favorites_sort_label', (loc) => loc.favorites_sort_label);
+
+  @override
+  String get favorites_sort_recently_saved =>
+      _resolve('favorites_sort_recently_saved', (loc) => loc.favorites_sort_recently_saved);
+
+  @override
+  String get favorites_sort_price_desc =>
+      _resolve('favorites_sort_price_desc', (loc) => loc.favorites_sort_price_desc);
+
+  @override
+  String get favorites_sort_price_asc =>
+      _resolve('favorites_sort_price_asc', (loc) => loc.favorites_sort_price_asc);
+
+  @override
+  String get publisherDashboardTitle =>
+      _resolve('publisherDashboardTitle', (loc) => loc.publisherDashboardTitle);
+
+  @override
+  String get publisherDashboardHeaderTitle =>
+      _resolve('publisherDashboardHeaderTitle', (loc) => loc.publisherDashboardHeaderTitle);
+
+  @override
+  String get publisherDashboardHeaderSubtitle =>
+      _resolve('publisherDashboardHeaderSubtitle', (loc) => loc.publisherDashboardHeaderSubtitle);
+
+  @override
+  String get publisherDashboardQuickActions =>
+      _resolve('publisherDashboardQuickActions', (loc) => loc.publisherDashboardQuickActions);
+
+  @override
+  String get publisherDashboardSummaryError =>
+      _resolve('publisherDashboardSummaryError', (loc) => loc.publisherDashboardSummaryError);
+
+  @override
+  String get publisherDashboardStatTotalListings =>
+      _resolve('publisherDashboardStatTotalListings', (loc) => loc.publisherDashboardStatTotalListings);
+
+  @override
+  String get publisherDashboardStatActiveListings =>
+      _resolve('publisherDashboardStatActiveListings', (loc) => loc.publisherDashboardStatActiveListings);
+
+  @override
+  String get publisherDashboardStatPendingListings =>
+      _resolve('publisherDashboardStatPendingListings', (loc) => loc.publisherDashboardStatPendingListings);
+
+  @override
+  String get publisherDashboardStatRejectedListings =>
+      _resolve('publisherDashboardStatRejectedListings', (loc) => loc.publisherDashboardStatRejectedListings);
+
+  @override
+  String get publisherDashboardStatTotalInquiries =>
+      _resolve('publisherDashboardStatTotalInquiries', (loc) => loc.publisherDashboardStatTotalInquiries);
+
+  @override
+  String get publisherDashboardStatNewInquiries =>
+      _resolve('publisherDashboardStatNewInquiries', (loc) => loc.publisherDashboardStatNewInquiries);
+
+  @override
+  String get publisherDashboardStatLeadEvents =>
+      _resolve('publisherDashboardStatLeadEvents', (loc) => loc.publisherDashboardStatLeadEvents);
+
+  @override
+  String get publisherDashboardActionMyListingsSubtitle =>
+      _resolve('publisherDashboardActionMyListingsSubtitle', (loc) => loc.publisherDashboardActionMyListingsSubtitle);
+
+  @override
+  String get publisherDashboardActionAddListing =>
+      _resolve('publisherDashboardActionAddListing', (loc) => loc.publisherDashboardActionAddListing);
+
+  @override
+  String get publisherDashboardActionAddListingSubtitle =>
+      _resolve('publisherDashboardActionAddListingSubtitle', (loc) => loc.publisherDashboardActionAddListingSubtitle);
+
+  @override
+  String get publisherDashboardActionSavedSearches =>
+      _resolve('publisherDashboardActionSavedSearches', (loc) => loc.publisherDashboardActionSavedSearches);
+
+  @override
+  String get publisherDashboardActionSavedSearchesSubtitle =>
+      _resolve('publisherDashboardActionSavedSearchesSubtitle', (loc) => loc.publisherDashboardActionSavedSearchesSubtitle);
+
+  @override
+  String get dashboardEntryTitle =>
+      _resolve('dashboardEntryTitle', (loc) => loc.dashboardEntryTitle);
+
+  @override
+  String get dashboardEntryEmptyTitle =>
+      _resolve('dashboardEntryEmptyTitle', (loc) => loc.dashboardEntryEmptyTitle);
+
+  @override
+  String get dashboardEntryEmptyBody =>
+      _resolve('dashboardEntryEmptyBody', (loc) => loc.dashboardEntryEmptyBody);
+
+  @override
+  String get adminConsoleHeaderTitle =>
+      _resolve('adminConsoleHeaderTitle', (loc) => loc.adminConsoleHeaderTitle);
+
+  @override
+  String get adminConsoleHeaderSubtitle =>
+      _resolve('adminConsoleHeaderSubtitle', (loc) => loc.adminConsoleHeaderSubtitle);
+
+  @override
+  String get adminRoleBadgeSuperAdmin =>
+      _resolve('adminRoleBadgeSuperAdmin', (loc) => loc.adminRoleBadgeSuperAdmin);
+
+  @override
+  String get adminRoleBadgeAdministrator =>
+      _resolve('adminRoleBadgeAdministrator', (loc) => loc.adminRoleBadgeAdministrator);
+
+  @override
+  String get adminSectionGroupModeration =>
+      _resolve('adminSectionGroupModeration', (loc) => loc.adminSectionGroupModeration);
+
+  @override
+  String get adminSectionGroupConfiguration =>
+      _resolve('adminSectionGroupConfiguration', (loc) => loc.adminSectionGroupConfiguration);
+
+  @override
+  String get adminSectionGroupInsights =>
+      _resolve('adminSectionGroupInsights', (loc) => loc.adminSectionGroupInsights);
+
+  @override
+  String get adminSectionGroupSuperAdmin =>
+      _resolve('adminSectionGroupSuperAdmin', (loc) => loc.adminSectionGroupSuperAdmin);
+
+  @override
+  String get adminQuickStatPendingUsers =>
+      _resolve('adminQuickStatPendingUsers', (loc) => loc.adminQuickStatPendingUsers);
+
+  @override
+  String get adminQuickStatPendingListings =>
+      _resolve('adminQuickStatPendingListings', (loc) => loc.adminQuickStatPendingListings);
+
+  @override
+  String get adminQuickStatOpenReports =>
+      _resolve('adminQuickStatOpenReports', (loc) => loc.adminQuickStatOpenReports);
+
+  @override
+  String get adminQuickStatNewInquiries =>
+      _resolve('adminQuickStatNewInquiries', (loc) => loc.adminQuickStatNewInquiries);
+
+  @override
+  String get adminQuickStatActiveListings =>
+      _resolve('adminQuickStatActiveListings', (loc) => loc.adminQuickStatActiveListings);
+
+  @override
+  String get adminSectionSubtitleApprovals =>
+      _resolve('adminSectionSubtitleApprovals', (loc) => loc.adminSectionSubtitleApprovals);
+
+  @override
+  String get adminSectionSubtitleListingReview =>
+      _resolve('adminSectionSubtitleListingReview', (loc) => loc.adminSectionSubtitleListingReview);
+
+  @override
+  String get adminSectionSubtitleReports =>
+      _resolve('adminSectionSubtitleReports', (loc) => loc.adminSectionSubtitleReports);
+
+  @override
+  String get adminSectionSubtitleAgencies =>
+      _resolve('adminSectionSubtitleAgencies', (loc) => loc.adminSectionSubtitleAgencies);
+
+  @override
+  String get adminSectionSubtitleInquiries =>
+      _resolve('adminSectionSubtitleInquiries', (loc) => loc.adminSectionSubtitleInquiries);
+
+  @override
+  String get adminSectionSubtitleLocations =>
+      _resolve('adminSectionSubtitleLocations', (loc) => loc.adminSectionSubtitleLocations);
+
+  @override
+  String get adminSectionSubtitleCurrencies =>
+      _resolve('adminSectionSubtitleCurrencies', (loc) => loc.adminSectionSubtitleCurrencies);
+
+  @override
+  String get adminSectionSubtitleAds =>
+      _resolve('adminSectionSubtitleAds', (loc) => loc.adminSectionSubtitleAds);
+
+  @override
+  String get adminSectionSubtitleSettings =>
+      _resolve('adminSectionSubtitleSettings', (loc) => loc.adminSectionSubtitleSettings);
+
+  @override
+  String get adminSectionSubtitleAuditLogs =>
+      _resolve('adminSectionSubtitleAuditLogs', (loc) => loc.adminSectionSubtitleAuditLogs);
+
+  @override
+  String get adminSectionSubtitleSuperAdmin =>
+      _resolve('adminSectionSubtitleSuperAdmin', (loc) => loc.adminSectionSubtitleSuperAdmin);
+
+  @override
   String get action_save => _resolve('action_save', (loc) => loc.action_save);
 
   @override
@@ -4518,4 +4869,424 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String get reports_my_empty_body =>
       _resolve('reports_my_empty_body', (loc) => loc.reports_my_empty_body);
+
+  // ── Phase 25 uplift v3 (Wave A) ──────────────────────────────────────────
+  @override
+  String get listing_details_buyer_safety_note => _resolve(
+    'listing_details_buyer_safety_note',
+    (loc) => loc.listing_details_buyer_safety_note,
+  );
+
+  @override
+  String get listing_details_similar_empty_title => _resolve(
+    'listing_details_similar_empty_title',
+    (loc) => loc.listing_details_similar_empty_title,
+  );
+
+  @override
+  String get listing_details_similar_empty_action => _resolve(
+    'listing_details_similar_empty_action',
+    (loc) => loc.listing_details_similar_empty_action,
+  );
+
+  @override
+  String get listing_details_affordability_title => _resolve(
+    'listing_details_affordability_title',
+    (loc) => loc.listing_details_affordability_title,
+  );
+
+  @override
+  String get listing_details_affordability_monthly_label => _resolve(
+    'listing_details_affordability_monthly_label',
+    (loc) => loc.listing_details_affordability_monthly_label,
+  );
+
+  @override
+  String get listing_details_affordability_down_label => _resolve(
+    'listing_details_affordability_down_label',
+    (loc) => loc.listing_details_affordability_down_label,
+  );
+
+  @override
+  String get listing_details_affordability_term_label => _resolve(
+    'listing_details_affordability_term_label',
+    (loc) => loc.listing_details_affordability_term_label,
+  );
+
+  @override
+  String get listing_details_affordability_rate_label => _resolve(
+    'listing_details_affordability_rate_label',
+    (loc) => loc.listing_details_affordability_rate_label,
+  );
+
+  @override
+  String get listing_details_affordability_disclaimer => _resolve(
+    'listing_details_affordability_disclaimer',
+    (loc) => loc.listing_details_affordability_disclaimer,
+  );
+
+  @override
+  String listing_details_affordability_years(String years) => _resolve(
+    'listing_details_affordability_years',
+    (loc) => loc.listing_details_affordability_years(years),
+  );
+
+  @override
+  String listing_details_affordability_percent_value(String value) => _resolve(
+    'listing_details_affordability_percent_value',
+    (loc) => loc.listing_details_affordability_percent_value(value),
+  );
+
+  @override
+  String agency_reject_reason_with_value(String reason) => _resolve(
+    'agency_reject_reason_with_value',
+    (loc) => loc.agency_reject_reason_with_value(reason),
+  );
+
+  @override
+  String label_colon_prefix(String label) =>
+      _resolve('label_colon_prefix', (loc) => loc.label_colon_prefix(label));
+
+  @override
+  String get report_filter_any_dash => _resolve(
+    'report_filter_any_dash',
+    (loc) => loc.report_filter_any_dash,
+  );
+
+  @override
+  String admin_report_reporter_with_id(String id) => _resolve(
+    'admin_report_reporter_with_id',
+    (loc) => loc.admin_report_reporter_with_id(id),
+  );
+
+  // ── Phase 25 uplift v3 (Wave B — featured listings) ──────────────────────
+  @override
+  String get home_featured_badge =>
+      _resolve('home_featured_badge', (loc) => loc.home_featured_badge);
+
+  @override
+  String get home_featured_section_title => _resolve(
+    'home_featured_section_title',
+    (loc) => loc.home_featured_section_title,
+  );
+
+  @override
+  String get adminPreviewActionFeature => _resolve(
+    'adminPreviewActionFeature',
+    (loc) => loc.adminPreviewActionFeature,
+  );
+
+  @override
+  String get adminFeatureDialogTitle => _resolve(
+    'adminFeatureDialogTitle',
+    (loc) => loc.adminFeatureDialogTitle,
+  );
+
+  @override
+  String get adminFeatureDialogBody =>
+      _resolve('adminFeatureDialogBody', (loc) => loc.adminFeatureDialogBody);
+
+  @override
+  String adminFeatureDialogOptionDays(int days) => _resolve(
+    'adminFeatureDialogOptionDays',
+    (loc) => loc.adminFeatureDialogOptionDays(days),
+  );
+
+  @override
+  String get adminFeatureDialogRemove => _resolve(
+    'adminFeatureDialogRemove',
+    (loc) => loc.adminFeatureDialogRemove,
+  );
+
+  @override
+  String get adminFeatureDialogCancel => _resolve(
+    'adminFeatureDialogCancel',
+    (loc) => loc.adminFeatureDialogCancel,
+  );
+
+  @override
+  String adminFeaturedUntil(String date) =>
+      _resolve('adminFeaturedUntil', (loc) => loc.adminFeaturedUntil(date));
+
+  @override
+  String get adminToastFeatureSuccess => _resolve(
+    'adminToastFeatureSuccess',
+    (loc) => loc.adminToastFeatureSuccess,
+  );
+
+  @override
+  String get adminToastUnfeatureSuccess => _resolve(
+    'adminToastUnfeatureSuccess',
+    (loc) => loc.adminToastUnfeatureSuccess,
+  );
+
+  // ── Phase 25 uplift v3 (Wave C — renewal) ────────────────────────────────
+  @override
+  String myListingsExpiresInDays(int days) => _resolve(
+    'myListingsExpiresInDays',
+    (loc) => loc.myListingsExpiresInDays(days),
+  );
+
+  @override
+  String get myListingsExpiredLabel =>
+      _resolve('myListingsExpiredLabel', (loc) => loc.myListingsExpiredLabel);
+
+  @override
+  String get myListingsRenewButton =>
+      _resolve('myListingsRenewButton', (loc) => loc.myListingsRenewButton);
+
+  @override
+  String get myListingsRenewSuccess =>
+      _resolve('myListingsRenewSuccess', (loc) => loc.myListingsRenewSuccess);
+
+  @override
+  String get myListingsRenewError =>
+      _resolve('myListingsRenewError', (loc) => loc.myListingsRenewError);
+
+  // ── Phase 25 uplift v3 (Wave E — lead analytics) ─────────────────────────
+  @override
+  String get leadAnalyticsTitle =>
+      _resolve('leadAnalyticsTitle', (loc) => loc.leadAnalyticsTitle);
+
+  @override
+  String get publisherDashboardActionLeadAnalyticsSubtitle => _resolve(
+    'publisherDashboardActionLeadAnalyticsSubtitle',
+    (loc) => loc.publisherDashboardActionLeadAnalyticsSubtitle,
+  );
+
+  @override
+  String get leadAnalyticsTotalCaption => _resolve(
+    'leadAnalyticsTotalCaption',
+    (loc) => loc.leadAnalyticsTotalCaption,
+  );
+
+  @override
+  String get leadAnalyticsTrendSectionLabel => _resolve(
+    'leadAnalyticsTrendSectionLabel',
+    (loc) => loc.leadAnalyticsTrendSectionLabel,
+  );
+
+  @override
+  String get leadAnalyticsByListingSectionLabel => _resolve(
+    'leadAnalyticsByListingSectionLabel',
+    (loc) => loc.leadAnalyticsByListingSectionLabel,
+  );
+
+  @override
+  String leadAnalyticsListingTotal(String count) => _resolve(
+    'leadAnalyticsListingTotal',
+    (loc) => loc.leadAnalyticsListingTotal(count),
+  );
+
+  @override
+  String get leadAnalyticsSourcePhone =>
+      _resolve('leadAnalyticsSourcePhone', (loc) => loc.leadAnalyticsSourcePhone);
+
+  @override
+  String get leadAnalyticsSourceWhatsapp => _resolve(
+    'leadAnalyticsSourceWhatsapp',
+    (loc) => loc.leadAnalyticsSourceWhatsapp,
+  );
+
+  @override
+  String get leadAnalyticsSourceInquiry => _resolve(
+    'leadAnalyticsSourceInquiry',
+    (loc) => loc.leadAnalyticsSourceInquiry,
+  );
+
+  @override
+  String get leadAnalyticsSourceFavorite => _resolve(
+    'leadAnalyticsSourceFavorite',
+    (loc) => loc.leadAnalyticsSourceFavorite,
+  );
+
+  @override
+  String get leadAnalyticsUntitledListing => _resolve(
+    'leadAnalyticsUntitledListing',
+    (loc) => loc.leadAnalyticsUntitledListing,
+  );
+
+  @override
+  String get leadAnalyticsError =>
+      _resolve('leadAnalyticsError', (loc) => loc.leadAnalyticsError);
+
+  @override
+  String get leadAnalyticsEmptyHeadline => _resolve(
+    'leadAnalyticsEmptyHeadline',
+    (loc) => loc.leadAnalyticsEmptyHeadline,
+  );
+
+  @override
+  String get leadAnalyticsEmptyBody =>
+      _resolve('leadAnalyticsEmptyBody', (loc) => loc.leadAnalyticsEmptyBody);
+
+  // ── Phase 25 uplift v3 (Wave D — reviews / seller trust) ─────────────────
+  @override
+  String get reviews_section_title =>
+      _resolve('reviews_section_title', (loc) => loc.reviews_section_title);
+
+  @override
+  String reviews_count(int count) =>
+      _resolve('reviews_count', (loc) => loc.reviews_count(count));
+
+  @override
+  String reviews_rating_with_count(double rating, int count) => _resolve(
+    'reviews_rating_with_count',
+    (loc) => loc.reviews_rating_with_count(rating, count),
+  );
+
+  @override
+  String reviews_response_rate(int pct) =>
+      _resolve('reviews_response_rate', (loc) => loc.reviews_response_rate(pct));
+
+  @override
+  String reviews_response_hours(int hours) => _resolve(
+    'reviews_response_hours',
+    (loc) => loc.reviews_response_hours(hours),
+  );
+
+  @override
+  String get reviews_empty_hint =>
+      _resolve('reviews_empty_hint', (loc) => loc.reviews_empty_hint);
+
+  @override
+  String get reviews_anonymous_reviewer => _resolve(
+    'reviews_anonymous_reviewer',
+    (loc) => loc.reviews_anonymous_reviewer,
+  );
+
+  @override
+  String get reviews_write_button =>
+      _resolve('reviews_write_button', (loc) => loc.reviews_write_button);
+
+  @override
+  String get reviews_sign_in_hint =>
+      _resolve('reviews_sign_in_hint', (loc) => loc.reviews_sign_in_hint);
+
+  @override
+  String get reviews_write_sheet_title => _resolve(
+    'reviews_write_sheet_title',
+    (loc) => loc.reviews_write_sheet_title,
+  );
+
+  @override
+  String get reviews_write_rating_label => _resolve(
+    'reviews_write_rating_label',
+    (loc) => loc.reviews_write_rating_label,
+  );
+
+  @override
+  String get reviews_write_comment_label => _resolve(
+    'reviews_write_comment_label',
+    (loc) => loc.reviews_write_comment_label,
+  );
+
+  @override
+  String get reviews_write_comment_hint => _resolve(
+    'reviews_write_comment_hint',
+    (loc) => loc.reviews_write_comment_hint,
+  );
+
+  @override
+  String get reviews_write_submit =>
+      _resolve('reviews_write_submit', (loc) => loc.reviews_write_submit);
+
+  @override
+  String get reviews_submit_success =>
+      _resolve('reviews_submit_success', (loc) => loc.reviews_submit_success);
+
+  @override
+  String get reviews_submit_already_reviewed => _resolve(
+    'reviews_submit_already_reviewed',
+    (loc) => loc.reviews_submit_already_reviewed,
+  );
+
+  @override
+  String get reviews_submit_error =>
+      _resolve('reviews_submit_error', (loc) => loc.reviews_submit_error);
+
+  @override
+  String get reviews_time_just_now =>
+      _resolve('reviews_time_just_now', (loc) => loc.reviews_time_just_now);
+
+  @override
+  String reviews_time_minutes(int minutes) => _resolve(
+    'reviews_time_minutes',
+    (loc) => loc.reviews_time_minutes(minutes),
+  );
+
+  @override
+  String reviews_time_hours(int hours) =>
+      _resolve('reviews_time_hours', (loc) => loc.reviews_time_hours(hours));
+
+  @override
+  String reviews_time_days(int days) =>
+      _resolve('reviews_time_days', (loc) => loc.reviews_time_days(days));
+
+  // ── Phase 25 uplift v3 (Wave F — comparison + recently viewed) ───────────
+  @override
+  String get comparisonPageTitle =>
+      _resolve('comparisonPageTitle', (loc) => loc.comparisonPageTitle);
+
+  @override
+  String get comparisonClearAll =>
+      _resolve('comparisonClearAll', (loc) => loc.comparisonClearAll);
+
+  @override
+  String get comparisonEmptyHint =>
+      _resolve('comparisonEmptyHint', (loc) => loc.comparisonEmptyHint);
+
+  @override
+  String get comparisonRowPurpose =>
+      _resolve('comparisonRowPurpose', (loc) => loc.comparisonRowPurpose);
+
+  @override
+  String get comparisonRowType =>
+      _resolve('comparisonRowType', (loc) => loc.comparisonRowType);
+
+  @override
+  String get comparisonRowRooms =>
+      _resolve('comparisonRowRooms', (loc) => loc.comparisonRowRooms);
+
+  @override
+  String get comparisonRowBathrooms =>
+      _resolve('comparisonRowBathrooms', (loc) => loc.comparisonRowBathrooms);
+
+  @override
+  String get comparisonRowArea =>
+      _resolve('comparisonRowArea', (loc) => loc.comparisonRowArea);
+
+  @override
+  String get comparisonRowLocation =>
+      _resolve('comparisonRowLocation', (loc) => loc.comparisonRowLocation);
+
+  @override
+  String get comparisonRemoveColumn =>
+      _resolve('comparisonRemoveColumn', (loc) => loc.comparisonRemoveColumn);
+
+  @override
+  String get comparisonAddToCompare =>
+      _resolve('comparisonAddToCompare', (loc) => loc.comparisonAddToCompare);
+
+  @override
+  String get comparisonRemoveFromCompare => _resolve(
+    'comparisonRemoveFromCompare',
+    (loc) => loc.comparisonRemoveFromCompare,
+  );
+
+  @override
+  String comparisonCompareCount(int count) => _resolve(
+    'comparisonCompareCount',
+    (loc) => loc.comparisonCompareCount(count),
+  );
+
+  @override
+  String get home_recently_viewed_title => _resolve(
+    'home_recently_viewed_title',
+    (loc) => loc.home_recently_viewed_title,
+  );
+
+  @override
+  String get comparisonValueNone =>
+      _resolve('comparisonValueNone', (loc) => loc.comparisonValueNone);
 }

@@ -2,6 +2,8 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import '../theme/colors.dart';
+import '../theme/elevation.dart';
 import '../theme/radii.dart';
 import '../theme/spacing.dart';
 import '../theme/typography.dart';
@@ -10,7 +12,9 @@ import '_widget_support.dart';
 /// Phase 25 (Claude Design) — frosted dark pill for labels rendered *over* a
 /// photo (e.g. the property type on a listing card / gallery). Theme-
 /// independent on purpose: it always reads as a dark glass chip with white
-/// text since it sits on imagery, not on a themed surface.
+/// text since it sits on imagery, not on a themed surface. The dark fill +
+/// white text come from the [AppColors.photoOverlay] / [AppColors.onPhoto]
+/// tokens, and a soft shadow lifts it off busy imagery.
 class GlassPill extends StatelessWidget {
   const GlassPill({required this.label, this.icon, super.key});
 
@@ -20,31 +24,39 @@ class GlassPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final styles = AppTextStyles.of(context);
-    return ClipRRect(
-      borderRadius: appRadius(AppRadii.pill),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-        child: Container(
-          padding: const EdgeInsetsDirectional.symmetric(
-            horizontal: AppSpacing.sm,
-            vertical: AppSpacing.xs,
-          ),
-          decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.55),
-            borderRadius: appRadius(AppRadii.pill),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (icon != null) ...[
-                Icon(icon, size: AppSpacing.md, color: Colors.white),
-                const SizedBox(width: AppSpacing.xs),
+    final colors = AppColors.of(context);
+    final elevation = AppElevation.of(context);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: appRadius(AppRadii.pill),
+        boxShadow: elevation.level1,
+      ),
+      child: ClipRRect(
+        borderRadius: appRadius(AppRadii.pill),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+          child: Container(
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: AppSpacing.sm,
+              vertical: AppSpacing.xs,
+            ),
+            decoration: BoxDecoration(
+              color: colors.photoOverlay,
+              borderRadius: appRadius(AppRadii.pill),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, size: AppSpacing.md, color: colors.onPhoto),
+                  const SizedBox(width: AppSpacing.xs),
+                ],
+                Text(
+                  label,
+                  style: styles.labelMedium.copyWith(color: colors.onPhoto),
+                ),
               ],
-              Text(
-                label,
-                style: styles.labelMedium.copyWith(color: Colors.white),
-              ),
-            ],
+            ),
           ),
         ),
       ),

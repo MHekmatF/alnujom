@@ -101,8 +101,11 @@ class PublisherListingDto {
       listingId: row['listing_id'] as String,
       publisherUserId: row['publisher_user_id'] as String,
       agencyId: row['agency_id'] as String?,
-      purpose: row['purpose'] as String,
-      propertyType: row['property_type'] as String,
+      // Defensive: a draft listing can carry a null purpose/property_type;
+      // fall back to safe enum sentinels so My Listings renders instead of
+      // throwing "Null is not a subtype of String".
+      purpose: row['purpose'] as String? ?? 'sale',
+      propertyType: row['property_type'] as String? ?? 'other',
       status: row['status'] as String,
       title: row['title'] as String? ?? '',
       governorateId: row['governorate_id'] as String?,

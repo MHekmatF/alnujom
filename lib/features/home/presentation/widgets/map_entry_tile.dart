@@ -51,7 +51,20 @@ class MapEntryTile extends StatelessWidget {
               padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
               child: Row(
                 children: [
-                  Icon(Icons.map_outlined, size: 32, color: colors.accent),
+                  // Soft accent disc so the pin reads as a deliberate
+                  // affordance, not a floating glyph.
+                  Container(
+                    padding: const EdgeInsetsDirectional.all(AppSpacing.sm),
+                    decoration: BoxDecoration(
+                      color: colors.accentContainer,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.map_outlined,
+                      size: 28,
+                      color: colors.accent,
+                    ),
+                  ),
                   const SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: Column(

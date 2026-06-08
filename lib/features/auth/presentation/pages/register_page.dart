@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/localization/locale_cubit.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_logo.dart';
+import '../widgets/auth_trust_note.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/phone_number.dart';
 import '../bloc/auth_bloc.dart';
@@ -111,6 +113,20 @@ class _RegisterPageState extends State<RegisterPage> {
                     const SizedBox(height: AppSpacing.md),
                     const Center(child: AppLogo()),
                     const SizedBox(height: AppSpacing.xl),
+                    Text(
+                      l10n.auth_register_headline,
+                      style: theme.textTheme.headlineMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      l10n.auth_register_subtitle,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: AppSpacing.xl),
                     TextFormField(
                       controller: _phoneController,
                       keyboardType: TextInputType.phone,
@@ -129,7 +145,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       },
                       onChanged: (_) => setState(() => _errorText = null),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.lg),
                     TextFormField(
                       controller: _passwordController,
                       obscureText: true,
@@ -145,7 +161,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       },
                       onChanged: (_) => setState(() => _errorText = null),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.lg),
                     TextFormField(
                       controller: _nameController,
                       keyboardType: TextInputType.name,
@@ -153,7 +169,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         labelText: l10n.register_full_name_label,
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.lg),
                     TextFormField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
@@ -161,31 +177,30 @@ class _RegisterPageState extends State<RegisterPage> {
                         labelText: l10n.register_real_email_label_optional,
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.xl),
                     if (_errorText != null) ...[
                       Text(
                         _errorText!,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.error,
                         ),
+                        textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: AppSpacing.sm),
                     ],
-                    FilledButton(
+                    AppButton.filledPrimary(
+                      label: l10n.register_submit,
+                      loading: isLoading,
+                      expanded: true,
                       onPressed: isLoading ? null : () => _submit(l10n),
-                      child: isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text(l10n.register_submit),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.sm),
                     TextButton(
                       onPressed: () => context.go(AppRoutes.login),
                       child: Text(l10n.register_have_account),
                     ),
+                    const SizedBox(height: AppSpacing.lg),
+                    AuthTrustNote(text: l10n.auth_trust_note),
                   ],
                 ),
               ),

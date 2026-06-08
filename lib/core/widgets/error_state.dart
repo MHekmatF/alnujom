@@ -37,8 +37,8 @@ class ErrorState extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                variant == ErrorStateVariant.network
+              _PoppingIcon(
+                icon: variant == ErrorStateVariant.network
                     ? LucideIcons.wifi_off
                     : LucideIcons.circle_alert,
                 color: colors.error,
@@ -67,6 +67,28 @@ class ErrorState extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// The error glyph in a soft tinted circle. The whole [ErrorState] already
+/// fades + slides in via [StaggeredListItem], so the glyph itself stays static.
+class _PoppingIcon extends StatelessWidget {
+  const _PoppingIcon({required this.icon, required this.color});
+
+  final IconData icon;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: AppSpacing.xxxl + AppSpacing.lg,
+      height: AppSpacing.xxxl + AppSpacing.lg,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color.withValues(alpha: 0.12),
+      ),
+      child: Icon(icon, color: color, size: AppSpacing.xxl),
     );
   }
 }

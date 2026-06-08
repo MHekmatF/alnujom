@@ -322,7 +322,9 @@ class _ActionButtons extends StatelessWidget {
             ),
             label: Text(
               l10n.agency_action_reject,
-              style: TextStyle(color: theme.colorScheme.error),
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: theme.colorScheme.error,
+              ),
             ),
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: theme.colorScheme.error),
@@ -351,7 +353,9 @@ class _ActionButtons extends StatelessWidget {
             ),
             label: Text(
               l10n.agency_action_suspend,
-              style: TextStyle(color: theme.colorScheme.error),
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: theme.colorScheme.error,
+              ),
             ),
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: theme.colorScheme.error),
@@ -457,11 +461,12 @@ class _InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '$label: ',
+          l10n.label_colon_prefix(label),
           style: theme.textTheme.labelMedium?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),

@@ -40,6 +40,8 @@ dependencies:
   image: ^4.8.0
   flutter_image_compress: ^2.4.0
   url_launcher: ^6.3.0
+  # Phase 25 uplift v2 — native share sheet for the listing-detail Share action.
+  share_plus: ^10.1.4
   # Phase 22 — push notifications (Android-only; app builds with push DISABLED
   # when google-services.json is absent — R-184/R-195/SC-003).
   firebase_core: ^3.13.1

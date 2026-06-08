@@ -50,6 +50,7 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/theme/motion.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
+import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/reduce_motion.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/map_entry_context.dart';
@@ -307,38 +308,12 @@ class _ErrorBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.error_outline, size: 48, color: theme.colorScheme.error),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              l10n.map_error_load_failed,
-              style: theme.textTheme.titleMedium,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              message,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            FilledButton.icon(
-              icon: const Icon(Icons.refresh),
-              label: Text(l10n.map_error_retry_action),
-              onPressed: () =>
-                  context.read<MapBloc>().add(const MarkersRefreshRequested()),
-            ),
-          ],
-        ),
-      ),
+    return ErrorState(
+      title: l10n.map_error_load_failed,
+      message: message,
+      variant: ErrorStateVariant.network,
+      onRetry: () =>
+          context.read<MapBloc>().add(const MarkersRefreshRequested()),
     );
   }
 }

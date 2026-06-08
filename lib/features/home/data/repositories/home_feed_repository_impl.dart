@@ -54,4 +54,33 @@ class HomeFeedRepositoryImpl implements HomeFeedRepository {
       return FailureResult(NetworkFailure(message, cause: e, stackTrace: st));
     }
   }
+
+  @override
+  Future<Result<List<HomeListingCard>>> fetchFeatured({
+    int limit = 10,
+    required Locale locale,
+  }) async {
+    try {
+      final dtos = await _datasource.fetchFeatured(limit: limit);
+      final entities = dtos.map((dto) => dto.toEntity(locale: locale)).toList();
+      return Success(entities);
+    } on SocketException catch (e, st) {
+      return FailureResult(NetworkFailure(e.message, cause: e, stackTrace: st));
+    } on TimeoutException catch (e, st) {
+      return FailureResult(
+        NetworkFailure(
+          e.message ?? 'Request timed out',
+          cause: e,
+          stackTrace: st,
+        ),
+      );
+    } catch (e, st) {
+      // Same transport-error handling as fetchPage — any unknown exception
+      // during the Supabase round-trip is a NetworkFailure (the featured
+      // carousel hides itself on failure). We deliberately do not import
+      // `package:supabase_flutter` per FR-030.
+      final message = e is Error ? e.toString() : e.toString();
+      return FailureResult(NetworkFailure(message, cause: e, stackTrace: st));
+    }
+  }
 }

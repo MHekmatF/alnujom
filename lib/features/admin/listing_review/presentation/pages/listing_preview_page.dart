@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 
 import '../../../../../core/di/injection.dart';
 import '../../../../../core/errors/failure.dart';
+import '../../../../../core/security/permission_checker.dart';
+import '../../../../../core/security/permission_keys.dart';
+import '../../../../../core/theme/colors.dart';
+import '../../../../../core/theme/radii.dart';
 import '../../../../../core/theme/spacing.dart';
+import '../../../../../core/theme/typography.dart';
+import '../../../../../core/widgets/_widget_support.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../../shared/presentation/widgets/listing_display/listing_amenities_block.dart';
 import '../../../../../shared/presentation/widgets/listing_display/listing_description_block.dart';
@@ -14,6 +21,7 @@ import '../../../../../shared/presentation/widgets/listing_display/listing_price
 import '../../../../currencies/domain/entities/currency.dart';
 import '../bloc/listing_preview_bloc.dart';
 import '../widgets/approve_confirmation_dialog.dart';
+import '../widgets/feature_listing_dialog.dart';
 import '../widgets/reject_reason_dialog.dart';
 
 /// Phase 12 — admin listing preview page.
@@ -44,8 +52,23 @@ class _ListingPreviewView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
+    // Phase 25 — the feature/unfeature action is gated on `listings.edit_any`,
+    // mirroring the permission gating used across the admin surfaces
+    // (see role_editor_page / auth_redirect). Cached, synchronous check.
+    final canFeature = getIt<PermissionChecker>().has(
+      PermissionKeys.listingsEditAny,
+    );
+
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.adminPreviewTitle)),
+      appBar: AppBar(
+        title: Text(l10n.adminPreviewTitle),
+        actions: [
+          if (canFeature)
+            BlocBuilder<ListingPreviewBloc, ListingPreviewState>(
+              builder: (ctx, state) => _FeatureAction(state: state),
+            ),
+        ],
+      ),
       body: BlocConsumer<ListingPreviewBloc, ListingPreviewState>(
         listenWhen: (prev, curr) =>
             (curr.lastSuccess != null && prev.lastSuccess == null) ||
@@ -72,8 +95,18 @@ class _ListingPreviewView extends StatelessWidget {
 
   void _handleStateSideEffects(BuildContext ctx, ListingPreviewState state) {
     final l10n = AppLocalizations.of(ctx)!;
-    if (state.lastSuccess != null) {
-      final msg = state.lastSuccess is RejectSuccess
+    final success = state.lastSuccess;
+    if (success != null) {
+      // Phase 25 — feature/unfeature stays on the page (the admin keeps
+      // reviewing); only approve/reject pop back to the queue.
+      if (success is FeatureSuccess) {
+        final msg = success.result.isFeatured
+            ? l10n.adminToastFeatureSuccess
+            : l10n.adminToastUnfeatureSuccess;
+        ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text(msg)));
+        return;
+      }
+      final msg = success is RejectSuccess
           ? l10n.adminToastRejectSuccess
           : l10n.adminToastApproveSuccess;
       ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text(msg)));
@@ -131,7 +164,14 @@ class _PreviewBody extends StatelessWidget {
           l.title.isEmpty ? '—' : l.title,
           style: Theme.of(context).textTheme.headlineSmall,
         ),
-        const SizedBox(height: AppSpacing.md),
+        const SizedBox(height: AppSpacing.sm),
+
+        // Phase 25 — current featured state (only when actively featured).
+        if (preview.isFeatured) ...[
+          _FeaturedBanner(featuredUntil: preview.featuredUntil!),
+          const SizedBox(height: AppSpacing.md),
+        ],
+        const SizedBox(height: AppSpacing.xs),
 
         // Price (Phase 12 ships without a per-page currency resolver — the
         // primary price is rendered in the publisher's stored currency).
@@ -271,6 +311,93 @@ class _StickyBottomBar extends StatelessWidget {
         ),
       );
     }
+  }
+}
+
+/// Phase 25 — app-bar action that opens the feature-duration chooser and
+/// dispatches [ListingPreviewFeaturePressed]. Reflects current featured state
+/// via a filled vs outlined star. Disabled while a mutator is in flight or the
+/// preview hasn't loaded yet.
+class _FeatureAction extends StatelessWidget {
+  const _FeatureAction({required this.state});
+
+  final ListingPreviewState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    final preview = state.preview;
+    final isReady = preview != null && !state.isLoading;
+    final disabled = !isReady || state.isMutatorInFlight;
+    final isFeatured = preview?.isFeatured ?? false;
+
+    return IconButton(
+      tooltip: l10n.adminPreviewActionFeature,
+      icon: Icon(
+        isFeatured ? Icons.star_rounded : Icons.star_outline_rounded,
+        color: isFeatured ? colors.primary : null,
+      ),
+      onPressed: disabled ? null : () => _onFeaturePressed(context, isFeatured),
+    );
+  }
+
+  Future<void> _onFeaturePressed(
+    BuildContext context,
+    bool isCurrentlyFeatured,
+  ) async {
+    final days = await FeatureListingDialog.show(
+      context,
+      isCurrentlyFeatured: isCurrentlyFeatured,
+    );
+    if (days != null && context.mounted) {
+      context.read<ListingPreviewBloc>().add(
+        ListingPreviewFeaturePressed(days: days),
+      );
+    }
+  }
+}
+
+/// Phase 25 — inline "currently featured until {date}" banner shown in the
+/// preview body when the listing has an active `featured_until`.
+class _FeaturedBanner extends StatelessWidget {
+  const _FeaturedBanner({required this.featuredUntil});
+
+  final DateTime featuredUntil;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    final dateStr = DateFormat.yMMMd(
+      Localizations.localeOf(context).languageCode,
+    ).format(featuredUntil.toLocal());
+
+    return Container(
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: colors.primaryContainer,
+        borderRadius: appRadius(AppRadii.md),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.star_rounded, size: AppSpacing.lg, color: colors.primary),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              l10n.adminFeaturedUntil(dateStr),
+              style: styles.labelLarge.copyWith(
+                color: colors.onPrimaryContainer,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

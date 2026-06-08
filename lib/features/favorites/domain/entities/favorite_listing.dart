@@ -25,6 +25,10 @@ class FavoriteListing extends Equatable {
     required this.cityNameEn,
     required this.isAvailable,
     required this.favoritedAt,
+    this.rooms,
+    this.bathrooms,
+    this.areaSize,
+    this.floor,
   });
 
   /// The favorited listing UUID (`favorites.listing_id` / `v_favorites.id`).
@@ -69,6 +73,15 @@ class FavoriteListing extends Equatable {
   /// When the favorite row was created (`favorites.created_at`).
   final DateTime favoritedAt;
 
+  /// Phase 25 uplift v2 — key facts (columns on `listings`, surfaced via
+  /// `v_favorites`). All nullable: land has no rooms/bathrooms, and every spec
+  /// is NULL when [isAvailable] is false (RLS-hidden listing). The card renders
+  /// only the present ones.
+  final int? rooms;
+  final int? bathrooms;
+  final double? areaSize;
+  final int? floor;
+
   @override
   List<Object?> get props => [
     id,
@@ -84,5 +97,9 @@ class FavoriteListing extends Equatable {
     cityNameEn,
     isAvailable,
     favoritedAt,
+    rooms,
+    bathrooms,
+    areaSize,
+    floor,
   ];
 }

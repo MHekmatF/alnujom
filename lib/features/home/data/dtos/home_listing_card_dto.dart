@@ -29,6 +29,11 @@ class HomeListingCardDto {
     this.agencyName,
     this.agencyLogoPath,
     this.agencyLogoUrl,
+    this.rooms,
+    this.bathrooms,
+    this.areaSize,
+    this.floor,
+    this.isFeatured = false,
   });
 
   final String id;
@@ -63,6 +68,19 @@ class HomeListingCardDto {
 
   /// Resolved public URL for the agency logo (agency-assets bucket).
   final String? agencyLogoUrl;
+
+  /// Phase 25 uplift v2 — key facts (columns on `listings`). All nullable;
+  /// the card renders only the ones present.
+  final int? rooms;
+  final int? bathrooms;
+  final double? areaSize;
+  final int? floor;
+
+  /// Featured-listings treatment — true when the row's `featured_until`
+  /// timestamp is still in the future. Parsed from the (newly-projected)
+  /// `featured_until` column on the feed, or forced `true` by the dedicated
+  /// featured datasource query (`SupabaseHomeFeedDatasource.fetchFeatured`).
+  final bool isFeatured;
 
   /// Parses the embedded-selects projection shape from
   /// `SupabaseHomeFeedDatasource.fetchPage`. Defensive against missing
@@ -148,6 +166,11 @@ class HomeListingCardDto {
       agencyId: agencyId,
       agencyName: agencyName,
       agencyLogoPath: agencyLogoPath,
+      rooms: _toInt(row['rooms']),
+      bathrooms: _toInt(row['bathrooms']),
+      areaSize: _toDouble(row['area_size']),
+      floor: _toInt(row['floor']),
+      isFeatured: _parseFeatured(row['featured_until']),
     );
   }
 
@@ -169,6 +192,11 @@ class HomeListingCardDto {
       agencyName: agencyName,
       agencyLogoPath: agencyLogoPath,
       agencyLogoUrl: agencyLogoUrl,
+      rooms: rooms,
+      bathrooms: bathrooms,
+      areaSize: areaSize,
+      floor: floor,
+      isFeatured: isFeatured,
     );
   }
 
@@ -189,6 +217,11 @@ class HomeListingCardDto {
       agencyName: agencyName,
       agencyLogoPath: agencyLogoPath,
       agencyLogoUrl: url,
+      rooms: rooms,
+      bathrooms: bathrooms,
+      areaSize: areaSize,
+      floor: floor,
+      isFeatured: isFeatured,
     );
   }
 
@@ -227,6 +260,38 @@ class HomeListingCardDto {
       agencyId: agencyId,
       agencyName: agencyName,
       agencyLogoUrl: agencyLogoUrl,
+      rooms: rooms,
+      bathrooms: bathrooms,
+      areaSize: areaSize,
+      floor: floor,
+      isFeatured: isFeatured,
+    );
+  }
+
+  /// Returns a copy with [isFeatured] forced to [value]. Used by the dedicated
+  /// featured query (`SupabaseHomeFeedDatasource.fetchFeatured`) whose rows are
+  /// featured by construction.
+  HomeListingCardDto copyWithIsFeatured(bool value) {
+    return HomeListingCardDto(
+      id: id,
+      title: title,
+      propertyType: propertyType,
+      purpose: purpose,
+      publishedAt: publishedAt,
+      primaryPrice: primaryPrice,
+      mainImage: mainImage,
+      mainImageUrl: mainImageUrl,
+      governorate: governorate,
+      city: city,
+      agencyId: agencyId,
+      agencyName: agencyName,
+      agencyLogoPath: agencyLogoPath,
+      agencyLogoUrl: agencyLogoUrl,
+      rooms: rooms,
+      bathrooms: bathrooms,
+      areaSize: areaSize,
+      floor: floor,
+      isFeatured: value,
     );
   }
 }
@@ -280,4 +345,26 @@ Decimal _decimal(Object? raw) {
   if (raw is num) return Decimal.parse(raw.toString());
   if (raw is String) return Decimal.parse(raw);
   throw StateError('home-feed row has non-numeric price amount: $raw');
+}
+
+int? _toInt(Object? raw) {
+  if (raw is num) return raw.toInt();
+  if (raw is String) return int.tryParse(raw);
+  return null;
+}
+
+/// Resolves the FEATURED flag from a raw `featured_until` timestamp: a listing
+/// is featured when the value is non-null AND strictly in the future (UTC
+/// compare). Defensive against an unparseable value (treated as not featured).
+bool _parseFeatured(Object? raw) {
+  if (raw is! String || raw.isEmpty) return false;
+  final until = DateTime.tryParse(raw);
+  if (until == null) return false;
+  return until.isAfter(DateTime.now().toUtc());
+}
+
+double? _toDouble(Object? raw) {
+  if (raw is num) return raw.toDouble();
+  if (raw is String) return double.tryParse(raw);
+  return null;
 }

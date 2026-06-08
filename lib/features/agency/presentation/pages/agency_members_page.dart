@@ -93,7 +93,9 @@ class _Roster extends StatelessWidget {
     final theme = Theme.of(context);
 
     return ListView(
-      padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.xxxl * 2),
+      padding: const EdgeInsetsDirectional.only(
+        bottom: AppSpacing.xxxl + AppSpacing.xxxl,
+      ),
       children: [
         // Pending invitations the CURRENT user received (across agencies).
         const _PendingInvitations(),

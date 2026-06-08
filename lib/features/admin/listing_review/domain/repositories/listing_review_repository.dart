@@ -27,6 +27,14 @@ abstract class ListingReviewRepository {
     RejectionReason preset,
     String? detail,
   );
+
+  /// Features (or un-features) a listing for [days] days via the admin RPC
+  /// `set_listing_featured`. `days <= 0` removes the featuring. Returns the new
+  /// `featured_until` on success (null when featuring was removed).
+  Future<Result<FeatureResult>> featureListing({
+    required String listingId,
+    required int days,
+  });
 }
 
 /// Cursor for the pending-queue keyset pagination. Per analysis finding C8
@@ -67,4 +75,21 @@ class RejectResult extends Equatable {
 
   @override
   List<Object?> get props => [preset, detail];
+}
+
+/// Returned by `featureListing` on success. [featuredUntil] is the new
+/// `listings.featured_until` value, or null when featuring was removed
+/// (the request passed `days <= 0`).
+class FeatureResult extends Equatable {
+  const FeatureResult({this.featuredUntil});
+
+  final DateTime? featuredUntil;
+
+  /// True when the listing remains featured after the mutation (i.e. the
+  /// returned `featured_until` is in the future).
+  bool get isFeatured =>
+      featuredUntil != null && featuredUntil!.isAfter(DateTime.now());
+
+  @override
+  List<Object?> get props => [featuredUntil];
 }

@@ -35,6 +35,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     on<SearchQueryChanged>(_onQueryChanged);
     on<SearchNextPageRequested>(_onNextPage);
     on<SearchRefreshRequested>(_onRefresh);
+    on<SearchDisplayModeChanged>(_onDisplayModeChanged);
   }
 
   final SearchListingsUseCase _useCase;
@@ -47,9 +48,15 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     Emitter<SearchState> emit,
   ) async {
     _debounce?.cancel();
+    // Preserve the current view mode across filter applications — the filter
+    // sheet / chips build a fresh FilterState (defaulting to list), but the
+    // list⇄map toggle is a separate user choice that must survive a re-search.
+    final filters = event.filters.copyWith(
+      displayMode: state.filters.displayMode,
+    );
     emit(
       state.copyWith(
-        filters: event.filters,
+        filters: filters,
         status: SearchStatus.loading,
         results: const [],
         clearCursor: true,
@@ -58,7 +65,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       ),
     );
     final result = await _useCase(
-      filters: event.filters,
+      filters: filters,
       sort: state.sort,
       cursor: null,
       limit: _pageSize,
@@ -197,6 +204,21 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       case FailureResult<List<SearchResultItem>>(:final failure):
         emit(state.copyWith(status: SearchStatus.failure, failure: failure));
     }
+  }
+
+  /// Phase 25 — view-only toggle. Does NOT touch results, cursor or status;
+  /// the same loaded dataset renders in list or embedded-map form. No-op when
+  /// the mode is unchanged (keeps the BlocSelector quiet).
+  void _onDisplayModeChanged(
+    SearchDisplayModeChanged event,
+    Emitter<SearchState> emit,
+  ) {
+    if (state.filters.displayMode == event.mode) return;
+    emit(
+      state.copyWith(
+        filters: state.filters.copyWith(displayMode: event.mode),
+      ),
+    );
   }
 
   SearchCursor? _makeCursor(List<SearchResultItem> items, SortOrder sort) {

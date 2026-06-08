@@ -19,7 +19,8 @@ import '../../domain/entities/favorite_listing.dart';
 ///   main_image_path,
 ///   governorate_name_ar, governorate_name_en,
 ///   city_name_ar, city_name_en,
-///   is_available
+///   is_available,
+///   rooms, bathrooms, area_size, floor  (Phase 25 uplift v2)
 class FavoriteListingDto {
   const FavoriteListingDto({
     required this.id,
@@ -35,6 +36,10 @@ class FavoriteListingDto {
     required this.cityNameAr,
     required this.cityNameEn,
     required this.isAvailable,
+    this.rooms,
+    this.bathrooms,
+    this.areaSize,
+    this.floor,
   });
 
   final String id;
@@ -52,6 +57,13 @@ class FavoriteListingDto {
   final String? cityNameAr;
   final String? cityNameEn;
   final bool isAvailable;
+
+  // Phase 25 uplift v2 — key facts (nullable; NULL when the listing is
+  // RLS-hidden or the column is not set, e.g. land has no rooms/bathrooms).
+  final int? rooms;
+  final int? bathrooms;
+  final double? areaSize;
+  final int? floor;
 
   factory FavoriteListingDto.fromJson(Map<String, dynamic> json) {
     // is_available arrives as bool or null; default false.
@@ -83,7 +95,25 @@ class FavoriteListingDto {
       cityNameAr: json['city_name_ar'] as String?,
       cityNameEn: json['city_name_en'] as String?,
       isAvailable: available,
+
+      // Numeric specs — defensive against num/String shapes and NULLs.
+      rooms: _toInt(json['rooms']),
+      bathrooms: _toInt(json['bathrooms']),
+      areaSize: _toDouble(json['area_size']),
+      floor: _toInt(json['floor']),
     );
+  }
+
+  static int? _toInt(Object? raw) {
+    if (raw is num) return raw.toInt();
+    if (raw is String) return int.tryParse(raw);
+    return null;
+  }
+
+  static double? _toDouble(Object? raw) {
+    if (raw is num) return raw.toDouble();
+    if (raw is String) return double.tryParse(raw);
+    return null;
   }
 
   FavoriteListing toEntity() {
@@ -101,6 +131,10 @@ class FavoriteListingDto {
       cityNameAr: cityNameAr,
       cityNameEn: cityNameEn,
       isAvailable: isAvailable,
+      rooms: rooms,
+      bathrooms: bathrooms,
+      areaSize: areaSize,
+      floor: floor,
     );
   }
 }

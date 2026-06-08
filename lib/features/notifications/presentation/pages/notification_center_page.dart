@@ -10,7 +10,8 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/localization/app_strings.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
-import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/empty_state.dart';
+import '../../../../core/widgets/error_state.dart';
 import '../bloc/notification_badge_cubit.dart';
 import '../bloc/notifications_cubit.dart';
 import '../widgets/notification_deep_link_resolver.dart';
@@ -93,17 +94,17 @@ class _NotificationCenterViewState extends State<_NotificationCenterView> {
               return const Center(child: CircularProgressIndicator());
 
             case NotificationsStatus.error:
-              return _ErrorView(
-                message: l10n.notification_load_error,
-                retryLabel: l10n.notification_retry,
+              return ErrorState(
+                title: l10n.notification_load_error,
+                variant: ErrorStateVariant.network,
                 onRetry: () => context.read<NotificationsCubit>().load(),
               );
 
             case NotificationsStatus.list:
               if (state.notifications.isEmpty) {
-                return _EmptyView(
-                  colors: colors,
-                  message: l10n.notification_empty_state,
+                return EmptyState(
+                  icon: Icons.notifications_none_outlined,
+                  headline: l10n.notification_empty_state,
                 );
               }
               return RefreshIndicator(
@@ -144,67 +145,3 @@ class _NotificationCenterViewState extends State<_NotificationCenterView> {
 // Private sub-widgets
 // ---------------------------------------------------------------------------
 
-class _EmptyView extends StatelessWidget {
-  const _EmptyView({required this.colors, required this.message});
-
-  final AppColors colors;
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final textStyles = AppTextStyles.of(context);
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.notifications_none_outlined,
-            size: 64,
-            color: colors.onSurfaceVariant,
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            message,
-            style: textStyles.bodyLarge,
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ErrorView extends StatelessWidget {
-  const _ErrorView({
-    required this.message,
-    required this.retryLabel,
-    required this.onRetry,
-  });
-
-  final String message;
-  final String retryLabel;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-    final textStyles = AppTextStyles.of(context);
-    return Padding(
-      padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.error_outline, size: 48, color: colors.error),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            message,
-            style: textStyles.bodyLarge,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          OutlinedButton(onPressed: onRetry, child: Text(retryLabel)),
-        ],
-      ),
-    );
-  }
-}

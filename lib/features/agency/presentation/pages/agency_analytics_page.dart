@@ -5,6 +5,7 @@
 // Phase 2 tokens only; all strings via AppLocalizations.
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/spacing.dart';
@@ -33,6 +34,10 @@ class _AgencyAnalyticsView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
+    // Render counters in the active locale's numerals (Arabic-Indic in ar).
+    final numFmt = NumberFormat.decimalPattern(
+      Localizations.localeOf(context).toLanguageTag(),
+    )..maximumFractionDigits = 0;
 
     return Scaffold(
       appBar: AppBar(
@@ -71,7 +76,7 @@ class _AgencyAnalyticsView extends StatelessWidget {
                         children: [
                           Text(entry.key, style: theme.textTheme.bodyLarge),
                           Text(
-                            '${entry.value}',
+                            numFmt.format(entry.value),
                             style: theme.textTheme.titleMedium,
                           ),
                         ],

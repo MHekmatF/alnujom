@@ -142,6 +142,13 @@ class ListingReviewRepositoryImpl implements ListingReviewRepository {
         }
       }
 
+      // Phase 25 — featured state. `loadListingPreview` selects `*`, so the
+      // raw row already carries `featured_until` when the column is set.
+      final featuredUntilRaw = raw['featured_until'];
+      final featuredUntil = featuredUntilRaw is String
+          ? DateTime.tryParse(featuredUntilRaw)
+          : null;
+
       return Success(
         ListingPreview(
           listing: listing,
@@ -154,6 +161,7 @@ class ListingReviewRepositoryImpl implements ListingReviewRepository {
           city: city,
           area: area,
           publisherDisplayName: publisherDisplay,
+          featuredUntil: featuredUntil,
         ),
       );
     } on Object catch (error, stackTrace) {
@@ -255,6 +263,32 @@ class ListingReviewRepositoryImpl implements ListingReviewRepository {
     } on Object catch (error, stackTrace) {
       _logger.warning(
         'rejectListing failed.',
+        error: error,
+        stackTrace: stackTrace,
+        tag: _tag,
+      );
+      return FailureResult(
+        UnknownFailure(error.toString(), cause: error, stackTrace: stackTrace),
+      );
+    }
+  }
+
+  // ─── featureListing ────────────────────────────────────────────────────
+
+  @override
+  Future<Result<FeatureResult>> featureListing({
+    required String listingId,
+    required int days,
+  }) async {
+    try {
+      final featuredUntil = await _datasource.featureListing(
+        listingId: listingId,
+        days: days,
+      );
+      return Success(FeatureResult(featuredUntil: featuredUntil));
+    } on Object catch (error, stackTrace) {
+      _logger.warning(
+        'featureListing failed.',
         error: error,
         stackTrace: stackTrace,
         tag: _tag,

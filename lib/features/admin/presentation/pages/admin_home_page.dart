@@ -4,24 +4,37 @@
 // NO Timer, NO Realtime subscription (FR-011/FR-020).
 // Phase 2 tokens only — no inline hex/font-size/padding literals (FR-017).
 // No hardcoded role branches — all gates via PermissionChecker (FR-015).
+//
+// Phase 25 uplift v2 — restyled into a premium grouped console:
+//   • a role-badge identity header (Super Admin / Administrator),
+//   • a horizontally-scrolling quick-stats KPI strip (admin_dashboard_counts),
+//   • sections grouped under localized headers (Moderation / Configuration /
+//     Insights / Super Admin) rendered with the shared AppDashboardTile.
+// All permission gating, the RouteAware re-entry reload, the Realtime counter
+// channel, and the quick-action deep-links are PRESERVED.
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/security/permission_checker.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/dashboard_tile.dart';
 import '../../../../core/widgets/locale_toggle_action.dart';
+import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../debug/locations_smoke_test_tile.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../dashboard/domain/entities/dashboard_counts.dart';
 import '../../dashboard/domain/entities/dashboard_section.dart';
 import '../../dashboard/presentation/bloc/dashboard_cubit.dart';
 import '../../dashboard/presentation/bloc/dashboard_state.dart';
-import '../../dashboard/presentation/widgets/coming_soon_tile.dart';
+import '../../dashboard/presentation/widgets/admin_quick_stats_row.dart';
+import '../../dashboard/presentation/widgets/admin_role_badge_header.dart';
 import '../../dashboard/presentation/widgets/dashboard_sections.dart';
-import '../../dashboard/presentation/widgets/dashboard_tile.dart';
 
 class AdminHomePage extends StatelessWidget {
   const AdminHomePage({super.key});
@@ -108,50 +121,101 @@ class _AdminHomeViewState extends State<_AdminHomeView> with RouteAware {
                   child: CustomScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
                     slivers: [
-                      // ── Counter status bar ─────────────────────────────
-                      if (isLoading || isError)
-                        SliverToBoxAdapter(
-                          child: _CounterStatusBar(
+                      // ── Role-badge identity header ──────────────────────
+                      SliverToBoxAdapter(
+                        child: StaggeredListItem(
+                          index: 0,
+                          child: AdminRoleBadgeHeader(checker: checker),
+                        ),
+                      ),
+                      // ── Quick-stats KPI strip ───────────────────────────
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsetsDirectional.only(
+                            top: AppSpacing.sm,
+                            bottom: AppSpacing.md,
+                          ),
+                          child: AdminQuickStatsRow(
+                            counts: counts,
                             isLoading: isLoading,
-                            isError: isError,
+                          ),
+                        ),
+                      ),
+                      // ── Counter error notice (loading shows in the strip) ─
+                      if (isError)
+                        SliverToBoxAdapter(
+                          child: _CounterErrorNotice(
                             l10n: l10n,
                             onRetry: () =>
                                 context.read<DashboardCubit>().refresh(),
                           ),
                         ),
-                      // ── Dashboard grid ─────────────────────────────────
-                      SliverPadding(
-                        padding: const EdgeInsets.all(AppSpacing.md),
-                        sliver: SliverGrid(
-                          gridDelegate:
-                              const SliverGridDelegateWithMaxCrossAxisExtent(
-                                maxCrossAxisExtent: 180,
-                                mainAxisSpacing: AppSpacing.sm,
-                                crossAxisSpacing: AppSpacing.sm,
-                                childAspectRatio: 1.0,
-                              ),
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) => _buildSectionTile(
-                              context,
-                              visibleSections[index],
-                              counts,
-                              l10n,
-                            ),
-                            childCount: visibleSections.length,
-                          ),
-                        ),
+                      // ── Grouped sections ────────────────────────────────
+                      ..._buildGroupedSlivers(
+                        context,
+                        visibleSections,
+                        counts,
+                        l10n,
                       ),
-                      // ── Debug smoke-test tile (kDebugMode only) ────────
+                      // ── Debug smoke-test tile (kDebugMode only) ─────────
                       if (kDebugMode)
                         const SliverToBoxAdapter(
                           child: LocationsSmokeTestTile(),
                         ),
+                      const SliverToBoxAdapter(
+                        child: SizedBox(height: AppSpacing.xxl),
+                      ),
                     ],
                   ),
                 );
               },
             ),
     );
+  }
+
+  /// Renders the visible sections grouped under localized group headers, in the
+  /// canonical group order. Empty groups are skipped.
+  List<Widget> _buildGroupedSlivers(
+    BuildContext context,
+    List<DashboardSection> sections,
+    DashboardCounts? counts,
+    AppLocalizations l10n,
+  ) {
+    final slivers = <Widget>[];
+    var runningIndex = 0;
+    for (final group in DashboardSectionGroup.values) {
+      final inGroup = sections.where((s) => s.group == group).toList();
+      if (inGroup.isEmpty) continue;
+
+      slivers.add(
+        SliverToBoxAdapter(
+          child: _GroupHeader(label: _groupLabel(group, l10n)),
+        ),
+      );
+      slivers.add(
+        SliverPadding(
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: AppSpacing.lg,
+          ),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate((context, index) {
+              final section = inGroup[index];
+              final tile = _buildSectionTile(context, section, counts, l10n);
+              return Padding(
+                padding: const EdgeInsetsDirectional.only(
+                  bottom: AppSpacing.md,
+                ),
+                child: StaggeredListItem(
+                  index: runningIndex++,
+                  child: tile,
+                ),
+              );
+            }, childCount: inGroup.length),
+          ),
+        ),
+      );
+    }
+    return slivers;
   }
 
   Widget _buildSectionTile(
@@ -161,41 +225,38 @@ class _AdminHomeViewState extends State<_AdminHomeView> with RouteAware {
     AppLocalizations l10n,
   ) {
     final label = _resolveLabel(section.labelKey, l10n);
+    final colors = AppColors.of(context);
 
-    if (section.state == DashboardSectionState.comingSoon) {
-      return ComingSoonTile(
-        icon: section.icon,
-        label: label,
-        comingSoonLabel: l10n.dashboardComingSoon,
-      );
-    }
-
-    // Counter: null = not permitted → omit badge; 0 = permitted, nothing pending.
+    // Counter: null = not permitted → omit badge; 0 = permitted, nothing
+    // pending. AppDashboardTile hides badges that are null or <= 0.
     final counter = counts != null
         ? _resolveCounter(section.counterKey, counts)
         : null;
 
-    // Secondary informational counter (contract: the Listings tile carries
-    // pending_listings as its badge AND active_listings as a caption).
-    final secondaryCounter = counts != null
-        ? _resolveCounter(section.secondaryCounterKey, counts)
-        : null;
-    final secondaryCounterLabel =
-        section.secondaryCounterKey == 'activeListings'
-        ? l10n.dashboardCounterActiveListings
-        : null;
-
     // Quick-action deep-link: counter tiles route to the filtered queue (FR-009).
     final quickRoute = _quickActionRoute(section.counterKey) ?? section.route!;
+    final subtitle = section.subtitleKey == null
+        ? null
+        : _resolveSubtitle(section.subtitleKey!, l10n);
 
-    return DashboardTile(
+    return AppDashboardTile(
       icon: section.icon,
-      label: label,
-      route: quickRoute,
-      counter: counter,
-      secondaryCounter: secondaryCounter,
-      secondaryCounterLabel: secondaryCounterLabel,
+      title: label,
+      subtitle: subtitle,
+      badgeCount: counter,
+      accent: _groupAccent(section.group, colors),
+      // Preserve the Phase 20 navigation behaviour (go_router push).
+      onTap: () => context.push(quickRoute),
     );
+  }
+
+  Color _groupAccent(DashboardSectionGroup group, AppColors colors) {
+    return switch (group) {
+      DashboardSectionGroup.moderation => colors.primary,
+      DashboardSectionGroup.configuration => colors.secondary,
+      DashboardSectionGroup.insights => colors.accent,
+      DashboardSectionGroup.superAdmin => colors.error,
+    };
   }
 
   /// Maps symbolic counter key → DashboardCounts field.
@@ -217,8 +278,6 @@ class _AdminHomeViewState extends State<_AdminHomeView> with RouteAware {
   }
 
   /// Quick-action deep-link per counter (FR-009).
-  /// pending_listings → adminListingReviewPending; open_reports → adminReports;
-  /// pending_users → adminApprovals; new_inquiries_24h → adminInquiries.
   String? _quickActionRoute(String? counterKey) {
     switch (counterKey) {
       case 'pendingUsers':
@@ -232,6 +291,15 @@ class _AdminHomeViewState extends State<_AdminHomeView> with RouteAware {
       default:
         return null;
     }
+  }
+
+  String _groupLabel(DashboardSectionGroup group, AppLocalizations l10n) {
+    return switch (group) {
+      DashboardSectionGroup.moderation => l10n.adminSectionGroupModeration,
+      DashboardSectionGroup.configuration => l10n.adminSectionGroupConfiguration,
+      DashboardSectionGroup.insights => l10n.adminSectionGroupInsights,
+      DashboardSectionGroup.superAdmin => l10n.adminSectionGroupSuperAdmin,
+    };
   }
 
   /// Maps DashboardSection.labelKey → localized string.
@@ -263,68 +331,89 @@ class _AdminHomeViewState extends State<_AdminHomeView> with RouteAware {
         return labelKey;
     }
   }
+
+  /// Maps DashboardSection.subtitleKey → localized string.
+  String? _resolveSubtitle(String subtitleKey, AppLocalizations l10n) {
+    switch (subtitleKey) {
+      case 'adminSectionSubtitleApprovals':
+        return l10n.adminSectionSubtitleApprovals;
+      case 'adminSectionSubtitleListingReview':
+        return l10n.adminSectionSubtitleListingReview;
+      case 'adminSectionSubtitleReports':
+        return l10n.adminSectionSubtitleReports;
+      case 'adminSectionSubtitleAgencies':
+        return l10n.adminSectionSubtitleAgencies;
+      case 'adminSectionSubtitleInquiries':
+        return l10n.adminSectionSubtitleInquiries;
+      case 'adminSectionSubtitleLocations':
+        return l10n.adminSectionSubtitleLocations;
+      case 'adminSectionSubtitleCurrencies':
+        return l10n.adminSectionSubtitleCurrencies;
+      case 'adminSectionSubtitleAds':
+        return l10n.adminSectionSubtitleAds;
+      case 'adminSectionSubtitleSettings':
+        return l10n.adminSectionSubtitleSettings;
+      case 'adminSectionSubtitleAuditLogs':
+        return l10n.adminSectionSubtitleAuditLogs;
+      case 'adminSectionSubtitleSuperAdmin':
+        return l10n.adminSectionSubtitleSuperAdmin;
+      default:
+        return null;
+    }
+  }
 }
 
-// ── Counter status bar ────────────────────────────────────────────────────────
+// ── Group header ──────────────────────────────────────────────────────────────
 
-class _CounterStatusBar extends StatelessWidget {
-  const _CounterStatusBar({
-    required this.isLoading,
-    required this.isError,
-    required this.l10n,
-    required this.onRetry,
-  });
+class _GroupHeader extends StatelessWidget {
+  const _GroupHeader({required this.label});
 
-  final bool isLoading;
-  final bool isError;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        AppSpacing.lg,
+        AppSpacing.md,
+        AppSpacing.lg,
+        AppSpacing.sm,
+      ),
+      child: Text(
+        label,
+        style: styles.labelLarge.copyWith(color: colors.textMuted),
+      ),
+    );
+  }
+}
+
+// ── Counter error notice ──────────────────────────────────────────────────────
+
+class _CounterErrorNotice extends StatelessWidget {
+  const _CounterErrorNotice({required this.l10n, required this.onRetry});
+
   final AppLocalizations l10n;
   final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    if (isLoading) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.lg,
-          vertical: AppSpacing.sm,
-        ),
-        child: Row(
-          children: [
-            const SizedBox(
-              width: AppSpacing.lg,
-              height: AppSpacing.lg,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Text(
-              l10n.dashboardCountersLoading,
-              style: theme.textTheme.bodySmall,
-            ),
-          ],
-        ),
-      );
-    }
-    // isError
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(
+      padding: const EdgeInsetsDirectional.symmetric(
         horizontal: AppSpacing.lg,
         vertical: AppSpacing.sm,
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.warning_amber_outlined,
-            size: AppSpacing.lg,
-            color: theme.colorScheme.error,
-          ),
+          Icon(Icons.warning_amber_outlined, color: colors.error),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
               l10n.dashboardCountersError,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.error,
-              ),
+              style: styles.bodyMedium.copyWith(color: colors.error),
             ),
           ),
           TextButton(
@@ -346,22 +435,22 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final styles = AppTextStyles.of(context);
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
+        padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               l10n.admin_home_empty_title,
-              style: theme.textTheme.titleLarge,
+              style: styles.titleLarge,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
               l10n.admin_home_empty_body,
-              style: theme.textTheme.bodyMedium,
+              style: styles.bodyMedium,
               textAlign: TextAlign.center,
             ),
           ],

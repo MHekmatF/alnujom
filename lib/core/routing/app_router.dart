@@ -58,6 +58,10 @@ import '../../features/inquiries/presentation/pages/inquiry_inbox_page.dart';
 import '../../features/map/domain/entities/map_entry_context.dart';
 import '../../features/map/presentation/pages/map_page.dart';
 import '../../features/search/presentation/pages/search_page.dart';
+import '../../features/search/presentation/pages/saved_searches_page.dart';
+import '../../features/search/domain/entities/filter_state.dart';
+import '../../features/publisher_dashboard/presentation/pages/publisher_dashboard_page.dart';
+import '../../features/dashboard/presentation/pages/dashboard_entry_page.dart';
 import '../../features/settings/presentation/bloc/app_settings_cubit.dart';
 import '../../features/settings/presentation/pages/about_support_page.dart';
 import '../../features/settings/presentation/pages/maintenance_screen.dart';
@@ -151,6 +155,10 @@ abstract final class AppRoutes {
   static const about = '/about';
   static const themeGallery = '/_debug/theme-gallery';
   static const debugMoneyFormatter = '/debug/money-formatter';
+  // Phase 25 uplift v2 — saved searches + role-aware dashboard.
+  static const savedSearches = '/saved-searches';
+  static const publisherDashboard = '/publisher/dashboard';
+  static const dashboard = '/dashboard';
 
   /// Phase 13 FR-010 helper — resolves Wave 2 F1 finding (no more literal
   /// string interpolation in [HomeListingCardTile]).
@@ -203,6 +211,10 @@ abstract final class AppRouteNames {
   static const listingDetails = 'listing-details';
   // Phase 14 FR-001 / FR-010: public search & filters route name.
   static const search = 'search';
+  // Phase 25 uplift v2 — saved searches + role-aware dashboard route names.
+  static const savedSearches = 'saved-searches';
+  static const publisherDashboard = 'publisher-dashboard';
+  static const dashboard = 'dashboard';
   // Phase 15 FR-007: public map view route name.
   static const map = 'map';
   // Phase 16 FR-001: publisher inquiry inbox route name.
@@ -554,12 +566,38 @@ GoRouter buildAppRouter({
       GoRoute(
         path: AppRoutes.search,
         name: AppRouteNames.search,
-        builder: (context, state) => SearchPage(
-          initialPropertyType: state.extra as PropertyType?,
-          // Phase 25: only the Home hero search pill requests keyboard focus
-          // (via `?focus=1`); tab/filter/ad/chip entries browse without it.
-          autofocus: state.uri.queryParameters['focus'] == '1',
-        ),
+        builder: (context, state) {
+          // `extra` may be a PropertyType (Home chip), a FilterState (re-applied
+          // saved search), or null (hero search bar).
+          final extra = state.extra;
+          return SearchPage(
+            initialPropertyType: extra is PropertyType ? extra : null,
+            initialFilters: extra is FilterState ? extra : null,
+            // Phase 25: only the Home hero search pill requests keyboard focus
+            // (via `?focus=1`); tab/filter/ad/chip entries browse without it.
+            autofocus: state.uri.queryParameters['focus'] == '1',
+          );
+        },
+      ),
+      // ─── Phase 25 uplift v2 — saved searches ───
+      GoRoute(
+        path: AppRoutes.savedSearches,
+        name: AppRouteNames.savedSearches,
+        builder: (context, state) => const SavedSearchesPage(),
+      ),
+      // ─── Phase 25 uplift v2 — role-aware dashboard ───
+      GoRoute(
+        path: AppRoutes.publisherDashboard,
+        name: AppRouteNames.publisherDashboard,
+        redirect: requirePublisherStatusRedirect,
+        builder: (context, state) => const PublisherDashboardPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.dashboard,
+        name: AppRouteNames.dashboard,
+        redirect: (context, state) =>
+            authBloc.state is Unauthenticated ? AppRoutes.login : null,
+        builder: (context, state) => const DashboardEntryPage(),
       ),
 
       // ─── Phase 15 — public map view ───

@@ -32,6 +32,7 @@ import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/motion.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/segmented_control.dart' as seg;
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/main_bottom_nav.dart';
@@ -43,24 +44,36 @@ import '../../../ads/domain/entities/ad_placement.dart';
 import '../../../ads/presentation/widgets/ad_slot.dart';
 import '../../../listing_form/domain/entities/listing.dart';
 import '../../domain/entities/count_filter_mode.dart';
+import '../../domain/entities/display_mode.dart';
 import '../../domain/entities/filter_state.dart';
 import '../bloc/search_bloc.dart';
 import '../bloc/search_event.dart';
 import '../bloc/search_state.dart';
+import '../cubit/recent_searches_cubit.dart';
+import '../cubit/saved_searches_cubit.dart';
 import '../widgets/inline_sort_control.dart';
+import '../widgets/recent_searches_panel.dart';
+import '../widgets/save_search_dialog.dart';
 import '../widgets/search_filter_sheet.dart';
+import '../widgets/search_map_view.dart';
 import '../widgets/search_result_card.dart';
 
 class SearchPage extends StatelessWidget {
   const SearchPage({
     super.key,
     this.initialPropertyType,
+    this.initialFilters,
     this.autofocus = false,
   });
 
   /// Set by [GoRouterState.extra] when the user enters via a property-type
   /// chip on Home (pre-filters by type).
   final PropertyType? initialPropertyType;
+
+  /// Phase 25 — a full [FilterState] to seed the BLoC with, set by
+  /// [GoRouterState.extra] when the user re-applies a saved search. Takes
+  /// precedence over [initialPropertyType].
+  final FilterState? initialFilters;
 
   /// Phase 25 — only auto-open the keyboard when the user entered with a clear
   /// typing intent (the Home hero search pill, via `?focus=1`). Browse-intent
@@ -70,26 +83,58 @@ class SearchPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final initialFilters = initialPropertyType != null
-        ? FilterState(propertyType: initialPropertyType)
-        : FilterState.empty;
-    return BlocProvider<SearchBloc>(
-      // @injectable factory — every push of /search gets a fresh BLoC (R-77).
-      create: (_) =>
-          getIt<SearchBloc>()
-            ..add(SearchFiltersApplied(filters: initialFilters)),
-      child: _SearchPageView(autofocusSearchBar: autofocus),
+    final seedFilters = initialFilters ??
+        (initialPropertyType != null
+            ? FilterState(propertyType: initialPropertyType)
+            : FilterState.empty);
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<SearchBloc>(
+          // @injectable factory — every push of /search gets a fresh BLoC (R-77).
+          create: (_) =>
+              getIt<SearchBloc>()
+                ..add(SearchFiltersApplied(filters: seedFilters)),
+        ),
+        BlocProvider<RecentSearchesCubit>(
+          create: (_) => getIt<RecentSearchesCubit>()..load(),
+        ),
+        BlocProvider<SavedSearchesCubit>(
+          create: (_) => getIt<SavedSearchesCubit>(),
+        ),
+      ],
+      child: _SearchPageView(
+        autofocusSearchBar: autofocus,
+        // Seed the local controller text so a re-applied saved search shows
+        // its query in the bar.
+        initialQuery: seedFilters.query,
+      ),
     );
   }
 }
 
-class _SearchPageView extends StatelessWidget {
-  const _SearchPageView({required this.autofocusSearchBar});
+class _SearchPageView extends StatefulWidget {
+  const _SearchPageView({required this.autofocusSearchBar, this.initialQuery});
 
   final bool autofocusSearchBar;
+  final String? initialQuery;
+
+  @override
+  State<_SearchPageView> createState() => _SearchPageViewState();
+}
+
+class _SearchPageViewState extends State<_SearchPageView> {
+  /// True while the search bar holds focus AND its text is empty — the
+  /// recent-searches panel overlays the results in that window.
+  bool _showRecent = false;
+
+  void _onFocusEmptyChanged(bool show) {
+    if (_showRecent == show) return;
+    setState(() => _showRecent = show);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         // No back arrow when opened as the Search bottom-nav tab root (nothing
@@ -98,14 +143,49 @@ class _SearchPageView extends StatelessWidget {
         leading: Navigator.canPop(context)
             ? const DeepLinkAwareBackButton()
             : null,
-        title: _SearchBar(autofocus: autofocusSearchBar),
+        title: _SearchBar(
+          autofocus: widget.autofocusSearchBar,
+          initialQuery: widget.initialQuery,
+          onFocusEmptyChanged: _onFocusEmptyChanged,
+        ),
         titleSpacing: 0,
+        actions: [
+          IconButton(
+            tooltip: l10n.search_saved_searches_title,
+            icon: const Icon(Icons.bookmark_border),
+            onPressed: () => context.push(AppRoutes.savedSearches),
+          ),
+        ],
       ),
-      body: const Column(
+      body: Column(
         children: [
-          _SortAndFiltersRow(),
-          _ActiveFilterChips(),
-          Expanded(child: _ResultsArea()),
+          const _SortAndFiltersRow(),
+          const _ActiveFilterChips(),
+          const _DisplayModeBar(),
+          Expanded(
+            child: Stack(
+              children: [
+                const _ResultsArea(),
+                if (_showRecent)
+                  Positioned.fill(
+                    child: RecentSearchesPanel(
+                      onSelected: (query) {
+                        // Dismiss focus + run the search.
+                        FocusScope.of(context).unfocus();
+                        _onFocusEmptyChanged(false);
+                        final bloc = context.read<SearchBloc>();
+                        bloc.add(
+                          SearchFiltersApplied(
+                            filters: bloc.state.filters.copyWith(query: query),
+                          ),
+                        );
+                        context.read<RecentSearchesCubit>().record(query);
+                      },
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ],
       ),
       bottomNavigationBar: const MainBottomNav(current: MainTab.search),
@@ -113,10 +193,94 @@ class _SearchPageView extends StatelessWidget {
   }
 }
 
+/// The list ⇄ map presentation toggle + the "save this search" action. Hidden
+/// in the initial (pre-first-search) state to keep the empty surface calm.
+class _DisplayModeBar extends StatelessWidget {
+  const _DisplayModeBar();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return BlocBuilder<SearchBloc, SearchState>(
+      buildWhen: (p, c) =>
+          p.filters.displayMode != c.filters.displayMode ||
+          (p.status == SearchStatus.initial) != (c.status == SearchStatus.initial),
+      builder: (context, state) {
+        if (state.status == SearchStatus.initial) {
+          return const SizedBox.shrink();
+        }
+        return Padding(
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.xs,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: seg.AppSegmentedControl<DisplayMode>(
+                  value: state.filters.displayMode,
+                  onChanged: (mode) => context.read<SearchBloc>().add(
+                    SearchDisplayModeChanged(mode: mode),
+                  ),
+                  segments: [
+                    seg.AppSegmentedSegment(
+                      icon: Icons.view_list_outlined,
+                      label: l10n.search_display_mode_list,
+                      value: DisplayMode.list,
+                    ),
+                    seg.AppSegmentedSegment(
+                      icon: Icons.map_outlined,
+                      label: l10n.search_display_mode_map,
+                      value: DisplayMode.map,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              IconButton.filledTonal(
+                tooltip: l10n.search_save_this_search_action,
+                icon: const Icon(Icons.bookmark_add_outlined),
+                onPressed: () => _onSaveSearch(context, state.filters),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _onSaveSearch(BuildContext context, FilterState filters) async {
+    final l10n = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
+    final cubit = context.read<SavedSearchesCubit>();
+    final label = await showSaveSearchDialog(
+      context: context,
+      suggestedLabel: filters.query ?? '',
+    );
+    if (label == null) return; // cancelled
+    final outcome = await cubit.save(label: label, filters: filters);
+    final message = switch (outcome) {
+      SaveSearchOutcome.saved => l10n.search_save_search_success,
+      SaveSearchOutcome.authRequired => l10n.search_save_search_auth_required,
+      SaveSearchOutcome.error => l10n.search_save_search_error,
+    };
+    messenger.showSnackBar(SnackBar(content: Text(message)));
+  }
+}
+
 class _SearchBar extends StatefulWidget {
-  const _SearchBar({required this.autofocus});
+  const _SearchBar({
+    required this.autofocus,
+    this.initialQuery,
+    this.onFocusEmptyChanged,
+  });
 
   final bool autofocus;
+  final String? initialQuery;
+
+  /// Fired with `true` when the bar is focused AND empty (show recent
+  /// searches), `false` otherwise.
+  final ValueChanged<bool>? onFocusEmptyChanged;
 
   @override
   State<_SearchBar> createState() => _SearchBarState();
@@ -124,15 +288,30 @@ class _SearchBar extends StatefulWidget {
 
 class _SearchBarState extends State<_SearchBar> {
   late final TextEditingController _controller;
+  late final FocusNode _focusNode;
 
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController();
+    _controller = TextEditingController(text: widget.initialQuery ?? '');
+    _focusNode = FocusNode()..addListener(_handleFocusChange);
+    _controller.addListener(_handleTextChange);
+  }
+
+  void _handleFocusChange() => _notifyFocusEmpty();
+  void _handleTextChange() => _notifyFocusEmpty();
+
+  void _notifyFocusEmpty() {
+    widget.onFocusEmptyChanged?.call(
+      _focusNode.hasFocus && _controller.text.trim().isEmpty,
+    );
   }
 
   @override
   void dispose() {
+    _controller.removeListener(_handleTextChange);
+    _focusNode.removeListener(_handleFocusChange);
+    _focusNode.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -151,6 +330,7 @@ class _SearchBarState extends State<_SearchBar> {
       listener: (context, state) => _controller.clear(),
       child: TextField(
         controller: _controller,
+        focusNode: _focusNode,
         autofocus: widget.autofocus,
         textInputAction: TextInputAction.search,
         decoration: InputDecoration(
@@ -193,6 +373,10 @@ class _SearchBarState extends State<_SearchBar> {
               ),
             ),
           );
+          // Phase 25 — persist committed (non-empty) queries to recents.
+          if (trimmed.isNotEmpty) {
+            context.read<RecentSearchesCubit>().record(trimmed);
+          }
         },
       ),
     );
@@ -455,6 +639,12 @@ class _ResultsArea extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     return BlocBuilder<SearchBloc, SearchState>(
       builder: (context, state) {
+        // Phase 25 — embedded map presentation of the same filtered results.
+        // The map owns its own load/empty/error chrome via SearchMapView.
+        if (state.filters.displayMode == DisplayMode.map &&
+            state.status != SearchStatus.initial) {
+          return SearchMapView(filters: state.filters);
+        }
         // Distinct widget types per phase → AnimatedSwitcher crossfades the
         // skeleton into results (or empty/error), but list→list during
         // pagination is the same type, so it updates in place without a fade.
@@ -534,16 +724,30 @@ class _EmptyView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.search_off, size: 48),
-            const SizedBox(height: 8),
+            Container(
+              width: AppSpacing.xxxl + AppSpacing.lg,
+              height: AppSpacing.xxxl + AppSpacing.lg,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.10),
+              ),
+              child: Icon(
+                Icons.search_off,
+                size: AppSpacing.xxl,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
             Text(
               l10n.search_empty_title,
-              style: Theme.of(context).textTheme.titleMedium,
+              style: Theme.of(context).textTheme.titleLarge,
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: AppSpacing.xs),
             Text(l10n.search_empty_subtitle, textAlign: TextAlign.center),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             TextButton(
               onPressed: () => context.read<SearchBloc>().add(
                 const SearchFiltersApplied(filters: FilterState.empty),

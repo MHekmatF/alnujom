@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../theme/colors.dart';
+import '../theme/elevation.dart';
 import '../theme/radii.dart';
 import '../theme/spacing.dart';
 import '../theme/typography.dart';
@@ -26,7 +28,9 @@ class StatusPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final styles = AppTextStyles.of(context);
-    final fg = foreground ?? Colors.white;
+    final colors = AppColors.of(context);
+    final elevation = AppElevation.of(context);
+    final fg = foreground ?? colors.onPhoto;
     return Container(
       padding: const EdgeInsetsDirectional.symmetric(
         horizontal: AppSpacing.sm,
@@ -35,6 +39,7 @@ class StatusPill extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         borderRadius: appRadius(AppRadii.pill),
+        boxShadow: elevation.level1,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

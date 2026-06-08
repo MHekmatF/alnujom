@@ -4,21 +4,24 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/motion.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
+import '../../../../core/widgets/empty_state.dart';
+import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/hero_tags.dart';
-import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/reduce_motion.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../features/listing_form/domain/entities/listing.dart'
-    show Listing, LocationVisibility;
+    show Listing, LocationVisibility, PropertyTypeDb;
 import '../../../../features/map/domain/entities/map_entry_context.dart';
 import '../../../../features/map/domain/entities/marker_coordinates.dart';
 import '../../../../features/currencies/domain/entities/currency.dart';
 import '../../../../features/listing_form/domain/entities/listing_media.dart';
+import '../../../../features/listing_form/domain/entities/listing_price.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/presentation/widgets/listing_display/listing_amenities_block.dart';
 import '../../../../shared/presentation/widgets/listing_display/listing_description_block.dart';
@@ -27,12 +30,23 @@ import '../../../../shared/presentation/widgets/listing_display/listing_location
 import '../../../../shared/presentation/widgets/listing_display/listing_price_block.dart';
 import '../../domain/entities/listing_details_aggregate.dart';
 import '../bloc/listing_details_bloc.dart';
+import '../widgets/affordability_calculator.dart';
+import '../widgets/buyer_safety_banner.dart';
 import '../widgets/contact_block.dart';
+import '../widgets/listing_details_skeleton.dart';
+import '../widgets/listing_facts_block.dart';
 import '../widgets/per_listing_action_block.dart';
+import '../widgets/similar_listings_carousel.dart';
+import '../../../../shared/domain/value_objects/money.dart';
+import '../../../../shared/presentation/money_formatter.dart';
 import '../../../ads/domain/entities/ad_placement.dart';
 import '../../../ads/presentation/widgets/ad_slot.dart';
 import '../../../reports/presentation/widgets/reporter_status_banner.dart';
 import '../../../agency/presentation/widgets/listing_agency_badge.dart';
+import '../../../reviews/presentation/bloc/seller_trust_cubit.dart';
+import '../../../reviews/presentation/widgets/seller_reviews_section.dart';
+import '../../../recently_viewed/domain/entities/recently_viewed_listing.dart';
+import '../../../recently_viewed/presentation/bloc/recently_viewed_cubit.dart';
 import '../../data/listing_details_video_launcher.dart';
 
 /// Phase 13 (spec/013-home-and-details) — listing details page.
@@ -98,7 +112,7 @@ class _ListingDetailsView extends StatelessWidget {
           switch (state.status) {
             case ListingDetailsStatus.initial:
             case ListingDetailsStatus.loading:
-              return _chromeScaffold(const _DetailLoadingView());
+              return _chromeScaffold(const ListingDetailsSkeleton());
             case ListingDetailsStatus.notFound:
               return _chromeScaffold(const _NotFoundView());
             case ListingDetailsStatus.error:
@@ -112,7 +126,7 @@ class _ListingDetailsView extends StatelessWidget {
             case ListingDetailsStatus.success:
               final aggregate = state.aggregate;
               if (aggregate == null) {
-                return _chromeScaffold(const _DetailLoadingView());
+                return _chromeScaffold(const ListingDetailsSkeleton());
               }
               // Success owns its own Scaffold whose SliverAppBar IS the bar
               // (a parallax collapsing gallery), so no top-level AppBar here.
@@ -132,13 +146,75 @@ class _ListingDetailsView extends StatelessWidget {
 
 // ─── Success body ─────────────────────────────────────────────────────────────
 
-class _SuccessBody extends StatelessWidget {
+class _SuccessBody extends StatefulWidget {
   const _SuccessBody({required this.aggregate});
 
   final ListingDetailsAggregate aggregate;
 
   @override
+  State<_SuccessBody> createState() => _SuccessBodyState();
+}
+
+class _SuccessBodyState extends State<_SuccessBody> {
+  @override
+  void initState() {
+    super.initState();
+    // Recently-viewed: record this listing once when the success body mounts.
+    // Best-effort + local-only; fired post-frame so it never competes with the
+    // first paint, and uses the active locale for the governorate snapshot.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _recordRecentlyViewed(Localizations.localeOf(context));
+    });
+  }
+
+  /// Captures a small snapshot of the loaded aggregate into the shared
+  /// [RecentlyViewedCubit] (de-duped by id, capped, most-recent-first). The main
+  /// image storage path is resolved to a public URL by the data layer so this
+  /// presentation file never touches Supabase.
+  void _recordRecentlyViewed(Locale locale) {
+    final aggregate = widget.aggregate;
+    final cubit = getIt<RecentlyViewedCubit>();
+
+    final mainMedia = _mainImageMedia(aggregate.media);
+    final primaryPrice = aggregate.prices.isEmpty
+        ? null
+        : aggregate.prices.firstWhere(
+            (p) => p.isPrimary,
+            orElse: () => aggregate.prices.first,
+          );
+    final governorateName = aggregate.governorate.localizedName(locale);
+
+    cubit.record(
+      RecentlyViewedListing(
+        id: aggregate.listing.id,
+        title: aggregate.listing.title,
+        mainImageUrl: cubit.resolveImageUrl(mainMedia?.storagePath),
+        priceAmount: primaryPrice?.amount.toString(),
+        currencyCode: primaryPrice?.currencyCode,
+        governorateName:
+            governorateName.isEmpty ? null : governorateName,
+      ),
+    );
+  }
+
+  /// The listing's main image media (is_main first, then ordering ASC),
+  /// restricted to image rows with a storage path; null when none qualifies.
+  ListingMedia? _mainImageMedia(List<ListingMedia> media) {
+    final images = media
+        .where((m) =>
+            m.kind == ListingMediaKind.image && m.storagePath != null)
+        .toList()
+      ..sort((a, b) {
+        if (a.isMain != b.isMain) return a.isMain ? -1 : 1;
+        return a.ordering.compareTo(b.ordering);
+      });
+    return images.isEmpty ? null : images.first;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final aggregate = widget.aggregate;
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
@@ -150,9 +226,15 @@ class _SuccessBody extends StatelessWidget {
         : null;
 
     final galleryHeight = MediaQuery.sizeOf(context).width * 9 / 16;
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
+    // Seller-trust layer: one cubit for the whole success body, seeded with the
+    // seller's user id. The contact card's rating/response summary and the
+    // Reviews section both read it, so loading happens once here.
+    return BlocProvider<SellerTrustCubit>(
+      create: (_) =>
+          getIt<SellerTrustCubit>()..load(aggregate.listing.publisherUserId),
+      child: Scaffold(
+        body: CustomScrollView(
+          slivers: [
           // 2. Parallax collapsing gallery + FR-027 video-tap overlay.
           //    Phase 12 Q8=A ListingGallery wrapped (not edited) per SC-016;
           //    it also owns the Hero destination flown from the home card.
@@ -215,6 +297,22 @@ class _SuccessBody extends StatelessWidget {
                       ),
                       const SizedBox(height: AppSpacing.md),
                     ],
+                    // 4b. Premium uplift v2 — key facts grid (beds·baths·area·
+                    //     floor·type) right under the title/price. Collapses to
+                    //     nothing when the listing has none of these.
+                    ListingFactsBlock(listing: aggregate.listing),
+                    const SizedBox(height: AppSpacing.md),
+                    // 4c. Premium uplift — financing ("حاسبة التمويل")
+                    //     calculator, expandable, seeded with the primary price.
+                    //     Indicative only; no currency conversion, no network.
+                    if (displayCurrency != null &&
+                        aggregate.prices.isNotEmpty) ...[
+                      AffordabilityCalculator(
+                        price: _primaryPrice(aggregate).amount,
+                        currencyCode: _primaryPrice(aggregate).currencyCode,
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                    ],
                     // 5. Location block — Phase 12 Q8=A VERBATIM (widget itself unmodified)
                     ListingLocationBlock(
                       governorate: aggregate.governorate,
@@ -254,8 +352,35 @@ class _SuccessBody extends StatelessWidget {
                         ),
                       ),
                     const SizedBox(height: AppSpacing.md),
-                    // 6. Contact block — Phase 16 rewired (listing passed for ContactCtaCubit)
-                    ContactBlock(listing: aggregate.listing),
+                    // 5c. Premium uplift — buyer-safety reassurance banner,
+                    //     placed just above the contact section so the buyer
+                    //     reads it before reaching out. Informational only.
+                    const BuyerSafetyBanner(),
+                    const SizedBox(height: AppSpacing.md),
+                    // 6. Contact block — Phase 16 rewired (listing passed for
+                    //    ContactCtaCubit). Premium uplift v2: richer AgentCard
+                    //    surface seeded with the publisher's name + username.
+                    ContactBlock(
+                      listing: aggregate.listing,
+                      contactName: aggregate.publisher.fullName.isNotEmpty
+                          ? aggregate.publisher.fullName
+                          : null,
+                      subtitle: aggregate.publisher.username != null &&
+                              aggregate.publisher.username!.isNotEmpty
+                          ? l10n.listing_details_contact_username(
+                              aggregate.publisher.username!,
+                            )
+                          : null,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    // 6b. Seller-trust "Reviews" section — header (avg + count),
+                    //     recent reviews, and a context-aware write affordance.
+                    //     Reads the page-level SellerTrustCubit; collapses when
+                    //     there's nothing to show and the viewer can't write.
+                    SellerReviewsSection(
+                      sellerId: aggregate.listing.publisherUserId,
+                      listingId: aggregate.listing.id,
+                    ),
                     const SizedBox(height: AppSpacing.md),
                     // 7. Amenities block — Phase 12 Q8=A VERBATIM
                     ListingAmenitiesBlock(
@@ -271,16 +396,69 @@ class _SuccessBody extends StatelessWidget {
                       ),
                       const SizedBox(height: AppSpacing.md),
                     ],
-                    // 9. Per-listing action block — Phase 17 Favorite live; Share/Report stubs
-                    PerListingActionBlock(listingId: aggregate.listing.id),
+                    // 9. Per-listing action block — Favorite + Report live;
+                    //    Share now live (premium uplift v2) with title + price.
+                    PerListingActionBlock(
+                      listingId: aggregate.listing.id,
+                      shareTitle: aggregate.listing.title,
+                      sharePrice: _sharePriceText(
+                        context,
+                        aggregate,
+                        displayCurrency,
+                      ),
+                    ),
                     const SizedBox(height: AppSpacing.lg),
                   ],
                 ),
               ),
             ),
           ),
-        ],
+          // 10. Premium uplift v2 — "similar listings" carousel: same property
+          //     type + governorate, excluding this listing. Self-contained
+          //     (hosts its own cubit); collapses when the pool is empty.
+          SliverToBoxAdapter(
+            child: SimilarListingsCarousel(
+              listingId: aggregate.listing.id,
+              propertyType: aggregate.listing.propertyType.toDbValue(),
+              propertyTypeEnum: aggregate.listing.propertyType,
+              governorateId: aggregate.listing.governorateId,
+              staggerIndex: 2,
+            ),
+          ),
+          const SliverToBoxAdapter(
+            child: SizedBox(height: AppSpacing.lg),
+          ),
+          ],
+        ),
       ),
+    );
+  }
+
+  /// Builds the localized primary-price string for the share payload, or null
+  /// when no price / currency is available.
+  String? _sharePriceText(
+    BuildContext context,
+    ListingDetailsAggregate aggregate,
+    Currency? displayCurrency,
+  ) {
+    if (displayCurrency == null || aggregate.prices.isEmpty) return null;
+    final primary = aggregate.prices.firstWhere(
+      (p) => p.isPrimary,
+      orElse: () => aggregate.prices.first,
+    );
+    return MoneyFormatter.format(
+      Money(amount: primary.amount, currencyCode: primary.currencyCode),
+      locale: Localizations.localeOf(context),
+      currency: displayCurrency,
+    );
+  }
+
+  /// The listing's primary price (isPrimary first, else the first available).
+  /// Caller must guard on `aggregate.prices.isNotEmpty`.
+  ListingPrice _primaryPrice(ListingDetailsAggregate aggregate) {
+    return aggregate.prices.firstWhere(
+      (p) => p.isPrimary,
+      orElse: () => aggregate.prices.first,
     );
   }
 
@@ -433,6 +611,7 @@ class _GalleryDots extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: List.generate(count, (i) {
         final active = i == current;
+        final onPhoto = AppColors.of(context).onPhoto;
         return AnimatedContainer(
           duration: AppMotion.base,
           curve: AppMotion.curve,
@@ -442,7 +621,7 @@ class _GalleryDots extends StatelessWidget {
           width: active ? AppSpacing.lg : AppSpacing.sm,
           height: AppSpacing.sm,
           decoration: BoxDecoration(
-            color: active ? Colors.white : Colors.white.withValues(alpha: 0.5),
+            color: active ? onPhoto : onPhoto.withValues(alpha: 0.5),
             borderRadius: appRadius(AppRadii.pill),
           ),
         );
@@ -493,34 +672,6 @@ class _KenBurnsState extends State<_KenBurns>
   }
 }
 
-// ─── Loading skeleton ─────────────────────────────────────────────────────────
-
-/// Shimmer placeholder for the detail page while it loads: a 16:9 gallery
-/// block, a title + sub line, and a content block — mirroring the real layout.
-class _DetailLoadingView extends StatelessWidget {
-  const _DetailLoadingView();
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsetsDirectional.all(AppSpacing.md),
-      children: const [
-        AspectRatio(aspectRatio: 16 / 9, child: LoadingState.card()),
-        SizedBox(height: AppSpacing.lg),
-        SizedBox(height: AppSpacing.xl, child: LoadingState.row()),
-        SizedBox(height: AppSpacing.md),
-        FractionallySizedBox(
-          alignment: AlignmentDirectional.centerStart,
-          widthFactor: 0.5,
-          child: SizedBox(height: AppSpacing.lg, child: LoadingState.row()),
-        ),
-        SizedBox(height: AppSpacing.xl),
-        LoadingState.card(),
-      ],
-    );
-  }
-}
-
 // ─── Not-found view ───────────────────────────────────────────────────────────
 
 class _NotFoundView extends StatelessWidget {
@@ -529,33 +680,11 @@ class _NotFoundView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.search_off_rounded,
-              size: 64,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              l10n.listing_details_not_found_title,
-              style: theme.textTheme.titleLarge,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            FilledButton(
-              onPressed: () => context.go(AppRoutes.home),
-              child: Text(l10n.listing_details_not_found_return_home),
-            ),
-          ],
-        ),
-      ),
+    return EmptyState(
+      icon: Icons.search_off_rounded,
+      headline: l10n.listing_details_not_found_title,
+      ctaLabel: l10n.listing_details_not_found_return_home,
+      onCtaPressed: () => context.go(AppRoutes.home),
     );
   }
 }
@@ -570,26 +699,10 @@ class _ErrorView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 64, color: theme.colorScheme.error),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              l10n.error_could_not_load_listing,
-              style: theme.textTheme.titleMedium,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            OutlinedButton(onPressed: onRetry, child: Text(l10n.action_retry)),
-          ],
-        ),
-      ),
+    return ErrorState(
+      title: l10n.error_could_not_load_listing,
+      variant: ErrorStateVariant.network,
+      onRetry: onRetry,
     );
   }
 }

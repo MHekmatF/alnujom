@@ -34,6 +34,11 @@ class HomeListingCard extends Equatable {
     this.agencyId,
     this.agencyName,
     this.agencyLogoUrl,
+    this.rooms,
+    this.bathrooms,
+    this.areaSize,
+    this.floor,
+    this.isFeatured = false,
   });
 
   final String id;
@@ -67,6 +72,21 @@ class HomeListingCard extends Equatable {
   /// null even when [agencyId] is set (agency has no logo).
   final String? agencyLogoUrl;
 
+  /// Phase 25 uplift v2 — key facts (columns on `listings`). Nullable: land has
+  /// no rooms/bathrooms, etc. The card renders only the present ones.
+  final int? rooms;
+  final int? bathrooms;
+  final double? areaSize;
+  final int? floor;
+
+  /// Featured-listings treatment — true when the listing's `featured_until`
+  /// timestamp is in the future (an admin has promoted it via the
+  /// `set_listing_featured` RPC). Drives the "مميّز / Featured" badge on the
+  /// card and the home "✨ عقارات مميّزة" carousel section. Rows returned by the
+  /// dedicated featured query are always `true`; rows in the regular feed are
+  /// `true` only when their (newly-projected) `featured_until` is still active.
+  final bool isFeatured;
+
   @override
   List<Object?> get props => [
     id,
@@ -82,5 +102,10 @@ class HomeListingCard extends Equatable {
     agencyId,
     agencyName,
     agencyLogoUrl,
+    rooms,
+    bathrooms,
+    areaSize,
+    floor,
+    isFeatured,
   ];
 }

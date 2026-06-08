@@ -4,8 +4,14 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/brand_mark.dart';
+import '../../../../core/widgets/empty_state.dart';
+import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/locale_toggle_action.dart';
 import '../../../../core/widgets/main_bottom_nav.dart';
@@ -22,11 +28,15 @@ import '../../../currencies/domain/usecases/list_currencies.dart';
 import '../../../favorites/presentation/bloc/favorites_cubit.dart';
 import '../../../inquiries/presentation/bloc/inquiries_unread_cubit.dart';
 import '../../../notifications/presentation/bloc/notification_badge_cubit.dart';
+import '../bloc/featured_listings_cubit.dart';
 import '../bloc/home_bloc.dart';
 import '../bloc/home_event.dart';
 import '../bloc/home_state.dart';
 import '../../../ads/domain/entities/ad_placement.dart';
 import '../../../ads/presentation/widgets/ad_slot.dart';
+import '../../../recently_viewed/presentation/bloc/recently_viewed_cubit.dart';
+import '../../../recently_viewed/presentation/widgets/recently_viewed_carousel.dart';
+import '../widgets/featured_listings_carousel.dart';
 import '../widgets/hero_search_bar.dart';
 import '../widgets/home_listing_card.dart';
 import '../../../notifications/presentation/widgets/notification_bell_action.dart';
@@ -56,9 +66,26 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context);
-    return BlocProvider<HomeBloc>(
-      create: (_) =>
-          getIt<HomeBloc>()..add(HomeFeedLoadRequested(locale: locale)),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<HomeBloc>(
+          create: (_) =>
+              getIt<HomeBloc>()..add(HomeFeedLoadRequested(locale: locale)),
+        ),
+        // Featured-listings treatment — load the "✨ عقارات مميّزة" carousel when
+        // Home opens. Page-scoped (mirrors HomeBloc); the section hides itself
+        // on empty / failure.
+        BlocProvider<FeaturedListingsCubit>(
+          create: (_) =>
+              getIt<FeaturedListingsCubit>()..load(locale: locale),
+        ),
+        // Recently-viewed: the shared (lazySingleton) cubit, loaded from local
+        // storage when Home opens. .value (not create) so we don't dispose the
+        // singleton the listing-details record path also uses.
+        BlocProvider<RecentlyViewedCubit>.value(
+          value: getIt<RecentlyViewedCubit>()..load(),
+        ),
+      ],
       child: const _HomeView(),
     );
   }
@@ -131,7 +158,7 @@ class _HomeViewState extends State<_HomeView> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const BrandMark(withWordmark: true, size: 24),
+        title: const BrandMark(withWordmark: true, size: 30),
         actions: const [
           // Phase 25 — slimmed Home chrome: only locale/theme + notifications
           // remain in the bar. Profile/sign-in is now the Profile tab, and the
@@ -151,9 +178,16 @@ class _HomeViewState extends State<_HomeView> {
             builder: (context, state) {
               return StarRefreshIndicator(
                 onRefresh: () async {
+                  // Capture cubits before the awaits (no BuildContext across
+                  // async gaps).
+                  final featured = context.read<FeaturedListingsCubit>();
+                  final recent = context.read<RecentlyViewedCubit>();
                   context.read<HomeBloc>().add(
                     HomeFeedRefreshRequested(locale: locale),
                   );
+                  // Featured-listings + recently-viewed also reload on refresh.
+                  await featured.load(locale: locale);
+                  await recent.load();
                 },
                 child: _buildBody(context, state, currenciesByCode, l10n),
               );
@@ -189,20 +223,16 @@ class _HomeViewState extends State<_HomeView> {
         const SliverToBoxAdapter(
           child: AdSlot(placement: AdPlacement.homeTopBanner),
         ),
+        // Featured-listings treatment — the "✨ عقارات مميّزة" carousel sits at the
+        // TOP of the feed (above the regular list). Hides itself entirely when
+        // there are no active featured listings or the load failed.
         SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(
-              AppSpacing.lg,
-              AppSpacing.md,
-              AppSpacing.lg,
-              AppSpacing.sm,
-            ),
-            child: Text(
-              l10n.home_latest_listings_header,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-          ),
+          child: FeaturedListingsCarousel(currenciesByCode: currenciesByCode),
         ),
+        // Recently-viewed: the "شوهد مؤخراً / Recently viewed" row, just under the
+        // featured carousel. Backed by local storage; hides itself when empty.
+        const SliverToBoxAdapter(child: RecentlyViewedCarousel()),
+        SliverToBoxAdapter(child: _SectionHeader(title: l10n.home_latest_listings_header)),
         ..._buildFeedSlivers(context, state, currenciesByCode, l10n),
       ],
     );
@@ -229,9 +259,9 @@ class _HomeViewState extends State<_HomeView> {
         return [
           SliverFillRemaining(
             hasScrollBody: false,
-            child: _ErrorView(
-              message: l10n.error_could_not_load_listings,
-              retryLabel: l10n.action_retry,
+            child: ErrorState(
+              title: l10n.error_could_not_load_listings,
+              variant: ErrorStateVariant.network,
               onRetry: () => context.read<HomeBloc>().add(
                 HomeFeedLoadRequested(locale: Localizations.localeOf(context)),
               ),
@@ -311,6 +341,46 @@ class _HomeCardSkeleton extends StatelessWidget {
   }
 }
 
+/// Premium feed section header — a bold title preceded by a short accent rule
+/// so the "Latest listings" block reads as a deliberate section start rather
+/// than a stray line of text. Purely presentational.
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.sm,
+      ),
+      child: Row(
+        children: [
+          // Short brand-accent rule anchoring the section start.
+          Container(
+            width: AppSpacing.xs,
+            height: AppSpacing.xl,
+            decoration: BoxDecoration(
+              color: colors.primary,
+              borderRadius: appRadius(AppRadii.pill),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Text(title, style: styles.titleLarge),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// Phase 25 (Claude Design) — personalized home hero greeting. Renders the
 /// signed-in user's first name when available, otherwise an anonymous welcome,
 /// with a fixed subtitle. Purely presentational (no navigation/logic).
@@ -320,7 +390,8 @@ class _HomeGreeting extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
 
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
@@ -339,20 +410,19 @@ class _HomeGreeting extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsetsDirectional.fromSTEB(
               AppSpacing.lg,
-              AppSpacing.lg,
+              AppSpacing.xl,
               AppSpacing.lg,
               AppSpacing.xs,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(greeting, style: theme.textTheme.headlineSmall),
+                // Bold display-scale welcome — the loudest line on first paint.
+                Text(greeting, style: styles.displayMedium),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   l10n.home_greeting_subtitle,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
+                  style: styles.bodyLarge.copyWith(color: colors.textMuted),
                 ),
               ],
             ),
@@ -409,7 +479,6 @@ class _EmptyView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, authState) {
         final profile = switch (authState) {
@@ -421,77 +490,18 @@ class _EmptyView extends StatelessWidget {
             profile.accountStatus == AccountStatus.approved &&
             profile.publisherStatus == PublisherStatus.approved;
 
-        return Padding(
-          padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.home_outlined,
-                size: 64,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                l10n.home_no_listings_yet,
-                style: theme.textTheme.bodyLarge,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              if (isApprovedPublisher)
-                OutlinedButton.icon(
-                  icon: const Icon(Icons.add_home_outlined),
-                  label: Text(l10n.home_empty_publish_first_listing),
-                  onPressed: () =>
-                      context.pushNamed(AppRouteNames.publisherListingsCreate),
-                )
-              else
-                OutlinedButton.icon(
-                  icon: const Icon(Icons.login_outlined),
-                  label: Text(l10n.home_empty_sign_in_to_publish),
-                  onPressed: () => context.go(AppRoutes.login),
-                ),
-            ],
-          ),
+        return EmptyState(
+          icon: Icons.home_outlined,
+          headline: l10n.home_no_listings_yet,
+          ctaLabel: isApprovedPublisher
+              ? l10n.home_empty_publish_first_listing
+              : l10n.home_empty_sign_in_to_publish,
+          onCtaPressed: isApprovedPublisher
+              ? () => context.pushNamed(AppRouteNames.publisherListingsCreate)
+              : () => context.go(AppRoutes.login),
         );
       },
     );
   }
 }
 
-class _ErrorView extends StatelessWidget {
-  const _ErrorView({
-    required this.message,
-    required this.retryLabel,
-    required this.onRetry,
-  });
-
-  final String message;
-  final String retryLabel;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.error_outline,
-            size: 48,
-            color: Theme.of(context).colorScheme.error,
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            message,
-            style: Theme.of(context).textTheme.bodyLarge,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          OutlinedButton(onPressed: onRetry, child: Text(retryLabel)),
-        ],
-      ),
-    );
-  }
-}

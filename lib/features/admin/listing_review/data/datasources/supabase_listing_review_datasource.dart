@@ -186,6 +186,35 @@ class SupabaseListingReviewDatasource {
     );
     return EdgeFunctionResponse(status: response.status, data: response.data);
   }
+
+  // ─── featureListing ────────────────────────────────────────────────────
+
+  /// Calls the admin RPC `set_listing_featured(p_listing_id, p_days)` which
+  /// sets `listings.featured_until` to `now() + p_days` (or clears it to NULL
+  /// when `p_days <= 0`). The RPC is SECURITY DEFINER and internally gated on
+  /// the `listings.edit_any` permission; it returns the new `featured_until`
+  /// (a `timestamptz`, or NULL when featuring was removed).
+  ///
+  /// Returns the parsed `featured_until` as a `DateTime?` — null means the
+  /// listing is no longer featured.
+  Future<DateTime?> featureListing({
+    required String listingId,
+    required int days,
+  }) async {
+    final result = await _client.rpc(
+      'set_listing_featured',
+      params: <String, dynamic>{
+        'p_listing_id': listingId,
+        'p_days': days,
+      },
+    );
+    // Scalar RETURNS timestamptz → the client yields the ISO-8601 string
+    // (or null when p_days <= 0 cleared the featuring).
+    if (result == null) return null;
+    final raw = result.toString();
+    if (raw.isEmpty) return null;
+    return DateTime.parse(raw);
+  }
 }
 
 /// Lightweight wrapper around the Supabase `FunctionResponse` so the

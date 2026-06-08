@@ -13,10 +13,18 @@ crafted, restrained — never cluttered. Photos lead, data supports. Trust and
 verification are central. WCAG-AA throughout (`color_scheme_contrast_test`).
 
 ## Brand mark
-A two-tone "sparkle": a large primary star with a smaller warm-coral companion
-("the stars"). In-app it is the `BrandMark` widget (CustomPainter, theme-
-coloured); as assets it is `branding/mark_{white,blue}.svg` →
-`assets/branding/{icon,icon_legacy,splash_light,splash_dark}.png`.
+The shipped identity (PRs #72/#73) is the **N-logo**: a deep-blue "N" inside a
+ring of stars over a skyline arc, with the Arabic wordmark **النّجوم** and the
+English line *Al Nujoom Real Estate Marketing*. Assets:
+`assets/branding/icon.png` (adaptive-icon foreground) + `icon_legacy.png`;
+`splash_full.png` (splash, light+dark); `logo_mark.png` (emblem only) and
+`logo_full.png` (full lockup — rendered by the in-app `AppLogo` on
+login/register/reset, sized by width). A logo is never mirrored for RTL.
+
+> **Known reconciliation item:** the in-app `BrandMark` widget (the `CustomPainter`
+> two-tone star used in the home app bar + onboarding) predates the N-logo
+> rebrand, so the app currently carries two marks. Unifying `BrandMark` to the
+> N-logo is a branding decision pending sign-off — tracked, not yet applied.
 
 ## Color tokens (`color_palette.dart` → `ModernPalette`)
 
@@ -40,9 +48,22 @@ coloured); as assets it is `branding/mark_{white,blue}.svg` →
 | outline | `#D8E0E8` | `#2B3640` |
 | onSurface | `#14202B` | `#E9EFF4` |
 | onSurfaceVariant | `#475663` | `#AAB7C2` |
-| textMuted | `#74838F` | `#7E8C98` |
+| textMuted | `#5F6C78` | `#7E8C98` |
 | **verified** (trust) | `#1F7A4D` | `#57C48C` |
 | **verifiedContainer** | `#DCF0E5` | `#163A2A` |
+| onError | `#FFFFFF` | `#420A0A` |
+| onSuccess | `#FFFFFF` | `#04231A` |
+| onPhoto | `#FFFFFF` | `#FFFFFF` |
+| photoOverlay | `#8C0B1118` | `#8C0B1118` |
+| scrim | `#66000000` | `#99000000` |
+
+> `textMuted` light was darkened from `#74838F` (3.66:1, below AA) to `#5F6C78`
+> (5.06:1) in the Phase-25 Impeccable polish — see `color_palette.dart`.
+> `onError`/`onSuccess` are explicit fills' foregrounds; `onPhoto` (always
+> white), `photoOverlay` (over-photo chip + scrim base) and `scrim` (modal
+> backdrop) are theme-independent and replace the old hardcoded
+> `Colors.white`/`Colors.black` over-photo values. The Material-3
+> `surfaceContainer*` tonal ladder is provided by `ColorScheme.fromSeed`.
 
 Semantic usage: **sale** purpose → `primary`/`primaryContainer` (blue); **rent**
 → `verified`/`verifiedContainer` (green); favorites/CTA highlight → `accent`.
@@ -61,8 +82,12 @@ keeps the Arabic font.
   (sheets) · pill 999.
 - **Elevation** (`AppElevation`): soft navy-tinted light shadows (`#102A43`
   @ ~6/8/14%); real dark shadows + hairline border on dark surfaces.
-- **Motion** (`AppMotion`): fast 150ms · base 200ms · slow 250ms ·
-  `Cubic(.2,.7,.3,1)`.
+- **Motion** (`AppMotion`): fast 150ms · base 200ms · slow 250ms · entrance
+  400ms · stagger 55ms · shared `Cubic(.2,.7,.3,1)`, plus `emphasized`
+  (entrance) and `exit` (dismiss) curves.
+- **Gradients** (`AppGradients.of(context)`): `photoScrim` + `photoTopScrim`
+  (over-photo legibility, derived from `photoOverlay`) and a whisper-soft
+  `featuredTint` (primary wash) for premium cards. Token-derived, never raw.
 
 ## Components
 - **Listing card** (`home_listing_card.dart`, `property_card.dart`): 16:10 photo,

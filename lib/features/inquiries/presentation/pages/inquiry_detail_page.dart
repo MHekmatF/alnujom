@@ -11,6 +11,7 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
+import '../../../../core/widgets/error_state.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/inquiry.dart';
 import '../../domain/entities/inquiry_status.dart';
@@ -51,22 +52,11 @@ class _InquiryDetailView extends StatelessWidget {
             InquiryDetailLoading() => const Center(
               child: CircularProgressIndicator(),
             ),
-            InquiryDetailError(:final failure) => Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.error_outline, size: 48),
-                  const SizedBox(height: 16),
-                  Text(failure.message),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => context.read<InquiryDetailBloc>().add(
-                      InquiryDetailOpened(id),
-                    ),
-                    child: const Icon(Icons.refresh),
-                  ),
-                ],
-              ),
+            InquiryDetailError(:final failure) => ErrorState(
+              title: failure.message,
+              variant: ErrorStateVariant.network,
+              onRetry: () =>
+                  context.read<InquiryDetailBloc>().add(InquiryDetailOpened(id)),
             ),
             InquiryDetailLoaded(:final inquiry) => _InquiryDetailBody(
               inquiry: inquiry,

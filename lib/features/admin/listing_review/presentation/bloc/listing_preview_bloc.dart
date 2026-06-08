@@ -8,6 +8,7 @@ import '../../../../../core/listing/rejection_reason.dart';
 import '../../domain/entities/listing_preview.dart';
 import '../../domain/repositories/listing_review_repository.dart';
 import '../../domain/usecases/approve_listing.dart';
+import '../../domain/usecases/feature_listing.dart';
 import '../../domain/usecases/load_listing_preview.dart';
 import '../../domain/usecases/reject_listing.dart';
 
@@ -41,6 +42,17 @@ class ListingPreviewRejectPressed extends ListingPreviewEvent {
   List<Object?> get props => [preset, detail];
 }
 
+/// Phase 25 — dispatched when the admin picks a duration (or "remove") from
+/// the feature chooser. `days <= 0` removes the featuring.
+class ListingPreviewFeaturePressed extends ListingPreviewEvent {
+  const ListingPreviewFeaturePressed({required this.days});
+
+  final int days;
+
+  @override
+  List<Object?> get props => [days];
+}
+
 // ─── Mutator success marker ─────────────────────────────────────────────
 
 sealed class ListingMutatorSuccess extends Equatable {
@@ -59,6 +71,16 @@ class ApproveSuccess extends ListingMutatorSuccess {
 class RejectSuccess extends ListingMutatorSuccess {
   const RejectSuccess(this.result);
   final RejectResult result;
+  @override
+  List<Object?> get props => [result];
+}
+
+/// Phase 25 — emitted after a successful feature/unfeature. Carries the
+/// resolved [FeatureResult] so the page can pick the right toast (featured
+/// vs un-featured) without re-reading the preview.
+class FeatureSuccess extends ListingMutatorSuccess {
+  const FeatureSuccess(this.result);
+  final FeatureResult result;
   @override
   List<Object?> get props => [result];
 }
@@ -117,15 +139,18 @@ class ListingPreviewBloc
     this._loadPreview,
     this._approveListing,
     this._rejectListing,
+    this._featureListing,
   ) : super(const ListingPreviewState()) {
     on<ListingPreviewLoad>(_onLoad);
     on<ListingPreviewApprovePressed>(_onApprove);
     on<ListingPreviewRejectPressed>(_onReject);
+    on<ListingPreviewFeaturePressed>(_onFeature);
   }
 
   final LoadListingPreviewUseCase _loadPreview;
   final ApproveListingUseCase _approveListing;
   final RejectListingUseCase _rejectListing;
+  final FeatureListingUseCase _featureListing;
 
   /// The listingId of the currently-loaded preview. Set on `Load`,
   /// consumed by approve/reject mutators.
@@ -163,6 +188,55 @@ class ListingPreviewBloc
           ),
         );
       case FailureResult<ApproveResult>(:final failure):
+        emit(state.copyWith(isMutatorInFlight: false, failure: failure));
+    }
+  }
+
+  Future<void> _onFeature(
+    ListingPreviewFeaturePressed event,
+    Emitter<ListingPreviewState> emit,
+  ) async {
+    final listingId = _currentListingId;
+    if (listingId == null) return;
+    // Clear any prior success so the page's listenWhen (which fires on the
+    // null→non-null transition) re-fires for back-to-back feature actions —
+    // the admin stays on this page rather than popping back to the queue.
+    emit(
+      state.copyWith(
+        isMutatorInFlight: true,
+        clearFailure: true,
+        clearLastSuccess: true,
+      ),
+    );
+    final result = await _featureListing.call(
+      listingId: listingId,
+      days: event.days,
+    );
+    switch (result) {
+      case Success<FeatureResult>(:final value):
+        // Refresh the in-place preview's featured state so the page reflects
+        // the new badge + chooser options without a full reload.
+        final updatedPreview = state.preview == null
+            ? null
+            : ListingPreview(
+                listing: state.preview!.listing,
+                details: state.preview!.details,
+                prices: state.preview!.prices,
+                media: state.preview!.media,
+                governorate: state.preview!.governorate,
+                city: state.preview!.city,
+                area: state.preview!.area,
+                publisherDisplayName: state.preview!.publisherDisplayName,
+                featuredUntil: value.featuredUntil,
+              );
+        emit(
+          state.copyWith(
+            preview: updatedPreview,
+            isMutatorInFlight: false,
+            lastSuccess: FeatureSuccess(value),
+          ),
+        );
+      case FailureResult<FeatureResult>(:final failure):
         emit(state.copyWith(isMutatorInFlight: false, failure: failure));
     }
   }

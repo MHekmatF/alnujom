@@ -29,6 +29,24 @@ class PublisherDashboardRepositoryImpl implements PublisherDashboardRepository {
   }
 
   @override
+  Future<Result<DateTime?>> renewListing({
+    required String listingId,
+    int days = 30,
+  }) async {
+    try {
+      final expiresAt = await _datasource.renewListing(
+        listingId: listingId,
+        days: days,
+      );
+      return Success(expiresAt);
+    } on Object catch (error, stackTrace) {
+      return FailureResult(
+        UnknownFailure(error.toString(), cause: error, stackTrace: stackTrace),
+      );
+    }
+  }
+
+  @override
   Future<Result<List<ModerationHistoryEntry>>> loadModerationHistory(
     String listingId,
   ) async {

@@ -8,6 +8,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
@@ -112,6 +113,7 @@ class _ListingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final id = row['id'] as String?;
@@ -169,7 +171,10 @@ class _ListingCard extends StatelessWidget {
                     if (amount != null) ...[
                       const SizedBox(height: AppSpacing.xs),
                       Text(
-                        '$amount $currency',
+                        l10n.priceWithCurrency(
+                          _formatAmount(context, amount as num),
+                          currency,
+                        ),
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: scheme.onSurfaceVariant,
                         ),
@@ -183,5 +188,14 @@ class _ListingCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Localized amount in the active locale's numerals (Arabic-Indic in ar),
+  /// with no fractional part — mirrors the favorites/search card idiom.
+  String _formatAmount(BuildContext context, num amount) {
+    final fmt = NumberFormat.decimalPattern(
+      Localizations.localeOf(context).toLanguageTag(),
+    )..maximumFractionDigits = 0;
+    return fmt.format(amount);
   }
 }

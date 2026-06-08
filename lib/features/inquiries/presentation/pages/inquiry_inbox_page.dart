@@ -10,6 +10,8 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
+import '../../../../core/widgets/empty_state.dart';
+import '../../../../core/widgets/error_state.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/inquiry.dart';
 import '../../domain/entities/inquiry_status.dart';
@@ -139,26 +141,19 @@ class _InboxBody extends StatelessWidget {
 
     return switch (state) {
       InquiryInboxLoading() => const Center(child: CircularProgressIndicator()),
-      InquiryInboxError(:final failure) => Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.error_outline, size: 48),
-            const SizedBox(height: 16),
-            Text(failure.message),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => context.read<InquiryInboxBloc>().add(
-                const InquiryInboxRefreshRequested(),
-              ),
-              child: const Icon(Icons.refresh),
-            ),
-          ],
+      InquiryInboxError(:final failure) => ErrorState(
+        title: failure.message,
+        variant: ErrorStateVariant.network,
+        onRetry: () => context.read<InquiryInboxBloc>().add(
+          const InquiryInboxRefreshRequested(),
         ),
       ),
       InquiryInboxLoaded(inquiries: final inquiries, hasMore: final hasMore) =>
         inquiries.isEmpty
-            ? Center(child: Text(l10n.inquiry_inbox_empty_state))
+            ? EmptyState(
+                icon: Icons.inbox_outlined,
+                headline: l10n.inquiry_inbox_empty_state,
+              )
             : RefreshIndicator(
                 onRefresh: () async {
                   context.read<InquiryInboxBloc>().add(

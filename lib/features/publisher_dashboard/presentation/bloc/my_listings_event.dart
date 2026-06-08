@@ -29,3 +29,16 @@ class LoadMore extends MyListingsEvent {
 class Refresh extends MyListingsEvent {
   const Refresh();
 }
+
+/// Renews the listing identified by [listingId] for [days] days. On success the
+/// bloc updates that listing's `expiresAt` in place and emits a one-shot
+/// success signal so the page can show a confirmation snackbar.
+class MyListingsRenewRequested extends MyListingsEvent {
+  const MyListingsRenewRequested(this.listingId, {this.days = 30});
+
+  final String listingId;
+  final int days;
+
+  @override
+  List<Object?> get props => [listingId, days];
+}
