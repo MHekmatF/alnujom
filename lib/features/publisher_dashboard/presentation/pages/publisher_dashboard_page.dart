@@ -26,8 +26,10 @@ import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../core/widgets/stat_card.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/publisher_dashboard_counts.dart';
+import '../bloc/publisher_analytics_cubit.dart';
 import '../bloc/publisher_dashboard_summary_cubit.dart';
 import '../bloc/publisher_dashboard_summary_state.dart';
+import 'lead_analytics_page.dart';
 
 class PublisherDashboardPage extends StatelessWidget {
   const PublisherDashboardPage({super.key});
@@ -304,6 +306,13 @@ class _QuickActions extends StatelessWidget {
             context.pushNamed(AppRouteNames.publisherListingsCreate),
       ),
       AppDashboardTile(
+        icon: LucideIcons.chart_no_axes_column,
+        title: l10n.leadAnalyticsTitle,
+        subtitle: l10n.publisherDashboardActionLeadAnalyticsSubtitle,
+        accent: colors.secondary,
+        onTap: () => _openLeadAnalytics(context),
+      ),
+      AppDashboardTile(
         icon: LucideIcons.bookmark,
         title: l10n.publisherDashboardActionSavedSearches,
         subtitle: l10n.publisherDashboardActionSavedSearchesSubtitle,
@@ -319,6 +328,20 @@ class _QuickActions extends StatelessWidget {
           StaggeredListItem(index: i + 8, child: tiles[i]),
         ],
       ],
+    );
+  }
+
+  /// Pushes the lead-analytics surface, providing a freshly-resolved
+  /// [PublisherAnalyticsCubit] (kicked off via load()). Navigator.push keeps
+  /// this additive — no go_router route is introduced.
+  void _openLeadAnalytics(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => BlocProvider<PublisherAnalyticsCubit>(
+          create: (_) => getIt<PublisherAnalyticsCubit>()..load(),
+          child: const LeadAnalyticsPage(),
+        ),
+      ),
     );
   }
 }

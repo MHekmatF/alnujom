@@ -37,6 +37,22 @@ class SupabasePublisherDashboardDatasource {
     return rows.map((r) => PublisherListingDto.fromMap(r)).toList();
   }
 
+  /// Renews a listing by extending its `expires_at` by [days] days via the
+  /// owner-gated `public.renew_listing` SECURITY DEFINER RPC. Returns the new
+  /// `expires_at` timestamp (UTC). The RPC enforces `auth.uid()` == the
+  /// listing's publisher, so no extra owner check is needed here.
+  Future<DateTime?> renewListing({
+    required String listingId,
+    int days = 30,
+  }) async {
+    final result = await _client.rpc<dynamic>(
+      'renew_listing',
+      params: {'p_listing_id': listingId, 'p_days': days},
+    );
+    if (result == null) return null;
+    return DateTime.parse(result as String);
+  }
+
   // ─── Phase 12 / US2 — moderation history ────────────────────────────────
 
   /// Loads the full chronological moderation history for one listing.

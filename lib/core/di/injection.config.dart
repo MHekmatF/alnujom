@@ -434,14 +434,20 @@ import '../../features/profile/domain/usecases/load_profile.dart' as _i1052;
 import '../../features/profile/domain/usecases/update_pii.dart' as _i281;
 import '../../features/profile/domain/usecases/update_profile.dart' as _i78;
 import '../../features/profile/presentation/cubit/profile_cubit.dart' as _i36;
+import '../../features/publisher_dashboard/data/datasources/publisher_analytics_datasource.dart'
+    as _i855;
 import '../../features/publisher_dashboard/data/datasources/publisher_dashboard_counts_datasource.dart'
     as _i157;
 import '../../features/publisher_dashboard/data/datasources/supabase_publisher_dashboard_datasource.dart'
     as _i333;
+import '../../features/publisher_dashboard/data/repositories/publisher_analytics_repository_impl.dart'
+    as _i945;
 import '../../features/publisher_dashboard/data/repositories/publisher_dashboard_counts_repository_impl.dart'
     as _i815;
 import '../../features/publisher_dashboard/data/repositories/publisher_dashboard_repository_impl.dart'
     as _i240;
+import '../../features/publisher_dashboard/domain/repositories/publisher_analytics_repository.dart'
+    as _i934;
 import '../../features/publisher_dashboard/domain/repositories/publisher_dashboard_counts_repository.dart'
     as _i563;
 import '../../features/publisher_dashboard/domain/repositories/publisher_dashboard_repository.dart'
@@ -452,12 +458,20 @@ import '../../features/publisher_dashboard/domain/usecases/load_moderation_histo
     as _i919;
 import '../../features/publisher_dashboard/domain/usecases/load_most_recent_rejection.dart'
     as _i564;
+import '../../features/publisher_dashboard/domain/usecases/load_publisher_daily_lead_totals.dart'
+    as _i895;
 import '../../features/publisher_dashboard/domain/usecases/load_publisher_dashboard_counts.dart'
     as _i373;
+import '../../features/publisher_dashboard/domain/usecases/load_publisher_listing_breakdown.dart'
+    as _i1026;
+import '../../features/publisher_dashboard/domain/usecases/renew_listing.dart'
+    as _i576;
 import '../../features/publisher_dashboard/presentation/bloc/moderation_history_cubit.dart'
     as _i711;
 import '../../features/publisher_dashboard/presentation/bloc/my_listings_bloc.dart'
     as _i417;
+import '../../features/publisher_dashboard/presentation/bloc/publisher_analytics_cubit.dart'
+    as _i741;
 import '../../features/publisher_dashboard/presentation/bloc/publisher_dashboard_summary_cubit.dart'
     as _i803;
 import '../../features/reports/data/datasources/supabase_reports_datasource.dart'
@@ -702,6 +716,9 @@ _i174.GetIt $initGetIt(
   gh.factory<_i835.SupabaseAppSettingsDatasource>(
     () => _i835.SupabaseAppSettingsDatasource(gh<_i454.SupabaseClient>()),
   );
+  gh.factory<_i855.PublisherAnalyticsDatasource>(
+    () => _i855.PublisherAnalyticsDatasource(gh<_i454.SupabaseClient>()),
+  );
   gh.lazySingleton<_i881.AuditLogRepository>(
     () => _i373.AuditLogRepositoryImpl(
       gh<_i617.AuditLogsDatasource>(),
@@ -921,10 +938,26 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i430.OnboardingRepository>(
     () => _i452.OnboardingRepositoryImpl(gh<_i144.OnboardingSeenStorage>()),
   );
+  gh.lazySingleton<_i934.PublisherAnalyticsRepository>(
+    () => _i945.PublisherAnalyticsRepositoryImpl(
+      gh<_i855.PublisherAnalyticsDatasource>(),
+      gh<_i354.AppLogger>(),
+    ),
+  );
   gh.lazySingleton<_i91.AgenciesAdminRepository>(
     () => _i61.AgenciesAdminRepositoryImpl(
       gh<_i185.SupabaseAgenciesAdminDatasource>(),
       gh<_i354.AppLogger>(),
+    ),
+  );
+  gh.factory<_i895.LoadPublisherDailyLeadTotals>(
+    () => _i895.LoadPublisherDailyLeadTotals(
+      gh<_i934.PublisherAnalyticsRepository>(),
+    ),
+  );
+  gh.factory<_i1026.LoadPublisherListingBreakdown>(
+    () => _i1026.LoadPublisherListingBreakdown(
+      gh<_i934.PublisherAnalyticsRepository>(),
     ),
   );
   gh.factory<_i941.LoadAssignedRoles>(
@@ -1088,6 +1121,9 @@ _i174.GetIt $initGetIt(
     () => _i564.LoadMostRecentRejectionUseCase(
       gh<_i754.PublisherDashboardRepository>(),
     ),
+  );
+  gh.factory<_i576.RenewListing>(
+    () => _i576.RenewListing(gh<_i754.PublisherDashboardRepository>()),
   );
   gh.lazySingleton<_i241.AdsAdminRepository>(
     () => _i634.AdsAdminRepositoryImpl(gh<_i185.SupabaseAdsAdminDatasource>()),
@@ -1277,6 +1313,12 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i611.ThemeCubit>(
     () => _i611.ThemeCubit(gh<_i753.PreferencesStore>(), gh<_i354.AppLogger>()),
+  );
+  gh.factory<_i741.PublisherAnalyticsCubit>(
+    () => _i741.PublisherAnalyticsCubit(
+      gh<_i895.LoadPublisherDailyLeadTotals>(),
+      gh<_i1026.LoadPublisherListingBreakdown>(),
+    ),
   );
   gh.factoryParam<_i193.InquiryFormBloc, String, dynamic>(
     (_listingId, _) =>
@@ -1474,9 +1516,6 @@ _i174.GetIt $initGetIt(
       gh<_i940.ReinstateAgency>(),
     ),
   );
-  gh.factory<_i417.MyListingsBloc>(
-    () => _i417.MyListingsBloc(gh<_i891.ListMyListings>()),
-  );
   gh.factory<_i321.LoadHomeFeed>(
     () => _i321.LoadHomeFeed(gh<_i433.HomeFeedRepository>()),
   );
@@ -1554,6 +1593,12 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i916.AgencyQueueBloc>(
     () => _i916.AgencyQueueBloc(gh<_i998.LoadAgencyVerificationQueue>()),
+  );
+  gh.factory<_i417.MyListingsBloc>(
+    () => _i417.MyListingsBloc(
+      gh<_i891.ListMyListings>(),
+      gh<_i576.RenewListing>(),
+    ),
   );
   gh.factory<_i682.AdsAdminCubit>(
     () => _i682.AdsAdminCubit(

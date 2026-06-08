@@ -10,6 +10,13 @@ abstract class PublisherDashboardRepository {
     int limit = 20,
   });
 
+  /// Renews [listingId] by extending its `expires_at` by [days] days (owner-
+  /// gated server-side). Returns the new `expires_at` on success.
+  Future<Result<DateTime?>> renewListing({
+    required String listingId,
+    int days = 30,
+  });
+
   /// Phase 12 / US2 — full chronological moderation history for a listing.
   /// Consumed by the US6 moderation history page (Phase 8).
   Future<Result<List<ModerationHistoryEntry>>> loadModerationHistory(

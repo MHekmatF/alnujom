@@ -5019,4 +5019,104 @@ final class _DebugAppLocalizations extends AppLocalizations {
     'adminToastUnfeatureSuccess',
     (loc) => loc.adminToastUnfeatureSuccess,
   );
+
+  // ── Phase 25 uplift v3 (Wave C — renewal) ────────────────────────────────
+  @override
+  String myListingsExpiresInDays(int days) => _resolve(
+    'myListingsExpiresInDays',
+    (loc) => loc.myListingsExpiresInDays(days),
+  );
+
+  @override
+  String get myListingsExpiredLabel =>
+      _resolve('myListingsExpiredLabel', (loc) => loc.myListingsExpiredLabel);
+
+  @override
+  String get myListingsRenewButton =>
+      _resolve('myListingsRenewButton', (loc) => loc.myListingsRenewButton);
+
+  @override
+  String get myListingsRenewSuccess =>
+      _resolve('myListingsRenewSuccess', (loc) => loc.myListingsRenewSuccess);
+
+  @override
+  String get myListingsRenewError =>
+      _resolve('myListingsRenewError', (loc) => loc.myListingsRenewError);
+
+  // ── Phase 25 uplift v3 (Wave E — lead analytics) ─────────────────────────
+  @override
+  String get leadAnalyticsTitle =>
+      _resolve('leadAnalyticsTitle', (loc) => loc.leadAnalyticsTitle);
+
+  @override
+  String get publisherDashboardActionLeadAnalyticsSubtitle => _resolve(
+    'publisherDashboardActionLeadAnalyticsSubtitle',
+    (loc) => loc.publisherDashboardActionLeadAnalyticsSubtitle,
+  );
+
+  @override
+  String get leadAnalyticsTotalCaption => _resolve(
+    'leadAnalyticsTotalCaption',
+    (loc) => loc.leadAnalyticsTotalCaption,
+  );
+
+  @override
+  String get leadAnalyticsTrendSectionLabel => _resolve(
+    'leadAnalyticsTrendSectionLabel',
+    (loc) => loc.leadAnalyticsTrendSectionLabel,
+  );
+
+  @override
+  String get leadAnalyticsByListingSectionLabel => _resolve(
+    'leadAnalyticsByListingSectionLabel',
+    (loc) => loc.leadAnalyticsByListingSectionLabel,
+  );
+
+  @override
+  String leadAnalyticsListingTotal(String count) => _resolve(
+    'leadAnalyticsListingTotal',
+    (loc) => loc.leadAnalyticsListingTotal(count),
+  );
+
+  @override
+  String get leadAnalyticsSourcePhone =>
+      _resolve('leadAnalyticsSourcePhone', (loc) => loc.leadAnalyticsSourcePhone);
+
+  @override
+  String get leadAnalyticsSourceWhatsapp => _resolve(
+    'leadAnalyticsSourceWhatsapp',
+    (loc) => loc.leadAnalyticsSourceWhatsapp,
+  );
+
+  @override
+  String get leadAnalyticsSourceInquiry => _resolve(
+    'leadAnalyticsSourceInquiry',
+    (loc) => loc.leadAnalyticsSourceInquiry,
+  );
+
+  @override
+  String get leadAnalyticsSourceFavorite => _resolve(
+    'leadAnalyticsSourceFavorite',
+    (loc) => loc.leadAnalyticsSourceFavorite,
+  );
+
+  @override
+  String get leadAnalyticsUntitledListing => _resolve(
+    'leadAnalyticsUntitledListing',
+    (loc) => loc.leadAnalyticsUntitledListing,
+  );
+
+  @override
+  String get leadAnalyticsError =>
+      _resolve('leadAnalyticsError', (loc) => loc.leadAnalyticsError);
+
+  @override
+  String get leadAnalyticsEmptyHeadline => _resolve(
+    'leadAnalyticsEmptyHeadline',
+    (loc) => loc.leadAnalyticsEmptyHeadline,
+  );
+
+  @override
+  String get leadAnalyticsEmptyBody =>
+      _resolve('leadAnalyticsEmptyBody', (loc) => loc.leadAnalyticsEmptyBody);
 }
