@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/analytics/analytics_service.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
@@ -166,6 +167,13 @@ class _SuccessBodyState extends State<_SuccessBody> {
       if (!mounted) return;
       _recordRecentlyViewed(Localizations.localeOf(context));
     });
+
+    // Product analytics — a listing loaded (the success body mounts only once
+    // the aggregate is available). Best-effort; no-op when telemetry is off.
+    getIt<AnalyticsService>().logEvent(
+      'listing_viewed',
+      props: {'id': widget.aggregate.listing.id},
+    );
   }
 
   /// Captures a small snapshot of the loaded aggregate into the shared

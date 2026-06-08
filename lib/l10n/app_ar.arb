@@ -1717,5 +1717,15 @@
   "home_recently_viewed_title": "شوهد مؤخراً",
   "@home_recently_viewed_title": { "description": "Phase 25 — Recently-viewed carousel title on Home." },
   "comparisonValueNone": "—",
-  "@comparisonValueNone": { "description": "Phase 25 — Placeholder for a missing value cell in the comparison table." }
+  "@comparisonValueNone": { "description": "Phase 25 — Placeholder for a missing value cell in the comparison table." },
+  "notification_type_saved_search_match": "عقار جديد يطابق بحثك المحفوظ",
+  "@notification_type_saved_search_match": { "description": "Growth — saved-search-match notification title." },
+  "notification_body_saved_search_match": "{listingTitle} يطابق بحثك المحفوظ \"{savedSearchLabel}\"",
+  "@notification_body_saved_search_match": { "description": "Growth — saved-search-match notification body.", "placeholders": { "listingTitle": { "type": "String" }, "savedSearchLabel": { "type": "String" } } },
+  "search_saved_searches_alerts_hint": "سنُعلمك عند توفّر عقار مطابق",
+  "@search_saved_searches_alerts_hint": { "description": "Growth — alerts hint on the saved searches page." },
+  "profile_data_saver_title": "توفير البيانات",
+  "@profile_data_saver_title": { "description": "Growth — Data saver (lite mode) toggle title." },
+  "profile_data_saver_subtitle": "تحميل صور وخرائط أخف لاستهلاك بيانات أقل",
+  "@profile_data_saver_subtitle": { "description": "Growth — Data saver toggle subtitle." }
 }

@@ -47,6 +47,7 @@ import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:latlong2/latlong.dart' show LatLng;
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/settings/lite_mode.dart';
 import '../../../../core/theme/motion.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
@@ -158,6 +159,10 @@ class _LoadedBody extends StatefulWidget {
 }
 
 class _LoadedBodyState extends State<_LoadedBody> {
+  // Tile-zoom caps: full fidelity vs. Data saver (fewer high-detail tiles).
+  static const int _fullMapMaxZoom = 18;
+  static const int _liteMapMaxZoom = 15;
+
   late final MapController _controller;
   CameraFit? _appliedFit;
 
@@ -190,8 +195,19 @@ class _LoadedBodyState extends State<_LoadedBody> {
 
   @override
   Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: LiteMode.notifier,
+      builder: (context, lite, _) => _buildMap(context, lite),
+    );
+  }
+
+  Widget _buildMap(BuildContext context, bool lite) {
     final l10n = AppLocalizations.of(context)!;
     final state = widget.state;
+    // Data saver: cap the tile zoom so the map never fetches the densest
+    // high-detail tile levels on a slow connection. The camera + clustering
+    // honour the same cap so nothing requests tiles that won't be served.
+    final tileMaxZoom = lite ? _liteMapMaxZoom : _fullMapMaxZoom;
 
     Widget clusterLayer = MarkerClusterLayerWidget(
       options: MarkerClusterLayerOptions(
@@ -206,7 +222,7 @@ class _LoadedBodyState extends State<_LoadedBody> {
         padding: const EdgeInsets.all(
           AppSpacing.xxl + AppSpacing.sm,
         ), // 32+8=40
-        maxZoom: 18,
+        maxZoom: tileMaxZoom.toDouble(),
         markers: state.markers
             .map((m) => _buildMarker(context, m))
             .toList(growable: false),
@@ -228,7 +244,7 @@ class _LoadedBodyState extends State<_LoadedBody> {
           options: MapOptions(
             initialCameraFit: state.cameraFit,
             minZoom: 6,
-            maxZoom: 18,
+            maxZoom: tileMaxZoom.toDouble(),
             interactionOptions: const InteractionOptions(
               flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
             ),
@@ -243,7 +259,7 @@ class _LoadedBodyState extends State<_LoadedBody> {
             TileLayer(
               urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
               userAgentPackageName: 'app.alnujom.realestate',
-              maxZoom: 18,
+              maxZoom: tileMaxZoom.toDouble(),
               errorTileCallback: (_, __, ___) {
                 // Per spec: render the default grey error tile (no custom
                 // widget needed; the empty callback satisfies the

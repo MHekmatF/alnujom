@@ -5289,4 +5289,41 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String get comparisonValueNone =>
       _resolve('comparisonValueNone', (loc) => loc.comparisonValueNone);
+
+  // ── Growth (Batch 1 — alerts + data saver) ───────────────────────────────
+  @override
+  String get notification_type_saved_search_match => _resolve(
+    'notification_type_saved_search_match',
+    (loc) => loc.notification_type_saved_search_match,
+  );
+
+  @override
+  String notification_body_saved_search_match(
+    String listingTitle,
+    String savedSearchLabel,
+  ) => _resolve(
+    'notification_body_saved_search_match',
+    (loc) => loc.notification_body_saved_search_match(
+      listingTitle,
+      savedSearchLabel,
+    ),
+  );
+
+  @override
+  String get search_saved_searches_alerts_hint => _resolve(
+    'search_saved_searches_alerts_hint',
+    (loc) => loc.search_saved_searches_alerts_hint,
+  );
+
+  @override
+  String get profile_data_saver_title => _resolve(
+    'profile_data_saver_title',
+    (loc) => loc.profile_data_saver_title,
+  );
+
+  @override
+  String get profile_data_saver_subtitle => _resolve(
+    'profile_data_saver_subtitle',
+    (loc) => loc.profile_data_saver_subtitle,
+  );
 }

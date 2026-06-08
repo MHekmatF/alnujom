@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/localization/locale_cubit.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/settings/lite_mode.dart';
 import '../../../../core/security/permission_checker.dart';
 import '../../../../core/security/permission_keys.dart';
 import '../../../../core/theme/radii.dart';
@@ -26,6 +27,8 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localeCode = context.read<LocaleCubit>().state.languageCode;
+    // Warm the Data saver flag so its SwitchListTile reflects the saved state.
+    LiteMode.load();
     return BlocProvider<ProfileCubit>(
       create: (_) => getIt<ProfileCubit>()
         ..load()
@@ -168,6 +171,20 @@ class _ProfileView extends StatelessWidget {
                 ],
                 const PreferredCurrencyToggle(),
                 const SizedBox(height: AppSpacing.lg),
+                // Data saver (lite / low-data) mode — reduces image resolution
+                // and map tile cost for low-bandwidth connections.
+                ValueListenableBuilder<bool>(
+                  valueListenable: LiteMode.notifier,
+                  builder: (context, lite, _) => SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    secondary: const Icon(Icons.data_saver_on_outlined),
+                    title: Text(l10n.profile_data_saver_title),
+                    subtitle: Text(l10n.profile_data_saver_subtitle),
+                    value: lite,
+                    onChanged: (value) => LiteMode.set(value),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.lock_outline),

@@ -584,6 +584,8 @@ import '../../features/super_admin/presentation/bloc/role_editor_bloc.dart'
     as _i885;
 import '../../features/super_admin/presentation/bloc/roles_list_bloc.dart'
     as _i329;
+import '../analytics/analytics_service.dart' as _i726;
+import '../analytics/sentry_analytics_service.dart' as _i172;
 import '../config/env_config.dart' as _i373;
 import '../data/repositories/permission_catalog_repository_impl.dart' as _i739;
 import '../localization/locale_cubit.dart' as _i960;
@@ -643,6 +645,9 @@ _i174.GetIt $initGetIt(
     () => _i24.SupabaseUserSearchDataSource(),
   );
   gh.lazySingleton<_i430.ComparisonCubit>(() => _i430.ComparisonCubit());
+  gh.lazySingleton<_i726.AnalyticsService>(
+    () => _i172.SentryAnalyticsService(),
+  );
   gh.lazySingleton<_i1015.PermissionCatalogRepository>(
     () => _i739.PermissionCatalogRepositoryImpl(),
   );

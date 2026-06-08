@@ -102,9 +102,49 @@ class _SavedSearchesList extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView.builder(
       padding: const EdgeInsetsDirectional.all(AppSpacing.md),
-      itemCount: items.length,
-      itemBuilder: (context, index) =>
-          _SavedSearchCard(savedSearch: items[index]),
+      // +1 leading row for the alerts hint.
+      itemCount: items.length + 1,
+      itemBuilder: (context, index) {
+        if (index == 0) return const _SavedSearchAlertsHint();
+        return _SavedSearchCard(savedSearch: items[index - 1]);
+      },
+    );
+  }
+}
+
+/// A subtle one-line reassurance that the user will be alerted when a matching
+/// property is posted (a DB trigger emits a `saved_search_match` notification).
+class _SavedSearchAlertsHint extends StatelessWidget {
+  const _SavedSearchAlertsHint();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(
+        bottom: AppSpacing.md,
+        start: AppSpacing.xs,
+        end: AppSpacing.xs,
+      ),
+      child: Row(
+        children: [
+          Icon(
+            LucideIcons.bell_ring,
+            size: AppSpacing.md,
+            color: colors.textMuted,
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              l10n.search_saved_searches_alerts_hint,
+              style: styles.labelMedium.copyWith(color: colors.textMuted),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

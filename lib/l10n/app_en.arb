@@ -1795,5 +1795,15 @@
   "home_recently_viewed_title": "Recently viewed",
   "@home_recently_viewed_title": { "description": "Phase 25 — Recently-viewed carousel title on Home." },
   "comparisonValueNone": "—",
-  "@comparisonValueNone": { "description": "Phase 25 — Placeholder for a missing value cell in the comparison table." }
+  "@comparisonValueNone": { "description": "Phase 25 — Placeholder for a missing value cell in the comparison table." },
+  "notification_type_saved_search_match": "New match for your saved search",
+  "@notification_type_saved_search_match": { "description": "Growth — saved-search-match notification title." },
+  "notification_body_saved_search_match": "{listingTitle} matches your saved search \"{savedSearchLabel}\"",
+  "@notification_body_saved_search_match": { "description": "Growth — saved-search-match notification body.", "placeholders": { "listingTitle": { "type": "String" }, "savedSearchLabel": { "type": "String" } } },
+  "search_saved_searches_alerts_hint": "We'll alert you when a matching property is posted",
+  "@search_saved_searches_alerts_hint": { "description": "Growth — alerts hint on the saved searches page." },
+  "profile_data_saver_title": "Data saver",
+  "@profile_data_saver_title": { "description": "Growth — Data saver (lite mode) toggle title." },
+  "profile_data_saver_subtitle": "Load lighter images and maps to use less data",
+  "@profile_data_saver_subtitle": { "description": "Growth — Data saver toggle subtitle." }
 }

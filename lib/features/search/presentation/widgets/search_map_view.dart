@@ -16,6 +16,7 @@ import 'package:latlong2/latlong.dart' show LatLng;
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/settings/lite_mode.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
@@ -122,6 +123,10 @@ class _LoadedMap extends StatefulWidget {
 }
 
 class _LoadedMapState extends State<_LoadedMap> {
+  // Tile-zoom caps: full fidelity vs. Data saver (fewer high-detail tiles).
+  static const int _fullMapMaxZoom = 18;
+  static const int _liteMapMaxZoom = 15;
+
   CameraFit? _appliedFit;
 
   @override
@@ -144,8 +149,18 @@ class _LoadedMapState extends State<_LoadedMap> {
 
   @override
   Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: LiteMode.notifier,
+      builder: (context, lite, _) => _buildMap(context, lite),
+    );
+  }
+
+  Widget _buildMap(BuildContext context, bool lite) {
     final l10n = AppLocalizations.of(context)!;
     final state = widget.state;
+    // Data saver: cap the tile zoom so the embedded map never pulls the densest
+    // high-detail tiles on a slow connection. Camera + clustering share the cap.
+    final tileMaxZoom = lite ? _liteMapMaxZoom : _fullMapMaxZoom;
 
     return Stack(
       children: [
@@ -154,7 +169,7 @@ class _LoadedMapState extends State<_LoadedMap> {
           options: MapOptions(
             initialCameraFit: state.cameraFit,
             minZoom: 6,
-            maxZoom: 18,
+            maxZoom: tileMaxZoom.toDouble(),
             interactionOptions: const InteractionOptions(
               flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
             ),
@@ -168,7 +183,7 @@ class _LoadedMapState extends State<_LoadedMap> {
             TileLayer(
               urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
               userAgentPackageName: 'app.alnujom.realestate',
-              maxZoom: 18,
+              maxZoom: tileMaxZoom.toDouble(),
               errorTileCallback: (_, __, ___) {},
             ),
             MarkerClusterLayerWidget(
@@ -179,7 +194,7 @@ class _LoadedMapState extends State<_LoadedMap> {
                 showPolygon: false,
                 size: const Size(40, 40),
                 padding: const EdgeInsets.all(AppSpacing.xxl + AppSpacing.sm),
-                maxZoom: 18,
+                maxZoom: tileMaxZoom.toDouble(),
                 markers: state.markers
                     .map((m) => _buildMarker(context, m))
                     .toList(growable: false),

@@ -141,6 +141,14 @@ abstract final class NotificationDeepLinkResolver {
         return const _NavRoute(AppRoutes.inquiries);
       case NotificationType.agencyInvitation:
         return const _NavRoute(AppRoutes.agency);
+      case NotificationType.savedSearchMatch:
+        // Phase 25 — tap a saved-search match → open the matched listing.
+        final id = params['listing_id'] as String?;
+        if (id == null) return null;
+        return _NavNamedRoute(
+          AppRouteNames.listingDetails,
+          pathParams: {'id': id},
+        );
     }
   }
 
