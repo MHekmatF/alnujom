@@ -8,6 +8,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/motion.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../comparison/presentation/cubit/comparison_cubit.dart';
+import '../../../comparison/presentation/widgets/compare_bottom_bar.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
@@ -31,9 +33,16 @@ class FavoritesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<FavoritesPageBloc>(
-      create: (_) =>
-          getIt<FavoritesPageBloc>()..add(const FavoritesPageOpened()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<FavoritesPageBloc>(
+          create: (_) =>
+              getIt<FavoritesPageBloc>()..add(const FavoritesPageOpened()),
+        ),
+        // Shared singleton — the comparison selection persists across the
+        // session, so re-provide (not re-create) it for the compare affordances.
+        BlocProvider<ComparisonCubit>.value(value: getIt<ComparisonCubit>()),
+      ],
       child: const _FavoritesView(),
     );
   }
@@ -56,23 +65,36 @@ class _FavoritesView extends StatelessWidget {
             : null,
         title: Text(l10n.favorites_page_title),
       ),
-      body: BlocBuilder<FavoritesPageBloc, FavoritesPageState>(
-        builder: (context, state) {
-          // Distinct types per phase → the skeleton crossfades into the list
-          // (or empty/error); list→list during pagination updates in place.
-          final child = switch (state) {
-            FavoritesPageLoading() => const _FavoritesSkeleton(),
-            FavoritesPageError() => const _ErrorBody(),
-            FavoritesPageLoaded(:final items, :final hasMore, :final sort) =>
-              items.isEmpty
-                  ? const FavoritesEmptyState()
-                  : _LoadedBody(items: items, hasMore: hasMore, sort: sort),
-          };
-          return AnimatedSwitcher(
-            duration: reduceMotion(context) ? Duration.zero : AppMotion.base,
-            child: child,
-          );
-        },
+      body: Stack(
+        children: [
+          BlocBuilder<FavoritesPageBloc, FavoritesPageState>(
+            builder: (context, state) {
+              // Distinct types per phase → the skeleton crossfades into the list
+              // (or empty/error); list→list during pagination updates in place.
+              final child = switch (state) {
+                FavoritesPageLoading() => const _FavoritesSkeleton(),
+                FavoritesPageError() => const _ErrorBody(),
+                FavoritesPageLoaded(
+                  :final items,
+                  :final hasMore,
+                  :final sort,
+                ) =>
+                  items.isEmpty
+                      ? const FavoritesEmptyState()
+                      : _LoadedBody(items: items, hasMore: hasMore, sort: sort),
+              };
+              return AnimatedSwitcher(
+                duration: reduceMotion(context) ? Duration.zero : AppMotion.base,
+                child: child,
+              );
+            },
+          ),
+          // Floating "Compare (N)" bar — appears once >=2 listings are selected.
+          const Align(
+            alignment: AlignmentDirectional.bottomCenter,
+            child: CompareBottomBar(),
+          ),
+        ],
       ),
       bottomNavigationBar: const MainBottomNav(current: MainTab.favorites),
     );

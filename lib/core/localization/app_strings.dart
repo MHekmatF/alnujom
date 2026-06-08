@@ -5222,4 +5222,71 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String reviews_time_days(int days) =>
       _resolve('reviews_time_days', (loc) => loc.reviews_time_days(days));
+
+  // ── Phase 25 uplift v3 (Wave F — comparison + recently viewed) ───────────
+  @override
+  String get comparisonPageTitle =>
+      _resolve('comparisonPageTitle', (loc) => loc.comparisonPageTitle);
+
+  @override
+  String get comparisonClearAll =>
+      _resolve('comparisonClearAll', (loc) => loc.comparisonClearAll);
+
+  @override
+  String get comparisonEmptyHint =>
+      _resolve('comparisonEmptyHint', (loc) => loc.comparisonEmptyHint);
+
+  @override
+  String get comparisonRowPurpose =>
+      _resolve('comparisonRowPurpose', (loc) => loc.comparisonRowPurpose);
+
+  @override
+  String get comparisonRowType =>
+      _resolve('comparisonRowType', (loc) => loc.comparisonRowType);
+
+  @override
+  String get comparisonRowRooms =>
+      _resolve('comparisonRowRooms', (loc) => loc.comparisonRowRooms);
+
+  @override
+  String get comparisonRowBathrooms =>
+      _resolve('comparisonRowBathrooms', (loc) => loc.comparisonRowBathrooms);
+
+  @override
+  String get comparisonRowArea =>
+      _resolve('comparisonRowArea', (loc) => loc.comparisonRowArea);
+
+  @override
+  String get comparisonRowLocation =>
+      _resolve('comparisonRowLocation', (loc) => loc.comparisonRowLocation);
+
+  @override
+  String get comparisonRemoveColumn =>
+      _resolve('comparisonRemoveColumn', (loc) => loc.comparisonRemoveColumn);
+
+  @override
+  String get comparisonAddToCompare =>
+      _resolve('comparisonAddToCompare', (loc) => loc.comparisonAddToCompare);
+
+  @override
+  String get comparisonRemoveFromCompare => _resolve(
+    'comparisonRemoveFromCompare',
+    (loc) => loc.comparisonRemoveFromCompare,
+  );
+
+  @override
+  String comparisonCompareCount(int count) => _resolve(
+    'comparisonCompareCount',
+    (loc) => loc.comparisonCompareCount(count),
+  );
+
+  @override
+  String get home_recently_viewed_title => _resolve(
+    'home_recently_viewed_title',
+    (loc) => loc.home_recently_viewed_title,
+  );
+
+  @override
+  String get comparisonValueNone =>
+      _resolve('comparisonValueNone', (loc) => loc.comparisonValueNone);
 }

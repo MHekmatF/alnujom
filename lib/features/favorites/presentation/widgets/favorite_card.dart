@@ -29,6 +29,8 @@ import '../../../../core/widgets/press_scale.dart';
 import '../../../../core/widgets/property_specs.dart';
 import '../../../../core/widgets/status_pill.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../comparison/domain/entities/comparison_item.dart';
+import '../../../comparison/presentation/widgets/compare_toggle_button.dart';
 import '../../../listing_form/domain/entities/listing.dart';
 import '../../domain/entities/favorite_listing.dart';
 import 'favorite_heart_button.dart';
@@ -206,6 +208,12 @@ class _Hero extends StatelessWidget {
             listingId: item.id,
             style: FavoriteHeartStyle.onImage,
           ),
+        ),
+        // Compare affordance (toggles this listing into the comparison set).
+        PositionedDirectional(
+          top: AppSpacing.sm,
+          start: AppSpacing.sm,
+          child: CompareToggleButton(item: ComparisonItem.fromFavorite(item)),
         ),
         PositionedDirectional(
           bottom: AppSpacing.sm,

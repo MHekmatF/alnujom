@@ -192,6 +192,8 @@ import '../../features/auth/data/repositories/auth_repository_impl.dart'
     as _i153;
 import '../../features/auth/domain/repositories/auth_repository.dart' as _i787;
 import '../../features/auth/presentation/bloc/auth_bloc.dart' as _i797;
+import '../../features/comparison/presentation/cubit/comparison_cubit.dart'
+    as _i430;
 import '../../features/currencies/data/datasources/supabase_currencies_datasource.dart'
     as _i311;
 import '../../features/currencies/data/repositories/currencies_repository_impl.dart'
@@ -474,6 +476,10 @@ import '../../features/publisher_dashboard/presentation/bloc/publisher_analytics
     as _i741;
 import '../../features/publisher_dashboard/presentation/bloc/publisher_dashboard_summary_cubit.dart'
     as _i803;
+import '../../features/recently_viewed/data/local/recently_viewed_store.dart'
+    as _i43;
+import '../../features/recently_viewed/presentation/bloc/recently_viewed_cubit.dart'
+    as _i57;
 import '../../features/reports/data/datasources/supabase_reports_datasource.dart'
     as _i231;
 import '../../features/reports/data/repositories/reports_repository_impl.dart'
@@ -636,6 +642,7 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i24.SupabaseUserSearchDataSource>(
     () => _i24.SupabaseUserSearchDataSource(),
   );
+  gh.lazySingleton<_i430.ComparisonCubit>(() => _i430.ComparisonCubit());
   gh.lazySingleton<_i1015.PermissionCatalogRepository>(
     () => _i739.PermissionCatalogRepositoryImpl(),
   );
@@ -861,6 +868,9 @@ _i174.GetIt $initGetIt(
   );
   gh.lazySingleton<_i193.RecentSearchesStorage>(
     () => _i193.RecentSearchesStorage(gh<_i354.AppLogger>()),
+  );
+  gh.lazySingleton<_i43.RecentlyViewedStore>(
+    () => _i43.RecentlyViewedStore(gh<_i354.AppLogger>()),
   );
   gh.factory<_i933.CheckForUpdate>(
     () => _i933.CheckForUpdate(gh<_i756.AppUpdateRepository>()),
@@ -1447,6 +1457,9 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i371.AdSlotCubit>(
     () => _i371.AdSlotCubit(gh<_i180.LoadServingAds>()),
+  );
+  gh.lazySingleton<_i57.RecentlyViewedCubit>(
+    () => _i57.RecentlyViewedCubit(gh<_i43.RecentlyViewedStore>()),
   );
   gh.factory<_i669.AssignRoleBloc>(
     () => _i669.AssignRoleBloc(

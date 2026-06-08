@@ -45,6 +45,8 @@ import '../../../reports/presentation/widgets/reporter_status_banner.dart';
 import '../../../agency/presentation/widgets/listing_agency_badge.dart';
 import '../../../reviews/presentation/bloc/seller_trust_cubit.dart';
 import '../../../reviews/presentation/widgets/seller_reviews_section.dart';
+import '../../../recently_viewed/domain/entities/recently_viewed_listing.dart';
+import '../../../recently_viewed/presentation/bloc/recently_viewed_cubit.dart';
 import '../../data/listing_details_video_launcher.dart';
 
 /// Phase 13 (spec/013-home-and-details) — listing details page.
@@ -144,13 +146,75 @@ class _ListingDetailsView extends StatelessWidget {
 
 // ─── Success body ─────────────────────────────────────────────────────────────
 
-class _SuccessBody extends StatelessWidget {
+class _SuccessBody extends StatefulWidget {
   const _SuccessBody({required this.aggregate});
 
   final ListingDetailsAggregate aggregate;
 
   @override
+  State<_SuccessBody> createState() => _SuccessBodyState();
+}
+
+class _SuccessBodyState extends State<_SuccessBody> {
+  @override
+  void initState() {
+    super.initState();
+    // Recently-viewed: record this listing once when the success body mounts.
+    // Best-effort + local-only; fired post-frame so it never competes with the
+    // first paint, and uses the active locale for the governorate snapshot.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _recordRecentlyViewed(Localizations.localeOf(context));
+    });
+  }
+
+  /// Captures a small snapshot of the loaded aggregate into the shared
+  /// [RecentlyViewedCubit] (de-duped by id, capped, most-recent-first). The main
+  /// image storage path is resolved to a public URL by the data layer so this
+  /// presentation file never touches Supabase.
+  void _recordRecentlyViewed(Locale locale) {
+    final aggregate = widget.aggregate;
+    final cubit = getIt<RecentlyViewedCubit>();
+
+    final mainMedia = _mainImageMedia(aggregate.media);
+    final primaryPrice = aggregate.prices.isEmpty
+        ? null
+        : aggregate.prices.firstWhere(
+            (p) => p.isPrimary,
+            orElse: () => aggregate.prices.first,
+          );
+    final governorateName = aggregate.governorate.localizedName(locale);
+
+    cubit.record(
+      RecentlyViewedListing(
+        id: aggregate.listing.id,
+        title: aggregate.listing.title,
+        mainImageUrl: cubit.resolveImageUrl(mainMedia?.storagePath),
+        priceAmount: primaryPrice?.amount.toString(),
+        currencyCode: primaryPrice?.currencyCode,
+        governorateName:
+            governorateName.isEmpty ? null : governorateName,
+      ),
+    );
+  }
+
+  /// The listing's main image media (is_main first, then ordering ASC),
+  /// restricted to image rows with a storage path; null when none qualifies.
+  ListingMedia? _mainImageMedia(List<ListingMedia> media) {
+    final images = media
+        .where((m) =>
+            m.kind == ListingMediaKind.image && m.storagePath != null)
+        .toList()
+      ..sort((a, b) {
+        if (a.isMain != b.isMain) return a.isMain ? -1 : 1;
+        return a.ordering.compareTo(b.ordering);
+      });
+    return images.isEmpty ? null : images.first;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final aggregate = widget.aggregate;
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 

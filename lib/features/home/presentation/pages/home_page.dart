@@ -34,6 +34,8 @@ import '../bloc/home_event.dart';
 import '../bloc/home_state.dart';
 import '../../../ads/domain/entities/ad_placement.dart';
 import '../../../ads/presentation/widgets/ad_slot.dart';
+import '../../../recently_viewed/presentation/bloc/recently_viewed_cubit.dart';
+import '../../../recently_viewed/presentation/widgets/recently_viewed_carousel.dart';
 import '../widgets/featured_listings_carousel.dart';
 import '../widgets/hero_search_bar.dart';
 import '../widgets/home_listing_card.dart';
@@ -76,6 +78,12 @@ class HomePage extends StatelessWidget {
         BlocProvider<FeaturedListingsCubit>(
           create: (_) =>
               getIt<FeaturedListingsCubit>()..load(locale: locale),
+        ),
+        // Recently-viewed: the shared (lazySingleton) cubit, loaded from local
+        // storage when Home opens. .value (not create) so we don't dispose the
+        // singleton the listing-details record path also uses.
+        BlocProvider<RecentlyViewedCubit>.value(
+          value: getIt<RecentlyViewedCubit>()..load(),
         ),
       ],
       child: const _HomeView(),
@@ -170,12 +178,16 @@ class _HomeViewState extends State<_HomeView> {
             builder: (context, state) {
               return StarRefreshIndicator(
                 onRefresh: () async {
+                  // Capture cubits before the awaits (no BuildContext across
+                  // async gaps).
+                  final featured = context.read<FeaturedListingsCubit>();
+                  final recent = context.read<RecentlyViewedCubit>();
                   context.read<HomeBloc>().add(
                     HomeFeedRefreshRequested(locale: locale),
                   );
-                  // Featured-listings treatment — pull-to-refresh also reloads
-                  // the "✨ عقارات مميّزة" carousel.
-                  await context.read<FeaturedListingsCubit>().load(locale: locale);
+                  // Featured-listings + recently-viewed also reload on refresh.
+                  await featured.load(locale: locale);
+                  await recent.load();
                 },
                 child: _buildBody(context, state, currenciesByCode, l10n),
               );
@@ -217,6 +229,9 @@ class _HomeViewState extends State<_HomeView> {
         SliverToBoxAdapter(
           child: FeaturedListingsCarousel(currenciesByCode: currenciesByCode),
         ),
+        // Recently-viewed: the "شوهد مؤخراً / Recently viewed" row, just under the
+        // featured carousel. Backed by local storage; hides itself when empty.
+        const SliverToBoxAdapter(child: RecentlyViewedCarousel()),
         SliverToBoxAdapter(child: _SectionHeader(title: l10n.home_latest_listings_header)),
         ..._buildFeedSlivers(context, state, currenciesByCode, l10n),
       ],
