@@ -5403,4 +5403,88 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String get chatListingUnavailable =>
       _resolve('chatListingUnavailable', (loc) => loc.chatListingUnavailable);
+
+  // ── Growth (Wave G3 — viewing scheduler) ─────────────────────────────────
+  @override
+  String get viewingRequestAction =>
+      _resolve('viewingRequestAction', (loc) => loc.viewingRequestAction);
+  @override
+  String get viewingsTile => _resolve('viewingsTile', (loc) => loc.viewingsTile);
+  @override
+  String get viewingRequestTitle =>
+      _resolve('viewingRequestTitle', (loc) => loc.viewingRequestTitle);
+  @override
+  String get viewingPickDate =>
+      _resolve('viewingPickDate', (loc) => loc.viewingPickDate);
+  @override
+  String get viewingPickTime =>
+      _resolve('viewingPickTime', (loc) => loc.viewingPickTime);
+  @override
+  String get viewingNoteLabel =>
+      _resolve('viewingNoteLabel', (loc) => loc.viewingNoteLabel);
+  @override
+  String get viewingNotePlaceholder =>
+      _resolve('viewingNotePlaceholder', (loc) => loc.viewingNotePlaceholder);
+  @override
+  String get viewingPastError =>
+      _resolve('viewingPastError', (loc) => loc.viewingPastError);
+  @override
+  String get viewingSubmitButton =>
+      _resolve('viewingSubmitButton', (loc) => loc.viewingSubmitButton);
+  @override
+  String get viewingRequestSuccess =>
+      _resolve('viewingRequestSuccess', (loc) => loc.viewingRequestSuccess);
+  @override
+  String get viewingRequestError =>
+      _resolve('viewingRequestError', (loc) => loc.viewingRequestError);
+  @override
+  String get viewingsListTitle =>
+      _resolve('viewingsListTitle', (loc) => loc.viewingsListTitle);
+  @override
+  String get viewingsListEmptyTitle =>
+      _resolve('viewingsListEmptyTitle', (loc) => loc.viewingsListEmptyTitle);
+  @override
+  String get viewingsListEmptyBody =>
+      _resolve('viewingsListEmptyBody', (loc) => loc.viewingsListEmptyBody);
+  @override
+  String get viewingsListErrorTitle =>
+      _resolve('viewingsListErrorTitle', (loc) => loc.viewingsListErrorTitle);
+  @override
+  String get viewingListingUnavailable => _resolve(
+    'viewingListingUnavailable',
+    (loc) => loc.viewingListingUnavailable,
+  );
+  @override
+  String get viewingStatusRequested =>
+      _resolve('viewingStatusRequested', (loc) => loc.viewingStatusRequested);
+  @override
+  String get viewingStatusConfirmed =>
+      _resolve('viewingStatusConfirmed', (loc) => loc.viewingStatusConfirmed);
+  @override
+  String get viewingStatusDeclined =>
+      _resolve('viewingStatusDeclined', (loc) => loc.viewingStatusDeclined);
+  @override
+  String get viewingStatusCancelled =>
+      _resolve('viewingStatusCancelled', (loc) => loc.viewingStatusCancelled);
+  @override
+  String get viewingConfirmAction =>
+      _resolve('viewingConfirmAction', (loc) => loc.viewingConfirmAction);
+  @override
+  String get viewingDeclineAction =>
+      _resolve('viewingDeclineAction', (loc) => loc.viewingDeclineAction);
+  @override
+  String get viewingCancelAction =>
+      _resolve('viewingCancelAction', (loc) => loc.viewingCancelAction);
+  @override
+  String get viewingConfirmedSuccess =>
+      _resolve('viewingConfirmedSuccess', (loc) => loc.viewingConfirmedSuccess);
+  @override
+  String get viewingDeclinedSuccess =>
+      _resolve('viewingDeclinedSuccess', (loc) => loc.viewingDeclinedSuccess);
+  @override
+  String get viewingCancelledSuccess =>
+      _resolve('viewingCancelledSuccess', (loc) => loc.viewingCancelledSuccess);
+  @override
+  String get viewingUpdateError =>
+      _resolve('viewingUpdateError', (loc) => loc.viewingUpdateError);
 }

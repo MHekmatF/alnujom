@@ -20,6 +20,7 @@ import '../../../../features/inquiries/presentation/bloc/contact_cta_cubit.dart'
 import '../../../../features/inquiries/presentation/sheets/inquiry_form_sheet.dart';
 import '../../../../features/listing_form/domain/entities/listing.dart';
 import '../../../../features/reviews/presentation/widgets/seller_trust_summary.dart';
+import '../../../../features/viewings/presentation/sheets/request_viewing_sheet.dart';
 import '../../../../l10n/app_localizations.dart';
 
 /// Phase 16 (spec/016-contact-inquiries) — Contact CTA block.
@@ -112,6 +113,18 @@ class ContactBlock extends StatelessWidget {
                 icon: const Icon(Icons.forum_outlined),
                 label: Text(
                   l10n.chatContactAction,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+            // Request-a-viewing CTA — opens the date/time request sheet. The
+            // block is hidden for self-contact, so no self-viewing.
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () => _onRequestViewingPressed(context),
+                icon: const Icon(Icons.calendar_today_outlined),
+                label: Text(
+                  l10n.viewingRequestAction,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -242,6 +255,36 @@ class ContactBlock extends StatelessWidget {
       isScrollControlled: true,
       builder: (_) => InquiryFormSheet(listingId: listing.id),
     );
+  }
+
+  /// Request-a-viewing entry. Anonymous → sign-in snackbar (same pattern as the
+  /// Message action). Signed-in → open the date/time request sheet seeded with
+  /// the listing id; on success show the standard confirmation snackbar.
+  Future<void> _onRequestViewingPressed(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
+
+    if (getIt<AuthBloc>().state is! Authenticated) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.chatSignInPrompt)),
+      );
+      return;
+    }
+
+    final submitted = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => RequestViewingSheet(listingId: listing.id),
+    );
+
+    if (submitted == true && context.mounted) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(l10n.viewingRequestSuccess),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   /// In-app chat entry. Anonymous → sign-in snackbar. Signed-in → open (or

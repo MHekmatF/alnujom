@@ -20,6 +20,8 @@ import '../../../auth/presentation/bloc/auth_event.dart';
 import '../../../chat/presentation/bloc/conversations_cubit.dart';
 import '../../../chat/presentation/pages/conversations_list_page.dart';
 import '../../../currencies/presentation/widgets/preferred_currency_toggle.dart';
+import '../../../viewings/presentation/cubit/viewings_cubit.dart';
+import '../../../viewings/presentation/pages/viewings_list_page.dart';
 import '../cubit/profile_cubit.dart';
 import '../cubit/profile_state.dart';
 
@@ -214,6 +216,24 @@ class _ProfileView extends StatelessWidget {
                       builder: (_) => BlocProvider<ConversationsCubit>(
                         create: (_) => getIt<ConversationsCubit>(),
                         child: const ConversationsListPage(),
+                      ),
+                    ),
+                  ),
+                ),
+                // Viewing scheduler — the user's scheduled viewings (signed-in
+                // only; this page renders solely for an authenticated profile).
+                // Pushed via a MaterialPageRoute since viewings has no
+                // go_router route.
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.calendar_today_outlined),
+                  title: Text(l10n.viewingsTile),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => BlocProvider<ViewingsCubit>(
+                        create: (_) => getIt<ViewingsCubit>(),
+                        child: const ViewingsListPage(),
                       ),
                     ),
                   ),
