@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/validators/price_validator.dart';
+import '../../../../core/widgets/_widget_support.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../currencies/domain/entities/currency.dart';
 import '../../../currencies/domain/usecases/list_currencies.dart';
@@ -13,7 +14,7 @@ import '../../domain/entities/listing_form_state.dart';
 import '../bloc/listing_form_bloc.dart';
 import '../bloc/listing_form_event.dart';
 import 'price_preview_subline.dart';
-import 'required_field_chip.dart';
+import 'step_section.dart';
 
 class StepPrices extends StatefulWidget {
   const StepPrices({super.key});
@@ -55,9 +56,11 @@ class _StepPricesState extends State<StepPrices> {
           future: _currenciesFuture,
           builder: (context, snap) {
             if (!snap.hasData) {
-              return const Padding(
-                padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
-                child: Center(child: CircularProgressIndicator()),
+              return Padding(
+                padding: const EdgeInsetsDirectional.symmetric(
+                  vertical: AppSpacing.xl,
+                ),
+                child: Center(child: appInlineSpinner(context)),
               );
             }
             final currencies = snap.data!;
@@ -79,20 +82,12 @@ class _StepPricesState extends State<StepPrices> {
               });
             }
             // Q3 single-currency lock — NO "Add another" button, NO multi-row.
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+            return StepSection(
+              icon: Icons.payments_outlined,
+              title: l10n.listingFormStepPricesTitle,
+              subtitle: l10n.listingFormStepPricesSubtitle,
               children: [
-                Row(
-                  children: [
-                    Text(
-                      l10n.fieldLabelCurrency,
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    const RequiredFieldChip(),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.sm),
+                FieldLabel(label: l10n.fieldLabelCurrency, required: true),
                 DropdownButtonFormField<String>(
                   initialValue: price?.currencyCode ?? selected.code,
                   isExpanded: true,
@@ -117,18 +112,8 @@ class _StepPricesState extends State<StepPrices> {
                     }
                   },
                 ),
-                const SizedBox(height: AppSpacing.lg),
-                Row(
-                  children: [
-                    Text(
-                      l10n.fieldLabelPrice,
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    const RequiredFieldChip(),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.sm),
+                const FieldGap(),
+                FieldLabel(label: l10n.fieldLabelPrice, required: true),
                 TextField(
                   controller: _amountController,
                   keyboardType: const TextInputType.numberWithOptions(
@@ -160,8 +145,8 @@ class _StepPricesState extends State<StepPrices> {
                     }
                   },
                 ),
-                const SizedBox(height: AppSpacing.md),
-                if (price != null)
+                if (price != null) ...[
+                  const SizedBox(height: AppSpacing.md),
                   PricePreviewSubline(
                     amount: price.amount,
                     currency: currencies.firstWhere(
@@ -169,6 +154,7 @@ class _StepPricesState extends State<StepPrices> {
                       orElse: () => selected,
                     ),
                   ),
+                ],
               ],
             );
           },

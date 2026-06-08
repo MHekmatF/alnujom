@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../agency/presentation/widgets/publish_under_agency_field.dart';
 import '../../domain/entities/listing.dart';
@@ -9,7 +8,7 @@ import '../../domain/entities/listing_form_state.dart';
 import '../bloc/listing_form_bloc.dart';
 import '../bloc/listing_form_event.dart';
 import '../util/listing_enum_labels.dart';
-import 'required_field_chip.dart';
+import 'step_section.dart';
 
 class StepBasics extends StatefulWidget {
   const StepBasics({super.key});
@@ -39,20 +38,12 @@ class _StepBasicsState extends State<StepBasics> {
           _titleController.text = listing.title;
           _seeded = true;
         }
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        return StepSection(
+          icon: Icons.home_work_outlined,
+          title: l10n.listingFormStepBasicsTitle,
+          subtitle: l10n.listingFormStepBasicsSubtitle,
           children: [
-            Row(
-              children: [
-                Text(
-                  l10n.fieldLabelTitle,
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                const RequiredFieldChip(),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
+            FieldLabel(label: l10n.fieldLabelTitle, required: true),
             TextField(
               controller: _titleController,
               onChanged: (v) =>
@@ -62,18 +53,8 @@ class _StepBasicsState extends State<StepBasics> {
                 border: const OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: AppSpacing.lg),
-            Row(
-              children: [
-                Text(
-                  l10n.fieldLabelPurpose,
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                const RequiredFieldChip(),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
+            const FieldGap(),
+            FieldLabel(label: l10n.fieldLabelPurpose, required: true),
             DropdownButtonFormField<ListingPurpose>(
               initialValue: listing.purpose,
               isExpanded: true,
@@ -92,18 +73,8 @@ class _StepBasicsState extends State<StepBasics> {
                 }
               },
             ),
-            const SizedBox(height: AppSpacing.lg),
-            Row(
-              children: [
-                Text(
-                  l10n.fieldLabelPropertyType,
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                const RequiredFieldChip(),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
+            const FieldGap(),
+            FieldLabel(label: l10n.fieldLabelPropertyType, required: true),
             DropdownButtonFormField<PropertyType>(
               initialValue: listing.propertyType,
               isExpanded: true,

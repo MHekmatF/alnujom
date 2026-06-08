@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/radii.dart';
+import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/app_button.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/listing_form_state.dart';
 import '../../domain/entities/submit_failure.dart';
@@ -15,8 +21,11 @@ class SubmitFailureDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     return AlertDialog(
-      title: Text(l10n.submitFailureTitle),
+      icon: Icon(Icons.error_outline, color: colors.error, size: AppSpacing.xxl),
+      title: Text(l10n.submitFailureTitle, style: styles.titleLarge),
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
@@ -24,37 +33,72 @@ class SubmitFailureDialog extends StatelessWidget {
           if (failure.hasMissingFields) ...[
             Text(
               l10n.submitFailureMissingFieldsHeader,
-              style: Theme.of(context).textTheme.titleSmall,
+              style: styles.bodyMedium.copyWith(color: colors.textMuted),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.md),
             ...failure.missingFields.map(
-              (path) => ListTile(
-                dense: true,
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.error_outline, size: 18),
-                title: Text(_labelForPath(path, l10n)),
-                trailing: TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    context.read<ListingFormBloc>().add(
-                      JumpToStep(_stepForPath(path)),
-                    );
-                  },
-                  child: Text(l10n.listingFormJumpToStepButton),
+              (path) => Padding(
+                padding: const EdgeInsetsDirectional.only(
+                  bottom: AppSpacing.xs,
+                ),
+                child: Container(
+                  padding: const EdgeInsetsDirectional.only(
+                    start: AppSpacing.md,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colors.error.withValues(alpha: 0.08),
+                    borderRadius: appRadius(AppRadii.md),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.circle,
+                        size: AppSpacing.sm,
+                        color: colors.error,
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: Text(
+                          _labelForPath(path, l10n),
+                          style: styles.bodyLarge.copyWith(
+                            color: colors.onSurface,
+                          ),
+                        ),
+                      ),
+                      AppButton(
+                        label: l10n.listingFormJumpToStepButton,
+                        variant: AppButtonVariant.text,
+                        size: AppButtonSize.dense,
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          context.read<ListingFormBloc>().add(
+                            JumpToStep(_stepForPath(path)),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ] else if (failure.userFacingMessage != null) ...[
-            Text(failure.userFacingMessage!),
+            Text(
+              failure.userFacingMessage!,
+              style: styles.bodyLarge.copyWith(color: colors.onSurface),
+            ),
           ] else ...[
-            Text(l10n.submitErrorUnknown),
+            Text(
+              l10n.submitErrorUnknown,
+              style: styles.bodyLarge.copyWith(color: colors.onSurface),
+            ),
           ],
         ],
       ),
       actions: [
-        TextButton(
+        AppButton(
+          label: l10n.actionDismiss,
+          variant: AppButtonVariant.text,
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(l10n.actionDismiss),
         ),
       ],
     );

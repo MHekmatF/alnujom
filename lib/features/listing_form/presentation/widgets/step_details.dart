@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
 import '../../../../core/validators/area_size_validator.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/listing.dart';
 import '../../domain/entities/listing_form_state.dart';
 import '../bloc/listing_form_bloc.dart';
 import '../bloc/listing_form_event.dart';
-import 'required_field_chip.dart';
+import 'step_section.dart';
 
 const List<String> kAmenitiesCatalog = <String>[
   'elevator',
@@ -72,143 +74,152 @@ class _StepDetailsState extends State<StepDetails> {
           _seeded = true;
         }
         final showRoomsBathrooms = listing.propertyType.isResidential;
+        final colors = AppColors.of(context);
+        final styles = AppTextStyles.of(context);
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              l10n.fieldLabelDescription,
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            TextField(
-              controller: _descriptionController,
-              maxLines: 4,
-              onChanged: (v) => context.read<ListingFormBloc>().add(
-                FieldChanged.description(v),
-              ),
-              decoration: const InputDecoration(border: OutlineInputBorder()),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Row(
+            StepSection(
+              icon: Icons.description_outlined,
+              title: l10n.listingFormStepDetailsTitle,
+              subtitle: l10n.listingFormStepDetailsSubtitle,
               children: [
-                Text(
-                  l10n.fieldLabelAreaSize,
-                  style: Theme.of(context).textTheme.titleSmall,
+                FieldLabel(label: l10n.fieldLabelDescription),
+                TextField(
+                  controller: _descriptionController,
+                  maxLines: 4,
+                  onChanged: (v) => context.read<ListingFormBloc>().add(
+                    FieldChanged.description(v),
+                  ),
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                  ),
                 ),
-                const SizedBox(width: AppSpacing.sm),
-                const RequiredFieldChip(),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            TextField(
-              controller: _areaSizeController,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              inputFormatters: <TextInputFormatter>[
-                FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-              ],
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(),
-                errorText: _areaSizeError,
-              ),
-              onChanged: (v) {
-                final parsed = double.tryParse(v);
-                final error = AreaSizeValidator.validate(parsed, l10n);
-                setState(() => _areaSizeError = error);
-                context.read<ListingFormBloc>().add(
-                  FieldChanged.areaSize(parsed),
-                );
-              },
-            ),
-            if (showRoomsBathrooms) ...[
-              const SizedBox(height: AppSpacing.lg),
-              Row(
-                children: [
-                  Expanded(
-                    child: _numericField(
-                      controller: _roomsController,
-                      label: l10n.fieldLabelRooms,
-                      onParsed: (i) => context.read<ListingFormBloc>().add(
-                        FieldChanged.rooms(i),
-                      ),
-                      required: true,
-                    ),
+                const FieldGap(),
+                FieldLabel(label: l10n.fieldLabelAreaSize, required: true),
+                TextField(
+                  controller: _areaSizeController,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
                   ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: _numericField(
-                      controller: _bathroomsController,
-                      label: l10n.fieldLabelBathrooms,
-                      onParsed: (i) => context.read<ListingFormBloc>().add(
-                        FieldChanged.bathrooms(i),
-                      ),
-                      required: true,
-                    ),
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                  ],
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    errorText: _areaSizeError,
                   ),
-                ],
-              ),
-            ],
-            const SizedBox(height: AppSpacing.lg),
-            _numericField(
-              controller: _floorController,
-              label: l10n.fieldLabelFloor,
-              onParsed: (i) =>
-                  context.read<ListingFormBloc>().add(FieldChanged.floor(i)),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            _numericField(
-              controller: _yearBuiltController,
-              label: l10n.fieldLabelYearBuilt,
-              onParsed: (i) => context.read<ListingFormBloc>().add(
-                FieldChanged.yearBuilt(i),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            SwitchListTile(
-              title: Text(l10n.fieldLabelFurnished),
-              value: details?.furnished ?? false,
-              onChanged: (v) => context.read<ListingFormBloc>().add(
-                FieldChanged.furnished(v),
-              ),
-              contentPadding: EdgeInsets.zero,
-            ),
-            SwitchListTile(
-              title: Text(l10n.fieldLabelParking),
-              value: details?.parking ?? false,
-              onChanged: (v) =>
-                  context.read<ListingFormBloc>().add(FieldChanged.parking(v)),
-              contentPadding: EdgeInsets.zero,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Text(
-              l10n.fieldLabelAmenities,
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.sm,
-              children: kAmenitiesCatalog.map((key) {
-                final selected = details?.amenities.contains(key) ?? false;
-                return FilterChip(
-                  label: Text(_amenityLabel(key, l10n)),
-                  selected: selected,
-                  onSelected: (val) {
-                    final current = List<String>.from(
-                      details?.amenities ?? const <String>[],
-                    );
-                    if (val) {
-                      if (!current.contains(key)) current.add(key);
-                    } else {
-                      current.remove(key);
-                    }
+                  onChanged: (v) {
+                    final parsed = double.tryParse(v);
+                    final error = AreaSizeValidator.validate(parsed, l10n);
+                    setState(() => _areaSizeError = error);
                     context.read<ListingFormBloc>().add(
-                      FieldChanged.amenities(current),
+                      FieldChanged.areaSize(parsed),
                     );
                   },
-                );
-              }).toList(),
+                ),
+                if (showRoomsBathrooms) ...[
+                  const FieldGap(),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: _numericField(
+                          controller: _roomsController,
+                          label: l10n.fieldLabelRooms,
+                          onParsed: (i) => context.read<ListingFormBloc>().add(
+                            FieldChanged.rooms(i),
+                          ),
+                          required: true,
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: _numericField(
+                          controller: _bathroomsController,
+                          label: l10n.fieldLabelBathrooms,
+                          onParsed: (i) => context.read<ListingFormBloc>().add(
+                            FieldChanged.bathrooms(i),
+                          ),
+                          required: true,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+                const FieldGap(),
+                _numericField(
+                  controller: _floorController,
+                  label: l10n.fieldLabelFloor,
+                  onParsed: (i) => context.read<ListingFormBloc>().add(
+                    FieldChanged.floor(i),
+                  ),
+                ),
+                const FieldGap(),
+                _numericField(
+                  controller: _yearBuiltController,
+                  label: l10n.fieldLabelYearBuilt,
+                  onParsed: (i) => context.read<ListingFormBloc>().add(
+                    FieldChanged.yearBuilt(i),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            StepSection(
+              icon: Icons.star_outline,
+              title: l10n.fieldLabelAmenities,
+              subtitle: l10n.listingFormDetailsFeaturesSubtitle,
+              children: [
+                SwitchListTile(
+                  title: Text(
+                    l10n.fieldLabelFurnished,
+                    style: styles.bodyLarge.copyWith(color: colors.onSurface),
+                  ),
+                  value: details?.furnished ?? false,
+                  onChanged: (v) => context.read<ListingFormBloc>().add(
+                    FieldChanged.furnished(v),
+                  ),
+                  contentPadding: EdgeInsets.zero,
+                ),
+                SwitchListTile(
+                  title: Text(
+                    l10n.fieldLabelParking,
+                    style: styles.bodyLarge.copyWith(color: colors.onSurface),
+                  ),
+                  value: details?.parking ?? false,
+                  onChanged: (v) => context.read<ListingFormBloc>().add(
+                    FieldChanged.parking(v),
+                  ),
+                  contentPadding: EdgeInsets.zero,
+                ),
+                const FieldGap(),
+                FieldLabel(label: l10n.fieldLabelAmenities),
+                Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.sm,
+                  children: kAmenitiesCatalog.map((key) {
+                    final selected = details?.amenities.contains(key) ?? false;
+                    return FilterChip(
+                      label: Text(_amenityLabel(key, l10n)),
+                      selected: selected,
+                      onSelected: (val) {
+                        final current = List<String>.from(
+                          details?.amenities ?? const <String>[],
+                        );
+                        if (val) {
+                          if (!current.contains(key)) current.add(key);
+                        } else {
+                          current.remove(key);
+                        }
+                        context.read<ListingFormBloc>().add(
+                          FieldChanged.amenities(current),
+                        );
+                      },
+                    );
+                  }).toList(),
+                ),
+              ],
             ),
           ],
         );
@@ -225,16 +236,7 @@ class _StepDetailsState extends State<StepDetails> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            Text(label, style: Theme.of(context).textTheme.titleSmall),
-            if (required) ...[
-              const SizedBox(width: AppSpacing.sm),
-              const RequiredFieldChip(),
-            ],
-          ],
-        ),
-        const SizedBox(height: AppSpacing.sm),
+        FieldLabel(label: label, required: required),
         TextField(
           controller: controller,
           keyboardType: TextInputType.number,
