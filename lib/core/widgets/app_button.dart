@@ -19,6 +19,11 @@ enum AppButtonVariant {
   destructive,
   iconButton,
   fab,
+
+  /// WhatsApp contact CTA — brand-green fill (Syria's primary contact
+  /// channel). Keeps the brand color in the token layer; feature code never
+  /// touches the literal.
+  whatsapp,
 }
 
 enum AppButtonSize { regular, dense }
@@ -107,6 +112,7 @@ class AppButton extends StatelessWidget {
         variant == AppButtonVariant.filledPrimary ||
         variant == AppButtonVariant.filledSuccess ||
         variant == AppButtonVariant.destructive ||
+        variant == AppButtonVariant.whatsapp ||
         variant == AppButtonVariant.fab;
     void handleTap() {
       if (usesHaptic) HapticFeedback.selectionClick();
@@ -196,6 +202,7 @@ class AppButton extends StatelessWidget {
     AppButtonVariant.destructive => colors.onError,
     AppButtonVariant.iconButton => colors.primary,
     AppButtonVariant.fab => colors.onPrimary,
+    AppButtonVariant.whatsapp => colors.onWhatsapp,
   };
 
   Color _background(AppColors colors) => switch (variant) {
@@ -207,5 +214,6 @@ class AppButton extends StatelessWidget {
     AppButtonVariant.destructive => colors.error,
     AppButtonVariant.iconButton => Colors.transparent,
     AppButtonVariant.fab => colors.primary,
+    AppButtonVariant.whatsapp => colors.whatsapp,
   };
 }
