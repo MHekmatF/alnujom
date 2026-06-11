@@ -5539,4 +5539,83 @@ final class _DebugAppLocalizations extends AppLocalizations {
     'mediaThumbnailPanoramaBadge',
     (loc) => loc.mediaThumbnailPanoramaBadge,
   );
+
+  // ── Redesign (profile sections + add-listing flow) ───────────────────────
+  @override
+  String get profileSectionAccount =>
+      _resolve('profileSectionAccount', (loc) => loc.profileSectionAccount);
+  @override
+  String get profileSectionActivity =>
+      _resolve('profileSectionActivity', (loc) => loc.profileSectionActivity);
+  @override
+  String get profileSectionSelling =>
+      _resolve('profileSectionSelling', (loc) => loc.profileSectionSelling);
+  @override
+  String get profileSectionAdmin =>
+      _resolve('profileSectionAdmin', (loc) => loc.profileSectionAdmin);
+  @override
+  String get profileSectionMore =>
+      _resolve('profileSectionMore', (loc) => loc.profileSectionMore);
+  @override
+  String listingFormStepCounter(int current, int total, String label) =>
+      _resolve(
+        'listingFormStepCounter',
+        (loc) => loc.listingFormStepCounter(current, total, label),
+      );
+  @override
+  String get listingFormStepBasicsSubtitle => _resolve(
+    'listingFormStepBasicsSubtitle',
+    (loc) => loc.listingFormStepBasicsSubtitle,
+  );
+  @override
+  String get listingFormStepLocationSubtitle => _resolve(
+    'listingFormStepLocationSubtitle',
+    (loc) => loc.listingFormStepLocationSubtitle,
+  );
+  @override
+  String get listingFormStepDetailsSubtitle => _resolve(
+    'listingFormStepDetailsSubtitle',
+    (loc) => loc.listingFormStepDetailsSubtitle,
+  );
+  @override
+  String get listingFormDetailsFeaturesSubtitle => _resolve(
+    'listingFormDetailsFeaturesSubtitle',
+    (loc) => loc.listingFormDetailsFeaturesSubtitle,
+  );
+  @override
+  String get listingFormStepPricesSubtitle => _resolve(
+    'listingFormStepPricesSubtitle',
+    (loc) => loc.listingFormStepPricesSubtitle,
+  );
+  @override
+  String get listingFormStepVisibilitySubtitle => _resolve(
+    'listingFormStepVisibilitySubtitle',
+    (loc) => loc.listingFormStepVisibilitySubtitle,
+  );
+  @override
+  String get listingFormContactSectionTitle => _resolve(
+    'listingFormContactSectionTitle',
+    (loc) => loc.listingFormContactSectionTitle,
+  );
+  @override
+  String get listingFormContactSectionSubtitle => _resolve(
+    'listingFormContactSectionSubtitle',
+    (loc) => loc.listingFormContactSectionSubtitle,
+  );
+  @override
+  String get listingFormStepMediaSubtitle => _resolve(
+    'listingFormStepMediaSubtitle',
+    (loc) => loc.listingFormStepMediaSubtitle,
+  );
+  @override
+  String get listingFormSubmitSuccessSubtitle => _resolve(
+    'listingFormSubmitSuccessSubtitle',
+    (loc) => loc.listingFormSubmitSuccessSubtitle,
+  );
+
+  @override
+  String profile_username_handle(String username) => _resolve(
+    'profile_username_handle',
+    (loc) => loc.profile_username_handle(username),
+  );
 }

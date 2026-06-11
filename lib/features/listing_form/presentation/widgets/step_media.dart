@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/app_button.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/listing.dart';
 import '../../domain/entities/listing_form_state.dart';
@@ -12,6 +16,7 @@ import '../bloc/listing_form_bloc.dart';
 import '../bloc/listing_form_event.dart';
 import '../util/android_settings_channel.dart';
 import 'media_picker.dart';
+import 'step_section.dart';
 
 /// Phase 11 — step 6 (Media) of the seven-step listing form.
 ///
@@ -52,8 +57,10 @@ class StepMedia extends StatelessWidget {
         final imagesFull = imageCount >= _imageCap;
         final videosFull = videoCount >= _videoCap;
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        return StepSection(
+          icon: Icons.photo_library_outlined,
+          title: l10n.listingFormStepMediaTitle,
+          subtitle: l10n.listingFormStepMediaSubtitle,
           children: [
             if (!isEditable) _ReadOnlyBanner(l10n: l10n),
             if (isEditable) ...[
@@ -79,22 +86,24 @@ class _ReadOnlyBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      margin: const EdgeInsets.only(bottom: AppSpacing.lg),
+      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+      margin: const EdgeInsetsDirectional.only(bottom: AppSpacing.lg),
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(AppRadii.md),
+        color: colors.surfaceVariant,
+        borderRadius: appRadius(AppRadii.md),
+        border: Border.all(color: colors.outline),
       ),
       child: Row(
         children: [
-          Icon(Icons.lock_outline, color: scheme.onSurfaceVariant),
+          Icon(Icons.lock_outline, color: colors.textMuted),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Text(
               l10n.mediaReadOnlyPendingOrApproved,
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: styles.bodyMedium.copyWith(color: colors.onSurface),
             ),
           ),
         ],
@@ -119,18 +128,22 @@ class _AddAffordances extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: ElevatedButton.icon(
+          child: AppButton(
+            label: l10n.mediaAddImages,
+            icon: Icons.add_photo_alternate_outlined,
+            variant: AppButtonVariant.tonal,
+            expanded: true,
             onPressed: imagesFull ? null : () => _pickImages(context),
-            icon: const Icon(Icons.add_photo_alternate_outlined),
-            label: Text(l10n.mediaAddImages),
           ),
         ),
         const SizedBox(width: AppSpacing.md),
         Expanded(
-          child: ElevatedButton.icon(
+          child: AppButton(
+            label: l10n.mediaAddVideo,
+            icon: Icons.videocam_outlined,
+            variant: AppButtonVariant.tonal,
+            expanded: true,
             onPressed: videosFull ? null : () => _pickVideo(context),
-            icon: const Icon(Icons.videocam_outlined),
-            label: Text(l10n.mediaAddVideo),
           ),
         ),
       ],

@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../locations/domain/entities/location_picker_selection.dart';
 import '../../../locations/presentation/widgets/location_picker.dart';
 import '../../domain/entities/listing_form_state.dart';
 import '../bloc/listing_form_bloc.dart';
 import '../bloc/listing_form_event.dart';
-import 'required_field_chip.dart';
+import 'step_section.dart';
 
 class StepLocation extends StatefulWidget {
   const StepLocation({super.key});
@@ -41,8 +44,12 @@ class _StepLocationState extends State<StepLocation> {
         }
         final centroidError =
             state.stepValidationErrors['location.centroid'] != null;
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        final colors = AppColors.of(context);
+        final styles = AppTextStyles.of(context);
+        return StepSection(
+          icon: Icons.location_on_outlined,
+          title: l10n.listingFormStepLocationTitle,
+          subtitle: l10n.listingFormStepLocationSubtitle,
           children: [
             // Phase 8 LocationPicker reused verbatim per SC-021.
             // The picker emits a (governorate, city, area) selection; the
@@ -71,18 +78,8 @@ class _StepLocationState extends State<StepLocation> {
                 bloc.add(FieldChanged.areaId(area));
               },
             ),
-            const SizedBox(height: AppSpacing.lg),
-            Row(
-              children: [
-                Text(
-                  l10n.fieldLabelAddressText,
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                const RequiredFieldChip(),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
+            const FieldGap(),
+            FieldLabel(label: l10n.fieldLabelAddressText, required: true),
             TextField(
               controller: _addressController,
               maxLines: 2,
@@ -95,18 +92,30 @@ class _StepLocationState extends State<StepLocation> {
               ),
             ),
             if (centroidError) ...[
-              const SizedBox(height: AppSpacing.lg),
+              const FieldGap(),
               Container(
-                padding: const EdgeInsets.all(AppSpacing.md),
+                padding: const EdgeInsetsDirectional.all(AppSpacing.md),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.errorContainer,
-                  borderRadius: BorderRadius.circular(AppRadii.sm),
+                  color: colors.error.withValues(alpha: 0.12),
+                  borderRadius: appRadius(AppRadii.md),
+                  border: Border.all(color: colors.error.withValues(alpha: 0.4)),
                 ),
-                child: Text(
-                  l10n.validatorAreaMissingCentroid,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onErrorContainer,
-                  ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      size: AppSpacing.lg,
+                      color: colors.error,
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        l10n.validatorAreaMissingCentroid,
+                        style: styles.bodyMedium.copyWith(color: colors.error),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

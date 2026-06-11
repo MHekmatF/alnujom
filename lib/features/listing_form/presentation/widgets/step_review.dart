@@ -3,15 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/app_button.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/listing_form_state.dart';
 import '../../domain/entities/listing_media.dart';
 import '../../domain/repositories/listings_repository.dart';
 import '../bloc/listing_form_bloc.dart';
 import '../bloc/listing_form_event.dart';
+import 'step_section.dart';
 
 class StepReview extends StatelessWidget {
   const StepReview({super.key});
@@ -28,8 +32,12 @@ class StepReview extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (state.media.isNotEmpty) _MediaSection(media: state.media),
+            if (state.media.isNotEmpty) ...[
+              _MediaSection(media: state.media),
+              const SizedBox(height: AppSpacing.lg),
+            ],
             _Section(
+              icon: Icons.home_work_outlined,
               title: l10n.listingFormStepBasicsTitle,
               onEdit: () => context.read<ListingFormBloc>().add(
                 const JumpToStep(ListingFormStep.basics),
@@ -40,7 +48,9 @@ class StepReview extends StatelessWidget {
                 (l10n.fieldLabelPropertyType, listing.propertyType.name),
               ],
             ),
+            const SizedBox(height: AppSpacing.lg),
             _Section(
+              icon: Icons.location_on_outlined,
               title: l10n.listingFormStepLocationTitle,
               onEdit: () => context.read<ListingFormBloc>().add(
                 const JumpToStep(ListingFormStep.location),
@@ -52,7 +62,9 @@ class StepReview extends StatelessWidget {
                 (l10n.fieldLabelAddressText, listing.addressText ?? '—'),
               ],
             ),
+            const SizedBox(height: AppSpacing.lg),
             _Section(
+              icon: Icons.description_outlined,
               title: l10n.listingFormStepDetailsTitle,
               onEdit: () => context.read<ListingFormBloc>().add(
                 const JumpToStep(ListingFormStep.details),
@@ -75,7 +87,9 @@ class StepReview extends StatelessWidget {
                 ),
               ],
             ),
+            const SizedBox(height: AppSpacing.lg),
             _Section(
+              icon: Icons.payments_outlined,
               title: l10n.listingFormStepPricesTitle,
               onEdit: () => context.read<ListingFormBloc>().add(
                 const JumpToStep(ListingFormStep.prices),
@@ -85,7 +99,9 @@ class StepReview extends StatelessWidget {
                 (l10n.fieldLabelPrice, price?.amount.toString() ?? '—'),
               ],
             ),
+            const SizedBox(height: AppSpacing.lg),
             _Section(
+              icon: Icons.visibility_outlined,
               title: l10n.listingFormStepVisibilityTitle,
               onEdit: () => context.read<ListingFormBloc>().add(
                 const JumpToStep(ListingFormStep.visibility),
@@ -110,13 +126,17 @@ class StepReview extends StatelessWidget {
   }
 }
 
+/// A grouped summary card for one step, with an Edit affordance that jumps back
+/// to that step (existing navigation — no new routes added).
 class _Section extends StatelessWidget {
   const _Section({
+    required this.icon,
     required this.title,
     required this.rows,
     required this.onEdit,
   });
 
+  final IconData icon;
   final String title;
   final List<(String, String)> rows;
   final VoidCallback onEdit;
@@ -124,56 +144,48 @@ class _Section extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Card(
-      margin: const EdgeInsetsDirectional.only(bottom: AppSpacing.md),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                ),
-                TextButton(
-                  onPressed: onEdit,
-                  child: Text(l10n.listingFormJumpToStepButton),
-                ),
-              ],
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    return StepSection(
+      icon: icon,
+      title: title,
+      trailing: AppButton(
+        label: l10n.listingFormJumpToStepButton,
+        icon: Icons.edit_outlined,
+        variant: AppButtonVariant.text,
+        size: AppButtonSize.dense,
+        onPressed: onEdit,
+      ),
+      children: [
+        for (var i = 0; i < rows.length; i++) ...[
+          if (i > 0)
+            Padding(
+              padding: const EdgeInsetsDirectional.symmetric(
+                vertical: AppSpacing.sm,
+              ),
+              child: Divider(height: AppSpacing.xxs, color: colors.divider),
             ),
-            const SizedBox(height: AppSpacing.sm),
-            ...rows.map(
-              (row) => Padding(
-                padding: const EdgeInsetsDirectional.only(
-                  bottom: AppSpacing.xs,
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      width: 120,
-                      child: Text(
-                        row.$1,
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ),
-                    Expanded(
-                      child: Text(
-                        row.$2.isEmpty ? '—' : row.$2,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    ),
-                  ],
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: AppSpacing.xxxl * 2 + AppSpacing.xl,
+                child: Text(
+                  rows[i].$1,
+                  style: styles.bodyMedium.copyWith(color: colors.textMuted),
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Text(
+                  rows[i].$2.isEmpty ? '—' : rows[i].$2,
+                  style: styles.bodyLarge.copyWith(color: colors.onSurface),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ],
     );
   }
 }
@@ -190,49 +202,35 @@ class _MediaSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final sorted = [...media]..sort((a, b) => a.ordering.compareTo(b.ordering));
-    return Card(
-      margin: const EdgeInsetsDirectional.only(bottom: AppSpacing.md),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    l10n.mediaReviewCarouselLabel,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                ),
-                TextButton(
-                  onPressed: () => context.read<ListingFormBloc>().add(
-                    const JumpToStep(ListingFormStep.media),
-                  ),
-                  child: Text(l10n.listingFormJumpToStepButton),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            SizedBox(
-              height: 96,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: sorted.length,
-                separatorBuilder: (_, _) =>
-                    const SizedBox(width: AppSpacing.sm),
-                itemBuilder: (context, index) {
-                  final m = sorted[index];
-                  return _ReviewThumbnail(
-                    media: m,
-                    mainBadge: m.isMain ? l10n.mediaThumbnailMainBadge : null,
-                  );
-                },
-              ),
-            ),
-          ],
+    return StepSection(
+      icon: Icons.photo_library_outlined,
+      title: l10n.mediaReviewCarouselLabel,
+      trailing: AppButton(
+        label: l10n.listingFormJumpToStepButton,
+        icon: Icons.edit_outlined,
+        variant: AppButtonVariant.text,
+        size: AppButtonSize.dense,
+        onPressed: () => context.read<ListingFormBloc>().add(
+          const JumpToStep(ListingFormStep.media),
         ),
       ),
+      children: [
+        SizedBox(
+          height: AppSpacing.xxxl * 2,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: sorted.length,
+            separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
+            itemBuilder: (context, index) {
+              final m = sorted[index];
+              return _ReviewThumbnail(
+                media: m,
+                mainBadge: m.isMain ? l10n.mediaThumbnailMainBadge : null,
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
@@ -245,35 +243,33 @@ class _ReviewThumbnail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     return ClipRRect(
-      borderRadius: BorderRadius.circular(AppRadii.md),
+      borderRadius: appRadius(AppRadii.md),
       child: SizedBox(
-        width: 96,
-        height: 96,
+        width: AppSpacing.xxxl * 2,
+        height: AppSpacing.xxxl * 2,
         child: Stack(
           fit: StackFit.expand,
           children: [
-            _buildPreview(scheme),
+            _buildPreview(colors),
             if (mainBadge != null)
-              Positioned(
+              PositionedDirectional(
                 top: AppSpacing.xs,
-                right: AppSpacing.xs,
+                end: AppSpacing.xs,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.xs,
-                    vertical: AppSpacing.xs,
+                  padding: const EdgeInsetsDirectional.symmetric(
+                    horizontal: AppSpacing.sm,
+                    vertical: AppSpacing.xxs,
                   ),
                   decoration: BoxDecoration(
-                    color: scheme.primary,
-                    borderRadius: BorderRadius.circular(AppRadii.sm),
+                    color: colors.primary,
+                    borderRadius: appRadius(AppRadii.pill),
                   ),
                   child: Text(
                     mainBadge!,
-                    style: AppTextStyles.of(context).labelMedium.copyWith(
-                      color: scheme.onPrimary,
-                      fontWeight: FontWeight.w600,
-                    ), // was fontSize:10 — labelMedium(12) is nearest token
+                    style: styles.labelMedium.copyWith(color: colors.onPrimary),
                   ),
                 ),
               ),
@@ -283,19 +279,23 @@ class _ReviewThumbnail extends StatelessWidget {
     );
   }
 
-  Widget _buildPreview(ColorScheme scheme) {
+  Widget _buildPreview(AppColors colors) {
     if (media.kind == ListingMediaKind.video) {
       return Container(
-        color: scheme.surfaceContainerHigh,
+        color: colors.surfaceVariant,
         alignment: Alignment.center,
-        child: Icon(Icons.play_arrow, color: scheme.onSurfaceVariant, size: 32),
+        child: Icon(
+          Icons.play_arrow,
+          color: colors.textMuted,
+          size: AppSpacing.xxl,
+        ),
       );
     }
     final path = media.storagePath;
     if (path == null) {
       return Container(
-        color: scheme.errorContainer,
-        child: Icon(Icons.broken_image_outlined, color: scheme.error),
+        color: colors.error.withValues(alpha: 0.12),
+        child: Icon(Icons.broken_image_outlined, color: colors.error),
       );
     }
     final url = getIt<ListingsRepository>().getMediaPublicUrl(
@@ -305,10 +305,10 @@ class _ReviewThumbnail extends StatelessWidget {
     return CachedNetworkImage(
       imageUrl: url,
       fit: BoxFit.cover,
-      placeholder: (_, _) => Container(color: scheme.surfaceContainerHigh),
+      placeholder: (_, _) => Container(color: colors.surfaceVariant),
       errorWidget: (_, _, _) => Container(
-        color: scheme.errorContainer,
-        child: Icon(Icons.broken_image_outlined, color: scheme.error),
+        color: colors.error.withValues(alpha: 0.12),
+        child: Icon(Icons.broken_image_outlined, color: colors.error),
       ),
     );
   }

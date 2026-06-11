@@ -4,7 +4,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/elevation.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/app_button.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
@@ -82,11 +87,18 @@ class _ListingFormBody extends StatelessWidget {
         }
       },
       builder: (context, state) {
+        final colors = AppColors.of(context);
+        final styles = AppTextStyles.of(context);
         return Scaffold(
+          backgroundColor: colors.surface,
           appBar: AppBar(
-            title: Text(_titleForStep(state.currentStep, l10n)),
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back),
+            title: Text(
+              _titleForStep(state.currentStep, l10n),
+              style: styles.titleLarge.copyWith(color: colors.onSurface),
+            ),
+            leading: AppButton.iconButton(
+              icon: Icons.arrow_back,
+              label: l10n.listingFormBackButton,
               onPressed: state.currentStep.previous == null
                   ? () => context.go(AppRoutes.shellHome)
                   : () => context.read<ListingFormBloc>().add(
@@ -94,34 +106,42 @@ class _ListingFormBody extends StatelessWidget {
                     ),
             ),
             actions: [
-              TextButton(
-                onPressed: state.saveInProgress
-                    ? null
-                    : () => context.read<ListingFormBloc>().add(
-                        const SaveStepAndExit(),
-                      ),
-                child: Text(l10n.listingFormSaveAndExitButton),
+              Padding(
+                padding: const EdgeInsetsDirectional.only(end: AppSpacing.sm),
+                child: AppButton(
+                  label: l10n.listingFormSaveAndExitButton,
+                  variant: AppButtonVariant.text,
+                  size: AppButtonSize.dense,
+                  onPressed: state.saveInProgress
+                      ? null
+                      : () => context.read<ListingFormBloc>().add(
+                          const SaveStepAndExit(),
+                        ),
+                ),
               ),
             ],
           ),
           body: state.loadInProgress
-              ? const Center(child: CircularProgressIndicator())
+              ? Center(child: appInlineSpinner(context))
               : !state.isReady
               ? Padding(
-                  padding: const EdgeInsets.all(AppSpacing.xl),
+                  padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
                   child: Center(
                     child: Text(
                       state.lastSaveError ?? l10n.listingFormLoadingMessage,
                       textAlign: TextAlign.center,
+                      style: styles.bodyLarge.copyWith(color: colors.textMuted),
                     ),
                   ),
                 )
               : Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.lg,
-                        vertical: AppSpacing.md,
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                        AppSpacing.lg,
+                        AppSpacing.md,
+                        AppSpacing.lg,
+                        AppSpacing.sm,
                       ),
                       child: StepProgressIndicator(
                         currentStep: state.currentStep,
@@ -129,17 +149,16 @@ class _ListingFormBody extends StatelessWidget {
                     ),
                     Expanded(
                       child: SingleChildScrollView(
-                        padding: const EdgeInsets.all(AppSpacing.lg),
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                          AppSpacing.lg,
+                          AppSpacing.sm,
+                          AppSpacing.lg,
+                          AppSpacing.xl,
+                        ),
                         child: _renderStep(state.currentStep),
                       ),
                     ),
-                    SafeArea(
-                      top: false,
-                      child: Padding(
-                        padding: const EdgeInsets.all(AppSpacing.lg),
-                        child: _BottomNav(state: state),
-                      ),
-                    ),
+                    _BottomNav(state: state),
                   ],
                 ),
         );
@@ -194,50 +213,68 @@ class _BottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    final elevation = AppElevation.of(context);
     final isLastStep = state.currentStep == ListingFormStep.review;
     final canGoBack = state.currentStep.previous != null;
-    return Row(
-      children: [
-        if (canGoBack)
-          Expanded(
-            child: OutlinedButton(
-              onPressed: () => context.read<ListingFormBloc>().add(
-                JumpToStep(state.currentStep.previous!),
-              ),
-              child: Text(l10n.listingFormBackButton),
-            ),
-          ),
-        if (canGoBack) const SizedBox(width: AppSpacing.md),
-        Expanded(
-          flex: 2,
-          child: FilledButton(
-            onPressed: state.saveInProgress || state.submitInProgress
-                ? null
-                : () {
-                    if (isLastStep) {
-                      context.read<ListingFormBloc>().add(
-                        const SubmitRequested(),
-                      );
-                    } else {
-                      context.read<ListingFormBloc>().add(
-                        const SaveStepAndContinue(),
-                      );
-                    }
-                  },
-            child: state.saveInProgress || state.submitInProgress
-                ? const SizedBox(
-                    height: 18,
-                    width: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(
-                    isLastStep
-                        ? l10n.listingFormSubmitButton
-                        : l10n.listingFormContinueButton,
+    final busy = state.saveInProgress || state.submitInProgress;
+
+    final bar = Container(
+      decoration: BoxDecoration(
+        color: colors.surface,
+        border: BorderDirectional(
+          top: BorderSide(color: colors.outline),
+        ),
+        boxShadow: elevation.level1,
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+          child: Row(
+            children: [
+              if (canGoBack) ...[
+                Expanded(
+                  child: AppButton(
+                    label: l10n.listingFormBackButton,
+                    variant: AppButtonVariant.outlined,
+                    expanded: true,
+                    onPressed: () => context.read<ListingFormBloc>().add(
+                      JumpToStep(state.currentStep.previous!),
+                    ),
                   ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+              ],
+              Expanded(
+                flex: 2,
+                child: AppButton(
+                  label: isLastStep
+                      ? l10n.listingFormSubmitButton
+                      : l10n.listingFormContinueButton,
+                  icon: isLastStep ? Icons.check_circle_outline : null,
+                  expanded: true,
+                  loading: busy,
+                  onPressed: busy
+                      ? null
+                      : () {
+                          if (isLastStep) {
+                            context.read<ListingFormBloc>().add(
+                              const SubmitRequested(),
+                            );
+                          } else {
+                            context.read<ListingFormBloc>().add(
+                              const SaveStepAndContinue(),
+                            );
+                          }
+                        },
+                ),
+              ),
+            ],
           ),
         ),
-      ],
+      ),
     );
+    return bar;
   }
 }
