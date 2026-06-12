@@ -33,6 +33,8 @@ final class AppColors {
     required this.onPhoto,
     required this.photoOverlay,
     required this.scrim,
+    required this.whatsapp,
+    required this.onWhatsapp,
     required this.divider,
     required this.disabledOverlay,
   });
@@ -66,6 +68,8 @@ final class AppColors {
     onPhoto: tokens.onPhoto,
     photoOverlay: tokens.photoOverlay,
     scrim: tokens.scrim,
+    whatsapp: tokens.whatsapp,
+    onWhatsapp: tokens.onWhatsapp,
     divider: tokens.outline,
     disabledOverlay: tokens.onSurface.withAlpha(0x61),
   );
@@ -104,6 +108,8 @@ final class AppColors {
       onPhoto: tokens?.onPhoto ?? Colors.white,
       photoOverlay: tokens?.photoOverlay ?? scheme.scrim,
       scrim: tokens?.scrim ?? scheme.scrim,
+      whatsapp: tokens?.whatsapp ?? (tokens?.success ?? scheme.tertiary),
+      onWhatsapp: tokens?.onWhatsapp ?? (tokens?.onSuccess ?? scheme.onPrimary),
       divider: scheme.outline,
       disabledOverlay: scheme.onSurface.withAlpha(0x61),
     );
@@ -137,6 +143,8 @@ final class AppColors {
   final Color onPhoto;
   final Color photoOverlay;
   final Color scrim;
+  final Color whatsapp;
+  final Color onWhatsapp;
   final Color divider;
   final Color disabledOverlay;
 
@@ -172,6 +180,8 @@ final class AppColors {
           onPhoto == other.onPhoto &&
           photoOverlay == other.photoOverlay &&
           scrim == other.scrim &&
+          whatsapp == other.whatsapp &&
+          onWhatsapp == other.onWhatsapp &&
           divider == other.divider &&
           disabledOverlay == other.disabledOverlay;
 
@@ -205,6 +215,8 @@ final class AppColors {
     onPhoto,
     photoOverlay,
     scrim,
+    whatsapp,
+    onWhatsapp,
     divider,
     disabledOverlay,
   ]);
@@ -228,6 +240,8 @@ final class AppColorTokens extends ThemeExtension<AppColorTokens> {
     required this.onPhoto,
     required this.photoOverlay,
     required this.scrim,
+    required this.whatsapp,
+    required this.onWhatsapp,
   });
 
   factory AppColorTokens.fromPalette(AppPaletteTokens tokens) => AppColorTokens(
@@ -246,6 +260,8 @@ final class AppColorTokens extends ThemeExtension<AppColorTokens> {
     onPhoto: tokens.onPhoto,
     photoOverlay: tokens.photoOverlay,
     scrim: tokens.scrim,
+    whatsapp: tokens.whatsapp,
+    onWhatsapp: tokens.onWhatsapp,
   );
 
   final Color accent;
@@ -263,6 +279,8 @@ final class AppColorTokens extends ThemeExtension<AppColorTokens> {
   final Color onPhoto;
   final Color photoOverlay;
   final Color scrim;
+  final Color whatsapp;
+  final Color onWhatsapp;
 
   @override
   AppColorTokens copyWith({
@@ -281,6 +299,8 @@ final class AppColorTokens extends ThemeExtension<AppColorTokens> {
     Color? onPhoto,
     Color? photoOverlay,
     Color? scrim,
+    Color? whatsapp,
+    Color? onWhatsapp,
   }) {
     return AppColorTokens(
       accent: accent ?? this.accent,
@@ -298,6 +318,8 @@ final class AppColorTokens extends ThemeExtension<AppColorTokens> {
       onPhoto: onPhoto ?? this.onPhoto,
       photoOverlay: photoOverlay ?? this.photoOverlay,
       scrim: scrim ?? this.scrim,
+      whatsapp: whatsapp ?? this.whatsapp,
+      onWhatsapp: onWhatsapp ?? this.onWhatsapp,
     );
   }
 
@@ -327,6 +349,8 @@ final class AppColorTokens extends ThemeExtension<AppColorTokens> {
       onPhoto: Color.lerp(onPhoto, other.onPhoto, t)!,
       photoOverlay: Color.lerp(photoOverlay, other.photoOverlay, t)!,
       scrim: Color.lerp(scrim, other.scrim, t)!,
+      whatsapp: Color.lerp(whatsapp, other.whatsapp, t)!,
+      onWhatsapp: Color.lerp(onWhatsapp, other.onWhatsapp, t)!,
     );
   }
 }

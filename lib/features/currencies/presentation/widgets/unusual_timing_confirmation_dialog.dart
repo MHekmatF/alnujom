@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 import '../../../../core/widgets/app_dialog.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -20,6 +21,7 @@ Future<bool> showUnusualTimingConfirmationDialog(
       message: direction == UnusualTimingDirection.future
           ? l10n.unusualTimingFutureBody(magnitude)
           : l10n.unusualTimingBackdateBody(magnitude),
+      icon: LucideIcons.clock,
       actionLabel: l10n.submitButton,
       cancelLabel: l10n.cancelButton,
       onAction: () => Navigator.of(context).pop(true),

@@ -14,6 +14,7 @@ import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/elevation.dart';
 import '../../../../core/theme/motion.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/reduce_motion.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../bloc/favorites_cubit.dart';
@@ -67,9 +68,7 @@ class FavoriteHeartButton extends StatelessWidget {
           current.lastToggleFailed && !previous.lastToggleFailed,
       listener: (context, state) {
         final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.favorite_toggle_failed)));
+        AppToast.error(context, l10n.favorite_toggle_failed);
       },
       builder: (context, state) {
         final isFavorited = state.favoritedIds.contains(listingId);
@@ -109,9 +108,7 @@ class FavoriteHeartButton extends StatelessWidget {
     // (Q2=A / FR-008 / FR-009 / R-116).
     if (!state.isSignedIn) {
       final l10n = AppLocalizations.of(context)!;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l10n.favorite_sign_in_prompt)));
+      AppToast.info(context, l10n.favorite_sign_in_prompt);
       context.push(AppRoutes.login);
       return;
     }
@@ -125,15 +122,14 @@ class FavoriteHeartButton extends StatelessWidget {
     // (the heart fills + pops), so they don't need a confirmation snackbar.
     if (wasFavorited) {
       final l10n = AppLocalizations.of(context)!;
-      final messenger = ScaffoldMessenger.of(context)
-        ..clearSnackBars();
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.favorite_removed_snackbar),
-          action: SnackBarAction(
-            label: l10n.action_undo,
-            onPressed: () => getIt<FavoritesCubit>().toggle(listingId),
-          ),
+      ScaffoldMessenger.of(context).clearSnackBars();
+      AppToast.show(
+        context,
+        l10n.favorite_removed_snackbar,
+        variant: AppToastVariant.info,
+        action: SnackBarAction(
+          label: l10n.action_undo,
+          onPressed: () => getIt<FavoritesCubit>().toggle(listingId),
         ),
       );
     }

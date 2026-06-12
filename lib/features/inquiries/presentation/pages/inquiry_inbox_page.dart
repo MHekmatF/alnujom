@@ -4,14 +4,22 @@
 // Full implementation per contracts/phase16-inbox-page-composition.md.
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
+import '../../../../core/widgets/loading_state.dart';
+import '../../../../core/widgets/press_scale.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/inquiry.dart';
 import '../../domain/entities/inquiry_status.dart';
@@ -70,7 +78,7 @@ class _StatusFilterButton extends StatelessWidget {
 
     return PopupMenuButton<InquiryStatus?>(
       tooltip: l10n.inquiry_inbox_filter_status_label,
-      icon: const Icon(Icons.filter_list),
+      icon: const Icon(LucideIcons.funnel),
       onSelected: (value) {
         context.read<InquiryInboxBloc>().add(
           InquiryInboxStatusFilterChanged(value),
@@ -114,7 +122,7 @@ class _ListingFilterButton extends StatelessWidget {
 
     return PopupMenuButton<String?>(
       tooltip: l10n.inquiry_inbox_filter_listing_label,
-      icon: const Icon(Icons.home_outlined),
+      icon: const Icon(LucideIcons.house),
       onSelected: (value) {
         context.read<InquiryInboxBloc>().add(
           InquiryInboxListingFilterChanged(value),
@@ -140,7 +148,7 @@ class _InboxBody extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return switch (state) {
-      InquiryInboxLoading() => const Center(child: CircularProgressIndicator()),
+      InquiryInboxLoading() => const _InboxSkeleton(),
       InquiryInboxError(:final failure) => ErrorState(
         title: failure.message,
         variant: ErrorStateVariant.network,
@@ -151,7 +159,7 @@ class _InboxBody extends StatelessWidget {
       InquiryInboxLoaded(inquiries: final inquiries, hasMore: final hasMore) =>
         inquiries.isEmpty
             ? EmptyState(
-                icon: Icons.inbox_outlined,
+                icon: LucideIcons.inbox,
                 headline: l10n.inquiry_inbox_empty_state,
               )
             : RefreshIndicator(
@@ -174,8 +182,8 @@ class _InboxBody extends StatelessWidget {
 
                     if (index >= inquiries.length) {
                       return const Padding(
-                        padding: EdgeInsets.all(AppSpacing.lg),
-                        child: Center(child: CircularProgressIndicator()),
+                        padding: EdgeInsetsDirectional.all(AppSpacing.lg),
+                        child: AppSpinner(),
                       );
                     }
 
@@ -187,6 +195,51 @@ class _InboxBody extends StatelessWidget {
   }
 }
 
+/// Loading skeleton — shimmer card rows shaped like the inbox tiles, matching
+/// the favorites-page skeleton idiom.
+class _InboxSkeleton extends StatelessWidget {
+  const _InboxSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.sm,
+      ),
+      itemCount: 6,
+      itemBuilder: (_, __) => const Padding(
+        padding: EdgeInsetsDirectional.only(bottom: AppSpacing.md),
+        child: AppSurface(
+          padding: EdgeInsetsDirectional.all(AppSpacing.lg),
+          radius: AppRadii.lg,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              FractionallySizedBox(
+                alignment: AlignmentDirectional.centerStart,
+                widthFactor: 0.45,
+                child: LoadingState.heading(),
+              ),
+              SizedBox(height: AppSpacing.sm),
+              LoadingState.line(),
+              SizedBox(height: AppSpacing.sm),
+              FractionallySizedBox(
+                alignment: AlignmentDirectional.centerStart,
+                widthFactor: 0.7,
+                child: LoadingState.line(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// One inquiry as a premium card row — AppSurface + PressScale, matching the
+/// favorites-card aesthetic (rounded card, hairline outline, token text).
 class _InquiryRowTile extends StatelessWidget {
   const _InquiryRowTile({required this.inquiry});
 
@@ -196,6 +249,8 @@ class _InquiryRowTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final matLoc = MaterialLocalizations.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
 
     final displayPhone =
         inquiry.decryptedPhone ??
@@ -205,49 +260,49 @@ class _InquiryRowTile extends StatelessWidget {
         : inquiry.senderName;
     final formattedDate = matLoc.formatCompactDate(inquiry.createdAt.toLocal());
 
-    return Card(
-      margin: const EdgeInsetsDirectional.symmetric(
+    return Padding(
+      padding: const EdgeInsetsDirectional.symmetric(
         horizontal: AppSpacing.sm,
         vertical: AppSpacing.xs,
       ),
-      child: InkWell(
-        onTap: () => context.push(AppRoutes.inquiryDetailFor(inquiry.id)),
-        child: Padding(
+      child: PressScale(
+        child: AppSurface(
+          onTap: () => context.push(AppRoutes.inquiryDetailFor(inquiry.id)),
           padding: const EdgeInsetsDirectional.all(AppSpacing.md),
+          radius: AppRadii.lg,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               InboxStatusBadge(status: inquiry.status),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      displayName,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
+                    Text(displayName, style: styles.titleMedium),
+                    const SizedBox(height: AppSpacing.xxs),
                     Text(
                       displayPhone,
-                      style: Theme.of(context).textTheme.bodySmall,
+                      style: styles.bodyMedium.copyWith(
+                        color: colors.textMuted,
+                      ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: AppSpacing.xxs),
                     Text(
                       inquiry.listingTitle,
-                      style: Theme.of(context).textTheme.bodySmall,
+                      style: styles.bodyMedium.copyWith(
+                        color: colors.textMuted,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.xs),
                     InquiryMessageSnippet(message: inquiry.message),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.xs),
                     Text(
                       formattedDate,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.outline,
+                      style: styles.labelMedium.copyWith(
+                        color: colors.textMuted,
                       ),
                     ),
                   ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 import '../../../../core/widgets/app_dialog.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -19,6 +20,7 @@ Future<bool> showDeleteCurrencyConfirmationDialog(
         exchangeRatesCount,
         listingPricesCount,
       ),
+      icon: LucideIcons.triangle_alert,
       actionLabel: l10n.deleteButton,
       cancelLabel: l10n.cancelButton,
       variant: AppDialogVariant.destructive,

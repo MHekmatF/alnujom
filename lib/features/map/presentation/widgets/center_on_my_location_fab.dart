@@ -16,9 +16,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/marker_coordinates.dart';
 import '../bloc/map_bloc.dart';
@@ -36,14 +38,13 @@ class CenterOnMyLocationFab extends StatelessWidget {
       heroTag: 'centerOnMyLocationFab',
       tooltip: l10n.map_fab_center_on_me_tooltip,
       onPressed: () => _handleTap(context),
-      child: const Icon(Icons.my_location),
+      child: const Icon(LucideIcons.locate_fixed),
     );
   }
 
   Future<void> _handleTap(BuildContext context) async {
     final bloc = context.read<MapBloc>();
     final l10n = AppLocalizations.of(context)!;
-    final messenger = ScaffoldMessenger.of(context);
 
     // .request() is idempotent against an already-granted permission: it
     // returns the current status without re-prompting per Android's
@@ -52,15 +53,14 @@ class CenterOnMyLocationFab extends StatelessWidget {
 
     if (status.isPermanentlyDenied) {
       bloc.add(const GeolocationPermissionDenied(permanentlyDenied: true));
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            l10n.map_geolocation_permission_permanently_denied_message,
-          ),
-          action: SnackBarAction(
-            label: l10n.map_geolocation_open_settings_action,
-            onPressed: openAppSettings,
-          ),
+      if (!context.mounted) return;
+      AppToast.show(
+        context,
+        l10n.map_geolocation_permission_permanently_denied_message,
+        variant: AppToastVariant.warning,
+        action: SnackBarAction(
+          label: l10n.map_geolocation_open_settings_action,
+          onPressed: openAppSettings,
         ),
       );
       return;
@@ -68,9 +68,8 @@ class CenterOnMyLocationFab extends StatelessWidget {
 
     if (!status.isGranted) {
       bloc.add(const GeolocationPermissionDenied(permanentlyDenied: false));
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.map_geolocation_permission_denied_message)),
-      );
+      if (!context.mounted) return;
+      AppToast.warning(context, l10n.map_geolocation_permission_denied_message);
       return;
     }
 
@@ -91,14 +90,12 @@ class CenterOnMyLocationFab extends StatelessWidget {
       );
     } on TimeoutException {
       bloc.add(const GeolocationFixFailed());
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.map_geolocation_fix_unavailable_message)),
-      );
+      if (!context.mounted) return;
+      AppToast.error(context, l10n.map_geolocation_fix_unavailable_message);
     } on LocationServiceDisabledException {
       bloc.add(const GeolocationFixFailed());
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.map_geolocation_fix_unavailable_message)),
-      );
+      if (!context.mounted) return;
+      AppToast.error(context, l10n.map_geolocation_fix_unavailable_message);
     }
   }
 }

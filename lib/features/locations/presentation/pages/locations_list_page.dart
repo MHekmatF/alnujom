@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/app_toast.dart';
+import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/locale_toggle_action.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/governorate_with_city_count.dart';
@@ -48,13 +51,11 @@ class _LocationsListView extends StatelessWidget {
             context.read<LocationsListBloc>().add(const RefreshRequested());
           }
         },
-        child: const Icon(Icons.add),
+        child: const Icon(LucideIcons.plus),
       ),
       body: BlocBuilder<LocationsListBloc, LocationsListState>(
         builder: (context, state) => switch (state) {
-          LocationsListLoading() => const Center(
-            child: CircularProgressIndicator(),
-          ),
+          LocationsListLoading() => const _LocationsListSkeleton(),
           LocationsListError(:final message) => Center(
             child: Text(message, textAlign: TextAlign.center),
           ),
@@ -66,7 +67,7 @@ class _LocationsListView extends StatelessWidget {
                         .read<LocationsListBloc>()
                         .add(const RefreshRequested()),
                     child: ListView.separated(
-                      padding: const EdgeInsets.all(AppSpacing.lg),
+                      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
                       itemCount: governorates.length,
                       separatorBuilder: (_, __) =>
                           const SizedBox(height: AppSpacing.sm),
@@ -153,10 +154,26 @@ class _LocationsListView extends StatelessWidget {
       }
     } on Object catch (error) {
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(error.toString())));
+        AppToast.error(context, error.toString());
       }
     }
+  }
+}
+
+/// Shimmer placeholder rows shown while the governorates list loads.
+class _LocationsListSkeleton extends StatelessWidget {
+  const _LocationsListSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+      itemCount: 6,
+      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+      itemBuilder: (_, __) => const SizedBox(
+        height: AppSpacing.xxxl + AppSpacing.xxl,
+        child: LoadingState.card(),
+      ),
+    );
   }
 }

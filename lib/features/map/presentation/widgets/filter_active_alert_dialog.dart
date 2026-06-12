@@ -17,8 +17,10 @@
 // widget can stay stateless.
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/app_dialog.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../listing_form/domain/entities/listing.dart';
 import '../../../search/domain/entities/count_filter_mode.dart';
@@ -36,39 +38,27 @@ class FilterActiveAlertDialog extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final chips = _buildChips(l10n, filterState);
 
-    return AlertDialog(
-      title: Text(l10n.map_filter_alert_title),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(l10n.map_filter_alert_body_prefix),
-          const SizedBox(height: AppSpacing.md),
-          Wrap(
-            spacing: AppSpacing.sm,
-            runSpacing: AppSpacing.sm,
-            children: chips
-                .map((label) => Chip(label: Text(label)))
-                .toList(growable: false),
-          ),
-        ],
+    // Branded AppDialog. "Keep filters" maps to the cancel slot — it simply
+    // pops; the page's `showDialog(...).then` dispatches FilterAlertDismissed
+    // unconditionally on ANY close path (button, barrier tap), exactly as
+    // before, so no event is lost.
+    return AppDialog(
+      title: l10n.map_filter_alert_title,
+      message: l10n.map_filter_alert_body_prefix,
+      icon: LucideIcons.funnel,
+      content: Wrap(
+        spacing: AppSpacing.sm,
+        runSpacing: AppSpacing.sm,
+        children: chips
+            .map((label) => Chip(label: Text(label)))
+            .toList(growable: false),
       ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            context.read<MapBloc>().add(const FilterAlertDismissed());
-            Navigator.of(context).pop();
-          },
-          child: Text(l10n.map_filter_alert_action_keep),
-        ),
-        TextButton(
-          onPressed: () {
-            context.read<MapBloc>().add(const FilterResetRequested());
-            Navigator.of(context).pop();
-          },
-          child: Text(l10n.map_filter_alert_action_reset),
-        ),
-      ],
+      cancelLabel: l10n.map_filter_alert_action_keep,
+      actionLabel: l10n.map_filter_alert_action_reset,
+      onAction: () {
+        context.read<MapBloc>().add(const FilterResetRequested());
+        Navigator.of(context).pop();
+      },
     );
   }
 

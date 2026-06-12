@@ -231,6 +231,9 @@ ThemeData buildAppTheme({
       thickness: 1,
       space: 1,
     ),
+    // Phase 28 — every spinner app-wide picks up the brand primary (closes the
+    // "93 bare CircularProgressIndicator" stock-Material leak in one line).
+    progressIndicatorTheme: ProgressIndicatorThemeData(color: colors.primary),
     snackBarTheme: SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
       backgroundColor: colors.secondary,

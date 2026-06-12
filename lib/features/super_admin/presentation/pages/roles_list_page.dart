@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
@@ -7,6 +8,8 @@ import '../../../../core/routing/app_router.dart';
 import '../../../../core/security/permission_checker.dart';
 import '../../../../core/security/permission_keys.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/app_toast.dart';
+import '../../../../core/widgets/loading_state.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/role_with_counts.dart';
 import '../../domain/failures.dart';
@@ -53,7 +56,7 @@ class _RolesListView extends StatelessWidget {
         actions: [
           if (canManage)
             IconButton(
-              icon: const Icon(Icons.person_add_outlined),
+              icon: const Icon(LucideIcons.user_plus),
               tooltip: l10n.superAdminAssignRoleTitle,
               // push (not go) so the back stack to the admin dashboard is kept.
               onPressed: () => context.push(AppRoutes.superAdminAssign),
@@ -70,15 +73,14 @@ class _RolesListView extends StatelessWidget {
                   context.read<RolesListBloc>().add(const RefreshRoles());
                 }
               },
-              child: const Icon(Icons.add),
+              child: const Icon(LucideIcons.plus),
             )
           : null,
       body: BlocBuilder<RolesListBloc, RolesListState>(
         builder: (context, state) {
           return switch (state) {
-            RolesListInitial() || RolesListLoading() => const Center(
-              child: CircularProgressIndicator(),
-            ),
+            RolesListInitial() ||
+            RolesListLoading() => const _RolesListSkeleton(),
             RolesListLoadFailure(:final failure) => Center(
               child: Text(failure.message, textAlign: TextAlign.center),
             ),
@@ -86,7 +88,7 @@ class _RolesListView extends StatelessWidget {
               onRefresh: () async =>
                   context.read<RolesListBloc>().add(const RefreshRoles()),
               child: ListView.separated(
-                padding: const EdgeInsets.all(AppSpacing.lg),
+                padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
                 itemCount: roles.length,
                 separatorBuilder: (_, __) =>
                     const SizedBox(height: AppSpacing.sm),
@@ -119,7 +121,6 @@ class _RolesListView extends StatelessWidget {
 
   Future<void> _deleteRole(BuildContext context, RoleWithCounts role) async {
     final l10n = AppLocalizations.of(context)!;
-    final messenger = ScaffoldMessenger.of(context);
     try {
       final count = await getIt<LoadAffectedUserCount>()(role.roleId);
       if (!context.mounted) return;
@@ -156,11 +157,29 @@ class _RolesListView extends StatelessWidget {
       if (!context.mounted) return;
       context.read<RolesListBloc>().add(const RefreshRoles());
     } on RoleHasUsersFailure {
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.errorRoleHasUsers(1))),
-      );
+      if (!context.mounted) return;
+      AppToast.error(context, l10n.errorRoleHasUsers(1));
     } on SuperAdminFailure catch (failure) {
-      messenger.showSnackBar(SnackBar(content: Text(failure.message)));
+      if (!context.mounted) return;
+      AppToast.error(context, failure.message);
     }
+  }
+}
+
+/// Shimmer placeholder rows shown while the roles list loads.
+class _RolesListSkeleton extends StatelessWidget {
+  const _RolesListSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+      itemCount: 6,
+      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+      itemBuilder: (_, __) => const SizedBox(
+        height: AppSpacing.xxxl + AppSpacing.xl,
+        child: LoadingState.card(),
+      ),
+    );
   }
 }

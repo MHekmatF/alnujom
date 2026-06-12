@@ -15,6 +15,7 @@
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
@@ -23,6 +24,7 @@ import '../../../../core/security/permission_checker.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/dashboard_tile.dart';
 import '../../../../core/widgets/locale_toggle_action.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
@@ -205,10 +207,7 @@ class _AdminHomeViewState extends State<_AdminHomeView> with RouteAware {
                 padding: const EdgeInsetsDirectional.only(
                   bottom: AppSpacing.md,
                 ),
-                child: StaggeredListItem(
-                  index: runningIndex++,
-                  child: tile,
-                ),
+                child: StaggeredListItem(index: runningIndex++, child: tile),
               );
             }, childCount: inGroup.length),
           ),
@@ -296,7 +295,8 @@ class _AdminHomeViewState extends State<_AdminHomeView> with RouteAware {
   String _groupLabel(DashboardSectionGroup group, AppLocalizations l10n) {
     return switch (group) {
       DashboardSectionGroup.moderation => l10n.adminSectionGroupModeration,
-      DashboardSectionGroup.configuration => l10n.adminSectionGroupConfiguration,
+      DashboardSectionGroup.configuration =>
+        l10n.adminSectionGroupConfiguration,
       DashboardSectionGroup.insights => l10n.adminSectionGroupInsights,
       DashboardSectionGroup.superAdmin => l10n.adminSectionGroupSuperAdmin,
     };
@@ -408,7 +408,7 @@ class _CounterErrorNotice extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.warning_amber_outlined, color: colors.error),
+          Icon(LucideIcons.triangle_alert, color: colors.error),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
@@ -416,9 +416,10 @@ class _CounterErrorNotice extends StatelessWidget {
               style: styles.bodyMedium.copyWith(color: colors.error),
             ),
           ),
-          TextButton(
+          AppButton(
+            label: l10n.dashboardCountersRetry,
+            variant: AppButtonVariant.text,
             onPressed: onRetry,
-            child: Text(l10n.dashboardCountersRetry),
           ),
         ],
       ),

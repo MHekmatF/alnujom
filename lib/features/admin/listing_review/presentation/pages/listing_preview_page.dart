@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 
@@ -12,6 +13,9 @@ import '../../../../../core/theme/radii.dart';
 import '../../../../../core/theme/spacing.dart';
 import '../../../../../core/theme/typography.dart';
 import '../../../../../core/widgets/_widget_support.dart';
+import '../../../../../core/widgets/app_button.dart';
+import '../../../../../core/widgets/app_spinner.dart';
+import '../../../../../core/widgets/app_toast.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../../shared/presentation/widgets/listing_display/listing_amenities_block.dart';
 import '../../../../../shared/presentation/widgets/listing_display/listing_description_block.dart';
@@ -76,7 +80,7 @@ class _ListingPreviewView extends StatelessWidget {
         listener: _handleStateSideEffects,
         builder: (ctx, state) {
           if (state.isLoading && state.preview == null) {
-            return const Center(child: CircularProgressIndicator());
+            return const AppSpinner.page();
           }
           if (state.failure != null && state.preview == null) {
             return _ErrorState(message: state.failure!.message);
@@ -103,13 +107,13 @@ class _ListingPreviewView extends StatelessWidget {
         final msg = success.result.isFeatured
             ? l10n.adminToastFeatureSuccess
             : l10n.adminToastUnfeatureSuccess;
-        ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text(msg)));
+        AppToast.success(ctx, msg);
         return;
       }
       final msg = success is RejectSuccess
           ? l10n.adminToastRejectSuccess
           : l10n.adminToastApproveSuccess;
-      ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text(msg)));
+      AppToast.success(ctx, msg);
       // Pop back to the queue page (the queue will refresh on-pop via the
       // RefreshIndicator pattern when the admin pulls).
       ctx.pop();
@@ -117,7 +121,7 @@ class _ListingPreviewView extends StatelessWidget {
     }
     if (state.failure != null) {
       final msg = _localizedFailureMessage(l10n, state.failure!);
-      ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text(msg)));
+      AppToast.error(ctx, msg);
       // For race-condition failures, pop back to queue.
       if (state.failure is AlreadyActedOnFailure ||
           state.failure is InvalidStatusTransitionFailure) {
@@ -153,7 +157,7 @@ class _PreviewBody extends StatelessWidget {
     final l = preview.listing;
 
     return ListView(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsetsDirectional.all(AppSpacing.md),
       children: [
         // Gallery
         ListingGallery(media: preview.media),
@@ -162,7 +166,7 @@ class _PreviewBody extends StatelessWidget {
         // Title
         Text(
           l.title.isEmpty ? '—' : l.title,
-          style: Theme.of(context).textTheme.headlineSmall,
+          style: AppTextStyles.of(context).titleLarge,
         ),
         const SizedBox(height: AppSpacing.sm),
 
@@ -252,38 +256,35 @@ class _StickyBottomBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
     final isReady = state.preview != null && !state.isLoading;
     final disabled = !isReady || state.isMutatorInFlight;
 
     return SafeArea(
       child: Container(
         decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHigh,
-          border: Border(
-            top: BorderSide(color: theme.colorScheme.outlineVariant),
-          ),
+          color: colors.card,
+          border: Border(top: BorderSide(color: colors.outline)),
         ),
-        padding: const EdgeInsets.symmetric(
+        padding: const EdgeInsetsDirectional.symmetric(
           horizontal: AppSpacing.md,
           vertical: AppSpacing.sm,
         ),
         child: Row(
           children: [
             Expanded(
-              child: OutlinedButton(
+              child: AppButton(
+                label: l10n.adminPreviewCtaReject,
+                variant: AppButtonVariant.destructive,
                 onPressed: disabled ? null : () => _onRejectPressed(context),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: theme.colorScheme.error,
-                ),
-                child: Text(l10n.adminPreviewCtaReject),
               ),
             ),
             const SizedBox(width: AppSpacing.lg),
             Expanded(
-              child: FilledButton(
+              child: AppButton(
+                label: l10n.adminPreviewCtaApprove,
+                variant: AppButtonVariant.filledSuccess,
                 onPressed: disabled ? null : () => _onApprovePressed(context),
-                child: Text(l10n.adminPreviewCtaApprove),
               ),
             ),
           ],
@@ -385,7 +386,7 @@ class _FeaturedBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.star_rounded, size: AppSpacing.lg, color: colors.primary),
+          Icon(LucideIcons.star, size: AppSpacing.lg, color: colors.primary),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
@@ -407,16 +408,15 @@ class _ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
+        padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
         child: Text(
           message,
           textAlign: TextAlign.center,
-          style: theme.textTheme.bodyLarge?.copyWith(
-            color: theme.colorScheme.error,
-          ),
+          style: styles.bodyLarge.copyWith(color: colors.error),
         ),
       ),
     );

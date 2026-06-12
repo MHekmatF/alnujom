@@ -9,6 +9,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_dropdown.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/report_reason.dart';
 import '../cubit/report_submission_cubit.dart';
@@ -52,7 +56,7 @@ class _ReportSheetBodyState extends State<_ReportSheetBody> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final styles = AppTextStyles.of(context);
 
     return BlocListener<ReportSubmissionCubit, ReportSubmissionState>(
       listenWhen: (prev, curr) => curr.result != null && prev.result == null,
@@ -60,19 +64,13 @@ class _ReportSheetBodyState extends State<_ReportSheetBody> {
         switch (state.result!) {
           case SubmitResult.success:
             Navigator.of(context).pop();
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(l10n.report_submitted_success)),
-            );
+            AppToast.success(context, l10n.report_submitted_success);
           case SubmitResult.alreadyReported:
             Navigator.of(context).pop();
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(l10n.report_already_reported)),
-            );
+            AppToast.info(context, l10n.report_already_reported);
           case SubmitResult.failure:
             Navigator.of(context).pop();
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(l10n.report_submit_failed)),
-            );
+            AppToast.error(context, l10n.report_submit_failed);
         }
       },
       child: SafeArea(
@@ -88,21 +86,15 @@ class _ReportSheetBodyState extends State<_ReportSheetBody> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Title
-              Text(
-                l10n.report_sheet_title,
-                style: theme.textTheme.titleLarge,
-              ),
+              Text(l10n.report_sheet_title, style: styles.titleLarge),
               const SizedBox(height: AppSpacing.lg),
               // Reason dropdown
               BlocBuilder<ReportSubmissionCubit, ReportSubmissionState>(
                 buildWhen: (prev, curr) => prev.reason != curr.reason,
                 builder: (context, state) {
-                  return DropdownButtonFormField<ReportReason>(
-                    initialValue: state.reason,
-                    decoration: InputDecoration(
-                      labelText: l10n.report_reason_field_label,
-                      border: const OutlineInputBorder(),
-                    ),
+                  return AppDropdown<ReportReason>(
+                    label: l10n.report_reason_field_label,
+                    value: state.reason,
                     items: ReportReason.values.map((reason) {
                       return DropdownMenuItem<ReportReason>(
                         value: reason,
@@ -139,30 +131,26 @@ class _ReportSheetBodyState extends State<_ReportSheetBody> {
                   return Row(
                     children: [
                       Expanded(
-                        child: OutlinedButton(
+                        child: AppButton(
+                          label: l10n.report_cancel_button,
+                          variant: AppButtonVariant.outlined,
+                          expanded: true,
                           onPressed: state.isSubmitting
                               ? null
                               : () => Navigator.of(context).pop(),
-                          child: Text(l10n.report_cancel_button),
                         ),
                       ),
                       const SizedBox(width: AppSpacing.md),
                       Expanded(
-                        child: FilledButton(
+                        child: AppButton.filledPrimary(
+                          label: l10n.report_submit_button,
+                          expanded: true,
+                          loading: state.isSubmitting,
                           onPressed: state.canSubmit
                               ? () => context
-                                  .read<ReportSubmissionCubit>()
-                                  .submit(widget.listingId)
+                                    .read<ReportSubmissionCubit>()
+                                    .submit(widget.listingId)
                               : null,
-                          child: state.isSubmitting
-                              ? const SizedBox(
-                                  width: AppSpacing.lg,
-                                  height: AppSpacing.lg,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : Text(l10n.report_submit_button),
                         ),
                       ),
                     ],

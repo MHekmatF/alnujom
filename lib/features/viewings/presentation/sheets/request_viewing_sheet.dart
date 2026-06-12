@@ -13,6 +13,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 
 import '../../../../core/di/injection.dart';
@@ -22,6 +23,8 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_text_field.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../cubit/viewings_cubit.dart';
 
@@ -83,8 +86,7 @@ class _RequestViewingBodyState extends State<_RequestViewingBody> {
     return dt != null && dt.isBefore(DateTime.now());
   }
 
-  bool get _canSubmit =>
-      !_submitting && _localDateTime != null && !_isInPast;
+  bool get _canSubmit => !_submitting && _localDateTime != null && !_isInPast;
 
   Future<void> _pickDate() async {
     final now = DateTime.now();
@@ -111,7 +113,6 @@ class _RequestViewingBodyState extends State<_RequestViewingBody> {
     if (local == null || _isInPast) return;
 
     final l10n = AppLocalizations.of(context)!;
-    final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     final cubit = context.read<ViewingsCubit>();
 
@@ -129,9 +130,7 @@ class _RequestViewingBodyState extends State<_RequestViewingBody> {
       navigator.pop(true);
     } else {
       setState(() => _submitting = false);
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.viewingRequestError)),
-      );
+      AppToast.error(context, l10n.viewingRequestError);
     }
   }
 
@@ -178,7 +177,7 @@ class _RequestViewingBodyState extends State<_RequestViewingBody> {
               const SizedBox(height: AppSpacing.lg),
               // Date picker field.
               _PickerField(
-                icon: Icons.calendar_today_outlined,
+                icon: LucideIcons.calendar,
                 label: dateLabel,
                 placeholder: _date == null,
                 onTap: _submitting ? null : _pickDate,
@@ -186,7 +185,7 @@ class _RequestViewingBodyState extends State<_RequestViewingBody> {
               const SizedBox(height: AppSpacing.md),
               // Time picker field.
               _PickerField(
-                icon: Icons.schedule_outlined,
+                icon: LucideIcons.clock,
                 label: timeLabel,
                 placeholder: _time == null,
                 onTap: _submitting ? null : _pickTime,
@@ -200,20 +199,18 @@ class _RequestViewingBodyState extends State<_RequestViewingBody> {
               ],
               const SizedBox(height: AppSpacing.md),
               // Optional note.
-              TextField(
+              AppTextField(
                 controller: _noteCtrl,
                 enabled: !_submitting,
                 maxLines: 3,
-                decoration: InputDecoration(
-                  labelText: l10n.viewingNoteLabel,
-                  hintText: l10n.viewingNotePlaceholder,
-                ),
+                label: l10n.viewingNoteLabel,
+                helperText: l10n.viewingNotePlaceholder,
               ),
               const SizedBox(height: AppSpacing.lg),
               AppButton(
                 label: l10n.viewingSubmitButton,
                 variant: AppButtonVariant.filledPrimary,
-                icon: Icons.event_available_outlined,
+                icon: LucideIcons.calendar_check,
                 expanded: true,
                 loading: _submitting,
                 onPressed: _canSubmit ? _submit : null,

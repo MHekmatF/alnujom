@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/app_toast.dart';
+import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/locale_toggle_action.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../data/repositories/currencies_repository_impl.dart'
@@ -40,7 +43,7 @@ class _CurrenciesListView extends StatelessWidget {
         actions: [
           TextButton.icon(
             onPressed: () => _openSetRate(context),
-            icon: const Icon(Icons.add_chart),
+            icon: const Icon(LucideIcons.chart_line),
             label: Text(l10n.setNewRateButton),
           ),
           const LocaleToggleAction(),
@@ -55,16 +58,15 @@ class _CurrenciesListView extends StatelessWidget {
             context.read<CurrenciesListBloc>().add(const RefreshCurrencies());
           }
         },
-        child: const Icon(Icons.add),
+        child: const Icon(LucideIcons.plus),
       ),
       body: BlocBuilder<CurrenciesListBloc, CurrenciesListState>(
         builder: (context, state) => switch (state) {
-          CurrenciesListInitial() || CurrenciesListLoading() => const Center(
-            child: CircularProgressIndicator(),
-          ),
+          CurrenciesListInitial() ||
+          CurrenciesListLoading() => const _CurrenciesSkeleton(),
           CurrenciesListError(:final reason) => Center(
             child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
+              padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
               child: Text(
                 _errorText(l10n, reason),
                 textAlign: TextAlign.center,
@@ -76,7 +78,7 @@ class _CurrenciesListView extends StatelessWidget {
               const RefreshCurrencies(),
             ),
             child: ListView.separated(
-              padding: const EdgeInsets.all(AppSpacing.lg),
+              padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
               itemCount: currencies.length,
               separatorBuilder: (_, __) =>
                   const SizedBox(height: AppSpacing.sm),
@@ -135,16 +137,12 @@ class _CurrenciesListView extends StatelessWidget {
     } on CurrenciesFailure catch (error) {
       if (context.mounted) {
         final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(_errorText(l10n, error.code))));
+        AppToast.error(context, _errorText(l10n, error.code));
       }
     } on Object catch (_) {
       if (context.mounted) {
         final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.errorCurrencyUnknown)));
+        AppToast.error(context, l10n.errorCurrencyUnknown);
       }
     }
   }
@@ -161,5 +159,23 @@ class _CurrenciesListView extends StatelessWidget {
       'validation_failed' => l10n.errorValidationFailed,
       _ => l10n.errorCurrencyUnknown,
     };
+  }
+}
+
+/// Shimmer placeholder rows shown while the currencies list loads.
+class _CurrenciesSkeleton extends StatelessWidget {
+  const _CurrenciesSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+      itemCount: 6,
+      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+      itemBuilder: (_, __) => const SizedBox(
+        height: AppSpacing.xxxl + AppSpacing.xl,
+        child: LoadingState.card(),
+      ),
+    );
   }
 }

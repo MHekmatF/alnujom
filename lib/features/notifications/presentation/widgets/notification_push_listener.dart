@@ -21,6 +21,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/localization/app_strings.dart';
 import '../../../../core/messaging/push_messaging_service.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../bloc/notification_badge_cubit.dart';
 import 'notification_deep_link_resolver.dart';
 
@@ -98,16 +99,16 @@ class _NotificationPushListenerState extends State<NotificationPushListener> {
   void _showForegroundSnackbar(PushPayload payload) {
     if (!mounted) return;
     final l10n = AppStrings.of(context).loc;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(l10n.notification_foreground_received),
-        action: SnackBarAction(
-          label: l10n.notification_foreground_view,
-          onPressed: () {
-            if (mounted) context.push('/notifications');
-          },
-        ),
-        duration: const Duration(seconds: 4),
+    AppToast.show(
+      context,
+      l10n.notification_foreground_received,
+      variant: AppToastVariant.info,
+      duration: const Duration(seconds: 4),
+      action: SnackBarAction(
+        label: l10n.notification_foreground_view,
+        onPressed: () {
+          if (mounted) context.push('/notifications');
+        },
       ),
     );
   }

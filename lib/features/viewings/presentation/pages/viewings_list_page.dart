@@ -9,6 +9,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 
 import '../../../../core/theme/colors.dart';
@@ -16,6 +17,8 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_spinner.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/status_pill.dart';
@@ -48,7 +51,7 @@ class _ViewingsListPageState extends State<ViewingsListPage> {
           switch (state.status) {
             case ViewingsStatus.initial:
             case ViewingsStatus.loading:
-              return const Center(child: CircularProgressIndicator());
+              return const AppSpinner.page();
             case ViewingsStatus.error:
               return ErrorState(
                 title: l10n.viewingsListErrorTitle,
@@ -57,7 +60,7 @@ class _ViewingsListPageState extends State<ViewingsListPage> {
             case ViewingsStatus.list:
               if (state.viewings.isEmpty) {
                 return EmptyState(
-                  icon: Icons.event_outlined,
+                  icon: LucideIcons.calendar,
                   headline: l10n.viewingsListEmptyTitle,
                   body: l10n.viewingsListEmptyBody,
                 );
@@ -121,7 +124,7 @@ class _ViewingCard extends StatelessWidget {
           Row(
             children: [
               Icon(
-                Icons.schedule_outlined,
+                LucideIcons.clock,
                 size: AppSpacing.lg,
                 color: colors.onSurfaceVariant,
               ),
@@ -161,8 +164,7 @@ class _ViewingCard extends StatelessWidget {
           child: AppButton(
             label: l10n.viewingConfirmAction,
             variant: AppButtonVariant.filledSuccess,
-            onPressed: () =>
-                _transition(context, ViewingStatus.confirmed),
+            onPressed: () => _transition(context, ViewingStatus.confirmed),
           ),
         ),
         Expanded(
@@ -193,7 +195,6 @@ class _ViewingCard extends StatelessWidget {
 
   Future<void> _transition(BuildContext context, ViewingStatus status) async {
     final l10n = AppLocalizations.of(context)!;
-    final messenger = ScaffoldMessenger.of(context);
     final cubit = context.read<ViewingsCubit>();
 
     final ok = await cubit.updateStatus(viewingId: viewing.id, status: status);
@@ -207,11 +208,10 @@ class _ViewingCard extends StatelessWidget {
             ViewingStatus.requested => l10n.viewingsListTitle,
           }
         : l10n.viewingUpdateError;
-    messenger.showSnackBar(
-      SnackBar(
-        content: Text(message),
-        behavior: SnackBarBehavior.floating,
-      ),
+    AppToast.show(
+      context,
+      message,
+      variant: ok ? AppToastVariant.success : AppToastVariant.error,
     );
   }
 
@@ -222,14 +222,8 @@ class _ViewingCard extends StatelessWidget {
     ViewingStatus status,
   ) {
     final (label, color) = switch (status) {
-      ViewingStatus.requested => (
-        l10n.viewingStatusRequested,
-        colors.warning,
-      ),
-      ViewingStatus.confirmed => (
-        l10n.viewingStatusConfirmed,
-        colors.success,
-      ),
+      ViewingStatus.requested => (l10n.viewingStatusRequested, colors.warning),
+      ViewingStatus.confirmed => (l10n.viewingStatusConfirmed, colors.success),
       ViewingStatus.declined => (l10n.viewingStatusDeclined, colors.error),
       ViewingStatus.cancelled => (
         l10n.viewingStatusCancelled,

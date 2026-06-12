@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../../../features/auth/presentation/bloc/auth_state.dart';
 import '../../../../features/favorites/presentation/bloc/favorites_cubit.dart';
@@ -85,9 +86,7 @@ class PerListingActionBlock extends StatelessWidget {
     final cubit = getIt<FavoritesCubit>();
     if (!cubit.state.isSignedIn) {
       final l10n = AppLocalizations.of(context)!;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l10n.favorite_sign_in_prompt)));
+      AppToast.warning(context, l10n.favorite_sign_in_prompt);
       context.push(AppRoutes.login);
       return;
     }
@@ -100,9 +99,7 @@ class PerListingActionBlock extends StatelessWidget {
   void _onReportTap(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     if (getIt<AuthBloc>().state is! Authenticated) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.report_sign_in_prompt)),
-      );
+      AppToast.warning(context, l10n.report_sign_in_prompt);
       context.push(AppRoutes.login);
       return;
     }
@@ -122,8 +119,10 @@ class PerListingActionBlock extends StatelessWidget {
     final link = '$_shareLinkBase${AppRoutes.listingDetailsFor(listingId)}';
 
     final lines = <String>[
-      if (shareTitle != null && shareTitle!.trim().isNotEmpty) shareTitle!.trim(),
-      if (sharePrice != null && sharePrice!.trim().isNotEmpty) sharePrice!.trim(),
+      if (shareTitle != null && shareTitle!.trim().isNotEmpty)
+        shareTitle!.trim(),
+      if (sharePrice != null && sharePrice!.trim().isNotEmpty)
+        sharePrice!.trim(),
       link,
     ];
     final text = lines.join('\n');

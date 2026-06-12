@@ -8,6 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_dropdown.dart';
+import '../../../../core/widgets/app_text_field.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/agency_member_role.dart';
 import '../bloc/agency_members_bloc.dart';
@@ -52,7 +57,7 @@ class _InviteMemberSheetState extends State<_InviteMemberSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final styles = AppTextStyles.of(context);
 
     return BlocConsumer<AgencyMembersBloc, AgencyMembersState>(
       listener: (context, state) {
@@ -66,13 +71,10 @@ class _InviteMemberSheetState extends State<_InviteMemberSheet> {
             final message = switch (state.actionError) {
               'user_not_found' => l10n.agency_invite_user_not_found,
               'already_member' ||
-              'already_owns_agency' =>
-                l10n.agency_invite_already_member,
+              'already_owns_agency' => l10n.agency_invite_already_member,
               _ => l10n.agency_action_failed,
             };
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(message)),
-            );
+            AppToast.error(context, message);
           }
         }
       },
@@ -91,26 +93,17 @@ class _InviteMemberSheetState extends State<_InviteMemberSheet> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  l10n.agency_invite_button,
-                  style: theme.textTheme.titleLarge,
-                ),
+                Text(l10n.agency_invite_button, style: styles.titleLarge),
                 const SizedBox(height: AppSpacing.lg),
-                TextField(
+                AppTextField(
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
-                  decoration: InputDecoration(
-                    labelText: l10n.agency_invite_phone_label,
-                    border: const OutlineInputBorder(),
-                  ),
+                  label: l10n.agency_invite_phone_label,
                 ),
                 const SizedBox(height: AppSpacing.md),
-                DropdownButtonFormField<AgencyMemberRole>(
-                  initialValue: _role,
-                  decoration: InputDecoration(
-                    labelText: l10n.agency_invite_role_label,
-                    border: const OutlineInputBorder(),
-                  ),
+                AppDropdown<AgencyMemberRole>(
+                  label: l10n.agency_invite_role_label,
+                  value: _role,
                   items: [
                     DropdownMenuItem(
                       value: AgencyMemberRole.agent,
@@ -121,32 +114,30 @@ class _InviteMemberSheetState extends State<_InviteMemberSheet> {
                       child: Text(l10n.agency_role_admin),
                     ),
                   ],
-                  onChanged: submitting
-                      ? null
-                      : (v) => setState(() => _role = v ?? AgencyMemberRole.agent),
+                  enabled: !submitting,
+                  onChanged: (v) =>
+                      setState(() => _role = v ?? AgencyMemberRole.agent),
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 Row(
                   children: [
                     Expanded(
-                      child: OutlinedButton(
+                      child: AppButton(
+                        label: l10n.agency_cancel_button,
+                        variant: AppButtonVariant.outlined,
+                        expanded: true,
                         onPressed: submitting
                             ? null
                             : () => Navigator.of(context).pop(),
-                        child: Text(l10n.agency_cancel_button),
                       ),
                     ),
                     const SizedBox(width: AppSpacing.md),
                     Expanded(
-                      child: FilledButton(
+                      child: AppButton.filledPrimary(
+                        label: l10n.agency_invite_button,
+                        expanded: true,
+                        loading: submitting,
                         onPressed: submitting ? null : _submit,
-                        child: submitting
-                            ? const SizedBox(
-                                width: AppSpacing.lg,
-                                height: AppSpacing.lg,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : Text(l10n.agency_invite_button),
                       ),
                     ),
                   ],
@@ -164,11 +155,11 @@ class _InviteMemberSheetState extends State<_InviteMemberSheet> {
     if (phone.isEmpty) return;
     _submitted = true;
     context.read<AgencyMembersBloc>().add(
-          AgencyMembersInviteRequested(
-            agencyId: widget.agencyId,
-            phone: phone,
-            role: _role.wireValue,
-          ),
-        );
+      AgencyMembersInviteRequested(
+        agencyId: widget.agencyId,
+        phone: phone,
+        role: _role.wireValue,
+      ),
+    );
   }
 }

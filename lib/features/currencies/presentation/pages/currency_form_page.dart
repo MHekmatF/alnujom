@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_spinner.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/locale_toggle_action.dart';
+import '../../../../core/widgets/press_scale.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../bloc/currency_form_bloc.dart';
 
@@ -67,9 +76,7 @@ class _CurrencyFormViewState extends State<_CurrencyFormView> {
           Navigator.of(context).pop(true);
         } else if (state.status == CurrencyFormStatus.saveFailure &&
             state.failureReason != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(_errorText(l10n, state.failureReason!))),
-          );
+          AppToast.error(context, _errorText(l10n, state.failureReason!));
         }
       },
       builder: (context, state) {
@@ -85,7 +92,7 @@ class _CurrencyFormViewState extends State<_CurrencyFormView> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const CircularProgressIndicator(),
+                      const AppSpinner(),
                       const SizedBox(height: AppSpacing.md),
                       Text(l10n.loadingHint),
                     ],
@@ -96,7 +103,7 @@ class _CurrencyFormViewState extends State<_CurrencyFormView> {
                   child: Form(
                     key: _formKey,
                     child: ListView(
-                      padding: const EdgeInsets.all(AppSpacing.lg),
+                      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
                       children: [
                         TextFormField(
                           controller: _code,
@@ -185,8 +192,8 @@ class _CurrencyFormViewState extends State<_CurrencyFormView> {
                           ),
                         ),
                         const SizedBox(height: AppSpacing.md),
-                        SwitchListTile(
-                          title: Text(l10n.currencyIsActiveLabel),
+                        _ActiveSwitchRow(
+                          label: l10n.currencyIsActiveLabel,
                           value: _isActive,
                           onChanged: (value) {
                             setState(() => _isActive = value);
@@ -194,11 +201,10 @@ class _CurrencyFormViewState extends State<_CurrencyFormView> {
                           },
                         ),
                         const SizedBox(height: AppSpacing.lg),
-                        FilledButton(
+                        AppButton(
+                          label: l10n.submitButton,
+                          loading: isSaving,
                           onPressed: isSaving ? null : () => _submit(context),
-                          child: isSaving
-                              ? const CircularProgressIndicator()
-                              : Text(l10n.submitButton),
                         ),
                       ],
                     ),
@@ -252,5 +258,57 @@ class _CurrencyFormViewState extends State<_CurrencyFormView> {
     );
     _changed(context, 'isActive', _isActive);
     context.read<CurrencyFormBloc>().add(const SubmitPressed());
+  }
+}
+
+/// Branded replacement for the stock [SwitchListTile] — tinted icon circle +
+/// label on a hairline surface with a trailing [Switch]. Tapping the row
+/// toggles, mirroring the original tile behavior.
+class _ActiveSwitchRow extends StatelessWidget {
+  const _ActiveSwitchRow({
+    required this.label,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final String label;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    return PressScale(
+      child: AppSurface(
+        radius: AppRadii.lg,
+        onTap: () => onChanged(!value),
+        padding: const EdgeInsetsDirectional.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: AppSpacing.xxl + AppSpacing.sm,
+              height: AppSpacing.xxl + AppSpacing.sm,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: colors.primary.withValues(alpha: 0.12),
+              ),
+              child: Icon(
+                LucideIcons.coins,
+                color: colors.primary,
+                size: AppSpacing.lg,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(child: Text(label, style: styles.bodyLarge)),
+            const SizedBox(width: AppSpacing.sm),
+            Switch(value: value, onChanged: onChanged),
+          ],
+        ),
+      ),
+    );
   }
 }

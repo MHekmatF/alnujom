@@ -12,18 +12,19 @@
 // Constitution VI: design tokens only; no inline hex/font/padding.
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/colors.dart';
+import '../../../../../core/theme/radii.dart';
 import '../../../../../core/theme/spacing.dart';
+import '../../../../../core/theme/typography.dart';
+import '../../../../../core/widgets/_widget_support.dart';
+import '../../../../../core/widgets/press_scale.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../reports/domain/entities/report_reason.dart';
 import '../../../../reports/presentation/widgets/report_status_chip.dart';
 import '../../domain/entities/report_queue_item.dart';
 
 class ReportQueueCard extends StatelessWidget {
-  const ReportQueueCard({
-    super.key,
-    required this.item,
-    required this.onTap,
-  });
+  const ReportQueueCard({super.key, required this.item, required this.onTap});
 
   final ReportQueueItem item;
   final VoidCallback onTap;
@@ -52,7 +53,8 @@ class ReportQueueCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
 
     final locationParts = [
       if (item.governorateNameAr != null || item.governorateNameEn != null)
@@ -65,77 +67,67 @@ class ReportQueueCard extends StatelessWidget {
             : item.cityNameEn,
     ].whereType<String>().join(' / ');
 
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
+    return PressScale(
+      child: AppSurface(
+        radius: AppRadii.lg,
         onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ── Header row: listing title + status chip ──────────────────
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Text(
-                      item.listingTitle.isEmpty ? '—' : item.listingTitle,
-                      style: theme.textTheme.titleMedium,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+        padding: const EdgeInsetsDirectional.all(AppSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Header row: listing title + status chip ──────────────────
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    item.listingTitle.isEmpty ? '—' : item.listingTitle,
+                    style: styles.titleMedium,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(width: AppSpacing.sm),
-                  ReportStatusChip(item.status),
-                ],
-              ),
-              if (locationParts.isNotEmpty) ...[
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  locationParts,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
+                const SizedBox(width: AppSpacing.sm),
+                ReportStatusChip(item.status),
               ],
-              const SizedBox(height: AppSpacing.sm),
-              // ── Reason chip ───────────────────────────────────────────────
-              _MiniChip(label: _reasonLabel(l10n, item.reason)),
-              if (item.note != null && item.note!.isNotEmpty) ...[
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  item.note!,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+            ),
+            if (locationParts.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.xs),
-              // ── Reporter ID (admin-visible) + reviewer soft-lock notice ──
               Text(
-                l10n.admin_report_reporter_with_id(item.reporterUserId),
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: theme.colorScheme.outline,
-                ),
+                locationParts,
+                style: styles.bodyMedium.copyWith(color: colors.textMuted),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              if (item.reviewingBy != null) ...[
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  l10n.report_being_reviewed_by(item.reviewingBy!),
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-              ],
             ],
-          ),
+            const SizedBox(height: AppSpacing.sm),
+            // ── Reason chip ───────────────────────────────────────────────
+            _MiniChip(label: _reasonLabel(l10n, item.reason)),
+            if (item.note != null && item.note!.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                item.note!,
+                style: styles.bodyMedium.copyWith(color: colors.textMuted),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+            const SizedBox(height: AppSpacing.xs),
+            // ── Reporter ID (admin-visible) + reviewer soft-lock notice ──
+            Text(
+              l10n.admin_report_reporter_with_id(item.reporterUserId),
+              style: styles.labelMedium.copyWith(color: colors.textMuted),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            if (item.reviewingBy != null) ...[
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                l10n.report_being_reviewed_by(item.reviewingBy!),
+                style: styles.labelMedium.copyWith(color: colors.primary),
+              ),
+            ],
+          ],
         ),
       ),
     );
@@ -150,21 +142,20 @@ class _MiniChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     return Container(
       padding: const EdgeInsetsDirectional.symmetric(
         horizontal: AppSpacing.sm,
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: theme.colorScheme.secondaryContainer,
-        borderRadius: BorderRadius.circular(AppSpacing.sm),
+        color: colors.primary.withValues(alpha: 0.10),
+        borderRadius: appRadius(AppRadii.pill),
       ),
       child: Text(
         label,
-        style: theme.textTheme.labelSmall?.copyWith(
-          color: theme.colorScheme.onSecondaryContainer,
-        ),
+        style: styles.labelMedium.copyWith(color: colors.primary),
       ),
     );
   }

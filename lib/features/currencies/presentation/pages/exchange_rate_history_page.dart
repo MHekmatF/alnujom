@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_spinner.dart';
+import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/locale_toggle_action.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/currency.dart';
@@ -71,7 +75,7 @@ class _ExchangeRateHistoryViewState extends State<_ExchangeRateHistoryView> {
             onPressed: () => context.push(
               '${AppRoutes.currenciesAdminSetRate}?base=${widget.baseCurrencyCode}',
             ),
-            icon: const Icon(Icons.add_chart),
+            icon: const Icon(LucideIcons.chart_line),
             tooltip: l10n.setNewRateButton,
           ),
           const LocaleToggleAction(),
@@ -83,8 +87,8 @@ class _ExchangeRateHistoryViewState extends State<_ExchangeRateHistoryView> {
           final currencies = snapshot.data ?? const <Currency>[];
           return BlocBuilder<ExchangeRateHistoryBloc, ExchangeRateHistoryState>(
             builder: (context, state) => switch (state) {
-              ExchangeRateHistoryInitial() || ExchangeRateHistoryLoading() =>
-                const Center(child: CircularProgressIndicator()),
+              ExchangeRateHistoryInitial() ||
+              ExchangeRateHistoryLoading() => const _HistorySkeleton(),
               ExchangeRateHistoryError() => _HistoryErrorView(
                 state: state,
                 baseCurrencyCode: widget.baseCurrencyCode,
@@ -131,20 +135,20 @@ class _HistoryErrorView extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(_errorText(l10n, state.code), textAlign: TextAlign.center),
             const SizedBox(height: AppSpacing.md),
-            FilledButton(
+            AppButton(
+              label: l10n.retryButton,
               onPressed: () => context.read<ExchangeRateHistoryBloc>().add(
                 LoadHistory(
                   baseCurrency: baseCurrencyCode,
                   targetFilter: state.targetFilter,
                 ),
               ),
-              child: Text(l10n.retryButton),
             ),
           ],
         ),
@@ -191,7 +195,7 @@ class _HistoryLoadedView extends StatelessWidget {
       children: [
         if (loadingMore) const LinearProgressIndicator(minHeight: 2),
         Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
+          padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
           child: Wrap(
             spacing: AppSpacing.sm,
             runSpacing: AppSpacing.sm,
@@ -221,9 +225,9 @@ class _HistoryLoadedView extends StatelessWidget {
               ? Center(child: Text(l10n.noRatesYet))
               : ListView.separated(
                   controller: scrollController,
-                  padding: const EdgeInsets.only(
-                    left: AppSpacing.lg,
-                    right: AppSpacing.lg,
+                  padding: const EdgeInsetsDirectional.only(
+                    start: AppSpacing.lg,
+                    end: AppSpacing.lg,
                     bottom: AppSpacing.lg,
                   ),
                   itemCount: state.rates.length + (loadingMore ? 1 : 0),
@@ -231,13 +235,31 @@ class _HistoryLoadedView extends StatelessWidget {
                       const SizedBox(height: AppSpacing.sm),
                   itemBuilder: (context, index) {
                     if (index >= state.rates.length) {
-                      return const Center(child: CircularProgressIndicator());
+                      return const AppSpinner();
                     }
                     return ExchangeRateRow(exchangeRate: state.rates[index]);
                   },
                 ),
         ),
       ],
+    );
+  }
+}
+
+/// Shimmer placeholder rows shown while the rate history loads.
+class _HistorySkeleton extends StatelessWidget {
+  const _HistorySkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+      itemCount: 6,
+      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+      itemBuilder: (_, __) => const SizedBox(
+        height: AppSpacing.xxxl + AppSpacing.xxl,
+        child: LoadingState.card(),
+      ),
     );
   }
 }

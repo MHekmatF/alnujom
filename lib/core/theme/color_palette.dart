@@ -104,6 +104,9 @@ final class ModernPalette extends ColorPalette {
     onPhoto: Color(0xFFFFFFFF),
     photoOverlay: Color(0x8C0B1118),
     scrim: Color(0x66000000),
+    // Phase 28 — WhatsApp contact CTA (brand green, same tier as success).
+    whatsapp: Color(0xFF1DAB61),
+    onWhatsapp: Color(0xFFFFFFFF),
   );
 
   @override
@@ -138,6 +141,10 @@ final class ModernPalette extends ColorPalette {
     onPhoto: Color(0xFFFFFFFF),
     photoOverlay: Color(0x8C0B1118),
     scrim: Color(0x99000000),
+    // Phase 28 — brighter brand green on dark surfaces, dark foreground
+    // (mirrors the success/onSuccess dark-mode pattern).
+    whatsapp: Color(0xFF25D366),
+    onWhatsapp: Color(0xFF05301B),
   );
 }
 
@@ -177,6 +184,8 @@ final class TrustPalette extends ColorPalette {
     onPhoto: Color(0xFFFFFFFF),
     photoOverlay: Color(0x8C0B1118),
     scrim: Color(0x66000000),
+    whatsapp: Color(0xFF1DAB61),
+    onWhatsapp: Color(0xFFFFFFFF),
   );
 
   @override
@@ -209,6 +218,8 @@ final class TrustPalette extends ColorPalette {
     onPhoto: Color(0xFFFFFFFF),
     photoOverlay: Color(0x8C0B1118),
     scrim: Color(0x99000000),
+    whatsapp: Color(0xFF25D366),
+    onWhatsapp: Color(0xFF05301B),
   );
 }
 
@@ -243,6 +254,8 @@ final class AppPaletteTokens {
     required this.onPhoto,
     required this.photoOverlay,
     required this.scrim,
+    required this.whatsapp,
+    required this.onWhatsapp,
   });
 
   final Color primary;
@@ -289,4 +302,12 @@ final class AppPaletteTokens {
 
   /// Modal/backdrop scrim overlay (dialogs, bottom sheets).
   final Color scrim;
+
+  /// WhatsApp contact CTA fill — the brand-recognizable green (Syria's primary
+  /// contact channel). Light uses WhatsApp's UI green; dark brightens the fill
+  /// and flips to a dark foreground, mirroring the success/onSuccess pattern.
+  final Color whatsapp;
+
+  /// Foreground on the [whatsapp] fill.
+  final Color onWhatsapp;
 }

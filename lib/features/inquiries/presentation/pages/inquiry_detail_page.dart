@@ -9,7 +9,10 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -49,14 +52,13 @@ class _InquiryDetailView extends StatelessWidget {
       body: BlocBuilder<InquiryDetailBloc, InquiryDetailState>(
         builder: (context, state) {
           return switch (state) {
-            InquiryDetailLoading() => const Center(
-              child: CircularProgressIndicator(),
-            ),
+            InquiryDetailLoading() => const AppSpinner.page(),
             InquiryDetailError(:final failure) => ErrorState(
               title: failure.message,
               variant: ErrorStateVariant.network,
-              onRetry: () =>
-                  context.read<InquiryDetailBloc>().add(InquiryDetailOpened(id)),
+              onRetry: () => context.read<InquiryDetailBloc>().add(
+                InquiryDetailOpened(id),
+              ),
             ),
             InquiryDetailLoaded(:final inquiry) => _InquiryDetailBody(
               inquiry: inquiry,
@@ -76,8 +78,8 @@ class _InquiryDetailBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
 
     final displayPhone =
         inquiry.decryptedPhone ??
@@ -90,16 +92,16 @@ class _InquiryDetailBody extends StatelessWidget {
         children: [
           // Status badge
           InboxStatusBadge(status: inquiry.status),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
 
           // Sender name
           Text(
             inquiry.senderName.isNotEmpty
                 ? inquiry.senderName
                 : l10n.inquiry_inbox_anonymous_sender_label,
-            style: textTheme.titleMedium,
+            style: styles.titleMedium,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
 
           // Callback phone row
           Row(
@@ -110,11 +112,11 @@ class _InquiryDetailBody extends StatelessWidget {
                   children: [
                     Text(
                       l10n.inquiry_detail_callback_phone_label,
-                      style: textTheme.labelSmall?.copyWith(
-                        color: colorScheme.outline,
+                      style: styles.labelMedium.copyWith(
+                        color: colors.textMuted,
                       ),
                     ),
-                    Text(displayPhone, style: textTheme.bodyMedium),
+                    Text(displayPhone, style: styles.bodyMedium),
                   ],
                 ),
               ),
@@ -129,11 +131,11 @@ class _InquiryDetailBody extends StatelessWidget {
                 ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
 
           // Message
-          Text(inquiry.message, style: textTheme.bodyMedium),
-          const SizedBox(height: 16),
+          Text(inquiry.message, style: styles.bodyMedium),
+          const SizedBox(height: AppSpacing.lg),
 
           // Listing reference (tappable)
           InkWell(
@@ -141,27 +143,25 @@ class _InquiryDetailBody extends StatelessWidget {
                 context.push(AppRoutes.listingDetailsFor(inquiry.listingId)),
             child: Row(
               children: [
-                const Icon(Icons.home_outlined, size: 18),
-                const SizedBox(width: 8),
+                const Icon(Icons.home_outlined, size: AppSpacing.lg),
+                const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
                     inquiry.listingTitle,
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.primary,
+                    style: styles.bodyMedium.copyWith(
+                      color: colors.primary,
                       decoration: TextDecoration.underline,
                     ),
                   ),
                 ),
                 Text(
                   l10n.inquiry_detail_listing_link_label,
-                  style: textTheme.labelSmall?.copyWith(
-                    color: colorScheme.primary,
-                  ),
+                  style: styles.labelMedium.copyWith(color: colors.primary),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.xl),
 
           // Status mutation buttons — gated by allowedTransitions.
           // The closed→new transition has NO UI affordance per Q2=B.
@@ -197,8 +197,8 @@ class _StatusMutationButtons extends StatelessWidget {
     if (visibleTransitions.isEmpty) return const SizedBox.shrink();
 
     return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.sm,
       children: [
         if (visibleTransitions.contains(InquiryStatus.responded))
           ElevatedButton(

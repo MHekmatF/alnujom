@@ -17,6 +17,7 @@ import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/app_dialog.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
@@ -87,7 +88,10 @@ class _SavedSearchesSkeleton extends StatelessWidget {
       itemCount: 5,
       itemBuilder: (_, __) => const Padding(
         padding: EdgeInsetsDirectional.only(bottom: AppSpacing.sm),
-        child: SizedBox(height: 80, child: LoadingState.card()),
+        child: SizedBox(
+          height: AppSpacing.xxxl + AppSpacing.xxl,
+          child: LoadingState.card(),
+        ),
       ),
     );
   }
@@ -245,19 +249,16 @@ class _SavedSearchCard extends StatelessWidget {
     final cubit = context.read<SavedSearchesCubit>();
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
-        title: Text(l10n.search_saved_searches_delete_title),
-        content: Text(l10n.search_saved_searches_delete_body),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(l10n.search_save_search_cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(l10n.search_saved_searches_delete),
-          ),
-        ],
+      // Cancel maybePops with null — like the old `false`, it fails the
+      // `confirmed == true` gate, so the return semantics are unchanged.
+      builder: (dialogContext) => AppDialog(
+        title: l10n.search_saved_searches_delete_title,
+        message: l10n.search_saved_searches_delete_body,
+        icon: LucideIcons.trash_2,
+        variant: AppDialogVariant.destructive,
+        cancelLabel: l10n.search_save_search_cancel,
+        actionLabel: l10n.search_saved_searches_delete,
+        onAction: () => Navigator.of(dialogContext).pop(true),
       ),
     );
     if (confirmed == true) {

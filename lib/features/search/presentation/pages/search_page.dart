@@ -33,6 +33,8 @@ import '../../../../core/theme/motion.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/segmented_control.dart' as seg;
+import '../../../../core/widgets/app_spinner.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/main_bottom_nav.dart';
@@ -83,7 +85,8 @@ class SearchPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final seedFilters = initialFilters ??
+    final seedFilters =
+        initialFilters ??
         (initialPropertyType != null
             ? FilterState(propertyType: initialPropertyType)
             : FilterState.empty);
@@ -204,7 +207,8 @@ class _DisplayModeBar extends StatelessWidget {
     return BlocBuilder<SearchBloc, SearchState>(
       buildWhen: (p, c) =>
           p.filters.displayMode != c.filters.displayMode ||
-          (p.status == SearchStatus.initial) != (c.status == SearchStatus.initial),
+          (p.status == SearchStatus.initial) !=
+              (c.status == SearchStatus.initial),
       builder: (context, state) {
         if (state.status == SearchStatus.initial) {
           return const SizedBox.shrink();
@@ -251,7 +255,6 @@ class _DisplayModeBar extends StatelessWidget {
 
   Future<void> _onSaveSearch(BuildContext context, FilterState filters) async {
     final l10n = AppLocalizations.of(context)!;
-    final messenger = ScaffoldMessenger.of(context);
     final cubit = context.read<SavedSearchesCubit>();
     final label = await showSaveSearchDialog(
       context: context,
@@ -259,12 +262,21 @@ class _DisplayModeBar extends StatelessWidget {
     );
     if (label == null) return; // cancelled
     final outcome = await cubit.save(label: label, filters: filters);
+    if (!context.mounted) return;
     final message = switch (outcome) {
       SaveSearchOutcome.saved => l10n.search_save_search_success,
       SaveSearchOutcome.authRequired => l10n.search_save_search_auth_required,
       SaveSearchOutcome.error => l10n.search_save_search_error,
     };
-    messenger.showSnackBar(SnackBar(content: Text(message)));
+    AppToast.show(
+      context,
+      message,
+      variant: switch (outcome) {
+        SaveSearchOutcome.saved => AppToastVariant.success,
+        SaveSearchOutcome.authRequired => AppToastVariant.warning,
+        SaveSearchOutcome.error => AppToastVariant.error,
+      },
+    );
   }
 }
 
@@ -649,9 +661,7 @@ class _ResultsArea extends StatelessWidget {
         // skeleton into results (or empty/error), but list→list during
         // pagination is the same type, so it updates in place without a fade.
         final child = switch (state.status) {
-          SearchStatus.initial => Center(
-            child: Text(l10n.search_placeholder),
-          ),
+          SearchStatus.initial => Center(child: Text(l10n.search_placeholder)),
           SearchStatus.loading =>
             state.results.isEmpty
                 ? const _SearchSkeleton()
@@ -875,11 +885,9 @@ class _PaginationSentinelState extends State<_PaginationSentinel> {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Padding(
-        padding: EdgeInsetsDirectional.all(AppSpacing.lg),
-        child: CircularProgressIndicator(),
-      ),
+    return const Padding(
+      padding: EdgeInsetsDirectional.all(AppSpacing.lg),
+      child: AppSpinner(),
     );
   }
 }

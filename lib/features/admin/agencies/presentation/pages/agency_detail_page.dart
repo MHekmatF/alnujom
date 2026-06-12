@@ -6,10 +6,18 @@
 // Constitution VI: design tokens only; no inline hex/font/padding.
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 import '../../../../../core/di/injection.dart';
 import '../../../../../core/errors/result.dart';
+import '../../../../../core/theme/colors.dart';
+import '../../../../../core/theme/radii.dart';
 import '../../../../../core/theme/spacing.dart';
+import '../../../../../core/theme/typography.dart';
+import '../../../../../core/widgets/_widget_support.dart';
+import '../../../../../core/widgets/app_button.dart';
+import '../../../../../core/widgets/app_spinner.dart';
+import '../../../../../core/widgets/app_toast.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../agency/domain/entities/agency_status.dart';
 import '../../domain/entities/agency_verification_item.dart';
@@ -80,7 +88,7 @@ class _AgencyDetailPageState extends State<AgencyDetailPage> {
             if (_loading) {
               return Scaffold(
                 appBar: AppBar(title: Text(l10n.agencies_queue_title)),
-                body: const Center(child: CircularProgressIndicator()),
+                body: const AppSpinner.page(),
               );
             }
             if (_error != null || _item == null) {
@@ -88,7 +96,7 @@ class _AgencyDetailPageState extends State<AgencyDetailPage> {
                 appBar: AppBar(title: Text(l10n.agencies_queue_title)),
                 body: Center(
                   child: Padding(
-                    padding: const EdgeInsets.all(AppSpacing.xl),
+                    padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -97,9 +105,9 @@ class _AgencyDetailPageState extends State<AgencyDetailPage> {
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: AppSpacing.md),
-                        FilledButton(
+                        AppButton(
+                          label: l10n.actionReload,
                           onPressed: _loadDetail,
-                          child: Text(l10n.actionReload),
                         ),
                       ],
                     ),
@@ -120,18 +128,11 @@ class _AgencyDetailPageState extends State<AgencyDetailPage> {
   ) {
     final l10n = AppLocalizations.of(context)!;
     if (state is AgencyModerationSuccess) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.agency_decision_success)),
-      );
+      AppToast.success(context, l10n.agency_decision_success);
       _loadDetail();
       context.read<AgencyModerationCubit>().reset();
     } else if (state is AgencyModerationFailure) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(state.failure.message),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
+      AppToast.error(context, state.failure.message);
       context.read<AgencyModerationCubit>().reset();
     }
   }
@@ -146,7 +147,8 @@ class _AgencyDetailView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     final cubit = context.read<AgencyModerationCubit>();
     final agency = item.agency;
     final request = item.request;
@@ -154,12 +156,12 @@ class _AgencyDetailView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(agency.name)),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: const EdgeInsetsDirectional.all(AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ── Agency basic info ────────────────────────────────────────────
-            Text(agency.name, style: theme.textTheme.headlineSmall),
+            Text(agency.name, style: styles.titleLarge),
             const SizedBox(height: AppSpacing.xs),
             _StatusPill(status: agency.status, l10n: l10n),
             const SizedBox(height: AppSpacing.md),
@@ -174,27 +176,31 @@ class _AgencyDetailView extends StatelessWidget {
             ],
             if (agency.whatsapp != null) ...[
               _InfoRow(
-                  label: l10n.agency_whatsapp_label, value: agency.whatsapp!),
+                label: l10n.agency_whatsapp_label,
+                value: agency.whatsapp!,
+              ),
               const SizedBox(height: AppSpacing.sm),
             ],
             if (agency.address != null) ...[
               _InfoRow(
-                  label: l10n.agency_address_label, value: agency.address!),
+                label: l10n.agency_address_label,
+                value: agency.address!,
+              ),
               const SizedBox(height: AppSpacing.sm),
             ],
             if (agency.description != null &&
                 agency.description!.isNotEmpty) ...[
               _InfoRow(
-                  label: l10n.agency_description_label,
-                  value: agency.description!),
+                label: l10n.agency_description_label,
+                value: agency.description!,
+              ),
               const SizedBox(height: AppSpacing.sm),
             ],
 
             const Divider(height: AppSpacing.xl),
 
             // ── Verification request ─────────────────────────────────────────
-            Text(l10n.agency_verify_title,
-                style: theme.textTheme.titleMedium),
+            Text(l10n.agency_verify_title, style: styles.titleMedium),
             const SizedBox(height: AppSpacing.sm),
             _InfoRow(
               label: 'Submitted',
@@ -214,18 +220,17 @@ class _AgencyDetailView extends StatelessWidget {
               const SizedBox(height: AppSpacing.md),
               Text(
                 l10n.agency_verify_documents_label,
-                style: theme.textTheme.labelLarge,
+                style: styles.labelLarge,
               ),
               const SizedBox(height: AppSpacing.sm),
               for (final url in request.evidenceUrls!)
                 Padding(
-                  padding:
-                      const EdgeInsetsDirectional.only(bottom: AppSpacing.xs),
+                  padding: const EdgeInsetsDirectional.only(
+                    bottom: AppSpacing.xs,
+                  ),
                   child: Text(
                     url,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.primary,
-                    ),
+                    style: styles.bodyMedium.copyWith(color: colors.primary),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -286,11 +291,10 @@ class _ActionButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
     final AgencyStatus status = agency.status as AgencyStatus;
 
     if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const AppSpinner();
     }
 
     return Wrap(
@@ -299,9 +303,10 @@ class _ActionButtons extends StatelessWidget {
       children: [
         // Approve — only when pending
         if (status == AgencyStatus.pending)
-          FilledButton.icon(
-            icon: const Icon(Icons.check_circle_outline),
-            label: Text(l10n.agency_action_approve),
+          AppButton(
+            label: l10n.agency_action_approve,
+            variant: AppButtonVariant.filledSuccess,
+            icon: LucideIcons.circle_check,
             onPressed: () async {
               final result = await AgencyDecisionDialog.show(
                 context,
@@ -315,20 +320,10 @@ class _ActionButtons extends StatelessWidget {
 
         // Reject — only when pending
         if (status == AgencyStatus.pending)
-          OutlinedButton.icon(
-            icon: Icon(
-              Icons.cancel_outlined,
-              color: theme.colorScheme.error,
-            ),
-            label: Text(
-              l10n.agency_action_reject,
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-            style: OutlinedButton.styleFrom(
-              side: BorderSide(color: theme.colorScheme.error),
-            ),
+          AppButton(
+            label: l10n.agency_action_reject,
+            variant: AppButtonVariant.destructive,
+            icon: LucideIcons.circle_x,
             onPressed: () async {
               final result = await AgencyDecisionDialog.show(
                 context,
@@ -346,20 +341,10 @@ class _ActionButtons extends StatelessWidget {
 
         // Suspend — only when approved
         if (status == AgencyStatus.approved)
-          OutlinedButton.icon(
-            icon: Icon(
-              Icons.pause_circle_outline,
-              color: theme.colorScheme.error,
-            ),
-            label: Text(
-              l10n.agency_action_suspend,
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-            style: OutlinedButton.styleFrom(
-              side: BorderSide(color: theme.colorScheme.error),
-            ),
+          AppButton(
+            label: l10n.agency_action_suspend,
+            variant: AppButtonVariant.destructive,
+            icon: LucideIcons.circle_pause,
             onPressed: () async {
               final result = await AgencyDecisionDialog.show(
                 context,
@@ -376,9 +361,9 @@ class _ActionButtons extends StatelessWidget {
 
         // Reinstate — only when suspended
         if (status == AgencyStatus.suspended)
-          FilledButton.icon(
-            icon: const Icon(Icons.play_circle_outline),
-            label: Text(l10n.agency_action_reinstate),
+          AppButton(
+            label: l10n.agency_action_reinstate,
+            icon: LucideIcons.circle_play,
             onPressed: () async {
               final result = await AgencyDecisionDialog.show(
                 context,
@@ -415,23 +400,24 @@ class _StatusPill extends StatelessWidget {
     }
   }
 
-  Color _color(ThemeData theme) {
+  Color _color(AppColors colors) {
     switch (status) {
       case AgencyStatus.pending:
-        return theme.colorScheme.tertiary;
+        return colors.warning;
       case AgencyStatus.approved:
-        return theme.colorScheme.primary;
+        return colors.success;
       case AgencyStatus.rejected:
-        return theme.colorScheme.error;
+        return colors.error;
       case AgencyStatus.suspended:
-        return theme.colorScheme.secondary;
+        return colors.textMuted;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final color = _color(theme);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    final color = _color(colors);
     return Container(
       padding: const EdgeInsetsDirectional.symmetric(
         horizontal: AppSpacing.sm,
@@ -439,13 +425,10 @@ class _StatusPill extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(AppSpacing.sm),
+        borderRadius: appRadius(AppRadii.pill),
         border: Border.all(color: color),
       ),
-      child: Text(
-        _label(),
-        style: theme.textTheme.labelSmall?.copyWith(color: color),
-      ),
+      child: Text(_label(), style: styles.labelMedium.copyWith(color: color)),
     );
   }
 }
@@ -460,23 +443,17 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     final l10n = AppLocalizations.of(context)!;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           l10n.label_colon_prefix(label),
-          style: theme.textTheme.labelMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
+          style: styles.labelMedium.copyWith(color: colors.textMuted),
         ),
-        Expanded(
-          child: Text(
-            value,
-            style: theme.textTheme.bodyMedium,
-          ),
-        ),
+        Expanded(child: Text(value, style: styles.bodyMedium)),
       ],
     );
   }

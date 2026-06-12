@@ -15,7 +15,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/inquiry.dart';
@@ -153,15 +156,15 @@ class _AdminInboxBody extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return switch (state) {
-      InquiryInboxLoading() => const Center(child: CircularProgressIndicator()),
+      InquiryInboxLoading() => const AppSpinner.page(),
       InquiryInboxError(:final failure) => Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline, size: 48),
-            const SizedBox(height: 16),
+            const Icon(Icons.error_outline, size: AppSpacing.xxxl),
+            const SizedBox(height: AppSpacing.lg),
             Text(failure.message),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
             ElevatedButton(
               onPressed: () => context.read<InquiryInboxBloc>().add(
                 const InquiryInboxRefreshRequested(),
@@ -192,8 +195,8 @@ class _AdminInboxBody extends StatelessWidget {
                     }
                     if (index >= inquiries.length) {
                       return const Padding(
-                        padding: EdgeInsets.all(AppSpacing.lg),
-                        child: Center(child: CircularProgressIndicator()),
+                        padding: EdgeInsetsDirectional.all(AppSpacing.lg),
+                        child: AppSpinner(),
                       );
                     }
                     return _AdminInquiryRowTile(inquiry: inquiries[index]);
@@ -213,6 +216,8 @@ class _AdminInquiryRowTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final matLoc = MaterialLocalizations.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
 
     final displayPhone =
         inquiry.decryptedPhone ??
@@ -234,36 +239,35 @@ class _AdminInquiryRowTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               InboxStatusBadge(status: inquiry.status),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      displayName,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
+                    Text(displayName, style: styles.titleMedium),
+                    const SizedBox(height: AppSpacing.xxs),
                     Text(
                       displayPhone,
-                      style: Theme.of(context).textTheme.bodySmall,
+                      style: styles.bodyMedium.copyWith(
+                        color: colors.textMuted,
+                      ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: AppSpacing.xxs),
                     Text(
                       inquiry.listingTitle,
-                      style: Theme.of(context).textTheme.bodySmall,
+                      style: styles.bodyMedium.copyWith(
+                        color: colors.textMuted,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.xs),
                     InquiryMessageSnippet(message: inquiry.message),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.xs),
                     Text(
                       matLoc.formatCompactDate(inquiry.createdAt.toLocal()),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.outline,
+                      style: styles.labelMedium.copyWith(
+                        color: colors.textMuted,
                       ),
                     ),
                   ],

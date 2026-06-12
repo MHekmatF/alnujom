@@ -20,6 +20,7 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/security/permission_checker.dart';
 import '../../../../core/security/permission_keys.dart';
+import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/publisher_status.dart';
@@ -62,7 +63,7 @@ class _PublisherOrEmpty extends StatelessWidget {
             state.status == ProfileStatus.initial) {
           return Scaffold(
             appBar: AppBar(title: Text(l10n.dashboardEntryTitle)),
-            body: const Center(child: CircularProgressIndicator()),
+            body: const AppSpinner.page(),
           );
         }
 

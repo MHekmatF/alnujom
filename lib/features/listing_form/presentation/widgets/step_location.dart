@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/app_text_field.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../locations/domain/entities/location_picker_selection.dart';
 import '../../../locations/presentation/widgets/location_picker.dart';
@@ -80,31 +82,35 @@ class _StepLocationState extends State<StepLocation> {
             ),
             const FieldGap(),
             FieldLabel(label: l10n.fieldLabelAddressText, required: true),
-            TextField(
+            AppTextField(
+              label: l10n.fieldLabelAddressText,
               controller: _addressController,
               maxLines: 2,
               onChanged: (v) => context.read<ListingFormBloc>().add(
                 FieldChanged.addressText(v),
               ),
-              decoration: InputDecoration(
-                hintText: l10n.fieldLabelAddressText,
-                border: const OutlineInputBorder(),
-              ),
             ),
             if (centroidError) ...[
               const FieldGap(),
+              // Error banner — errorContainer-style token treatment: a soft
+              // error tint with a hairline error border, token geometry.
               Container(
-                padding: const EdgeInsetsDirectional.all(AppSpacing.md),
+                padding: const EdgeInsetsDirectional.symmetric(
+                  horizontal: AppSpacing.lg,
+                  vertical: AppSpacing.md,
+                ),
                 decoration: BoxDecoration(
-                  color: colors.error.withValues(alpha: 0.12),
+                  color: colors.error.withValues(alpha: 0.10),
                   borderRadius: appRadius(AppRadii.md),
-                  border: Border.all(color: colors.error.withValues(alpha: 0.4)),
+                  border: Border.all(
+                    color: colors.error.withValues(alpha: 0.35),
+                  ),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Icon(
-                      Icons.error_outline,
+                      LucideIcons.circle_alert,
                       size: AppSpacing.lg,
                       color: colors.error,
                     ),

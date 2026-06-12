@@ -4,7 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/app_spinner.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
@@ -28,7 +31,8 @@ class MaintenanceScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     final locale = Localizations.localeOf(context);
 
     return BlocBuilder<AppSettingsCubit, AppSettingsState>(
@@ -52,28 +56,28 @@ class MaintenanceScreen extends StatelessWidget {
           body: SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(AppSpacing.xl),
+                padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Icon(
                       Icons.build_outlined,
-                      size: 64,
-                      color: theme.colorScheme.primary,
+                      size: AppSpacing.xxxl + AppSpacing.lg,
+                      color: colors.primary,
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     Text(
                       l10n.maintenance_title,
                       textAlign: TextAlign.center,
-                      style: theme.textTheme.headlineSmall,
+                      style: styles.headlineMedium,
                     ),
                     const SizedBox(height: AppSpacing.md),
                     Text(
                       message,
                       textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+                      style: styles.bodyLarge.copyWith(
+                        color: colors.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xl),
@@ -82,10 +86,9 @@ class MaintenanceScreen extends StatelessWidget {
                           ? null
                           : () => context.read<AppSettingsCubit>().load(),
                       icon: isRetrying
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                          ? AppSpinner(
+                              size: AppSpacing.lg,
+                              color: colors.onPrimary,
                             )
                           : const Icon(Icons.refresh),
                       label: Text(l10n.maintenance_retry),
@@ -100,14 +103,14 @@ class MaintenanceScreen extends StatelessWidget {
                     ],
                     if (contact.hasAny) ...[
                       const SizedBox(height: AppSpacing.xl),
-                      Divider(color: theme.colorScheme.outlineVariant),
+                      Divider(color: colors.divider),
                       const SizedBox(height: AppSpacing.sm),
                       Align(
                         alignment: AlignmentDirectional.centerStart,
                         child: Text(
                           l10n.maintenance_support_heading,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
+                          style: styles.labelLarge.copyWith(
+                            color: colors.onSurfaceVariant,
                           ),
                         ),
                       ),

@@ -5,8 +5,12 @@
 // Returns [ResolveActionResult] via Navigator.pop on confirm; null on cancel.
 // Constitution VI: design tokens. Constitution IX: zero Supabase imports.
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
+import '../../../../../core/theme/colors.dart';
 import '../../../../../core/theme/spacing.dart';
+import '../../../../../core/theme/typography.dart';
+import '../../../../../core/widgets/app_button.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../domain/entities/moderation_action_type.dart';
 
@@ -114,10 +118,13 @@ class _ResolveActionDialogState extends State<ResolveActionDialog> {
   }
 
   // Step 1 — pick an action + optional note.
+  // Kept as a hand-rolled AlertDialog: the confirm action stays disabled
+  // until an option is picked, and step 2's "cancel" goes back to step 1
+  // instead of popping — neither fits AppDialog's fixed action pair.
   Widget _buildActionStep(AppLocalizations l10n) {
-    final theme = Theme.of(context);
+    final styles = AppTextStyles.of(context);
     return AlertDialog(
-      title: Text(l10n.report_resolve_dialog_title),
+      title: Text(l10n.report_resolve_dialog_title, style: styles.titleLarge),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -141,10 +148,7 @@ class _ResolveActionDialogState extends State<ResolveActionDialog> {
               ),
             ),
             const SizedBox(height: AppSpacing.md),
-            Text(
-              l10n.report_note_field_hint,
-              style: theme.textTheme.labelLarge,
-            ),
+            Text(l10n.report_note_field_hint, style: styles.labelLarge),
             const SizedBox(height: AppSpacing.sm),
             TextField(
               controller: _noteController,
@@ -154,41 +158,68 @@ class _ResolveActionDialogState extends State<ResolveActionDialog> {
                 border: OutlineInputBorder(),
                 isDense: true,
               ),
-              buildCounter: (_, {required currentLength, required isFocused, maxLength}) => null,
+              buildCounter:
+                  (
+                    _, {
+                    required currentLength,
+                    required isFocused,
+                    maxLength,
+                  }) => null,
             ),
           ],
         ),
       ),
       actions: [
-        TextButton(onPressed: _onCancel, child: Text(l10n.report_cancel_button)),
-        FilledButton(
+        AppButton(
+          label: l10n.report_cancel_button,
+          variant: AppButtonVariant.text,
+          onPressed: _onCancel,
+        ),
+        AppButton(
+          label: l10n.report_resolve_button,
           onPressed: _selectedAction != null
               ? () => _onSelectAction(_selectedAction!)
               : null,
-          child: Text(l10n.report_resolve_button),
         ),
+        const SizedBox(width: AppSpacing.xs),
       ],
     );
   }
 
-  // Step 2 — confirm destructive action.
+  // Step 2 — confirm destructive action. "Cancel" returns to step 1 (does
+  // not pop), so this stays a hand-rolled AlertDialog styled like AppDialog's
+  // destructive variant.
   Widget _buildConfirmStep(AppLocalizations l10n) {
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     return AlertDialog(
-      title: Text(l10n.resolve_confirm_title),
-      content: Text(l10n.resolve_confirm_body),
+      icon: Container(
+        width: AppSpacing.xxxl,
+        height: AppSpacing.xxxl,
+        decoration: BoxDecoration(
+          color: colors.error.withValues(alpha: 0.12),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          LucideIcons.triangle_alert,
+          color: colors.error,
+          size: AppSpacing.xl,
+        ),
+      ),
+      title: Text(l10n.resolve_confirm_title, style: styles.titleLarge),
+      content: Text(l10n.resolve_confirm_body, style: styles.bodyMedium),
       actions: [
-        TextButton(
+        AppButton(
+          label: l10n.report_cancel_button,
+          variant: AppButtonVariant.text,
           onPressed: _onBackFromConfirm,
-          child: Text(l10n.report_cancel_button),
         ),
-        FilledButton(
+        AppButton(
+          label: _actionLabel(l10n, _selectedAction!),
+          variant: AppButtonVariant.destructive,
           onPressed: _onConfirmDestructive,
-          style: FilledButton.styleFrom(
-            backgroundColor: Theme.of(context).colorScheme.error,
-            foregroundColor: Theme.of(context).colorScheme.onError,
-          ),
-          child: Text(_actionLabel(l10n, _selectedAction!)),
         ),
+        const SizedBox(width: AppSpacing.xs),
       ],
     );
   }

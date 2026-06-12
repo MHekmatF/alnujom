@@ -4,8 +4,10 @@
 // filters to `saved_searches`. Returns the trimmed label, or null if the user
 // cancelled / left it blank.
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/app_dialog.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../l10n/app_localizations.dart';
 
@@ -51,8 +53,12 @@ class _SaveSearchDialogState extends State<_SaveSearchDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return AlertDialog(
-      title: Text(l10n.search_save_search_dialog_title),
+    // Branded AppDialog with the label field in its content slot. A blank
+    // label pops null — identical to the old disabled-confirm outcome (the
+    // caller treats null as "cancelled").
+    return AppDialog(
+      title: l10n.search_save_search_dialog_title,
+      icon: LucideIcons.bookmark_plus,
       content: Padding(
         padding: const EdgeInsetsDirectional.only(top: AppSpacing.xs),
         child: AppTextField(
@@ -61,16 +67,9 @@ class _SaveSearchDialogState extends State<_SaveSearchDialog> {
           onChanged: (_) => setState(() {}),
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(l10n.search_save_search_cancel),
-        ),
-        FilledButton(
-          onPressed: _controller.text.trim().isEmpty ? null : _submit,
-          child: Text(l10n.search_save_search_confirm),
-        ),
-      ],
+      cancelLabel: l10n.search_save_search_cancel,
+      actionLabel: l10n.search_save_search_confirm,
+      onAction: _submit,
     );
   }
 }

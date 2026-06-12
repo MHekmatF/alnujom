@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:intl/intl.dart' as intl;
 
+import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/presentation/rate_formatter.dart';
 import '../../../../shared/util/arabic_digits.dart';
@@ -28,32 +33,77 @@ class ExchangeRateRow extends StatelessWidget {
               ? l10n.systemActorLabel
               : l10n.unknownActorLabel);
 
-    return Card(
-      child: ListTile(
-        title: Wrap(
-          spacing: AppSpacing.sm,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            Text(
-              l10n.exchangeRatePairLabel(
-                exchangeRate.baseCurrency,
-                exchangeRate.targetCurrency,
-              ),
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+
+    return AppSurface(
+      radius: AppRadii.lg,
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: AppSpacing.xxl + AppSpacing.lg,
+            height: AppSpacing.xxl + AppSpacing.lg,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: colors.accent.withValues(alpha: 0.12),
             ),
-            if (exchangeRate.isDerived) const DerivedBadge(),
-          ],
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(RateFormatter.format(exchangeRate.rate, locale)),
-            Text(
-              _localizeDate(locale, dateFormat, exchangeRate.effectiveAt, l10n),
+            child: Icon(
+              LucideIcons.arrow_right_left,
+              color: colors.accent,
+              size: AppSpacing.xl,
             ),
-            Text(l10n.setByLineFormat(setBy)),
-            Text(l10n.sourceLineFormat(source)),
-          ],
-        ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Wrap(
+                  spacing: AppSpacing.sm,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(
+                      l10n.exchangeRatePairLabel(
+                        exchangeRate.baseCurrency,
+                        exchangeRate.targetCurrency,
+                      ),
+                      style: styles.bodyLarge,
+                    ),
+                    if (exchangeRate.isDerived) const DerivedBadge(),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  RateFormatter.format(exchangeRate.rate, locale),
+                  style: styles.labelLarge.copyWith(color: colors.primary),
+                ),
+                Text(
+                  _localizeDate(
+                    locale,
+                    dateFormat,
+                    exchangeRate.effectiveAt,
+                    l10n,
+                  ),
+                  style: styles.bodyMedium.copyWith(color: colors.textMuted),
+                ),
+                Text(
+                  l10n.setByLineFormat(setBy),
+                  style: styles.bodyMedium.copyWith(color: colors.textMuted),
+                ),
+                Text(
+                  l10n.sourceLineFormat(source),
+                  style: styles.bodyMedium.copyWith(color: colors.textMuted),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

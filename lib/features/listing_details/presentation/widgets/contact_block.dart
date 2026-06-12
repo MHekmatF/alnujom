@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/errors/result.dart';
+import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/agent_card.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../../../features/auth/presentation/bloc/auth_state.dart';
 import '../../../../features/chat/domain/usecases/get_or_create_conversation.dart';
@@ -32,6 +35,12 @@ import '../../../../l10n/app_localizations.dart';
 /// handlers + visibility logic (Call only when phone is set; WhatsApp always
 /// rendered, disabled when no number; self-contact collapse) are preserved
 /// verbatim — only the presentation changed.
+///
+/// Phase 28 — the WhatsApp CTA is promoted to the MOST prominent contact
+/// action: a full-width brand-green [AppButton] at the top of the action
+/// stack, opening `wa.me` with a localized pre-filled message (listing title +
+/// canonical link). No sticky/pinned bottom bar — the CTA lives inline in the
+/// contact card.
 ///
 /// FR-001d: self-contact guard — when the signed-in user IS the publisher the
 /// widget collapses to `SizedBox.shrink()`.
@@ -72,7 +81,8 @@ class ContactBlock extends StatelessWidget {
           final colors = AppColors.of(context);
           final styles = AppTextStyles.of(context);
 
-          // Secondary actions (Call + WhatsApp) share a row; each can shrink.
+          // Secondary actions (Call + Message + Viewing) share a row; each
+          // can shrink.
           final secondary = <Widget>[
             // Call CTA — visible only when phone is set (FR-001a).
             if (state.showCall)
@@ -80,29 +90,7 @@ class ContactBlock extends StatelessWidget {
                 child: OutlinedButton.icon(
                   onPressed: () => _onCallPressed(context, state.phone!),
                   icon: const Icon(Icons.phone_outlined),
-                  label: Text(
-                    l10n.cta_call,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ),
-            // WhatsApp CTA — always rendered; disabled w/o number (Q1=B-refined).
-            if (state.showWhatsApp)
-              Expanded(
-                child: Tooltip(
-                  message: state.whatsappEnabled
-                      ? ''
-                      : l10n.contact_whatsapp_disabled_tooltip,
-                  child: OutlinedButton.icon(
-                    onPressed: state.whatsappEnabled
-                        ? () => _onWhatsAppPressed(context, state.whatsapp!)
-                        : null,
-                    icon: const Icon(Icons.chat_outlined),
-                    label: Text(
-                      l10n.cta_whatsapp,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
+                  label: Text(l10n.cta_call, overflow: TextOverflow.ellipsis),
                 ),
               ),
             // In-app chat CTA — opens (or creates) a conversation with the
@@ -131,8 +119,29 @@ class ContactBlock extends StatelessWidget {
             ),
           ];
 
-          // Primary action — full-width Send-inquiry (always present for
-          // non-self-contact per FR-001c).
+          // WhatsApp CTA — Phase 28: promoted to the MOST prominent contact
+          // action — a full-width brand-green button with a localized
+          // pre-filled message. Still always rendered while disabled without
+          // a number (Q1=B-refined preserved verbatim).
+          final whatsappCta = state.showWhatsApp
+              ? Tooltip(
+                  message: state.whatsappEnabled
+                      ? ''
+                      : l10n.contact_whatsapp_disabled_tooltip,
+                  child: AppButton(
+                    label: l10n.cta_whatsapp,
+                    variant: AppButtonVariant.whatsapp,
+                    icon: LucideIcons.message_circle,
+                    expanded: true,
+                    onPressed: state.whatsappEnabled
+                        ? () => _onWhatsAppPressed(context, state.whatsapp!)
+                        : null,
+                  ),
+                )
+              : null;
+
+          // Send-inquiry — full-width (always present for non-self-contact
+          // per FR-001c), now seconded to the WhatsApp CTA.
           final primary = state.showInquiry
               ? AppButton(
                   label: l10n.cta_send_inquiry,
@@ -144,13 +153,18 @@ class ContactBlock extends StatelessWidget {
               : null;
 
           // Stack the seller-trust summary (rating + response badge) above the
-          // primary inquiry over the Call/WhatsApp pair. The summary reads the
-          // page-provided SellerTrustCubit and collapses when no data.
+          // WhatsApp + inquiry CTAs over the Call/Message/Viewing row. The
+          // summary reads the page-provided SellerTrustCubit and collapses
+          // when no data.
           final actionStack = Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
             children: [
               const SellerTrustSummary(),
+              if (whatsappCta != null) whatsappCta,
+              if (whatsappCta != null &&
+                  (primary != null || secondary.isNotEmpty))
+                const SizedBox(height: AppSpacing.sm),
               if (primary != null) primary,
               if (primary != null && secondary.isNotEmpty)
                 const SizedBox(height: AppSpacing.sm),
@@ -218,36 +232,42 @@ class ContactBlock extends StatelessWidget {
     );
     final launched = await launchUrl(Uri.parse('tel:$phone'));
     if (!launched && context.mounted) {
-      final l10n = AppLocalizations.of(context)!;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.contact_dialer_unavailable),
-          behavior: SnackBarBehavior.floating,
-        ),
+      AppToast.error(
+        context,
+        AppLocalizations.of(context)!.contact_dialer_unavailable,
       );
     }
   }
 
   Future<void> _onWhatsAppPressed(BuildContext context, String whatsapp) async {
+    final l10n = AppLocalizations.of(context)!;
+    // Phase 28 — localized pre-filled message (listing title + canonical
+    // link). Composed via `Uri.queryParameters` so the Arabic text
+    // percent-encodes correctly in the wa.me deep link.
+    final link = '$_waLinkBase${AppRoutes.listingDetailsFor(listing.id)}';
+    final e164NoPlus = whatsapp.replaceAll('+', '');
+    final uri = Uri(
+      scheme: 'https',
+      host: 'wa.me',
+      path: e164NoPlus,
+      queryParameters: {
+        'text': l10n.contactWhatsappPrefill(listing.title, link),
+      },
+    );
+
     await getIt<RecordLeadEvent>()(
       listingId: listing.id,
       eventType: LeadEventType.whatsappClicked,
     );
-    final e164NoPlus = whatsapp.replaceAll('+', '');
-    final launched = await launchUrl(
-      Uri.parse('https://wa.me/$e164NoPlus'),
-      mode: LaunchMode.externalApplication,
-    );
+    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!launched && context.mounted) {
-      final l10n = AppLocalizations.of(context)!;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.contact_whatsapp_app_unavailable),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      AppToast.error(context, l10n.contact_whatsapp_app_unavailable);
     }
   }
+
+  /// Canonical https base for the pre-filled WhatsApp listing link — mirrors
+  /// `PerListingActionBlock._shareLinkBase` so both deep links stay identical.
+  static const String _waLinkBase = 'https://alnujom.app';
 
   void _onSendInquiryPressed(BuildContext context) {
     showModalBottomSheet<void>(
@@ -257,17 +277,14 @@ class ContactBlock extends StatelessWidget {
     );
   }
 
-  /// Request-a-viewing entry. Anonymous → sign-in snackbar (same pattern as the
+  /// Request-a-viewing entry. Anonymous → sign-in toast (same pattern as the
   /// Message action). Signed-in → open the date/time request sheet seeded with
-  /// the listing id; on success show the standard confirmation snackbar.
+  /// the listing id; on success show the standard confirmation toast.
   Future<void> _onRequestViewingPressed(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
-    final messenger = ScaffoldMessenger.of(context);
 
     if (getIt<AuthBloc>().state is! Authenticated) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.chatSignInPrompt)),
-      );
+      AppToast.warning(context, l10n.chatSignInPrompt);
       return;
     }
 
@@ -278,26 +295,18 @@ class ContactBlock extends StatelessWidget {
     );
 
     if (submitted == true && context.mounted) {
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.viewingRequestSuccess),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      AppToast.success(context, l10n.viewingRequestSuccess);
     }
   }
 
-  /// In-app chat entry. Anonymous → sign-in snackbar. Signed-in → open (or
+  /// In-app chat entry. Anonymous → sign-in toast. Signed-in → open (or
   /// create) the conversation for this listing, then push the thread page.
   Future<void> _onMessagePressed(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
-    final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
 
     if (getIt<AuthBloc>().state is! Authenticated) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.chatSignInPrompt)),
-      );
+      AppToast.warning(context, l10n.chatSignInPrompt);
       return;
     }
 
@@ -318,9 +327,7 @@ class ContactBlock extends StatelessWidget {
           ),
         );
       case FailureResult():
-        messenger.showSnackBar(
-          SnackBar(content: Text(l10n.chatOpenError)),
-        );
+        AppToast.error(context, l10n.chatOpenError);
     }
   }
 }

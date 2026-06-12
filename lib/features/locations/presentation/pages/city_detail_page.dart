@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/app_spinner.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/locale_toggle_action.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/area.dart';
@@ -68,12 +72,10 @@ class _CityDetailView extends StatelessWidget {
                 );
               }
             },
-            child: const Icon(Icons.add),
+            child: const Icon(LucideIcons.plus),
           ),
           body: switch (state) {
-            CityDetailLoading() => const Center(
-              child: CircularProgressIndicator(),
-            ),
+            CityDetailLoading() => const AppSpinner.page(),
             CityDetailError(:final message) => Center(
               child: Text(message, textAlign: TextAlign.center),
             ),
@@ -83,7 +85,7 @@ class _CityDetailView extends StatelessWidget {
                   const CityDetailRefreshRequested(),
                 ),
                 child: ListView(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
                   children: [
                     Row(
                       children: [
@@ -97,7 +99,7 @@ class _CityDetailView extends StatelessWidget {
                               governorate.localizedName(locale),
                               city.localizedName(locale),
                             ),
-                            style: Theme.of(context).textTheme.titleMedium,
+                            style: AppTextStyles.of(context).titleMedium,
                           ),
                         ),
                         TextButton.icon(
@@ -112,7 +114,7 @@ class _CityDetailView extends StatelessWidget {
                               );
                             }
                           },
-                          icon: const Icon(Icons.edit_outlined),
+                          icon: const Icon(LucideIcons.pencil),
                           label: Text(l10n.editAffordance),
                         ),
                       ],
@@ -123,7 +125,9 @@ class _CityDetailView extends StatelessWidget {
                     else
                       ...areas.map(
                         (area) => Padding(
-                          padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                          padding: const EdgeInsetsDirectional.only(
+                            bottom: AppSpacing.sm,
+                          ),
                           child: AreaCard(
                             area: area,
                             onEdit: () => _openAreaForm(
@@ -189,9 +193,7 @@ class _CityDetailView extends StatelessWidget {
       }
     } on Object catch (error) {
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(error.toString())));
+        AppToast.error(context, error.toString());
       }
     }
   }

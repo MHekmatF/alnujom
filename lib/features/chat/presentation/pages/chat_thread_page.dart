@@ -18,6 +18,7 @@ import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -89,7 +90,7 @@ class _ChatThreadPageState extends State<ChatThreadPage> {
               builder: (context, state) {
                 switch (state.status) {
                   case ChatThreadStatus.loading:
-                    return const Center(child: CircularProgressIndicator());
+                    return const AppSpinner.page();
                   case ChatThreadStatus.error:
                     return ErrorState(
                       title: l10n.chatThreadErrorTitle,
@@ -173,7 +174,10 @@ class _MessageBubble extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(message.body, style: styles.bodyLarge.copyWith(color: textColor)),
+                  Text(
+                    message.body,
+                    style: styles.bodyLarge.copyWith(color: textColor),
+                  ),
                   const SizedBox(height: AppSpacing.xxs),
                   Text(
                     time,

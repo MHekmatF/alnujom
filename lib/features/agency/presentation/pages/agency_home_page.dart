@@ -4,13 +4,28 @@
 // Replaces the Phase-1 stub. None → "Create agency" form; owner/member →
 // management surface (status chip + links to members/listings/analytics/verify).
 // Phase 2 tokens only; all strings via AppLocalizations (Constitution V/VI).
+//
+// Phase 28 (premium-worth pass) — purely visual retrofit: stock fields →
+// AppTextField, FilledButton → AppButton, ListTiles → branded AppSurface rows
+// (the profile-page _ProfileRow idiom), snackbars → AppToast. Behavior, bloc
+// wiring, strings, and navigation are unchanged.
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_spinner.dart';
+import '../../../../core/widgets/app_text_field.dart';
+import '../../../../core/widgets/app_toast.dart';
+import '../../../../core/widgets/press_scale.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/agency.dart';
 import '../bloc/agency_home_cubit.dart';
@@ -45,9 +60,7 @@ class _AgencyHomeView extends StatelessWidget {
             'already_owns_agency' => l10n.agency_already_owns,
             _ => l10n.agency_action_failed,
           };
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(message)),
-          );
+          AppToast.error(context, message);
         }
       },
       builder: (context, state) {
@@ -56,26 +69,29 @@ class _AgencyHomeView extends StatelessWidget {
             title: Text(switch (state) {
               AgencyHomeNone() ||
               AgencyHomeCreating() ||
-              AgencyHomeCreateFailure() =>
-                l10n.agency_create_title,
+              AgencyHomeCreateFailure() => l10n.agency_create_title,
               AgencyHomeInvited() => l10n.agency_invitations_title,
               _ => l10n.agency_profile_title,
             }),
           ),
           body: switch (state) {
-            AgencyHomeLoading() =>
-              const Center(child: CircularProgressIndicator()),
+            AgencyHomeLoading() => const AppSpinner.page(),
             AgencyHomeError() => Center(child: Text(l10n.agency_generic_error)),
             AgencyHomeNone() ||
             AgencyHomeCreating() ||
-            AgencyHomeCreateFailure() =>
-              _CreateAgencyForm(submitting: state is AgencyHomeCreating),
+            AgencyHomeCreateFailure() => _CreateAgencyForm(
+              submitting: state is AgencyHomeCreating,
+            ),
             AgencyHomeInvited(:final invitations, :final responding) =>
               _InvitedView(invitations: invitations, responding: responding),
-            AgencyHomeOwner(:final agency) =>
-              _ManagementSurface(agency: agency, isOwner: true),
-            AgencyHomeMember(:final agency) =>
-              _ManagementSurface(agency: agency, isOwner: false),
+            AgencyHomeOwner(:final agency) => _ManagementSurface(
+              agency: agency,
+              isOwner: true,
+            ),
+            AgencyHomeMember(:final agency) => _ManagementSurface(
+              agency: agency,
+              isOwner: false,
+            ),
           },
         );
       },
@@ -116,52 +132,53 @@ class _CreateAgencyFormState extends State<_CreateAgencyForm> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
             l10n.agency_no_agency_message,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
+            style: styles.bodyMedium.copyWith(color: colors.onSurfaceVariant),
           ),
           const SizedBox(height: AppSpacing.lg),
-          _Field(controller: _nameController, label: l10n.agency_name_label),
+          AppTextField(
+            controller: _nameController,
+            label: l10n.agency_name_label,
+          ),
           const SizedBox(height: AppSpacing.md),
-          _Field(
+          AppTextField(
             controller: _descriptionController,
             label: l10n.agency_description_label,
-            hint: l10n.agency_create_description_hint,
+            helperText: l10n.agency_create_description_hint,
             maxLines: 3,
           ),
           const SizedBox(height: AppSpacing.md),
-          _Field(
+          AppTextField(
             controller: _phoneController,
             label: l10n.agency_phone_label,
             keyboardType: TextInputType.phone,
           ),
           const SizedBox(height: AppSpacing.md),
-          _Field(
+          AppTextField(
             controller: _whatsappController,
             label: l10n.agency_whatsapp_label,
             keyboardType: TextInputType.phone,
           ),
           const SizedBox(height: AppSpacing.md),
-          _Field(controller: _addressController, label: l10n.agency_address_label),
+          AppTextField(
+            controller: _addressController,
+            label: l10n.agency_address_label,
+          ),
           const SizedBox(height: AppSpacing.xl),
-          FilledButton(
+          AppButton.filledPrimary(
+            label: l10n.agency_create_button,
+            expanded: true,
+            loading: widget.submitting,
             onPressed: widget.submitting ? null : _submit,
-            child: widget.submitting
-                ? const SizedBox(
-                    width: AppSpacing.lg,
-                    height: AppSpacing.lg,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(l10n.agency_create_button),
           ),
         ],
       ),
@@ -177,41 +194,11 @@ class _CreateAgencyFormState extends State<_CreateAgencyForm> {
     }
 
     context.read<AgencyHomeCubit>().create(
-          name: name,
-          description: trimmedOrNull(_descriptionController),
-          phone: trimmedOrNull(_phoneController),
-          whatsapp: trimmedOrNull(_whatsappController),
-          address: trimmedOrNull(_addressController),
-        );
-  }
-}
-
-class _Field extends StatelessWidget {
-  const _Field({
-    required this.controller,
-    required this.label,
-    this.hint,
-    this.maxLines = 1,
-    this.keyboardType,
-  });
-
-  final TextEditingController controller;
-  final String label;
-  final String? hint;
-  final int maxLines;
-  final TextInputType? keyboardType;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      controller: controller,
-      maxLines: maxLines,
-      keyboardType: keyboardType,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        border: const OutlineInputBorder(),
-      ),
+      name: name,
+      description: trimmedOrNull(_descriptionController),
+      phone: trimmedOrNull(_phoneController),
+      whatsapp: trimmedOrNull(_whatsappController),
+      address: trimmedOrNull(_addressController),
     );
   }
 }
@@ -229,44 +216,47 @@ class _InvitedView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final styles = AppTextStyles.of(context);
     final cubit = context.read<AgencyHomeCubit>();
 
     return ListView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
       children: [
-        Text(l10n.agency_invitations_title, style: theme.textTheme.titleMedium),
+        Text(l10n.agency_invitations_title, style: styles.titleMedium),
         const SizedBox(height: AppSpacing.sm),
         for (final invite in invitations)
-          Card(
-            margin: const EdgeInsetsDirectional.only(bottom: AppSpacing.sm),
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
+          Padding(
+            padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.sm),
+            child: AppSurface(
+              padding: const EdgeInsetsDirectional.all(AppSpacing.md),
               child: Row(
                 children: [
                   Expanded(
                     child: Text(
                       l10n.agency_invitation_pending_from(invite.agencyName),
-                      style: theme.textTheme.bodyMedium,
+                      style: styles.bodyMedium,
                     ),
                   ),
-                  TextButton(
+                  AppButton(
+                    label: l10n.agency_invitation_decline,
+                    variant: AppButtonVariant.text,
+                    size: AppButtonSize.dense,
                     onPressed: responding
                         ? null
                         : () => cubit.respondInvitation(
-                              agencyId: invite.membership.agencyId,
-                              accept: false,
-                            ),
-                    child: Text(l10n.agency_invitation_decline),
+                            agencyId: invite.membership.agencyId,
+                            accept: false,
+                          ),
                   ),
-                  FilledButton(
+                  AppButton(
+                    label: l10n.agency_invitation_accept,
+                    size: AppButtonSize.dense,
                     onPressed: responding
                         ? null
                         : () => cubit.respondInvitation(
-                              agencyId: invite.membership.agencyId,
-                              accept: true,
-                            ),
-                    child: Text(l10n.agency_invitation_accept),
+                            agencyId: invite.membership.agencyId,
+                            accept: true,
+                          ),
                   ),
                 ],
               ),
@@ -290,16 +280,15 @@ class _ManagementSurface extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
 
     return ListView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
       children: [
         Row(
           children: [
-            Expanded(
-              child: Text(agency.name, style: theme.textTheme.headlineSmall),
-            ),
+            Expanded(child: Text(agency.name, style: styles.headlineMedium)),
             const SizedBox(width: AppSpacing.sm),
             AgencyStatusChip(agency.status),
           ],
@@ -309,43 +298,32 @@ class _ManagementSurface extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
           Text(
             agency.description!,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
+            style: styles.bodyMedium.copyWith(color: colors.onSurfaceVariant),
           ),
         ],
         const SizedBox(height: AppSpacing.lg),
         _ManageTile(
-          icon: Icons.group_outlined,
+          icon: LucideIcons.users,
           label: l10n.agency_manage_members,
-          onTap: () => context.push(
-            AppRoutes.agencyMembers,
-            extra: agency,
-          ),
+          onTap: () => context.push(AppRoutes.agencyMembers, extra: agency),
         ),
         _ManageTile(
-          icon: Icons.list_alt_outlined,
+          icon: LucideIcons.list,
           label: l10n.agency_manage_listings,
-          onTap: () => context.push(
-            AppRoutes.agencyListings,
-            extra: agency.id,
-          ),
+          onTap: () => context.push(AppRoutes.agencyListings, extra: agency.id),
         ),
         _ManageTile(
-          icon: Icons.bar_chart_outlined,
+          icon: LucideIcons.chart_column,
           label: l10n.agency_manage_analytics,
-          onTap: () => context.push(
-            AppRoutes.agencyAnalytics,
-            extra: agency.id,
-          ),
+          onTap: () =>
+              context.push(AppRoutes.agencyAnalytics, extra: agency.id),
         ),
         if (isOwner)
           _ManageTile(
-            icon: Icons.edit_outlined,
+            icon: LucideIcons.pencil,
             label: l10n.agency_edit_button,
             onTap: () async {
-              final changed =
-                  await context.push<bool>(AppRoutes.agencyEdit);
+              final changed = await context.push<bool>(AppRoutes.agencyEdit);
               if (changed == true && context.mounted) {
                 await context.read<AgencyHomeCubit>().load();
               }
@@ -353,17 +331,15 @@ class _ManagementSurface extends StatelessWidget {
           ),
         if (isOwner)
           _ManageTile(
-            icon: Icons.verified_outlined,
+            icon: LucideIcons.badge_check,
             label: l10n.agency_manage_verify,
-            onTap: () => context.push(
-              AppRoutes.agencyVerify,
-              extra: agency.id,
-            ),
+            onTap: () => context.push(AppRoutes.agencyVerify, extra: agency.id),
           ),
         const SizedBox(height: AppSpacing.lg),
-        OutlinedButton.icon(
-          icon: const Icon(Icons.open_in_new),
-          label: Text(l10n.agency_profile_title),
+        AppButton(
+          label: l10n.agency_profile_title,
+          variant: AppButtonVariant.outlined,
+          icon: LucideIcons.external_link,
           onPressed: () => context.push('/agency/${agency.id}'),
         ),
       ],
@@ -371,6 +347,9 @@ class _ManagementSurface extends StatelessWidget {
   }
 }
 
+/// A branded management row — AppSurface card + PressScale tap feedback, a
+/// leading icon in a soft primary-tinted square, and a trailing chevron
+/// (mirrors the profile page's `_ProfileRow` idiom).
 class _ManageTile extends StatelessWidget {
   const _ManageTile({
     required this.icon,
@@ -384,12 +363,47 @@ class _ManageTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Icon(icon),
-      title: Text(label),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: onTap,
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.sm),
+      child: PressScale(
+        child: AppSurface(
+          onTap: onTap,
+          padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+          radius: AppRadii.lg,
+          child: Row(
+            children: [
+              Container(
+                width: AppSpacing.xxl + AppSpacing.sm,
+                height: AppSpacing.xxl + AppSpacing.sm,
+                alignment: AlignmentDirectional.center,
+                decoration: BoxDecoration(
+                  color: colors.primary.withValues(alpha: 0.12),
+                  borderRadius: appRadius(AppRadii.md),
+                ),
+                child: Icon(icon, color: colors.primary, size: AppSpacing.xl),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Text(
+                  label,
+                  style: styles.titleMedium,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Icon(
+                LucideIcons.chevron_right,
+                size: AppSpacing.xl,
+                color: colors.textMuted,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

@@ -11,10 +11,18 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../../core/theme/colors.dart';
 import '../../../../../core/theme/radii.dart';
 import '../../../../../core/theme/spacing.dart';
+import '../../../../../core/theme/typography.dart';
+import '../../../../../core/widgets/_widget_support.dart';
+import '../../../../../core/widgets/app_button.dart';
+import '../../../../../core/widgets/app_spinner.dart';
+import '../../../../../core/widgets/app_toast.dart';
+import '../../../../../core/widgets/press_scale.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../domain/entities/ad.dart';
 import '../../../domain/entities/ad_link.dart';
@@ -125,17 +133,13 @@ class _AdEditorPageState extends State<AdEditorPage> {
 
     // Schedule validation
     if (_startAt != null && _endAt != null && !_startAt!.isBefore(_endAt!)) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l10n.scheduleStartMustBeforeEnd)));
+      AppToast.warning(context, l10n.scheduleStartMustBeforeEnd);
       return;
     }
 
     // Image required
     if (_imagePath == null || _imagePath!.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l10n.adsAdminImageRequired)));
+      AppToast.warning(context, l10n.adsAdminImageRequired);
       return;
     }
 
@@ -143,9 +147,7 @@ class _AdEditorPageState extends State<AdEditorPage> {
     final arFilled = _captionArController.text.trim().isNotEmpty;
     final enFilled = _captionEnController.text.trim().isNotEmpty;
     if (arFilled != enFilled) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.adsAdminCaptionBothOrNeither)),
-      );
+      AppToast.warning(context, l10n.adsAdminCaptionBothOrNeither);
       return;
     }
 
@@ -216,12 +218,12 @@ class _AdEditorPageState extends State<AdEditorPage> {
         }
 
         if (state is AdsAdminError) {
-          ScaffoldMessenger.of(
-            ctx,
-          ).showSnackBar(SnackBar(content: Text(state.failure.message)));
+          AppToast.error(ctx, state.failure.message);
         }
       },
       builder: (ctx, state) {
+        final styles = AppTextStyles.of(ctx);
+        final colors = AppColors.of(ctx);
         return Scaffold(
           appBar: AppBar(
             title: Text(
@@ -230,13 +232,10 @@ class _AdEditorPageState extends State<AdEditorPage> {
             actions: [
               if (_isSaving)
                 const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-                  child: Center(
-                    child: SizedBox.square(
-                      dimension: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
+                  padding: EdgeInsetsDirectional.symmetric(
+                    horizontal: AppSpacing.lg,
                   ),
+                  child: AppSpinner(size: AppSpacing.lg),
                 )
               else
                 TextButton(onPressed: _save, child: Text(l10n.saveLabel)),
@@ -245,7 +244,7 @@ class _AdEditorPageState extends State<AdEditorPage> {
           body: Form(
             key: _formKey,
             child: ListView(
-              padding: const EdgeInsets.all(AppSpacing.lg),
+              padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
               children: [
                 // ── Title ───────────────────────────────────────────────────
                 TextFormField(
@@ -260,10 +259,7 @@ class _AdEditorPageState extends State<AdEditorPage> {
                 const SizedBox(height: AppSpacing.lg),
 
                 // ── Image ────────────────────────────────────────────────
-                Text(
-                  l10n.adsAdminImageLabel,
-                  style: Theme.of(ctx).textTheme.titleSmall,
-                ),
+                Text(l10n.adsAdminImageLabel, style: styles.labelLarge),
                 const SizedBox(height: AppSpacing.sm),
                 _ImagePickerArea(
                   imagePreviewBytes: _imagePreviewBytes,
@@ -274,16 +270,11 @@ class _AdEditorPageState extends State<AdEditorPage> {
                 const SizedBox(height: AppSpacing.lg),
 
                 // ── Optional bilingual captions ──────────────────────────
-                Text(
-                  l10n.adsAdminCaptionLabel,
-                  style: Theme.of(ctx).textTheme.titleSmall,
-                ),
+                Text(l10n.adsAdminCaptionLabel, style: styles.labelLarge),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   l10n.adsAdminCaptionBothOrNeitherHint,
-                  style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(ctx).colorScheme.outline,
-                  ),
+                  style: styles.bodyMedium.copyWith(color: colors.textMuted),
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 TextFormField(
@@ -352,11 +343,10 @@ class _AdEditorPageState extends State<AdEditorPage> {
                 const SizedBox(height: AppSpacing.lg),
 
                 // ── Active toggle ────────────────────────────────────────
-                SwitchListTile(
+                _ActiveSwitchRow(
+                  label: l10n.adsAdminActiveToggleLabel,
                   value: _isActive,
                   onChanged: (v) => setState(() => _isActive = v),
-                  title: Text(l10n.adsAdminActiveToggleLabel),
-                  contentPadding: EdgeInsets.zero,
                 ),
                 const SizedBox(height: AppSpacing.xxl),
               ],
@@ -386,7 +376,8 @@ class _ImagePickerArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
 
     final hasImage =
         imagePreviewBytes != null || (existingImagePath?.isNotEmpty ?? false);
@@ -396,9 +387,9 @@ class _ImagePickerArea extends StatelessWidget {
       child: Container(
         height: 160,
         decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(AppRadii.sm),
-          border: Border.all(color: theme.colorScheme.outline),
+          color: colors.surfaceVariant,
+          borderRadius: appRadius(AppRadii.sm),
+          border: Border.all(color: colors.outline),
         ),
         child: hasImage
             ? Stack(
@@ -406,7 +397,7 @@ class _ImagePickerArea extends StatelessWidget {
                 children: [
                   if (imagePreviewBytes != null)
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(AppRadii.sm),
+                      borderRadius: appRadius(AppRadii.sm),
                       child: Image.memory(
                         imagePreviewBytes!,
                         fit: BoxFit.cover,
@@ -415,28 +406,30 @@ class _ImagePickerArea extends StatelessWidget {
                   else
                     Center(
                       child: Icon(
-                        Icons.image_outlined,
-                        size: 48,
-                        color: theme.colorScheme.onSurfaceVariant,
+                        LucideIcons.image,
+                        size: AppSpacing.xxxl,
+                        color: colors.onSurfaceVariant,
                       ),
                     ),
                   // Upload indicator overlay
                   if (isSaving)
                     Container(
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.surface.withValues(alpha: 0.7),
-                        borderRadius: BorderRadius.circular(AppRadii.sm),
+                        color: colors.surface.withValues(alpha: 0.7),
+                        borderRadius: appRadius(AppRadii.sm),
                       ),
-                      child: const Center(child: CircularProgressIndicator()),
+                      child: const AppSpinner(),
                     ),
                   // Tap to replace overlay
                   if (!isSaving)
-                    Positioned(
+                    PositionedDirectional(
                       bottom: AppSpacing.sm,
-                      right: AppSpacing.sm,
-                      child: FilledButton.tonal(
+                      end: AppSpacing.sm,
+                      child: AppButton(
+                        label: l10n.adsAdminImageReplaceLabel,
+                        variant: AppButtonVariant.tonal,
+                        size: AppButtonSize.dense,
                         onPressed: onPickTapped,
-                        child: Text(l10n.adsAdminImageReplaceLabel),
                       ),
                     ),
                 ],
@@ -445,19 +438,73 @@ class _ImagePickerArea extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    Icons.add_photo_alternate_outlined,
-                    size: 40,
-                    color: theme.colorScheme.onSurfaceVariant,
+                    LucideIcons.image_plus,
+                    size: AppSpacing.xxl + AppSpacing.sm,
+                    color: colors.onSurfaceVariant,
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   Text(
                     l10n.adsAdminImagePickLabel,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+                    style: styles.bodyMedium.copyWith(
+                      color: colors.onSurfaceVariant,
                     ),
                   ),
                 ],
               ),
+      ),
+    );
+  }
+}
+
+// ── Active toggle row ─────────────────────────────────────────────────────────
+
+/// Branded replacement for the stock [SwitchListTile] — tinted icon circle +
+/// label on a hairline surface with a trailing [Switch]. Tapping the row
+/// toggles, mirroring the original tile behavior.
+class _ActiveSwitchRow extends StatelessWidget {
+  const _ActiveSwitchRow({
+    required this.label,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final String label;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    return PressScale(
+      child: AppSurface(
+        radius: AppRadii.lg,
+        onTap: () => onChanged(!value),
+        padding: const EdgeInsetsDirectional.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: AppSpacing.xxl + AppSpacing.sm,
+              height: AppSpacing.xxl + AppSpacing.sm,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: colors.primary.withValues(alpha: 0.12),
+              ),
+              child: Icon(
+                LucideIcons.megaphone,
+                color: colors.primary,
+                size: AppSpacing.lg,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(child: Text(label, style: styles.bodyLarge)),
+            const SizedBox(width: AppSpacing.sm),
+            Switch(value: value, onChanged: onChanged),
+          ],
+        ),
       ),
     );
   }

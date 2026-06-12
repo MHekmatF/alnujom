@@ -9,6 +9,7 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/rating_stars.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
@@ -52,11 +53,14 @@ class SellerReviewsSection extends StatelessWidget {
           SubmitOutcome.none => null,
         };
         if (message != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(message),
-              behavior: SnackBarBehavior.floating,
-            ),
+          AppToast.show(
+            context,
+            message,
+            variant: switch (state.submitOutcome) {
+              SubmitOutcome.success => AppToastVariant.success,
+              SubmitOutcome.error => AppToastVariant.error,
+              _ => AppToastVariant.info,
+            },
           );
         }
         context.read<SellerTrustCubit>().clearSubmitOutcome();
@@ -96,10 +100,7 @@ class SellerReviewsSection extends StatelessWidget {
                   ),
                 ),
                 if (state.hasRating)
-                  RatingStars(
-                    value: state.rating!.avgRating,
-                    showValue: true,
-                  ),
+                  RatingStars(value: state.rating!.avgRating, showValue: true),
               ],
             ),
             if (state.hasRating) ...[
@@ -133,10 +134,7 @@ class SellerReviewsSection extends StatelessWidget {
               ),
 
             const SizedBox(height: AppSpacing.sm),
-            _WriteAffordance(
-              sellerId: sellerId,
-              listingId: listingId,
-            ),
+            _WriteAffordance(sellerId: sellerId, listingId: listingId),
           ],
         );
       },
@@ -244,10 +242,7 @@ class _ReviewTile extends StatelessWidget {
                   style: styles.labelLarge.copyWith(color: colors.onSurface),
                 ),
               ),
-              RatingStars(
-                value: review.rating.toDouble(),
-                size: AppSpacing.md,
-              ),
+              RatingStars(value: review.rating.toDouble(), size: AppSpacing.md),
             ],
           ),
           if (review.comment != null && review.comment!.trim().isNotEmpty) ...[

@@ -8,7 +8,7 @@
 // the admin hub renders as grouped sections (Moderation / Configuration /
 // Insights / Super Admin) with localized group headers, plus an optional
 // [subtitleKey] for a one-line tile description.
-import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 import '../../../../../core/routing/app_router.dart';
 import '../../../../../core/security/permission_keys.dart';
@@ -26,7 +26,7 @@ const List<DashboardSection> kDashboardSections = [
     counterKey: 'pendingUsers',
     subtitleKey: 'adminSectionSubtitleApprovals',
     group: DashboardSectionGroup.moderation,
-    icon: Icons.how_to_reg_outlined,
+    icon: LucideIcons.user_check,
   ),
   DashboardSection(
     labelKey: 'adminTilePendingReview',
@@ -41,7 +41,7 @@ const List<DashboardSection> kDashboardSections = [
     secondaryCounterKey: 'activeListings',
     subtitleKey: 'adminSectionSubtitleListingReview',
     group: DashboardSectionGroup.moderation,
-    icon: Icons.fact_check_outlined,
+    icon: LucideIcons.clipboard_check,
   ),
   DashboardSection(
     labelKey: 'admin_tile_reports',
@@ -50,7 +50,7 @@ const List<DashboardSection> kDashboardSections = [
     counterKey: 'openReports',
     subtitleKey: 'adminSectionSubtitleReports',
     group: DashboardSectionGroup.moderation,
-    icon: Icons.flag_outlined,
+    icon: LucideIcons.flag,
   ),
   DashboardSection(
     labelKey: 'admin_tile_agencies',
@@ -62,7 +62,7 @@ const List<DashboardSection> kDashboardSections = [
     route: AppRoutes.adminAgencies,
     subtitleKey: 'adminSectionSubtitleAgencies',
     group: DashboardSectionGroup.moderation,
-    icon: Icons.business_outlined,
+    icon: LucideIcons.building_2,
   ),
   DashboardSection(
     labelKey: 'dashboardTileInquiries',
@@ -71,7 +71,7 @@ const List<DashboardSection> kDashboardSections = [
     counterKey: 'newInquiries24h',
     subtitleKey: 'adminSectionSubtitleInquiries',
     group: DashboardSectionGroup.moderation,
-    icon: Icons.forum_outlined,
+    icon: LucideIcons.message_square,
   ),
   // ── Configuration ───────────────────────────────────────────────────────
   DashboardSection(
@@ -80,7 +80,7 @@ const List<DashboardSection> kDashboardSections = [
     route: AppRoutes.locationsAdmin,
     subtitleKey: 'adminSectionSubtitleLocations',
     group: DashboardSectionGroup.configuration,
-    icon: Icons.location_on_outlined,
+    icon: LucideIcons.map_pin,
   ),
   DashboardSection(
     labelKey: 'adminHomeCurrenciesTile',
@@ -88,7 +88,7 @@ const List<DashboardSection> kDashboardSections = [
     route: AppRoutes.currenciesAdmin,
     subtitleKey: 'adminSectionSubtitleCurrencies',
     group: DashboardSectionGroup.configuration,
-    icon: Icons.currency_exchange,
+    icon: LucideIcons.coins,
   ),
   DashboardSection(
     labelKey: 'dashboardTileAds',
@@ -96,7 +96,7 @@ const List<DashboardSection> kDashboardSections = [
     route: AppRoutes.adminAds,
     subtitleKey: 'adminSectionSubtitleAds',
     group: DashboardSectionGroup.configuration,
-    icon: Icons.campaign_outlined,
+    icon: LucideIcons.megaphone,
   ),
   DashboardSection(
     labelKey: 'dashboardTileSettings',
@@ -104,7 +104,7 @@ const List<DashboardSection> kDashboardSections = [
     route: AppRoutes.adminSettings,
     subtitleKey: 'adminSectionSubtitleSettings',
     group: DashboardSectionGroup.configuration,
-    icon: Icons.settings_outlined,
+    icon: LucideIcons.settings,
   ),
   // ── Insights ────────────────────────────────────────────────────────────
   DashboardSection(
@@ -113,7 +113,7 @@ const List<DashboardSection> kDashboardSections = [
     route: AppRoutes.adminAuditLogs,
     subtitleKey: 'adminSectionSubtitleAuditLogs',
     group: DashboardSectionGroup.insights,
-    icon: Icons.history_outlined,
+    icon: LucideIcons.history,
   ),
   // ── Super Admin ─────────────────────────────────────────────────────────
   DashboardSection(
@@ -128,6 +128,6 @@ const List<DashboardSection> kDashboardSections = [
     route: AppRoutes.superAdminRoles,
     subtitleKey: 'adminSectionSubtitleSuperAdmin',
     group: DashboardSectionGroup.superAdmin,
-    icon: Icons.shield_outlined,
+    icon: LucideIcons.shield,
   ),
 ];

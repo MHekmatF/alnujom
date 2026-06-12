@@ -3,7 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
 
 /// Phase 23 (FC / T022) — a single tappable support-contact channel row
 /// (phone / WhatsApp / email) used by both [MaintenanceScreen] and
@@ -68,20 +72,50 @@ class SupportContactRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: theme.colorScheme.primary),
-      title: Text(label, style: theme.textTheme.bodyMedium),
-      subtitle: Text(
-        value,
-        style: theme.textTheme.bodySmall?.copyWith(
-          color: theme.colorScheme.onSurfaceVariant,
-        ),
-      ),
-      trailing: const Icon(Icons.open_in_new, size: AppSpacing.lg),
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    return InkWell(
+      borderRadius: appRadius(AppRadii.md),
       onTap: () =>
           unawaited(launchUrl(launchUri, mode: LaunchMode.externalApplication)),
+      child: Padding(
+        padding: const EdgeInsetsDirectional.symmetric(vertical: AppSpacing.sm),
+        child: Row(
+          children: [
+            // Leading icon in a soft brand-tinted square (profile-row idiom).
+            Container(
+              width: AppSpacing.xxl + AppSpacing.sm,
+              height: AppSpacing.xxl + AppSpacing.sm,
+              alignment: AlignmentDirectional.center,
+              decoration: BoxDecoration(
+                color: colors.primary.withValues(alpha: 0.12),
+                borderRadius: appRadius(AppRadii.md),
+              ),
+              child: Icon(icon, color: colors.primary, size: AppSpacing.xl),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label, style: styles.titleMedium),
+                  const SizedBox(height: AppSpacing.xxs),
+                  Text(
+                    value,
+                    style: styles.bodyMedium.copyWith(color: colors.textMuted),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Icon(
+              Icons.open_in_new,
+              size: AppSpacing.lg,
+              color: colors.textMuted,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

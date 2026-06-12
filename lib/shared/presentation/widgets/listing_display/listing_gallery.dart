@@ -11,14 +11,34 @@ import 'package:supabase_flutter/supabase_flutter.dart' show Supabase;
 import '../../../../core/theme/spacing.dart';
 import '../../../../features/listing_form/domain/entities/listing_media.dart';
 import '../../../../l10n/app_localizations.dart';
+import 'fullscreen_gallery_viewer.dart';
 
 /// Phase 12 Q8=A shared widget — horizontal carousel of media items.
 /// Items are sorted by `ordering ASC` with `is_main=true` floated to the
 /// front. Each item renders 16:9. Empty list → 16:9 placeholder card.
+///
+/// Phase 28 — tapping an IMAGE item opens the story-style
+/// [FullscreenGalleryViewer] at that index. Video taps remain untouched here:
+/// the details page intercepts them via its own wrapper (`_GalleryWithVideoTap`)
+/// whose tap recognizer is only armed when the visible item is a video, so the
+/// two never compete.
 class ListingGallery extends StatelessWidget {
   const ListingGallery({super.key, required this.media});
 
   final List<ListingMedia> media;
+
+  /// Resolves the public `listing-images` URL for an image row (null for
+  /// videos / rows without a storage path). Shared with the fullscreen viewer
+  /// items so the documented Supabase exception stays confined to this one
+  /// widget.
+  static String? imageUrlFor(ListingMedia media) {
+    if (media.kind != ListingMediaKind.image || media.storagePath == null) {
+      return null;
+    }
+    return Supabase.instance.client.storage
+        .from('listing-images')
+        .getPublicUrl(media.storagePath!);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,39 +74,55 @@ class ListingGallery extends StatelessWidget {
       aspectRatio: 16 / 9,
       child: PageView.builder(
         itemCount: sorted.length,
-        itemBuilder: (ctx, index) => _GalleryItem(media: sorted[index]),
+        itemBuilder: (ctx, index) => _GalleryItem(
+          media: sorted[index],
+          onImageTap: () => FullscreenGalleryViewer.open(
+            ctx,
+            items: [
+              for (final m in sorted)
+                FullscreenGalleryItem(media: m, imageUrl: imageUrlFor(m)),
+            ],
+            initialIndex: index,
+          ),
+        ),
       ),
     );
   }
 }
 
 class _GalleryItem extends StatelessWidget {
-  const _GalleryItem({required this.media});
+  const _GalleryItem({required this.media, required this.onImageTap});
 
   final ListingMedia media;
+
+  /// Phase 28 — fired when an image item is tapped (opens the fullscreen
+  /// viewer at this item's index). Only attached on the image branch, so
+  /// video/placeholder taps keep bubbling to the details page's wrapper.
+  final VoidCallback onImageTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     if (media.kind == ListingMediaKind.image && media.storagePath != null) {
-      final url = Supabase.instance.client.storage
-          .from('listing-images')
-          .getPublicUrl(media.storagePath!);
-      return Container(
-        margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(AppSpacing.sm),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: CachedNetworkImage(
-          imageUrl: url,
-          fit: BoxFit.cover,
-          placeholder: (_, __) =>
-              Container(color: theme.colorScheme.surfaceContainerHigh),
-          errorWidget: (_, __, ___) =>
-              const _MediaPlaceholder(icon: Icons.broken_image_outlined),
+      final url = ListingGallery.imageUrlFor(media)!;
+      return GestureDetector(
+        onTap: onImageTap,
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(AppSpacing.sm),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: CachedNetworkImage(
+            imageUrl: url,
+            fit: BoxFit.cover,
+            placeholder: (_, __) =>
+                Container(color: theme.colorScheme.surfaceContainerHigh),
+            errorWidget: (_, __, ___) =>
+                const _MediaPlaceholder(icon: Icons.broken_image_outlined),
+          ),
         ),
       );
     }

@@ -9,7 +9,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../core/di/injection.dart';
+import '../../../../../core/theme/colors.dart';
 import '../../../../../core/theme/spacing.dart';
+import '../../../../../core/theme/typography.dart';
+import '../../../../../core/widgets/app_button.dart';
+import '../../../../../core/widgets/app_spinner.dart';
+import '../../../../../core/widgets/loading_state.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../agency/domain/entities/agency_status.dart';
 import '../bloc/agency_queue_bloc.dart';
@@ -70,17 +75,13 @@ class _AgencyQueueViewState extends State<_AgencyQueueView> {
         children: [
           // ── Status filter bar ────────────────────────────────────────────
           BlocBuilder<AgencyQueueBloc, AgencyQueueState>(
-            buildWhen: (prev, curr) =>
-                prev.statusFilter != curr.statusFilter,
+            buildWhen: (prev, curr) => prev.statusFilter != curr.statusFilter,
             builder: (ctx, state) {
               return _AgencyStatusFilterBar(
                 selected: state.statusFilter,
                 onChanged: (s) {
                   ctx.read<AgencyQueueBloc>().add(
-                    AgencyQueueFilterChanged(
-                      status: s,
-                      clearStatus: s == null,
-                    ),
+                    AgencyQueueFilterChanged(status: s, clearStatus: s == null),
                   );
                 },
               );
@@ -91,22 +92,22 @@ class _AgencyQueueViewState extends State<_AgencyQueueView> {
             child: BlocBuilder<AgencyQueueBloc, AgencyQueueState>(
               builder: (ctx, state) {
                 if (state.isLoadingFirstPage && state.items.isEmpty) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const _QueueSkeleton();
                 }
                 if (state.failure != null && state.items.isEmpty) {
                   return _ErrorState(
                     message: state.failure!.message,
-                    onRetry: () => ctx
-                        .read<AgencyQueueBloc>()
-                        .add(const AgencyQueueRefresh()),
+                    onRetry: () => ctx.read<AgencyQueueBloc>().add(
+                      const AgencyQueueRefresh(),
+                    ),
                   );
                 }
                 if (state.isEmpty) {
                   return RefreshIndicator(
                     onRefresh: () async {
-                      ctx
-                          .read<AgencyQueueBloc>()
-                          .add(const AgencyQueueRefresh());
+                      ctx.read<AgencyQueueBloc>().add(
+                        const AgencyQueueRefresh(),
+                      );
                     },
                     child: ListView(
                       children: [
@@ -118,13 +119,11 @@ class _AgencyQueueViewState extends State<_AgencyQueueView> {
                 }
                 return RefreshIndicator(
                   onRefresh: () async {
-                    ctx
-                        .read<AgencyQueueBloc>()
-                        .add(const AgencyQueueRefresh());
+                    ctx.read<AgencyQueueBloc>().add(const AgencyQueueRefresh());
                   },
                   child: ListView.separated(
                     controller: _scrollController,
-                    padding: const EdgeInsets.all(AppSpacing.md),
+                    padding: const EdgeInsetsDirectional.all(AppSpacing.md),
                     itemCount:
                         state.items.length + (state.isLoadingNextPage ? 1 : 0),
                     separatorBuilder: (_, __) =>
@@ -132,8 +131,8 @@ class _AgencyQueueViewState extends State<_AgencyQueueView> {
                     itemBuilder: (ctx, index) {
                       if (index >= state.items.length) {
                         return const Padding(
-                          padding: EdgeInsets.all(AppSpacing.md),
-                          child: Center(child: CircularProgressIndicator()),
+                          padding: EdgeInsetsDirectional.all(AppSpacing.md),
+                          child: AppSpinner(),
                         );
                       }
                       final item = state.items[index];
@@ -190,7 +189,7 @@ class _AgencyStatusFilterBar extends StatelessWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
+      padding: const EdgeInsetsDirectional.symmetric(
         horizontal: AppSpacing.md,
         vertical: AppSpacing.sm,
       ),
@@ -211,13 +210,11 @@ class _AgencyStatusFilterBar extends StatelessWidget {
             // One chip per status
             for (final status in AgencyStatus.values)
               Padding(
-                padding:
-                    const EdgeInsetsDirectional.only(end: AppSpacing.sm),
+                padding: const EdgeInsetsDirectional.only(end: AppSpacing.sm),
                 child: FilterChip(
                   label: Text(statusLabel(status)),
                   selected: selected == status,
-                  onSelected: (picked) =>
-                      onChanged(picked ? status : null),
+                  onSelected: (picked) => onChanged(picked ? status : null),
                   selectedColor: theme.colorScheme.primaryContainer,
                 ),
               ),
@@ -238,27 +235,44 @@ class _ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
+        padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               message,
               textAlign: TextAlign.center,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: theme.colorScheme.error,
-              ),
+              style: styles.bodyLarge.copyWith(color: colors.error),
             ),
             const SizedBox(height: AppSpacing.md),
-            FilledButton(
+            AppButton(
+              label: AppLocalizations.of(context)!.actionReload,
               onPressed: onRetry,
-              child: Text(AppLocalizations.of(context)!.actionReload),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Shimmer placeholder rows shown while the first agency page loads.
+class _QueueSkeleton extends StatelessWidget {
+  const _QueueSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      padding: const EdgeInsetsDirectional.all(AppSpacing.md),
+      itemCount: 6,
+      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+      itemBuilder: (_, __) => const SizedBox(
+        height: AppSpacing.xxxl + AppSpacing.xxl,
+        child: LoadingState.card(),
       ),
     );
   }

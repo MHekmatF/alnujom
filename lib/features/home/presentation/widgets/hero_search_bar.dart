@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_router.dart';
@@ -71,6 +72,26 @@ class HeroSearchBar extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsetsDirectional.all(AppSpacing.md),
                 child: Icon(Icons.tune, color: colors.onPrimary),
+              ),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          // Phase 28 (WS-6) — smart search assistant entry point.
+          Tooltip(
+            message: l10n.assistantTitle,
+            child: Material(
+              color: colors.primaryContainer,
+              borderRadius: appRadius(AppRadii.md),
+              child: InkWell(
+                borderRadius: appRadius(AppRadii.md),
+                onTap: () => context.push(AppRoutes.assistant),
+                child: Padding(
+                  padding: const EdgeInsetsDirectional.all(AppSpacing.md),
+                  child: Icon(
+                    LucideIcons.sparkles,
+                    color: colors.onPrimaryContainer,
+                  ),
+                ),
               ),
             ),
           ),
