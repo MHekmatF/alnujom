@@ -36,6 +36,14 @@ class OverpassNearbyAmenitiesDatasource {
   static const String _amenityRegex =
       'school|hospital|pharmacy|marketplace|place_of_worship';
 
+  /// Identifying User-Agent per the Overpass usage policy. Required in
+  /// practice: overpass-api.de answers HTTP 406 to Dart's default
+  /// `Dart/x.y (dart:io)` agent (and to curl's), which silently collapsed
+  /// the section on device.
+  static const Map<String, String> _headers = {
+    'User-Agent': 'AlNujom/1.0 (+https://alnujom.app)',
+  };
+
   /// Session-scoped cache keyed by listing id — a details page revisit never
   /// re-hits Overpass for the same listing.
   static final Map<String, List<NearbyAmenity>> _cache =
@@ -59,7 +67,7 @@ class OverpassNearbyAmenitiesDatasource {
         ');out center 30;';
 
     final response = await http
-        .post(Uri.parse(endpoint), body: {'data': query})
+        .post(Uri.parse(endpoint), headers: _headers, body: {'data': query})
         .timeout(_timeout);
     if (response.statusCode != 200) {
       throw http.ClientException(
