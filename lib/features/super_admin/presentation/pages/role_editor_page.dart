@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/security/permission_checker.dart';
 import '../../../../core/security/permission_keys.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/app_spinner.dart';
+import '../../../../core/widgets/app_text_field.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../bloc/role_editor_bloc.dart';
 import '../widgets/permission_checklist.dart';
@@ -42,24 +46,23 @@ class _RoleEditorView extends StatelessWidget {
             RoleSaveConflictReason.systemRoleProtected =>
               l10n.errorSystemRoleImmutable,
           };
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(message),
-              action: state.reason == RoleSaveConflictReason.concurrentEdit
-                  ? SnackBarAction(
-                      label: l10n.actionReload,
-                      onPressed: () => context.read<RoleEditorBloc>().add(
-                        const ReloadAfterConflict(),
-                      ),
-                    )
-                  : null,
-            ),
+          AppToast.show(
+            context,
+            message,
+            variant: AppToastVariant.warning,
+            action: state.reason == RoleSaveConflictReason.concurrentEdit
+                ? SnackBarAction(
+                    label: l10n.actionReload,
+                    onPressed: () => context.read<RoleEditorBloc>().add(
+                      const ReloadAfterConflict(),
+                    ),
+                  )
+                : null,
           );
         } else if (state is RoleEditorSaveError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.errorRoleSaveFailed(state.failure.message)),
-            ),
+          AppToast.error(
+            context,
+            l10n.errorRoleSaveFailed(state.failure.message),
           );
         }
       },
@@ -86,22 +89,19 @@ class _RoleEditorView extends StatelessWidget {
                           )
                         : null,
                     child: state.saving
-                        ? const CircularProgressIndicator()
-                        : const Icon(Icons.save),
+                        ? const AppSpinner()
+                        : const Icon(LucideIcons.save),
                   )
                 : null,
             body: switch (state) {
-              RoleEditorInitial() || RoleEditorLoading() => const Center(
-                child: CircularProgressIndicator(),
-              ),
+              RoleEditorInitial() ||
+              RoleEditorLoading() => const AppSpinner.page(),
               RoleEditorLoadFailure(:final failure) => Center(
                 child: Text(failure.message, textAlign: TextAlign.center),
               ),
               RoleEditorSaveSucceeded() ||
               RoleEditorSaveConflict() ||
-              RoleEditorSaveError() => const Center(
-                child: CircularProgressIndicator(),
-              ),
+              RoleEditorSaveError() => const AppSpinner.page(),
               RoleEditorEditing() => _RoleEditorForm(
                 state: state,
                 permissionReadOnly:
@@ -169,27 +169,27 @@ class _RoleEditorFormState extends State<_RoleEditorForm> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return ListView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
       children: [
-        TextField(
+        AppTextField(
+          label: l10n.roleDisplayNameLabelAr,
           controller: _arController,
-          decoration: InputDecoration(labelText: l10n.roleDisplayNameLabelAr),
           onChanged: (value) => context.read<RoleEditorBloc>().add(
             UpdateDisplayName('ar', value),
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
-        TextField(
+        AppTextField(
+          label: l10n.roleDisplayNameLabelEn,
           controller: _enController,
-          decoration: InputDecoration(labelText: l10n.roleDisplayNameLabelEn),
           onChanged: (value) => context.read<RoleEditorBloc>().add(
             UpdateDisplayName('en', value),
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
-        TextField(
+        AppTextField(
+          label: l10n.roleDescriptionLabel,
           controller: _descriptionController,
-          decoration: InputDecoration(labelText: l10n.roleDescriptionLabel),
           maxLines: 3,
           onChanged: (value) =>
               context.read<RoleEditorBloc>().add(UpdateDescription(value)),

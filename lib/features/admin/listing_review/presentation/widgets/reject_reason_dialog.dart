@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 import '../../../../../core/listing/rejection_reason.dart';
+import '../../../../../core/theme/colors.dart';
 import '../../../../../core/theme/spacing.dart';
+import '../../../../../core/theme/typography.dart';
+import '../../../../../core/widgets/app_button.dart';
 import '../../../../../l10n/app_localizations.dart';
 
 /// Phase 12 (spec/012-listing-approval) — Reject-reason dialog (FR-013, Q3=A,
@@ -13,6 +17,11 @@ import '../../../../../l10n/app_localizations.dart';
 ///   - if preset == other, the detail field has a non-empty trimmed value.
 ///
 /// Contract: `contracts/phase12-reject-reason-dialog.md`.
+///
+/// Kept as a hand-rolled [AlertDialog]: the confirm action stays disabled
+/// until validation passes, which [AppDialog]'s fixed action pair cannot
+/// express. Visuals mirror the AppDialog idiom (tinted destructive glyph,
+/// token type, AppButton actions).
 class RejectReasonDialog extends StatefulWidget {
   const RejectReasonDialog({super.key});
 
@@ -96,7 +105,8 @@ class _RejectReasonDialogState extends State<RejectReasonDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     final detailLabel = _isOtherSelected
         ? l10n.rejectDialogDetailLabelRequired
         : l10n.rejectDialogDetailLabelOptional;
@@ -106,7 +116,20 @@ class _RejectReasonDialogState extends State<RejectReasonDialog> {
     final detailLength = _detailController.text.length;
 
     return AlertDialog(
-      title: Text(l10n.rejectDialogTitle),
+      icon: Container(
+        width: AppSpacing.xxxl,
+        height: AppSpacing.xxxl,
+        decoration: BoxDecoration(
+          color: colors.error.withValues(alpha: 0.12),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          LucideIcons.triangle_alert,
+          color: colors.error,
+          size: AppSpacing.xl,
+        ),
+      ),
+      title: Text(l10n.rejectDialogTitle, style: styles.titleLarge),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -132,14 +155,12 @@ class _RejectReasonDialogState extends State<RejectReasonDialog> {
               ),
             ),
             const SizedBox(height: AppSpacing.md),
-            Text(detailLabel, style: theme.textTheme.labelLarge),
+            Text(detailLabel, style: styles.labelLarge),
             if (detailHint != null) ...[
               const SizedBox(height: AppSpacing.xs),
               Text(
                 detailHint,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
+                style: styles.bodyMedium.copyWith(color: colors.textMuted),
               ),
             ],
             const SizedBox(height: AppSpacing.sm),
@@ -161,20 +182,24 @@ class _RejectReasonDialogState extends State<RejectReasonDialog> {
               alignment: AlignmentDirectional.centerEnd,
               child: Text(
                 l10n.rejectDialogCounter(detailLength),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
+                style: styles.bodyMedium.copyWith(color: colors.textMuted),
               ),
             ),
           ],
         ),
       ),
       actions: [
-        TextButton(onPressed: _onCancel, child: Text(l10n.rejectDialogCancel)),
-        FilledButton(
-          onPressed: _isConfirmEnabled ? _onConfirm : null,
-          child: Text(l10n.rejectDialogConfirm),
+        AppButton(
+          label: l10n.rejectDialogCancel,
+          variant: AppButtonVariant.text,
+          onPressed: _onCancel,
         ),
+        AppButton(
+          label: l10n.rejectDialogConfirm,
+          variant: AppButtonVariant.destructive,
+          onPressed: _isConfirmEnabled ? _onConfirm : null,
+        ),
+        const SizedBox(width: AppSpacing.xs),
       ],
     );
   }

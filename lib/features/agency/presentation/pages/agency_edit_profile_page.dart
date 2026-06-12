@@ -12,14 +12,24 @@
 // low-RAM device the app/route can be recreated on return with no `extra` (it
 // is not part of the URI) — which previously red-screened on `state.extra as
 // Agency`. Self-loading is robust to that recreation. Phase 2 tokens only.
+//
+// Phase 28 (premium-worth pass) — purely visual retrofit: AppTextField,
+// AppButton, AppToast, AppSpinner. Behavior unchanged.
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/errors/result.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_spinner.dart';
+import '../../../../core/widgets/app_text_field.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/agency.dart';
 import '../../domain/repositories/agency_repository.dart';
@@ -115,7 +125,6 @@ class _AgencyEditProfilePageState extends State<AgencyEditProfilePage> {
   Future<void> _pickAsset({required bool isCover}) async {
     final agency = _agency;
     if (agency == null) return;
-    final messenger = ScaffoldMessenger.of(context);
     final l10n = AppLocalizations.of(context)!;
     final XFile? file = await ImagePicker().pickImage(
       source: ImageSource.gallery,
@@ -134,7 +143,8 @@ class _AgencyEditProfilePageState extends State<AgencyEditProfilePage> {
       final bytes = await file.readAsBytes();
       final ext = file.name.contains('.') ? file.name.split('.').last : 'jpg';
       final prefix = isCover ? 'cover' : 'logo';
-      final filename = '${prefix}_${DateTime.now().millisecondsSinceEpoch}.$ext';
+      final filename =
+          '${prefix}_${DateTime.now().millisecondsSinceEpoch}.$ext';
       final result = await getIt<AgencyRepository>().uploadAgencyAsset(
         agencyId: agency.id,
         filename: filename,
@@ -165,18 +175,14 @@ class _AgencyEditProfilePageState extends State<AgencyEditProfilePage> {
             }
           });
           if (persist is FailureResult) {
-            messenger.showSnackBar(
-              SnackBar(content: Text(l10n.agency_action_failed)),
-            );
+            AppToast.error(context, l10n.agency_action_failed);
           }
         case FailureResult():
           setState(() {
             _uploadingCover = false;
             _uploadingLogo = false;
           });
-          messenger.showSnackBar(
-            SnackBar(content: Text(l10n.agency_action_failed)),
-          );
+          AppToast.error(context, l10n.agency_action_failed);
       }
     } catch (_) {
       if (!mounted) return;
@@ -184,16 +190,13 @@ class _AgencyEditProfilePageState extends State<AgencyEditProfilePage> {
         _uploadingCover = false;
         _uploadingLogo = false;
       });
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.agency_action_failed)),
-      );
+      AppToast.error(context, l10n.agency_action_failed);
     }
   }
 
   Future<void> _save() async {
     final agency = _agency;
     if (agency == null) return;
-    final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     final l10n = AppLocalizations.of(context)!;
     setState(() => _saving = true);
@@ -218,9 +221,7 @@ class _AgencyEditProfilePageState extends State<AgencyEditProfilePage> {
       case Success():
         navigator.pop(true);
       case FailureResult():
-        messenger.showSnackBar(
-          SnackBar(content: Text(l10n.agency_action_failed)),
-        );
+        AppToast.error(context, l10n.agency_action_failed);
     }
   }
 
@@ -230,19 +231,19 @@ class _AgencyEditProfilePageState extends State<AgencyEditProfilePage> {
 
     Widget body;
     if (_loading) {
-      body = const Center(child: CircularProgressIndicator());
+      body = const AppSpinner.page();
     } else if (_agency == null || _loadFailed) {
       body = Center(
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.xl),
+          padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(l10n.agency_generic_error, textAlign: TextAlign.center),
               const SizedBox(height: AppSpacing.md),
-              FilledButton(
+              AppButton.filledPrimary(
+                label: l10n.action_retry,
                 onPressed: _loadAgency,
-                child: Text(l10n.action_retry),
               ),
             ],
           ),
@@ -252,7 +253,7 @@ class _AgencyEditProfilePageState extends State<AgencyEditProfilePage> {
       body = AbsorbPointer(
         absorbing: _saving,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
+          padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -274,27 +275,36 @@ class _AgencyEditProfilePageState extends State<AgencyEditProfilePage> {
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
-              _field(_name, l10n.agency_name_label),
+              AppTextField(controller: _name, label: l10n.agency_name_label),
               const SizedBox(height: AppSpacing.md),
-              _field(_description, l10n.agency_description_label, maxLines: 3),
+              AppTextField(
+                controller: _description,
+                label: l10n.agency_description_label,
+                maxLines: 3,
+              ),
               const SizedBox(height: AppSpacing.md),
-              _field(_phone, l10n.agency_phone_label,
-                  keyboardType: TextInputType.phone),
+              AppTextField(
+                controller: _phone,
+                label: l10n.agency_phone_label,
+                keyboardType: TextInputType.phone,
+              ),
               const SizedBox(height: AppSpacing.md),
-              _field(_whatsapp, l10n.agency_whatsapp_label,
-                  keyboardType: TextInputType.phone),
+              AppTextField(
+                controller: _whatsapp,
+                label: l10n.agency_whatsapp_label,
+                keyboardType: TextInputType.phone,
+              ),
               const SizedBox(height: AppSpacing.md),
-              _field(_address, l10n.agency_address_label),
+              AppTextField(
+                controller: _address,
+                label: l10n.agency_address_label,
+              ),
               const SizedBox(height: AppSpacing.xl),
-              FilledButton(
+              AppButton.filledPrimary(
+                label: l10n.agency_save_button,
+                expanded: true,
+                loading: _saving,
                 onPressed: _busy ? null : _save,
-                child: _saving
-                    ? const SizedBox(
-                        width: AppSpacing.lg,
-                        height: AppSpacing.lg,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Text(l10n.agency_save_button),
               ),
             ],
           ),
@@ -305,23 +315,6 @@ class _AgencyEditProfilePageState extends State<AgencyEditProfilePage> {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.agency_edit_button)),
       body: body,
-    );
-  }
-
-  Widget _field(
-    TextEditingController controller,
-    String label, {
-    int maxLines = 1,
-    TextInputType? keyboardType,
-  }) {
-    return TextField(
-      controller: controller,
-      maxLines: maxLines,
-      keyboardType: keyboardType,
-      decoration: InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
-      ),
     );
   }
 }
@@ -341,43 +334,44 @@ class _LogoPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final colors = AppColors.of(context);
     final hasImage = url != null && url!.isNotEmpty;
     return Column(
       children: [
         ClipRRect(
-          borderRadius: BorderRadius.circular(AppRadii.md),
+          borderRadius: appRadius(AppRadii.md),
           child: SizedBox(
             width: AppSpacing.xxxl + AppSpacing.xl,
             height: AppSpacing.xxxl + AppSpacing.xl,
             child: uploading
-                ? Container(
-                    color: scheme.surfaceContainerHighest,
-                    child: const Center(child: CircularProgressIndicator()),
+                ? ColoredBox(
+                    color: colors.surfaceVariant,
+                    child: const AppSpinner(),
                   )
                 : hasImage
-                    ? CachedNetworkImage(
-                        imageUrl: url!,
-                        fit: BoxFit.cover,
-                        errorWidget: (_, __, ___) => _fallback(scheme),
-                      )
-                    : _fallback(scheme),
+                ? CachedNetworkImage(
+                    imageUrl: url!,
+                    fit: BoxFit.cover,
+                    errorWidget: (_, __, ___) => _fallback(colors),
+                  )
+                : _fallback(colors),
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
-        TextButton.icon(
+        AppButton(
+          label: label,
+          variant: AppButtonVariant.text,
+          icon: LucideIcons.camera,
           onPressed: onPick,
-          icon: const Icon(Icons.photo_camera_outlined),
-          label: Text(label),
         ),
       ],
     );
   }
 
-  Widget _fallback(ColorScheme scheme) => Container(
-        color: scheme.surfaceContainerHighest,
-        child: Icon(Icons.business_outlined, color: scheme.onSurfaceVariant),
-      );
+  Widget _fallback(AppColors colors) => ColoredBox(
+    color: colors.surfaceVariant,
+    child: Icon(LucideIcons.building_2, color: colors.textMuted),
+  );
 }
 
 class _CoverPicker extends StatelessWidget {
@@ -395,41 +389,42 @@ class _CoverPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final colors = AppColors.of(context);
     final hasImage = url != null && url!.isNotEmpty;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ClipRRect(
-          borderRadius: BorderRadius.circular(AppRadii.md),
+          borderRadius: appRadius(AppRadii.md),
           child: SizedBox(
             height: AppSpacing.xxxl + AppSpacing.xxxl,
             child: uploading
-                ? Container(
-                    color: scheme.surfaceContainerHighest,
-                    child: const Center(child: CircularProgressIndicator()),
+                ? ColoredBox(
+                    color: colors.surfaceVariant,
+                    child: const AppSpinner(),
                   )
                 : hasImage
-                    ? CachedNetworkImage(
-                        imageUrl: url!,
-                        fit: BoxFit.cover,
-                        errorWidget: (_, __, ___) => _fallback(scheme),
-                      )
-                    : _fallback(scheme),
+                ? CachedNetworkImage(
+                    imageUrl: url!,
+                    fit: BoxFit.cover,
+                    errorWidget: (_, __, ___) => _fallback(colors),
+                  )
+                : _fallback(colors),
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
-        TextButton.icon(
+        AppButton(
+          label: label,
+          variant: AppButtonVariant.text,
+          icon: LucideIcons.image,
           onPressed: onPick,
-          icon: const Icon(Icons.image_outlined),
-          label: Text(label),
         ),
       ],
     );
   }
 
-  Widget _fallback(ColorScheme scheme) => Container(
-        color: scheme.surfaceContainerHighest,
-        child: Icon(Icons.panorama_outlined, color: scheme.onSurfaceVariant),
-      );
+  Widget _fallback(AppColors colors) => ColoredBox(
+    color: colors.surfaceVariant,
+    child: Icon(LucideIcons.images, color: colors.textMuted),
+  );
 }

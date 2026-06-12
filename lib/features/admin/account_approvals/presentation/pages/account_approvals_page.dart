@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../../core/di/injection.dart';
+import '../../../../../core/theme/colors.dart';
+import '../../../../../core/theme/radii.dart';
 import '../../../../../core/theme/spacing.dart';
+import '../../../../../core/theme/typography.dart';
+import '../../../../../core/widgets/_widget_support.dart';
+import '../../../../../core/widgets/app_button.dart';
+import '../../../../../core/widgets/app_dialog.dart';
+import '../../../../../core/widgets/loading_state.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../domain/entities/account_approval_request.dart';
 import '../cubit/account_approvals_cubit.dart';
@@ -28,15 +36,16 @@ class _AccountApprovalsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.admin_queue_title)),
       body: BlocBuilder<AccountApprovalsCubit, AccountApprovalsState>(
         builder: (context, state) {
           return switch (state) {
-            AccountApprovalsInitial() || AccountApprovalsLoading() =>
-              const Center(child: CircularProgressIndicator()),
+            AccountApprovalsInitial() ||
+            AccountApprovalsLoading() => const _QueueSkeleton(),
 
             AccountApprovalsError(:final failure) => Center(
               child: Column(
@@ -44,16 +53,14 @@ class _AccountApprovalsView extends StatelessWidget {
                 children: [
                   Text(
                     failure.message,
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: theme.colorScheme.error,
-                    ),
+                    style: styles.bodyLarge.copyWith(color: colors.error),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 16),
-                  FilledButton(
+                  const SizedBox(height: AppSpacing.lg),
+                  AppButton(
+                    label: l10n.admin_queue_pull_to_refresh,
                     onPressed: () =>
                         context.read<AccountApprovalsCubit>().loadPending(),
-                    child: Text(l10n.admin_queue_pull_to_refresh),
                   ),
                 ],
               ),
@@ -88,9 +95,9 @@ class _AccountApprovalsView extends StatelessWidget {
         child: Opacity(
           opacity: isMutating ? 0.6 : 1.0,
           child: ListView.separated(
-            padding: const EdgeInsets.all(AppSpacing.lg),
+            padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
             itemCount: requests.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 12),
+            separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
             itemBuilder: (context, index) =>
                 _RequestCard(request: requests[index]),
           ),
@@ -108,52 +115,46 @@ class _RequestCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
     final dateStr = DateFormat.yMMMd().add_Hm().format(
       request.createdAt.toLocal(),
     );
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (request.registrantFullName != null)
-              _Row(
-                l10n.admin_queue_full_name_label,
-                request.registrantFullName!,
+    return AppSurface(
+      radius: AppRadii.lg,
+      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (request.registrantFullName != null)
+            _Row(l10n.admin_queue_full_name_label, request.registrantFullName!),
+          if (request.registrantPhone != null)
+            _Row(l10n.admin_queue_phone_label, request.registrantPhone!),
+          if (request.registrantEmail != null)
+            _Row(l10n.admin_queue_email_label, request.registrantEmail!),
+          _Row(l10n.admin_queue_created_at_label, dateStr),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
+              Expanded(
+                child: AppButton(
+                  label: l10n.admin_action_approve,
+                  variant: AppButtonVariant.filledSuccess,
+                  onPressed: () => context
+                      .read<AccountApprovalsCubit>()
+                      .approve(request.userId),
+                ),
               ),
-            if (request.registrantPhone != null)
-              _Row(l10n.admin_queue_phone_label, request.registrantPhone!),
-            if (request.registrantEmail != null)
-              _Row(l10n.admin_queue_email_label, request.registrantEmail!),
-            _Row(l10n.admin_queue_created_at_label, dateStr),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: FilledButton(
-                    onPressed: () => context
-                        .read<AccountApprovalsCubit>()
-                        .approve(request.userId),
-                    child: Text(l10n.admin_action_approve),
-                  ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: AppButton(
+                  label: l10n.admin_action_reject,
+                  variant: AppButtonVariant.destructive,
+                  onPressed: () => _onRejectTap(context, l10n).ignore(),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => _onRejectTap(context, l10n).ignore(),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: theme.colorScheme.error,
-                    ),
-                    child: Text(l10n.admin_action_reject),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -164,8 +165,12 @@ class _RequestCard extends StatelessWidget {
 
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.admin_action_reject_reason_title),
+      builder: (dialogContext) => AppDialog(
+        title: l10n.admin_action_reject_reason_title,
+        icon: LucideIcons.triangle_alert,
+        variant: AppDialogVariant.destructive,
+        actionLabel: l10n.admin_action_confirm,
+        cancelLabel: l10n.admin_action_cancel,
         content: Form(
           key: formKey,
           child: TextFormField(
@@ -180,20 +185,11 @@ class _RequestCard extends StatelessWidget {
             maxLines: 3,
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(l10n.admin_action_cancel),
-          ),
-          FilledButton(
-            onPressed: () {
-              if (formKey.currentState!.validate()) {
-                Navigator.of(dialogContext).pop(true);
-              }
-            },
-            child: Text(l10n.admin_action_confirm),
-          ),
-        ],
+        onAction: () {
+          if (formKey.currentState!.validate()) {
+            Navigator.of(dialogContext).pop(true);
+          }
+        },
       ),
     );
 
@@ -219,21 +215,35 @@ class _Row extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.sm),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.outline,
-            ),
+            style: styles.bodyMedium.copyWith(color: colors.textMuted),
           ),
-          Text(value, style: theme.textTheme.bodyMedium),
+          Text(value, style: styles.bodyLarge),
         ],
       ),
+    );
+  }
+}
+
+/// Shimmer placeholder rows shown while the approvals queue loads.
+class _QueueSkeleton extends StatelessWidget {
+  const _QueueSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+      itemCount: 4,
+      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
+      itemBuilder: (_, __) => const LoadingState.card(),
     );
   }
 }

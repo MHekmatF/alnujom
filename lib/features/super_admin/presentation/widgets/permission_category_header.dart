@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
 import '../../../../l10n/app_localizations.dart';
 
 class PermissionCategoryHeader extends StatelessWidget {
@@ -11,10 +12,13 @@ class PermissionCategoryHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: AppSpacing.lg, bottom: AppSpacing.sm),
+      padding: const EdgeInsetsDirectional.only(
+        top: AppSpacing.lg,
+        bottom: AppSpacing.sm,
+      ),
       child: Text(
         _resolveLocalized(context),
-        style: Theme.of(context).textTheme.titleMedium,
+        style: AppTextStyles.of(context).titleMedium,
       ),
     );
   }

@@ -42,14 +42,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:latlong2/latlong.dart' show LatLng;
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/settings/lite_mode.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/motion.dart';
+import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/reduce_motion.dart';
@@ -136,8 +142,8 @@ class _MapView extends StatelessWidget {
         },
         builder: (context, state) {
           return switch (state) {
-            MapInitial() => const Center(child: CircularProgressIndicator()),
-            MapLoading() => const Center(child: CircularProgressIndicator()),
+            MapInitial() => const AppSpinner.page(),
+            MapLoading() => const AppSpinner.page(),
             MapError(failure: final f) => _ErrorBody(message: f.message),
             MapLoaded() => _LoadedBody(state: state),
           };
@@ -340,11 +346,12 @@ class _EmptyDatasetBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     return Material(
       elevation: 2,
-      borderRadius: BorderRadius.circular(AppSpacing.sm),
-      color: theme.colorScheme.surface.withValues(alpha: 0.92),
+      borderRadius: appRadius(AppRadii.sm),
+      color: colors.surface.withValues(alpha: 0.92),
       child: Padding(
         padding: const EdgeInsetsDirectional.symmetric(
           horizontal: AppSpacing.md,
@@ -354,12 +361,12 @@ class _EmptyDatasetBanner extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              Icons.info_outline,
-              size: 18,
-              color: theme.colorScheme.onSurfaceVariant,
+              LucideIcons.info,
+              size: AppSpacing.lg,
+              color: colors.onSurfaceVariant,
             ),
             const SizedBox(width: AppSpacing.sm),
-            Flexible(child: Text(message, style: theme.textTheme.bodySmall)),
+            Flexible(child: Text(message, style: styles.labelMedium)),
           ],
         ),
       ),

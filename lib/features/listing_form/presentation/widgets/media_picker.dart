@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/app_dialog.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/listing.dart';
 import '../../domain/entities/listing_form_state.dart';
@@ -117,21 +122,13 @@ class MediaPicker extends StatelessWidget {
     final messenger = ScaffoldMessenger.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogCtx) => AlertDialog(
-        title: Text(l10n.mediaActionDelete),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogCtx).pop(false),
-            child: Text(l10n.actionCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogCtx).pop(true),
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(dialogCtx).colorScheme.error,
-            ),
-            child: Text(l10n.mediaActionDelete),
-          ),
-        ],
+      builder: (dialogCtx) => AppDialog(
+        title: l10n.mediaActionDelete,
+        icon: LucideIcons.trash_2,
+        variant: AppDialogVariant.destructive,
+        actionLabel: l10n.mediaActionDelete,
+        cancelLabel: l10n.actionCancel,
+        onAction: () => Navigator.of(dialogCtx).pop(true),
       ),
     );
     if (confirmed == true) {
@@ -149,21 +146,26 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.xl),
+      padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(AppRadii.md),
+        color: colors.surfaceVariant,
+        borderRadius: appRadius(AppRadii.md),
       ),
       child: Column(
         children: [
-          Icon(Icons.image_outlined, size: 48, color: scheme.onSurfaceVariant),
+          Icon(
+            LucideIcons.image,
+            size: AppSpacing.xxxl,
+            color: colors.onSurfaceVariant,
+          ),
           const SizedBox(height: AppSpacing.md),
           Text(
             l10n.mediaActionReorderHint,
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: styles.bodyMedium,
           ),
         ],
       ),

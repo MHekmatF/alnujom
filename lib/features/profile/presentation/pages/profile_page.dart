@@ -30,6 +30,7 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/main_bottom_nav.dart';
 import '../../../../core/widgets/press_scale.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -77,7 +78,7 @@ class _ProfileView extends StatelessWidget {
             state.status == ProfileStatus.initial) {
           return Scaffold(
             appBar: AppBar(title: Text(l10n.profile_title)),
-            body: const Center(child: CircularProgressIndicator()),
+            body: const AppSpinner.page(),
             bottomNavigationBar: const MainBottomNav(current: MainTab.profile),
           );
         }
@@ -97,8 +98,7 @@ class _ProfileView extends StatelessWidget {
         final colors = AppColors.of(context);
 
         // Resolve gates once so each section can be hidden when empty.
-        final isPublisher =
-            profile.publisherStatus == PublisherStatus.approved;
+        final isPublisher = profile.publisherStatus == PublisherStatus.approved;
         final isAdmin = getIt<PermissionChecker>().any(
           PermissionKeys.adminCategoryKeys,
         );
@@ -319,7 +319,8 @@ class _IdentityHeader extends StatelessWidget {
     final elevation = AppElevation.of(context);
     final gradients = AppGradients.of(context);
 
-    final displayName = profile.fullName ??
+    final displayName =
+        profile.fullName ??
         (profile.username != null
             ? '@${profile.username}'
             : (profile.phone ?? ''));
@@ -561,8 +562,7 @@ class _StatusBadge extends StatelessWidget {
     final icon = switch (status) {
       AccountStatus.approved => Icons.verified_outlined,
       AccountStatus.pending => Icons.hourglass_empty_outlined,
-      AccountStatus.rejected ||
-      AccountStatus.suspended => Icons.block_outlined,
+      AccountStatus.rejected || AccountStatus.suspended => Icons.block_outlined,
       _ => Icons.info_outline,
     };
 

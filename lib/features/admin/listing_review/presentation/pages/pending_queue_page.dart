@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../core/di/injection.dart';
+import '../../../../../core/theme/colors.dart';
 import '../../../../../core/theme/spacing.dart';
+import '../../../../../core/theme/typography.dart';
+import '../../../../../core/widgets/app_button.dart';
+import '../../../../../core/widgets/app_spinner.dart';
+import '../../../../../core/widgets/loading_state.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../bloc/pending_queue_bloc.dart';
 import '../widgets/pending_queue_card.dart';
@@ -62,7 +67,7 @@ class _PendingQueueViewState extends State<_PendingQueueView> {
       body: BlocBuilder<PendingQueueBloc, PendingQueueState>(
         builder: (ctx, state) {
           if (state.isLoadingFirstPage && state.listings.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
+            return const _QueueSkeleton();
           }
           if (state.failure != null && state.listings.isEmpty) {
             return _ErrorState(
@@ -78,7 +83,7 @@ class _PendingQueueViewState extends State<_PendingQueueView> {
               },
               child: ListView(
                 children: [
-                  const SizedBox(height: 80),
+                  const SizedBox(height: AppSpacing.xxxl + AppSpacing.xxl),
                   Center(child: Text(l10n.adminQueueEmpty)),
                 ],
               ),
@@ -91,7 +96,7 @@ class _PendingQueueViewState extends State<_PendingQueueView> {
             },
             child: ListView.separated(
               controller: _scrollController,
-              padding: const EdgeInsets.all(AppSpacing.md),
+              padding: const EdgeInsetsDirectional.all(AppSpacing.md),
               itemCount:
                   state.listings.length + (state.isLoadingNextPage ? 1 : 0),
               separatorBuilder: (_, __) =>
@@ -99,8 +104,8 @@ class _PendingQueueViewState extends State<_PendingQueueView> {
               itemBuilder: (ctx, index) {
                 if (index >= state.listings.length) {
                   return const Padding(
-                    padding: EdgeInsets.all(AppSpacing.md),
-                    child: Center(child: CircularProgressIndicator()),
+                    padding: EdgeInsetsDirectional.all(AppSpacing.md),
+                    child: AppSpinner(),
                   );
                 }
                 return PendingQueueCard(summary: state.listings[index]);
@@ -121,27 +126,44 @@ class _ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
+        padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               message,
               textAlign: TextAlign.center,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: theme.colorScheme.error,
-              ),
+              style: styles.bodyLarge.copyWith(color: colors.error),
             ),
             const SizedBox(height: AppSpacing.md),
-            FilledButton(
+            AppButton(
+              label: AppLocalizations.of(context)!.actionReload,
               onPressed: onRetry,
-              child: Text(AppLocalizations.of(context)!.actionReload),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Shimmer placeholder rows shown while the first queue page loads.
+class _QueueSkeleton extends StatelessWidget {
+  const _QueueSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      padding: const EdgeInsetsDirectional.all(AppSpacing.md),
+      itemCount: 6,
+      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+      itemBuilder: (_, __) => const SizedBox(
+        height: AppSpacing.xxxl + AppSpacing.xxl,
+        child: LoadingState.card(),
       ),
     );
   }

@@ -10,10 +10,16 @@
 // Constitution VI: design tokens only; no inline hex/font/padding.
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 import '../../../../../core/di/injection.dart';
 import '../../../../../core/errors/result.dart';
+import '../../../../../core/theme/colors.dart';
 import '../../../../../core/theme/spacing.dart';
+import '../../../../../core/theme/typography.dart';
+import '../../../../../core/widgets/app_button.dart';
+import '../../../../../core/widgets/app_spinner.dart';
+import '../../../../../core/widgets/app_toast.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../reports/domain/entities/report_reason.dart';
 import '../../../../reports/domain/entities/report_status.dart';
@@ -89,7 +95,7 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
             if (_loading) {
               return Scaffold(
                 appBar: AppBar(title: Text(l10n.reports_queue_title)),
-                body: const Center(child: CircularProgressIndicator()),
+                body: const AppSpinner.page(),
               );
             }
             if (_error != null || _item == null) {
@@ -97,7 +103,7 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
                 appBar: AppBar(title: Text(l10n.reports_queue_title)),
                 body: Center(
                   child: Padding(
-                    padding: const EdgeInsets.all(AppSpacing.xl),
+                    padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -106,9 +112,9 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: AppSpacing.md),
-                        FilledButton(
+                        AppButton(
+                          label: l10n.actionReload,
                           onPressed: _loadReport,
-                          child: Text(l10n.actionReload),
                         ),
                       ],
                     ),
@@ -116,10 +122,7 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
                 ),
               );
             }
-            return _ReportDetailView(
-              item: _item!,
-              onReload: _loadReport,
-            );
+            return _ReportDetailView(item: _item!, onReload: _loadReport);
           },
         ),
       ),
@@ -129,20 +132,13 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
   void _onResolveStateChanged(BuildContext context, ReportResolveState state) {
     final l10n = AppLocalizations.of(context)!;
     if (state is ReportResolveSuccess) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.report_resolved_success)),
-      );
+      AppToast.success(context, l10n.report_resolved_success);
       // Reload so the page reflects the updated status.
       _loadReport();
       // Reset cubit so future actions are not blocked.
       context.read<ReportResolveCubit>().reset();
     } else if (state is ReportResolveFailure) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(state.failure.message),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
+      AppToast.error(context, state.failure.message);
       context.read<ReportResolveCubit>().reset();
     }
   }
@@ -178,7 +174,8 @@ class _ReportDetailView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     final cubit = context.read<ReportResolveCubit>();
 
     final isOpen = item.status.isOpen;
@@ -186,14 +183,14 @@ class _ReportDetailView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.reports_queue_title)),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: const EdgeInsetsDirectional.all(AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ── Listing info ─────────────────────────────────────────────
             Text(
               item.listingTitle.isEmpty ? '—' : item.listingTitle,
-              style: theme.textTheme.headlineSmall,
+              style: styles.titleLarge,
             ),
             const SizedBox(height: AppSpacing.xs),
             _InfoRow(
@@ -209,10 +206,7 @@ class _ReportDetailView extends StatelessWidget {
             ),
             if (item.note != null && item.note!.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.sm),
-              Text(
-                item.note!,
-                style: theme.textTheme.bodyMedium,
-              ),
+              Text(item.note!, style: styles.bodyMedium),
             ],
             const SizedBox(height: AppSpacing.sm),
             _InfoRow(label: 'Reporter', value: item.reporterUserId),
@@ -224,9 +218,7 @@ class _ReportDetailView extends StatelessWidget {
               const SizedBox(height: AppSpacing.xs),
               Text(
                 l10n.report_being_reviewed_by(item.reviewingBy!),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.primary,
-                ),
+                style: styles.bodyMedium.copyWith(color: colors.primary),
               ),
             ],
             const SizedBox(height: AppSpacing.lg),
@@ -235,9 +227,10 @@ class _ReportDetailView extends StatelessWidget {
             if (isOpen) ...[
               // Start review button (soft-claim)
               if (item.status == ReportStatus.newReport)
-                OutlinedButton.icon(
-                  icon: const Icon(Icons.rate_review_outlined),
-                  label: Text(l10n.report_start_review_button),
+                AppButton(
+                  label: l10n.report_start_review_button,
+                  variant: AppButtonVariant.outlined,
+                  icon: LucideIcons.eye,
                   onPressed: () {
                     cubit.startReview(item.id);
                   },
@@ -247,25 +240,22 @@ class _ReportDetailView extends StatelessWidget {
               BlocBuilder<ReportResolveCubit, ReportResolveState>(
                 builder: (ctx, state) {
                   final isLoading = state is ReportResolveLoading;
-                  return FilledButton.icon(
-                    icon: isLoading
-                        ? const SizedBox.square(
-                            dimension: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.gavel_outlined),
-                    label: Text(l10n.report_resolve_button),
+                  return AppButton(
+                    label: l10n.report_resolve_button,
+                    icon: LucideIcons.gavel,
+                    loading: isLoading,
                     onPressed: isLoading
                         ? null
                         : () async {
-                            final result =
-                                await ResolveActionDialog.show(context);
+                            final result = await ResolveActionDialog.show(
+                              context,
+                            );
                             if (result != null && ctx.mounted) {
                               await ctx.read<ReportResolveCubit>().resolve(
-                                    item.id,
-                                    result.action,
-                                    note: result.note,
-                                  );
+                                item.id,
+                                result.action,
+                                note: result.note,
+                              );
                             }
                           },
                   );
@@ -289,23 +279,17 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     final l10n = AppLocalizations.of(context)!;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           l10n.label_colon_prefix(label),
-          style: theme.textTheme.labelMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
+          style: styles.labelMedium.copyWith(color: colors.textMuted),
         ),
-        Expanded(
-          child: Text(
-            value,
-            style: theme.textTheme.bodyMedium,
-          ),
-        ),
+        Expanded(child: Text(value, style: styles.bodyMedium)),
       ],
     );
   }

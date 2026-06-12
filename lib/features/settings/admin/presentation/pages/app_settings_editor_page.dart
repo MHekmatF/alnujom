@@ -8,6 +8,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../core/di/injection.dart';
 import '../../../../../core/theme/spacing.dart';
+import '../../../../../core/widgets/app_spinner.dart';
+import '../../../../../core/widgets/app_toast.dart';
 import '../../../../../features/currencies/domain/entities/currency.dart';
 import '../../../../../features/currencies/domain/usecases/list_currencies.dart';
 import '../../../../../features/listing_form/domain/entities/listing.dart';
@@ -44,23 +46,16 @@ class _AppSettingsEditorView extends StatelessWidget {
         listener: (ctx, state) {
           if (state is AppSettingsEditorLoaded) {
             if (state.lastSavedKey != null && state.saveFailure == null) {
-              ScaffoldMessenger.of(ctx).showSnackBar(
-                SnackBar(content: Text(l10n.settingsEditorSavedSnackbar)),
-              );
+              AppToast.success(ctx, l10n.settingsEditorSavedSnackbar);
             }
             if (state.saveFailure != null) {
-              ScaffoldMessenger.of(ctx).showSnackBar(
-                SnackBar(
-                  content: Text(l10n.settingsEditorSaveError),
-                  backgroundColor: Theme.of(ctx).colorScheme.error,
-                ),
-              );
+              AppToast.error(ctx, l10n.settingsEditorSaveError);
             }
           }
         },
         builder: (ctx, state) {
           if (state is AppSettingsEditorLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const AppSpinner.page();
           }
           if (state is AppSettingsEditorError) {
             return Center(
@@ -80,7 +75,7 @@ class _AppSettingsEditorView extends StatelessWidget {
           if (state is AppSettingsEditorLoaded) {
             return _SettingsForm(state: state);
           }
-          return const Center(child: CircularProgressIndicator());
+          return const AppSpinner.page();
         },
       ),
     );
@@ -102,7 +97,7 @@ class _SettingsForm extends StatelessWidget {
     return RefreshIndicator(
       onRefresh: cubit.load,
       child: ListView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
         children: [
           // ── General ────────────────────────────────────────────────────────
           SettingsSectionHeader(l10n.settingsEditorSectionGeneral),
@@ -221,11 +216,9 @@ class _CurrencyPickerState extends State<_CurrencyPicker> {
   @override
   Widget build(BuildContext context) {
     if (_loadingCurrencies) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(AppSpacing.sm),
-          child: CircularProgressIndicator(strokeWidth: 2),
-        ),
+      return const Padding(
+        padding: EdgeInsetsDirectional.all(AppSpacing.sm),
+        child: AppSpinner(),
       );
     }
 

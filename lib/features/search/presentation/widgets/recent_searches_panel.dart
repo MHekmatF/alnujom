@@ -72,24 +72,39 @@ class RecentSearchesPanel extends StatelessWidget {
                 ),
               ),
               for (final query in state.queries)
-                ListTile(
-                  leading: Icon(
-                    LucideIcons.clock,
-                    size: AppSpacing.lg,
-                    color: colors.textMuted,
-                  ),
-                  title: Text(
-                    query,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: styles.bodyLarge,
-                  ),
-                  trailing: Icon(
-                    LucideIcons.arrow_up_left,
-                    size: AppSpacing.lg,
-                    color: colors.textMuted,
-                  ),
+                // Light tappable row (history icon + query + recall arrow).
+                InkWell(
                   onTap: () => onSelected(query),
+                  child: Padding(
+                    padding: const EdgeInsetsDirectional.symmetric(
+                      horizontal: AppSpacing.lg,
+                      vertical: AppSpacing.md,
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          LucideIcons.clock,
+                          size: AppSpacing.lg,
+                          color: colors.textMuted,
+                        ),
+                        const SizedBox(width: AppSpacing.md),
+                        Expanded(
+                          child: Text(
+                            query,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: styles.bodyLarge,
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.sm),
+                        Icon(
+                          LucideIcons.arrow_up_left,
+                          size: AppSpacing.lg,
+                          color: colors.textMuted,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
             ],
           );

@@ -12,8 +12,12 @@ import 'package:intl/intl.dart' hide TextDirection;
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../bloc/agency_listings_bloc.dart';
@@ -50,13 +54,18 @@ class _AgencyListingsView extends StatelessWidget {
       body: BlocBuilder<AgencyListingsBloc, AgencyListingsState>(
         builder: (context, state) {
           return switch (state) {
-            AgencyListingsLoading() =>
-              const Center(child: CircularProgressIndicator()),
-            AgencyListingsError() =>
-              Center(child: Text(l10n.agency_generic_error)),
-            AgencyListingsLoaded(:final items, :final hasMore) => items.isEmpty
-                ? Center(child: Text(l10n.agency_listings_empty))
-                : _ListBody(agencyId: agencyId, items: items, hasMore: hasMore),
+            AgencyListingsLoading() => const AppSpinner.page(),
+            AgencyListingsError() => Center(
+              child: Text(l10n.agency_generic_error),
+            ),
+            AgencyListingsLoaded(:final items, :final hasMore) =>
+              items.isEmpty
+                  ? Center(child: Text(l10n.agency_listings_empty))
+                  : _ListBody(
+                      agencyId: agencyId,
+                      items: items,
+                      hasMore: hasMore,
+                    ),
           };
         },
       ),
@@ -79,24 +88,24 @@ class _ListBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return RefreshIndicator(
       onRefresh: () async {
-        context
-            .read<AgencyListingsBloc>()
-            .add(AgencyListingsRefreshRequested(agencyId));
+        context.read<AgencyListingsBloc>().add(
+          AgencyListingsRefreshRequested(agencyId),
+        );
       },
       child: ListView.builder(
         itemCount: items.length + (hasMore ? 1 : 0),
         itemBuilder: (context, index) {
           if (index >= (items.length * 0.8).floor() && hasMore) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              context
-                  .read<AgencyListingsBloc>()
-                  .add(AgencyListingsMoreLoaded(agencyId));
+              context.read<AgencyListingsBloc>().add(
+                AgencyListingsMoreLoaded(agencyId),
+              );
             });
           }
           if (index >= items.length) {
             return const Padding(
-              padding: EdgeInsets.all(AppSpacing.lg),
-              child: Center(child: CircularProgressIndicator()),
+              padding: EdgeInsetsDirectional.all(AppSpacing.lg),
+              child: AppSpinner(),
             );
           }
           return _ListingCard(row: items[index]);
@@ -114,8 +123,8 @@ class _ListingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     final id = row['id'] as String?;
     final title = (row['title'] as String?) ?? '';
     final amount = row['primary_amount'];
@@ -137,7 +146,7 @@ class _ListingCard extends StatelessWidget {
           child: Row(
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.circular(AppRadii.sm),
+                borderRadius: appRadius(AppRadii.sm),
                 child: SizedBox(
                   width: AppSpacing.xxxl + AppSpacing.xl,
                   height: AppSpacing.xxxl + AppSpacing.xl,
@@ -146,13 +155,13 @@ class _ListingCard extends StatelessWidget {
                           imageUrl: imagePath,
                           fit: BoxFit.cover,
                           errorWidget: (_, __, ___) =>
-                              ColoredBox(color: scheme.surfaceContainerHighest),
+                              ColoredBox(color: colors.surfaceVariant),
                         )
                       : ColoredBox(
-                          color: scheme.surfaceContainerHighest,
+                          color: colors.surfaceVariant,
                           child: Icon(
                             Icons.image_not_supported_outlined,
-                            color: scheme.onSurfaceVariant,
+                            color: colors.onSurfaceVariant,
                           ),
                         ),
                 ),
@@ -164,7 +173,7 @@ class _ListingCard extends StatelessWidget {
                   children: [
                     Text(
                       title.isEmpty ? '—' : title,
-                      style: theme.textTheme.titleSmall,
+                      style: styles.titleMedium,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -175,8 +184,8 @@ class _ListingCard extends StatelessWidget {
                           _formatAmount(context, amount as num),
                           currency,
                         ),
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: scheme.onSurfaceVariant,
+                        style: styles.bodyMedium.copyWith(
+                          color: colors.onSurfaceVariant,
                         ),
                       ),
                     ],

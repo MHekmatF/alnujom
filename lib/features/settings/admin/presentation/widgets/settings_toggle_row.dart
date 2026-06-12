@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../../core/theme/spacing.dart';
+import '../../../../../../core/theme/typography.dart';
+import '../../../../../../core/widgets/app_spinner.dart';
 
 /// A single-row labeled toggle for a boolean setting value.
 ///
@@ -29,19 +31,15 @@ class SettingsToggleRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+      padding: const EdgeInsetsDirectional.symmetric(vertical: AppSpacing.xs),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Expanded(
-            child: Text(label, style: Theme.of(context).textTheme.bodyMedium),
+            child: Text(label, style: AppTextStyles.of(context).bodyMedium),
           ),
           isSaving
-              ? const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
+              ? const AppSpinner()
               : Switch(value: value, onChanged: onChanged),
         ],
       ),

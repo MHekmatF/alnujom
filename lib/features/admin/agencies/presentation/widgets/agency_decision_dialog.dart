@@ -7,8 +7,12 @@
 // Returns [AgencyDecisionResult] via Navigator.pop on confirm; null on cancel.
 // Constitution VI: design tokens. Constitution IX: zero Supabase imports.
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
+import '../../../../../core/theme/colors.dart';
 import '../../../../../core/theme/spacing.dart';
+import '../../../../../core/theme/typography.dart';
+import '../../../../../core/widgets/app_button.dart';
 import '../../../../../l10n/app_localizations.dart';
 
 // ─── Action enum ─────────────────────────────────────────────────────────────
@@ -65,10 +69,8 @@ class _AgencyDecisionDialogState extends State<AgencyDecisionDialog> {
   bool _confirmingDestructive = false;
 
   // Reject fields
-  final TextEditingController _rejectPresetController =
-      TextEditingController();
-  final TextEditingController _rejectDetailController =
-      TextEditingController();
+  final TextEditingController _rejectPresetController = TextEditingController();
+  final TextEditingController _rejectDetailController = TextEditingController();
 
   // Suspend reason field
   final TextEditingController _suspendReasonController =
@@ -119,8 +121,7 @@ class _AgencyDecisionDialogState extends State<AgencyDecisionDialog> {
     }
   }
 
-  void _onBackFromConfirm() =>
-      setState(() => _confirmingDestructive = false);
+  void _onBackFromConfirm() => setState(() => _confirmingDestructive = false);
 
   @override
   Widget build(BuildContext context) {
@@ -135,9 +136,13 @@ class _AgencyDecisionDialogState extends State<AgencyDecisionDialog> {
   }
 
   // ── Main step ────────────────────────────────────────────────────────────────
+  // Kept as a hand-rolled AlertDialog: the confirm action is gated on the
+  // reject preset, and the suspend flow swaps into a second confirmation
+  // step — neither fits AppDialog's fixed action pair. Visuals mirror the
+  // AppDialog idiom (token type, AppButton actions).
 
   Widget _buildMainStep(AppLocalizations l10n) {
-    final theme = Theme.of(context);
+    final styles = AppTextStyles.of(context);
     final action = widget.action;
 
     String title;
@@ -162,10 +167,7 @@ class _AgencyDecisionDialogState extends State<AgencyDecisionDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              l10n.agency_reject_reason_label,
-              style: theme.textTheme.labelLarge,
-            ),
+            Text(l10n.agency_reject_reason_label, style: styles.labelLarge),
             const SizedBox(height: AppSpacing.sm),
             // Preset field (required)
             TextField(
@@ -177,7 +179,13 @@ class _AgencyDecisionDialogState extends State<AgencyDecisionDialog> {
                 hintText: l10n.agency_reject_reason_label,
               ),
               onChanged: (_) => setState(() {}),
-              buildCounter: (_, {required currentLength, required isFocused, maxLength}) => null,
+              buildCounter:
+                  (
+                    _, {
+                    required currentLength,
+                    required isFocused,
+                    maxLength,
+                  }) => null,
             ),
             const SizedBox(height: AppSpacing.md),
             // Optional detail
@@ -189,7 +197,13 @@ class _AgencyDecisionDialogState extends State<AgencyDecisionDialog> {
                 border: OutlineInputBorder(),
                 isDense: true,
               ),
-              buildCounter: (_, {required currentLength, required isFocused, maxLength}) => null,
+              buildCounter:
+                  (
+                    _, {
+                    required currentLength,
+                    required isFocused,
+                    maxLength,
+                  }) => null,
             ),
           ],
         ),
@@ -200,10 +214,7 @@ class _AgencyDecisionDialogState extends State<AgencyDecisionDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              l10n.agency_suspend_confirm_body,
-              style: theme.textTheme.bodyMedium,
-            ),
+            Text(l10n.agency_suspend_confirm_body, style: styles.bodyMedium),
             const SizedBox(height: AppSpacing.md),
             TextField(
               controller: _suspendReasonController,
@@ -213,58 +224,79 @@ class _AgencyDecisionDialogState extends State<AgencyDecisionDialog> {
                 border: OutlineInputBorder(),
                 isDense: true,
               ),
-              buildCounter: (_, {required currentLength, required isFocused, maxLength}) => null,
+              buildCounter:
+                  (
+                    _, {
+                    required currentLength,
+                    required isFocused,
+                    maxLength,
+                  }) => null,
             ),
           ],
         ),
       );
     }
 
-    final bool isDestructive = action == AgencyDecisionAction.suspend ||
+    final bool isDestructive =
+        action == AgencyDecisionAction.suspend ||
         action == AgencyDecisionAction.reject;
 
     return AlertDialog(
-      title: Text(title),
+      title: Text(title, style: styles.titleLarge),
       content: content,
       actions: [
-        TextButton(
+        AppButton(
+          label: MaterialLocalizations.of(context).cancelButtonLabel,
+          variant: AppButtonVariant.text,
           onPressed: _onCancel,
-          child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
         ),
-        FilledButton(
+        AppButton(
+          label: title,
+          variant: isDestructive
+              ? AppButtonVariant.destructive
+              : AppButtonVariant.filledPrimary,
           onPressed: canConfirm ? _onConfirm : null,
-          style: isDestructive
-              ? FilledButton.styleFrom(
-                  backgroundColor: theme.colorScheme.error,
-                  foregroundColor: theme.colorScheme.onError,
-                )
-              : null,
-          child: Text(title),
         ),
+        const SizedBox(width: AppSpacing.xs),
       ],
     );
   }
 
   // ── Suspend confirmation step ─────────────────────────────────────────────────
+  // "Cancel" returns to the main step (does not pop), so this stays a
+  // hand-rolled AlertDialog styled like AppDialog's destructive variant.
 
   Widget _buildSuspendConfirmStep(AppLocalizations l10n) {
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     return AlertDialog(
-      title: Text(l10n.agency_suspend_confirm_title),
-      content: Text(l10n.agency_suspend_confirm_body),
+      icon: Container(
+        width: AppSpacing.xxxl,
+        height: AppSpacing.xxxl,
+        decoration: BoxDecoration(
+          color: colors.error.withValues(alpha: 0.12),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          LucideIcons.triangle_alert,
+          color: colors.error,
+          size: AppSpacing.xl,
+        ),
+      ),
+      title: Text(l10n.agency_suspend_confirm_title, style: styles.titleLarge),
+      content: Text(l10n.agency_suspend_confirm_body, style: styles.bodyMedium),
       actions: [
-        TextButton(
+        AppButton(
+          label: MaterialLocalizations.of(context).cancelButtonLabel,
+          variant: AppButtonVariant.text,
           onPressed: _onBackFromConfirm,
-          child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
         ),
-        FilledButton(
+        AppButton(
+          label: l10n.agency_action_suspend,
+          variant: AppButtonVariant.destructive,
           onPressed: _onConfirm,
-          style: FilledButton.styleFrom(
-            backgroundColor: theme.colorScheme.error,
-            foregroundColor: theme.colorScheme.onError,
-          ),
-          child: Text(l10n.agency_action_suspend),
         ),
+        const SizedBox(width: AppSpacing.xs),
       ],
     );
   }

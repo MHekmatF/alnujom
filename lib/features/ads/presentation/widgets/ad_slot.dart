@@ -31,6 +31,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../listing_form/domain/entities/listing.dart'
     show PropertyType, PropertyTypeDb;
@@ -147,8 +148,6 @@ class _AdSlotView extends StatelessWidget {
   void _showFallback(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final message = l10n?.adSlotTargetNotFound ?? 'Link unavailable';
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    AppToast.warning(context, message);
   }
 }

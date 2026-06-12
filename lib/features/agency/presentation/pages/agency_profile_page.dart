@@ -13,8 +13,12 @@ import 'package:intl/intl.dart' hide TextDirection;
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/agency.dart';
@@ -63,10 +67,10 @@ class _AgencyProfileView extends StatelessWidget {
       body: BlocBuilder<AgencyVerificationCubit, AgencyVerificationState>(
         builder: (context, state) {
           return switch (state) {
-            AgencyVerificationLoading() =>
-              const Center(child: CircularProgressIndicator()),
-            AgencyVerificationError() =>
-              Center(child: Text(l10n.agency_generic_error)),
+            AgencyVerificationLoading() => const AppSpinner.page(),
+            AgencyVerificationError() => Center(
+              child: Text(l10n.agency_generic_error),
+            ),
             AgencyVerificationReady(:final agency) =>
               agency.status == AgencyStatus.approved
                   ? _ProfileBody(agency: agency)
@@ -86,16 +90,16 @@ class _ProfileBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
 
     return ListView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
       children: [
         Row(
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(AppRadii.md),
+              borderRadius: appRadius(AppRadii.md),
               child: SizedBox(
                 width: AppSpacing.xxxl,
                 height: AppSpacing.xxxl,
@@ -103,9 +107,9 @@ class _ProfileBody extends StatelessWidget {
                     ? CachedNetworkImage(
                         imageUrl: agency.logoPath!,
                         fit: BoxFit.cover,
-                        errorWidget: (_, __, ___) => _logoFallback(scheme),
+                        errorWidget: (_, __, ___) => _logoFallback(colors),
                       )
-                    : _logoFallback(scheme),
+                    : _logoFallback(colors),
               ),
             ),
             const SizedBox(width: AppSpacing.md),
@@ -113,16 +117,20 @@ class _ProfileBody extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(agency.name, style: theme.textTheme.titleLarge),
+                  Text(agency.name, style: styles.titleLarge),
                   const SizedBox(height: AppSpacing.xs),
                   Row(
                     children: [
-                      Icon(Icons.verified, size: AppSpacing.lg, color: scheme.primary),
+                      Icon(
+                        Icons.verified,
+                        size: AppSpacing.lg,
+                        color: colors.primary,
+                      ),
                       const SizedBox(width: AppSpacing.xs),
                       Text(
                         l10n.agency_verified_badge,
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: scheme.primary,
+                        style: styles.labelMedium.copyWith(
+                          color: colors.primary,
                         ),
                       ),
                     ],
@@ -135,7 +143,7 @@ class _ProfileBody extends StatelessWidget {
         if (agency.description != null &&
             agency.description!.trim().isNotEmpty) ...[
           const SizedBox(height: AppSpacing.lg),
-          Text(agency.description!, style: theme.textTheme.bodyMedium),
+          Text(agency.description!, style: styles.bodyMedium),
         ],
         if (agency.phone != null && agency.phone!.isNotEmpty)
           _ContactRow(icon: Icons.phone_outlined, value: agency.phone!),
@@ -144,28 +152,29 @@ class _ProfileBody extends StatelessWidget {
         if (agency.address != null && agency.address!.isNotEmpty)
           _ContactRow(icon: Icons.location_on_outlined, value: agency.address!),
         const SizedBox(height: AppSpacing.lg),
-        Text(l10n.agency_manage_listings, style: theme.textTheme.titleMedium),
+        Text(l10n.agency_manage_listings, style: styles.titleMedium),
         const SizedBox(height: AppSpacing.sm),
         BlocBuilder<AgencyListingsBloc, AgencyListingsState>(
           builder: (context, state) {
             return switch (state) {
               AgencyListingsLoading() => const Padding(
-                  padding: EdgeInsets.all(AppSpacing.lg),
-                  child: Center(child: CircularProgressIndicator()),
-                ),
+                padding: EdgeInsetsDirectional.all(AppSpacing.lg),
+                child: AppSpinner(),
+              ),
               AgencyListingsError() => Text(l10n.agency_generic_error),
-              AgencyListingsLoaded(:final items) => items.isEmpty
-                  ? Text(
-                      l10n.agency_listings_empty,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: scheme.onSurfaceVariant,
+              AgencyListingsLoaded(:final items) =>
+                items.isEmpty
+                    ? Text(
+                        l10n.agency_listings_empty,
+                        style: styles.bodyMedium.copyWith(
+                          color: colors.onSurfaceVariant,
+                        ),
+                      )
+                    : Column(
+                        children: [
+                          for (final row in items) _ListingRow(row: row),
+                        ],
                       ),
-                    )
-                  : Column(
-                      children: [
-                        for (final row in items) _ListingRow(row: row),
-                      ],
-                    ),
             };
           },
         ),
@@ -173,10 +182,10 @@ class _ProfileBody extends StatelessWidget {
     );
   }
 
-  Widget _logoFallback(ColorScheme scheme) {
+  Widget _logoFallback(AppColors colors) {
     return ColoredBox(
-      color: scheme.surfaceContainerHighest,
-      child: Icon(Icons.business_outlined, color: scheme.onSurfaceVariant),
+      color: colors.surfaceVariant,
+      child: Icon(Icons.business_outlined, color: colors.onSurfaceVariant),
     );
   }
 }
@@ -189,12 +198,12 @@ class _ContactRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final colors = AppColors.of(context);
     return Padding(
       padding: const EdgeInsetsDirectional.only(top: AppSpacing.sm),
       child: Row(
         children: [
-          Icon(icon, size: AppSpacing.lg, color: scheme.onSurfaceVariant),
+          Icon(icon, size: AppSpacing.lg, color: colors.onSurfaceVariant),
           const SizedBox(width: AppSpacing.sm),
           Expanded(child: Text(value)),
         ],
@@ -211,8 +220,8 @@ class _ListingRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     final id = row['id'] as String?;
     final title = (row['title'] as String?) ?? '';
     final amount = row['primary_amount'];
@@ -231,7 +240,7 @@ class _ListingRow extends StatelessWidget {
           child: Row(
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.circular(AppRadii.sm),
+                borderRadius: appRadius(AppRadii.sm),
                 child: SizedBox(
                   width: AppSpacing.xxxl,
                   height: AppSpacing.xxxl,
@@ -240,13 +249,13 @@ class _ListingRow extends StatelessWidget {
                           imageUrl: imagePath,
                           fit: BoxFit.cover,
                           errorWidget: (_, __, ___) =>
-                              ColoredBox(color: scheme.surfaceContainerHighest),
+                              ColoredBox(color: colors.surfaceVariant),
                         )
                       : ColoredBox(
-                          color: scheme.surfaceContainerHighest,
+                          color: colors.surfaceVariant,
                           child: Icon(
                             Icons.image_not_supported_outlined,
-                            color: scheme.onSurfaceVariant,
+                            color: colors.onSurfaceVariant,
                           ),
                         ),
                 ),
@@ -258,7 +267,7 @@ class _ListingRow extends StatelessWidget {
                   children: [
                     Text(
                       title.isEmpty ? '—' : title,
-                      style: theme.textTheme.titleSmall,
+                      style: styles.titleMedium,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -269,8 +278,8 @@ class _ListingRow extends StatelessWidget {
                           _formatAmount(context, amount as num),
                           currency,
                         ),
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: scheme.onSurfaceVariant,
+                        style: styles.bodyMedium.copyWith(
+                          color: colors.onSurfaceVariant,
                         ),
                       ),
                     ],

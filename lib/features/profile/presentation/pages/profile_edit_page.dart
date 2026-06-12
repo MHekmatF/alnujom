@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_spinner.dart';
+import '../../../../core/widgets/app_text_field.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/repositories/profile_repository.dart';
 import '../cubit/profile_cubit.dart';
@@ -28,11 +34,17 @@ class _ProfileEditView extends StatefulWidget {
 }
 
 class _ProfileEditViewState extends State<_ProfileEditView> {
-  final _formKey = GlobalKey<FormState>();
   final _fullNameController = TextEditingController();
   final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _avatarUrlController = TextEditingController();
+
+  // Field-level validation errors (same rules as the original Form
+  // validators — surfaced through AppTextField.errorText on Save).
+  String? _fullNameError;
+  String? _usernameError;
+  String? _emailError;
+  String? _avatarUrlError;
 
   bool _initialized = false;
   bool _savePending = false;
@@ -57,8 +69,49 @@ class _ProfileEditViewState extends State<_ProfileEditView> {
     context.read<ProfileCubit>().startEdit();
   }
 
+  /// Validation rules preserved 1:1 from the original `TextFormField`
+  /// validators; errors render via each field's `errorText`.
+  bool _validate(AppLocalizations l10n) {
+    String? fullNameError;
+    final fullName = _fullNameController.text.trim();
+    if (fullName.isNotEmpty && fullName.length > 100) {
+      fullNameError = l10n.invalid_full_name;
+    }
+
+    String? usernameError;
+    final username = _usernameController.text.trim().toLowerCase();
+    if (username.isNotEmpty &&
+        !RegExp(r'^[a-z0-9_]{3,30}$').hasMatch(username)) {
+      usernameError = l10n.invalid_username;
+    }
+
+    String? emailError;
+    final email = _emailController.text.trim();
+    if (email.isNotEmpty &&
+        !RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email)) {
+      emailError = l10n.invalid_email;
+    }
+
+    String? avatarUrlError;
+    final avatarUrl = _avatarUrlController.text.trim();
+    if (avatarUrl.isNotEmpty && !avatarUrl.startsWith('https://')) {
+      avatarUrlError = l10n.invalid_avatar_url;
+    }
+
+    setState(() {
+      _fullNameError = fullNameError;
+      _usernameError = usernameError;
+      _emailError = emailError;
+      _avatarUrlError = avatarUrlError;
+    });
+    return fullNameError == null &&
+        usernameError == null &&
+        emailError == null &&
+        avatarUrlError == null;
+  }
+
   Future<void> _save(AppLocalizations l10n) async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_validate(l10n)) return;
 
     final cubit = context.read<ProfileCubit>();
     setState(() => _savePending = true);
@@ -74,7 +127,6 @@ class _ProfileEditViewState extends State<_ProfileEditView> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
 
     return BlocConsumer<ProfileCubit, ProfileState>(
       listener: (context, state) {
@@ -92,10 +144,12 @@ class _ProfileEditViewState extends State<_ProfileEditView> {
             state.status == ProfileStatus.initial) {
           return Scaffold(
             appBar: AppBar(title: Text(l10n.profile_title)),
-            body: const Center(child: CircularProgressIndicator()),
+            body: const AppSpinner.page(),
           );
         }
 
+        final colors = AppColors.of(context);
+        final styles = AppTextStyles.of(context);
         final isSaving = state.status == ProfileStatus.saving;
         final failure = state.status == ProfileStatus.saveFailure
             ? state.failure
@@ -108,114 +162,70 @@ class _ProfileEditViewState extends State<_ProfileEditView> {
           appBar: AppBar(
             title: Text(l10n.profile_title),
             leading: IconButton(
-              icon: const Icon(Icons.close),
+              icon: const Icon(LucideIcons.x),
               onPressed: () {
                 if (Navigator.canPop(context)) Navigator.pop(context);
               },
             ),
           ),
           body: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSpacing.xl),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  TextFormField(
-                    controller: _fullNameController,
-                    decoration: InputDecoration(
-                      labelText: l10n.profile_full_name_label,
-                    ),
-                    validator: (v) {
-                      if (v == null) return null;
-                      final t = v.trim();
-                      if (t.isNotEmpty && t.length > 100) {
-                        return l10n.invalid_full_name;
-                      }
-                      return null;
-                    },
+            padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                AppTextField(
+                  label: l10n.profile_full_name_label,
+                  controller: _fullNameController,
+                  errorText: _fullNameError,
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                AppTextField(
+                  label: l10n.profile_username_label,
+                  controller: _usernameController,
+                  errorText: _usernameError,
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                AppTextField(
+                  label: l10n.profile_email_label,
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  errorText: _emailError,
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                AppTextField(
+                  label: l10n.profile_avatar_label,
+                  controller: _avatarUrlController,
+                  keyboardType: TextInputType.url,
+                  errorText: _avatarUrlError,
+                ),
+                const SizedBox(height: AppSpacing.xl),
+                if (errorText != null) ...[
+                  Text(
+                    errorText,
+                    style: styles.bodyMedium.copyWith(color: colors.error),
+                    textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _usernameController,
-                    decoration: InputDecoration(
-                      labelText: l10n.profile_username_label,
-                    ),
-                    validator: (v) {
-                      if (v == null || v.trim().isEmpty) return null;
-                      final t = v.trim().toLowerCase();
-                      if (!RegExp(r'^[a-z0-9_]{3,30}$').hasMatch(t)) {
-                        return l10n.invalid_username;
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      labelText: l10n.profile_email_label,
-                    ),
-                    validator: (v) {
-                      if (v == null || v.trim().isEmpty) return null;
-                      if (!RegExp(
-                        r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
-                      ).hasMatch(v.trim())) {
-                        return l10n.invalid_email;
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _avatarUrlController,
-                    keyboardType: TextInputType.url,
-                    decoration: InputDecoration(
-                      labelText: l10n.profile_avatar_label,
-                    ),
-                    validator: (v) {
-                      if (v == null || v.trim().isEmpty) return null;
-                      if (!v.trim().startsWith('https://')) {
-                        return l10n.invalid_avatar_url;
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 24),
-                  if (errorText != null) ...[
-                    Text(
-                      errorText,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.error,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 12),
-                  ],
-                  FilledButton(
-                    onPressed: isSaving ? null : () => _save(l10n),
-                    child: isSaving
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Text(l10n.profile_save_button),
-                  ),
-                  const SizedBox(height: 8),
-                  TextButton(
-                    onPressed: isSaving
-                        ? null
-                        : () {
-                            if (Navigator.canPop(context)) {
-                              Navigator.pop(context);
-                            }
-                          },
-                    child: Text(l10n.profile_cancel_button),
-                  ),
+                  const SizedBox(height: AppSpacing.md),
                 ],
-              ),
+                AppButton.filledPrimary(
+                  label: l10n.profile_save_button,
+                  expanded: true,
+                  loading: isSaving,
+                  onPressed: isSaving ? null : () => _save(l10n),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                AppButton(
+                  label: l10n.profile_cancel_button,
+                  variant: AppButtonVariant.text,
+                  onPressed: isSaving
+                      ? null
+                      : () {
+                          if (Navigator.canPop(context)) {
+                            Navigator.pop(context);
+                          }
+                        },
+                ),
+              ],
             ),
           ),
         );

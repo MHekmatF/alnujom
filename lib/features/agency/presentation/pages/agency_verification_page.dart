@@ -5,14 +5,25 @@
 // side) + an optional document photo upload (D-2) + a status banner. A rejected
 // agency surfaces the rejection REASON (D-3); an approved agency shows the
 // approved banner and disables resubmission. Phase 2 tokens; strings via l10n.
+//
+// Phase 28 (premium-worth pass) — purely visual retrofit: AppTextField,
+// AppButton, AppToast, AppSpinner. Behavior unchanged.
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/errors/result.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_spinner.dart';
+import '../../../../core/widgets/app_text_field.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/agency.dart';
@@ -55,24 +66,22 @@ class _AgencyVerificationView extends StatelessWidget {
             curr is AgencyVerificationReady && curr.submitted,
         listener: (context, state) {
           if (state is AgencyVerificationReady && state.submitted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(l10n.agency_verify_submitted)),
-            );
+            AppToast.success(context, l10n.agency_verify_submitted);
           }
         },
         builder: (context, state) {
           return switch (state) {
-            AgencyVerificationLoading() =>
-              const Center(child: CircularProgressIndicator()),
-            AgencyVerificationError() =>
-              Center(child: Text(l10n.agency_generic_error)),
+            AgencyVerificationLoading() => const AppSpinner.page(),
+            AgencyVerificationError() => Center(
+              child: Text(l10n.agency_generic_error),
+            ),
             AgencyVerificationReady() => _VerificationForm(
-                agencyId: agencyId,
-                agency: state.agency,
-                request: state.request,
-                submitting: state.submitting,
-                errorCode: state.errorCode,
-              ),
+              agencyId: agencyId,
+              agency: state.agency,
+              request: state.request,
+              submitting: state.submitting,
+              errorCode: state.errorCode,
+            ),
           };
         },
       ),
@@ -124,7 +133,6 @@ class _VerificationFormState extends State<_VerificationForm> {
   }
 
   Future<void> _pickDocument() async {
-    final messenger = ScaffoldMessenger.of(context);
     final l10n = AppLocalizations.of(context)!;
     final file = await ImagePicker().pickImage(
       source: ImageSource.gallery,
@@ -152,16 +160,12 @@ class _VerificationFormState extends State<_VerificationForm> {
           });
         case FailureResult():
           setState(() => _uploadingDoc = false);
-          messenger.showSnackBar(
-            SnackBar(content: Text(l10n.agency_action_failed)),
-          );
+          AppToast.error(context, l10n.agency_action_failed);
       }
     } catch (_) {
       if (!mounted) return;
       setState(() => _uploadingDoc = false);
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.agency_action_failed)),
-      );
+      AppToast.error(context, l10n.agency_action_failed);
     }
   }
 
@@ -170,18 +174,18 @@ class _VerificationFormState extends State<_VerificationForm> {
     final registration = _registrationController.text.trim();
     if (id.isEmpty || registration.isEmpty) return;
     context.read<AgencyVerificationCubit>().submit(
-          agencyId: widget.agencyId,
-          idDocumentNumber: id,
-          registrationNumber: registration,
-          evidenceUrls: _evidenceUrls.isEmpty ? null : List.of(_evidenceUrls),
-        );
+      agencyId: widget.agencyId,
+      idDocumentNumber: id,
+      registrationNumber: registration,
+      evidenceUrls: _evidenceUrls.isEmpty ? null : List.of(_evidenceUrls),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
 
     final isApproved = widget.agency.status == AgencyStatus.approved;
     final isRejected = widget.agency.status == AgencyStatus.rejected;
@@ -189,16 +193,16 @@ class _VerificationFormState extends State<_VerificationForm> {
     final rejectionReason = widget.request?.decisionReason;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Status banner.
           Container(
-            padding: const EdgeInsets.all(AppSpacing.md),
+            padding: const EdgeInsetsDirectional.all(AppSpacing.md),
             decoration: BoxDecoration(
-              color: scheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(AppRadii.md),
+              color: colors.surfaceVariant,
+              borderRadius: appRadius(AppRadii.md),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -211,66 +215,48 @@ class _VerificationFormState extends State<_VerificationForm> {
                     l10n.agency_reject_reason_with_value(
                       rejectionReason ?? l10n.agency_status_rejected,
                     ),
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: scheme.error,
-                    ),
+                    style: styles.bodyMedium.copyWith(color: colors.error),
                   ),
                 ],
               ],
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
-          TextField(
+          AppTextField(
             controller: _idController,
             enabled: canSubmit,
-            decoration: InputDecoration(
-              labelText: l10n.agency_verify_id_number_label,
-              border: const OutlineInputBorder(),
-            ),
+            label: l10n.agency_verify_id_number_label,
           ),
           const SizedBox(height: AppSpacing.md),
-          TextField(
+          AppTextField(
             controller: _registrationController,
             enabled: canSubmit,
-            decoration: InputDecoration(
-              labelText: l10n.agency_verify_registration_label,
-              border: const OutlineInputBorder(),
-            ),
+            label: l10n.agency_verify_registration_label,
           ),
           const SizedBox(height: AppSpacing.md),
           // D-2: optional supporting-document photo upload.
-          OutlinedButton.icon(
+          AppButton(
+            label: _evidenceUrls.isEmpty
+                ? l10n.agency_verify_documents_label
+                : '${l10n.agency_verify_documents_label} (${_evidenceUrls.length})',
+            variant: AppButtonVariant.outlined,
+            icon: LucideIcons.paperclip,
+            loading: _uploadingDoc,
             onPressed: canSubmit ? _pickDocument : null,
-            icon: _uploadingDoc
-                ? const SizedBox(
-                    width: AppSpacing.md,
-                    height: AppSpacing.md,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.attach_file_outlined),
-            label: Text(
-              _evidenceUrls.isEmpty
-                  ? l10n.agency_verify_documents_label
-                  : '${l10n.agency_verify_documents_label} (${_evidenceUrls.length})',
-            ),
           ),
           if (widget.errorCode != null) ...[
             const SizedBox(height: AppSpacing.md),
             Text(
               l10n.agency_action_failed,
-              style: theme.textTheme.bodySmall?.copyWith(color: scheme.error),
+              style: styles.labelMedium.copyWith(color: colors.error),
             ),
           ],
           const SizedBox(height: AppSpacing.xl),
-          FilledButton(
+          AppButton.filledPrimary(
+            label: l10n.agency_verify_submit_button,
+            expanded: true,
+            loading: widget.submitting,
             onPressed: canSubmit ? _submit : null,
-            child: widget.submitting
-                ? const SizedBox(
-                    width: AppSpacing.lg,
-                    height: AppSpacing.lg,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(l10n.agency_verify_submit_button),
           ),
         ],
       ),

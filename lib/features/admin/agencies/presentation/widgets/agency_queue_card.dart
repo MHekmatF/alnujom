@@ -6,17 +6,18 @@
 // Constitution VI: design tokens only; no inline hex/font/padding.
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/colors.dart';
+import '../../../../../core/theme/radii.dart';
 import '../../../../../core/theme/spacing.dart';
+import '../../../../../core/theme/typography.dart';
+import '../../../../../core/widgets/_widget_support.dart';
+import '../../../../../core/widgets/press_scale.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../agency/domain/entities/agency_status.dart';
 import '../../domain/entities/agency_verification_item.dart';
 
 class AgencyQueueCard extends StatelessWidget {
-  const AgencyQueueCard({
-    super.key,
-    required this.item,
-    required this.onTap,
-  });
+  const AgencyQueueCard({super.key, required this.item, required this.onTap});
 
   final AgencyVerificationItem item;
   final VoidCallback onTap;
@@ -34,75 +35,70 @@ class AgencyQueueCard extends StatelessWidget {
     }
   }
 
-  Color _statusColor(ThemeData theme, AgencyStatus status) {
+  Color _statusColor(AppColors colors, AgencyStatus status) {
     switch (status) {
       case AgencyStatus.pending:
-        return theme.colorScheme.tertiary;
+        return colors.warning;
       case AgencyStatus.approved:
-        return theme.colorScheme.primary;
+        return colors.success;
       case AgencyStatus.rejected:
-        return theme.colorScheme.error;
+        return colors.error;
       case AgencyStatus.suspended:
-        return theme.colorScheme.secondary;
+        return colors.textMuted;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     final agency = item.agency;
     final request = item.request;
 
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
+    return PressScale(
+      child: AppSurface(
+        radius: AppRadii.lg,
         onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ── Header row: agency name + status chip ────────────────────
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Text(
-                      agency.name,
-                      style: theme.textTheme.titleMedium,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+        padding: const EdgeInsetsDirectional.all(AppSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Header row: agency name + status chip ────────────────────
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    agency.name,
+                    style: styles.titleMedium,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(width: AppSpacing.sm),
-                  _AgencyStatusChip(
-                    label: _statusLabel(l10n, agency.status),
-                    color: _statusColor(theme, agency.status),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              // ── Owner display name ────────────────────────────────────────
-              if (item.ownerDisplayName != null)
-                Text(
-                  item.ownerDisplayName!,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
-              const SizedBox(height: AppSpacing.sm),
-              // ── Submitted-at ─────────────────────────────────────────────
+                const SizedBox(width: AppSpacing.sm),
+                _AgencyStatusChip(
+                  label: _statusLabel(l10n, agency.status),
+                  color: _statusColor(colors, agency.status),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            // ── Owner display name ────────────────────────────────────────
+            if (item.ownerDisplayName != null)
               Text(
-                request.submittedAt.toLocal().toString().substring(0, 16),
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: theme.colorScheme.outline,
-                ),
+                item.ownerDisplayName!,
+                style: styles.bodyMedium.copyWith(color: colors.textMuted),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-            ],
-          ),
+            const SizedBox(height: AppSpacing.sm),
+            // ── Submitted-at ─────────────────────────────────────────────
+            Text(
+              request.submittedAt.toLocal().toString().substring(0, 16),
+              style: styles.labelMedium.copyWith(color: colors.textMuted),
+            ),
+          ],
         ),
       ),
     );
@@ -119,7 +115,7 @@ class _AgencyStatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final styles = AppTextStyles.of(context);
     return Container(
       padding: const EdgeInsetsDirectional.symmetric(
         horizontal: AppSpacing.sm,
@@ -127,13 +123,10 @@ class _AgencyStatusChip extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(AppSpacing.sm),
-        border: Border.all(color: color, width: 1),
+        borderRadius: appRadius(AppRadii.pill),
+        border: Border.all(color: color),
       ),
-      child: Text(
-        label,
-        style: theme.textTheme.labelSmall?.copyWith(color: color),
-      ),
+      child: Text(label, style: styles.labelMedium.copyWith(color: color)),
     );
   }
 }

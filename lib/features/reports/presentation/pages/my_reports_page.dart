@@ -12,7 +12,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/report.dart';
@@ -29,8 +34,7 @@ class MyReportsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<MyReportsBloc>(
-      create: (_) =>
-          getIt<MyReportsBloc>()..add(const MyReportsOpened()),
+      create: (_) => getIt<MyReportsBloc>()..add(const MyReportsOpened()),
       child: const _MyReportsView(),
     );
   }
@@ -51,10 +55,8 @@ class _MyReportsView extends StatelessWidget {
       body: BlocBuilder<MyReportsBloc, MyReportsState>(
         builder: (context, state) {
           return switch (state) {
-            MyReportsLoading() =>
-              const Center(child: CircularProgressIndicator()),
-            MyReportsError(:final failure) =>
-              _ErrorBody(failure: failure),
+            MyReportsLoading() => const AppSpinner.page(),
+            MyReportsError(:final failure) => _ErrorBody(failure: failure),
             MyReportsLoaded(:final items, :final hasMore) =>
               items.isEmpty
                   ? const MyReportsEmptyState()
@@ -88,9 +90,9 @@ class _ErrorBody extends StatelessWidget {
             label: Text(
               MaterialLocalizations.of(context).refreshIndicatorSemanticLabel,
             ),
-            onPressed: () => context
-                .read<MyReportsBloc>()
-                .add(const MyReportsRefreshRequested()),
+            onPressed: () => context.read<MyReportsBloc>().add(
+              const MyReportsRefreshRequested(),
+            ),
           ),
         ],
       ),
@@ -112,9 +114,7 @@ class _LoadedBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return RefreshIndicator(
       onRefresh: () async {
-        context
-            .read<MyReportsBloc>()
-            .add(const MyReportsRefreshRequested());
+        context.read<MyReportsBloc>().add(const MyReportsRefreshRequested());
       },
       child: ListView.builder(
         itemCount: items.length + (hasMore ? 1 : 0),
@@ -122,17 +122,15 @@ class _LoadedBody extends StatelessWidget {
           // Trigger load-more near the end.
           if (index >= (items.length * 0.8).floor() && hasMore) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              context
-                  .read<MyReportsBloc>()
-                  .add(const MyReportsMoreLoaded());
+              context.read<MyReportsBloc>().add(const MyReportsMoreLoaded());
             });
           }
 
           // Loading spinner sentinel.
           if (index >= items.length) {
             return const Padding(
-              padding: EdgeInsets.all(AppSpacing.lg),
-              child: Center(child: CircularProgressIndicator()),
+              padding: EdgeInsetsDirectional.all(AppSpacing.lg),
+              child: AppSpinner(),
             );
           }
 
@@ -155,8 +153,8 @@ class _ReportCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -173,7 +171,7 @@ class _ReportCard extends StatelessWidget {
             children: [
               // Thumbnail
               ClipRRect(
-                borderRadius: BorderRadius.circular(AppSpacing.sm),
+                borderRadius: appRadius(AppRadii.sm),
                 child: SizedBox(
                   width: AppSpacing.xxxl + AppSpacing.xl,
                   height: AppSpacing.xxxl + AppSpacing.xl,
@@ -182,20 +180,20 @@ class _ReportCard extends StatelessWidget {
                           imageUrl: item.mainImagePath!,
                           fit: BoxFit.cover,
                           placeholder: (_, __) =>
-                              ColoredBox(color: scheme.surfaceContainerHighest),
+                              ColoredBox(color: colors.surfaceVariant),
                           errorWidget: (_, __, ___) => ColoredBox(
-                            color: scheme.surfaceContainerHighest,
+                            color: colors.surfaceVariant,
                             child: Icon(
                               Icons.broken_image_outlined,
-                              color: scheme.onSurfaceVariant,
+                              color: colors.onSurfaceVariant,
                             ),
                           ),
                         )
                       : ColoredBox(
-                          color: scheme.surfaceContainerHighest,
+                          color: colors.surfaceVariant,
                           child: Icon(
                             Icons.image_not_supported_outlined,
-                            color: scheme.onSurfaceVariant,
+                            color: colors.onSurfaceVariant,
                           ),
                         ),
                 ),
@@ -209,15 +207,15 @@ class _ReportCard extends StatelessWidget {
                     if (item.listingTitle.isNotEmpty)
                       Text(
                         item.listingTitle,
-                        style: theme.textTheme.titleSmall,
+                        style: styles.titleMedium,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                     const SizedBox(height: AppSpacing.xs),
                     Text(
                       _reasonLabel(l10n, item.reason),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: scheme.onSurfaceVariant,
+                      style: styles.bodyMedium.copyWith(
+                        color: colors.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xs),

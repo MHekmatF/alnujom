@@ -1,9 +1,17 @@
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_spinner.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/locale_toggle_action.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/presentation/rate_formatter.dart';
@@ -81,9 +89,7 @@ class _SetExchangeRateViewState extends State<_SetExchangeRateView> {
           Navigator.of(context).pop(true);
         } else if (state.status == SetRateStatus.saveFailure &&
             state.failureReason != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(_errorText(l10n, state.failureReason!))),
-          );
+          AppToast.error(context, _errorText(l10n, state.failureReason!));
         }
       },
       builder: (context, state) {
@@ -100,9 +106,9 @@ class _SetExchangeRateViewState extends State<_SetExchangeRateView> {
                 actions: const [LocaleToggleAction()],
               ),
               body: snapshot.connectionState != ConnectionState.done
-                  ? const Center(child: CircularProgressIndicator())
+                  ? const AppSpinner.page()
                   : ListView(
-                      padding: const EdgeInsets.all(AppSpacing.lg),
+                      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
                       children: [
                         DropdownButtonFormField<String>(
                           initialValue: state.baseCurrency,
@@ -180,13 +186,9 @@ class _SetExchangeRateViewState extends State<_SetExchangeRateView> {
                             ),
                           ),
                         const SizedBox(height: AppSpacing.md),
-                        ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          title: Text(l10n.effectiveAtLabel),
-                          subtitle: Text(
-                            state.effectiveAt.toLocal().toString(),
-                          ),
-                          trailing: const Icon(Icons.event),
+                        _EffectiveAtRow(
+                          label: l10n.effectiveAtLabel,
+                          value: state.effectiveAt.toLocal().toString(),
                           onTap: isSaving
                               ? null
                               : () => _pickEffectiveAt(context, state),
@@ -204,15 +206,14 @@ class _SetExchangeRateViewState extends State<_SetExchangeRateView> {
                               .add(SourceChanged(value)),
                         ),
                         const SizedBox(height: AppSpacing.lg),
-                        FilledButton(
+                        AppButton(
+                          label: l10n.submitButton,
+                          loading: isSaving,
                           onPressed: isSaving
                               ? null
                               : () => context.read<SetExchangeRateBloc>().add(
                                   const SetRateSubmitPressed(),
                                 ),
-                          child: isSaving
-                              ? const CircularProgressIndicator()
-                              : Text(l10n.submitButton),
                         ),
                       ],
                     ),
@@ -258,5 +259,75 @@ class _SetExchangeRateViewState extends State<_SetExchangeRateView> {
       'validation_failed' => l10n.errorValidationFailed,
       _ => l10n.errorCurrencyUnknown,
     };
+  }
+}
+
+/// Branded "effective at" picker row — tinted calendar glyph, label,
+/// current value, and a tap target opening the date/time pickers
+/// (replaces the stock [ListTile]).
+class _EffectiveAtRow extends StatelessWidget {
+  const _EffectiveAtRow({
+    required this.label,
+    required this.value,
+    required this.onTap,
+  });
+
+  final String label;
+  final String value;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+
+    return AppSurface(
+      radius: AppRadii.lg,
+      onTap: onTap,
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: AppSpacing.xxl + AppSpacing.lg,
+            height: AppSpacing.xxl + AppSpacing.lg,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: colors.primary.withValues(alpha: 0.12),
+            ),
+            child: Icon(
+              LucideIcons.calendar,
+              color: colors.primary,
+              size: AppSpacing.xl,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: styles.bodyLarge),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  value,
+                  style: styles.bodyMedium.copyWith(color: colors.textMuted),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Icon(
+            Directionality.of(context) == TextDirection.rtl
+                ? LucideIcons.chevron_left
+                : LucideIcons.chevron_right,
+            size: AppSpacing.xl,
+            color: colors.textMuted,
+          ),
+        ],
+      ),
+    );
   }
 }

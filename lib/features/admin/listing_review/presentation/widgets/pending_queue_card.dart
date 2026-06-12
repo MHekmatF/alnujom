@@ -1,8 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../../core/theme/colors.dart';
+import '../../../../../core/theme/radii.dart';
 import '../../../../../core/theme/spacing.dart';
+import '../../../../../core/theme/typography.dart';
+import '../../../../../core/widgets/_widget_support.dart';
+import '../../../../../core/widgets/press_scale.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../../shared/presentation/money_formatter.dart';
 import '../../../../currencies/domain/entities/currency.dart';
@@ -33,81 +39,74 @@ class PendingQueueCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     final locale = Localizations.localeOf(context);
 
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
+    return PressScale(
+      child: AppSurface(
+        radius: AppRadii.lg,
         onTap: () =>
             context.push('/admin/listing-review/preview/${summary.id}'),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _Thumbnail(url: summary.mainImageUrl),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      summary.title.isEmpty ? '—' : summary.title,
-                      style: theme.textTheme.titleMedium,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Wrap(
-                      spacing: AppSpacing.xs,
-                      runSpacing: AppSpacing.xs,
-                      children: [
-                        _MiniChip(label: _purposeLabel(l10n, summary.purpose)),
-                        _MiniChip(
-                          label: _propertyTypeLabel(l10n, summary.propertyType),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      '${summary.governorateName} / '
-                      '${summary.cityName} / '
-                      '${summary.areaName}',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (summary.primaryPrice != null &&
-                        displayCurrency != null) ...[
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        MoneyFormatter.format(
-                          summary.primaryPrice!,
-                          locale: locale,
-                          currency: displayCurrency!,
-                        ),
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          color: theme.colorScheme.primary,
-                        ),
+        padding: const EdgeInsetsDirectional.all(AppSpacing.md),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _Thumbnail(url: summary.mainImageUrl),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    summary.title.isEmpty ? '—' : summary.title,
+                    style: styles.titleMedium,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Wrap(
+                    spacing: AppSpacing.xs,
+                    runSpacing: AppSpacing.xs,
+                    children: [
+                      _MiniChip(label: _purposeLabel(l10n, summary.purpose)),
+                      _MiniChip(
+                        label: _propertyTypeLabel(l10n, summary.propertyType),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    '${summary.governorateName} / '
+                    '${summary.cityName} / '
+                    '${summary.areaName}',
+                    style: styles.bodyMedium.copyWith(color: colors.textMuted),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (summary.primaryPrice != null &&
+                      displayCurrency != null) ...[
                     const SizedBox(height: AppSpacing.xs),
                     Text(
-                      '${l10n.adminQueuePublisherPrefix} '
-                      '${summary.publisherDisplayName} • '
-                      '${_timeAgo(l10n, summary.submittedAt)}',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.outline,
+                      MoneyFormatter.format(
+                        summary.primaryPrice!,
+                        locale: locale,
+                        currency: displayCurrency!,
                       ),
+                      style: styles.labelLarge.copyWith(color: colors.primary),
                     ),
                   ],
-                ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    '${l10n.adminQueuePublisherPrefix} '
+                    '${summary.publisherDisplayName} • '
+                    '${_timeAgo(l10n, summary.submittedAt)}',
+                    style: styles.bodyMedium.copyWith(color: colors.textMuted),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -141,29 +140,28 @@ class _Thumbnail extends StatelessWidget {
   const _Thumbnail({this.url});
   final String? url;
 
+  static const double _side = AppSpacing.xxxl + AppSpacing.lg;
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
     final placeholder = Container(
-      width: 64,
-      height: 64,
+      width: _side,
+      height: _side,
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(AppSpacing.sm),
+        color: colors.surfaceVariant,
+        borderRadius: appRadius(AppRadii.sm),
       ),
-      alignment: Alignment.center,
-      child: Icon(
-        Icons.home_outlined,
-        color: theme.colorScheme.onSurfaceVariant,
-      ),
+      alignment: AlignmentDirectional.center,
+      child: Icon(LucideIcons.house, color: colors.textMuted),
     );
     if (url == null) return placeholder;
     return ClipRRect(
-      borderRadius: BorderRadius.circular(AppSpacing.sm),
+      borderRadius: appRadius(AppRadii.sm),
       child: CachedNetworkImage(
         imageUrl: url!,
-        width: 64,
-        height: 64,
+        width: _side,
+        height: _side,
         fit: BoxFit.cover,
         placeholder: (_, __) => placeholder,
         errorWidget: (_, __, ___) => placeholder,
@@ -178,21 +176,20 @@ class _MiniChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     return Container(
-      padding: const EdgeInsets.symmetric(
+      padding: const EdgeInsetsDirectional.symmetric(
         horizontal: AppSpacing.sm,
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: theme.colorScheme.secondaryContainer,
-        borderRadius: BorderRadius.circular(AppSpacing.sm),
+        color: colors.primary.withValues(alpha: 0.10),
+        borderRadius: appRadius(AppRadii.pill),
       ),
       child: Text(
         label,
-        style: theme.textTheme.labelSmall?.copyWith(
-          color: theme.colorScheme.onSecondaryContainer,
-        ),
+        style: styles.labelMedium.copyWith(color: colors.primary),
       ),
     );
   }

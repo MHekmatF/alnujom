@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
@@ -23,8 +24,24 @@ class SubmitFailureDialog extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
+    // Deliberately stays an AlertDialog shell: this is a single-action
+    // informational dialog (Dismiss only), and AppDialog always renders a
+    // cancel + action pair. Token styles + AppButton actions keep it in the
+    // branded family; the icon treatment mirrors AppDialog's tinted circle.
     return AlertDialog(
-      icon: Icon(Icons.error_outline, color: colors.error, size: AppSpacing.xxl),
+      icon: Container(
+        width: AppSpacing.xxxl,
+        height: AppSpacing.xxxl,
+        decoration: BoxDecoration(
+          color: colors.error.withValues(alpha: 0.12),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          LucideIcons.circle_alert,
+          color: colors.error,
+          size: AppSpacing.xl,
+        ),
+      ),
       title: Text(l10n.submitFailureTitle, style: styles.titleLarge),
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

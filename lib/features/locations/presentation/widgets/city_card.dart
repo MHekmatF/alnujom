@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
+import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/radii.dart';
+import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/press_scale.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/city_with_area_count.dart';
 import 'hidden_badge.dart';
@@ -7,6 +14,8 @@ import 'system_row_badge.dart';
 
 enum _CardAction { edit, toggleActive, delete }
 
+/// Branded city row — tinted-circle glyph + name/area-count on a hairline
+/// surface (replaces the stock [Card]+[ListTile]).
 class CityCard extends StatelessWidget {
   const CityCard({
     super.key,
@@ -26,20 +35,63 @@ class CityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     final locale = Localizations.localeOf(context);
     final city = summary.city;
 
-    return Card(
-      child: ListTile(
-        leading: const Icon(Icons.location_city_outlined),
-        title: Text(city.localizedName(locale)),
-        subtitle: Text(l10n.subtitleAreaCount(summary.areaCount)),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
+    return PressScale(
+      child: AppSurface(
+        radius: AppRadii.lg,
+        onTap: onTap,
+        padding: const EdgeInsetsDirectional.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
+        ),
+        child: Row(
           children: [
-            if (city.isSystem) const SystemRowBadge(),
-            if (!city.isActive) const HiddenBadge(),
+            Container(
+              width: AppSpacing.xxl + AppSpacing.lg,
+              height: AppSpacing.xxl + AppSpacing.lg,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: colors.primary.withValues(alpha: 0.12),
+              ),
+              child: Icon(
+                LucideIcons.building_2,
+                color: colors.primary,
+                size: AppSpacing.xl,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Wrap(
+                    spacing: AppSpacing.sm,
+                    runSpacing: AppSpacing.xs,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(city.localizedName(locale), style: styles.bodyLarge),
+                      if (city.isSystem) const SystemRowBadge(),
+                      if (!city.isActive) const HiddenBadge(),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    l10n.subtitleAreaCount(summary.areaCount),
+                    style: styles.bodyMedium.copyWith(color: colors.textMuted),
+                  ),
+                ],
+              ),
+            ),
             PopupMenuButton<_CardAction>(
+              icon: Icon(
+                LucideIcons.ellipsis_vertical,
+                color: colors.textMuted,
+              ),
               onSelected: (action) => switch (action) {
                 _CardAction.edit => onEdit(),
                 _CardAction.toggleActive => onToggleActive(),
@@ -65,7 +117,6 @@ class CityCard extends StatelessWidget {
             ),
           ],
         ),
-        onTap: onTap,
       ),
     );
   }

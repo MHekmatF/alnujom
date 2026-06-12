@@ -3,8 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/listing/rejection_reason.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/app_spinner.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../listing_form/domain/entities/listing.dart';
 import '../../domain/entities/moderation_history_entry.dart';
@@ -50,21 +54,21 @@ class _ModerationHistoryView extends StatelessWidget {
       body: BlocBuilder<ModerationHistoryCubit, ModerationHistoryState>(
         builder: (context, state) {
           return switch (state) {
-            ModerationHistoryInitial() || ModerationHistoryLoading() =>
-              const Center(child: CircularProgressIndicator()),
+            ModerationHistoryInitial() ||
+            ModerationHistoryLoading() => const AppSpinner.page(),
             ModerationHistoryLoaded(:final entries) when entries.isEmpty =>
               Center(
                 child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.xl),
+                  padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
                   child: Text(
                     l10n.publisherHistoryEmpty,
                     textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyLarge,
+                    style: AppTextStyles.of(context).bodyLarge,
                   ),
                 ),
               ),
             ModerationHistoryLoaded(:final entries) => ListView.builder(
-              padding: const EdgeInsets.symmetric(
+              padding: const EdgeInsetsDirectional.symmetric(
                 horizontal: AppSpacing.lg,
                 vertical: AppSpacing.md,
               ),
@@ -74,14 +78,14 @@ class _ModerationHistoryView extends StatelessWidget {
             ),
             ModerationHistoryError() => Center(
               child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.xl),
+                padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       l10n.adminErrorUnknown,
                       textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyLarge,
+                      style: AppTextStyles.of(context).bodyLarge,
                     ),
                     const SizedBox(height: AppSpacing.md),
                     FilledButton(
@@ -110,19 +114,17 @@ class _HistoryEntryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     final hasDetail =
         entry.rejectionDetail != null &&
         entry.rejectionDetail!.trim().isNotEmpty;
 
     return Card(
-      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadii.md),
-      ),
+      margin: const EdgeInsetsDirectional.only(bottom: AppSpacing.sm),
+      shape: RoundedRectangleBorder(borderRadius: appRadius(AppRadii.md)),
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: const EdgeInsetsDirectional.all(AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -130,42 +132,29 @@ class _HistoryEntryCard extends StatelessWidget {
             Row(
               children: [
                 if (entry.previousStatus == null)
-                  _StatusPill(
-                    label: l10n.publisherHistoryFirstEntry,
-                    scheme: scheme,
-                    theme: theme,
-                  )
+                  _StatusPill(label: l10n.publisherHistoryFirstEntry)
                 else ...[
-                  _StatusPill(
-                    label: _statusLabel(entry.previousStatus!),
-                    scheme: scheme,
-                    theme: theme,
-                  ),
+                  _StatusPill(label: _statusLabel(entry.previousStatus!)),
                   Padding(
-                    padding: const EdgeInsets.symmetric(
+                    padding: const EdgeInsetsDirectional.symmetric(
                       horizontal: AppSpacing.xs,
                     ),
                     child: Icon(
                       Icons.arrow_forward,
-                      size: 16,
-                      color: scheme.onSurfaceVariant,
+                      size: AppSpacing.lg,
+                      color: colors.onSurfaceVariant,
                     ),
                   ),
                 ],
-                _StatusPill(
-                  label: _statusLabel(entry.newStatus),
-                  scheme: scheme,
-                  theme: theme,
-                  isNew: true,
-                ),
+                _StatusPill(label: _statusLabel(entry.newStatus), isNew: true),
               ],
             ),
             const SizedBox(height: AppSpacing.sm),
             // Timestamp + admin attribution (NEVER the admin's actual name).
             Text(
               '${_formatTimestamp(entry.changedAt)} • ${l10n.publisherHistoryAdminTeam}',
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: scheme.onSurfaceVariant,
+              style: styles.labelMedium.copyWith(
+                color: colors.onSurfaceVariant,
               ),
             ),
             // Rejection preset + detail block.
@@ -173,10 +162,7 @@ class _HistoryEntryCard extends StatelessWidget {
               const SizedBox(height: AppSpacing.sm),
               Text(
                 _presetLabel(entry.rejectionPreset!),
-                style: theme.textTheme.titleSmall?.copyWith(
-                  color: scheme.onSurface,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: styles.titleMedium.copyWith(color: colors.onSurface),
               ),
               if (hasDetail) ...[
                 const SizedBox(height: AppSpacing.xs),
@@ -189,16 +175,14 @@ class _HistoryEntryCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     border: BorderDirectional(
                       start: BorderSide(
-                        color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
+                        color: colors.onSurfaceVariant.withValues(alpha: 0.5),
                         width: 3,
                       ),
                     ),
                   ),
                   child: Text(
                     entry.rejectionDetail!,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: scheme.onSurface,
-                    ),
+                    style: styles.bodyMedium.copyWith(color: colors.onSurface),
                   ),
                 ),
               ],
@@ -264,34 +248,28 @@ class _HistoryEntryCard extends StatelessWidget {
 
 /// Small status label chip for the arc row.
 class _StatusPill extends StatelessWidget {
-  const _StatusPill({
-    required this.label,
-    required this.scheme,
-    required this.theme,
-    this.isNew = false,
-  });
+  const _StatusPill({required this.label, this.isNew = false});
 
   final String label;
-  final ColorScheme scheme;
-  final ThemeData theme;
   final bool isNew;
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     return Container(
-      padding: const EdgeInsets.symmetric(
+      padding: const EdgeInsetsDirectional.symmetric(
         horizontal: AppSpacing.sm,
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: isNew ? scheme.primaryContainer : scheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(AppRadii.sm),
+        color: isNew ? colors.primaryContainer : colors.surfaceVariant,
+        borderRadius: appRadius(AppRadii.sm),
       ),
       child: Text(
         label,
-        style: theme.textTheme.labelSmall?.copyWith(
-          color: isNew ? scheme.onPrimaryContainer : scheme.onSurfaceVariant,
-          fontWeight: FontWeight.w500,
+        style: styles.labelMedium.copyWith(
+          color: isNew ? colors.onPrimaryContainer : colors.onSurfaceVariant,
         ),
       ),
     );

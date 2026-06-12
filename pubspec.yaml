@@ -40,6 +40,9 @@ dependencies:
   image: ^4.8.0
   flutter_image_compress: ^2.4.0
   url_launcher: ^6.3.0
+  # Phase 28 — nearby-amenities lookup (OpenStreetMap Overpass API; was already
+  # transitive via supabase_flutter, promoted to a direct dep for the import).
+  http: ^1.2.0
   # Phase 25 uplift v2 — native share sheet for the listing-detail Share action.
   share_plus: ^10.1.4
   # Phase 22 — push notifications (Android-only; app builds with push DISABLED

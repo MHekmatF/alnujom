@@ -8,6 +8,7 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/listing.dart';
 import '../../domain/entities/listing_form_state.dart';
@@ -153,7 +154,6 @@ class _AddAffordances extends StatelessWidget {
   Future<void> _pickImages(BuildContext context) async {
     final bloc = context.read<ListingFormBloc>();
     final isRtl = Directionality.of(context) == TextDirection.rtl;
-    final messenger = ScaffoldMessenger.of(context);
     final l10n = AppLocalizations.of(context)!;
     try {
       final picker = ImagePicker();
@@ -164,49 +164,48 @@ class _AddAffordances extends StatelessWidget {
         // reliably across image_picker versions; surface a non-fatal hint
         // with the Open-settings CTA so the publisher can recover if it
         // was a denial.
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(l10n.mediaErrorGalleryPermissionDenied),
-            action: SnackBarAction(
-              label: l10n.mediaActionOpenSettings,
-              onPressed: AndroidSettingsChannel.openAppSettings,
-            ),
+        if (!context.mounted) return;
+        AppToast.show(
+          context,
+          l10n.mediaErrorGalleryPermissionDenied,
+          variant: AppToastVariant.warning,
+          action: SnackBarAction(
+            label: l10n.mediaActionOpenSettings,
+            onPressed: AndroidSettingsChannel.openAppSettings,
           ),
         );
         return;
       }
       bloc.add(MediaPicked(files, isRtl: isRtl));
     } catch (_) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.mediaErrorUploadFailed)),
-      );
+      if (!context.mounted) return;
+      AppToast.error(context, l10n.mediaErrorUploadFailed);
     }
   }
 
   Future<void> _pickVideo(BuildContext context) async {
     final bloc = context.read<ListingFormBloc>();
-    final messenger = ScaffoldMessenger.of(context);
     final l10n = AppLocalizations.of(context)!;
     try {
       final picker = ImagePicker();
       final file = await picker.pickVideo(source: ImageSource.gallery);
       if (file == null) {
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(l10n.mediaErrorGalleryPermissionDenied),
-            action: SnackBarAction(
-              label: l10n.mediaActionOpenSettings,
-              onPressed: AndroidSettingsChannel.openAppSettings,
-            ),
+        if (!context.mounted) return;
+        AppToast.show(
+          context,
+          l10n.mediaErrorGalleryPermissionDenied,
+          variant: AppToastVariant.warning,
+          action: SnackBarAction(
+            label: l10n.mediaActionOpenSettings,
+            onPressed: AndroidSettingsChannel.openAppSettings,
           ),
         );
         return;
       }
       bloc.add(VideoPicked(file));
     } catch (_) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.mediaErrorUploadFailed)),
-      );
+      if (!context.mounted) return;
+      AppToast.error(context, l10n.mediaErrorUploadFailed);
     }
   }
 }

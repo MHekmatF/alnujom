@@ -186,6 +186,16 @@ import '../../features/app_update/domain/usecases/check_for_update.dart'
     as _i933;
 import '../../features/app_update/presentation/bloc/app_update_cubit.dart'
     as _i1067;
+import '../../features/assistant/data/datasources/assistant_stats_datasource.dart'
+    as _i918;
+import '../../features/assistant/data/repositories/assistant_stats_repository_impl.dart'
+    as _i142;
+import '../../features/assistant/domain/assistant_brain.dart' as _i84;
+import '../../features/assistant/domain/query_parser.dart' as _i367;
+import '../../features/assistant/domain/repositories/assistant_stats_repository.dart'
+    as _i554;
+import '../../features/assistant/presentation/bloc/assistant_cubit.dart'
+    as _i697;
 import '../../features/auth/data/datasources/supabase_auth_datasource.dart'
     as _i76;
 import '../../features/auth/data/repositories/auth_repository_impl.dart'
@@ -300,16 +310,28 @@ import '../../features/inquiries/presentation/bloc/inquiry_form_bloc.dart'
     as _i193;
 import '../../features/inquiries/presentation/bloc/inquiry_inbox_bloc.dart'
     as _i264;
+import '../../features/listing_details/data/datasources/overpass_nearby_amenities_datasource.dart'
+    as _i676;
 import '../../features/listing_details/data/datasources/supabase_listing_details_datasource.dart'
     as _i1006;
+import '../../features/listing_details/data/datasources/supabase_market_insights_datasource.dart'
+    as _i111;
 import '../../features/listing_details/data/datasources/supabase_similar_listings_datasource.dart'
     as _i913;
 import '../../features/listing_details/data/repositories/listing_details_repository_impl.dart'
     as _i677;
+import '../../features/listing_details/data/repositories/market_insights_repository_impl.dart'
+    as _i190;
+import '../../features/listing_details/data/repositories/nearby_amenities_repository_impl.dart'
+    as _i897;
 import '../../features/listing_details/data/repositories/similar_listings_repository_impl.dart'
     as _i474;
 import '../../features/listing_details/domain/repositories/listing_details_repository.dart'
     as _i895;
+import '../../features/listing_details/domain/repositories/market_insights_repository.dart'
+    as _i392;
+import '../../features/listing_details/domain/repositories/nearby_amenities_repository.dart'
+    as _i823;
 import '../../features/listing_details/domain/repositories/similar_listings_repository.dart'
     as _i888;
 import '../../features/listing_details/domain/usecases/load_listing_details.dart'
@@ -318,6 +340,10 @@ import '../../features/listing_details/domain/usecases/load_similar_listings.dar
     as _i981;
 import '../../features/listing_details/presentation/bloc/listing_details_bloc.dart'
     as _i935;
+import '../../features/listing_details/presentation/bloc/market_insights_cubit.dart'
+    as _i290;
+import '../../features/listing_details/presentation/bloc/nearby_amenities_cubit.dart'
+    as _i568;
 import '../../features/listing_details/presentation/bloc/similar_listings_cubit.dart'
     as _i255;
 import '../../features/listing_form/data/datasources/supabase_listing_media_datasource.dart'
@@ -645,6 +671,10 @@ _i174.GetIt $initGetIt(
   gh.factory<_i736.PackageInfoVersionSource>(
     () => const _i736.PackageInfoVersionSource(),
   );
+  gh.factory<_i367.QueryParser>(() => const _i367.QueryParser());
+  gh.factory<_i676.OverpassNearbyAmenitiesDatasource>(
+    () => const _i676.OverpassNearbyAmenitiesDatasource(),
+  );
   gh.factory<_i207.SupabaseListingsDatasource>(
     () => _i207.SupabaseListingsDatasource(),
   );
@@ -662,6 +692,7 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i394.SupabaseAccountApprovalsDatasource>(
     () => _i394.SupabaseAccountApprovalsDatasource(),
   );
+  gh.lazySingleton<_i430.ComparisonCubit>(() => _i430.ComparisonCubit());
   gh.lazySingleton<_i825.SupabaseProfileDataSource>(
     () => _i825.SupabaseProfileDataSource(),
   );
@@ -671,7 +702,6 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i24.SupabaseUserSearchDataSource>(
     () => _i24.SupabaseUserSearchDataSource(),
   );
-  gh.lazySingleton<_i430.ComparisonCubit>(() => _i430.ComparisonCubit());
   gh.lazySingleton<_i726.AnalyticsService>(
     () => _i172.SentryAnalyticsService(),
   );
@@ -719,6 +749,12 @@ _i174.GetIt $initGetIt(
   gh.factory<_i523.SupabaseManifestDatasource>(
     () => _i523.SupabaseManifestDatasource(gh<_i454.SupabaseClient>()),
   );
+  gh.factory<_i918.AssistantStatsDatasource>(
+    () => _i918.AssistantStatsDatasource(gh<_i454.SupabaseClient>()),
+  );
+  gh.factory<_i572.SupabaseChatDatasource>(
+    () => _i572.SupabaseChatDatasource(gh<_i454.SupabaseClient>()),
+  );
   gh.factory<_i311.SupabaseCurrenciesDatasource>(
     () => _i311.SupabaseCurrenciesDatasource(gh<_i454.SupabaseClient>()),
   );
@@ -734,6 +770,9 @@ _i174.GetIt $initGetIt(
   gh.factory<_i1006.SupabaseListingDetailsDatasource>(
     () => _i1006.SupabaseListingDetailsDatasource(gh<_i454.SupabaseClient>()),
   );
+  gh.factory<_i111.SupabaseMarketInsightsDatasource>(
+    () => _i111.SupabaseMarketInsightsDatasource(gh<_i454.SupabaseClient>()),
+  );
   gh.factory<_i913.SupabaseSimilarListingsDatasource>(
     () => _i913.SupabaseSimilarListingsDatasource(gh<_i454.SupabaseClient>()),
   );
@@ -746,6 +785,9 @@ _i174.GetIt $initGetIt(
   gh.factory<_i445.SupabasePushTokenDatasource>(
     () => _i445.SupabasePushTokenDatasource(gh<_i454.SupabaseClient>()),
   );
+  gh.factory<_i855.PublisherAnalyticsDatasource>(
+    () => _i855.PublisherAnalyticsDatasource(gh<_i454.SupabaseClient>()),
+  );
   gh.factory<_i157.PublisherDashboardCountsDatasource>(
     () => _i157.PublisherDashboardCountsDatasource(gh<_i454.SupabaseClient>()),
   );
@@ -756,6 +798,9 @@ _i174.GetIt $initGetIt(
   gh.factory<_i231.SupabaseReportsDatasource>(
     () => _i231.SupabaseReportsDatasource(gh<_i454.SupabaseClient>()),
   );
+  gh.factory<_i638.SupabaseReviewsDatasource>(
+    () => _i638.SupabaseReviewsDatasource(gh<_i454.SupabaseClient>()),
+  );
   gh.factory<_i782.SupabaseSavedSearchesDatasource>(
     () => _i782.SupabaseSavedSearchesDatasource(gh<_i454.SupabaseClient>()),
   );
@@ -764,15 +809,6 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i835.SupabaseAppSettingsDatasource>(
     () => _i835.SupabaseAppSettingsDatasource(gh<_i454.SupabaseClient>()),
-  );
-  gh.factory<_i855.PublisherAnalyticsDatasource>(
-    () => _i855.PublisherAnalyticsDatasource(gh<_i454.SupabaseClient>()),
-  );
-  gh.factory<_i638.SupabaseReviewsDatasource>(
-    () => _i638.SupabaseReviewsDatasource(gh<_i454.SupabaseClient>()),
-  );
-  gh.factory<_i572.SupabaseChatDatasource>(
-    () => _i572.SupabaseChatDatasource(gh<_i454.SupabaseClient>()),
   );
   gh.factory<_i222.SupabaseViewingsDatasource>(
     () => _i222.SupabaseViewingsDatasource(gh<_i454.SupabaseClient>()),
@@ -873,6 +909,11 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i753.PreferencesStore>(
     () => _i190.SecurePreferencesStore(gh<_i354.AppLogger>()),
   );
+  gh.lazySingleton<_i554.AssistantStatsRepository>(
+    () => _i142.AssistantStatsRepositoryImpl(
+      gh<_i918.AssistantStatsDatasource>(),
+    ),
+  );
   gh.lazySingleton<_i894.ProfileRepository>(
     () => _i334.ProfileRepositoryImpl(
       gh<_i825.SupabaseProfileDataSource>(),
@@ -904,11 +945,11 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i144.OnboardingSeenStorage>(
     () => _i144.OnboardingSeenStorage(gh<_i354.AppLogger>()),
   );
-  gh.lazySingleton<_i193.RecentSearchesStorage>(
-    () => _i193.RecentSearchesStorage(gh<_i354.AppLogger>()),
-  );
   gh.lazySingleton<_i43.RecentlyViewedStore>(
     () => _i43.RecentlyViewedStore(gh<_i354.AppLogger>()),
+  );
+  gh.lazySingleton<_i193.RecentSearchesStorage>(
+    () => _i193.RecentSearchesStorage(gh<_i354.AppLogger>()),
   );
   gh.factory<_i933.CheckForUpdate>(
     () => _i933.CheckForUpdate(gh<_i756.AppUpdateRepository>()),
@@ -961,11 +1002,23 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i752.SupabaseClientWrapper>(
     () => _i748.SupabaseClientWrapperImpl(gh<_i354.AppLogger>()),
   );
+  gh.lazySingleton<_i823.NearbyAmenitiesRepository>(
+    () => _i897.NearbyAmenitiesRepositoryImpl(
+      gh<_i676.OverpassNearbyAmenitiesDatasource>(),
+      gh<_i354.AppLogger>(),
+    ),
+  );
   gh.factory<_i190.SearchListingsUseCase>(
     () => _i190.SearchListingsUseCase(gh<_i357.SearchRepository>()),
   );
   gh.factory<_i212.FavoritesRepository>(
     () => _i144.FavoritesRepositoryImpl(gh<_i8.SupabaseFavoritesDatasource>()),
+  );
+  gh.lazySingleton<_i392.MarketInsightsRepository>(
+    () => _i190.MarketInsightsRepositoryImpl(
+      gh<_i111.SupabaseMarketInsightsDatasource>(),
+      gh<_i354.AppLogger>(),
+    ),
   );
   gh.lazySingleton<_i563.PublisherDashboardCountsRepository>(
     () => _i815.PublisherDashboardCountsRepositoryImpl(
@@ -984,6 +1037,12 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i930.RecordAdClick>(
     () => _i930.RecordAdClick(gh<_i186.AdsServingRepository>()),
+  );
+  gh.factory<_i568.NearbyAmenitiesCubit>(
+    () => _i568.NearbyAmenitiesCubit(gh<_i823.NearbyAmenitiesRepository>()),
+  );
+  gh.factory<_i290.MarketInsightsCubit>(
+    () => _i290.MarketInsightsCubit(gh<_i392.MarketInsightsRepository>()),
   );
   gh.factory<_i71.AgencyMembersBloc>(
     () => _i71.AgencyMembersBloc(
@@ -1079,6 +1138,9 @@ _i174.GetIt $initGetIt(
   gh.factory<_i404.ApproveListingUseCase>(
     () => _i404.ApproveListingUseCase(gh<_i155.ListingReviewRepository>()),
   );
+  gh.factory<_i542.FeatureListingUseCase>(
+    () => _i542.FeatureListingUseCase(gh<_i155.ListingReviewRepository>()),
+  );
   gh.factory<_i96.LoadListingPreviewUseCase>(
     () => _i96.LoadListingPreviewUseCase(gh<_i155.ListingReviewRepository>()),
   );
@@ -1087,9 +1149,6 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i880.RejectListingUseCase>(
     () => _i880.RejectListingUseCase(gh<_i155.ListingReviewRepository>()),
-  );
-  gh.factory<_i542.FeatureListingUseCase>(
-    () => _i542.FeatureListingUseCase(gh<_i155.ListingReviewRepository>()),
   );
   gh.factory<_i524.AgencyVerificationCubit>(
     () => _i524.AgencyVerificationCubit(
@@ -1427,6 +1486,13 @@ _i174.GetIt $initGetIt(
   gh.factory<_i225.SubmitReview>(
     () => _i225.SubmitReview(gh<_i412.ReviewsRepository>()),
   );
+  gh.factory<_i84.AssistantBrain>(
+    () => _i84.RuleBasedAssistantBrain(
+      gh<_i367.QueryParser>(),
+      gh<_i533.ListGovernorates>(),
+      gh<_i554.AssistantStatsRepository>(),
+    ),
+  );
   gh.factory<_i230.ArchiveAd>(
     () => _i230.ArchiveAd(gh<_i241.AdsAdminRepository>()),
   );
@@ -1642,11 +1708,11 @@ _i174.GetIt $initGetIt(
       gh<_i940.ReinstateAgency>(),
     ),
   );
-  gh.factory<_i321.LoadHomeFeed>(
-    () => _i321.LoadHomeFeed(gh<_i433.HomeFeedRepository>()),
-  );
   gh.factory<_i240.LoadFeaturedListings>(
     () => _i240.LoadFeaturedListings(gh<_i433.HomeFeedRepository>()),
+  );
+  gh.factory<_i321.LoadHomeFeed>(
+    () => _i321.LoadHomeFeed(gh<_i433.HomeFeedRepository>()),
   );
   gh.factory<_i778.ListingPreviewBloc>(
     () => _i778.ListingPreviewBloc(
@@ -1738,6 +1804,9 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i665.ConversationsCubit>(
     () => _i665.ConversationsCubit(gh<_i929.ListConversations>()),
+  );
+  gh.factory<_i697.AssistantCubit>(
+    () => _i697.AssistantCubit(gh<_i84.AssistantBrain>()),
   );
   gh.factory<_i980.ReportSubmissionCubit>(
     () => _i980.ReportSubmissionCubit(gh<_i684.SubmitReport>()),

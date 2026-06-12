@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 import '../../../../../core/theme/colors.dart';
+import '../../../../../core/theme/radii.dart';
 import '../../../../../core/theme/spacing.dart';
 import '../../../../../core/theme/typography.dart';
+import '../../../../../core/widgets/_widget_support.dart';
+import '../../../../../core/widgets/app_button.dart';
 import '../../../../../l10n/app_localizations.dart';
 
 /// Phase 25 — feature-duration chooser for the admin listing-review preview.
@@ -13,6 +17,10 @@ import '../../../../../l10n/app_localizations.dart';
 ///   - 7 / 14 / 30 → feature for that many days
 ///   - 0           → remove featuring
 ///   - null        → cancelled / dismissed
+///
+/// Kept as a hand-rolled [AlertDialog]: this is a chooser whose options pop
+/// the result directly (no primary action), which [AppDialog]'s fixed
+/// confirm/cancel pair cannot express.
 class FeatureListingDialog extends StatelessWidget {
   const FeatureListingDialog({super.key, required this.isCurrentlyFeatured});
 
@@ -40,7 +48,20 @@ class FeatureListingDialog extends StatelessWidget {
     final styles = AppTextStyles.of(context);
 
     return AlertDialog(
-      title: Text(l10n.adminFeatureDialogTitle),
+      icon: Container(
+        width: AppSpacing.xxxl,
+        height: AppSpacing.xxxl,
+        decoration: BoxDecoration(
+          color: colors.warning.withValues(alpha: 0.12),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          LucideIcons.star,
+          color: colors.warning,
+          size: AppSpacing.xl,
+        ),
+      ),
+      title: Text(l10n.adminFeatureDialogTitle, style: styles.titleLarge),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -53,7 +74,7 @@ class FeatureListingDialog extends StatelessWidget {
           for (final days in _durations) ...[
             _DurationTile(
               label: l10n.adminFeatureDialogOptionDays(days),
-              icon: Icons.star_rounded,
+              icon: LucideIcons.star,
               foreground: colors.primary,
               onTap: () => Navigator.of(context).pop(days),
             ),
@@ -63,7 +84,7 @@ class FeatureListingDialog extends StatelessWidget {
             const SizedBox(height: AppSpacing.xs),
             _DurationTile(
               label: l10n.adminFeatureDialogRemove,
-              icon: Icons.star_outline_rounded,
+              icon: LucideIcons.star_off,
               foreground: colors.error,
               onTap: () => Navigator.of(context).pop(0),
             ),
@@ -71,15 +92,19 @@ class FeatureListingDialog extends StatelessWidget {
         ],
       ),
       actions: [
-        TextButton(
+        AppButton(
+          label: l10n.adminFeatureDialogCancel,
+          variant: AppButtonVariant.text,
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(l10n.adminFeatureDialogCancel),
         ),
+        const SizedBox(width: AppSpacing.xs),
       ],
     );
   }
 }
 
+/// Branded chooser row — tinted-circle leading glyph + label on a hairline
+/// surface (replaces the stock [ListTile]).
 class _DurationTile extends StatelessWidget {
   const _DurationTile({
     required this.label,
@@ -96,13 +121,33 @@ class _DurationTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final styles = AppTextStyles.of(context);
-    return ListTile(
-      contentPadding: const EdgeInsetsDirectional.symmetric(
-        horizontal: AppSpacing.sm,
-      ),
-      leading: Icon(icon, color: foreground),
-      title: Text(label, style: styles.bodyLarge.copyWith(color: foreground)),
+    return AppSurface(
+      radius: AppRadii.md,
       onTap: onTap,
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: AppSpacing.xxl + AppSpacing.sm,
+            height: AppSpacing.xxl + AppSpacing.sm,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: foreground.withValues(alpha: 0.12),
+            ),
+            child: Icon(icon, color: foreground, size: AppSpacing.lg),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Text(
+              label,
+              style: styles.bodyLarge.copyWith(color: foreground),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

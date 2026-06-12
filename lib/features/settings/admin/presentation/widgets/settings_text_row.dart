@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../../core/localization/app_strings.dart';
 import '../../../../../../core/theme/spacing.dart';
+import '../../../../../../core/widgets/app_spinner.dart';
 
 /// A single-row validated text field with an inline Save button.
 ///
@@ -82,7 +83,7 @@ class _SettingsTextRowState extends State<SettingsTextRow> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+      padding: const EdgeInsetsDirectional.symmetric(vertical: AppSpacing.sm),
       child: Form(
         key: _formKey,
         child: Row(
@@ -105,17 +106,14 @@ class _SettingsTextRowState extends State<SettingsTextRow> {
             const SizedBox(width: AppSpacing.sm),
             widget.isSaving
                 ? const Padding(
-                    padding: EdgeInsets.only(top: AppSpacing.xs),
-                    child: SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
+                    padding: EdgeInsetsDirectional.only(top: AppSpacing.xs),
+                    child: AppSpinner(),
                   )
                 : TextButton(
                     onPressed: _handleSave,
                     child: Text(
-                      widget.saveLabel ?? AppStrings.of(context).loc.action_save,
+                      widget.saveLabel ??
+                          AppStrings.of(context).loc.action_save,
                     ),
                   ),
           ],

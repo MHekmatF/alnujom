@@ -4,7 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/support_contact.dart';
 import '../bloc/app_settings_cubit.dart';
@@ -22,7 +26,8 @@ class AboutSupportPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.about_title)),
@@ -37,12 +42,12 @@ class AboutSupportPage extends StatelessWidget {
           if (!hasAnything) {
             return Center(
               child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.xl),
+                padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
                 child: Text(
                   l10n.about_no_info,
                   textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                  style: styles.bodyMedium.copyWith(
+                    color: colors.onSurfaceVariant,
                   ),
                 ),
               ),
@@ -50,13 +55,13 @@ class AboutSupportPage extends StatelessWidget {
           }
 
           return ListView(
-            padding: const EdgeInsets.all(AppSpacing.lg),
+            padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
             children: [
               if (contact.hasAny) ...[
                 Text(
                   l10n.about_support_heading,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                  style: styles.labelLarge.copyWith(
+                    color: colors.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xs),
@@ -66,8 +71,8 @@ class AboutSupportPage extends StatelessWidget {
               if (hasLinks) ...[
                 Text(
                   l10n.about_legal_heading,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                  style: styles.labelLarge.copyWith(
+                    color: colors.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xs),
@@ -138,18 +143,42 @@ class _LinkTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: theme.colorScheme.primary),
-      title: Text(label, style: theme.textTheme.bodyMedium),
-      trailing: const Icon(Icons.open_in_new, size: AppSpacing.lg),
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    return InkWell(
+      borderRadius: appRadius(AppRadii.md),
       onTap: () {
         final uri = Uri.tryParse(url);
         if (uri != null) {
           unawaited(launchUrl(uri, mode: LaunchMode.externalApplication));
         }
       },
+      child: Padding(
+        padding: const EdgeInsetsDirectional.symmetric(vertical: AppSpacing.sm),
+        child: Row(
+          children: [
+            // Leading icon in a soft brand-tinted square (profile-row idiom).
+            Container(
+              width: AppSpacing.xxl + AppSpacing.sm,
+              height: AppSpacing.xxl + AppSpacing.sm,
+              alignment: AlignmentDirectional.center,
+              decoration: BoxDecoration(
+                color: colors.primary.withValues(alpha: 0.12),
+                borderRadius: appRadius(AppRadii.md),
+              ),
+              child: Icon(icon, color: colors.primary, size: AppSpacing.xl),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(child: Text(label, style: styles.titleMedium)),
+            const SizedBox(width: AppSpacing.sm),
+            Icon(
+              Icons.open_in_new,
+              size: AppSpacing.lg,
+              color: colors.textMuted,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

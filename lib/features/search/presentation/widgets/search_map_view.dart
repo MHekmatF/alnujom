@@ -22,6 +22,7 @@ import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../map/domain/entities/map_entry_context.dart';
@@ -101,9 +102,7 @@ class _SearchMapBodyState extends State<_SearchMapBody> {
     return BlocBuilder<MapBloc, MapState>(
       builder: (context, state) {
         return switch (state) {
-          MapInitial() || MapLoading() => const Center(
-            child: CircularProgressIndicator(),
-          ),
+          MapInitial() || MapLoading() => const AppSpinner.page(),
           MapError(failure: final f) => _MapErrorBody(message: f.message),
           MapLoaded() => _LoadedMap(controller: _controller, state: state),
         };
@@ -281,7 +280,11 @@ class _ViewFullMapButton extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.open_in_full, size: AppSpacing.lg, color: colors.primary),
+              Icon(
+                Icons.open_in_full,
+                size: AppSpacing.lg,
+                color: colors.primary,
+              ),
               const SizedBox(width: AppSpacing.sm),
               Text(
                 l10n.search_view_full_map,

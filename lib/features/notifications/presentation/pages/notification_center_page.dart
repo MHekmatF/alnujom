@@ -10,6 +10,7 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/localization/app_strings.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../bloc/notification_badge_cubit.dart';
@@ -91,7 +92,7 @@ class _NotificationCenterViewState extends State<_NotificationCenterView> {
           switch (state.status) {
             case NotificationsStatus.initial:
             case NotificationsStatus.loading:
-              return const Center(child: CircularProgressIndicator());
+              return const AppSpinner.page();
 
             case NotificationsStatus.error:
               return ErrorState(
@@ -119,7 +120,7 @@ class _NotificationCenterViewState extends State<_NotificationCenterView> {
                     if (index >= state.notifications.length) {
                       return const Padding(
                         padding: EdgeInsetsDirectional.all(AppSpacing.lg),
-                        child: Center(child: CircularProgressIndicator()),
+                        child: AppSpinner(),
                       );
                     }
                     final notification = state.notifications[index];
@@ -144,4 +145,3 @@ class _NotificationCenterViewState extends State<_NotificationCenterView> {
 // ---------------------------------------------------------------------------
 // Private sub-widgets
 // ---------------------------------------------------------------------------
-

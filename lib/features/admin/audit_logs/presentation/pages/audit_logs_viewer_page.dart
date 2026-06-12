@@ -11,7 +11,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 
 import '../../../../../core/di/injection.dart';
+import '../../../../../core/theme/colors.dart';
+import '../../../../../core/theme/radii.dart';
 import '../../../../../core/theme/spacing.dart';
+import '../../../../../core/theme/typography.dart';
+import '../../../../../core/widgets/_widget_support.dart';
+import '../../../../../core/widgets/app_button.dart';
+import '../../../../../core/widgets/app_spinner.dart';
+import '../../../../../core/widgets/loading_state.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../domain/entities/audit_log_entry.dart';
 import '../bloc/audit_log_cubit.dart';
@@ -68,7 +75,7 @@ class _AuditLogsViewState extends State<_AuditLogsView> {
       body: BlocBuilder<AuditLogCubit, AuditLogState>(
         builder: (ctx, state) {
           if (state.isLoadingFirstPage && state.items.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
+            return const _LogsSkeleton();
           }
           if (state.failure != null && state.items.isEmpty) {
             return _ErrorState(
@@ -91,15 +98,15 @@ class _AuditLogsViewState extends State<_AuditLogsView> {
             onRefresh: () => ctx.read<AuditLogCubit>().refresh(),
             child: ListView.separated(
               controller: _scrollController,
-              padding: const EdgeInsets.all(AppSpacing.md),
+              padding: const EdgeInsetsDirectional.all(AppSpacing.md),
               itemCount: state.items.length + (state.isLoadingNextPage ? 1 : 0),
               separatorBuilder: (_, __) =>
                   const SizedBox(height: AppSpacing.sm),
               itemBuilder: (ctx, index) {
                 if (index >= state.items.length) {
                   return const Padding(
-                    padding: EdgeInsets.all(AppSpacing.md),
-                    child: Center(child: CircularProgressIndicator()),
+                    padding: EdgeInsetsDirectional.all(AppSpacing.md),
+                    child: AppSpinner(),
                   );
                 }
                 return _AuditLogCard(entry: state.items[index]);
@@ -123,26 +130,35 @@ class _AuditLogCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     final locale = Localizations.localeOf(context).toString();
     final timestamp = DateFormat.yMMMd(
       locale,
     ).add_Hms().format(entry.createdAt.toLocal());
 
-    return Card(
+    return Material(
+      color: colors.card,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: appRadius(AppRadii.lg),
+        side: BorderSide(color: colors.outline),
+      ),
       child: ExpansionTile(
-        tilePadding: const EdgeInsets.symmetric(
+        tilePadding: const EdgeInsetsDirectional.symmetric(
           horizontal: AppSpacing.lg,
           vertical: AppSpacing.xs,
         ),
+        shape: const Border(),
+        collapsedShape: const Border(),
         childrenPadding: const EdgeInsetsDirectional.only(
           start: AppSpacing.lg,
           end: AppSpacing.lg,
           bottom: AppSpacing.lg,
         ),
-        title: Text(entry.action, style: theme.textTheme.titleSmall),
+        title: Text(entry.action, style: styles.titleMedium),
         subtitle: Padding(
-          padding: const EdgeInsets.only(top: AppSpacing.xs),
+          padding: const EdgeInsetsDirectional.only(top: AppSpacing.xs),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -186,19 +202,21 @@ class _FieldRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     // Composed outside TextSpan() so the l10n-literals lint passes — [label] is
     // a localized field label supplied by the caller.
     final labelText = '$label: ';
     return Padding(
-      padding: const EdgeInsets.only(top: AppSpacing.xs),
+      padding: const EdgeInsetsDirectional.only(top: AppSpacing.xs),
       child: RichText(
         text: TextSpan(
-          style: theme.textTheme.bodySmall,
+          style: styles.bodyMedium.copyWith(color: colors.textMuted),
           children: [
             TextSpan(
               text: labelText,
-              style: theme.textTheme.bodySmall?.copyWith(
+              style: styles.bodyMedium.copyWith(
+                color: colors.textMuted,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -223,7 +241,8 @@ class _JsonBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     final hasData = json != null && json!.isNotEmpty;
     final text = hasData
         ? const JsonEncoder.withIndent('  ').convert(json)
@@ -234,22 +253,20 @@ class _JsonBlock extends StatelessWidget {
       children: [
         Text(
           label,
-          style: theme.textTheme.labelMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: styles.labelMedium.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: AppSpacing.xs),
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(AppSpacing.sm),
+          padding: const EdgeInsetsDirectional.all(AppSpacing.sm),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(AppSpacing.xs),
+            color: colors.surfaceVariant,
+            borderRadius: appRadius(AppRadii.sm),
           ),
           child: SelectableText(
             text,
             textDirection: TextDirection.ltr,
-            style: theme.textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
+            style: styles.bodyMedium.copyWith(fontFamily: 'monospace'),
           ),
         ),
       ],
@@ -265,27 +282,44 @@ class _ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
+        padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               message,
               textAlign: TextAlign.center,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: theme.colorScheme.error,
-              ),
+              style: styles.bodyLarge.copyWith(color: colors.error),
             ),
             const SizedBox(height: AppSpacing.md),
-            FilledButton(
+            AppButton(
+              label: AppLocalizations.of(context)!.actionReload,
               onPressed: onRetry,
-              child: Text(AppLocalizations.of(context)!.actionReload),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Shimmer placeholder rows shown while the first audit-log page loads.
+class _LogsSkeleton extends StatelessWidget {
+  const _LogsSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      padding: const EdgeInsetsDirectional.all(AppSpacing.md),
+      itemCount: 6,
+      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+      itemBuilder: (_, __) => const SizedBox(
+        height: AppSpacing.xxxl + AppSpacing.xxl,
+        child: LoadingState.card(),
       ),
     );
   }

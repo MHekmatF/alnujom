@@ -6,7 +6,11 @@
 // Phase 2 tokens only; no inline hex/font-size/padding.
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/agency_member.dart';
 import '../../domain/entities/agency_member_role.dart';
@@ -38,8 +42,8 @@ class AgencyMemberTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
 
     final roleLabel = member.role.isAdmin
         ? l10n.agency_role_admin
@@ -51,44 +55,75 @@ class AgencyMemberTile extends StatelessWidget {
 
     final showActions = canManage && !isOwner;
 
-    return ListTile(
-      contentPadding: const EdgeInsetsDirectional.symmetric(
+    return Padding(
+      padding: const EdgeInsetsDirectional.symmetric(
         horizontal: AppSpacing.lg,
+        vertical: AppSpacing.sm,
       ),
-      leading: CircleAvatar(
-        backgroundColor: scheme.secondaryContainer,
-        child: Icon(Icons.person_outline, color: scheme.onSecondaryContainer),
-      ),
-      title: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
-      subtitle: Row(
+      child: Row(
         children: [
-          Chip(
-            label: Text(roleLabel),
-            labelStyle: theme.textTheme.labelSmall?.copyWith(
-              color: scheme.onSurfaceVariant,
+          // Avatar circle (brand-tinted), matching the profile-header idiom.
+          Container(
+            width: AppSpacing.xxxl,
+            height: AppSpacing.xxxl,
+            alignment: AlignmentDirectional.center,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: colors.primaryContainer,
             ),
-            backgroundColor: scheme.surfaceContainerHighest,
-            side: BorderSide.none,
-            padding: EdgeInsets.zero,
-            visualDensity: VisualDensity.compact,
+            child: Icon(Icons.person_outline, color: colors.onPrimaryContainer),
           ),
-          if (member.phone != null && member.displayName != null) ...[
-            const SizedBox(width: AppSpacing.sm),
-            Flexible(
-              child: Text(
-                member.phone!,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: scheme.onSurfaceVariant,
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: styles.titleMedium,
                 ),
-              ),
+                const SizedBox(height: AppSpacing.xs),
+                Row(
+                  children: [
+                    // Soft tonal role pill (token-clean Chip replacement).
+                    Container(
+                      padding: const EdgeInsetsDirectional.symmetric(
+                        horizontal: AppSpacing.sm,
+                        vertical: AppSpacing.xxs,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colors.surfaceVariant,
+                        borderRadius: appRadius(AppRadii.pill),
+                      ),
+                      child: Text(
+                        roleLabel,
+                        style: styles.labelMedium.copyWith(
+                          color: colors.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                    if (member.phone != null && member.displayName != null) ...[
+                      const SizedBox(width: AppSpacing.sm),
+                      Flexible(
+                        child: Text(
+                          member.phone!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: styles.bodyMedium.copyWith(
+                            color: colors.textMuted,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
             ),
-          ],
-        ],
-      ),
-      trailing: showActions
-          ? PopupMenuButton<String>(
+          ),
+          if (showActions)
+            PopupMenuButton<String>(
               icon: const Icon(Icons.more_vert),
               onSelected: (value) {
                 switch (value) {
@@ -116,8 +151,9 @@ class AgencyMemberTile extends StatelessWidget {
                   child: Text(l10n.agency_member_remove),
                 ),
               ],
-            )
-          : null,
+            ),
+        ],
+      ),
     );
   }
 }

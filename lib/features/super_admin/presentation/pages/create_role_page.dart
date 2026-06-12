@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/app_spinner.dart';
+import '../../../../core/widgets/app_text_field.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/permission_catalog_entry.dart';
 import '../../domain/entities/role_mutation_result.dart';
@@ -50,47 +54,37 @@ class _CreateRolePageState extends State<CreateRolePage> {
       appBar: AppBar(title: Text(l10n.superAdminCreateRoleTitle)),
       floatingActionButton: FloatingActionButton(
         onPressed: _saving ? null : _save,
-        child: _saving
-            ? const CircularProgressIndicator()
-            : const Icon(Icons.save),
+        child: _saving ? const AppSpinner() : const Icon(LucideIcons.save),
       ),
       body: FutureBuilder<List<PermissionCatalogEntry>>(
         future: _catalogFuture,
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
+            return const AppSpinner.page();
           }
           return ListView(
-            padding: const EdgeInsets.all(AppSpacing.lg),
+            padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
             children: [
-              TextField(
+              AppTextField(
+                label: l10n.roleKeyLabel,
                 controller: _keyController,
-                decoration: InputDecoration(
-                  labelText: l10n.roleKeyLabel,
-                  errorText: _keyError,
-                ),
+                errorText: _keyError,
                 onChanged: (_) => setState(() => _keyError = null),
               ),
               const SizedBox(height: AppSpacing.lg),
-              TextField(
+              AppTextField(
+                label: l10n.roleDisplayNameLabelAr,
                 controller: _arController,
-                decoration: InputDecoration(
-                  labelText: l10n.roleDisplayNameLabelAr,
-                ),
               ),
               const SizedBox(height: AppSpacing.lg),
-              TextField(
+              AppTextField(
+                label: l10n.roleDisplayNameLabelEn,
                 controller: _enController,
-                decoration: InputDecoration(
-                  labelText: l10n.roleDisplayNameLabelEn,
-                ),
               ),
               const SizedBox(height: AppSpacing.lg),
-              TextField(
+              AppTextField(
+                label: l10n.roleDescriptionLabel,
                 controller: _descriptionController,
-                decoration: InputDecoration(
-                  labelText: l10n.roleDescriptionLabel,
-                ),
                 maxLines: 3,
               ),
               const SizedBox(height: AppSpacing.xl),
@@ -123,9 +117,7 @@ class _CreateRolePageState extends State<CreateRolePage> {
     }
     if (_arController.text.trim().isEmpty &&
         _enController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.errorRoleDisplayNameRequired)),
-      );
+      AppToast.warning(context, l10n.errorRoleDisplayNameRequired);
       return;
     }
     setState(() => _saving = true);
@@ -148,9 +140,7 @@ class _CreateRolePageState extends State<CreateRolePage> {
       if (mounted) setState(() => _keyError = l10n.errorRoleKeyDuplicate);
     } on SuperAdminFailure catch (failure) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(failure.message)));
+        AppToast.error(context, failure.message);
       }
     } finally {
       if (mounted) setState(() => _saving = false);

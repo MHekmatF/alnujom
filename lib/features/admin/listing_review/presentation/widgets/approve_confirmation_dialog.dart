@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
+import '../../../../../core/widgets/app_dialog.dart';
 import '../../../../../l10n/app_localizations.dart';
 
 /// Phase 12 — Approve confirmation dialog.
@@ -18,19 +20,13 @@ class ApproveConfirmationDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return AlertDialog(
-      title: Text(l10n.adminApproveDialogTitle),
-      content: Text(l10n.adminApproveDialogBody),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(false),
-          child: Text(l10n.adminApproveDialogCancel),
-        ),
-        FilledButton(
-          onPressed: () => Navigator.of(context).pop(true),
-          child: Text(l10n.adminApproveDialogConfirm),
-        ),
-      ],
+    return AppDialog(
+      title: l10n.adminApproveDialogTitle,
+      message: l10n.adminApproveDialogBody,
+      icon: LucideIcons.circle_check,
+      actionLabel: l10n.adminApproveDialogConfirm,
+      cancelLabel: l10n.adminApproveDialogCancel,
+      onAction: () => Navigator.of(context).pop(true),
     );
   }
 }

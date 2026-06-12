@@ -9,7 +9,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../core/di/injection.dart';
+import '../../../../../core/theme/colors.dart';
 import '../../../../../core/theme/spacing.dart';
+import '../../../../../core/theme/typography.dart';
+import '../../../../../core/widgets/app_button.dart';
+import '../../../../../core/widgets/app_spinner.dart';
+import '../../../../../core/widgets/loading_state.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../bloc/reports_queue_bloc.dart';
 import '../bloc/reports_queue_state.dart';
@@ -23,8 +28,7 @@ class ReportsQueuePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<ReportsQueueBloc>(
-      create: (_) =>
-          getIt<ReportsQueueBloc>()..add(const ReportsQueueOpened()),
+      create: (_) => getIt<ReportsQueueBloc>()..add(const ReportsQueueOpened()),
       child: const _ReportsQueueView(),
     );
   }
@@ -102,22 +106,22 @@ class _ReportsQueueViewState extends State<_ReportsQueueView> {
             child: BlocBuilder<ReportsQueueBloc, ReportsQueueState>(
               builder: (ctx, state) {
                 if (state.isLoadingFirstPage && state.items.isEmpty) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const _QueueSkeleton();
                 }
                 if (state.failure != null && state.items.isEmpty) {
                   return _ErrorState(
                     message: state.failure!.message,
-                    onRetry: () => ctx
-                        .read<ReportsQueueBloc>()
-                        .add(const ReportsQueueRefresh()),
+                    onRetry: () => ctx.read<ReportsQueueBloc>().add(
+                      const ReportsQueueRefresh(),
+                    ),
                   );
                 }
                 if (state.isEmpty) {
                   return RefreshIndicator(
                     onRefresh: () async {
-                      ctx
-                          .read<ReportsQueueBloc>()
-                          .add(const ReportsQueueRefresh());
+                      ctx.read<ReportsQueueBloc>().add(
+                        const ReportsQueueRefresh(),
+                      );
                     },
                     child: ListView(
                       children: [
@@ -129,22 +133,22 @@ class _ReportsQueueViewState extends State<_ReportsQueueView> {
                 }
                 return RefreshIndicator(
                   onRefresh: () async {
-                    ctx
-                        .read<ReportsQueueBloc>()
-                        .add(const ReportsQueueRefresh());
+                    ctx.read<ReportsQueueBloc>().add(
+                      const ReportsQueueRefresh(),
+                    );
                   },
                   child: ListView.separated(
                     controller: _scrollController,
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    itemCount: state.items.length +
-                        (state.isLoadingNextPage ? 1 : 0),
+                    padding: const EdgeInsetsDirectional.all(AppSpacing.md),
+                    itemCount:
+                        state.items.length + (state.isLoadingNextPage ? 1 : 0),
                     separatorBuilder: (_, __) =>
                         const SizedBox(height: AppSpacing.sm),
                     itemBuilder: (ctx, index) {
                       if (index >= state.items.length) {
                         return const Padding(
-                          padding: EdgeInsets.all(AppSpacing.md),
-                          child: Center(child: CircularProgressIndicator()),
+                          padding: EdgeInsetsDirectional.all(AppSpacing.md),
+                          child: AppSpinner(),
                         );
                       }
                       final item = state.items[index];
@@ -179,27 +183,44 @@ class _ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
+        padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               message,
               textAlign: TextAlign.center,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: theme.colorScheme.error,
-              ),
+              style: styles.bodyLarge.copyWith(color: colors.error),
             ),
             const SizedBox(height: AppSpacing.md),
-            FilledButton(
+            AppButton(
+              label: AppLocalizations.of(context)!.actionReload,
               onPressed: onRetry,
-              child: Text(AppLocalizations.of(context)!.actionReload),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Shimmer placeholder rows shown while the first reports page loads.
+class _QueueSkeleton extends StatelessWidget {
+  const _QueueSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      padding: const EdgeInsetsDirectional.all(AppSpacing.md),
+      itemCount: 6,
+      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+      itemBuilder: (_, __) => const SizedBox(
+        height: AppSpacing.xxxl + AppSpacing.xxl,
+        child: LoadingState.card(),
       ),
     );
   }

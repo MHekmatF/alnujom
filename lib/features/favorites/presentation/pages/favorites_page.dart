@@ -10,6 +10,7 @@ import '../../../../core/theme/motion.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../comparison/presentation/cubit/comparison_cubit.dart';
 import '../../../comparison/presentation/widgets/compare_bottom_bar.dart';
+import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
@@ -84,7 +85,9 @@ class _FavoritesView extends StatelessWidget {
                       : _LoadedBody(items: items, hasMore: hasMore, sort: sort),
               };
               return AnimatedSwitcher(
-                duration: reduceMotion(context) ? Duration.zero : AppMotion.base,
+                duration: reduceMotion(context)
+                    ? Duration.zero
+                    : AppMotion.base,
                 child: child,
               );
             },
@@ -168,8 +171,8 @@ class _LoadedBody extends StatelessWidget {
           // Loading spinner sentinel at the end of the list.
           if (itemIndex >= items.length) {
             return const Padding(
-              padding: EdgeInsets.all(AppSpacing.lg),
-              child: Center(child: CircularProgressIndicator()),
+              padding: EdgeInsetsDirectional.all(AppSpacing.lg),
+              child: AppSpinner(),
             );
           }
 
@@ -214,4 +217,3 @@ class _FavoritesSkeleton extends StatelessWidget {
     );
   }
 }
-

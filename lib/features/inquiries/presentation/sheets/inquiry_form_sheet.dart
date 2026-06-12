@@ -8,8 +8,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
@@ -156,9 +161,7 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
             Navigator.of(context).pop(true);
           } else if (state is InquiryFormFailed) {
             final l10n = AppLocalizations.of(context)!;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(l10n.inquiry_form_submission_failed)),
-            );
+            AppToast.error(context, l10n.inquiry_form_submission_failed);
           }
         },
         child: DraggableScrollableSheet(
@@ -199,11 +202,14 @@ class _SheetBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final colorScheme = Theme.of(context).colorScheme;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
 
     return Material(
-      color: colorScheme.surface,
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+      color: colors.surface,
+      borderRadius: const BorderRadius.vertical(
+        top: Radius.circular(AppRadii.lg),
+      ),
       child: BlocBuilder<InquiryFormBloc, InquiryFormState>(
         builder: (context, state) {
           final isSubmitting = state is InquiryFormSubmitting;
@@ -220,22 +226,21 @@ class _SheetBody extends StatelessWidget {
               // Handle indicator
               Center(
                 child: Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: AppSpacing.lg),
+                  width: AppSpacing.xxl + AppSpacing.sm,
+                  height: AppSpacing.xs,
+                  margin: const EdgeInsetsDirectional.only(
+                    bottom: AppSpacing.lg,
+                  ),
                   decoration: BoxDecoration(
-                    color: colorScheme.outlineVariant,
-                    borderRadius: BorderRadius.circular(
+                    color: colors.outline,
+                    borderRadius: appRadius(
                       AppRadii.pill,
                     ), // drag-handle bar — fully rounded
                   ),
                 ),
               ),
               // Sheet title
-              Text(
-                l10n.inquiry_form_title,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
+              Text(l10n.inquiry_form_title, style: styles.titleLarge),
               const SizedBox(height: AppSpacing.lg),
               // Name field
               TextField(
@@ -298,10 +303,10 @@ class _SheetBody extends StatelessWidget {
                     l10n.inquiry_form_message_counter(
                       _maxMessageLength - messageLength,
                     ),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    style: styles.labelMedium.copyWith(
                       color: messageLength > 1900
-                          ? colorScheme.error
-                          : colorScheme.onSurfaceVariant,
+                          ? colors.error
+                          : colors.onSurfaceVariant,
                     ),
                     textAlign: TextAlign.end,
                   ),
@@ -309,21 +314,15 @@ class _SheetBody extends StatelessWidget {
               const SizedBox(height: AppSpacing.lg),
               // Submit button — disabled while submitting or while any
               // required field is empty.
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: (isSubmitting || !_hasRequiredFields(state))
-                      ? null
-                      : () => context.read<InquiryFormBloc>().add(
-                          const InquiryFormSubmitted(),
-                        ),
-                  child: isSubmitting
-                      ? const SizedBox.square(
-                          dimension: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(l10n.inquiry_form_submit_button),
-                ),
+              AppButton.filledPrimary(
+                label: l10n.inquiry_form_submit_button,
+                expanded: true,
+                loading: isSubmitting,
+                onPressed: (isSubmitting || !_hasRequiredFields(state))
+                    ? null
+                    : () => context.read<InquiryFormBloc>().add(
+                        const InquiryFormSubmitted(),
+                      ),
               ),
               SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
             ],

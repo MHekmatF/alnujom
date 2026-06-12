@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 class UserSearchField extends StatefulWidget {
   const UserSearchField({
@@ -30,7 +31,7 @@ class _UserSearchFieldState extends State<UserSearchField> {
     return TextField(
       decoration: InputDecoration(
         hintText: widget.hintText,
-        prefixIcon: const Icon(Icons.search),
+        prefixIcon: const Icon(LucideIcons.search),
       ),
       onChanged: (value) {
         _timer?.cancel();

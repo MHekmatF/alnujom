@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_spinner.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/phone_number.dart';
 import '../../domain/entities/private_contact_methods.dart';
@@ -112,7 +116,8 @@ class _PrivateViewState extends State<_PrivateView> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
 
     return BlocConsumer<ProfileCubit, ProfileState>(
       listener: (context, state) {
@@ -130,7 +135,7 @@ class _PrivateViewState extends State<_PrivateView> {
             state.piiStatus == PiiStatus.idle) {
           return Scaffold(
             appBar: AppBar(title: Text(l10n.profile_private_section_title)),
-            body: const Center(child: CircularProgressIndicator()),
+            body: const AppSpinner.page(),
           );
         }
 
@@ -139,39 +144,39 @@ class _PrivateViewState extends State<_PrivateView> {
         return Scaffold(
           appBar: AppBar(title: Text(l10n.profile_private_section_title)),
           body: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSpacing.xl),
+            padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
                   l10n.profile_private_legal_name,
-                  style: theme.textTheme.titleMedium,
+                  style: styles.titleMedium,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 TextField(
                   controller: _legalNameController,
                   decoration: InputDecoration(
                     labelText: l10n.profile_private_legal_name,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.lg),
                 Text(
                   l10n.profile_private_national_id,
-                  style: theme.textTheme.titleMedium,
+                  style: styles.titleMedium,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 TextField(
                   controller: _nationalIdController,
                   decoration: InputDecoration(
                     labelText: l10n.profile_private_national_id,
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: AppSpacing.xl),
                 Text(
                   l10n.profile_private_contact_methods_title,
-                  style: theme.textTheme.titleMedium,
+                  style: styles.titleMedium,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 _ContactField(
                   controller: _whatsappController,
                   label: l10n.profile_private_contact_methods_whatsapp,
@@ -194,26 +199,20 @@ class _PrivateViewState extends State<_PrivateView> {
                   label: l10n.profile_private_contact_methods_secondary_phone,
                   keyboardType: TextInputType.phone,
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: AppSpacing.xl),
                 if (_piiError != null) ...[
                   Text(
                     _piiError!,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.error,
-                    ),
+                    style: styles.bodyMedium.copyWith(color: colors.error),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.md),
                 ],
-                FilledButton(
+                AppButton.filledPrimary(
+                  label: l10n.profile_save_button,
+                  loading: isSaving,
+                  expanded: true,
                   onPressed: isSaving ? null : () => _saveAll(l10n),
-                  child: isSaving
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(l10n.profile_save_button),
                 ),
               ],
             ),
@@ -245,7 +244,7 @@ class _ContactField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.md),
       child: TextField(
         controller: controller,
         keyboardType: keyboardType,

@@ -10,6 +10,7 @@ import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/brand_mark.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
@@ -77,8 +78,7 @@ class HomePage extends StatelessWidget {
         // Home opens. Page-scoped (mirrors HomeBloc); the section hides itself
         // on empty / failure.
         BlocProvider<FeaturedListingsCubit>(
-          create: (_) =>
-              getIt<FeaturedListingsCubit>()..load(locale: locale),
+          create: (_) => getIt<FeaturedListingsCubit>()..load(locale: locale),
         ),
         // Recently-viewed: the shared (lazySingleton) cubit, loaded from local
         // storage when Home opens. .value (not create) so we don't dispose the
@@ -236,7 +236,9 @@ class _HomeViewState extends State<_HomeView> {
         // Recently-viewed: the "شوهد مؤخراً / Recently viewed" row, just under the
         // featured carousel. Backed by local storage; hides itself when empty.
         const SliverToBoxAdapter(child: RecentlyViewedCarousel()),
-        SliverToBoxAdapter(child: _SectionHeader(title: l10n.home_latest_listings_header)),
+        SliverToBoxAdapter(
+          child: _SectionHeader(title: l10n.home_latest_listings_header),
+        ),
         ..._buildFeedSlivers(context, state, currenciesByCode, l10n),
       ],
     );
@@ -376,9 +378,7 @@ class _SectionHeader extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Text(title, style: styles.titleLarge),
-          ),
+          Expanded(child: Text(title, style: styles.titleLarge)),
         ],
       ),
     );
@@ -456,7 +456,7 @@ class _FeedFooter extends StatelessWidget {
     if (state.status == HomeFeedStatus.loadingMore) {
       return const Padding(
         padding: EdgeInsetsDirectional.all(AppSpacing.lg),
-        child: Center(child: CircularProgressIndicator()),
+        child: AppSpinner(),
       );
     }
     if (state.endReached && state.listings.isNotEmpty) {
@@ -465,8 +465,8 @@ class _FeedFooter extends StatelessWidget {
         child: Center(
           child: Text(
             l10n.home_no_more_listings,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            style: AppTextStyles.of(context).labelMedium.copyWith(
+              color: AppColors.of(context).onSurfaceVariant,
             ),
           ),
         ),
@@ -508,4 +508,3 @@ class _EmptyView extends StatelessWidget {
     );
   }
 }
-

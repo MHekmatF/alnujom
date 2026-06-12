@@ -57,6 +57,7 @@ import '../../features/inquiries/presentation/pages/inquiry_detail_page.dart';
 import '../../features/inquiries/presentation/pages/inquiry_inbox_page.dart';
 import '../../features/map/domain/entities/map_entry_context.dart';
 import '../../features/map/presentation/pages/map_page.dart';
+import '../../features/assistant/presentation/pages/assistant_page.dart';
 import '../../features/search/presentation/pages/search_page.dart';
 import '../../features/search/presentation/pages/saved_searches_page.dart';
 import '../../features/search/domain/entities/filter_state.dart';
@@ -116,6 +117,8 @@ abstract final class AppRoutes {
   static const listingDetails = '/listings/:id';
   // Phase 14 FR-001 / FR-010: public search & filters route.
   static const search = '/search';
+  // Phase 28 — smart search assistant (anonymous-accessible, mirrors /search).
+  static const assistant = '/assistant';
   // Phase 15 FR-007: public map view route.
   static const map = '/map';
   // Phase 16 FR-001: publisher inquiry inbox route.
@@ -211,6 +214,8 @@ abstract final class AppRouteNames {
   static const listingDetails = 'listing-details';
   // Phase 14 FR-001 / FR-010: public search & filters route name.
   static const search = 'search';
+  // Phase 28 — smart search assistant route name.
+  static const assistant = 'assistant';
   // Phase 25 uplift v2 — saved searches + role-aware dashboard route names.
   static const savedSearches = 'saved-searches';
   static const publisherDashboard = 'publisher-dashboard';
@@ -261,8 +266,9 @@ abstract final class AppRouteNames {
 /// the `MaterialApp.router` `builder` (whose context has no Navigator below it).
 /// `rootNavigatorKey.currentContext` resolves to the GoRouter root Navigator,
 /// so `showDialog` can attach correctly.
-final GlobalKey<NavigatorState> rootNavigatorKey =
-    GlobalKey<NavigatorState>(debugLabel: 'rootNavigator');
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>(
+  debugLabel: 'rootNavigator',
+);
 
 GoRouter buildAppRouter({
   required AppLogger logger,
@@ -578,6 +584,14 @@ GoRouter buildAppRouter({
             autofocus: state.uri.queryParameters['focus'] == '1',
           );
         },
+      ),
+      // ─── Phase 28 — smart search assistant ───
+      // Anonymous-accessible (mirrors /search): pure on-device parsing; the
+      // optional market-stats RPC is anon-granted server-side.
+      GoRoute(
+        path: AppRoutes.assistant,
+        name: AppRouteNames.assistant,
+        builder: (context, state) => const AssistantPage(),
       ),
       // ─── Phase 25 uplift v2 — saved searches ───
       GoRoute(

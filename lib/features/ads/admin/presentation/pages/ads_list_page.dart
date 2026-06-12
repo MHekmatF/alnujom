@@ -8,9 +8,19 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 import '../../../../../core/di/injection.dart';
+import '../../../../../core/theme/colors.dart';
+import '../../../../../core/theme/radii.dart';
 import '../../../../../core/theme/spacing.dart';
+import '../../../../../core/theme/typography.dart';
+import '../../../../../core/widgets/_widget_support.dart';
+import '../../../../../core/widgets/app_dialog.dart';
+import '../../../../../core/widgets/app_spinner.dart';
+import '../../../../../core/widgets/app_toast.dart';
+import '../../../../../core/widgets/loading_state.dart';
+import '../../../../../core/widgets/press_scale.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../domain/entities/ad.dart';
 import '../bloc/ads_admin_cubit.dart';
@@ -47,7 +57,8 @@ class _AdsListView extends StatelessWidget {
                   state is AdsAdminList && state.includeArchived;
               return IconButton(
                 icon: Icon(
-                  includeArchived ? Icons.archive : Icons.archive_outlined,
+                  LucideIcons.archive,
+                  color: includeArchived ? AppColors.of(ctx).primary : null,
                 ),
                 tooltip: l10n.adsAdminArchivedFilterTooltip,
                 onPressed: () {
@@ -63,14 +74,12 @@ class _AdsListView extends StatelessWidget {
       body: BlocConsumer<AdsAdminCubit, AdsAdminState>(
         listener: (ctx, state) {
           if (state is AdsAdminError) {
-            ScaffoldMessenger.of(
-              ctx,
-            ).showSnackBar(SnackBar(content: Text(state.failure.message)));
+            AppToast.error(ctx, state.failure.message);
           }
         },
         builder: (ctx, state) {
           if (state is AdsAdminLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const _AdsListSkeleton();
           }
           if (state is AdsAdminList) {
             if (state.ads.isEmpty) {
@@ -81,7 +90,7 @@ class _AdsListView extends StatelessWidget {
                 includeArchived: state.includeArchived,
               ),
               child: ListView.separated(
-                padding: const EdgeInsets.all(AppSpacing.lg),
+                padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
                 itemCount: state.ads.length,
                 separatorBuilder: (_, __) =>
                     const SizedBox(height: AppSpacing.sm),
@@ -114,13 +123,13 @@ class _AdsListView extends StatelessWidget {
           // initial — transient states, often driven by the shared editor
           // cubit. Show a spinner instead of a spurious error screen (review
           // Bug 1); the editor-return reload in _openEditor restores the list.
-          return const Center(child: CircularProgressIndicator());
+          return const AppSpinner.page();
         },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _openEditor(context),
         tooltip: l10n.adsAdminCreateTooltip,
-        child: const Icon(Icons.add),
+        child: const Icon(LucideIcons.plus),
       ),
     );
   }
@@ -147,6 +156,8 @@ class _AdsListView extends StatelessWidget {
   }
 }
 
+/// Branded ad row — tinted-circle glyph + title + status chip on a hairline
+/// surface (replaces the stock [Card]+[ListTile]).
 class _AdListTile extends StatelessWidget {
   const _AdListTile({required this.ad, required this.onTap});
 
@@ -156,26 +167,57 @@ class _AdListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
 
-    return Card(
-      child: ListTile(
+    return PressScale(
+      child: AppSurface(
+        radius: AppRadii.lg,
         onTap: onTap,
-        title: Text(ad.title, style: theme.textTheme.titleSmall),
-        subtitle: AdStatusChip(ad.status),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
+        padding: const EdgeInsetsDirectional.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
+        ),
+        child: Row(
           children: [
+            Container(
+              width: AppSpacing.xxl + AppSpacing.lg,
+              height: AppSpacing.xxl + AppSpacing.lg,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: colors.primary.withValues(alpha: 0.12),
+              ),
+              child: Icon(
+                LucideIcons.megaphone,
+                color: colors.primary,
+                size: AppSpacing.xl,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    ad.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: styles.bodyLarge,
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  AdStatusChip(ad.status),
+                ],
+              ),
+            ),
             // Activate / Deactivate — not shown for archived ads
             if (ad.archivedAt == null) ...[
               IconButton(
                 icon: Icon(
                   ad.isActive
-                      ? Icons.toggle_on_outlined
-                      : Icons.toggle_off_outlined,
-                  color: ad.isActive
-                      ? theme.colorScheme.primary
-                      : theme.colorScheme.outline,
+                      ? LucideIcons.toggle_right
+                      : LucideIcons.toggle_left,
+                  color: ad.isActive ? colors.primary : colors.textMuted,
                 ),
                 tooltip: ad.isActive
                     ? l10n.adsAdminDeactivateTooltip
@@ -189,10 +231,7 @@ class _AdListTile extends StatelessWidget {
               ),
               // Archive (soft-delete)
               IconButton(
-                icon: Icon(
-                  Icons.archive_outlined,
-                  color: theme.colorScheme.error,
-                ),
+                icon: Icon(LucideIcons.archive, color: colors.error),
                 tooltip: l10n.adsAdminArchiveTooltip,
                 onPressed: () => _confirmArchive(context, ad),
               ),
@@ -207,23 +246,36 @@ class _AdListTile extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.adsAdminArchiveConfirmTitle),
-        content: Text(l10n.adsAdminArchiveConfirmBody(ad.title)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.cancelLabel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.adsAdminArchiveAction),
-          ),
-        ],
+      builder: (ctx) => AppDialog(
+        icon: LucideIcons.archive,
+        variant: AppDialogVariant.destructive,
+        title: l10n.adsAdminArchiveConfirmTitle,
+        message: l10n.adsAdminArchiveConfirmBody(ad.title),
+        cancelLabel: l10n.cancelLabel,
+        actionLabel: l10n.adsAdminArchiveAction,
+        onAction: () => Navigator.pop(ctx, true),
       ),
     );
     if (confirmed == true && context.mounted) {
       unawaited(context.read<AdsAdminCubit>().archiveAd(ad.id));
     }
+  }
+}
+
+/// Shimmer placeholder rows shown while the ads list loads.
+class _AdsListSkeleton extends StatelessWidget {
+  const _AdsListSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+      itemCount: 6,
+      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+      itemBuilder: (_, __) => const SizedBox(
+        height: AppSpacing.xxxl + AppSpacing.xxl,
+        child: LoadingState.card(),
+      ),
+    );
   }
 }

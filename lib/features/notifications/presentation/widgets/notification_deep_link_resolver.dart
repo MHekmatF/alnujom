@@ -15,6 +15,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/localization/app_strings.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../domain/entities/app_notification.dart';
 import '../../domain/entities/notification_type.dart';
 import '../../domain/usecases/mark_notification_read.dart';
@@ -155,9 +156,7 @@ abstract final class NotificationDeepLinkResolver {
   static void _showFallback(BuildContext context) {
     if (!context.mounted) return;
     final l10n = AppStrings.of(context).loc;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.notification_content_unavailable)),
-    );
+    AppToast.warning(context, l10n.notification_content_unavailable);
   }
 }
 

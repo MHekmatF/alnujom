@@ -4,6 +4,7 @@
 // Constitution VI: design tokens only; Constitution IX: zero Supabase imports.
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/colors.dart';
 import '../../../../../core/theme/spacing.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../reports/domain/entities/report_reason.dart';
@@ -30,10 +31,10 @@ class ReportFilterBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
 
     return Container(
-      color: theme.colorScheme.surfaceContainerLow,
+      color: colors.surfaceVariant,
       padding: const EdgeInsetsDirectional.symmetric(
         horizontal: AppSpacing.md,
         vertical: AppSpacing.sm,
@@ -114,10 +115,7 @@ class _StatusDropdown extends StatelessWidget {
         for (final s in ReportStatus.values)
           DropdownMenuItem<ReportStatus?>(
             value: s,
-            child: Text(
-              _statusLabel(l10n, s),
-              overflow: TextOverflow.ellipsis,
-            ),
+            child: Text(_statusLabel(l10n, s), overflow: TextOverflow.ellipsis),
           ),
       ],
       onChanged: onChanged,
@@ -185,10 +183,7 @@ class _ReasonDropdown extends StatelessWidget {
         for (final r in ReportReason.values)
           DropdownMenuItem<ReportReason?>(
             value: r,
-            child: Text(
-              _reasonLabel(l10n, r),
-              overflow: TextOverflow.ellipsis,
-            ),
+            child: Text(_reasonLabel(l10n, r), overflow: TextOverflow.ellipsis),
           ),
       ],
       onChanged: onChanged,

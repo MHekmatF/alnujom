@@ -8,6 +8,8 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/errors/result.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/app_spinner.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../currencies/domain/entities/currency.dart';
 import '../../../currencies/domain/usecases/list_currencies.dart';
@@ -78,7 +80,6 @@ class _MyListingsViewState extends State<_MyListingsView> {
                       prev.renewSuccessToken != curr.renewSuccessToken ||
                       prev.renewErrorToken != curr.renewErrorToken,
                   listener: (context, state) {
-                    final messenger = ScaffoldMessenger.of(context);
                     final succeeded =
                         state.renewSuccessToken != _lastRenewSuccessToken;
                     final failed =
@@ -86,65 +87,67 @@ class _MyListingsViewState extends State<_MyListingsView> {
                     _lastRenewSuccessToken = state.renewSuccessToken;
                     _lastRenewErrorToken = state.renewErrorToken;
                     if (!succeeded && !failed) return;
-                    messenger.hideCurrentSnackBar();
-                    messenger.showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          succeeded
-                              ? l10n.myListingsRenewSuccess
-                              : l10n.myListingsRenewError,
-                        ),
-                      ),
+                    AppToast.show(
+                      context,
+                      succeeded
+                          ? l10n.myListingsRenewSuccess
+                          : l10n.myListingsRenewError,
+                      variant: succeeded
+                          ? AppToastVariant.success
+                          : AppToastVariant.error,
                     );
                   },
                   child: BlocBuilder<MyListingsBloc, MyListingsState>(
                     builder: (context, state) {
-                    if (state.loading && state.listings.isEmpty) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    if (state.errorMessage != null && state.listings.isEmpty) {
-                      return _ErrorBody(message: state.errorMessage!);
-                    }
-                    if (state.listings.isEmpty) {
-                      return const _EmptyBody();
-                    }
-                    return _LocationLabelsHost(
-                      listings: state.listings,
-                      builder: (context, governorates, areas) {
-                        return RefreshIndicator(
-                          onRefresh: () async {
-                            context.read<MyListingsBloc>().add(const Refresh());
-                            await _waitForRefresh(context);
-                          },
-                          child: ListView.builder(
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            itemCount:
-                                state.listings.length +
-                                (state.endReached ? 0 : 1),
-                            itemBuilder: (context, index) {
-                              if (index >= state.listings.length) {
-                                context.read<MyListingsBloc>().add(
-                                  const LoadMore(),
-                                );
-                                return const Padding(
-                                  padding: EdgeInsets.all(AppSpacing.lg),
-                                  child: Center(
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                );
-                              }
-                              final pl = state.listings[index];
-                              return _ListingRow(
-                                publisherListing: pl,
-                                currenciesByCode: currenciesByCode,
-                                governoratesById: governorates,
-                                areasById: areas,
+                      if (state.loading && state.listings.isEmpty) {
+                        return const AppSpinner.page();
+                      }
+                      if (state.errorMessage != null &&
+                          state.listings.isEmpty) {
+                        return _ErrorBody(message: state.errorMessage!);
+                      }
+                      if (state.listings.isEmpty) {
+                        return const _EmptyBody();
+                      }
+                      return _LocationLabelsHost(
+                        listings: state.listings,
+                        builder: (context, governorates, areas) {
+                          return RefreshIndicator(
+                            onRefresh: () async {
+                              context.read<MyListingsBloc>().add(
+                                const Refresh(),
                               );
+                              await _waitForRefresh(context);
                             },
-                          ),
-                        );
-                      },
-                    );
+                            child: ListView.builder(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              itemCount:
+                                  state.listings.length +
+                                  (state.endReached ? 0 : 1),
+                              itemBuilder: (context, index) {
+                                if (index >= state.listings.length) {
+                                  context.read<MyListingsBloc>().add(
+                                    const LoadMore(),
+                                  );
+                                  return const Padding(
+                                    padding: EdgeInsetsDirectional.all(
+                                      AppSpacing.lg,
+                                    ),
+                                    child: AppSpinner(),
+                                  );
+                                }
+                                final pl = state.listings[index];
+                                return _ListingRow(
+                                  publisherListing: pl,
+                                  currenciesByCode: currenciesByCode,
+                                  governoratesById: governorates,
+                                  areasById: areas,
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      );
                     },
                   ),
                 ),
