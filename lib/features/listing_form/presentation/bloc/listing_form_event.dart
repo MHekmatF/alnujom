@@ -191,6 +191,20 @@ class VideoPicked extends ListingFormEvent {
   List<Object?> get props => [file];
 }
 
+/// Phase 029 (F5) — Publisher picked a single equirectangular image via the
+/// "Add 360° photo" CTA. The BLoC runs it through the panorama pipeline on the
+/// shared isolate worker (aspect-gated 2:1, no watermark, 4096px cap) then
+/// uploads it to `listing-images` as a `kind='panorama'` row. Reuses the same
+/// upload-ghost / progress machinery as [MediaPicked] / [VideoPicked].
+class PanoramaPicked extends ListingFormEvent {
+  const PanoramaPicked(this.file);
+
+  final XFile file;
+
+  @override
+  List<Object?> get props => [file];
+}
+
 /// Publisher dragged a thumbnail to a new position; `newOrder` is the list
 /// of `listing_media.id` values in the new sequence (1-indexed via list order).
 class MediaReordered extends ListingFormEvent {

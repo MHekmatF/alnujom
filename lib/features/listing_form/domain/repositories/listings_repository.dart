@@ -115,6 +115,16 @@ abstract class ListingsRepository {
     required int ordering,
   });
 
+  /// Phase 029 (F5) — uploads processed equirectangular panorama JPEG bytes to
+  /// `listing-images` then inserts a `kind='panorama'` row (watermarked=false,
+  /// is_main=false). The panorama pipeline runs in the isolate worker BEFORE
+  /// this call (no watermark — it would break the 360° wrap seam).
+  Future<ListingMedia> uploadPanorama({
+    required String listingId,
+    required Uint8List panoramaBytes,
+    required int ordering,
+  });
+
   /// Re-sequences `ordering` for a list of media ids (drag-reorder commit).
   Future<void> reorderMedia({
     required String listingId,

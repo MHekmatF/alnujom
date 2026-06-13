@@ -228,6 +228,8 @@ class LocationsRepositoryImpl implements LocationsRepository {
     required String cityId,
     required String key,
     required Map<String, String> displayName,
+    required double centroidLat,
+    required double centroidLng,
     Map<String, String>? description,
     int? position,
     bool isActive = true,
@@ -237,6 +239,8 @@ class LocationsRepositoryImpl implements LocationsRepository {
         cityId: cityId,
         key: key,
         displayName: displayName,
+        centroidLat: centroidLat,
+        centroidLng: centroidLng,
         description: description,
         position: position,
         isActive: isActive,
@@ -256,6 +260,8 @@ class LocationsRepositoryImpl implements LocationsRepository {
     Map<String, String>? description,
     int? position,
     bool? isActive,
+    double? centroidLat,
+    double? centroidLng,
   }) async {
     try {
       return (await _ds.updateArea(
@@ -265,6 +271,8 @@ class LocationsRepositoryImpl implements LocationsRepository {
         description: description,
         position: position,
         isActive: isActive,
+        centroidLat: centroidLat,
+        centroidLng: centroidLng,
       )).toEntity();
     } on PostgrestException catch (e, st) {
       throw _mapPostgrest(e, st);

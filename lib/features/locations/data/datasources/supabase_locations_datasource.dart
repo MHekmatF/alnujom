@@ -185,6 +185,11 @@ class SupabaseLocationsDatasource {
     required String cityId,
     required String key,
     required Map<String, String> displayName,
+    // centroid_lat / centroid_lng are NOT NULL on `areas` (CHECK lat 32..37,
+    // lng 35..43). Omitting them previously caused a 23502 on insert — they
+    // are now required by the create flow (validated upstream in the bloc).
+    required double centroidLat,
+    required double centroidLng,
     Map<String, String>? description,
     int? position,
     bool isActive = true,
@@ -195,6 +200,8 @@ class SupabaseLocationsDatasource {
           'city_id': cityId,
           'key': key,
           'display_name': displayName,
+          'centroid_lat': centroidLat,
+          'centroid_lng': centroidLng,
           if (description != null) 'description': description,
           if (position != null) 'position': position,
           'is_active': isActive,
@@ -211,6 +218,8 @@ class SupabaseLocationsDatasource {
     Map<String, String>? description,
     int? position,
     bool? isActive,
+    double? centroidLat,
+    double? centroidLng,
   }) async {
     final updates = <String, dynamic>{
       if (key != null) 'key': key,
@@ -218,6 +227,8 @@ class SupabaseLocationsDatasource {
       if (description != null) 'description': description,
       if (position != null) 'position': position,
       if (isActive != null) 'is_active': isActive,
+      if (centroidLat != null) 'centroid_lat': centroidLat,
+      if (centroidLng != null) 'centroid_lng': centroidLng,
     };
     final response = await _client
         .from('areas')

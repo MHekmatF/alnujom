@@ -48,4 +48,39 @@ class PublisherAnalyticsDatasource {
         )
         .toList(growable: false);
   }
+
+  /// Phase 29 — invokes `publisher_inquiries_by_day(p_days)` (SECURITY DEFINER,
+  /// scoped to `auth.uid()`). Like the lead-totals RPC, days with zero
+  /// inquiries are omitted and gap-filled by the repository.
+  Future<List<PublisherDailyLeadTotalDto>> fetchInquiriesByDay({
+    int days = 30,
+  }) async {
+    final result = await _client.rpc(
+      'publisher_inquiries_by_day',
+      params: {'p_days': days},
+    );
+    final rows = result as List<dynamic>;
+    return rows
+        .map(
+          (row) => PublisherDailyLeadTotalDto.fromJson(
+            Map<String, dynamic>.from(row as Map),
+          ),
+        )
+        .toList(growable: false);
+  }
+
+  /// Phase 29 — invokes `publisher_viewings_by_status()` (SECURITY DEFINER,
+  /// scoped to `auth.uid()`). Returns one (status, total) row per non-empty
+  /// status bucket among the caller's viewings.
+  Future<List<PublisherStatusTotalDto>> fetchViewingsByStatus() async {
+    final result = await _client.rpc('publisher_viewings_by_status');
+    final rows = result as List<dynamic>;
+    return rows
+        .map(
+          (row) => PublisherStatusTotalDto.fromJson(
+            Map<String, dynamic>.from(row as Map),
+          ),
+        )
+        .toList(growable: false);
+  }
 }

@@ -88,6 +88,19 @@ final class IsActiveToggled extends LocationFormEvent {
   List<Object?> get props => [value];
 }
 
+/// Area-only: the centroid coordinate (from the map picker or the manual
+/// lat/lng inputs). Governorate/city levels have no centroid columns and
+/// never dispatch this.
+final class CentroidChanged extends LocationFormEvent {
+  const CentroidChanged({required this.lat, required this.lng});
+
+  final double lat;
+  final double lng;
+
+  @override
+  List<Object?> get props => [lat, lng];
+}
+
 final class SaveRequested extends LocationFormEvent {
   const SaveRequested();
 }
@@ -120,6 +133,8 @@ final class LocationFormEditing extends LocationFormState {
     this.englishName,
     this.position,
     required this.isActive,
+    this.centroidLat,
+    this.centroidLng,
     this.isLoadedSystemRow = false,
     this.isSaving = false,
   });
@@ -133,6 +148,12 @@ final class LocationFormEditing extends LocationFormState {
   final String? englishName;
   final int? position;
   final bool isActive;
+
+  /// Area-only centroid (null until the picker/inputs supply one). Governorate
+  /// and city forms leave these null and never read them.
+  final double? centroidLat;
+  final double? centroidLng;
+
   final bool isLoadedSystemRow;
   final bool isSaving;
 
@@ -142,6 +163,8 @@ final class LocationFormEditing extends LocationFormState {
     String? englishName,
     int? Function()? position,
     bool? isActive,
+    double? centroidLat,
+    double? centroidLng,
     bool? isSaving,
   }) {
     return LocationFormEditing(
@@ -154,6 +177,8 @@ final class LocationFormEditing extends LocationFormState {
       englishName: englishName ?? this.englishName,
       position: position != null ? position() : this.position,
       isActive: isActive ?? this.isActive,
+      centroidLat: centroidLat ?? this.centroidLat,
+      centroidLng: centroidLng ?? this.centroidLng,
       isLoadedSystemRow: isLoadedSystemRow,
       isSaving: isSaving ?? this.isSaving,
     );
@@ -170,6 +195,8 @@ final class LocationFormEditing extends LocationFormState {
     englishName,
     position,
     isActive,
+    centroidLat,
+    centroidLng,
     isLoadedSystemRow,
     isSaving,
   ];
@@ -218,8 +245,16 @@ class LocationFormBloc extends Bloc<LocationFormEvent, LocationFormState> {
     on<EnglishNameChanged>(_onEnglishNameChanged);
     on<PositionChanged>(_onPositionChanged);
     on<IsActiveToggled>(_onIsActiveToggled);
+    on<CentroidChanged>(_onCentroidChanged);
     on<SaveRequested>(_onSaveRequested);
   }
+
+  // Mirror the DB CHECK constraint on `areas` (centroid_lat 32..37,
+  // centroid_lng 35..43) so the user gets a friendly error before the insert.
+  static const double centroidLatMin = 32;
+  static const double centroidLatMax = 37;
+  static const double centroidLngMin = 35;
+  static const double centroidLngMax = 43;
 
   final LoadGovernorateDetail _loadGovernorateDetail;
   final LoadCityDetail _loadCityDetail;
@@ -305,6 +340,8 @@ class LocationFormBloc extends Bloc<LocationFormEvent, LocationFormState> {
               englishName: area.displayName['en'],
               position: area.position,
               isActive: area.isActive,
+              centroidLat: area.centroidLat,
+              centroidLng: area.centroidLng,
             ),
           );
       }
@@ -357,6 +394,15 @@ class LocationFormBloc extends Bloc<LocationFormEvent, LocationFormState> {
     emit(editing.copyWith(isActive: event.value));
   }
 
+  void _onCentroidChanged(
+    CentroidChanged event,
+    Emitter<LocationFormState> emit,
+  ) {
+    final editing = state;
+    if (editing is! LocationFormEditing) return;
+    emit(editing.copyWith(centroidLat: event.lat, centroidLng: event.lng));
+  }
+
   Future<void> _onSaveRequested(
     SaveRequested event,
     Emitter<LocationFormState> emit,
@@ -379,6 +425,27 @@ class LocationFormBloc extends Bloc<LocationFormEvent, LocationFormState> {
       );
       emit(editing);
       return;
+    }
+
+    // Area-only: a centroid is mandatory (DB columns are NOT NULL) and must
+    // sit inside Syria's bounds (DB CHECK). Validate here so the user gets a
+    // friendly message instead of a raw 23502/23514 from Postgres.
+    if (editing.level == LocationLevel.area) {
+      final lat = editing.centroidLat;
+      final lng = editing.centroidLng;
+      if (lat == null || lng == null) {
+        emit(const LocationFormSaveFailure(CentroidRequiredFailure()));
+        emit(editing);
+        return;
+      }
+      if (lat < centroidLatMin ||
+          lat > centroidLatMax ||
+          lng < centroidLngMin ||
+          lng > centroidLngMax) {
+        emit(const LocationFormSaveFailure(CentroidOutOfBoundsFailure()));
+        emit(editing);
+        return;
+      }
     }
 
     emit(editing.copyWith(isSaving: true));
@@ -454,6 +521,9 @@ class LocationFormBloc extends Bloc<LocationFormEvent, LocationFormState> {
               cityId: parentId,
               key: trimmedKey,
               displayName: displayName,
+              // Non-null: guarded by the area-level validation above.
+              centroidLat: editing.centroidLat!,
+              centroidLng: editing.centroidLng!,
               position: editing.position,
               isActive: editing.isActive,
             );
@@ -464,6 +534,9 @@ class LocationFormBloc extends Bloc<LocationFormEvent, LocationFormState> {
               displayName: displayName,
               position: editing.position,
               isActive: editing.isActive,
+              // Non-null: guarded by the area-level validation above.
+              centroidLat: editing.centroidLat,
+              centroidLng: editing.centroidLng,
             );
           }
       }

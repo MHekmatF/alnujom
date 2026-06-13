@@ -14,4 +14,14 @@ abstract class PublisherAnalyticsRepository {
   Future<Result<List<PublisherDailyLeadTotal>>> fetchDailyTotals({
     int days = 30,
   });
+
+  /// Phase 29 — the trailing [days]-day daily inquiries trend, gap-filled (one
+  /// entry per calendar day, oldest → newest) by the implementation.
+  Future<Result<List<PublisherDailyLeadTotal>>> fetchDailyInquiries({
+    int days = 30,
+  });
+
+  /// Phase 29 — the caller's viewings grouped by status (empty buckets omitted),
+  /// ordered busiest-first.
+  Future<Result<List<PublisherStatusTotal>>> fetchViewingsByStatus();
 }

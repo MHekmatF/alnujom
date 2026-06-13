@@ -38,6 +38,7 @@ import '../../../ads/domain/entities/ad_placement.dart';
 import '../../../ads/presentation/widgets/ad_slot.dart';
 import '../../../recently_viewed/presentation/bloc/recently_viewed_cubit.dart';
 import '../../../recently_viewed/presentation/widgets/recently_viewed_carousel.dart';
+import '../../../reels/presentation/widgets/reels_rail.dart';
 import '../widgets/featured_listings_carousel.dart';
 import '../widgets/hero_search_bar.dart';
 import '../widgets/home_listing_card.dart';
@@ -236,6 +237,10 @@ class _HomeViewState extends State<_HomeView> {
         // Recently-viewed: the "شوهد مؤخراً / Recently viewed" row, just under the
         // featured carousel. Backed by local storage; hides itself when empty.
         const SliverToBoxAdapter(child: RecentlyViewedCarousel()),
+        // Phase 029 (Reels W4) — the "Reels" rail of vertical video posters.
+        // Self-wired (hosts its own ReelsRailCubit) and hides itself entirely
+        // on empty / failure / loading, mirroring the FeaturedListingsCarousel.
+        const SliverToBoxAdapter(child: ReelsRail()),
         SliverToBoxAdapter(
           child: _SectionHeader(title: l10n.home_latest_listings_header),
         ),

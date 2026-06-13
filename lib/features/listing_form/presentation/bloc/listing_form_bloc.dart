@@ -32,9 +32,11 @@ import '../../domain/usecases/save_form_step.dart';
 import '../../domain/usecases/set_main_image.dart';
 import '../../domain/usecases/submit_listing.dart';
 import '../../domain/usecases/upload_image.dart';
+import '../../domain/usecases/upload_panorama.dart';
 import '../../domain/usecases/upload_video.dart';
 import '../../domain/usecases/validate_submit_payload.dart';
 import '../util/image_isolate_worker.dart';
+import '../util/panorama_pipeline.dart' show NotEquirectangularException;
 import '../util/watermark_pipeline.dart';
 import 'listing_form_event.dart';
 
@@ -49,6 +51,7 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
     this._repository,
     this._uploadImage,
     this._uploadVideo,
+    this._uploadPanorama,
     this._reorderMedia,
     this._setMainImage,
     this._deleteMedia,
@@ -73,6 +76,8 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
     // Phase 11 — five new MediaPicker handlers (R-40).
     on<MediaPicked>(_onMediaPicked);
     on<VideoPicked>(_onVideoPicked);
+    // Phase 029 (F5) — 360° panorama upload handler.
+    on<PanoramaPicked>(_onPanoramaPicked);
     on<MediaReordered>(_onMediaReordered);
     on<MediaSetMain>(_onMediaSetMain);
     on<MediaSetPanorama>(_onMediaSetPanorama);
@@ -88,6 +93,7 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
   final ListingsRepository _repository;
   final UploadImage _uploadImage;
   final UploadVideo _uploadVideo;
+  final UploadPanorama _uploadPanorama;
   final ReorderMedia _reorderMedia;
   final SetMainImage _setMainImage;
   final DeleteMedia _deleteMedia;
@@ -536,6 +542,10 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
     if (error is UnsupportedFormatException) {
       return 'media.error.formatNotSupported';
     }
+    // Phase 029 (F5) — picked image is not a 2:1 equirectangular panorama.
+    if (error is NotEquirectangularException) {
+      return 'media.error.notEquirectangular';
+    }
     if (error is ImageTooLargeException) return 'media.error.imageTooLarge';
     if (error is WatermarkAssetMissingException) {
       return 'media.error.watermarkAssetMissing';
@@ -556,6 +566,8 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
           final kind = detailMap?['kind'] as String?;
           if (kind == 'image') return 'media.cap.images10';
           if (kind == 'video') return 'media.cap.videos2';
+          // Phase 029 (F5) — panorama cap (2 per listing).
+          if (kind == 'panorama') return 'media.cap.panoramas2';
         } catch (_) {
           // Fall through to generic upload-failed if DETAIL is unparseable.
         }
@@ -714,6 +726,91 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
         filePath: event.file.path,
         ordering: 0, // sentinel — trigger assigns per task #29 fix
       ).timeout(const Duration(seconds: 60));
+      final nextInFlight = <String, MediaUploadProgress>{
+        ...state.uploadInFlight,
+      }..remove(localId);
+      emit(
+        state.copyWith(
+          media: <ListingMedia>[...state.media, inserted],
+          uploadInFlight: nextInFlight,
+        ),
+      );
+    } catch (e) {
+      final errorKey = _mapMediaErrorToArbKey(e);
+      emit(
+        state.copyWith(
+          uploadInFlight: <String, MediaUploadProgress>{
+            ...state.uploadInFlight,
+            localId: MediaUploadProgressError(errorKey),
+          },
+        ),
+      );
+    }
+  }
+
+  /// Phase 029 (F5) — runs a picked equirectangular image through the panorama
+  /// pipeline on the shared isolate worker (no watermark, 4096px cap, 2:1
+  /// aspect gate), then uploads it as a `kind='panorama'` row. Reuses the same
+  /// upload-ghost / progress machinery as [_onMediaPicked] / [_onVideoPicked].
+  Future<void> _onPanoramaPicked(
+    PanoramaPicked event,
+    Emitter<ListingFormState> emit,
+  ) async {
+    final listing = state.draftListing;
+    if (listing == null) return;
+    final listingId = listing.id;
+
+    try {
+      // The panorama pipeline does not need the watermark asset, but the worker
+      // lifecycle is shared with images; starting it here is idempotent.
+      await _ensureImageWorker();
+    } catch (_) {
+      // Worker / asset load failed — surface a generic upload error tile.
+      final localId = _newLocalId();
+      emit(
+        state.copyWith(
+          uploadInFlight: <String, MediaUploadProgress>{
+            ...state.uploadInFlight,
+            localId: const MediaUploadProgressError('media.error.uploadFailed'),
+          },
+        ),
+      );
+      return;
+    }
+
+    final localId = _newLocalId();
+    emit(
+      state.copyWith(
+        uploadInFlight: <String, MediaUploadProgress>{
+          ...state.uploadInFlight,
+          localId: const MediaUploadProgressProcessing(),
+        },
+      ),
+    );
+
+    try {
+      final inserted = await () async {
+        final sourceBytes = await event.file.readAsBytes();
+        final processedJpeg = await _imageWorker!.processPanorama(
+          sourceBytes: sourceBytes,
+        );
+
+        emit(
+          state.copyWith(
+            uploadInFlight: <String, MediaUploadProgress>{
+              ...state.uploadInFlight,
+              localId: const MediaUploadProgressUploading(),
+            },
+          ),
+        );
+
+        return await _uploadPanorama(
+          listingId: listingId,
+          panoramaBytes: processedJpeg,
+          ordering: 0, // sentinel — trigger assigns
+        );
+      }().timeout(const Duration(seconds: 60));
+
       final nextInFlight = <String, MediaUploadProgress>{
         ...state.uploadInFlight,
       }..remove(localId);

@@ -61,6 +61,18 @@ dependencies:
   # Phase 24 UP — in-app update prompt (Android-only; R-210).
   package_info_plus: 9.0.1
   panorama_viewer: ^2.0.7
+  # Phase 29 — F4 Reels: official Flutter in-app video playback (ExoPlayer on
+  # Android). One controller active at a time; strict 3-controller window.
+  video_player: ^2.9.2
+  # Phase 29 — F1 CRM follow-up reminders: device-local scheduled notifications.
+  # There is NO server scheduler (pg_cron is not installed), so reminders are
+  # scheduled on-device with zonedSchedule in INEXACT mode (no exact-alarm
+  # permission). The in-app "due today" list is the permission-denied fallback.
+  flutter_local_notifications: ^19.0.0
+  # Phase 29 — required by flutter_local_notifications zonedSchedule (tz db +
+  # device IANA zone; DateTime.timeZoneName returns unusable abbreviations).
+  timezone: ^0.10.0
+  flutter_timezone: ^4.1.0
 
 dev_dependencies:
   flutter_test:

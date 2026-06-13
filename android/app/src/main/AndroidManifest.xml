@@ -8,6 +8,9 @@
     <!-- Phase 22: Android 13+ (API 33) requires this for the runtime push-notification prompt
          and to display FCM banners; harmless on older APIs. App still builds/runs without push. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Phase 29 (F1): re-register device-local CRM reminder notifications after
+         a device reboot (flutter_local_notifications ScheduledNotificationBootReceiver). -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <application
         android:label="alnujom"
         android:name="${applicationName}"
@@ -45,6 +48,21 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="alnujom_notifications" />
+        <!-- Phase 29 (F1): flutter_local_notifications receivers for scheduled
+             (zonedSchedule) CRM follow-up reminders + reboot re-registration. -->
+        <receiver
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"
+            android:exported="false" />
+        <receiver
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

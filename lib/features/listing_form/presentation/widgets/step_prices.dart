@@ -119,6 +119,12 @@ class _StepPricesState extends State<StepPrices> {
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
+                  // Phase 029 (F3 #5) — keyboard polish: keep the amount field
+                  // above the keyboard and dismiss it on submit (last input on
+                  // the step).
+                  scrollPadding: const EdgeInsets.all(AppSpacing.xxxl),
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: (_) => FocusScope.of(context).unfocus(),
                   inputFormatters: <TextInputFormatter>[
                     FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                   ],
