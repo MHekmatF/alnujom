@@ -73,6 +73,10 @@ dependencies:
   # device IANA zone; DateTime.timeZoneName returns unusable abbreviations).
   timezone: ^0.10.0
   flutter_timezone: ^4.1.0
+  # Phase 30 — F1 client-side video compression (720p) + poster thumbnails so
+  # listing videos don't fill Storage (they upload RAW today). Best-effort:
+  # always falls back to the original on failure.
+  video_compress: ^3.1.4
 
 dev_dependencies:
   flutter_test:
