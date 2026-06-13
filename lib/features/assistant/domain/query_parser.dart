@@ -187,6 +187,19 @@ class QueryParser {
         typeText = m.group(0);
       }
     }
+    // Guarded typo-tolerance fallback. ONLY runs when exact matching found no
+    // property type — it can never override an exact match. We scan LATIN
+    // tokens (Arabic typos are covered by normalization folding; Arabic fuzzy
+    // matching is too risky given short, dense roots) of length >= 4 and adopt
+    // a type only when there is an UNAMBIGUOUS nearest keyword at edit distance
+    // <= 1. See [_fuzzyPropertyType] for the exact guard.
+    if (propertyType == null) {
+      final (fuzzyType, fuzzyText) = _fuzzyPropertyType(working);
+      if (fuzzyType != null) {
+        propertyType = fuzzyType;
+        typeText = fuzzyText;
+      }
+    }
 
     // ── governorate (longest display-name match wins) ──
     Governorate? governorate;
@@ -441,6 +454,91 @@ class QueryParser {
       last = m;
     }
     return last;
+  }
+
+  /// Pure-Dart typo-tolerant property-type fallback over LATIN tokens.
+  ///
+  /// Guard (all must hold to adopt a type):
+  ///   • token is purely `[a-z]` (Arabic tokens are skipped — folding in
+  ///     [normalizeQueryText] already absorbs Arabic orthographic variation,
+  ///     and fuzzy-matching short Arabic roots flips meaning too easily);
+  ///   • token length >= 4 (short tokens like "lot"/"land" are too close to
+  ///     unrelated words at distance 1 to trust);
+  ///   • the token is itself NOT an exact keyword (those are handled upstream);
+  ///   • across the Latin property-type keywords, the MINIMUM edit distance is
+  ///     <= 1 AND every keyword achieving that minimum maps to the SAME
+  ///     [PropertyType] — i.e. the nearest keyword is unambiguous about type.
+  ///     A tie between two types (e.g. distance 1 to both a `shop` and an
+  ///     `office` keyword) is rejected rather than guessed.
+  ///
+  /// The earliest qualifying token in the text wins, mirroring the
+  /// exact-match "earliest wins" rule. Returns (type, matchedTokenText).
+  (PropertyType?, String?) _fuzzyPropertyType(String working) {
+    // Only the purely-Latin keywords are fuzzy-comparison candidates; an
+    // Arabic keyword can never sit within distance 1 of a Latin token, so this
+    // is both a correctness guard and a perf trim.
+    final latinKeywords = <String, PropertyType>{
+      for (final e in kPropertyTypeKeywords.entries)
+        if (_isLatinToken(e.key)) e.key: e.value,
+    };
+
+    for (final tokenMatch in RegExp('[a-z]+').allMatches(working)) {
+      final token = tokenMatch.group(0)!;
+      if (token.length < 4) continue;
+      // An exact keyword would already have been caught upstream; skip so the
+      // fallback never second-guesses a clean hit (and never "corrects" a real
+      // word to a different type).
+      if (latinKeywords.containsKey(token)) continue;
+
+      var bestDistance = 1 << 30;
+      final typesAtBest = <PropertyType>{};
+      for (final entry in latinKeywords.entries) {
+        final d = _levenshtein(token, entry.key);
+        if (d < bestDistance) {
+          bestDistance = d;
+          typesAtBest
+            ..clear()
+            ..add(entry.value);
+        } else if (d == bestDistance) {
+          typesAtBest.add(entry.value);
+        }
+      }
+      if (bestDistance <= 1 && typesAtBest.length == 1) {
+        return (typesAtBest.first, token);
+      }
+    }
+    return (null, null);
+  }
+
+  /// True when [s] is a non-empty purely ASCII-lowercase-letter string.
+  static bool _isLatinToken(String s) =>
+      s.isNotEmpty && RegExp(r'^[a-z]+$').hasMatch(s);
+
+  /// Classic two-row Levenshtein edit distance (insert/delete/substitute = 1).
+  /// Bounded inputs (single tokens vs short keywords) so the O(m·n) cost is
+  /// negligible.
+  static int _levenshtein(String a, String b) {
+    if (a == b) return 0;
+    if (a.isEmpty) return b.length;
+    if (b.isEmpty) return a.length;
+    var prev = List<int>.generate(b.length + 1, (i) => i);
+    var curr = List<int>.filled(b.length + 1, 0);
+    for (var i = 0; i < a.length; i++) {
+      curr[0] = i + 1;
+      for (var j = 0; j < b.length; j++) {
+        final cost = a.codeUnitAt(i) == b.codeUnitAt(j) ? 0 : 1;
+        final del = prev[j + 1] + 1;
+        final ins = curr[j] + 1;
+        final sub = prev[j] + cost;
+        var min = del < ins ? del : ins;
+        if (sub < min) min = sub;
+        curr[j + 1] = min;
+      }
+      final tmp = prev;
+      prev = curr;
+      curr = tmp;
+    }
+    return prev[b.length];
   }
 
   static String _blank(String s, int start, int end) =>

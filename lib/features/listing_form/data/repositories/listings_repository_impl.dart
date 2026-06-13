@@ -190,11 +190,13 @@ class ListingsRepositoryImpl implements ListingsRepository {
     required String listingId,
     required String filePath,
     required int ordering,
+    String? thumbnailJpegPath,
   }) async {
     final dto = await _mediaDs.uploadVideo(
       listingId: listingId,
       filePath: filePath,
       ordering: ordering,
+      thumbnailJpegPath: thumbnailJpegPath,
     );
     return dto.toEntity();
   }

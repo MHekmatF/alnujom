@@ -180,12 +180,21 @@ class SupabaseListingMediaDatasource {
 
   /// Uploads an MP4 to `listing-videos` then inserts the row. No watermark
   /// is applied — Phase 11 watermarks images only per FR-014.
+  ///
+  /// Phase 030 (W1): when [thumbnailJpegPath] is provided, the poster JPEG is
+  /// also uploaded to the `listing-images` bucket at `{listingId}/{suffix}_thumb.jpg`
+  /// (sharing the mp4's random suffix) and its storage path is written into the
+  /// new `listing_media.thumbnail_path` column on the inserted video row. The
+  /// poster is best-effort — a failed poster upload never blocks the video
+  /// upload (the row is still inserted with a null `thumbnail_path`).
   Future<ListingMediaDto> uploadVideo({
     required String listingId,
     required String filePath,
     required int ordering,
+    String? thumbnailJpegPath,
   }) async {
-    final path = '$listingId/${_randomSuffix()}.mp4';
+    final suffix = _randomSuffix();
+    final path = '$listingId/$suffix.mp4';
     await _client.storage
         .from(_videosBucket)
         .upload(
@@ -196,6 +205,30 @@ class SupabaseListingMediaDatasource {
             upsert: false,
           ),
         );
+
+    // Best-effort poster upload to the images bucket (sharing the mp4 suffix).
+    // A failure here must NOT abort the video upload — the row is inserted with
+    // a null thumbnail_path and the reels/gallery falls back to the first image.
+    String? thumbnailPath;
+    if (thumbnailJpegPath != null) {
+      final candidate = '$listingId/${suffix}_thumb.jpg';
+      try {
+        await _client.storage
+            .from(_imagesBucket)
+            .upload(
+              candidate,
+              File(thumbnailJpegPath),
+              fileOptions: const supabase.FileOptions(
+                contentType: 'image/jpeg',
+                upsert: false,
+              ),
+            );
+        thumbnailPath = candidate;
+      } catch (_) {
+        thumbnailPath = null; // poster is optional — fall through
+      }
+    }
+
     try {
       final row = await _client
           .from('listing_media')
@@ -207,6 +240,8 @@ class SupabaseListingMediaDatasource {
             'ordering': 0, // sentinel — trigger assigns
             'is_main': false, // FR-002 CHECK — video rows can never be main
             'watermarked': false,
+            // Phase 030 (W1) — poster path in the listing-images bucket (or null).
+            'thumbnail_path': thumbnailPath,
           })
           .select()
           .single();
@@ -215,6 +250,12 @@ class SupabaseListingMediaDatasource {
       try {
         await _client.storage.from(_videosBucket).remove([path]);
       } catch (_) {}
+      // Also clean up the orphaned poster object if the row INSERT failed.
+      if (thumbnailPath != null) {
+        try {
+          await _client.storage.from(_imagesBucket).remove([thumbnailPath]);
+        } catch (_) {}
+      }
       rethrow;
     }
   }

@@ -54,19 +54,33 @@ class ReelsFeedPage extends StatelessWidget {
         }
         return cubit;
       },
-      child: const _ReelsFeedView(),
+      child: const ReelsFeedBody(),
     );
   }
 }
 
-class _ReelsFeedView extends StatefulWidget {
-  const _ReelsFeedView();
+/// Phase 030 (W4) — the reusable feed BODY shared by the pushed fullscreen
+/// [ReelsFeedPage] (home rail) and the persistent [ReelsTabPage] (bottom-nav
+/// Reels tab). Expects an ancestor [BlocProvider]<[ReelsFeedCubit]> to already
+/// be seeded/loading; it owns the [PageView], the ≤3-controller window and the
+/// mute/Data-saver chrome. Disposes every [VideoPlayerController] when removed
+/// from the tree (and pauses the current one on `deactivate`, so leaving the
+/// tab via the bottom nav stops playback immediately).
+///
+/// [emptyBody] is an optional friendly subtitle for the empty state — the
+/// persistent tab passes one (it's always reachable now, unlike the
+/// self-hiding rail), the pushed fullscreen feed leaves it null.
+class ReelsFeedBody extends StatefulWidget {
+  const ReelsFeedBody({super.key, this.emptyBody});
+
+  /// Optional empty-state subtitle (the Reels tab supplies a friendly hint).
+  final String? emptyBody;
 
   @override
-  State<_ReelsFeedView> createState() => _ReelsFeedViewState();
+  State<ReelsFeedBody> createState() => _ReelsFeedBodyState();
 }
 
-class _ReelsFeedViewState extends State<_ReelsFeedView> {
+class _ReelsFeedBodyState extends State<ReelsFeedBody> {
   final PageController _pageController = PageController();
 
   /// The live controllers, keyed by reel index. Only ever holds the window
@@ -81,6 +95,16 @@ class _ReelsFeedViewState extends State<_ReelsFeedView> {
   /// Set once we've kicked off the very first window build, so we don't re-run
   /// it on every rebuild.
   bool _initialWindowBuilt = false;
+
+  @override
+  void deactivate() {
+    // Fires when the body is detached from the tree — e.g. the user switches
+    // away from the Reels bottom-nav tab (`context.go` to another root) or the
+    // pushed feed is popped. Pause playback immediately so audio/video never
+    // bleeds past the route; full controller disposal happens in [dispose].
+    _controllers[_current]?.pause();
+    super.deactivate();
+  }
 
   @override
   void dispose() {
@@ -265,6 +289,7 @@ class _ReelsFeedViewState extends State<_ReelsFeedView> {
               return EmptyState(
                 icon: Icons.videocam_off_outlined,
                 headline: l10n.reels_empty_headline,
+                body: widget.emptyBody,
               );
             case ReelsFeedStatus.loaded:
             case ReelsFeedStatus.loadingMore:

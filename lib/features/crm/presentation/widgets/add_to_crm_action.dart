@@ -53,7 +53,7 @@ Future<void> addToCrm(
       l10n.crmAddedToCrmSuccess,
       variant: AppToastVariant.success,
       action: SnackBarAction(
-        label: l10n.crmViewAction,
+        label: l10n.crmViewInCrm,
         onPressed: () => Navigator.of(context).push(
           MaterialPageRoute<void>(builder: (_) => const CrmPage()),
         ),

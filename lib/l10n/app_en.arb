@@ -2245,5 +2245,21 @@
   "locationCentroidRequired": "Please set the area's location on the map before saving.",
   "@locationCentroidRequired": { "description": "Phase 29." },
   "locationCentroidOutOfBounds": "The location must be inside Syria (latitude 32–37, longitude 35–43).",
-  "@locationCentroidOutOfBounds": { "description": "Phase 29." }
+  "@locationCentroidOutOfBounds": { "description": "Phase 29." },
+  "videoCompressing": "Compressing video…",
+  "@videoCompressing": { "description": "Phase 30." },
+  "crmViewInCrm": "View in CRM",
+  "@crmViewInCrm": { "description": "Phase 30." },
+  "nav_reels": "Reels",
+  "@nav_reels": { "description": "Phase 30." },
+  "reels_tab_empty_subtitle": "Video reels from listings will show up here.",
+  "@reels_tab_empty_subtitle": { "description": "Phase 30." },
+  "navDrawerMenuTooltip": "Menu",
+  "@navDrawerMenuTooltip": { "description": "Phase 30." },
+  "navDrawerSignInCta": "Sign in",
+  "@navDrawerSignInCta": { "description": "Phase 30." },
+  "navDrawerSignInSubtitle": "Sign in to access your tools and account",
+  "@navDrawerSignInSubtitle": { "description": "Phase 30." },
+  "navDrawerAbout": "About & support",
+  "@navDrawerAbout": { "description": "Phase 30." }
 }

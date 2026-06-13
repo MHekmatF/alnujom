@@ -54,6 +54,7 @@ class ListingMedia extends Equatable {
     this.rawKind,
     this.storagePath,
     this.externalUrl,
+    this.thumbnailPath,
     required this.ordering,
     required this.isMain,
     required this.watermarked,
@@ -74,6 +75,11 @@ class ListingMedia extends Equatable {
   final String? rawKind;
   final String? storagePath;
   final String? externalUrl;
+
+  /// Phase 030 (W1) — poster JPEG path in the `listing-images` bucket for a
+  /// video row (null for images / pre-migration rows). Lets a video tile show a
+  /// real poster instead of a generic play-button placeholder.
+  final String? thumbnailPath;
   final int ordering;
   final bool isMain;
   final bool watermarked;
@@ -92,6 +98,7 @@ class ListingMedia extends Equatable {
     String? rawKind,
     String? storagePath,
     String? externalUrl,
+    String? thumbnailPath,
     int? ordering,
     bool? isMain,
     bool? watermarked,
@@ -105,6 +112,7 @@ class ListingMedia extends Equatable {
       rawKind: rawKind ?? this.rawKind,
       storagePath: storagePath ?? this.storagePath,
       externalUrl: externalUrl ?? this.externalUrl,
+      thumbnailPath: thumbnailPath ?? this.thumbnailPath,
       ordering: ordering ?? this.ordering,
       isMain: isMain ?? this.isMain,
       watermarked: watermarked ?? this.watermarked,
@@ -121,6 +129,7 @@ class ListingMedia extends Equatable {
     rawKind,
     storagePath,
     externalUrl,
+    thumbnailPath,
     ordering,
     isMain,
     watermarked,

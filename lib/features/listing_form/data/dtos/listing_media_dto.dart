@@ -11,6 +11,7 @@ class ListingMediaDto {
     required this.kind,
     this.storagePath,
     this.externalUrl,
+    this.thumbnailPath,
     required this.ordering,
     required this.isMain,
     required this.watermarked,
@@ -23,6 +24,11 @@ class ListingMediaDto {
   final String kind; // 'image' | 'video' | 'external_link'
   final String? storagePath;
   final String? externalUrl;
+
+  /// Phase 030 (W1) — poster JPEG path in the `listing-images` bucket for a
+  /// video row (null for images / older rows). Read defensively: the column is
+  /// nullable and absent from pre-migration rows.
+  final String? thumbnailPath;
   final int ordering;
   final bool isMain;
   final bool watermarked;
@@ -36,6 +42,7 @@ class ListingMediaDto {
       kind: json['kind'] as String,
       storagePath: json['storage_path'] as String?,
       externalUrl: json['external_url'] as String?,
+      thumbnailPath: json['thumbnail_path'] as String?,
       ordering: (json['ordering'] as num).toInt(),
       isMain: json['is_main'] as bool,
       watermarked: json['watermarked'] as bool,
@@ -53,6 +60,7 @@ class ListingMediaDto {
     rawKind: kind,
     storagePath: storagePath,
     externalUrl: externalUrl,
+    thumbnailPath: thumbnailPath,
     ordering: ordering,
     isMain: isMain,
     watermarked: watermarked,

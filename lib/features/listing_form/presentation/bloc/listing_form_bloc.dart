@@ -37,6 +37,7 @@ import '../../domain/usecases/upload_video.dart';
 import '../../domain/usecases/validate_submit_payload.dart';
 import '../util/image_isolate_worker.dart';
 import '../util/panorama_pipeline.dart' show NotEquirectangularException;
+import '../util/video_processor.dart';
 import '../util/watermark_pipeline.dart';
 import 'listing_form_event.dart';
 
@@ -58,6 +59,7 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
     this._loadMediaForListing,
     this._loadMyActiveAgencies,
     this._appSettingsCubit,
+    this._videoProcessor,
   ) : super(
         const ListingFormState(
           mode: ListingFormMode.create,
@@ -105,6 +107,10 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
   // fail-open path. Read-only here.
   final AppSettingsCubit _appSettingsCubit;
 
+  // Phase 030 (W1) — best-effort 720p transcode + poster-thumbnail helper for
+  // picked videos. Wraps the video_compress singleton; never blocks publishing.
+  final VideoProcessor _videoProcessor;
+
   // Phase 11 — lazily-instantiated isolate worker per R-25 (one per BLoC
   // lifecycle, processes images sequentially).
   ImageIsolateWorker? _imageWorker;
@@ -112,6 +118,10 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
 
   static const String _watermarkAssetPath =
       'assets/images/watermark/logo_watermark.png';
+
+  // Phase 030 (W1) — 30 MB cap (30 * 1024 * 1024), boundary inclusive. Mirrors
+  // VideoFileValidator; used as a backstop on the post-transcode result.
+  static const int _videoSizeCapBytes = 31457280;
 
   /// Set by the caller via `attachContext` before dispatching
   /// `LoadOrCreateDraftRequested`. Holds the signed-in publisher's
@@ -711,20 +721,84 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
       return;
     }
 
-    emit(
-      state.copyWith(
-        uploadInFlight: <String, MediaUploadProgress>{
-          ...state.uploadInFlight,
-          localId: const MediaUploadProgressUploading(),
-        },
-      ),
-    );
-
     try {
+      // Phase 030 (W1) — best-effort 720p transcode. Surface a determinate
+      // "compressing" ghost; the helper falls back to the original file on any
+      // failure / no-gain, so this NEVER blocks publishing.
+      emit(
+        state.copyWith(
+          uploadInFlight: <String, MediaUploadProgress>{
+            ...state.uploadInFlight,
+            localId: const MediaUploadProgressCompressing(),
+          },
+        ),
+      );
+
+      final compressed = await _videoProcessor.compress(
+        event.file.path,
+        onProgress: (percent) {
+          // Emit directly from the progress callback — we are still inside this
+          // handler's async body (the emitter is live across the await), so the
+          // ghost updates live. Dispatching a separate event would NOT work:
+          // bloc processes events sequentially, so a queued event can't run
+          // until this handler returns. Guard against a dismissed entry / a
+          // closed bloc.
+          if (isClosed) return;
+          final current = state.uploadInFlight[localId];
+          if (current is! MediaUploadProgressCompressing) return;
+          emit(
+            state.copyWith(
+              uploadInFlight: <String, MediaUploadProgress>{
+                ...state.uploadInFlight,
+                localId: MediaUploadProgressCompressing(percent),
+              },
+            ),
+          );
+        },
+      );
+      final uploadPath = compressed.path;
+
+      // Backstop re-validation of the compressed result against the ≤30 MB cap
+      // (a no-gain fallback keeps the original, which already passed above; a
+      // genuine transcode should be smaller, but guard anyway).
+      int compressedSize = sizeBytes;
+      try {
+        compressedSize = await compressed.length();
+      } catch (_) {
+        compressedSize = sizeBytes;
+      }
+      if (compressedSize > _videoSizeCapBytes) {
+        emit(
+          state.copyWith(
+            uploadInFlight: <String, MediaUploadProgress>{
+              ...state.uploadInFlight,
+              localId: const MediaUploadProgressError(
+                'media.error.videoSizeExceeded',
+              ),
+            },
+          ),
+        );
+        return;
+      }
+
+      // Best-effort poster frame (null = upload proceeds without a poster).
+      final thumbnailFile = await _videoProcessor.thumbnail(uploadPath);
+
+      // Flip to the upload phase before the bucket commit.
+      emit(
+        state.copyWith(
+          uploadInFlight: <String, MediaUploadProgress>{
+            ...state.uploadInFlight,
+            localId: const MediaUploadProgressUploading(),
+          },
+        ),
+      );
+
       final inserted = await _uploadVideo(
         listingId: listingId,
-        filePath: event.file.path,
+        filePath: uploadPath,
         ordering: 0, // sentinel — trigger assigns per task #29 fix
+        thumbnailJpegPath: thumbnailFile?.path,
       ).timeout(const Duration(seconds: 60));
       final nextInFlight = <String, MediaUploadProgress>{
         ...state.uploadInFlight,

@@ -16,78 +16,125 @@
 
 import '../../listing_form/domain/entities/listing.dart';
 
-/// Property-type keywords (ar singular/plural + en singular/plural).
+/// Property-type keywords (ar singular/plural + en singular/plural +
+/// transliterations + common misspellings).
 ///
-/// Deliberately UNMAPPED: بيت / منزل / house / home — the enum has no "house"
-/// value and force-mapping them to `apartment`, `villa` or `other` would
-/// silently exclude most relevant listings, so generic-home words simply
-/// don't constrain the type.
+/// Deliberately UNMAPPED: the enum's `other` value — there is no generic-home
+/// catch-all keyword that should resolve to it. NOTE: unlike earlier phases,
+/// the generic-home words بيت/منزل/سكن/house/home/flat now map to `apartment`,
+/// the overwhelmingly dominant residential type on this market; without a
+/// "house" enum value, leaving them unmapped meant the single most common way
+/// people say "a place to live" constrained nothing. `flat` is British-English
+/// for apartment; `appt`/`apt`-style abbreviations are included.
+///
+/// REMINDER — keys are stored NORMALIZED (post-[normalizeQueryText]): ة→ه,
+/// أ/إ/آ/ٱ→ا, ى→ي, diacritics/tatweel stripped, Latin lowercased. So "شقة" is
+/// written "شقه", "فلة" as "فله", "قطعة" as "قطعه". A key written in raw
+/// (un-folded) form would never match the normalized working text.
 const Map<String, PropertyType> kPropertyTypeKeywords = {
-  // apartment — شقة/شقق
-  'شقه': PropertyType.apartment,
+  // ── apartment ── شقة/شقق + generic-home words + transliterations/misspellings.
+  'شقه': PropertyType.apartment, // شقة (folded ة→ه)
   'شقق': PropertyType.apartment,
+  'بيت': PropertyType.apartment, // generic "home/house" → dominant residential type
+  'منزل': PropertyType.apartment,
+  'سكن': PropertyType.apartment,
   'apartment': PropertyType.apartment,
   'apartments': PropertyType.apartment,
-  'flat': PropertyType.apartment,
+  'appartment': PropertyType.apartment, // common misspelling (double-p)
+  'apartement': PropertyType.apartment, // French-influenced misspelling
+  'aparment': PropertyType.apartment, // common misspelling (missing t)
+  'appt': PropertyType.apartment, // abbreviation
+  'apt': PropertyType.apartment, // abbreviation
+  'flat': PropertyType.apartment, // British English
   'flats': PropertyType.apartment,
-  // villa — فيلا/فلل
+  'house': PropertyType.apartment,
+  'houses': PropertyType.apartment,
+  'home': PropertyType.apartment,
+  'homes': PropertyType.apartment,
+  // ── villa ── فيلا/فلل + transliterations/misspellings.
   'فيلا': PropertyType.villa,
-  'فيلات': PropertyType.villa,
+  'فيللا': PropertyType.villa, // doubled-ل spelling
+  'فله': PropertyType.villa, // فلة (folded ة→ه)
   'فلل': PropertyType.villa,
+  'فيلات': PropertyType.villa,
+  'قصر': PropertyType.villa, // "palace" — treated as a large standalone villa
   'villa': PropertyType.villa,
   'villas': PropertyType.villa,
-  // land — أرض/أراضي
-  'ارض': PropertyType.land,
-  'اراضي': PropertyType.land,
+  'vila': PropertyType.villa, // common misspelling (single l)
+  'fila': PropertyType.villa, // transliteration of فلة
+  'filla': PropertyType.villa, // transliteration variant
+  // ── land ── أرض/أراضي + transliterations/misspellings.
+  'ارض': PropertyType.land, // أرض (folded أ→ا)
+  'اراضي': PropertyType.land, // أراضي (folded أ→ا)
+  'مقسم': PropertyType.land, // subdivided plot
+  'مقسوم': PropertyType.land,
+  'قطعه': PropertyType.land, // قطعة (folded ة→ه) — "plot/parcel"
   'land': PropertyType.land,
   'lands': PropertyType.land,
   'plot': PropertyType.land,
-  // shop — محل/محلات
+  'parcel': PropertyType.land,
+  // ── shop ── محل/محلات + transliterations.
   'محل': PropertyType.shop,
   'محلات': PropertyType.shop,
   'دكان': PropertyType.shop,
+  'متجر': PropertyType.shop, // "store"
   'shop': PropertyType.shop,
   'shops': PropertyType.shop,
   'store': PropertyType.shop,
-  // office — مكتب/مكاتب
+  'stores': PropertyType.shop,
+  // ── office ── مكتب/مكاتب.
   'مكتب': PropertyType.office,
   'مكاتب': PropertyType.office,
   'office': PropertyType.office,
   'offices': PropertyType.office,
-  // farm — مزرعة/مزارع
-  'مزرعه': PropertyType.farm,
+  // ── farm ── مزرعة/مزارع + orchard.
+  'مزرعه': PropertyType.farm, // مزرعة (folded ة→ه)
   'مزارع': PropertyType.farm,
+  'بستان': PropertyType.farm, // "orchard"
   'farm': PropertyType.farm,
   'farms': PropertyType.farm,
-  // warehouse — مستودع/مستودعات
+  // ── warehouse ── مستودع/مستودعات/مخزن + transliterations.
   'مستودع': PropertyType.warehouse,
   'مستودعات': PropertyType.warehouse,
+  'مخزن': PropertyType.warehouse,
+  'مخازن': PropertyType.warehouse,
   'warehouse': PropertyType.warehouse,
   'warehouses': PropertyType.warehouse,
   'depot': PropertyType.warehouse,
+  'storage': PropertyType.warehouse,
 };
 
 /// Purpose keywords. When BOTH a rent keyword and a daily keyword match
 /// ("اجار يومي", "daily rent") the parser resolves to [ListingPurpose.dailyRent]
 /// — the more specific intent wins.
 const Map<String, ListingPurpose> kPurposeKeywords = {
+  // ── sale ── buying intent maps to sale (the listing's side of a purchase).
   'للبيع': ListingPurpose.sale,
   'بيع': ListingPurpose.sale,
+  'للشراء': ListingPurpose.sale, // "for purchase" (buyer phrasing)
   'شراء': ListingPurpose.sale,
   'sale': ListingPurpose.sale,
+  'forsale': ListingPurpose.sale, // no-space spelling
+  'for sale': ListingPurpose.sale, // spaced spelling (normalizer keeps one space)
   'sell': ListingPurpose.sale,
   'buy': ListingPurpose.sale,
-  'للايجار': ListingPurpose.rent,
-  'ايجار': ListingPurpose.rent,
+  // ── rent ── إيجار normalizes to ايجار (إ→ا); كراء is the Levantine/Maghrebi synonym.
+  'للايجار': ListingPurpose.rent, // للإيجار (folded إ→ا)
+  'ايجار': ListingPurpose.rent, // إيجار (folded إ→ا)
   'اجار': ListingPurpose.rent,
   'للاجار': ListingPurpose.rent,
+  'كراء': ListingPurpose.rent, // colloquial "rent"
   'استئجار': ListingPurpose.rent,
   'rent': ListingPurpose.rent,
+  'forrent': ListingPurpose.rent, // no-space spelling
+  'for rent': ListingPurpose.rent, // spaced spelling (normalizer keeps one space)
   'rental': ListingPurpose.rent,
   'lease': ListingPurpose.rent,
+  // ── dailyRent ── upgrades rent when paired (handled in the parser).
   'يومي': ListingPurpose.dailyRent,
-  'يوميه': ListingPurpose.dailyRent,
+  'يوميه': ListingPurpose.dailyRent, // يومية (folded ة→ه)
   'daily': ListingPurpose.dailyRent,
+  // ── investment ──
   'استثمار': ListingPurpose.investment,
   'للاستثمار': ListingPurpose.investment,
   'investment': ListingPurpose.investment,

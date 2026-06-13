@@ -109,10 +109,15 @@ abstract class ListingsRepository {
 
   /// Uploads an MP4 file to `listing-videos` then inserts the row. No
   /// watermark composite for videos in Phase 11.
+  ///
+  /// Phase 030 (W1): [thumbnailJpegPath] (optional) is a poster JPEG uploaded to
+  /// `listing-images` whose storage path lands in `listing_media.thumbnail_path`.
+  /// Best-effort — a failed/absent poster never blocks the video insert.
   Future<ListingMedia> uploadVideo({
     required String listingId,
     required String filePath,
     required int ordering,
+    String? thumbnailJpegPath,
   });
 
   /// Phase 029 (F5) — uploads processed equirectangular panorama JPEG bytes to

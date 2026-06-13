@@ -2167,5 +2167,21 @@
   "locationCentroidRequired": "يرجى تحديد موقع المنطقة على الخريطة قبل الحفظ.",
   "@locationCentroidRequired": { "description": "Phase 29." },
   "locationCentroidOutOfBounds": "يجب أن يكون الموقع داخل سوريا (خط العرض 32–37، خط الطول 35–43).",
-  "@locationCentroidOutOfBounds": { "description": "Phase 29." }
+  "@locationCentroidOutOfBounds": { "description": "Phase 29." },
+  "videoCompressing": "عم نضغط الفيديو…",
+  "@videoCompressing": { "description": "Phase 30." },
+  "crmViewInCrm": "عرض في العملاء",
+  "@crmViewInCrm": { "description": "Phase 30." },
+  "nav_reels": "ريلز",
+  "@nav_reels": { "description": "Phase 30." },
+  "reels_tab_empty_subtitle": "ستظهر هنا ريلز الفيديو الخاصة بالعقارات.",
+  "@reels_tab_empty_subtitle": { "description": "Phase 30." },
+  "navDrawerMenuTooltip": "القائمة",
+  "@navDrawerMenuTooltip": { "description": "Phase 30." },
+  "navDrawerSignInCta": "تسجيل الدخول",
+  "@navDrawerSignInCta": { "description": "Phase 30." },
+  "navDrawerSignInSubtitle": "سجّل دخولك للوصول إلى أدواتك وحسابك",
+  "@navDrawerSignInSubtitle": { "description": "Phase 30." },
+  "navDrawerAbout": "حول التطبيق والدعم",
+  "@navDrawerAbout": { "description": "Phase 30." }
 }
