@@ -67,6 +67,8 @@ abstract class LocationsRepository {
     required String cityId,
     required String key,
     required Map<String, String> displayName,
+    required double centroidLat,
+    required double centroidLng,
     Map<String, String>? description,
     int? position,
     bool isActive = true,
@@ -78,6 +80,8 @@ abstract class LocationsRepository {
     Map<String, String>? description,
     int? position,
     bool? isActive,
+    double? centroidLat,
+    double? centroidLng,
   });
   Future<void> deleteArea(String id);
 

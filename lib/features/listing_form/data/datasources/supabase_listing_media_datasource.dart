@@ -124,6 +124,60 @@ class SupabaseListingMediaDatasource {
     }
   }
 
+  /// Phase 029 (F5) — Uploads a processed equirectangular JPEG to
+  /// `listing-images` (a panorama is just an image stored in the same bucket)
+  /// then inserts the `listing_media` row with `kind='panorama'`,
+  /// `watermarked=false` (the panorama pipeline applies no watermark — it would
+  /// break the 360° wrap seam) and `is_main=false` (a panorama can never be the
+  /// main image — the `listing_media_main_only_when_image_chk` CHECK plus the
+  /// one-main partial index already forbid it).
+  ///
+  /// Path convention matches [uploadImage]: `{listingId}/{suffix}.jpg`. On INSERT
+  /// failure the bucket object is removed (orphan cleanup, FR-015 parity).
+  Future<ListingMediaDto> uploadPanorama({
+    required String listingId,
+    required Uint8List panoramaJpegBytes,
+    required int ordering,
+  }) async {
+    final path = '$listingId/${_randomSuffix()}.jpg';
+    await _client.storage
+        .from(_imagesBucket)
+        .uploadBinary(
+          path,
+          panoramaJpegBytes,
+          fileOptions: const supabase.FileOptions(
+            contentType: 'image/jpeg',
+            upsert: false,
+          ),
+        );
+    try {
+      final row = await _client
+          .from('listing_media')
+          .insert(<String, dynamic>{
+            'listing_id': listingId,
+            'kind': 'panorama',
+            'storage_path': path,
+            'external_url': null,
+            'ordering': 0, // sentinel — trigger assigns max(ordering)+1
+            'is_main': false, // panorama rows can never be main
+            'watermarked': false, // no watermark on equirectangular images
+          })
+          .select()
+          .single();
+      return ListingMediaDto.fromJson(Map<String, dynamic>.from(row));
+    } catch (e) {
+      // On INSERT failure (panorama cap trigger fire, RLS deny, etc.) —
+      // orphan cleanup, mirroring uploadImage.
+      try {
+        await _client.storage.from(_imagesBucket).remove([path]);
+      } catch (_) {
+        // Swallow cleanup failure — the bucket object becomes a true orphan;
+        // the reconciliation job will eventually clean it up.
+      }
+      rethrow;
+    }
+  }
+
   /// Uploads an MP4 to `listing-videos` then inserts the row. No watermark
   /// is applied — Phase 11 watermarks images only per FR-014.
   Future<ListingMediaDto> uploadVideo({

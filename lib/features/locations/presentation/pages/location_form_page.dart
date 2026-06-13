@@ -18,6 +18,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../domain/failures.dart';
 import '../bloc/location_form_bloc.dart';
 import '../widgets/bilingual_display_name_field.dart';
+import '../widgets/centroid_map_picker.dart';
 
 class LocationFormPage extends StatelessWidget {
   const LocationFormPage({super.key});
@@ -60,6 +61,8 @@ class _LocationFormView extends StatelessWidget {
             KeyAlreadyUsedFailure() => l10n.keyAlreadyUsed,
             SystemRowProtectedFailure() => l10n.cannotDeleteSystemRow,
             NotAuthorizedFailure() => l10n.locationsLoadFailed,
+            CentroidRequiredFailure() => l10n.locationCentroidRequired,
+            CentroidOutOfBoundsFailure() => l10n.locationCentroidOutOfBounds,
             _ => l10n.locationSaveFailed,
           };
           AppToast.error(context, message);
@@ -200,6 +203,20 @@ class _LocationFormBodyState extends State<_LocationFormBody> {
               IsActiveToggled(value: value),
             ),
           ),
+          // Centroid picker is area-only — governorate/city have no centroid
+          // columns. The map+inputs feed the bloc's CentroidChanged event;
+          // save-time validation (bounds + required) lives in the bloc.
+          if (state.level == LocationLevel.area) ...[
+            const SizedBox(height: AppSpacing.lg),
+            CentroidMapPicker(
+              key: ValueKey('centroid-${state.id ?? 'new'}'),
+              initialLat: state.centroidLat,
+              initialLng: state.centroidLng,
+              onChanged: (lat, lng) => context.read<LocationFormBloc>().add(
+                CentroidChanged(lat: lat, lng: lng),
+              ),
+            ),
+          ],
           const SizedBox(height: AppSpacing.xl),
           AppButton(
             label: l10n.actionCreate,

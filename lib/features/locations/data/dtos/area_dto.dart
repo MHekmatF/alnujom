@@ -10,6 +10,8 @@ class AreaDto {
     required this.description,
     required this.position,
     required this.isActive,
+    required this.centroidLat,
+    required this.centroidLng,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -25,6 +27,10 @@ class AreaDto {
           : null,
       position: json['position'] as int?,
       isActive: json['is_active'] as bool? ?? true,
+      // centroid_* are NOT NULL in the DB; parse defensively (Postgres may
+      // serialize numeric as either num or String over PostgREST).
+      centroidLat: _parseDouble(json['centroid_lat']),
+      centroidLng: _parseDouble(json['centroid_lng']),
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
     );
@@ -37,8 +43,16 @@ class AreaDto {
   final Map<String, String>? description;
   final int? position;
   final bool isActive;
+  final double centroidLat;
+  final double centroidLng;
   final DateTime createdAt;
   final DateTime updatedAt;
+
+  static double _parseDouble(Object? value) {
+    if (value is num) return value.toDouble();
+    if (value is String) return double.parse(value);
+    return 0;
+  }
 
   Area toEntity() {
     return Area(
@@ -49,6 +63,8 @@ class AreaDto {
       description: description,
       position: position,
       isActive: isActive,
+      centroidLat: centroidLat,
+      centroidLng: centroidLng,
       createdAt: createdAt,
       updatedAt: updatedAt,
     );

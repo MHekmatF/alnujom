@@ -33,3 +33,16 @@ final class LocationsUnknownFailure extends LocationsFailure {
 final class CentroidMissingFailure extends LocationsFailure {
   const CentroidMissingFailure() : super('centroid missing for area');
 }
+
+/// Phase 29 — the area form was saved without picking a map centroid.
+/// Surfaced as a friendly l10n message so the user never hits a raw 23502.
+final class CentroidRequiredFailure extends LocationsFailure {
+  const CentroidRequiredFailure() : super('centroid required for area');
+}
+
+/// Phase 29 — the picked/entered centroid is outside Syria's valid bounds
+/// (lat 32..37, lng 35..43). Surfaced before the insert so the user never
+/// hits a raw 23514 CHECK violation.
+final class CentroidOutOfBoundsFailure extends LocationsFailure {
+  const CentroidOutOfBoundsFailure() : super('centroid out of bounds');
+}

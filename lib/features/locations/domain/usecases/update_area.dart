@@ -16,6 +16,8 @@ class UpdateArea {
     Map<String, String>? description,
     int? position,
     bool? isActive,
+    double? centroidLat,
+    double? centroidLng,
   }) => repository.updateArea(
     id,
     key: key,
@@ -23,5 +25,7 @@ class UpdateArea {
     description: description,
     position: position,
     isActive: isActive,
+    centroidLat: centroidLat,
+    centroidLng: centroidLng,
   );
 }

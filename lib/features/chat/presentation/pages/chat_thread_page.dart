@@ -21,6 +21,7 @@ import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
+import '../../../crm/presentation/widgets/add_to_crm_action.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/message.dart';
 import '../bloc/chat_thread_cubit.dart';
@@ -74,6 +75,21 @@ class _ChatThreadPageState extends State<ChatThreadPage> {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
+        actions: [
+          // Phase 29 (F1) — "Add to CRM": attach this conversation's buyer as a
+          // lead. The upsert RPC resolves the buyer + verifies the caller is the
+          // publisher server-side (a non-publisher tap surfaces an error toast).
+          IconButton(
+            icon: const Icon(Icons.handshake_outlined),
+            tooltip: l10n.crmAddToCrmAction,
+            onPressed: () => addToCrm(
+              context,
+              source: CrmLeadSource.conversation,
+              sourceId: widget.conversationId,
+              displayName: widget.listingTitle,
+            ),
+          ),
+        ],
       ),
       body: Column(
         children: [

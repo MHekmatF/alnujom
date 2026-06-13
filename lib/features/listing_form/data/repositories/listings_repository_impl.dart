@@ -200,6 +200,20 @@ class ListingsRepositoryImpl implements ListingsRepository {
   }
 
   @override
+  Future<ListingMedia> uploadPanorama({
+    required String listingId,
+    required Uint8List panoramaBytes,
+    required int ordering,
+  }) async {
+    final dto = await _mediaDs.uploadPanorama(
+      listingId: listingId,
+      panoramaJpegBytes: panoramaBytes,
+      ordering: ordering,
+    );
+    return dto.toEntity();
+  }
+
+  @override
   Future<void> reorderMedia({
     required String listingId,
     required List<String> newOrderIds,

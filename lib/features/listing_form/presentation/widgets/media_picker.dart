@@ -23,11 +23,14 @@ import 'media_thumbnail.dart';
 /// surface as ghost tiles at the end with a progress / error overlay; their
 /// keys come from the `state.uploadInFlight` map.
 ///
-/// Reorder strategy: Phase 11 v1 uses the long-press action sheet's
-/// "Move up" / "Move down" actions to re-sequence `ordering`. Drag-reorder
-/// in a 3-column grid is forward-stated to a future spec (no
-/// `reorderable_grid_view` package is in pubspec.yaml and adding one is
-/// out of R-22 scope).
+/// Reorder strategy (Phase 029 F3): drag-reorder via [LongPressDraggable] +
+/// [DragTarget] over the existing [GridView] — NO new package. Long-press a
+/// committed tile to lift it, then drop it onto another tile to re-sequence;
+/// on drop the EXISTING [MediaReordered] event fires (its contract and the
+/// reorder RPC are unchanged). The per-thumbnail action sheet (set main, 360°,
+/// move up / move down, delete) stays reachable via the tile's "more actions"
+/// handle as the accessibility fallback, since the long-press gesture is now
+/// owned by the drag recognizer.
 class MediaPicker extends StatelessWidget {
   const MediaPicker({super.key});
 
@@ -64,9 +67,13 @@ class MediaPicker extends StatelessWidget {
           itemBuilder: (context, index) {
             if (index < media.length) {
               final m = media[index];
-              return MediaThumbnail(
+              final thumbnail = MediaThumbnail(
                 media: m,
                 isEditable: isEditable,
+                // Phase 029 (F3) — drag-reorder is the primary gesture in
+                // editable mode, so the tile surfaces its action sheet via the
+                // "more actions" handle instead of its own long-press.
+                dragEnabled: isEditable,
                 onSetMain: m.kind == ListingMediaKind.image
                     ? () => context.read<ListingFormBloc>().add(
                         MediaSetMain(m.id),
@@ -87,6 +94,13 @@ class MediaPicker extends StatelessWidget {
                 onMoveDown: index < media.length - 1
                     ? () => _moveTo(context, media, index, index + 1)
                     : null,
+              );
+              if (!isEditable) return thumbnail;
+              return _DraggableMediaTile(
+                media: m,
+                fromIndex: index,
+                onReorderTo: (from, to) => _moveTo(context, media, from, to),
+                child: thumbnail,
               );
             }
             final ghost = inFlightEntries[index - media.length];
@@ -110,6 +124,7 @@ class MediaPicker extends StatelessWidget {
     int from,
     int to,
   ) {
+    if (from == to) return;
     final reordered = List<ListingMedia>.from(media);
     final picked = reordered.removeAt(from);
     reordered.insert(to, picked);
@@ -169,6 +184,63 @@ class _EmptyState extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Phase 029 (F3) — wraps a [MediaThumbnail] in a [LongPressDraggable] (lift on
+/// long-press) and a [DragTarget] (drop zone). On a drop, calls [onReorderTo]
+/// with the source and destination grid indices, which dispatches the EXISTING
+/// [MediaReordered] event. NO new package — pure Flutter drag widgets over the
+/// existing [GridView].
+class _DraggableMediaTile extends StatelessWidget {
+  const _DraggableMediaTile({
+    required this.media,
+    required this.fromIndex,
+    required this.onReorderTo,
+    required this.child,
+  });
+
+  final ListingMedia media;
+  final int fromIndex;
+  final void Function(int from, int to) onReorderTo;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    return DragTarget<int>(
+      onWillAcceptWithDetails: (details) => details.data != fromIndex,
+      onAcceptWithDetails: (details) => onReorderTo(details.data, fromIndex),
+      builder: (context, candidate, rejected) {
+        final hovering = candidate.isNotEmpty;
+        return LongPressDraggable<int>(
+          data: fromIndex,
+          // The dragged proxy floats under the finger; keep it compact.
+          feedback: Opacity(
+            opacity: 0.9,
+            child: SizedBox(
+              width: AppSpacing.xxxl * 2,
+              height: AppSpacing.xxxl * 2,
+              child: ClipRRect(
+                borderRadius: appRadius(AppRadii.md),
+                child: child,
+              ),
+            ),
+          ),
+          // The original cell dims while a drag is in flight.
+          childWhenDragging: Opacity(opacity: 0.35, child: child),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: appRadius(AppRadii.md),
+              border: hovering
+                  ? Border.all(color: colors.primary, width: 2)
+                  : null,
+            ),
+            child: child,
+          ),
+        );
+      },
     );
   }
 }

@@ -33,6 +33,7 @@ class MediaThumbnail extends StatelessWidget {
     this.onDelete,
     this.onMoveUp,
     this.onMoveDown,
+    this.dragEnabled = false,
   }) : onDismiss = null,
        _ghostProgress = null;
 
@@ -51,6 +52,7 @@ class MediaThumbnail extends StatelessWidget {
        onDelete = null,
        onMoveUp = null,
        onMoveDown = null,
+       dragEnabled = false,
        _ghostProgress = progress;
 
   final ListingMedia? media;
@@ -64,16 +66,29 @@ class MediaThumbnail extends StatelessWidget {
   final VoidCallback? onMoveUp;
   final VoidCallback? onMoveDown;
   final VoidCallback? onDismiss;
+
+  /// Phase 029 (F3) — when true, an enclosing [LongPressDraggable] owns the
+  /// long-press gesture for drag-reorder, so this tile suppresses its own
+  /// long-press action sheet and instead surfaces a small "more actions" handle
+  /// (top-end) that opens the same sheet on tap. This keeps every per-thumbnail
+  /// action (set main, 360°, move up/down, delete) reachable as the
+  /// accessibility fallback while drag-reorder is the primary gesture.
+  final bool dragEnabled;
   final MediaUploadProgress? _ghostProgress;
 
   bool get _isGhost => _ghostProgress != null;
 
   @override
   Widget build(BuildContext context) {
+    // When drag-reorder is enabled, an enclosing LongPressDraggable claims the
+    // long-press gesture, so we MUST NOT also wire onLongPress here (the two
+    // recognizers would conflict). The action sheet stays reachable via the
+    // top-end "more actions" handle instead.
+    final useInternalLongPress = !dragEnabled;
     return ClipRRect(
       borderRadius: BorderRadius.circular(AppRadii.md),
       child: GestureDetector(
-        onLongPress: (_isGhost || !isEditable)
+        onLongPress: (_isGhost || !isEditable || !useInternalLongPress)
             ? null
             : () => _openActionSheet(context),
         child: Stack(
@@ -101,6 +116,14 @@ class MediaThumbnail extends StatelessWidget {
                 bottom: AppSpacing.sm,
                 start: AppSpacing.sm,
                 child: _PanoramaBadge(),
+              ),
+            // Phase 029 (F3) — "more actions" handle, shown only when drag is
+            // enabled (so the long-press sheet remains reachable as fallback).
+            if (!_isGhost && isEditable && dragEnabled)
+              PositionedDirectional(
+                bottom: AppSpacing.sm,
+                end: AppSpacing.sm,
+                child: _ActionsHandle(onTap: () => _openActionSheet(context)),
               ),
             if (_isGhost)
               _GhostOverlay(progress: _ghostProgress!, onDismiss: onDismiss),
@@ -175,9 +198,12 @@ class MediaThumbnail extends StatelessWidget {
                 ListTile(
                   leading: const Icon(Icons.threesixty),
                   title: Text(
+                    // Phase 029 (F5) — softened wording: this marks an ALREADY
+                    // UPLOADED ordinary photo as 360° (distinct from the new
+                    // "Add 360° photo" upload CTA on the media step).
                     (media?.isPanorama ?? false)
-                        ? l10n.mediaActionUnmarkPanorama
-                        : l10n.mediaActionMarkPanorama,
+                        ? l10n.mediaActionUnmarkExistingPanorama
+                        : l10n.mediaActionMarkExistingPanorama,
                   ),
                   onTap: () {
                     Navigator.of(sheetCtx).pop();
@@ -246,6 +272,36 @@ class _MainBadge extends StatelessWidget {
         style: AppTextStyles.of(context).labelMedium.copyWith(
           color: scheme.onPrimary,
           fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+}
+
+/// Phase 029 (F3) — small over-photo "more actions" handle. Tapping opens the
+/// per-thumbnail action sheet (set main, 360°, move up/down, delete). Rendered
+/// only when drag-reorder is enabled so the sheet stays reachable.
+class _ActionsHandle extends StatelessWidget {
+  const _ActionsHandle({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Material(
+      color: scheme.scrim.withValues(alpha: 0.6),
+      shape: const CircleBorder(),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.xs),
+          child: Icon(
+            Icons.more_vert,
+            size: AppSpacing.lg,
+            color: scheme.onInverseSurface,
+          ),
         ),
       ),
     );
@@ -406,6 +462,11 @@ class _GhostOverlay extends StatelessWidget {
         return l10n.mediaCapImages10;
       case 'media.cap.videos2':
         return l10n.mediaCapVideos2;
+      // Phase 029 (F5) — 360° panorama-specific errors.
+      case 'media.cap.panoramas2':
+        return l10n.mediaCapPanoramas2;
+      case 'media.error.notEquirectangular':
+        return l10n.mediaErrorNotEquirectangular;
       default:
         return l10n.mediaErrorUploadFailed;
     }

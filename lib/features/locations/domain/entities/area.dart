@@ -11,6 +11,12 @@ class Area extends Equatable {
     this.description,
     this.position,
     required this.isActive,
+    // Defaulted (not `required`) so existing callers that build a display-only
+    // Area without centroid data (e.g. the listing-details aggregate DTO, which
+    // never reads the centroid) keep compiling. The locations DTO always maps
+    // the real NOT-NULL DB values; the area form reads/writes the real values.
+    this.centroidLat = 0,
+    this.centroidLng = 0,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -22,6 +28,14 @@ class Area extends Equatable {
   final Map<String, String>? description;
   final int? position;
   final bool isActive;
+
+  /// Area centroid latitude (DB column `centroid_lat`, NOT NULL, range 32..37).
+  /// Used by the map auto-fill (FR-013a) and required when creating an area.
+  final double centroidLat;
+
+  /// Area centroid longitude (DB column `centroid_lng`, NOT NULL, range 35..43).
+  final double centroidLng;
+
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -45,6 +59,8 @@ class Area extends Equatable {
     description,
     position,
     isActive,
+    centroidLat,
+    centroidLng,
     createdAt,
     updatedAt,
   ];

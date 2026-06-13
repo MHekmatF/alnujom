@@ -23,12 +23,15 @@ import '../../../../core/widgets/dashboard_tile.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
+import 'package:alnujom/features/crm/presentation/pages/crm_page.dart';
+
 import '../../../../core/widgets/stat_card.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/publisher_dashboard_counts.dart';
 import '../bloc/publisher_analytics_cubit.dart';
 import '../bloc/publisher_dashboard_summary_cubit.dart';
 import '../bloc/publisher_dashboard_summary_state.dart';
+import '../widgets/publisher_charts_section.dart';
 import 'lead_analytics_page.dart';
 
 class PublisherDashboardPage extends StatelessWidget {
@@ -71,6 +74,12 @@ class _PublisherDashboardView extends StatelessWidget {
                 _Header(l10n: l10n),
                 const SizedBox(height: AppSpacing.lg),
                 _SummarySection(state: state, l10n: l10n),
+                if (state is PublisherDashboardSummaryLoaded) ...[
+                  const SizedBox(height: AppSpacing.xl),
+                  _SectionLabel(label: l10n.publisherChartsSectionLabel),
+                  const SizedBox(height: AppSpacing.md),
+                  PublisherChartsSection(counts: state.counts),
+                ],
                 const SizedBox(height: AppSpacing.xl),
                 _SectionLabel(label: l10n.publisherDashboardQuickActions),
                 const SizedBox(height: AppSpacing.md),
@@ -296,6 +305,15 @@ class _QuickActions extends StatelessWidget {
         subtitle: l10n.publisherDashboardActionMyListingsSubtitle,
         accent: colors.primary,
         onTap: () => context.push(AppRoutes.publisherMyListings),
+      ),
+      AppDashboardTile(
+        icon: LucideIcons.contact,
+        title: l10n.dashCrmTileTitle,
+        subtitle: l10n.dashCrmTileSubtitle,
+        accent: colors.accent,
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (_) => const CrmPage()),
+        ),
       ),
       AppDashboardTile(
         icon: LucideIcons.plus,

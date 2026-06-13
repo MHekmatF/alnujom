@@ -30,6 +30,8 @@ import '../../../../core/widgets/locale_toggle_action.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../debug/locations_smoke_test_tile.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../analytics/presentation/bloc/admin_analytics_cubit.dart';
+import '../../analytics/presentation/pages/admin_analytics_page.dart';
 import '../../dashboard/domain/entities/dashboard_counts.dart';
 import '../../dashboard/domain/entities/dashboard_section.dart';
 import '../../dashboard/presentation/bloc/dashboard_cubit.dart';
@@ -159,6 +161,31 @@ class _AdminHomeViewState extends State<_AdminHomeView> with RouteAware {
                         counts,
                         l10n,
                       ),
+                      // ── Analytics & charts (Navigator.push, not a route) ─
+                      // Gated by the union of the analytics RPCs' permissions;
+                      // each RPC re-gates server-side, so a partial admin sees
+                      // empty charts rather than an error.
+                      if (checker.any(const [
+                        'listings.view_all',
+                        'users.view',
+                        'inquiries.view_all',
+                      ]))
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsetsDirectional.only(
+                              start: AppSpacing.lg,
+                              top: AppSpacing.md,
+                              end: AppSpacing.lg,
+                            ),
+                            child: AppDashboardTile(
+                              icon: LucideIcons.chart_no_axes_column,
+                              title: l10n.adminAnalyticsTileTitle,
+                              subtitle: l10n.adminAnalyticsTileSubtitle,
+                              accent: AppColors.of(context).accent,
+                              onTap: () => _openAnalytics(context),
+                            ),
+                          ),
+                        ),
                       // ── Debug smoke-test tile (kDebugMode only) ─────────
                       if (kDebugMode)
                         const SliverToBoxAdapter(
@@ -172,6 +199,20 @@ class _AdminHomeViewState extends State<_AdminHomeView> with RouteAware {
                 );
               },
             ),
+    );
+  }
+
+  /// Pushes the admin analytics surface, providing a freshly-resolved
+  /// [AdminAnalyticsCubit] (kicked off via load()). Navigator.push keeps this
+  /// additive — no go_router route is introduced.
+  void _openAnalytics(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => BlocProvider<AdminAnalyticsCubit>(
+          create: (_) => getIt<AdminAnalyticsCubit>()..load(),
+          child: const AdminAnalyticsPage(),
+        ),
+      ),
     );
   }
 

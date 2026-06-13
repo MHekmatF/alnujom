@@ -88,6 +88,10 @@ class _StepDetailsState extends State<StepDetails> {
                 TextField(
                   controller: _descriptionController,
                   maxLines: 4,
+                  // Phase 029 (F3 #5) — keep the focused multiline field above
+                  // the keyboard. (No textInputAction.next on multiline — the
+                  // newline key stays as the action.)
+                  scrollPadding: const EdgeInsets.all(AppSpacing.xxxl),
                   onChanged: (v) => context.read<ListingFormBloc>().add(
                     FieldChanged.description(v),
                   ),
@@ -102,6 +106,10 @@ class _StepDetailsState extends State<StepDetails> {
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
+                  // Phase 029 (F3 #5) — keyboard polish.
+                  scrollPadding: const EdgeInsets.all(AppSpacing.xxxl),
+                  textInputAction: TextInputAction.next,
+                  onSubmitted: (_) => FocusScope.of(context).nextFocus(),
                   inputFormatters: <TextInputFormatter>[
                     FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                   ],
@@ -237,17 +245,23 @@ class _StepDetailsState extends State<StepDetails> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         FieldLabel(label: label, required: required),
-        TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          inputFormatters: <TextInputFormatter>[
-            FilteringTextInputFormatter.digitsOnly,
-          ],
-          decoration: const InputDecoration(border: OutlineInputBorder()),
-          onChanged: (v) {
-            final parsed = int.tryParse(v);
-            onParsed(parsed);
-          },
+        Builder(
+          builder: (context) => TextField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            // Phase 029 (F3 #5) — keyboard polish.
+            scrollPadding: const EdgeInsets.all(AppSpacing.xxxl),
+            textInputAction: TextInputAction.next,
+            onSubmitted: (_) => FocusScope.of(context).nextFocus(),
+            inputFormatters: <TextInputFormatter>[
+              FilteringTextInputFormatter.digitsOnly,
+            ],
+            decoration: const InputDecoration(border: OutlineInputBorder()),
+            onChanged: (v) {
+              final parsed = int.tryParse(v);
+              onParsed(parsed);
+            },
+          ),
         ),
       ],
     );

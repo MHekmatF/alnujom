@@ -41,6 +41,7 @@ import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
 import '../../../chat/presentation/bloc/conversations_cubit.dart';
 import '../../../chat/presentation/pages/conversations_list_page.dart';
+import '../../../crm/presentation/pages/crm_page.dart';
 import '../../../currencies/presentation/widgets/preferred_currency_toggle.dart';
 import '../../../viewings/presentation/cubit/viewings_cubit.dart';
 import '../../../viewings/presentation/pages/viewings_list_page.dart';
@@ -216,6 +217,18 @@ class _ProfileView extends StatelessWidget {
                       // Publisher-only: inquiries inbox + my listings (relocated
                       // from the Home AppBar in Phase 25).
                       if (isPublisher) ...[
+                        // Phase 29 (F1) — CRM lead pipeline. Pushed via a
+                        // MaterialPageRoute (CRM has no go_router route); the
+                        // page hosts its own CrmLeadsCubit BlocProvider.
+                        _ProfileRow(
+                          icon: Icons.handshake_outlined,
+                          title: l10n.crmPageTitle,
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => const CrmPage(),
+                            ),
+                          ),
+                        ),
                         _ProfileRow(
                           icon: Icons.inbox_outlined,
                           title: l10n.home_inquiries_action_tooltip,

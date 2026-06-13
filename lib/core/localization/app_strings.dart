@@ -5841,4 +5841,377 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String get assistantPoweredBy =>
       _resolve('assistantPoweredBy', (loc) => loc.assistantPoweredBy);
+  @override
+  String get crmPageTitle =>
+      _resolve("crmPageTitle", (loc) => loc.crmPageTitle);
+  @override
+  String get crmLeadDetailTitle =>
+      _resolve("crmLeadDetailTitle", (loc) => loc.crmLeadDetailTitle);
+  @override
+  String get crmAddLeadAction =>
+      _resolve("crmAddLeadAction", (loc) => loc.crmAddLeadAction);
+  @override
+  String get crmAddLeadTitle =>
+      _resolve("crmAddLeadTitle", (loc) => loc.crmAddLeadTitle);
+  @override
+  String get crmLeadNameLabel =>
+      _resolve("crmLeadNameLabel", (loc) => loc.crmLeadNameLabel);
+  @override
+  String get crmLeadCreatedSuccess =>
+      _resolve("crmLeadCreatedSuccess", (loc) => loc.crmLeadCreatedSuccess);
+  @override
+  String get crmLoadErrorTitle =>
+      _resolve("crmLoadErrorTitle", (loc) => loc.crmLoadErrorTitle);
+  @override
+  String get crmEmptyTitle =>
+      _resolve("crmEmptyTitle", (loc) => loc.crmEmptyTitle);
+  @override
+  String get crmEmptyBody =>
+      _resolve("crmEmptyBody", (loc) => loc.crmEmptyBody);
+  @override
+  String get crmFilterAll =>
+      _resolve("crmFilterAll", (loc) => loc.crmFilterAll);
+  @override
+  String get crmStageNew =>
+      _resolve("crmStageNew", (loc) => loc.crmStageNew);
+  @override
+  String get crmStageContacted =>
+      _resolve("crmStageContacted", (loc) => loc.crmStageContacted);
+  @override
+  String get crmStageViewing =>
+      _resolve("crmStageViewing", (loc) => loc.crmStageViewing);
+  @override
+  String get crmStageNegotiation =>
+      _resolve("crmStageNegotiation", (loc) => loc.crmStageNegotiation);
+  @override
+  String get crmStageWon =>
+      _resolve("crmStageWon", (loc) => loc.crmStageWon);
+  @override
+  String get crmStageLost =>
+      _resolve("crmStageLost", (loc) => loc.crmStageLost);
+  @override
+  String get crmStageSectionTitle =>
+      _resolve("crmStageSectionTitle", (loc) => loc.crmStageSectionTitle);
+  @override
+  String crmLeadLastActivity(String when) => _resolve(
+    "crmLeadLastActivity",
+    (loc) => loc.crmLeadLastActivity(when),
+  );
+  @override
+  String get crmRelativeToday =>
+      _resolve("crmRelativeToday", (loc) => loc.crmRelativeToday);
+  @override
+  String get crmRelativeYesterday =>
+      _resolve("crmRelativeYesterday", (loc) => loc.crmRelativeYesterday);
+  @override
+  String crmRelativeDaysAgo(int count) => _resolve(
+    "crmRelativeDaysAgo",
+    (loc) => loc.crmRelativeDaysAgo(count),
+  );
+  @override
+  String crmDueTodayTitle(int count) => _resolve(
+    "crmDueTodayTitle",
+    (loc) => loc.crmDueTodayTitle(count),
+  );
+  @override
+  String get crmRemindersSectionTitle =>
+      _resolve("crmRemindersSectionTitle", (loc) => loc.crmRemindersSectionTitle);
+  @override
+  String get crmRemindersEmpty =>
+      _resolve("crmRemindersEmpty", (loc) => loc.crmRemindersEmpty);
+  @override
+  String get crmRemindersPermissionDenied =>
+      _resolve("crmRemindersPermissionDenied", (loc) => loc.crmRemindersPermissionDenied);
+  @override
+  String get crmReminderAddAction =>
+      _resolve("crmReminderAddAction", (loc) => loc.crmReminderAddAction);
+  @override
+  String get crmReminderAddTitle =>
+      _resolve("crmReminderAddTitle", (loc) => loc.crmReminderAddTitle);
+  @override
+  String get crmReminderTitleLabel =>
+      _resolve("crmReminderTitleLabel", (loc) => loc.crmReminderTitleLabel);
+  @override
+  String get crmReminderPickTime =>
+      _resolve("crmReminderPickTime", (loc) => loc.crmReminderPickTime);
+  @override
+  String get crmReminderAddedSuccess =>
+      _resolve("crmReminderAddedSuccess", (loc) => loc.crmReminderAddedSuccess);
+  @override
+  String get crmReminderToggleTooltip =>
+      _resolve("crmReminderToggleTooltip", (loc) => loc.crmReminderToggleTooltip);
+  @override
+  String get crmReminderDeleteTitle =>
+      _resolve("crmReminderDeleteTitle", (loc) => loc.crmReminderDeleteTitle);
+  @override
+  String get crmReminderDeleteMessage =>
+      _resolve("crmReminderDeleteMessage", (loc) => loc.crmReminderDeleteMessage);
+  @override
+  String get crmNotesSectionTitle =>
+      _resolve("crmNotesSectionTitle", (loc) => loc.crmNotesSectionTitle);
+  @override
+  String get crmNoteComposerHint =>
+      _resolve("crmNoteComposerHint", (loc) => loc.crmNoteComposerHint);
+  @override
+  String get crmNoteSendAction =>
+      _resolve("crmNoteSendAction", (loc) => loc.crmNoteSendAction);
+  @override
+  String get crmNoteAddedSuccess =>
+      _resolve("crmNoteAddedSuccess", (loc) => loc.crmNoteAddedSuccess);
+  @override
+  String get crmNoteAddError =>
+      _resolve("crmNoteAddError", (loc) => loc.crmNoteAddError);
+  @override
+  String get crmNoteDeleteTitle =>
+      _resolve("crmNoteDeleteTitle", (loc) => loc.crmNoteDeleteTitle);
+  @override
+  String get crmNoteDeleteMessage =>
+      _resolve("crmNoteDeleteMessage", (loc) => loc.crmNoteDeleteMessage);
+  @override
+  String get crmTimelineSectionTitle =>
+      _resolve("crmTimelineSectionTitle", (loc) => loc.crmTimelineSectionTitle);
+  @override
+  String get crmTimelineEmptyTitle =>
+      _resolve("crmTimelineEmptyTitle", (loc) => loc.crmTimelineEmptyTitle);
+  @override
+  String get crmTimelineInquiry =>
+      _resolve("crmTimelineInquiry", (loc) => loc.crmTimelineInquiry);
+  @override
+  String get crmTimelineMessage =>
+      _resolve("crmTimelineMessage", (loc) => loc.crmTimelineMessage);
+  @override
+  String get crmTimelineViewingRequested =>
+      _resolve("crmTimelineViewingRequested", (loc) => loc.crmTimelineViewingRequested);
+  @override
+  String get crmTimelineViewingConfirmed =>
+      _resolve("crmTimelineViewingConfirmed", (loc) => loc.crmTimelineViewingConfirmed);
+  @override
+  String get crmTimelineViewingDeclined =>
+      _resolve("crmTimelineViewingDeclined", (loc) => loc.crmTimelineViewingDeclined);
+  @override
+  String get crmTimelineViewingCancelled =>
+      _resolve("crmTimelineViewingCancelled", (loc) => loc.crmTimelineViewingCancelled);
+  @override
+  String get crmTimelineNote =>
+      _resolve("crmTimelineNote", (loc) => loc.crmTimelineNote);
+  @override
+  String get crmActionChat =>
+      _resolve("crmActionChat", (loc) => loc.crmActionChat);
+  @override
+  String get crmActionCall =>
+      _resolve("crmActionCall", (loc) => loc.crmActionCall);
+  @override
+  String get crmActionWhatsapp =>
+      _resolve("crmActionWhatsapp", (loc) => loc.crmActionWhatsapp);
+  @override
+  String get crmActionLaunchFailed =>
+      _resolve("crmActionLaunchFailed", (loc) => loc.crmActionLaunchFailed);
+  @override
+  String get crmChatUnavailable =>
+      _resolve("crmChatUnavailable", (loc) => loc.crmChatUnavailable);
+  @override
+  String get crmDeleteAction =>
+      _resolve("crmDeleteAction", (loc) => loc.crmDeleteAction);
+  @override
+  String get crmAddToCrmAction =>
+      _resolve("crmAddToCrmAction", (loc) => loc.crmAddToCrmAction);
+  @override
+  String get crmAddedToCrmSuccess =>
+      _resolve("crmAddedToCrmSuccess", (loc) => loc.crmAddedToCrmSuccess);
+  @override
+  String get crmAddToCrmError =>
+      _resolve("crmAddToCrmError", (loc) => loc.crmAddToCrmError);
+  @override
+  String get crmViewAction =>
+      _resolve("crmViewAction", (loc) => loc.crmViewAction);
+  @override
+  String get adminAnalyticsTitle =>
+      _resolve("adminAnalyticsTitle", (loc) => loc.adminAnalyticsTitle);
+  @override
+  String get adminAnalyticsTileTitle =>
+      _resolve("adminAnalyticsTileTitle", (loc) => loc.adminAnalyticsTileTitle);
+  @override
+  String get adminAnalyticsTileSubtitle =>
+      _resolve("adminAnalyticsTileSubtitle", (loc) => loc.adminAnalyticsTileSubtitle);
+  @override
+  String get adminAnalyticsListingsByMonthTitle =>
+      _resolve("adminAnalyticsListingsByMonthTitle", (loc) => loc.adminAnalyticsListingsByMonthTitle);
+  @override
+  String get adminAnalyticsUsersByMonthTitle =>
+      _resolve("adminAnalyticsUsersByMonthTitle", (loc) => loc.adminAnalyticsUsersByMonthTitle);
+  @override
+  String get adminAnalyticsLeadEventsByDayTitle =>
+      _resolve("adminAnalyticsLeadEventsByDayTitle", (loc) => loc.adminAnalyticsLeadEventsByDayTitle);
+  @override
+  String get adminAnalyticsListingsByGovernorateTitle =>
+      _resolve("adminAnalyticsListingsByGovernorateTitle", (loc) => loc.adminAnalyticsListingsByGovernorateTitle);
+  @override
+  String get adminAnalyticsEmptyHint =>
+      _resolve("adminAnalyticsEmptyHint", (loc) => loc.adminAnalyticsEmptyHint);
+  @override
+  String get adminAnalyticsError =>
+      _resolve("adminAnalyticsError", (loc) => loc.adminAnalyticsError);
+  @override
+  String get publisherChartsSectionLabel =>
+      _resolve("publisherChartsSectionLabel", (loc) => loc.publisherChartsSectionLabel);
+  @override
+  String get publisherChartsLeadsByDayTitle =>
+      _resolve("publisherChartsLeadsByDayTitle", (loc) => loc.publisherChartsLeadsByDayTitle);
+  @override
+  String get publisherChartsInquiriesByDayTitle =>
+      _resolve("publisherChartsInquiriesByDayTitle", (loc) => loc.publisherChartsInquiriesByDayTitle);
+  @override
+  String get publisherChartsViewingsByStatusTitle =>
+      _resolve("publisherChartsViewingsByStatusTitle", (loc) => loc.publisherChartsViewingsByStatusTitle);
+  @override
+  String get publisherChartsListingsByStatusTitle =>
+      _resolve("publisherChartsListingsByStatusTitle", (loc) => loc.publisherChartsListingsByStatusTitle);
+  @override
+  String get publisherChartsEmptyHint =>
+      _resolve("publisherChartsEmptyHint", (loc) => loc.publisherChartsEmptyHint);
+  @override
+  String get publisherChartsStatusActive =>
+      _resolve("publisherChartsStatusActive", (loc) => loc.publisherChartsStatusActive);
+  @override
+  String get publisherChartsStatusPending =>
+      _resolve("publisherChartsStatusPending", (loc) => loc.publisherChartsStatusPending);
+  @override
+  String get publisherChartsStatusRejected =>
+      _resolve("publisherChartsStatusRejected", (loc) => loc.publisherChartsStatusRejected);
+  @override
+  String get publisherChartsViewingRequested =>
+      _resolve("publisherChartsViewingRequested", (loc) => loc.publisherChartsViewingRequested);
+  @override
+  String get publisherChartsViewingConfirmed =>
+      _resolve("publisherChartsViewingConfirmed", (loc) => loc.publisherChartsViewingConfirmed);
+  @override
+  String get publisherChartsViewingDeclined =>
+      _resolve("publisherChartsViewingDeclined", (loc) => loc.publisherChartsViewingDeclined);
+  @override
+  String get publisherChartsViewingCancelled =>
+      _resolve("publisherChartsViewingCancelled", (loc) => loc.publisherChartsViewingCancelled);
+  @override
+  String get dashCrmTileTitle =>
+      _resolve("dashCrmTileTitle", (loc) => loc.dashCrmTileTitle);
+  @override
+  String get dashCrmTileSubtitle =>
+      _resolve("dashCrmTileSubtitle", (loc) => loc.dashCrmTileSubtitle);
+  @override
+  String get mediaAddPanorama =>
+      _resolve("mediaAddPanorama", (loc) => loc.mediaAddPanorama);
+  @override
+  String mediaTipsPhotoCount(int count) => _resolve(
+    "mediaTipsPhotoCount",
+    (loc) => loc.mediaTipsPhotoCount(count),
+  );
+  @override
+  String get mediaTipsLightingHint =>
+      _resolve("mediaTipsLightingHint", (loc) => loc.mediaTipsLightingHint);
+  @override
+  String get mediaActionMarkExistingPanorama =>
+      _resolve("mediaActionMarkExistingPanorama", (loc) => loc.mediaActionMarkExistingPanorama);
+  @override
+  String get mediaActionUnmarkExistingPanorama =>
+      _resolve("mediaActionUnmarkExistingPanorama", (loc) => loc.mediaActionUnmarkExistingPanorama);
+  @override
+  String get mediaCapPanoramas2 =>
+      _resolve("mediaCapPanoramas2", (loc) => loc.mediaCapPanoramas2);
+  @override
+  String get mediaErrorNotEquirectangular =>
+      _resolve("mediaErrorNotEquirectangular", (loc) => loc.mediaErrorNotEquirectangular);
+  @override
+  String get mediaPanoramaHelpTitle =>
+      _resolve("mediaPanoramaHelpTitle", (loc) => loc.mediaPanoramaHelpTitle);
+  @override
+  String get mediaPanoramaHelpIntro =>
+      _resolve("mediaPanoramaHelpIntro", (loc) => loc.mediaPanoramaHelpIntro);
+  @override
+  String get mediaPanoramaHelpStep1 =>
+      _resolve("mediaPanoramaHelpStep1", (loc) => loc.mediaPanoramaHelpStep1);
+  @override
+  String get mediaPanoramaHelpStep2 =>
+      _resolve("mediaPanoramaHelpStep2", (loc) => loc.mediaPanoramaHelpStep2);
+  @override
+  String get mediaPanoramaHelpStep3 =>
+      _resolve("mediaPanoramaHelpStep3", (loc) => loc.mediaPanoramaHelpStep3);
+  @override
+  String get mediaPanoramaHelpGetApp =>
+      _resolve("mediaPanoramaHelpGetApp", (loc) => loc.mediaPanoramaHelpGetApp);
+  @override
+  String get listingFormPreviewHeading =>
+      _resolve("listingFormPreviewHeading", (loc) => loc.listingFormPreviewHeading);
+  @override
+  String get listingFormPreviewTitlePlaceholder =>
+      _resolve("listingFormPreviewTitlePlaceholder", (loc) => loc.listingFormPreviewTitlePlaceholder);
+  @override
+  String get listingFormPreviewPricePlaceholder =>
+      _resolve("listingFormPreviewPricePlaceholder", (loc) => loc.listingFormPreviewPricePlaceholder);
+  @override
+  String get listingFormPreviewLocationPlaceholder =>
+      _resolve("listingFormPreviewLocationPlaceholder", (loc) => loc.listingFormPreviewLocationPlaceholder);
+  @override
+  String get listingFormPreviewFeaturedLabel =>
+      _resolve("listingFormPreviewFeaturedLabel", (loc) => loc.listingFormPreviewFeaturedLabel);
+  @override
+  String get listingFormChecklistTitle =>
+      _resolve("listingFormChecklistTitle", (loc) => loc.listingFormChecklistTitle);
+  @override
+  String get listingFormChecklistAllComplete =>
+      _resolve("listingFormChecklistAllComplete", (loc) => loc.listingFormChecklistAllComplete);
+  @override
+  String listingFormChecklistMissingSubtitle(int count) => _resolve(
+    "listingFormChecklistMissingSubtitle",
+    (loc) => loc.listingFormChecklistMissingSubtitle(count),
+  );
+  @override
+  String get listingFormChecklistPhoneOrWhatsapp =>
+      _resolve("listingFormChecklistPhoneOrWhatsapp", (loc) => loc.listingFormChecklistPhoneOrWhatsapp);
+  @override
+  String get listingFormChecklistGenericMissing =>
+      _resolve("listingFormChecklistGenericMissing", (loc) => loc.listingFormChecklistGenericMissing);
+  @override
+  String get listingFormChecklistFix =>
+      _resolve("listingFormChecklistFix", (loc) => loc.listingFormChecklistFix);
+  @override
+  String get reels_section_title =>
+      _resolve("reels_section_title", (loc) => loc.reels_section_title);
+  @override
+  String get reels_see_all =>
+      _resolve("reels_see_all", (loc) => loc.reels_see_all);
+  @override
+  String get reels_view_listing =>
+      _resolve("reels_view_listing", (loc) => loc.reels_view_listing);
+  @override
+  String get reels_empty_headline =>
+      _resolve("reels_empty_headline", (loc) => loc.reels_empty_headline);
+  @override
+  String get reels_load_error =>
+      _resolve("reels_load_error", (loc) => loc.reels_load_error);
+  @override
+  String get reels_lite_confirm_title =>
+      _resolve("reels_lite_confirm_title", (loc) => loc.reels_lite_confirm_title);
+  @override
+  String get reels_lite_confirm_message =>
+      _resolve("reels_lite_confirm_message", (loc) => loc.reels_lite_confirm_message);
+  @override
+  String get reels_lite_confirm_action =>
+      _resolve("reels_lite_confirm_action", (loc) => loc.reels_lite_confirm_action);
+  @override
+  String get locationCentroidLabel =>
+      _resolve("locationCentroidLabel", (loc) => loc.locationCentroidLabel);
+  @override
+  String get locationCentroidHelper =>
+      _resolve("locationCentroidHelper", (loc) => loc.locationCentroidHelper);
+  @override
+  String get locationCentroidLatLabel =>
+      _resolve("locationCentroidLatLabel", (loc) => loc.locationCentroidLatLabel);
+  @override
+  String get locationCentroidLngLabel =>
+      _resolve("locationCentroidLngLabel", (loc) => loc.locationCentroidLngLabel);
+  @override
+  String get locationCentroidRequired =>
+      _resolve("locationCentroidRequired", (loc) => loc.locationCentroidRequired);
+  @override
+  String get locationCentroidOutOfBounds =>
+      _resolve("locationCentroidOutOfBounds", (loc) => loc.locationCentroidOutOfBounds);
 }

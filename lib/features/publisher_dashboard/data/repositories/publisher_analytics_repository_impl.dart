@@ -68,6 +68,51 @@ class PublisherAnalyticsRepositoryImpl implements PublisherAnalyticsRepository {
     }
   }
 
+  @override
+  Future<Result<List<PublisherDailyLeadTotal>>> fetchDailyInquiries({
+    int days = 30,
+  }) async {
+    try {
+      final dtos = await _datasource.fetchInquiriesByDay(days: days);
+      final sparse = <String, int>{};
+      for (final dto in dtos) {
+        final point = dto.toEntity();
+        sparse[_dateKey(point.day)] = point.total;
+      }
+      return Success(_gapFill(sparse: sparse, days: days));
+    } on Object catch (error, stackTrace) {
+      _logger.warning(
+        'fetchDailyInquiries failed.',
+        error: error,
+        stackTrace: stackTrace,
+        tag: _tag,
+      );
+      return FailureResult(
+        UnknownFailure(error.toString(), cause: error, stackTrace: stackTrace),
+      );
+    }
+  }
+
+  @override
+  Future<Result<List<PublisherStatusTotal>>> fetchViewingsByStatus() async {
+    try {
+      final dtos = await _datasource.fetchViewingsByStatus();
+      return Success(
+        dtos.map((dto) => dto.toEntity()).toList(growable: false),
+      );
+    } on Object catch (error, stackTrace) {
+      _logger.warning(
+        'fetchViewingsByStatus failed.',
+        error: error,
+        stackTrace: stackTrace,
+        tag: _tag,
+      );
+      return FailureResult(
+        UnknownFailure(error.toString(), cause: error, stackTrace: stackTrace),
+      );
+    }
+  }
+
   /// Produces one [PublisherDailyLeadTotal] per calendar day across the trailing
   /// [days]-day window (oldest → newest, ending today), pulling totals from the
   /// [sparse] map and defaulting absent days to 0.

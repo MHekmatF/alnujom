@@ -22,6 +22,7 @@ import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/status_pill.dart';
+import '../../../crm/presentation/widgets/add_to_crm_action.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/viewing.dart';
 import '../cubit/viewings_cubit.dart';
@@ -149,6 +150,26 @@ class _ViewingCard extends StatelessWidget {
           if (actions.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.md),
             Row(children: _interspersed(actions)),
+          ],
+          // Phase 29 (F1) — publisher-only "Add to CRM": attach this viewing's
+          // requester as a lead (resolved + ownership-checked server-side).
+          if (viewing.amIPublisher) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: AppButton(
+                label: l10n.crmAddToCrmAction,
+                variant: AppButtonVariant.text,
+                size: AppButtonSize.dense,
+                icon: LucideIcons.handshake,
+                onPressed: () => addToCrm(
+                  context,
+                  source: CrmLeadSource.viewing,
+                  sourceId: viewing.id,
+                  displayName: viewing.listingTitle,
+                ),
+              ),
+            ),
           ],
         ],
       ),

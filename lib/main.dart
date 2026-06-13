@@ -12,7 +12,10 @@ import 'core/logging/noop_crash_reporter.dart';
 import 'core/logging/sentry_crash_reporter.dart';
 import 'core/messaging/push_messaging_service.dart';
 import 'core/network/supabase_client_wrapper.dart';
+import 'core/network/types/auth_state.dart' as app_auth;
+import 'core/notifications/local_reminder_scheduler.dart';
 import 'core/storage/preferences_store.dart';
+import 'features/crm/domain/repositories/crm_repository.dart';
 import 'features/notifications/data/datasources/fcm_push_messaging_service.dart';
 import 'features/notifications/data/datasources/noop_push_messaging_service.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -199,6 +202,53 @@ Future<void> _bootstrap(Stopwatch coldStartWatch) async {
       analytics.logEvent('app_open');
     } catch (_) {
       // Telemetry is strictly best-effort — never disrupt the app.
+    }
+
+    // Phase 29 (F1) — once auth is ready, (re)schedule the signed-in
+    // publisher's open CRM follow-up reminders as device-local notifications
+    // (there is no server scheduler). Best-effort + guarded.
+    try {
+      _scheduleCrmRemindersOnAuth();
+    } catch (_) {
+      // Never disrupt the app for a reminder reschedule.
+    }
+  });
+}
+
+/// Listens for the signed-in auth state and (re)schedules the publisher's open
+/// CRM follow-up reminders. Fully guarded — any failure is swallowed.
+void _scheduleCrmRemindersOnAuth() {
+  late final SupabaseClientWrapper wrapper;
+  try {
+    wrapper = getIt<SupabaseClientWrapper>();
+  } catch (_) {
+    return;
+  }
+
+  Future<void> reschedule() async {
+    try {
+      final repo = getIt<CrmRepository>();
+      final scheduler = getIt<LocalReminderScheduler>();
+      final result = await repo.loadOpenReminders();
+      switch (result) {
+        case Success(:final value):
+          final now = DateTime.now();
+          final items = value
+              .where((r) => r.isOpenFuture(now))
+              .map((r) => (id: r.id, title: r.title, due: r.dueAt))
+              .toList();
+          await scheduler.syncOpenReminders(items);
+        case FailureResult():
+          break;
+      }
+    } catch (_) {
+      // Best-effort.
+    }
+  }
+
+  wrapper.authStateChanges().listen((state) {
+    if (state == app_auth.AuthState.signedIn) {
+      unawaited(reschedule());
     }
   });
 }

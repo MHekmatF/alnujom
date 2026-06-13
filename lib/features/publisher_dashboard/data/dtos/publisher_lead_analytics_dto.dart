@@ -76,6 +76,24 @@ class PublisherDailyLeadTotalDto {
   }
 }
 
+/// Phase 29 — maps one `publisher_viewings_by_status()` row → entity.
+class PublisherStatusTotalDto {
+  const PublisherStatusTotalDto({required this.status, required this.total});
+
+  final String status;
+  final int total;
+
+  factory PublisherStatusTotalDto.fromJson(Map<String, dynamic> json) {
+    return PublisherStatusTotalDto(
+      status: (json['status'] ?? '').toString(),
+      total: _toInt(json['total']),
+    );
+  }
+
+  PublisherStatusTotal toEntity() =>
+      PublisherStatusTotal(status: status, total: total);
+}
+
 /// Coerces a JSON scalar to a non-null int (Supabase BIGINT may arrive as int,
 /// num, or String), defaulting to 0.
 int _toInt(dynamic value) {

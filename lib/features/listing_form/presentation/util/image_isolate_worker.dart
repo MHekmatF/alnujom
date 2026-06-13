@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:isolate';
 import 'dart:typed_data';
 
+import 'panorama_pipeline.dart';
 import 'watermark_pipeline.dart';
 
 /// Phase 11 R-25 — Shared sequential background isolate worker.
@@ -47,6 +48,16 @@ class _ImageJob {
   });
 }
 
+/// Phase 029 (F5) — Panorama job sent from main isolate to the worker isolate.
+/// Mirrors [_ImageJob] but runs the equirectangular pipeline (no watermark, no
+/// watermark asset bytes needed, 4096px cap, 2:1 aspect gate).
+class _PanoramaJob {
+  final SendPort replyTo;
+  final Uint8List sourceBytes;
+
+  const _PanoramaJob({required this.replyTo, required this.sourceBytes});
+}
+
 /// Result returned from the worker isolate to the main isolate.
 class _ImageResult {
   /// Non-null on success.
@@ -80,6 +91,16 @@ void _workerEntry(SendPort mainSendPort) {
           sourceBytes: message.sourceBytes,
           watermarkAssetBytes: message.watermarkAssetBytes,
           isRtl: message.isRtl,
+        );
+        message.replyTo.send(_ImageResult.success(resultBytes));
+      } catch (e) {
+        message.replyTo.send(_ImageResult.failure(e));
+      }
+    } else if (message is _PanoramaJob) {
+      // Phase 029 (F5) — equirectangular panorama path (no watermark).
+      try {
+        final resultBytes = await processPanoramaForUpload(
+          sourceBytes: message.sourceBytes,
         );
         message.replyTo.send(_ImageResult.success(resultBytes));
       } catch (e) {
@@ -174,6 +195,47 @@ class ImageIsolateWorker {
         watermarkAssetBytes: watermarkAssetBytes,
         isRtl: isRtl,
       ),
+    );
+
+    return completer.future;
+  }
+
+  /// Phase 029 (F5) — sends [sourceBytes] to the background isolate for the
+  /// equirectangular panorama pipeline (no watermark, 4096px cap, 2:1 aspect
+  /// gate). Returns the processed JPEG bytes on success; throws the original
+  /// pipeline exception (e.g. [NotEquirectangularException]) on failure.
+  ///
+  /// Like [processImage], jobs are processed sequentially on the isolate side;
+  /// callers MUST await this call before issuing the next job.
+  Future<Uint8List> processPanorama({required Uint8List sourceBytes}) async {
+    if (!_started || _workerSendPort == null) {
+      throw StateError(
+        'ImageIsolateWorker.start() must be called before processPanorama()',
+      );
+    }
+
+    final replyPort = ReceivePort();
+    final completer = Completer<Uint8List>();
+
+    replyPort.listen((message) {
+      replyPort.close();
+      if (message is _ImageResult) {
+        if (message.bytes != null) {
+          completer.complete(message.bytes);
+        } else {
+          completer.completeError(
+            message.error ?? Exception('Unknown isolate error'),
+          );
+        }
+      } else {
+        completer.completeError(
+          Exception('Unexpected isolate response: $message'),
+        );
+      }
+    });
+
+    _workerSendPort!.send(
+      _PanoramaJob(replyTo: replyPort.sendPort, sourceBytes: sourceBytes),
     );
 
     return completer.future;

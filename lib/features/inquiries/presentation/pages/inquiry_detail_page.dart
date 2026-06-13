@@ -12,9 +12,11 @@ import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
 import '../../../../core/widgets/error_state.dart';
+import '../../../crm/presentation/widgets/add_to_crm_action.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/inquiry.dart';
 import '../../domain/entities/inquiry_status.dart';
@@ -162,6 +164,24 @@ class _InquiryDetailBody extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
+
+          // Phase 29 (F1) — "Add to CRM": attach this inquiry's sender as a
+          // lead in the publisher's pipeline (publisher-only; the lead's
+          // contact is resolved server-side by the upsert RPC).
+          if (inquiry.viewerIsPublisher) ...[
+            AppButton(
+              label: l10n.crmAddToCrmAction,
+              variant: AppButtonVariant.tonal,
+              icon: Icons.handshake_outlined,
+              onPressed: () => addToCrm(
+                context,
+                source: CrmLeadSource.inquiry,
+                sourceId: inquiry.id,
+                displayName: inquiry.senderName,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+          ],
 
           // Status mutation buttons — gated by allowedTransitions.
           // The closed→new transition has NO UI affordance per Q2=B.

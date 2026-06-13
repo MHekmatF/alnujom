@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../agency/presentation/widgets/publish_under_agency_field.dart';
 import '../../domain/entities/listing.dart';
@@ -46,6 +47,11 @@ class _StepBasicsState extends State<StepBasics> {
             FieldLabel(label: l10n.fieldLabelTitle, required: true),
             TextField(
               controller: _titleController,
+              // Phase 029 (F3 #5) — keyboard polish: keep the focused field
+              // visible above the keyboard and advance focus on submit.
+              scrollPadding: const EdgeInsets.all(AppSpacing.xxxl),
+              textInputAction: TextInputAction.next,
+              onSubmitted: (_) => FocusScope.of(context).nextFocus(),
               onChanged: (v) =>
                   context.read<ListingFormBloc>().add(FieldChanged.title(v)),
               decoration: InputDecoration(

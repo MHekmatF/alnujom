@@ -22,6 +22,7 @@ import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/charts/token_bar_chart.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
@@ -182,120 +183,27 @@ class _TotalHeader extends StatelessWidget {
   }
 }
 
-/// A hand-built daily-leads bar chart for the trailing window. One token-styled
-/// bar per (gap-filled) calendar day, height scaled to the busiest day. RTL-safe
-/// (the Row lays out start→end, so it reverses naturally under RTL).
+/// A daily-leads bar chart for the trailing window. One bar per (gap-filled)
+/// calendar day, height scaled to the busiest day, with a first→last date
+/// caption. Phase 29: delegates to the shared [TokenBarChart] (identical
+/// visuals — same card shell, normalization, min-nib, zero-stub, captions).
 class _DailyBarChart extends StatelessWidget {
   const _DailyBarChart({required this.byDay, required this.l10n});
 
   final List<PublisherDailyLeadTotal> byDay;
   final AppLocalizations l10n;
 
-  /// Plot height for the tallest bar.
-  static const double _chartHeight = 140;
-
   @override
   Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-    final styles = AppTextStyles.of(context);
-    final elevation = AppElevation.of(context);
     final locale = Localizations.localeOf(context).toLanguageTag();
-
-    final maxTotal = byDay.fold<int>(
-      0,
-      (peak, point) => point.total > peak ? point.total : peak,
-    );
-
-    return Container(
-      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: colors.card,
-        borderRadius: appRadius(AppRadii.lg),
-        border: Border.all(color: colors.outline),
-        boxShadow: elevation.level1,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            height: _chartHeight,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                for (final point in byDay)
-                  Expanded(
-                    child: _Bar(
-                      fraction: maxTotal == 0
-                          ? 0
-                          : point.total / maxTotal,
-                      maxHeight: _chartHeight,
-                      filled: point.total > 0,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          // Range caption: first day → last day of the window.
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                _formatDay(byDay.first.day, locale),
-                style: styles.labelMedium.copyWith(color: colors.textMuted),
-              ),
-              Text(
-                _formatDay(byDay.last.day, locale),
-                style: styles.labelMedium.copyWith(color: colors.textMuted),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _formatDay(DateTime day, String locale) {
-    return DateFormat.MMMd(locale).format(day);
-  }
-}
-
-/// A single token-styled bar. Days with no leads render a faint baseline stub so
-/// the axis still reads as continuous.
-class _Bar extends StatelessWidget {
-  const _Bar({
-    required this.fraction,
-    required this.maxHeight,
-    required this.filled,
-  });
-
-  final double fraction;
-  final double maxHeight;
-  final bool filled;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-    // A minimum visible nib so a non-zero day never collapses to nothing, and a
-    // faint stub for zero days.
-    final double height = filled
-        ? (maxHeight * fraction).clamp(AppSpacing.xs, maxHeight)
-        : AppSpacing.xs / 2;
-
-    return Padding(
-      padding: const EdgeInsetsDirectional.symmetric(horizontal: AppSpacing.xxs),
-      child: Align(
-        alignment: AlignmentDirectional.bottomCenter,
-        child: Container(
-          height: height,
-          decoration: BoxDecoration(
-            color: filled
-                ? colors.primary
-                : colors.outline.withValues(alpha: 0.6),
-            borderRadius: appRadius(AppRadii.sm),
-          ),
-        ),
-      ),
+    return TokenBarChart(
+      values: byDay.map((p) => p.total).toList(growable: false),
+      startCaption: byDay.isEmpty
+          ? null
+          : DateFormat.MMMd(locale).format(byDay.first.day),
+      endCaption: byDay.isEmpty
+          ? null
+          : DateFormat.MMMd(locale).format(byDay.last.day),
     );
   }
 }

@@ -65,6 +65,19 @@ class PublisherDailyLeadTotal {
   final int total;
 }
 
+/// Phase 29 — a (status, total) bucket, e.g. viewings grouped by status
+/// (`requested` / `confirmed` / `declined` / `cancelled`). Returned by the
+/// `publisher_viewings_by_status()` RPC; empty buckets are omitted by the RPC.
+class PublisherStatusTotal {
+  const PublisherStatusTotal({required this.status, required this.total});
+
+  /// The raw status key (mapped to a localized label by the UI).
+  final String status;
+
+  /// Count of rows in this status bucket (>= 0).
+  final int total;
+}
+
 /// The full lead-analytics payload for the authenticated publisher: the daily
 /// trend (gap-filled by the repository) plus the per-listing breakdown.
 class PublisherLeadAnalytics {
