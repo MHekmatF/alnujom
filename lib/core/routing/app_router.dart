@@ -58,6 +58,7 @@ import '../../features/inquiries/presentation/pages/inquiry_inbox_page.dart';
 import '../../features/map/domain/entities/map_entry_context.dart';
 import '../../features/map/presentation/pages/map_page.dart';
 import '../../features/assistant/presentation/pages/assistant_page.dart';
+import '../../features/reels/presentation/pages/reels_tab_page.dart';
 import '../../features/search/presentation/pages/search_page.dart';
 import '../../features/search/presentation/pages/saved_searches_page.dart';
 import '../../features/search/domain/entities/filter_state.dart';
@@ -119,6 +120,9 @@ abstract final class AppRoutes {
   static const search = '/search';
   // Phase 28 — smart search assistant (anonymous-accessible, mirrors /search).
   static const assistant = '/assistant';
+  // Phase 030 (W4) — Reels bottom-nav tab (replaced /search as a tab;
+  // anonymous-accessible, mirrors /search — no redirect).
+  static const reels = '/reels';
   // Phase 15 FR-007: public map view route.
   static const map = '/map';
   // Phase 16 FR-001: publisher inquiry inbox route.
@@ -216,6 +220,8 @@ abstract final class AppRouteNames {
   static const search = 'search';
   // Phase 28 — smart search assistant route name.
   static const assistant = 'assistant';
+  // Phase 030 (W4) — Reels bottom-nav tab route name.
+  static const reels = 'reels';
   // Phase 25 uplift v2 — saved searches + role-aware dashboard route names.
   static const savedSearches = 'saved-searches';
   static const publisherDashboard = 'publisher-dashboard';
@@ -592,6 +598,14 @@ GoRouter buildAppRouter({
         path: AppRoutes.assistant,
         name: AppRouteNames.assistant,
         builder: (context, state) => const AssistantPage(),
+      ),
+      // ─── Phase 030 (W4) — Reels bottom-nav tab ───
+      // Anonymous-accessible (mirrors /search): no redirect. Renders the
+      // persistent Reels tab (its own ReelsFeedCubit + the bottom nav).
+      GoRoute(
+        path: AppRoutes.reels,
+        name: AppRouteNames.reels,
+        builder: (context, state) => const ReelsTabPage(),
       ),
       // ─── Phase 25 uplift v2 — saved searches ───
       GoRoute(

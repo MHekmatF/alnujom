@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
@@ -15,8 +16,13 @@ import '../theme/spacing.dart';
 import '../theme/typography.dart';
 import 'reduce_motion.dart';
 
-/// The four primary destinations of the public app shell.
-enum MainTab { home, search, favorites, profile }
+/// The primary destinations of the public app shell.
+///
+/// Phase 030 (W4): the Search tab was replaced by [reels]; Search is still
+/// reachable from the Home search bar but is no longer a tab (it renders the
+/// bar under [none], which highlights nothing). New visual order:
+/// Home · Reels · [+Publish] · Favorites · Profile.
+enum MainTab { home, reels, favorites, profile, none }
 
 /// Phase 25 (Claude Design) — the persistent bottom navigation bar shared by
 /// the four primary surfaces (home / search / favorites / profile).
@@ -71,7 +77,7 @@ class MainBottomNav extends StatelessWidget {
             authState.profile.publisherStatus == PublisherStatus.approved;
 
         // Destinations + parallel action/tab lists so the prominent "Publish"
-        // entry can sit between Search and Favorites without ever being a tab.
+        // entry can sit between Reels and Favorites without ever being a tab.
         final destinations = <Widget>[
           NavigationDestination(
             icon: const Icon(Icons.home_outlined),
@@ -79,16 +85,16 @@ class MainBottomNav extends StatelessWidget {
             label: l10n.home_title,
           ),
           NavigationDestination(
-            icon: const Icon(Icons.search_outlined),
-            selectedIcon: selectedIcon(Icons.search_rounded, MainTab.search),
-            label: l10n.nav_search,
+            icon: const Icon(LucideIcons.video),
+            selectedIcon: selectedIcon(LucideIcons.video, MainTab.reels),
+            label: l10n.nav_reels,
           ),
         ];
         final actions = <VoidCallback>[
           () => context.go(AppRoutes.home),
-          () => context.go(AppRoutes.search),
+          () => context.go(AppRoutes.reels),
         ];
-        final tabs = <MainTab?>[MainTab.home, MainTab.search];
+        final tabs = <MainTab?>[MainTab.home, MainTab.reels];
 
         if (isApprovedPublisher) {
           destinations.add(
@@ -123,6 +129,11 @@ class MainBottomNav extends StatelessWidget {
         ]);
         tabs.addAll([MainTab.favorites, MainTab.profile]);
 
+        // Phase 030 (W4): MainTab.none renders the bar with NO highlighted slot
+        // (e.g. the Search page, which is no longer a tab). NavigationBar needs
+        // a valid index, so we clamp to 0 but suppress the selected styling
+        // below so nothing lights up.
+        final highlightNone = current == MainTab.none;
         var selectedIndex = tabs.indexOf(current);
         if (selectedIndex < 0) selectedIndex = 0;
 
@@ -138,14 +149,14 @@ class MainBottomNav extends StatelessWidget {
             iconTheme: WidgetStateProperty.resolveWith(
               (states) => IconThemeData(
                 size: AppSpacing.xl,
-                color: states.contains(WidgetState.selected)
+                color: !highlightNone && states.contains(WidgetState.selected)
                     ? colors.primary
                     : colors.textMuted,
               ),
             ),
             labelTextStyle: WidgetStateProperty.resolveWith(
               (states) => styles.labelMedium.copyWith(
-                color: states.contains(WidgetState.selected)
+                color: !highlightNone && states.contains(WidgetState.selected)
                     ? colors.primary
                     : colors.textMuted,
               ),

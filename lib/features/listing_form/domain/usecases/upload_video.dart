@@ -18,11 +18,13 @@ class UploadVideo {
     required String listingId,
     required String filePath,
     required int ordering,
+    String? thumbnailJpegPath,
   }) {
     return _repository.uploadVideo(
       listingId: listingId,
       filePath: filePath,
       ordering: ordering,
+      thumbnailJpegPath: thumbnailJpegPath,
     );
   }
 }

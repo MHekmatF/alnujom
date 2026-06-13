@@ -24,6 +24,19 @@ class MediaUploadProgressProcessing extends MediaUploadProgress {
   const MediaUploadProgressProcessing();
 }
 
+/// Phase 030 (W1) — a picked video is being transcoded to 720p before upload.
+///
+/// [percent] is the 0..100 progress emitted by the `video_compress` plugin, or
+/// null before the first tick (rendered as an indeterminate spinner until the
+/// first progress event arrives). Surfaced on the picker ghost tile with a
+/// "compressing" label so the publisher knows the wait is the transcode, not a
+/// stalled upload.
+class MediaUploadProgressCompressing extends MediaUploadProgress {
+  const MediaUploadProgressCompressing([this.percent]);
+
+  final double? percent;
+}
+
 class MediaUploadProgressUploading extends MediaUploadProgress {
   const MediaUploadProgressUploading();
 }

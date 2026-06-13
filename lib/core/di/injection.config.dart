@@ -394,6 +394,8 @@ import '../../features/listing_form/domain/usecases/validate_submit_payload.dart
     as _i396;
 import '../../features/listing_form/presentation/bloc/listing_form_bloc.dart'
     as _i315;
+import '../../features/listing_form/presentation/util/video_processor.dart'
+    as _i957;
 import '../../features/locations/data/datasources/supabase_locations_datasource.dart'
     as _i665;
 import '../../features/locations/data/repositories/locations_repository_impl.dart'
@@ -712,6 +714,7 @@ _i174.GetIt $initGetIt(
   gh.factory<_i396.ValidateSubmitPayload>(
     () => const _i396.ValidateSubmitPayload(),
   );
+  gh.factory<_i957.VideoProcessor>(() => _i957.VideoProcessor());
   gh.factory<_i665.SupabaseLocationsDatasource>(
     () => _i665.SupabaseLocationsDatasource(),
   );
@@ -1886,9 +1889,6 @@ _i174.GetIt $initGetIt(
       gh<_i831.UploadAdImage>(),
     ),
   );
-  gh.factory<_i665.ConversationsCubit>(
-    () => _i665.ConversationsCubit(gh<_i929.ListConversations>()),
-  );
   gh.factory<_i315.ListingFormBloc>(
     () => _i315.ListingFormBloc(
       gh<_i874.SaveFormStep>(),
@@ -1906,7 +1906,11 @@ _i174.GetIt $initGetIt(
       gh<_i406.LoadMediaForListing>(),
       gh<_i611.LoadMyActiveAgencies>(),
       gh<_i557.AppSettingsCubit>(),
+      gh<_i957.VideoProcessor>(),
     ),
+  );
+  gh.factory<_i665.ConversationsCubit>(
+    () => _i665.ConversationsCubit(gh<_i929.ListConversations>()),
   );
   gh.factory<_i697.AssistantCubit>(
     () => _i697.AssistantCubit(gh<_i84.AssistantBrain>()),

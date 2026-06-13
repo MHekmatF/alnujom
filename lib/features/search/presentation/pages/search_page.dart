@@ -191,7 +191,7 @@ class _SearchPageViewState extends State<_SearchPageView> {
           ),
         ],
       ),
-      bottomNavigationBar: const MainBottomNav(current: MainTab.search),
+      bottomNavigationBar: const MainBottomNav(current: MainTab.none),
     );
   }
 }

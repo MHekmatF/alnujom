@@ -20,8 +20,6 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/localization/locale_cubit.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/settings/lite_mode.dart';
-import '../../../../core/security/permission_checker.dart';
-import '../../../../core/security/permission_keys.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/elevation.dart';
 import '../../../../core/theme/gradients.dart';
@@ -30,21 +28,16 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_nav_drawer.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/main_bottom_nav.dart';
 import '../../../../core/widgets/press_scale.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/entities/profile.dart';
 import '../../../../shared/domain/value_objects/account_status.dart';
-import '../../../../shared/domain/value_objects/publisher_status.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
-import '../../../chat/presentation/bloc/conversations_cubit.dart';
-import '../../../chat/presentation/pages/conversations_list_page.dart';
-import '../../../crm/presentation/pages/crm_page.dart';
 import '../../../currencies/presentation/widgets/preferred_currency_toggle.dart';
-import '../../../viewings/presentation/cubit/viewings_cubit.dart';
-import '../../../viewings/presentation/pages/viewings_list_page.dart';
 import '../../domain/entities/assigned_role.dart';
 import '../cubit/profile_cubit.dart';
 import '../cubit/profile_state.dart';
@@ -96,17 +89,12 @@ class _ProfileView extends StatelessWidget {
           );
         }
 
-        final colors = AppColors.of(context);
-
-        // Resolve gates once so each section can be hidden when empty.
-        final isPublisher = profile.publisherStatus == PublisherStatus.approved;
-        final isAdmin = getIt<PermissionChecker>().any(
-          PermissionKeys.adminCategoryKeys,
-        );
-        final showDashboard = isPublisher || isAdmin;
-
         return Scaffold(
           bottomNavigationBar: const MainBottomNav(current: MainTab.profile),
+          // Phase 030 (W5) — the relocated tool sections (Selling / Admin /
+          // Activity / Reports) live in this app-wide navigation drawer. The
+          // profile body below is now a focused identity + account surface.
+          drawer: const AppNavDrawer(),
           appBar: AppBar(
             title: Text(l10n.profile_title),
             actions: [
@@ -162,133 +150,11 @@ class _ProfileView extends StatelessWidget {
                   ],
                 ),
 
-                // ── Activity (Messages + Viewings) ─────────────────────────
-                _ProfileSection(
-                  title: l10n.profileSectionActivity,
-                  children: [
-                    // In-app chat — conversations inbox (signed-in only; this
-                    // page renders solely for an authenticated profile). Pushed
-                    // via a MaterialPageRoute since chat has no go_router route.
-                    _ProfileRow(
-                      icon: Icons.forum_outlined,
-                      title: l10n.chatMessagesTile,
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => BlocProvider<ConversationsCubit>(
-                            create: (_) => getIt<ConversationsCubit>(),
-                            child: const ConversationsListPage(),
-                          ),
-                        ),
-                      ),
-                    ),
-                    // Viewing scheduler — the user's scheduled viewings
-                    // (signed-in only). Pushed via a MaterialPageRoute since
-                    // viewings has no go_router route.
-                    _ProfileRow(
-                      icon: Icons.calendar_today_outlined,
-                      title: l10n.viewingsTile,
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => BlocProvider<ViewingsCubit>(
-                            create: (_) => getIt<ViewingsCubit>(),
-                            child: const ViewingsListPage(),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
-                // ── Selling (publisher / dashboard / agency) ───────────────
-                // Hidden entirely when no row's gate passes.
-                if (showDashboard || isPublisher)
-                  _ProfileSection(
-                    title: l10n.profileSectionSelling,
-                    children: [
-                      // Phase 25 uplift v2 — role-aware Dashboard entry
-                      // (publisher KPIs or admin console, resolved inside
-                      // DashboardEntryPage). Gated publisher-approved OR admin.
-                      if (showDashboard)
-                        _ProfileRow(
-                          icon: Icons.dashboard_outlined,
-                          title: l10n.dashboardEntryTitle,
-                          onTap: () => context.push(AppRoutes.dashboard),
-                        ),
-                      // Publisher-only: inquiries inbox + my listings (relocated
-                      // from the Home AppBar in Phase 25).
-                      if (isPublisher) ...[
-                        // Phase 29 (F1) — CRM lead pipeline. Pushed via a
-                        // MaterialPageRoute (CRM has no go_router route); the
-                        // page hosts its own CrmLeadsCubit BlocProvider.
-                        _ProfileRow(
-                          icon: Icons.handshake_outlined,
-                          title: l10n.crmPageTitle,
-                          onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute<void>(
-                              builder: (_) => const CrmPage(),
-                            ),
-                          ),
-                        ),
-                        _ProfileRow(
-                          icon: Icons.inbox_outlined,
-                          title: l10n.home_inquiries_action_tooltip,
-                          onTap: () => context.push(AppRoutes.inquiries),
-                        ),
-                        _ProfileRow(
-                          icon: Icons.list_alt_outlined,
-                          title: l10n.myListingsPageTitle,
-                          onTap: () =>
-                              context.push(AppRoutes.publisherMyListings),
-                        ),
-                      ],
-                      // Phase 19 — My Agency tile (T059). Always visible to a
-                      // signed-in profile; grouped under Selling.
-                      _ProfileRow(
-                        icon: Icons.business_outlined,
-                        title: l10n.profile_agency_tile,
-                        onTap: () => context.push(AppRoutes.agency),
-                      ),
-                    ],
-                  ),
-                // NOTE: when the Selling section is hidden (non-publisher,
-                // non-admin) My Agency is relocated into the "More" group below
-                // so it is never dropped (preserved visibility).
-
-                // ── Admin (admin only) ─────────────────────────────────────
-                if (isAdmin)
-                  _ProfileSection(
-                    title: l10n.profileSectionAdmin,
-                    children: [
-                      // Admin-only: the sole in-app entry to the admin home.
-                      _ProfileRow(
-                        icon: Icons.admin_panel_settings_outlined,
-                        title: l10n.admin_home_title,
-                        accent: colors.error,
-                        onTap: () => context.push(AppRoutes.admin),
-                      ),
-                    ],
-                  ),
-
-                // ── More ───────────────────────────────────────────────────
-                _ProfileSection(
-                  title: l10n.profileSectionMore,
-                  children: [
-                    // My Agency lives here when the Selling section is hidden,
-                    // so it is never dropped for non-publisher/non-admin users.
-                    if (!(showDashboard || isPublisher))
-                      _ProfileRow(
-                        icon: Icons.business_outlined,
-                        title: l10n.profile_agency_tile,
-                        onTap: () => context.push(AppRoutes.agency),
-                      ),
-                    // Phase 18 — My Reports tile (T051).
-                    _ProfileRow(
-                      icon: Icons.flag_outlined,
-                      title: l10n.profile_reports_tile,
-                      onTap: () => context.push(AppRoutes.reports),
-                    ),
-                  ],
-                ),
+                // Phase 030 (W5) — the tool sections previously listed here
+                // (Activity = Messages/Viewings; Selling = Dashboard/CRM/
+                // Inquiries/My Listings/Agency; Admin = Admin Home; More =
+                // Reports) moved into the app navigation drawer (AppNavDrawer),
+                // leaving the profile a focused identity + account surface.
 
                 // ── Sign out (destructive, visually separated) ─────────────
                 const SizedBox(height: AppSpacing.sm),
@@ -680,20 +546,16 @@ class _ProfileRow extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.onTap,
-    this.accent,
   });
 
   final IconData icon;
   final String title;
   final VoidCallback onTap;
-  final Color? accent;
 
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
-    final tint = accent ?? colors.primary;
-    final isDestructive = accent == colors.error;
 
     return PressScale(
       child: Material(
@@ -704,13 +566,13 @@ class _ProfileRow extends StatelessWidget {
             padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
             child: Row(
               children: [
-                _RowIcon(icon: icon, tint: tint),
+                _RowIcon(icon: icon, tint: colors.primary),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Text(
                     title,
                     style: styles.titleMedium.copyWith(
-                      color: isDestructive ? colors.error : colors.onSurface,
+                      color: colors.onSurface,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

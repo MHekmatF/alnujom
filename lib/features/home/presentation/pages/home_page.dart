@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/analytics/analytics_service.dart';
@@ -10,6 +11,7 @@ import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/app_nav_drawer.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/brand_mark.dart';
 import '../../../../core/widgets/empty_state.dart';
@@ -162,7 +164,19 @@ class _HomeViewState extends State<_HomeView> {
     final locale = Localizations.localeOf(context);
 
     return Scaffold(
+      // Phase 030 (W5) — app navigation drawer (opens from the start side =
+      // RIGHT under RTL). Hosts the tool sections relocated off the Profile tab.
+      drawer: const AppNavDrawer(),
       appBar: AppBar(
+        // Phase 030 (W5) — hamburger affordance opening the nav drawer. Wrapped
+        // in a Builder so Scaffold.of(context) resolves the enclosing Scaffold.
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(LucideIcons.menu),
+            tooltip: l10n.navDrawerMenuTooltip,
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
+        ),
         title: const BrandMark(withWordmark: true, size: 30),
         actions: const [
           // Phase 25 — slimmed Home chrome: only locale/theme + notifications

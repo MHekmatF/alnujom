@@ -6214,4 +6214,28 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String get locationCentroidOutOfBounds =>
       _resolve("locationCentroidOutOfBounds", (loc) => loc.locationCentroidOutOfBounds);
+  @override
+  String get videoCompressing =>
+      _resolve("videoCompressing", (loc) => loc.videoCompressing);
+  @override
+  String get crmViewInCrm =>
+      _resolve("crmViewInCrm", (loc) => loc.crmViewInCrm);
+  @override
+  String get nav_reels =>
+      _resolve("nav_reels", (loc) => loc.nav_reels);
+  @override
+  String get reels_tab_empty_subtitle =>
+      _resolve("reels_tab_empty_subtitle", (loc) => loc.reels_tab_empty_subtitle);
+  @override
+  String get navDrawerMenuTooltip =>
+      _resolve("navDrawerMenuTooltip", (loc) => loc.navDrawerMenuTooltip);
+  @override
+  String get navDrawerSignInCta =>
+      _resolve("navDrawerSignInCta", (loc) => loc.navDrawerSignInCta);
+  @override
+  String get navDrawerSignInSubtitle =>
+      _resolve("navDrawerSignInSubtitle", (loc) => loc.navDrawerSignInSubtitle);
+  @override
+  String get navDrawerAbout =>
+      _resolve("navDrawerAbout", (loc) => loc.navDrawerAbout);
 }

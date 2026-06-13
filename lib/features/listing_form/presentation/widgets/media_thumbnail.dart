@@ -140,15 +140,37 @@ class MediaThumbnail extends StatelessWidget {
     }
     final m = media!;
     if (m.kind == ListingMediaKind.video) {
-      return Container(
-        color: scheme.surfaceContainerHighest,
-        child: Center(
-          child: Icon(
-            Icons.play_circle_outline,
-            size: 48,
-            color: scheme.onSurfaceVariant,
-          ),
+      // Phase 030 (W1) — show the generated poster (in listing-images) behind a
+      // play-button overlay when present; otherwise fall back to the neutral
+      // placeholder used before posters existed.
+      final poster = m.thumbnailPath;
+      final playOverlay = Center(
+        child: Icon(
+          Icons.play_circle_outline,
+          size: 48,
+          color: poster != null ? scheme.onInverseSurface : scheme.onSurfaceVariant,
         ),
+      );
+      if (poster == null) {
+        return Container(color: scheme.surfaceContainerHighest, child: playOverlay);
+      }
+      final posterUrl = getIt<ListingsRepository>().getMediaPublicUrl(
+        bucket: 'listing-images',
+        path: poster,
+      );
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          CachedNetworkImage(
+            imageUrl: posterUrl,
+            fit: BoxFit.cover,
+            placeholder: (_, _) =>
+                Container(color: scheme.surfaceContainerHighest),
+            errorWidget: (_, _, _) =>
+                Container(color: scheme.surfaceContainerHighest),
+          ),
+          playOverlay,
+        ],
       );
     }
     // kind=image — render via cached_network_image for re-mount reliability (R-29)
@@ -392,6 +414,29 @@ class _GhostOverlay extends StatelessWidget {
               MediaUploadProgressProcessing() ||
               MediaUploadProgressUploading() =>
                 const CircularProgressIndicator(),
+              // Phase 030 (W1) — 720p transcode in progress. Determinate ring +
+              // a "compressing" caption once the first progress tick arrives.
+              MediaUploadProgressCompressing(percent: final pct) => Padding(
+                padding: const EdgeInsets.all(AppSpacing.sm),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(
+                      value: (pct != null) ? (pct / 100).clamp(0.0, 1.0) : null,
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      l10n.videoCompressing,
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.of(context).labelMedium.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
               MediaUploadProgressError(errorKey: final key) => Padding(
                 padding: const EdgeInsets.all(AppSpacing.sm),
                 child: Column(
