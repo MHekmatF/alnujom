@@ -2308,6 +2308,8 @@
   "@revisionBannerTitle": { "description": "Phase 31." },
   "revisionBannerBody": "The live listing stays unchanged until approved.",
   "@revisionBannerBody": { "description": "Phase 31." },
+  "revisionStartFailedMessage": "Couldn't start editing this listing. You may not be its owner, so its live content was left unchanged.",
+  "@revisionStartFailedMessage": { "description": "Phase 31 follow-up — shown when begin_listing_revision fails for an approved listing instead of editing the live listing in place." },
   "myListingsEditNeedsApproval": "Edit (needs approval)",
   "@myListingsEditNeedsApproval": { "description": "Phase 31." },
   "myListingsEditInReviewBadge": "Edit in review",
