@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
@@ -10,12 +11,14 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/segmented_control.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../domain/entities/listing_form_state.dart';
 import '../bloc/listing_form_bloc.dart';
 import '../bloc/listing_form_event.dart';
+import 'listing_detail_form_page.dart';
 import '../widgets/step_basics.dart';
 import '../widgets/step_details.dart';
 import '../widgets/step_location.dart';
@@ -49,7 +52,100 @@ class ListingFormPage extends StatelessWidget {
         }
         return bloc;
       },
-      child: const _ListingFormBody(),
+      // Phase 031 (WS-A) — CREATE mode offers two layouts behind an in-page
+      // toggle (detail-style single scroll vs the classic stepper); EDIT mode
+      // is always the stepper.
+      child: mode == ListingFormMode.create
+          ? const _CreateFlowSwitcher()
+          : const _ListingFormBody(),
+    );
+  }
+}
+
+/// Phase 031 (WS-A) — CREATE-mode shell that lets the publisher switch between
+/// the detail-style single-scroll form and the classic stepper via a top
+/// [AppSegmentedControl]. The choice is held in the session-lifetime
+/// [createFlowUsesDetailView] notifier (defaults to the detail view) so it
+/// sticks across re-entries within the same app run. EDIT mode never reaches
+/// this widget.
+class _CreateFlowSwitcher extends StatelessWidget {
+  const _CreateFlowSwitcher();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    final elevation = AppElevation.of(context);
+
+    return ValueListenableBuilder<bool>(
+      valueListenable: createFlowUsesDetailView,
+      builder: (context, detailView, _) {
+        final toggle = Container(
+          decoration: BoxDecoration(
+            color: colors.surface,
+            boxShadow: detailView ? elevation.level1 : elevation.level0,
+          ),
+          child: SafeArea(
+            bottom: false,
+            child: Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(
+                AppSpacing.lg,
+                AppSpacing.sm,
+                AppSpacing.lg,
+                AppSpacing.sm,
+              ),
+              child: AppSegmentedControl<bool>(
+                value: detailView,
+                onChanged: (v) => createFlowUsesDetailView.value = v,
+                segments: [
+                  AppSegmentedSegment<bool>(
+                    icon: LucideIcons.layout_panel_top,
+                    label: l10n.createToggleDetailView,
+                    value: true,
+                  ),
+                  AppSegmentedSegment<bool>(
+                    icon: LucideIcons.list_ordered,
+                    label: l10n.createToggleClassicSteps,
+                    value: false,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        if (detailView) {
+          // Detail view owns its own chrome (title bar + body + submit bar).
+          return Scaffold(
+            backgroundColor: colors.surface,
+            appBar: AppBar(
+              backgroundColor: colors.surface,
+              elevation: 0,
+              title: Text(l10n.formDetailPageTitle),
+              leading: AppButton.iconButton(
+                icon: Icons.arrow_back,
+                label: l10n.listingFormBackButton,
+                onPressed: () => context.go(AppRoutes.shellHome),
+              ),
+            ),
+            body: Column(
+              children: [
+                toggle,
+                const Expanded(child: ListingDetailFormPage()),
+              ],
+            ),
+          );
+        }
+
+        // Classic stepper keeps its own Scaffold (per-step app bar + bottom
+        // nav). The toggle strip rides above it as a slim mode selector.
+        return Column(
+          children: [
+            Material(color: colors.surface, child: toggle),
+            const Expanded(child: _ListingFormBody()),
+          ],
+        );
+      },
     );
   }
 }

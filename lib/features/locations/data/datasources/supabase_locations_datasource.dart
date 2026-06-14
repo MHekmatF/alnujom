@@ -111,6 +111,18 @@ class SupabaseLocationsDatasource {
     return CityDto.fromJson(response);
   }
 
+  /// Phase 031 (WS-D) — flat read of all cities (no governorate scope), used by
+  /// the smart-search assistant's city matcher. Plain `select()` (no nested
+  /// area count) keeps the payload small.
+  Future<List<CityDto>> listAllCities({required bool includeInactive}) async {
+    var query = _client.from('cities').select();
+    final response =
+        await (includeInactive ? query : query.eq('is_active', true))
+            .order('position', ascending: true, nullsFirst: false)
+            .order('key', ascending: true);
+    return response.map(CityDto.fromJson).toList();
+  }
+
   Future<CityDto> createCity({
     required String governorateId,
     required String key,
@@ -179,6 +191,17 @@ class SupabaseLocationsDatasource {
   Future<AreaDto> loadArea(String id) async {
     final response = await _client.from('areas').select().eq('id', id).single();
     return AreaDto.fromJson(response);
+  }
+
+  /// Phase 031 (WS-D) — flat read of all areas (no city scope), used by the
+  /// smart-search assistant's neighborhood matcher.
+  Future<List<AreaDto>> listAllAreas({required bool includeInactive}) async {
+    var query = _client.from('areas').select();
+    final response =
+        await (includeInactive ? query : query.eq('is_active', true))
+            .order('position', ascending: true, nullsFirst: false)
+            .order('key', ascending: true);
+    return response.map(AreaDto.fromJson).toList();
   }
 
   Future<AreaDto> createArea({

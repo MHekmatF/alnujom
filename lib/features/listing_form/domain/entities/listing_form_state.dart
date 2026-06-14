@@ -6,6 +6,7 @@ import 'listing_details.dart';
 import 'listing_media.dart';
 import 'listing_price.dart';
 import 'listing_visibility.dart';
+import 'revision_manifest_item.dart';
 import 'submit_failure.dart';
 
 /// Phase 11 — per-thumbnail upload progress state surfaced on the picker grid.
@@ -100,6 +101,9 @@ class ListingFormState extends Equatable {
     this.media = const <ListingMedia>[],
     this.uploadInFlight = const <String, MediaUploadProgress>{},
     this.availableAgencies = const <Agency>[],
+    this.isRevision = false,
+    this.revisionId,
+    this.revisionManifest = const <RevisionManifestItem>[],
   });
 
   final ListingFormMode mode;
@@ -131,6 +135,20 @@ class ListingFormState extends Equatable {
   /// to no eligible agency (the publish-under-agency selector hides itself).
   final List<Agency> availableAgencies;
 
+  /// Phase 031 (WS-B) — true when this EDIT session is a stay-live REVISION of
+  /// an APPROVED listing. All field/media edits are STAGED onto the revision
+  /// ([revisionId]) and the live listing is left untouched until an admin
+  /// applies it. Draft/rejected edits leave this false (today's in-place flow).
+  final bool isRevision;
+
+  /// The open `listing_revisions.id` this session edits (only when [isRevision]).
+  final String? revisionId;
+
+  /// Phase 031 (WS-B) — the staged media manifest for the revision. In revision
+  /// mode this is the source of truth for media; [media] is derived from it for
+  /// the picker. Empty/ignored outside revision mode.
+  final List<RevisionManifestItem> revisionManifest;
+
   bool get isReady => draftListing != null && !loadInProgress;
 
   ListingFormState copyWith({
@@ -151,6 +169,9 @@ class ListingFormState extends Equatable {
     List<ListingMedia>? media,
     Map<String, MediaUploadProgress>? uploadInFlight,
     List<Agency>? availableAgencies,
+    bool? isRevision,
+    Object? revisionId = _sentinel,
+    List<RevisionManifestItem>? revisionManifest,
   }) {
     return ListingFormState(
       mode: mode ?? this.mode,
@@ -180,6 +201,11 @@ class ListingFormState extends Equatable {
       media: media ?? this.media,
       uploadInFlight: uploadInFlight ?? this.uploadInFlight,
       availableAgencies: availableAgencies ?? this.availableAgencies,
+      isRevision: isRevision ?? this.isRevision,
+      revisionId: identical(revisionId, _sentinel)
+          ? this.revisionId
+          : revisionId as String?,
+      revisionManifest: revisionManifest ?? this.revisionManifest,
     );
   }
 
@@ -202,6 +228,9 @@ class ListingFormState extends Equatable {
     media,
     uploadInFlight,
     availableAgencies,
+    isRevision,
+    revisionId,
+    revisionManifest,
   ];
 }
 

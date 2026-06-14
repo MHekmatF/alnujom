@@ -75,6 +75,18 @@ class LocationsRepositoryImpl implements LocationsRepository {
   }
 
   @override
+  Future<List<City>> listAllCities({required bool includeInactive}) async {
+    try {
+      final dtos = await _ds.listAllCities(includeInactive: includeInactive);
+      return dtos.map((d) => d.toEntity()).toList();
+    } on PostgrestException catch (e, st) {
+      throw _mapPostgrest(e, st);
+    } on Object catch (e, st) {
+      throw _mapUnknown(e, st);
+    }
+  }
+
+  @override
   Future<List<Area>> listAreasForCity(
     String cityId, {
     required bool includeInactive,
@@ -216,6 +228,18 @@ class LocationsRepositoryImpl implements LocationsRepository {
   Future<Area> loadArea(String id) async {
     try {
       return (await _ds.loadArea(id)).toEntity();
+    } on PostgrestException catch (e, st) {
+      throw _mapPostgrest(e, st);
+    } on Object catch (e, st) {
+      throw _mapUnknown(e, st);
+    }
+  }
+
+  @override
+  Future<List<Area>> listAllAreas({required bool includeInactive}) async {
+    try {
+      final dtos = await _ds.listAllAreas(includeInactive: includeInactive);
+      return dtos.map((d) => d.toEntity()).toList();
     } on PostgrestException catch (e, st) {
       throw _mapPostgrest(e, st);
     } on Object catch (e, st) {

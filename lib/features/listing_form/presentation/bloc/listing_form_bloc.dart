@@ -20,19 +20,26 @@ import '../../domain/entities/listing_details.dart';
 import '../../domain/entities/listing_form_state.dart';
 import '../../domain/entities/listing_media.dart';
 import '../../domain/entities/listing_price.dart';
+import '../../domain/entities/listing_revision.dart';
 import '../../domain/entities/listing_visibility.dart';
+import '../../domain/entities/revision_manifest_item.dart';
 import '../../domain/entities/submit_failure.dart';
 import '../../domain/repositories/listings_repository.dart';
+import '../../domain/usecases/begin_revision.dart';
 import '../../domain/usecases/delete_draft.dart';
 import '../../domain/usecases/delete_media.dart';
 import '../../domain/usecases/derive_area_centroid.dart';
 import '../../domain/usecases/load_media_for_listing.dart';
+import '../../domain/usecases/load_revision.dart';
 import '../../domain/usecases/reorder_media.dart';
 import '../../domain/usecases/save_form_step.dart';
+import '../../domain/usecases/save_revision.dart';
 import '../../domain/usecases/set_main_image.dart';
 import '../../domain/usecases/submit_listing.dart';
+import '../../domain/usecases/submit_revision.dart';
 import '../../domain/usecases/upload_image.dart';
 import '../../domain/usecases/upload_panorama.dart';
+import '../../domain/usecases/upload_staged_media.dart';
 import '../../domain/usecases/upload_video.dart';
 import '../../domain/usecases/validate_submit_payload.dart';
 import '../util/image_isolate_worker.dart';
@@ -60,6 +67,13 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
     this._loadMyActiveAgencies,
     this._appSettingsCubit,
     this._videoProcessor,
+    this._beginRevision,
+    this._loadRevision,
+    this._saveRevision,
+    this._submitRevision,
+    this._uploadStagedImage,
+    this._uploadStagedVideo,
+    this._uploadStagedPanorama,
   ) : super(
         const ListingFormState(
           mode: ListingFormMode.create,
@@ -110,6 +124,17 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
   // Phase 030 (W1) — best-effort 720p transcode + poster-thumbnail helper for
   // picked videos. Wraps the video_compress singleton; never blocks publishing.
   final VideoProcessor _videoProcessor;
+
+  // Phase 031 (WS-B) — stay-live edit-revision usecases. Engaged ONLY when an
+  // EDIT session loads an APPROVED listing (state.isRevision); draft/rejected
+  // edits keep today's in-place behavior.
+  final BeginRevision _beginRevision;
+  final LoadRevision _loadRevision;
+  final SaveRevision _saveRevision;
+  final SubmitRevision _submitRevision;
+  final UploadStagedImage _uploadStagedImage;
+  final UploadStagedVideo _uploadStagedVideo;
+  final UploadStagedPanorama _uploadStagedPanorama;
 
   // Phase 11 — lazily-instantiated isolate worker per R-25 (one per BLoC
   // lifecycle, processes images sequentially).
@@ -176,6 +201,19 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
           );
           return;
         }
+
+        // Phase 031 (WS-B) — STAY-LIVE REVISION. An APPROVED listing must stay
+        // public on its old content while the publisher edits a staged copy.
+        // Begin (or resume) the open revision and load its proposed+manifest
+        // into the form instead of the live listing's own values. Draft/
+        // rejected listings fall through to today's in-place edit flow.
+        if (listing.status == ListingStatus.approved) {
+          final loaded = await _loadRevisionForEditing(listing, agencies, emit);
+          if (loaded) return;
+          // On any revision-setup failure, fall back to a read of the live
+          // listing so the form still renders (in-place edit semantics).
+        }
+
         final details = await _repository.loadDetails(listing.id);
         final price = await _repository.loadPrimaryPrice(listing.id);
         // Phase 11 — populate `state.media` from listing_media rows so the
@@ -238,6 +276,293 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
       return result.value.where((a) => a.status.canPublishUnder).toList();
     }
     return const <Agency>[];
+  }
+
+  /// Phase 031 (WS-B) — opens (or resumes) the stay-live revision for an
+  /// APPROVED [liveListing], folds its `proposed` snapshot onto the in-memory
+  /// draft entities and its `media_manifest` onto the picker, and emits the
+  /// loaded revision-mode state. Returns true on success; false (with no emit)
+  /// to let the caller fall back to the live-listing in-place read.
+  Future<bool> _loadRevisionForEditing(
+    Listing liveListing,
+    List<Agency> agencies,
+    Emitter<ListingFormState> emit,
+  ) async {
+    try {
+      final revisionId = await _beginRevision(liveListing.id);
+      final revision = await _loadRevision(revisionId);
+      if (revision == null) return false;
+
+      final draftListing = _applyProposedToListing(liveListing, revision);
+      final draftDetails = _proposedToDetails(liveListing.id, revision.proposed);
+      final draftPrice = _proposedToPrice(liveListing.id, revision.proposed);
+      final manifest = revision.manifest;
+      final media = _manifestToMedia(liveListing.id, manifest);
+
+      emit(
+        state.copyWith(
+          draftListing: draftListing,
+          draftDetails: draftDetails,
+          draftPrice: draftPrice,
+          loadInProgress: false,
+          media: media,
+          uploadInFlight: const <String, MediaUploadProgress>{},
+          availableAgencies: agencies,
+          isRevision: true,
+          revisionId: revisionId,
+          revisionManifest: manifest,
+        ),
+      );
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Folds a revision's `proposed` scalar keys onto the live [listing]. The
+  /// status stays `approved` (the live listing is untouched) so the rest of the
+  /// form treats this as the editable subject; revision-mode handlers ensure no
+  /// live write happens.
+  Listing _applyProposedToListing(Listing listing, ListingRevision revision) {
+    final p = revision.proposed;
+    return listing.copyWith(
+      title: (p['title'] as String?) ?? listing.title,
+      purpose: _purposeOr(p['purpose'], listing.purpose),
+      propertyType: _propertyTypeOr(p['property_type'], listing.propertyType),
+      governorateId: p['governorate_id'] as String?,
+      cityId: p['city_id'] as String?,
+      areaId: p['area_id'] as String?,
+      addressText: p['address_text'] as String?,
+      latitude: _numOrNull(p['latitude'])?.toDouble(),
+      longitude: _numOrNull(p['longitude'])?.toDouble(),
+      locationVisibility: _locVisOr(
+        p['location_visibility'],
+        listing.locationVisibility,
+      ),
+      contactNameVisibility: _contactVisOr(
+        p['contact_name_visibility'],
+        listing.contactNameVisibility,
+      ),
+      phone: p['phone'] as String?,
+      whatsapp: p['whatsapp'] as String?,
+      areaSize: _numOrNull(p['area_size'])?.toDouble(),
+      rooms: _intOrNull(p['rooms']),
+      bathrooms: _intOrNull(p['bathrooms']),
+      floor: _intOrNull(p['floor']),
+    );
+  }
+
+  ListingDetails? _proposedToDetails(
+    String listingId,
+    Map<String, dynamic> p,
+  ) {
+    final description = p['description'] as String?;
+    final amenitiesRaw = p['amenities'];
+    final amenities = amenitiesRaw is List
+        ? amenitiesRaw.map((e) => e.toString()).toList()
+        : const <String>[];
+    final yearBuilt = _intOrNull(p['year_built']);
+    final furnished = p['furnished'] as bool?;
+    final parking = p['parking'] as bool?;
+    if (description == null &&
+        amenities.isEmpty &&
+        yearBuilt == null &&
+        furnished == null &&
+        parking == null) {
+      return null;
+    }
+    final now = DateTime.now();
+    return ListingDetails(
+      listingId: listingId,
+      description: description,
+      amenities: amenities,
+      yearBuilt: yearBuilt,
+      furnished: furnished,
+      parking: parking,
+      createdAt: now,
+      updatedAt: now,
+    );
+  }
+
+  ListingPrice? _proposedToPrice(String listingId, Map<String, dynamic> p) {
+    final code = p['price_currency_code'] as String?;
+    final amountRaw = p['price_amount'];
+    if (code == null || code.isEmpty || amountRaw == null) return null;
+    Decimal amount;
+    try {
+      amount = Decimal.parse(amountRaw.toString());
+    } catch (_) {
+      return null;
+    }
+    return ListingPrice(
+      id: '',
+      listingId: listingId,
+      currencyCode: code,
+      amount: amount,
+      isPrimary: true,
+      createdAt: DateTime.now(),
+    );
+  }
+
+  List<ListingMedia> _manifestToMedia(
+    String listingId,
+    List<RevisionManifestItem> manifest,
+  ) {
+    final sorted = [...manifest]
+      ..sort((a, b) => a.ordering.compareTo(b.ordering));
+    return sorted.map((m) => m.toMedia(listingId)).toList();
+  }
+
+  /// Builds the `proposed` JSON object (exact RPC keys) from the current draft.
+  /// Mirrors the snapshot shape `begin_listing_revision` produces.
+  Map<String, dynamic> _buildProposed() {
+    final listing = state.draftListing!;
+    final details = state.draftDetails;
+    final price = state.draftPrice;
+    return <String, dynamic>{
+      'title': listing.title,
+      'purpose': listing.purpose.toDbValue(),
+      'property_type': listing.propertyType.toDbValue(),
+      'governorate_id': listing.governorateId,
+      'city_id': listing.cityId,
+      'area_id': listing.areaId,
+      'address_text': listing.addressText,
+      'latitude': listing.latitude,
+      'longitude': listing.longitude,
+      'location_visibility': listing.locationVisibility.toDbValue(),
+      'contact_name_visibility': listing.contactNameVisibility.toDbValue(),
+      'phone': listing.phone,
+      'whatsapp': listing.whatsapp,
+      'area_size': listing.areaSize,
+      'rooms': listing.rooms,
+      'bathrooms': listing.bathrooms,
+      'floor': listing.floor,
+      'description': details?.description,
+      'amenities': details?.amenities ?? const <String>[],
+      'year_built': details?.yearBuilt,
+      'furnished': details?.furnished,
+      'parking': details?.parking,
+      'price_currency_code': price?.currencyCode,
+      'price_amount': price?.amount.toString(),
+    };
+  }
+
+  /// Persists the current draft + manifest onto the open revision via
+  /// `save_listing_revision`. No-op outside revision mode.
+  Future<void> _persistRevision() async {
+    final revisionId = state.revisionId;
+    if (!state.isRevision || revisionId == null) return;
+    await _saveRevision(
+      revisionId: revisionId,
+      proposed: _buildProposed(),
+      manifest: state.revisionManifest,
+    );
+  }
+
+  /// Phase 031 (WS-B) — re-normalizes a staged manifest (1-based `ordering` by
+  /// list position) and emits both the manifest and its derived [media] view.
+  /// Best-effort persists the manifest onto the revision (the in-memory state is
+  /// already the source of truth; a failed save retries on the next step save).
+  Future<void> _emitManifest(
+    List<RevisionManifestItem> next,
+    Emitter<ListingFormState> emit,
+  ) async {
+    final renumbered = <RevisionManifestItem>[];
+    for (var i = 0; i < next.length; i++) {
+      renumbered.add(next[i].copyWith(ordering: i + 1));
+    }
+    final listingId = state.draftListing?.id ?? '';
+    emit(
+      state.copyWith(
+        revisionManifest: renumbered,
+        media: _manifestToMedia(listingId, renumbered),
+      ),
+    );
+    try {
+      await _persistRevision();
+    } catch (_) {
+      // Swallowed — the manifest lives in state and re-saves on the next
+      // step save / submit.
+    }
+  }
+
+  /// Appends a freshly-uploaded staged media item to the manifest. New images
+  /// auto-become main when no image is present yet (mirrors the live path);
+  /// videos/panoramas never become main.
+  Future<void> _appendManifestItem({
+    required String storagePath,
+    required String kind,
+    String? thumbnailPath,
+    required Emitter<ListingFormState> emit,
+  }) async {
+    final hasImage = state.revisionManifest.any((m) => m.kind == 'image');
+    final isMain = kind == 'image' && !hasImage;
+    final next = [
+      ...state.revisionManifest,
+      RevisionManifestItem(
+        storagePath: storagePath,
+        kind: kind,
+        isMain: isMain,
+        ordering: state.revisionManifest.length + 1,
+        thumbnailPath: thumbnailPath,
+      ),
+    ];
+    await _emitManifest(next, emit);
+  }
+
+  static ListingPurpose _purposeOr(Object? raw, ListingPurpose fallback) {
+    if (raw is! String) return fallback;
+    try {
+      return ListingPurposeDb.fromDbValue(raw);
+    } catch (_) {
+      return fallback;
+    }
+  }
+
+  static PropertyType _propertyTypeOr(Object? raw, PropertyType fallback) {
+    if (raw is! String) return fallback;
+    try {
+      return PropertyTypeDb.fromDbValue(raw);
+    } catch (_) {
+      return fallback;
+    }
+  }
+
+  static LocationVisibility _locVisOr(
+    Object? raw,
+    LocationVisibility fallback,
+  ) {
+    if (raw is! String) return fallback;
+    try {
+      return LocationVisibilityDb.fromDbValue(raw);
+    } catch (_) {
+      return fallback;
+    }
+  }
+
+  static ContactNameVisibility _contactVisOr(
+    Object? raw,
+    ContactNameVisibility fallback,
+  ) {
+    if (raw is! String) return fallback;
+    try {
+      return ContactNameVisibilityDb.fromDbValue(raw);
+    } catch (_) {
+      return fallback;
+    }
+  }
+
+  static num? _numOrNull(Object? raw) {
+    if (raw == null) return null;
+    if (raw is num) return raw;
+    return num.tryParse(raw.toString());
+  }
+
+  static int? _intOrNull(Object? raw) {
+    if (raw == null) return null;
+    if (raw is int) return raw;
+    if (raw is num) return raw.toInt();
+    return int.tryParse(raw.toString());
   }
 
   Future<void> _onFieldChanged(
@@ -418,7 +743,13 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
     if (state.saveInProgress) return;
     emit(state.copyWith(saveInProgress: true, lastSaveError: null));
     try {
-      await _saveFormStep(state, state.currentStep);
+      // Phase 031 (WS-B) — in revision mode the step's edits are STAGED onto the
+      // open revision (no live listing write). Otherwise today's in-place save.
+      if (state.isRevision) {
+        await _persistRevision();
+      } else {
+        await _saveFormStep(state, state.currentStep);
+      }
       final next = state.currentStep.next ?? state.currentStep;
       emit(state.copyWith(saveInProgress: false, currentStep: next));
     } catch (e) {
@@ -433,7 +764,12 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
     if (state.saveInProgress) return;
     emit(state.copyWith(saveInProgress: true, lastSaveError: null));
     try {
-      await _saveFormStep(state, state.currentStep);
+      // Phase 031 (WS-B) — stage onto the revision in revision mode.
+      if (state.isRevision) {
+        await _persistRevision();
+      } else {
+        await _saveFormStep(state, state.currentStep);
+      }
       emit(state.copyWith(saveInProgress: false, savedAndExited: true));
     } catch (e) {
       emit(state.copyWith(saveInProgress: false, lastSaveError: e.toString()));
@@ -471,6 +807,19 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
       ),
     );
     try {
+      // Phase 031 (WS-B) — revision mode: persist the staged edits then move the
+      // revision to pending_review. The LIVE listing stays approved + public on
+      // its old content until an admin applies the revision (NOT submit_listing).
+      if (state.isRevision) {
+        final revisionId = state.revisionId;
+        if (revisionId == null) {
+          throw StateError('revision id missing');
+        }
+        await _persistRevision();
+        await _submitRevision(revisionId);
+        emit(state.copyWith(submitInProgress: false, submitSucceeded: true));
+        return;
+      }
       final result = await _submitListing(listing.id);
       emit(
         state.copyWith(
@@ -638,6 +987,45 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
         // 60-second budget. Earlier the timeout wrapped ONLY processImage —
         // discovered during T088 walk that uploads on slow networks could
         // exceed the budget without firing the timeout.
+        //
+        // Phase 031 (WS-B) — in REVISION mode the watermarked bytes are uploaded
+        // to the SAME {listingId}/ bucket path but NO live listing_media row is
+        // inserted; instead a manifest entry is staged. The admin's
+        // apply_listing_revision later reconciles the live rows.
+        if (state.isRevision) {
+          final stagedPath = await () async {
+            final sourceBytes = await file.readAsBytes();
+            final watermarkedJpeg = await _imageWorker!.processImage(
+              sourceBytes: sourceBytes,
+              watermarkAssetBytes: _watermarkAssetBytes!,
+              isRtl: event.isRtl,
+            );
+            emit(
+              state.copyWith(
+                uploadInFlight: <String, MediaUploadProgress>{
+                  ...state.uploadInFlight,
+                  localId: const MediaUploadProgressUploading(),
+                },
+              ),
+            );
+            return await _uploadStagedImage(
+              listingId: listingId,
+              watermarkedBytes: watermarkedJpeg,
+            );
+          }().timeout(const Duration(seconds: 60));
+
+          final nextInFlight = <String, MediaUploadProgress>{
+            ...state.uploadInFlight,
+          }..remove(localId);
+          emit(state.copyWith(uploadInFlight: nextInFlight));
+          await _appendManifestItem(
+            storagePath: stagedPath,
+            kind: 'image',
+            emit: emit,
+          );
+          continue;
+        }
+
         final inserted = await () async {
           final sourceBytes = await file.readAsBytes();
           final watermarkedJpeg = await _imageWorker!.processImage(
@@ -794,6 +1182,27 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
         ),
       );
 
+      // Phase 031 (WS-B) — staged (manifest) upload in revision mode: no live
+      // listing_media row is inserted; a manifest entry is appended instead.
+      if (state.isRevision) {
+        final staged = await _uploadStagedVideo(
+          listingId: listingId,
+          filePath: uploadPath,
+          thumbnailJpegPath: thumbnailFile?.path,
+        ).timeout(const Duration(seconds: 60));
+        final nextInFlight = <String, MediaUploadProgress>{
+          ...state.uploadInFlight,
+        }..remove(localId);
+        emit(state.copyWith(uploadInFlight: nextInFlight));
+        await _appendManifestItem(
+          storagePath: staged.storagePath,
+          kind: 'video',
+          thumbnailPath: staged.thumbnailPath,
+          emit: emit,
+        );
+        return;
+      }
+
       final inserted = await _uploadVideo(
         listingId: listingId,
         filePath: uploadPath,
@@ -863,6 +1272,39 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
     );
 
     try {
+      // Phase 031 (WS-B) — staged panorama upload in revision mode.
+      if (state.isRevision) {
+        final stagedPath = await () async {
+          final sourceBytes = await event.file.readAsBytes();
+          final processedJpeg = await _imageWorker!.processPanorama(
+            sourceBytes: sourceBytes,
+          );
+          emit(
+            state.copyWith(
+              uploadInFlight: <String, MediaUploadProgress>{
+                ...state.uploadInFlight,
+                localId: const MediaUploadProgressUploading(),
+              },
+            ),
+          );
+          return await _uploadStagedPanorama(
+            listingId: listingId,
+            panoramaBytes: processedJpeg,
+          );
+        }().timeout(const Duration(seconds: 60));
+
+        final nextInFlight = <String, MediaUploadProgress>{
+          ...state.uploadInFlight,
+        }..remove(localId);
+        emit(state.copyWith(uploadInFlight: nextInFlight));
+        await _appendManifestItem(
+          storagePath: stagedPath,
+          kind: kListingMediaKindPanorama,
+          emit: emit,
+        );
+        return;
+      }
+
       final inserted = await () async {
         final sourceBytes = await event.file.readAsBytes();
         final processedJpeg = await _imageWorker!.processPanorama(
@@ -914,6 +1356,24 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
     final listing = state.draftListing;
     if (listing == null) return;
 
+    // Phase 031 (WS-B) — in revision mode media ids are the staged
+    // storage_path; reorder the manifest in place and re-persist (no RPC).
+    if (state.isRevision) {
+      final byPath = <String, RevisionManifestItem>{
+        for (final m in state.revisionManifest) m.storagePath: m,
+      };
+      final reordered = <RevisionManifestItem>[];
+      for (final id in event.newOrder) {
+        final m = byPath[id];
+        if (m != null) reordered.add(m);
+      }
+      for (final m in state.revisionManifest) {
+        if (!event.newOrder.contains(m.storagePath)) reordered.add(m);
+      }
+      await _emitManifest(reordered, emit);
+      return;
+    }
+
     // Optimistic update — reorder state.media locally first so the picker
     // grid reflects the new order instantly. The RPC call happens in
     // background; on failure we reload from the server to undo.
@@ -951,6 +1411,20 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
   ) async {
     final listing = state.draftListing;
     if (listing == null) return;
+
+    // Phase 031 (WS-B) — revision mode: flip is_main in the manifest (the
+    // event.mediaId is the staged storage_path). Only image rows can be main.
+    if (state.isRevision) {
+      final next = state.revisionManifest.map((m) {
+        if (m.storagePath == event.mediaId) {
+          return m.copyWith(isMain: m.kind == 'image');
+        }
+        return m.copyWith(isMain: false);
+      }).toList();
+      await _emitManifest(next, emit);
+      return;
+    }
+
     try {
       await _setMainImage(listingId: listing.id, mediaId: event.mediaId);
       final reloaded = await _loadMediaForListing(listingId: listing.id);
@@ -972,6 +1446,20 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
     final targetKind = event.makePanorama
         ? kListingMediaKindPanorama
         : ListingMediaKind.image.toDbValue();
+
+    // Phase 031 (WS-B) — revision mode: flip the manifest entry's kind (id is
+    // the staged storage_path). A panorama can never be main.
+    if (state.isRevision) {
+      final next = state.revisionManifest.map((m) {
+        if (m.storagePath != event.mediaId) return m;
+        return m.copyWith(
+          kind: targetKind,
+          isMain: event.makePanorama ? false : m.isMain,
+        );
+      }).toList();
+      await _emitManifest(next, emit);
+      return;
+    }
     final optimistic = state.media
         .map(
           (m) => m.id == event.mediaId ? m.copyWith(rawKind: targetKind) : m,
@@ -1000,6 +1488,38 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
     MediaDeleted event,
     Emitter<ListingFormState> emit,
   ) async {
+    // Phase 031 (WS-B) — revision mode: removal updates the manifest ONLY (the
+    // staged bucket object is left for apply-time / out-of-band reconciliation,
+    // mirroring the apply RPC's orphan-storage note). id is the storage_path.
+    if (state.isRevision) {
+      final removed = state.revisionManifest.firstWhere(
+        (m) => m.storagePath == event.mediaId,
+        orElse: () => const RevisionManifestItem(
+          storagePath: '',
+          kind: 'image',
+          isMain: false,
+          ordering: 0,
+        ),
+      );
+      var next = state.revisionManifest
+          .where((m) => m.storagePath != event.mediaId)
+          .toList();
+      // If the removed item was the main image, promote the first remaining
+      // image to main so the listing keeps a cover.
+      if (removed.isMain) {
+        var promoted = false;
+        next = next.map((m) {
+          if (!promoted && m.kind == 'image') {
+            promoted = true;
+            return m.copyWith(isMain: true);
+          }
+          return m;
+        }).toList();
+      }
+      await _emitManifest(next, emit);
+      return;
+    }
+
     try {
       await _deleteMedia(mediaId: event.mediaId);
       emit(

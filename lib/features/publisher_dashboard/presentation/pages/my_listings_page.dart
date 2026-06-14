@@ -14,6 +14,8 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../currencies/domain/entities/currency.dart';
 import '../../../currencies/domain/usecases/list_currencies.dart';
 import '../../../listing_form/domain/entities/listing.dart';
+import '../../../listing_form/domain/entities/listing_revision.dart';
+import '../../../listing_form/domain/usecases/find_open_revision.dart';
 import '../../../locations/domain/entities/area.dart';
 import '../../../locations/domain/entities/governorate.dart';
 import '../../../locations/domain/repositories/locations_repository.dart';
@@ -332,6 +334,17 @@ class _ListingRow extends StatelessWidget {
     final isRejected =
         publisherListing.listing.status == ListingStatus.rejected;
 
+    // Phase 031 (WS-B) — for an APPROVED listing, look up whether an open
+    // pending_review revision exists so the card can show "Edit in review".
+    if (publisherListing.isRevisionEditable) {
+      return _ApprovedRevisionCardLoader(
+        publisherListing: publisherListing,
+        currenciesByCode: currenciesByCode,
+        governoratesById: governoratesById,
+        areasById: areasById,
+      );
+    }
+
     final card = ListingCard(
       publisherListing: publisherListing,
       currenciesByCode: currenciesByCode,
@@ -354,6 +367,75 @@ class _ListingRow extends StatelessWidget {
         _RejectionBannerLoader(listingId: publisherListing.listing.id),
         card,
       ],
+    );
+  }
+}
+
+/// Phase 031 (WS-B) — resolves whether an APPROVED listing has an open
+/// `pending_review` revision (so the card shows the "Edit in review" badge
+/// instead of the "Edit (needs approval)" hint). Best-effort: any failure
+/// degrades to the plain affordance hint.
+class _ApprovedRevisionCardLoader extends StatefulWidget {
+  const _ApprovedRevisionCardLoader({
+    required this.publisherListing,
+    required this.currenciesByCode,
+    required this.governoratesById,
+    required this.areasById,
+  });
+
+  final PublisherListing publisherListing;
+  final Map<String, Currency> currenciesByCode;
+  final Map<String, Governorate> governoratesById;
+  final Map<String, Area> areasById;
+
+  @override
+  State<_ApprovedRevisionCardLoader> createState() =>
+      _ApprovedRevisionCardLoaderState();
+}
+
+class _ApprovedRevisionCardLoaderState
+    extends State<_ApprovedRevisionCardLoader> {
+  late Future<ListingRevision?> _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = _load();
+  }
+
+  @override
+  void didUpdateWidget(_ApprovedRevisionCardLoader oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.publisherListing.listing.id !=
+        widget.publisherListing.listing.id) {
+      _future = _load();
+    }
+  }
+
+  Future<ListingRevision?> _load() async {
+    try {
+      return await getIt<FindOpenRevision>().call(
+        widget.publisherListing.listing.id,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<ListingRevision?>(
+      future: _future,
+      builder: (context, snapshot) {
+        final editInReview = snapshot.data?.isPending ?? false;
+        return ListingCard(
+          publisherListing: widget.publisherListing,
+          currenciesByCode: widget.currenciesByCode,
+          governoratesById: widget.governoratesById,
+          areasById: widget.areasById,
+          editInReview: editInReview,
+        );
+      },
     );
   }
 }

@@ -6238,4 +6238,157 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String get navDrawerAbout =>
       _resolve("navDrawerAbout", (loc) => loc.navDrawerAbout);
+  @override
+  String get createToggleDetailView =>
+      _resolve("createToggleDetailView", (loc) => loc.createToggleDetailView);
+  @override
+  String get createToggleClassicSteps =>
+      _resolve("createToggleClassicSteps", (loc) => loc.createToggleClassicSteps);
+  @override
+  String get formDetailPageTitle =>
+      _resolve("formDetailPageTitle", (loc) => loc.formDetailPageTitle);
+  @override
+  String get formDetailPreviewHint =>
+      _resolve("formDetailPreviewHint", (loc) => loc.formDetailPreviewHint);
+  @override
+  String get formDetailSubmitButton =>
+      _resolve("formDetailSubmitButton", (loc) => loc.formDetailSubmitButton);
+  @override
+  String get formDetailTitleSectionTitle =>
+      _resolve("formDetailTitleSectionTitle", (loc) => loc.formDetailTitleSectionTitle);
+  @override
+  String get formDetailTitleSectionSubtitle =>
+      _resolve("formDetailTitleSectionSubtitle", (loc) => loc.formDetailTitleSectionSubtitle);
+  @override
+  String get formDetailClassificationSectionTitle =>
+      _resolve("formDetailClassificationSectionTitle", (loc) => loc.formDetailClassificationSectionTitle);
+  @override
+  String get formDetailClassificationSectionSubtitle =>
+      _resolve("formDetailClassificationSectionSubtitle", (loc) => loc.formDetailClassificationSectionSubtitle);
+  @override
+  String get formDetailPriceSectionTitle =>
+      _resolve("formDetailPriceSectionTitle", (loc) => loc.formDetailPriceSectionTitle);
+  @override
+  String get formDetailPriceSectionSubtitle =>
+      _resolve("formDetailPriceSectionSubtitle", (loc) => loc.formDetailPriceSectionSubtitle);
+  @override
+  String get formDetailLocationSectionTitle =>
+      _resolve("formDetailLocationSectionTitle", (loc) => loc.formDetailLocationSectionTitle);
+  @override
+  String get formDetailLocationSectionSubtitle =>
+      _resolve("formDetailLocationSectionSubtitle", (loc) => loc.formDetailLocationSectionSubtitle);
+  @override
+  String get formDetailFactsSectionTitle =>
+      _resolve("formDetailFactsSectionTitle", (loc) => loc.formDetailFactsSectionTitle);
+  @override
+  String get formDetailFactsSectionSubtitle =>
+      _resolve("formDetailFactsSectionSubtitle", (loc) => loc.formDetailFactsSectionSubtitle);
+  @override
+  String get formDetailAmenitiesSectionTitle =>
+      _resolve("formDetailAmenitiesSectionTitle", (loc) => loc.formDetailAmenitiesSectionTitle);
+  @override
+  String get formDetailAmenitiesSectionSubtitle =>
+      _resolve("formDetailAmenitiesSectionSubtitle", (loc) => loc.formDetailAmenitiesSectionSubtitle);
+  @override
+  String get formDetailDescriptionSectionTitle =>
+      _resolve("formDetailDescriptionSectionTitle", (loc) => loc.formDetailDescriptionSectionTitle);
+  @override
+  String get formDetailDescriptionSectionSubtitle =>
+      _resolve("formDetailDescriptionSectionSubtitle", (loc) => loc.formDetailDescriptionSectionSubtitle);
+  @override
+  String get formDetailContactSectionTitle =>
+      _resolve("formDetailContactSectionTitle", (loc) => loc.formDetailContactSectionTitle);
+  @override
+  String get formDetailContactSectionSubtitle =>
+      _resolve("formDetailContactSectionSubtitle", (loc) => loc.formDetailContactSectionSubtitle);
+  @override
+  String get revisionBannerTitle =>
+      _resolve("revisionBannerTitle", (loc) => loc.revisionBannerTitle);
+  @override
+  String get revisionBannerBody =>
+      _resolve("revisionBannerBody", (loc) => loc.revisionBannerBody);
+  @override
+  String get myListingsEditNeedsApproval =>
+      _resolve("myListingsEditNeedsApproval", (loc) => loc.myListingsEditNeedsApproval);
+  @override
+  String get myListingsEditInReviewBadge =>
+      _resolve("myListingsEditInReviewBadge", (loc) => loc.myListingsEditInReviewBadge);
+  @override
+  String get adminRevisionsSectionTitle =>
+      _resolve("adminRevisionsSectionTitle", (loc) => loc.adminRevisionsSectionTitle);
+  @override
+  String get adminRevisionPendingSubtitle =>
+      _resolve("adminRevisionPendingSubtitle", (loc) => loc.adminRevisionPendingSubtitle);
+  @override
+  String get adminRevisionReviewTitle =>
+      _resolve("adminRevisionReviewTitle", (loc) => loc.adminRevisionReviewTitle);
+  @override
+  String get adminRevisionApprovedToast =>
+      _resolve("adminRevisionApprovedToast", (loc) => loc.adminRevisionApprovedToast);
+  @override
+  String get adminRevisionRejectedToast =>
+      _resolve("adminRevisionRejectedToast", (loc) => loc.adminRevisionRejectedToast);
+  @override
+  String get adminRevisionProposedMediaLabel =>
+      _resolve("adminRevisionProposedMediaLabel", (loc) => loc.adminRevisionProposedMediaLabel);
+  @override
+  String get adminRevisionChangesLabel =>
+      _resolve("adminRevisionChangesLabel", (loc) => loc.adminRevisionChangesLabel);
+  @override
+  String get adminRevisionNoFieldChanges =>
+      _resolve("adminRevisionNoFieldChanges", (loc) => loc.adminRevisionNoFieldChanges);
+  @override
+  String get adminRevisionApproveCta =>
+      _resolve("adminRevisionApproveCta", (loc) => loc.adminRevisionApproveCta);
+  @override
+  String get adminRevisionFieldPrice =>
+      _resolve("adminRevisionFieldPrice", (loc) => loc.adminRevisionFieldPrice);
+  @override
+  String get adminRevisionFieldCurrency =>
+      _resolve("adminRevisionFieldCurrency", (loc) => loc.adminRevisionFieldCurrency);
+  @override
+  String get adminRevisionFieldAddress =>
+      _resolve("adminRevisionFieldAddress", (loc) => loc.adminRevisionFieldAddress);
+  @override
+  String get adminRevisionFieldAreaSize =>
+      _resolve("adminRevisionFieldAreaSize", (loc) => loc.adminRevisionFieldAreaSize);
+  @override
+  String get adminRevisionFieldRooms =>
+      _resolve("adminRevisionFieldRooms", (loc) => loc.adminRevisionFieldRooms);
+  @override
+  String get adminRevisionFieldBathrooms =>
+      _resolve("adminRevisionFieldBathrooms", (loc) => loc.adminRevisionFieldBathrooms);
+  @override
+  String get adminRevisionFieldFloor =>
+      _resolve("adminRevisionFieldFloor", (loc) => loc.adminRevisionFieldFloor);
+  @override
+  String get adminRevisionFieldDescription =>
+      _resolve("adminRevisionFieldDescription", (loc) => loc.adminRevisionFieldDescription);
+  @override
+  String get adminRevisionFieldAmenities =>
+      _resolve("adminRevisionFieldAmenities", (loc) => loc.adminRevisionFieldAmenities);
+  @override
+  String get adminRevisionFieldYearBuilt =>
+      _resolve("adminRevisionFieldYearBuilt", (loc) => loc.adminRevisionFieldYearBuilt);
+  @override
+  String get adminRevisionFieldFurnished =>
+      _resolve("adminRevisionFieldFurnished", (loc) => loc.adminRevisionFieldFurnished);
+  @override
+  String get adminRevisionFieldParking =>
+      _resolve("adminRevisionFieldParking", (loc) => loc.adminRevisionFieldParking);
+  @override
+  String get adminRevisionFieldPhone =>
+      _resolve("adminRevisionFieldPhone", (loc) => loc.adminRevisionFieldPhone);
+  @override
+  String get adminRevisionFieldWhatsapp =>
+      _resolve("adminRevisionFieldWhatsapp", (loc) => loc.adminRevisionFieldWhatsapp);
+  @override
+  String get adminRevisionFieldLocation =>
+      _resolve("adminRevisionFieldLocation", (loc) => loc.adminRevisionFieldLocation);
+  @override
+  String get adminRevisionFieldLocationVisibility =>
+      _resolve("adminRevisionFieldLocationVisibility", (loc) => loc.adminRevisionFieldLocationVisibility);
+  @override
+  String get adminRevisionFieldContactVisibility =>
+      _resolve("adminRevisionFieldContactVisibility", (loc) => loc.adminRevisionFieldContactVisibility);
 }

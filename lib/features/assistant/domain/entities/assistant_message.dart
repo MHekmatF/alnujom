@@ -29,8 +29,26 @@ enum AssistantReplyKind {
   stats,
 }
 
+/// Phase 031 (WS-D) — a guided follow-up the assistant offers when a parse is
+/// thin (e.g. a property type with no location or budget) or empty. The page
+/// maps each value to a localized chip label + a localized composer SEED that
+/// PRE-FILLS the input (the user completes + sends — still one-shot, no
+/// conversation state is kept).
+enum AssistantFollowUp {
+  /// "In which governorate?" — offered when no location matched.
+  askGovernorate,
+
+  /// "What's your budget?" — offered when no price matched.
+  askBudget,
+}
+
 class AssistantReply extends Equatable {
-  const AssistantReply({required this.kind, this.parsed, this.stats});
+  const AssistantReply({
+    required this.kind,
+    this.parsed,
+    this.stats,
+    this.followUps = const <AssistantFollowUp>[],
+  });
 
   final AssistantReplyKind kind;
 
@@ -42,8 +60,13 @@ class AssistantReply extends Equatable {
   /// Present for [AssistantReplyKind.stats] only.
   final AreaStats? stats;
 
+  /// Phase 031 (WS-D) — guided next-step prompts. May appear on a thin
+  /// [AssistantReplyKind.parsed] reply (refine a partial search) or on a
+  /// [AssistantReplyKind.noMatch] reply (help the user phrase a first query).
+  final List<AssistantFollowUp> followUps;
+
   @override
-  List<Object?> get props => [kind, parsed, stats];
+  List<Object?> get props => [kind, parsed, stats, followUps];
 }
 
 class AssistantMessage extends Equatable {

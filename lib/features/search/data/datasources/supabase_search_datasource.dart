@@ -146,6 +146,20 @@ class SupabaseSearchDatasource {
     if (filters.areaSizeMax != null) {
       params['p_area_size_max'] = filters.areaSizeMax;
     }
+    // Phase 031 (WS-D) — feature flags + amenity containment. Each is sent only
+    // when constrained so the RPC's DEFAULT NULL drives "filter inactive".
+    // `p_amenities` is a JSON array; the RPC casts it to jsonb and tests
+    // containment (`ld.amenities @> p_amenities`) so every listed amenity must
+    // be present on the listing.
+    if (filters.furnished != null) {
+      params['p_furnished'] = filters.furnished;
+    }
+    if (filters.parking != null) {
+      params['p_parking'] = filters.parking;
+    }
+    if (filters.amenities.isNotEmpty) {
+      params['p_amenities'] = filters.amenities.toList();
+    }
     // Owner-vs-agency lister filter (DEFAULT NULL ⇒ all listers).
     if (filters.isAgency != null) {
       params['p_is_agency'] = filters.isAgency;

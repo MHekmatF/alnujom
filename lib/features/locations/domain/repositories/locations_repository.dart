@@ -18,12 +18,23 @@ abstract class LocationsRepository {
   });
   Future<City> loadCity(String id);
 
+  /// Phase 031 (WS-D) — flat list of EVERY city across all governorates (each
+  /// [City] carries its `governorateId`). Used by the smart-search assistant to
+  /// match a city name anywhere in a query without first resolving its
+  /// governorate.
+  Future<List<City>> listAllCities({required bool includeInactive});
+
   // Read — areas
   Future<List<Area>> listAreasForCity(
     String cityId, {
     required bool includeInactive,
   });
   Future<Area> loadArea(String id);
+
+  /// Phase 031 (WS-D) — flat list of EVERY area across all cities (each [Area]
+  /// carries its `cityId`). Companion to [listAllCities] for assistant
+  /// neighborhood matching.
+  Future<List<Area>> listAllAreas({required bool includeInactive});
 
   // Write — governorates
   Future<Governorate> createGovernorate({

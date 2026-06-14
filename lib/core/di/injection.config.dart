@@ -84,6 +84,8 @@ import '../../features/admin/listing_review/data/repositories/listing_review_rep
     as _i1072;
 import '../../features/admin/listing_review/domain/repositories/listing_review_repository.dart'
     as _i155;
+import '../../features/admin/listing_review/domain/usecases/apply_revision.dart'
+    as _i841;
 import '../../features/admin/listing_review/domain/usecases/approve_listing.dart'
     as _i404;
 import '../../features/admin/listing_review/domain/usecases/feature_listing.dart'
@@ -92,12 +94,22 @@ import '../../features/admin/listing_review/domain/usecases/load_listing_preview
     as _i96;
 import '../../features/admin/listing_review/domain/usecases/load_pending_queue.dart'
     as _i207;
+import '../../features/admin/listing_review/domain/usecases/load_pending_revisions.dart'
+    as _i318;
+import '../../features/admin/listing_review/domain/usecases/load_revision_diff.dart'
+    as _i169;
 import '../../features/admin/listing_review/domain/usecases/reject_listing.dart'
     as _i880;
+import '../../features/admin/listing_review/domain/usecases/reject_revision.dart'
+    as _i1048;
 import '../../features/admin/listing_review/presentation/bloc/listing_preview_bloc.dart'
     as _i778;
 import '../../features/admin/listing_review/presentation/bloc/pending_queue_bloc.dart'
     as _i554;
+import '../../features/admin/listing_review/presentation/bloc/pending_revisions_cubit.dart'
+    as _i277;
+import '../../features/admin/listing_review/presentation/bloc/revision_review_bloc.dart'
+    as _i992;
 import '../../features/admin/reports/data/datasources/supabase_reports_admin_datasource.dart'
     as _i433;
 import '../../features/admin/reports/data/repositories/reports_admin_repository_impl.dart'
@@ -362,33 +374,50 @@ import '../../features/listing_details/presentation/bloc/similar_listings_cubit.
     as _i255;
 import '../../features/listing_form/data/datasources/supabase_listing_media_datasource.dart'
     as _i214;
+import '../../features/listing_form/data/datasources/supabase_listing_revision_datasource.dart'
+    as _i1020;
 import '../../features/listing_form/data/datasources/supabase_listings_datasource.dart'
     as _i207;
+import '../../features/listing_form/data/repositories/listing_revisions_repository_impl.dart'
+    as _i736;
 import '../../features/listing_form/data/repositories/listings_repository_impl.dart'
     as _i946;
 import '../../features/listing_form/domain/entities/listing.dart' as _i699;
+import '../../features/listing_form/domain/repositories/listing_revisions_repository.dart'
+    as _i902;
 import '../../features/listing_form/domain/repositories/listings_repository.dart'
     as _i340;
+import '../../features/listing_form/domain/usecases/begin_revision.dart' as _i7;
 import '../../features/listing_form/domain/usecases/delete_draft.dart' as _i814;
 import '../../features/listing_form/domain/usecases/delete_media.dart' as _i732;
 import '../../features/listing_form/domain/usecases/derive_area_centroid.dart'
     as _i906;
+import '../../features/listing_form/domain/usecases/find_open_revision.dart'
+    as _i994;
 import '../../features/listing_form/domain/usecases/load_media_for_listing.dart'
     as _i406;
 import '../../features/listing_form/domain/usecases/load_or_create_draft.dart'
     as _i802;
+import '../../features/listing_form/domain/usecases/load_revision.dart'
+    as _i657;
 import '../../features/listing_form/domain/usecases/reorder_media.dart'
     as _i1022;
 import '../../features/listing_form/domain/usecases/save_form_step.dart'
     as _i874;
+import '../../features/listing_form/domain/usecases/save_revision.dart'
+    as _i222;
 import '../../features/listing_form/domain/usecases/set_main_image.dart'
     as _i629;
 import '../../features/listing_form/domain/usecases/submit_listing.dart'
     as _i829;
+import '../../features/listing_form/domain/usecases/submit_revision.dart'
+    as _i62;
 import '../../features/listing_form/domain/usecases/upload_image.dart'
     as _i1062;
 import '../../features/listing_form/domain/usecases/upload_panorama.dart'
     as _i206;
+import '../../features/listing_form/domain/usecases/upload_staged_media.dart'
+    as _i520;
 import '../../features/listing_form/domain/usecases/upload_video.dart' as _i490;
 import '../../features/listing_form/domain/usecases/validate_submit_payload.dart'
     as _i396;
@@ -414,6 +443,8 @@ import '../../features/locations/domain/usecases/delete_area.dart' as _i662;
 import '../../features/locations/domain/usecases/delete_city.dart' as _i239;
 import '../../features/locations/domain/usecases/delete_governorate.dart'
     as _i937;
+import '../../features/locations/domain/usecases/list_all_areas.dart' as _i548;
+import '../../features/locations/domain/usecases/list_all_cities.dart' as _i450;
 import '../../features/locations/domain/usecases/list_areas_for_city.dart'
     as _i358;
 import '../../features/locations/domain/usecases/list_cities_for_governorate.dart'
@@ -718,6 +749,9 @@ _i174.GetIt $initGetIt(
   gh.factory<_i665.SupabaseLocationsDatasource>(
     () => _i665.SupabaseLocationsDatasource(),
   );
+  gh.factory<_i1020.SupabaseListingRevisionDatasource>(
+    () => _i1020.SupabaseListingRevisionDatasource(),
+  );
   gh.singleton<_i373.EnvConfig>(() => const _i373.EnvConfig());
   gh.lazySingleton<_i454.SupabaseClient>(() => supabaseModule.supabaseClient());
   gh.lazySingleton<_i394.SupabaseAccountApprovalsDatasource>(
@@ -738,6 +772,47 @@ _i174.GetIt $initGetIt(
   );
   gh.lazySingleton<_i1015.PermissionCatalogRepository>(
     () => _i739.PermissionCatalogRepositoryImpl(),
+  );
+  gh.lazySingleton<_i902.ListingRevisionsRepository>(
+    () => _i736.ListingRevisionsRepositoryImpl(
+      gh<_i1020.SupabaseListingRevisionDatasource>(),
+    ),
+  );
+  gh.factory<_i841.ApplyRevision>(
+    () => _i841.ApplyRevision(gh<_i902.ListingRevisionsRepository>()),
+  );
+  gh.factory<_i318.LoadPendingRevisions>(
+    () => _i318.LoadPendingRevisions(gh<_i902.ListingRevisionsRepository>()),
+  );
+  gh.factory<_i169.LoadRevisionDiff>(
+    () => _i169.LoadRevisionDiff(gh<_i902.ListingRevisionsRepository>()),
+  );
+  gh.factory<_i1048.RejectRevision>(
+    () => _i1048.RejectRevision(gh<_i902.ListingRevisionsRepository>()),
+  );
+  gh.factory<_i7.BeginRevision>(
+    () => _i7.BeginRevision(gh<_i902.ListingRevisionsRepository>()),
+  );
+  gh.factory<_i994.FindOpenRevision>(
+    () => _i994.FindOpenRevision(gh<_i902.ListingRevisionsRepository>()),
+  );
+  gh.factory<_i657.LoadRevision>(
+    () => _i657.LoadRevision(gh<_i902.ListingRevisionsRepository>()),
+  );
+  gh.factory<_i222.SaveRevision>(
+    () => _i222.SaveRevision(gh<_i902.ListingRevisionsRepository>()),
+  );
+  gh.factory<_i62.SubmitRevision>(
+    () => _i62.SubmitRevision(gh<_i902.ListingRevisionsRepository>()),
+  );
+  gh.factory<_i520.UploadStagedImage>(
+    () => _i520.UploadStagedImage(gh<_i902.ListingRevisionsRepository>()),
+  );
+  gh.factory<_i520.UploadStagedPanorama>(
+    () => _i520.UploadStagedPanorama(gh<_i902.ListingRevisionsRepository>()),
+  );
+  gh.factory<_i520.UploadStagedVideo>(
+    () => _i520.UploadStagedVideo(gh<_i902.ListingRevisionsRepository>()),
   );
   gh.lazySingleton<_i340.ListingsRepository>(
     () => _i946.ListingsRepositoryImpl(
@@ -855,6 +930,13 @@ _i174.GetIt $initGetIt(
   );
   gh.lazySingleton<_i677.CrmRepository>(
     () => _i516.CrmRepositoryImpl(gh<_i802.SupabaseCrmDatasource>()),
+  );
+  gh.factory<_i992.RevisionReviewBloc>(
+    () => _i992.RevisionReviewBloc(
+      gh<_i169.LoadRevisionDiff>(),
+      gh<_i841.ApplyRevision>(),
+      gh<_i1048.RejectRevision>(),
+    ),
   );
   gh.lazySingleton<_i881.AuditLogRepository>(
     () => _i373.AuditLogRepositoryImpl(
@@ -1077,6 +1159,9 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i212.FavoritesRepository>(
     () => _i144.FavoritesRepositoryImpl(gh<_i8.SupabaseFavoritesDatasource>()),
+  );
+  gh.factory<_i277.PendingRevisionsCubit>(
+    () => _i277.PendingRevisionsCubit(gh<_i318.LoadPendingRevisions>()),
   );
   gh.lazySingleton<_i392.MarketInsightsRepository>(
     () => _i190.MarketInsightsRepositoryImpl(
@@ -1402,6 +1487,12 @@ _i174.GetIt $initGetIt(
   gh.factory<_i1054.UpdateGovernorate>(
     () => _i1054.UpdateGovernorate(gh<_i704.LocationsRepository>()),
   );
+  gh.factory<_i548.ListAllAreas>(
+    () => _i548.ListAllAreas(gh<_i704.LocationsRepository>()),
+  );
+  gh.factory<_i450.ListAllCities>(
+    () => _i450.ListAllCities(gh<_i704.LocationsRepository>()),
+  );
   gh.factory<_i711.ModerationHistoryCubit>(
     () =>
         _i711.ModerationHistoryCubit(gh<_i919.LoadModerationHistoryUseCase>()),
@@ -1553,13 +1644,6 @@ _i174.GetIt $initGetIt(
   gh.factory<_i225.SubmitReview>(
     () => _i225.SubmitReview(gh<_i412.ReviewsRepository>()),
   );
-  gh.factory<_i84.AssistantBrain>(
-    () => _i84.RuleBasedAssistantBrain(
-      gh<_i367.QueryParser>(),
-      gh<_i533.ListGovernorates>(),
-      gh<_i554.AssistantStatsRepository>(),
-    ),
-  );
   gh.factory<_i230.ArchiveAd>(
     () => _i230.ArchiveAd(gh<_i241.AdsAdminRepository>()),
   );
@@ -1577,6 +1661,15 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i831.UploadAdImage>(
     () => _i831.UploadAdImage(gh<_i241.AdsAdminRepository>()),
+  );
+  gh.factory<_i84.AssistantBrain>(
+    () => _i84.RuleBasedAssistantBrain(
+      gh<_i367.QueryParser>(),
+      gh<_i533.ListGovernorates>(),
+      gh<_i450.ListAllCities>(),
+      gh<_i548.ListAllAreas>(),
+      gh<_i554.AssistantStatsRepository>(),
+    ),
   );
   gh.factory<_i49.SellerTrustCubit>(
     () => _i49.SellerTrustCubit(
@@ -1889,26 +1982,6 @@ _i174.GetIt $initGetIt(
       gh<_i831.UploadAdImage>(),
     ),
   );
-  gh.factory<_i315.ListingFormBloc>(
-    () => _i315.ListingFormBloc(
-      gh<_i874.SaveFormStep>(),
-      gh<_i829.SubmitListing>(),
-      gh<_i814.DeleteDraft>(),
-      gh<_i906.DeriveAreaCentroid>(),
-      gh<_i396.ValidateSubmitPayload>(),
-      gh<_i340.ListingsRepository>(),
-      gh<_i1062.UploadImage>(),
-      gh<_i490.UploadVideo>(),
-      gh<_i206.UploadPanorama>(),
-      gh<_i1022.ReorderMedia>(),
-      gh<_i629.SetMainImage>(),
-      gh<_i732.DeleteMedia>(),
-      gh<_i406.LoadMediaForListing>(),
-      gh<_i611.LoadMyActiveAgencies>(),
-      gh<_i557.AppSettingsCubit>(),
-      gh<_i957.VideoProcessor>(),
-    ),
-  );
   gh.factory<_i665.ConversationsCubit>(
     () => _i665.ConversationsCubit(gh<_i929.ListConversations>()),
   );
@@ -1930,6 +2003,33 @@ _i174.GetIt $initGetIt(
       gh<_i591.RealtimeSignals>(),
     ),
     dispose: (i) => i.dispose(),
+  );
+  gh.factory<_i315.ListingFormBloc>(
+    () => _i315.ListingFormBloc(
+      gh<_i874.SaveFormStep>(),
+      gh<_i829.SubmitListing>(),
+      gh<_i814.DeleteDraft>(),
+      gh<_i906.DeriveAreaCentroid>(),
+      gh<_i396.ValidateSubmitPayload>(),
+      gh<_i340.ListingsRepository>(),
+      gh<_i1062.UploadImage>(),
+      gh<_i490.UploadVideo>(),
+      gh<_i206.UploadPanorama>(),
+      gh<_i1022.ReorderMedia>(),
+      gh<_i629.SetMainImage>(),
+      gh<_i732.DeleteMedia>(),
+      gh<_i406.LoadMediaForListing>(),
+      gh<_i611.LoadMyActiveAgencies>(),
+      gh<_i557.AppSettingsCubit>(),
+      gh<_i957.VideoProcessor>(),
+      gh<_i7.BeginRevision>(),
+      gh<_i657.LoadRevision>(),
+      gh<_i222.SaveRevision>(),
+      gh<_i62.SubmitRevision>(),
+      gh<_i520.UploadStagedImage>(),
+      gh<_i520.UploadStagedVideo>(),
+      gh<_i520.UploadStagedPanorama>(),
+    ),
   );
   gh.lazySingleton<_i583.GoRouter>(
     () => routerModule.router(gh<_i354.AppLogger>(), gh<_i797.AuthBloc>()),

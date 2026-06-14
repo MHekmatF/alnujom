@@ -19,10 +19,24 @@ enum AssistantFragmentKind {
   propertyType,
   purpose,
   location,
+
+  /// Phase 031 (WS-D) — a matched CITY span (distinct from [location], which is
+  /// the governorate). Renders with a different icon in the reply bubble.
+  city,
+
+  /// Phase 031 (WS-D) — a matched AREA / neighborhood span.
+  area,
   price,
   rooms,
   bathrooms,
   currency,
+
+  /// Phase 031 (WS-D) — a matched area-size (m²) span, e.g. "مساحه 150 متر".
+  areaSize,
+
+  /// Phase 031 (WS-D) — a matched amenity / feature span (furnished, parking,
+  /// garden, elevator, …). The chip text echoes the user's own word.
+  amenity,
 }
 
 /// One recognized span of the user's input (already normalized), tagged with
