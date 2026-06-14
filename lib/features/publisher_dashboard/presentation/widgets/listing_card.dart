@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/property_specs.dart';
@@ -44,12 +45,18 @@ class ListingCard extends StatelessWidget {
     required this.governoratesById,
     required this.areasById,
     this.hideLegacyRejectionBlock = false,
+    this.editInReview = false,
   });
 
   final PublisherListing publisherListing;
   final Map<String, Currency> currenciesByCode;
   final Map<String, Governorate> governoratesById;
   final Map<String, Area> areasById;
+
+  /// Phase 031 (WS-B) — true when an open `pending_review` revision exists for
+  /// this APPROVED listing. Surfaces an "Edit in review" badge; otherwise an
+  /// approved card surfaces the "Edit (needs approval)" affordance hint.
+  final bool editInReview;
 
   /// When true (Phase 12 / US2 — `_ListingRow` sets this for rejected
   /// listings), the legacy Phase 10 `RejectionReasonBlock` + `ResubmitCta`
@@ -132,6 +139,13 @@ class ListingCard extends StatelessWidget {
                 ),
               ),
               _ExpirySection(listing: listing),
+              // Phase 031 (WS-B) — approved listings: surface either the
+              // "Edit in review" badge (an open pending revision exists) or the
+              // "Edit (needs approval)" affordance hint.
+              if (publisherListing.isRevisionEditable) ...[
+                const SizedBox(height: AppSpacing.sm),
+                _RevisionHint(editInReview: editInReview),
+              ],
               if (publisherListing.hasRejectionReason &&
                   !hideLegacyRejectionBlock) ...[
                 const SizedBox(height: AppSpacing.md),
@@ -184,7 +198,10 @@ class ListingCard extends StatelessWidget {
 
   void _onTap(BuildContext context) {
     final listing = publisherListing.listing;
-    if (publisherListing.isEditable) {
+    // Phase 031 (WS-B) — APPROVED listings open the SAME edit route; the form
+    // bloc detects `approved` and drives stay-live revision mode (the live
+    // listing stays public until an admin applies the staged edit).
+    if (publisherListing.canOpenEditForm) {
       context.goNamed(
         AppRouteNames.publisherListingsEdit,
         pathParameters: {'id': listing.id},
@@ -198,6 +215,76 @@ class ListingCard extends StatelessWidget {
         ),
       );
     }
+  }
+}
+
+/// Phase 031 (WS-B) — the per-card revision affordance for an APPROVED listing:
+/// an "Edit in review" pill when a pending revision exists, otherwise an
+/// "Edit (needs approval)" hint row. Tapping the card itself opens the edit
+/// form (the bloc drives revision mode), so this is a passive indicator.
+class _RevisionHint extends StatelessWidget {
+  const _RevisionHint({required this.editInReview});
+
+  final bool editInReview;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final palette = AppColors.of(context);
+    final scheme = Theme.of(context).colorScheme;
+
+    if (editInReview) {
+      return Align(
+        alignment: AlignmentDirectional.centerStart,
+        child: Container(
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: AppSpacing.sm,
+            vertical: AppSpacing.xs,
+          ),
+          decoration: BoxDecoration(
+            color: palette.warning.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(AppRadii.sm),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                LucideIcons.clock,
+                size: AppSpacing.md,
+                color: palette.warning,
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              Text(
+                l10n.myListingsEditInReviewBadge,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: palette.warning,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Row(
+      children: [
+        Icon(
+          LucideIcons.square_pen,
+          size: AppSpacing.md,
+          color: scheme.onSurfaceVariant,
+        ),
+        const SizedBox(width: AppSpacing.xs),
+        Expanded(
+          child: Text(
+            l10n.myListingsEditNeedsApproval,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 

@@ -27,7 +27,10 @@
 import 'package:injectable/injectable.dart';
 
 import '../../listing_form/domain/entities/listing.dart';
+import '../../locations/domain/entities/area.dart';
+import '../../locations/domain/entities/city.dart';
 import '../../locations/domain/entities/governorate.dart';
+import '../../search/domain/entities/count_filter_mode.dart';
 import '../../search/domain/entities/filter_state.dart';
 import 'entities/parsed_query.dart';
 import 'keyword_tables.dart';
@@ -124,6 +127,8 @@ class QueryParser {
   ParsedQuery parse(
     String rawInput, {
     List<Governorate> governorates = const [],
+    List<City> cities = const [],
+    List<Area> areas = const [],
   }) {
     final normalized = normalizeQueryText(rawInput);
     if (normalized.isEmpty) return ParsedQuery.empty;
@@ -131,6 +136,26 @@ class QueryParser {
     // `working` gets matched spans blanked out so a number consumed by the
     // rooms matcher can never be re-read as a price.
     var working = normalized;
+
+    // ── area size (m²) ──
+    // MUST run before rooms/baths and price so its number is consumed and can
+    // never be re-read as a room count or a budget. Distinguished from price
+    // purely by an adjacent area-size unit (متر / م2 / sqm / مساحه …).
+    double? areaSizeMin;
+    double? areaSizeMax;
+    String? areaSizeText;
+    (areaSizeMin, areaSizeMax, areaSizeText, working) = _matchAreaSize(working);
+
+    // ── "at least" intent (global, one-shot) ──
+    // A single at-least phrase (على الأقل / ما لا يقل عن / at least / …) OR a
+    // trailing "+" on a digit in the RAW input flips the matched rooms/baths
+    // counts to atLeast. We read the raw input for "+": the normalizer turns
+    // "3+" into "3 ", so the marker is gone from `working`.
+    final atLeast =
+        _hasAtLeastPhrase(normalized) || RegExp(r'\d\s*\+').hasMatch(rawInput);
+    final countMode = atLeast
+        ? CountFilterMode.atLeast
+        : CountFilterMode.exactly;
 
     // ── rooms / bathrooms ──
     String? roomsText;
@@ -217,6 +242,103 @@ class QueryParser {
           governorate = gov;
           governorateText = m.group(0);
         }
+      }
+    }
+
+    // ── city (within the matched governorate when one matched, else anywhere) ──
+    // A matched city also PINS its governorate, so naming only a city
+    // ("شقة بجرمانا") still resolves the governorate filter. Longest display-name
+    // match wins, mirroring the governorate logic + the same normalize/boundary
+    // rules. When a governorate matched, we only consider its own cities so a
+    // namesake city in another governorate can't override the explicit one.
+    City? city;
+    String? cityText;
+    var bestCityLen = 0;
+    for (final c in cities) {
+      if (governorate != null && c.governorateId != governorate.id) continue;
+      for (final name in c.displayName.values) {
+        final normalizedName = normalizeQueryText(name);
+        if (normalizedName.isEmpty || normalizedName.length <= bestCityLen) {
+          continue;
+        }
+        final m = _keywordRe(normalizedName).firstMatch(working);
+        if (m != null) {
+          bestCityLen = normalizedName.length;
+          city = c;
+          cityText = m.group(0);
+        }
+      }
+    }
+    // A city named without its governorate resolves the governorate too.
+    if (city != null && governorate == null) {
+      for (final gov in governorates) {
+        if (gov.id == city.governorateId) {
+          governorate = gov;
+          break;
+        }
+      }
+    }
+
+    // ── area / neighborhood (within the matched city when one matched) ──
+    // Same scope-narrowing as cities: once a city is known, only its areas are
+    // candidates. A matched area also pins its city (and thus governorate).
+    Area? area;
+    String? areaText;
+    var bestAreaLen = 0;
+    for (final a in areas) {
+      if (city != null && a.cityId != city.id) continue;
+      for (final name in a.displayName.values) {
+        final normalizedName = normalizeQueryText(name);
+        if (normalizedName.isEmpty || normalizedName.length <= bestAreaLen) {
+          continue;
+        }
+        final m = _keywordRe(normalizedName).firstMatch(working);
+        if (m != null) {
+          bestAreaLen = normalizedName.length;
+          area = a;
+          areaText = m.group(0);
+        }
+      }
+    }
+    // An area named without its city resolves the city (and governorate) too.
+    if (area != null && city == null) {
+      for (final c in cities) {
+        if (c.id == area.cityId) {
+          city = c;
+          for (final gov in governorates) {
+            if (gov.id == c.governorateId) {
+              governorate = gov;
+              break;
+            }
+          }
+          break;
+        }
+      }
+    }
+
+    // ── amenities / feature flags ──
+    bool? furnished;
+    bool? parking;
+    final amenitySet = <String>{};
+    final amenityFragments = <String>[];
+    for (final entry in kAmenityKeywords.entries) {
+      final m = _keywordRe(entry.key).firstMatch(working);
+      if (m == null) continue;
+      final value = entry.value;
+      if (value == kAmenityFurnishedSentinel) {
+        furnished = true;
+      } else if (value == kAmenityParkingSentinel) {
+        parking = true;
+      } else {
+        if (!amenitySet.contains(value)) {
+          amenityFragments.add(m.group(0)!);
+        }
+        amenitySet.add(value);
+      }
+      // Surface furnished/parking words as chips too (the user's own word).
+      if (value == kAmenityFurnishedSentinel ||
+          value == kAmenityParkingSentinel) {
+        amenityFragments.add(m.group(0)!);
       }
     }
 
@@ -318,6 +440,8 @@ class QueryParser {
       }
     }
 
+    final hasAreaSize = areaSizeMin != null || areaSizeMax != null;
+
     // ── assemble ──
     final fragments = <MatchedFragment>[
       if (typeText != null)
@@ -326,34 +450,57 @@ class QueryParser {
         MatchedFragment(AssistantFragmentKind.purpose, purposeText),
       if (governorateText != null)
         MatchedFragment(AssistantFragmentKind.location, governorateText),
+      if (cityText != null)
+        MatchedFragment(AssistantFragmentKind.city, cityText),
+      if (areaText != null)
+        MatchedFragment(AssistantFragmentKind.area, areaText),
       if (rooms != null && roomsText != null)
         MatchedFragment(AssistantFragmentKind.rooms, roomsText),
       if (bathrooms != null && bathText != null)
         MatchedFragment(AssistantFragmentKind.bathrooms, bathText),
+      if (areaSizeText != null)
+        MatchedFragment(AssistantFragmentKind.areaSize, areaSizeText),
       if (priceText != null)
         MatchedFragment(AssistantFragmentKind.price, priceText),
       if (hasPrice && currencyText != null)
         MatchedFragment(AssistantFragmentKind.currency, currencyText),
+      for (final word in amenityFragments)
+        MatchedFragment(AssistantFragmentKind.amenity, word),
     ];
 
     final filters = FilterState(
       purpose: purpose,
       propertyType: propertyType,
       governorateId: governorate?.id,
+      cityId: city?.id,
+      areaId: area?.id,
       priceMin: priceMin,
       priceMax: priceMax,
       priceCurrency: hasPrice ? currencyCode : null,
       rooms: rooms,
+      roomsMode: rooms != null ? countMode : CountFilterMode.exactly,
       bathrooms: bathrooms,
+      bathroomsMode: bathrooms != null ? countMode : CountFilterMode.exactly,
+      areaSizeMin: areaSizeMin,
+      areaSizeMax: areaSizeMax,
+      furnished: furnished,
+      parking: parking,
+      amenities: amenitySet,
     );
 
     final dimensions = [
       propertyType,
       purpose,
       governorate,
+      city,
+      area,
       rooms,
       bathrooms,
       if (hasPrice) true,
+      if (hasAreaSize) true,
+      furnished,
+      parking,
+      if (amenitySet.isNotEmpty) true,
     ].whereType<Object>().length;
 
     return ParsedQuery(
@@ -398,6 +545,100 @@ class QueryParser {
       }
     }
     return (null, null, working);
+  }
+
+  /// Pre-compiled alternation of area-size unit markers (longest first so
+  /// multi-token forms like "sq m" win over "m").
+  static final String _areaUnitAlt = (kAreaSizeUnits.toList()
+        ..sort((a, b) => b.length.compareTo(a.length)))
+      .map(RegExp.escape)
+      .join('|');
+
+  /// A number directly followed by an area-size unit: "150 متر", "200م2",
+  /// "180 sqm". The unit must be on a word boundary so "m" in "metro" can't
+  /// match. Capture group 1 is the integer/decimal.
+  static final RegExp _areaNumberRe = RegExp(
+    '([0-9]+(?:\\.[0-9]+)?)\\s*(?:$_areaUnitAlt)(?![$_wordChars])',
+  );
+
+  /// A leading area-size noun ("مساحه" / "size") that introduces a number a
+  /// little later in the sentence ("مساحه 150", "مساحه حوالي 150").
+  static final RegExp _areaLeadInRe = RegExp(
+    '(?<![$_wordChars])(?:مساحه|size)(?![$_wordChars])',
+  );
+
+  /// Detects an area-size figure or range and returns (min, max, chipText,
+  /// working-with-the-number(s)-blanked). Runs BEFORE rooms/price so the m²
+  /// number is consumed once and only once. Distinguished from price purely by
+  /// an adjacent area-size unit; a bare "مساحه" with no number yields nothing.
+  (double?, double?, String?, String) _matchAreaSize(String working) {
+    // ── range with a single trailing unit: "بين 100 و 200 متر" ──
+    // Find two consecutive numbers where the SECOND carries an area unit and
+    // an opener ("بين"/"من"/"from"/"between") precedes the first.
+    final unitHit = _areaNumberRe.firstMatch(working);
+    if (unitHit == null) return (null, null, null, working);
+
+    final secondStart = unitHit.start;
+    // Look back for "<n> <connector> " immediately before the unit number.
+    final before = working.substring(0, secondStart);
+    // Try to detect "X <connector> Y unit".
+    for (final connector in kRangeConnectors) {
+      final connRe = RegExp(
+        '([0-9]+(?:\\.[0-9]+)?)\\s+${RegExp.escape(connector)}\\s+\$',
+      );
+      final cm = connRe.firstMatch(before);
+      if (cm != null) {
+        final loStr = cm.group(1)!;
+        final lo = double.tryParse(loStr);
+        final hi = double.tryParse(unitHit.group(1)!);
+        if (lo != null && hi != null) {
+          final fragStart = _rangeOpenerStart(working, cm.start);
+          final text = _tidy(working.substring(fragStart, unitHit.end));
+          final blanked = _blank(working, cm.start, unitHit.end);
+          final min = lo <= hi ? lo : hi;
+          final max = lo <= hi ? hi : lo;
+          return (min, max, text, blanked);
+        }
+      }
+    }
+
+    // ── single value with comparator: "اقل من 150 متر" / "اكثر من 200 متر" ──
+    final value = double.tryParse(unitHit.group(1)!);
+    if (value == null) return (null, null, null, working);
+    final (isMin, compStart) = _comparatorBefore(working, unitHit.start);
+
+    // A leading "مساحه"/"size" noun without a comparator → treat as the chip
+    // start so the fragment reads "مساحه 150 متر".
+    var fragStart = compStart;
+    if (compStart == unitHit.start) {
+      final leadIns = _areaLeadInRe.allMatches(working.substring(0, unitHit.start));
+      Match? lead;
+      for (final m in leadIns) {
+        lead = m;
+      }
+      if (lead != null) fragStart = lead.start;
+    }
+
+    final text = _tidy(working.substring(fragStart, unitHit.end));
+    final blanked = _blank(working, unitHit.start, unitHit.end);
+    if (isMin) {
+      return (value, null, text, blanked);
+    }
+    // Bare "150 متر" (no comparator) means EXACTLY-ish: treat as an upper bound
+    // window is wrong; the project's RPC area-size is a min/max range, so a bare
+    // size is most usefully read as a maximum ("up to 150 m²"), matching the
+    // budget convention. But a leading "مساحه"/"size" with no comparator more
+    // naturally means "around this size" — we still map to max to avoid
+    // over-narrowing, consistent with the price ceiling default.
+    return (null, value, text, blanked);
+  }
+
+  /// True when any "at least" phrase appears in the (normalized) sentence.
+  bool _hasAtLeastPhrase(String normalized) {
+    for (final phrase in kAtLeastPhrases) {
+      if (_keywordRe(phrase).firstMatch(normalized) != null) return true;
+    }
+    return false;
   }
 
   /// True when [first]..[second] reads as "بين X و Y" / "من X الى Y" /

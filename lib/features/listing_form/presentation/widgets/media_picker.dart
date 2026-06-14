@@ -42,11 +42,17 @@ class MediaPicker extends StatelessWidget {
       buildWhen: (prev, next) =>
           prev.media != next.media ||
           prev.uploadInFlight != next.uploadInFlight ||
+          prev.isRevision != next.isRevision ||
           prev.draftListing?.status != next.draftListing?.status,
       builder: (context, state) {
         final media = state.media;
         final inFlightEntries = state.uploadInFlight.entries.toList();
+        // Phase 031 (WS-B) — a stay-live revision edits an APPROVED listing, so
+        // the status gate alone would lock the picker; treat revision mode as
+        // editable (its media edits operate on the staged manifest, not live
+        // listing_media rows).
         final isEditable =
+            state.isRevision ||
             state.draftListing?.status == ListingStatus.draft ||
             state.draftListing?.status == ListingStatus.rejected;
 

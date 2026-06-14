@@ -238,6 +238,106 @@ const List<String> kBathUnits = ['حمامات', 'حمام', 'bathrooms', 'bathr
 /// Arabic counted-word forms for bathrooms.
 const Map<String, int> kBathWordCounts = {'حمامين': 2};
 
+/// Phase 031 (WS-D) — area-size unit markers. A number adjacent to one of
+/// these is an AREA (m²) figure, not a price: it feeds `areaSizeMin/Max`. Kept
+/// distinct from price so "متر" never collides with a budget number. Stored
+/// NORMALIZED (م² → the parser also accepts the literal "م2"). "مساحه" (مساحة)
+/// is the lead-in noun; "متر"/"م"/"م2"/"sqm"/"sq m"/"size" are the unit forms.
+const List<String> kAreaSizeUnits = [
+  'متر',
+  'امتار',
+  'م2',
+  'م²',
+  'مساحه',
+  'sqm',
+  'sq m',
+  'sqft',
+  'm2',
+  'meter',
+  'meters',
+  'metre',
+  'metres',
+  'size',
+];
+
+/// Phase 031 (WS-D) — "at least" phrases. When one of these sits before/around
+/// a rooms/bathrooms count (or a trailing "+" attaches to it, e.g. "3+ غرف"),
+/// the count mode becomes [CountFilterMode.atLeast]. NOTE: "الاقل" is "الأقل"
+/// folded; "ما لا يقل عن" normalizes unchanged.
+const List<String> kAtLeastPhrases = [
+  'علي الاقل',
+  'ع الاقل',
+  'الاقل',
+  'ما لا يقل عن',
+  'لا يقل عن',
+  'فما فوق',
+  'وما فوق',
+  'فاكثر',
+  'او اكثر',
+  'at least',
+  'minimum',
+  'min',
+  'or more',
+  'plus',
+];
+
+/// Phase 031 (WS-D) — amenity / feature keywords → the listing amenities
+/// catalog value, OR one of the two booleans on `listing_details`. A value of
+/// `furnished` / `parking` (the two SENTINELS below) routes to
+/// `FilterState.furnished` / `FilterState.parking`; every other value is a
+/// real catalog key (see `kAmenitiesCatalog` in the listing form:
+/// elevator | balcony | swimming_pool | garden | security | generator |
+/// solar_panels | central_heating | air_conditioning | furnished_kitchen).
+/// Keys are stored NORMALIZED (ة→ه, أ/إ/آ→ا, ى→ي, Latin lowercased).
+const String kAmenityFurnishedSentinel = 'furnished';
+const String kAmenityParkingSentinel = 'parking';
+
+const Map<String, String> kAmenityKeywords = {
+  // ── furnished (boolean) ──
+  'مفروش': kAmenityFurnishedSentinel,
+  'مفروشه': kAmenityFurnishedSentinel, // مفروشة
+  'furnished': kAmenityFurnishedSentinel,
+  // ── parking (boolean) ──
+  'موقف': kAmenityParkingSentinel,
+  'مواقف': kAmenityParkingSentinel,
+  'كراج': kAmenityParkingSentinel,
+  'كاراج': kAmenityParkingSentinel,
+  'garage': kAmenityParkingSentinel,
+  'parking': kAmenityParkingSentinel,
+  // ── catalog amenities ──
+  'حديقه': 'garden', // حديقة
+  'garden': 'garden',
+  'مصعد': 'elevator',
+  'اسانسير': 'elevator', // colloquial
+  'elevator': 'elevator',
+  'lift': 'elevator',
+  'تكييف': 'air_conditioning',
+  'مكيف': 'air_conditioning',
+  'مكيفات': 'air_conditioning',
+  'ac': 'air_conditioning',
+  'مسبح': 'swimming_pool',
+  'بركه': 'swimming_pool', // بركة
+  'pool': 'swimming_pool',
+  'شمسيه': 'solar_panels', // (الواح) شمسية
+  'شمسي': 'solar_panels',
+  'الواح شمسيه': 'solar_panels',
+  'solar': 'solar_panels',
+  'تدفئه': 'central_heating', // تدفئة
+  'تدفيه': 'central_heating', // common spelling
+  'heating': 'central_heating',
+  'امن': 'security', // أمن
+  'حراسه': 'security', // حراسة
+  'security': 'security',
+  'مولده': 'generator', // مولدة
+  'مولد': 'generator',
+  'كهرباء': 'generator', // colloquial for backup power
+  'generator': 'generator',
+  'بلكون': 'balcony',
+  'بلكونه': 'balcony',
+  'شرفه': 'balcony', // شرفة
+  'balcony': 'balcony',
+};
+
 /// Market-stats intent markers. Bare "سعر"/"price" is deliberately EXCLUDED:
 /// it appears in ordinary budget phrasings ("بسعر 500 مليون") that should run
 /// the normal search path, not the stats RPC.

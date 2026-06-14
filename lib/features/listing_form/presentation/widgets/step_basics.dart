@@ -9,6 +9,7 @@ import '../../domain/entities/listing_form_state.dart';
 import '../bloc/listing_form_bloc.dart';
 import '../bloc/listing_form_event.dart';
 import '../util/listing_enum_labels.dart';
+import 'revision_banner.dart';
 import 'step_section.dart';
 
 class StepBasics extends StatefulWidget {
@@ -44,6 +45,8 @@ class _StepBasicsState extends State<StepBasics> {
           title: l10n.listingFormStepBasicsTitle,
           subtitle: l10n.listingFormStepBasicsSubtitle,
           children: [
+            // Phase 031 (WS-B) — stay-live edit notice (revision mode only).
+            if (state.isRevision) const RevisionBanner(),
             FieldLabel(label: l10n.fieldLabelTitle, required: true),
             TextField(
               controller: _titleController,

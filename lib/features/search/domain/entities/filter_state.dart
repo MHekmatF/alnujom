@@ -21,6 +21,17 @@ class FilterState extends Equatable {
   final double? areaSizeMin;
   final double? areaSizeMax;
 
+  /// Phase 031 (WS-D) — feature flags + amenity multi-select. All three are
+  /// backward-compatible additions: `null`/empty mean "no constraint", so an
+  /// existing [FilterState] or a pre-031 saved-search payload behaves exactly
+  /// as before. `furnished`/`parking` gate the `listing_details` booleans;
+  /// `amenities` requires every listed key to be present (JSONB containment in
+  /// the RPC). Values use the same catalog keys as the listing form
+  /// (`elevator`, `garden`, `swimming_pool`, …).
+  final bool? furnished;
+  final bool? parking;
+  final Set<String> amenities;
+
   /// Owner-vs-agency lister filter. `null` ⇒ any (both owner- and
   /// agency-listed), `true` ⇒ only agency-listed, `false` ⇒ only owner-listed.
   /// Serialized to the RPC's `p_is_agency` param (only when non-null) and to
@@ -49,6 +60,9 @@ class FilterState extends Equatable {
     this.bathroomsMode = CountFilterMode.exactly,
     this.areaSizeMin,
     this.areaSizeMax,
+    this.furnished,
+    this.parking,
+    this.amenities = const <String>{},
     this.isAgency,
     this.displayMode = DisplayMode.list,
   });
@@ -68,6 +82,9 @@ class FilterState extends Equatable {
       bathrooms == null &&
       areaSizeMin == null &&
       areaSizeMax == null &&
+      furnished == null &&
+      parking == null &&
+      amenities.isEmpty &&
       isAgency == null;
 
   /// Phase 15 G3: true when at least one filter dimension is active.
@@ -85,6 +102,9 @@ class FilterState extends Equatable {
       bathrooms != null ||
       areaSizeMin != null ||
       areaSizeMax != null ||
+      furnished != null ||
+      parking != null ||
+      amenities.isNotEmpty ||
       isAgency != null ||
       (query != null && query!.isNotEmpty);
 
@@ -104,6 +124,9 @@ class FilterState extends Equatable {
     CountFilterMode? bathroomsMode,
     double? areaSizeMin,
     double? areaSizeMax,
+    bool? furnished,
+    bool? parking,
+    Set<String>? amenities,
     bool? isAgency,
     DisplayMode? displayMode,
     // Sentinel for clearing nullable fields
@@ -119,6 +142,8 @@ class FilterState extends Equatable {
     bool clearRooms = false,
     bool clearBathrooms = false,
     bool clearAreaSize = false,
+    bool clearFurnished = false,
+    bool clearParking = false,
     bool clearIsAgency = false,
   }) {
     return FilterState(
@@ -143,6 +168,9 @@ class FilterState extends Equatable {
       bathroomsMode: bathroomsMode ?? this.bathroomsMode,
       areaSizeMin: clearAreaSize ? null : (areaSizeMin ?? this.areaSizeMin),
       areaSizeMax: clearAreaSize ? null : (areaSizeMax ?? this.areaSizeMax),
+      furnished: clearFurnished ? null : (furnished ?? this.furnished),
+      parking: clearParking ? null : (parking ?? this.parking),
+      amenities: amenities ?? this.amenities,
       isAgency: clearIsAgency ? null : (isAgency ?? this.isAgency),
       displayMode: displayMode ?? this.displayMode,
     );
@@ -175,6 +203,9 @@ class FilterState extends Equatable {
     }
     if (areaSizeMin != null) json['area_size_min'] = areaSizeMin;
     if (areaSizeMax != null) json['area_size_max'] = areaSizeMax;
+    if (furnished != null) json['furnished'] = furnished;
+    if (parking != null) json['parking'] = parking;
+    if (amenities.isNotEmpty) json['amenities'] = amenities.toList();
     if (isAgency != null) json['is_agency'] = isAgency;
     return json;
   }
@@ -224,6 +255,13 @@ class FilterState extends Equatable {
       bathroomsMode: readMode(json['bathrooms_mode']),
       areaSizeMin: readDouble(json['area_size_min']),
       areaSizeMax: readDouble(json['area_size_max']),
+      furnished: json['furnished'] is bool ? json['furnished'] as bool : null,
+      parking: json['parking'] is bool ? json['parking'] as bool : null,
+      amenities: json['amenities'] is List
+          ? (json['amenities'] as List)
+                .whereType<String>()
+                .toSet()
+          : const <String>{},
       isAgency: json['is_agency'] is bool ? json['is_agency'] as bool : null,
     );
   }
@@ -245,6 +283,9 @@ class FilterState extends Equatable {
     bathroomsMode,
     areaSizeMin,
     areaSizeMax,
+    furnished,
+    parking,
+    amenities,
     isAgency,
     displayMode,
   ];

@@ -16,7 +16,11 @@
 import 'package:injectable/injectable.dart';
 
 import '../../listing_form/domain/entities/listing.dart';
+import '../../locations/domain/entities/area.dart';
+import '../../locations/domain/entities/city.dart';
 import '../../locations/domain/entities/governorate.dart';
+import '../../locations/domain/usecases/list_all_areas.dart';
+import '../../locations/domain/usecases/list_all_cities.dart';
 import '../../locations/domain/usecases/list_governorates.dart';
 import 'entities/assistant_message.dart';
 import 'query_parser.dart';
@@ -33,23 +37,40 @@ abstract class AssistantBrain {
 /// offline except for that stats path, which degrades silently.
 @Injectable(as: AssistantBrain)
 class RuleBasedAssistantBrain implements AssistantBrain {
-  RuleBasedAssistantBrain(this._parser, this._listGovernorates, this._stats);
+  RuleBasedAssistantBrain(
+    this._parser,
+    this._listGovernorates,
+    this._listAllCities,
+    this._listAllAreas,
+    this._stats,
+  );
 
   final QueryParser _parser;
   final ListGovernorates _listGovernorates;
+  final ListAllCities _listAllCities;
+  final ListAllAreas _listAllAreas;
   final AssistantStatsRepository _stats;
 
-  /// Session cache — governorates are small and effectively static. Cities
-  /// are NOT matched at this stage: there is no cheap "list ALL cities"
-  /// usecase (the existing ones are per-governorate), so location matching
-  /// is governorate-granular for now. The parser API already carries
-  /// `filters.cityId` so a city table can slot in without contract changes.
+  /// Session caches — governorates / cities / areas are effectively static and
+  /// small enough to hold in memory. Loaded once on the first message so the
+  /// parser can match a city or neighborhood anywhere in the sentence (a
+  /// matched city pins its governorate; a matched area pins its city). Phase 31
+  /// (WS-D): cities/areas are now matched too (was governorate-only in Phase 28).
   List<Governorate>? _governoratesCache;
+  List<City>? _citiesCache;
+  List<Area>? _areasCache;
 
   @override
   Future<AssistantReply> handle(String input) async {
     final governorates = await _governorates();
-    final parsed = _parser.parse(input, governorates: governorates);
+    final cities = await _cities();
+    final areas = await _areas();
+    final parsed = _parser.parse(
+      input,
+      governorates: governorates,
+      cities: cities,
+      areas: areas,
+    );
 
     // Stats-flavored question with a recognized area → try the market RPC.
     // Any failure (offline, RPC missing, empty area) falls through to the
@@ -87,6 +108,27 @@ class RuleBasedAssistantBrain implements AssistantBrain {
     } catch (_) {
       // Offline / fetch failure: parsing still works, just without location
       // matching. Not cached so the next message retries.
+      return const [];
+    }
+  }
+
+  Future<List<City>> _cities() async {
+    final cached = _citiesCache;
+    if (cached != null) return cached;
+    try {
+      return _citiesCache = await _listAllCities(includeInactive: false);
+    } catch (_) {
+      // Not cached so the next message retries; city matching simply skipped.
+      return const [];
+    }
+  }
+
+  Future<List<Area>> _areas() async {
+    final cached = _areasCache;
+    if (cached != null) return cached;
+    try {
+      return _areasCache = await _listAllAreas(includeInactive: false);
+    } catch (_) {
       return const [];
     }
   }
