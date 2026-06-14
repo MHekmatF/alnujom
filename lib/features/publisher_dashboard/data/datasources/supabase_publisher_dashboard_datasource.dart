@@ -13,9 +13,7 @@ import '../dtos/publisher_listing_dto.dart';
 ///
 /// Reads the SQL view `public.v_publisher_listings` (created in Phase 2
 /// migration 8). The view does the most-recent-history-row + primary-price
-/// joins server-side, so this datasource is a single PostgREST query. RLS
-/// inheritance on the view means the calling user only sees their own rows
-/// (or all rows if they hold `listings.view_all` — admin path).
+/// joins server-side, so this datasource is a single PostgREST query.
 @injectable
 class SupabasePublisherDashboardDatasource {
   SupabasePublisherDashboardDatasource(this._client);
@@ -27,7 +25,18 @@ class SupabasePublisherDashboardDatasource {
     int offset = 0,
     int limit = 20,
   }) async {
-    var query = _client.from('v_publisher_listings').select();
+    // "My Listings" is always scoped to the signed-in user's OWN listings.
+    // The view's RLS would otherwise surface EVERY listing to a moderator who
+    // holds `listings.view_all`, so this screen must filter on
+    // `publisher_user_id` explicitly — admins moderate other people's listings
+    // through the separate admin review queue, not here. (Found in QA: another
+    // user's listing appeared in an admin's "My Listings".)
+    final uid = _client.auth.currentUser?.id;
+    if (uid == null) return const <PublisherListingDto>[];
+    var query = _client
+        .from('v_publisher_listings')
+        .select()
+        .eq('publisher_user_id', uid);
     if (statusFilter != null) {
       query = query.eq('status', statusFilter);
     }
