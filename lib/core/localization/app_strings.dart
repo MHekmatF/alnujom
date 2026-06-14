@@ -6308,6 +6308,11 @@ final class _DebugAppLocalizations extends AppLocalizations {
   String get revisionBannerBody =>
       _resolve("revisionBannerBody", (loc) => loc.revisionBannerBody);
   @override
+  String get revisionStartFailedMessage => _resolve(
+    "revisionStartFailedMessage",
+    (loc) => loc.revisionStartFailedMessage,
+  );
+  @override
   String get myListingsEditNeedsApproval =>
       _resolve("myListingsEditNeedsApproval", (loc) => loc.myListingsEditNeedsApproval);
   @override

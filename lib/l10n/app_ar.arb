@@ -2230,6 +2230,8 @@
   "@revisionBannerTitle": { "description": "Phase 31." },
   "revisionBannerBody": "لن يظهر للعامة حتى تتم الموافقة.",
   "@revisionBannerBody": { "description": "Phase 31." },
+  "revisionStartFailedMessage": "تعذّر بدء تعديل هذا الإعلان. قد لا تكون مالكه، لذا بقي محتواه المنشور دون تغيير.",
+  "@revisionStartFailedMessage": { "description": "Phase 31 follow-up — shown when begin_listing_revision fails for an approved listing instead of editing the live listing in place." },
   "myListingsEditNeedsApproval": "تعديل (يتطلب موافقة)",
   "@myListingsEditNeedsApproval": { "description": "Phase 31." },
   "myListingsEditInReviewBadge": "تعديل قيد المراجعة",

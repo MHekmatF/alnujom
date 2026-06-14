@@ -48,6 +48,15 @@ import '../util/video_processor.dart';
 import '../util/watermark_pipeline.dart';
 import 'listing_form_event.dart';
 
+/// Sentinel stored in [ListingFormState.lastSaveError] when a stay-live
+/// revision could NOT be started for an approved listing (e.g. the caller is
+/// not the owner — an admin reaching a foreign listing via a queue). The page
+/// maps this to a localized message; the form is intentionally left unrendered
+/// so the live, public listing is never edited in place. See
+/// `_onLoadOrCreateDraftRequested`.
+const String kListingFormRevisionStartFailed =
+    'listing_form.revision_start_failed';
+
 @injectable
 class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
   ListingFormBloc(
@@ -210,8 +219,18 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
         if (listing.status == ListingStatus.approved) {
           final loaded = await _loadRevisionForEditing(listing, agencies, emit);
           if (loaded) return;
-          // On any revision-setup failure, fall back to a read of the live
-          // listing so the form still renders (in-place edit semantics).
+          // Revision setup failed (e.g. the caller is not the owner — an admin
+          // reaching a foreign listing via the review queue). Do NOT fall back
+          // to an in-place read: editing an APPROVED listing in place would
+          // mutate the LIVE, public content directly, bypassing the stay-live
+          // review. Surface an error and leave the form unrendered instead.
+          emit(
+            state.copyWith(
+              loadInProgress: false,
+              lastSaveError: kListingFormRevisionStartFailed,
+            ),
+          );
+          return;
         }
 
         final details = await _repository.loadDetails(listing.id);

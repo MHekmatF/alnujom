@@ -224,7 +224,10 @@ class _ListingFormBody extends StatelessWidget {
                   padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
                   child: Center(
                     child: Text(
-                      state.lastSaveError ?? l10n.listingFormLoadingMessage,
+                      state.lastSaveError == kListingFormRevisionStartFailed
+                          ? l10n.revisionStartFailedMessage
+                          : (state.lastSaveError ??
+                                l10n.listingFormLoadingMessage),
                       textAlign: TextAlign.center,
                       style: styles.bodyLarge.copyWith(color: colors.textMuted),
                     ),
