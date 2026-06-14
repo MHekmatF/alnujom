@@ -820,6 +820,22 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
         emit(state.copyWith(submitInProgress: false, submitSucceeded: true));
         return;
       }
+      // Phase 031 follow-up — the single-scroll detail-style CREATE form
+      // (ListingDetailFormPage) mutates only in-memory state via FieldChanged;
+      // unlike the stepper it has no per-step "Continue"/"Save & exit" that
+      // would call SaveFormStep, so nothing reaches the DB. Flush the whole
+      // draft once here before the server validates it, otherwise the
+      // submit_listing RPC sees an empty row and rejects every field. This is
+      // idempotent for the stepper, which already saved each step in place.
+      for (final step in const <ListingFormStep>[
+        ListingFormStep.basics,
+        ListingFormStep.location,
+        ListingFormStep.details,
+        ListingFormStep.prices,
+        ListingFormStep.visibility,
+      ]) {
+        await _saveFormStep(state, step);
+      }
       final result = await _submitListing(listing.id);
       emit(
         state.copyWith(
