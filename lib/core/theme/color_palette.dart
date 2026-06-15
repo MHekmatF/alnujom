@@ -83,62 +83,64 @@ final class ModernPalette extends ColorPalette {
   @override
   String get name => 'modern';
 
-  // Phase 32 redesign — "Premium-airy" light language (from the Al Nujom Design
-  // System). Warm cream surfaces (#FAF6EF) + crisp white cards and an airy 4px
-  // rhythm; the brand stars-blue stays the PRIMARY (trust + AA-legible links,
-  // icons, active states), GOLD (#C2A14D) is elevated to the premium/featured
-  // signature (tertiary — featured badges, price/premium accents), coral marks
-  // favorites, and the green/WhatsApp trust signals are preserved. Warm ink
-  // ramp. Gold is never used as link/label text (fails contrast) — only as a
-  // fill behind dark ink or as a badge tint. WCAG AA on cream.
+  // Phase 32 redesign — "Airy" light language (from the Al Nujom Design System).
+  // Cool off-white surfaces (#F5F7FA) + crisp white cards and an airy 4px
+  // rhythm; a fresh TEAL (#0F766E) is the PRIMARY UI accent (links, icons,
+  // active states, price — AA-legible as text on the cool surface), GOLD
+  // (#C2A14D) stays the premium/featured signature (tertiary — featured badges
+  // only), coral marks favorites, and the green/WhatsApp trust signals are
+  // preserved. Slate ink ramp (#0F172A → #475569 → #64748B). Gold is never used
+  // as link/label text (fails contrast) — only as a fill behind dark ink or a
+  // badge tint. WCAG AA on the cool surface.
   @override
   AppPaletteTokens get _lightTokens => const AppPaletteTokens(
-    primary: Color(0xFF13507D),
+    primary: Color(0xFF0F766E),
     onPrimary: Color(0xFFFFFFFF),
-    primaryContainer: Color(0xFFDCE8F3),
-    onPrimaryContainer: Color(0xFF082B44),
+    primaryContainer: Color(0xFFCCFBF1),
+    onPrimaryContainer: Color(0xFF0A4A45),
     accent: Color(0xFFF4795B),
     onAccent: Color(0xFFFFFFFF),
     accentContainer: Color(0xFFFBE5DC),
-    secondary: Color(0xFF1A1714),
+    secondary: Color(0xFF0F172A),
     onSecondary: Color(0xFFFFFFFF),
     tertiary: Color(0xFFC2A14D),
     success: Color(0xFF2E9E6B),
     warning: Color(0xFFC98318),
     error: Color(0xFFD23F3F),
-    surface: Color(0xFFFAF6EF),
-    surfaceVariant: Color(0xFFF1EADD),
+    surface: Color(0xFFF5F7FA),
+    surfaceVariant: Color(0xFFEAEFF5),
     card: Color(0xFFFFFFFF),
-    outline: Color(0xFFEADFCD),
-    outlineStrong: Color(0xFFD2C6B2),
-    onSurface: Color(0xFF1A1714),
-    onSurfaceVariant: Color(0xFF5C5346),
-    // Warm equivalent of the old #5F6C78 muted: #6E6456 ≈ 5.0:1 on cream
-    // (#FAF6EF), still clearly lighter than onSurfaceVariant (#5C5346 ≈ 7.5:1)
-    // so the timestamp/location/placeholder hierarchy holds.
-    textMuted: Color(0xFF6E6456),
+    outline: Color(0xFFE2E8F0),
+    outlineStrong: Color(0xFFCBD5E1),
+    onSurface: Color(0xFF0F172A),
+    onSurfaceVariant: Color(0xFF475569),
+    // Slate muted (#64748B ≈ 4.6:1 on #F5F7FA), clearly lighter than
+    // onSurfaceVariant (#475569 ≈ 7:1) so the timestamp/location/placeholder
+    // hierarchy holds.
+    textMuted: Color(0xFF64748B),
     verified: Color(0xFF1F7A4D),
     verifiedContainer: Color(0xFFDCF0E5),
     onError: Color(0xFFFFFFFF),
     onSuccess: Color(0xFFFFFFFF),
     onPhoto: Color(0xFFFFFFFF),
-    // Warm dark scrim base for over-photo chips + the bottom image gradient.
-    photoOverlay: Color(0x8C160F0A),
+    // Cool slate-tinted dark scrim for over-photo chips + the image gradient.
+    photoOverlay: Color(0x8C0F172A),
     scrim: Color(0x66000000),
     whatsapp: Color(0xFF1DAB61),
     onWhatsapp: Color(0xFFFFFFFF),
   );
 
-  // Phase 32 redesign — DS "Dark" direction: midnight-navy surfaces (#0B1020),
-  // elevated #161C2D cards, an electric-blue (#3B82F6) primary that glows on key
-  // CTAs / the active nav (glow added at the widget layer), a warm gold featured
-  // accent, coral favorites, and the green/WhatsApp trust signals. WCAG AA.
+  // Phase 32 redesign — DS dark surfaces (midnight-navy #0B1020 + elevated
+  // #161C2D cards) carrying the Airy TEAL accent for brand consistency with
+  // light: a bright teal (#2DD4BF) primary that glows on key CTAs / the active
+  // nav (glow added at the widget layer) and takes DARK ink (#04231F) on fills,
+  // a warm gold featured accent, coral favorites, green/WhatsApp trust. WCAG AA.
   @override
   AppPaletteTokens get _darkTokens => const AppPaletteTokens(
-    primary: Color(0xFF3B82F6),
-    onPrimary: Color(0xFFFFFFFF),
-    primaryContainer: Color(0xFF18233E),
-    onPrimaryContainer: Color(0xFFCFE0FB),
+    primary: Color(0xFF2DD4BF),
+    onPrimary: Color(0xFF04231F),
+    primaryContainer: Color(0xFF134E4A),
+    onPrimaryContainer: Color(0xFF99F6E4),
     accent: Color(0xFFFF8E72),
     onAccent: Color(0xFF3A1207),
     accentContainer: Color(0xFF4A2114),
