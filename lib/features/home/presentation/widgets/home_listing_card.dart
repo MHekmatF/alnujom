@@ -388,8 +388,11 @@ class _Hero extends StatelessWidget {
             start: AppSpacing.md,
             child: StatusPill(
               label: l10n.home_featured_badge,
-              color: AppColors.of(context).primary,
-              icon: LucideIcons.sparkles,
+              // Premium "مميّز" signal — solid GOLD with dark ink (gold fails
+              // contrast under white). Matches AppBadge.featured everywhere.
+              color: AppColors.of(context).tertiary,
+              foreground: Theme.of(context).colorScheme.onTertiary,
+              icon: LucideIcons.star,
             ),
           ),
         PositionedDirectional(
