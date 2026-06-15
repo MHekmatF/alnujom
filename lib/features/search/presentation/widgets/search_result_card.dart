@@ -146,9 +146,9 @@ class SearchResultCard extends StatelessWidget {
                               item.primaryAmount.toStringAsFixed(0),
                               item.primaryCurrency,
                             ),
-                            style: styles.priceMedium.copyWith(
-                              color: colors.onSurface,
-                            ),
+                            // Price leads in the brand primary (priceMedium's
+                            // default) — consistent with the home + detail cards.
+                            style: styles.priceMedium,
                             textAlign: TextAlign.start,
                           ),
                         ),

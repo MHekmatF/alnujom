@@ -126,13 +126,15 @@ class _FeaturedSectionHeader extends StatelessWidget {
           Container(
             padding: const EdgeInsetsDirectional.all(AppSpacing.xs),
             decoration: BoxDecoration(
-              color: colors.primaryContainer,
+              // Gold sparkle tile — ties the "featured" section to the gold
+              // premium signal used on the cards' مميّز badge.
+              color: colors.tertiary,
               borderRadius: appRadius(AppRadii.md),
             ),
             child: Icon(
               LucideIcons.sparkles,
               size: AppSpacing.lg,
-              color: colors.onPrimaryContainer,
+              color: Theme.of(context).colorScheme.onTertiary,
             ),
           ),
           const SizedBox(width: AppSpacing.md),
