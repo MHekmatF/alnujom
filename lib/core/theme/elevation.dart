@@ -45,44 +45,44 @@ final class AppElevation {
       );
     }
 
-    // Phase 32 — Premium-airy: warm brown-tinted soft shadows (DS
-    // `--shadow-sm/md/lg`, base #261C0C ≈ rgba(38,28,12)) so white cards lift
-    // gently off the warm cream surface. A two-layer set (key + ambient) at
-    // each level reads softer and more "expensive" than a single hard shadow.
+    // Phase 32 — Airy: cool slate-tinted soft shadows (DS `--shadow-sm/md/lg`,
+    // base #0F172A ≈ rgba(15,23,42)) so white cards lift gently off the cool
+    // off-white surface. A two-layer set (key + ambient) at each level reads
+    // softer and more "expensive" than a single hard shadow.
     return const AppElevation._(
       level0: [],
       level1: [
         BoxShadow(
-          color: Color(0x16261C0C),
+          color: Color(0x160F172A),
           offset: Offset(0, 2),
           blurRadius: 6,
         ),
         BoxShadow(
-          color: Color(0x0A261C0C),
+          color: Color(0x0A0F172A),
           offset: Offset(0, 1),
           blurRadius: 2,
         ),
       ],
       level2: [
         BoxShadow(
-          color: Color(0x1F261C0C),
+          color: Color(0x1F0F172A),
           offset: Offset(0, 8),
           blurRadius: 24,
         ),
         BoxShadow(
-          color: Color(0x0F261C0C),
+          color: Color(0x0F0F172A),
           offset: Offset(0, 2),
           blurRadius: 6,
         ),
       ],
       level3: [
         BoxShadow(
-          color: Color(0x2B261C0C),
+          color: Color(0x2B0F172A),
           offset: Offset(0, 18),
           blurRadius: 44,
         ),
         BoxShadow(
-          color: Color(0x12261C0C),
+          color: Color(0x120F172A),
           offset: Offset(0, 6),
           blurRadius: 14,
         ),
