@@ -35,6 +35,9 @@ sealed class ColorPalette {
   AppPaletteTokens get _darkTokens;
 
   ColorScheme _scheme(AppPaletteTokens tokens, Brightness brightness) {
+    // Gold/tertiary always carries a dark foreground (it fails contrast under
+    // white); the deep ink reads cleanly on both the warm and the brighter gold.
+    const onTertiary = Color(0xFF1A1714);
     return ColorScheme.fromSeed(
       seedColor: tokens.primary,
       brightness: brightness,
@@ -45,7 +48,12 @@ sealed class ColorPalette {
       onPrimaryContainer: tokens.onPrimaryContainer,
       secondary: tokens.secondary,
       onSecondary: tokens.onSecondary,
+      secondaryContainer: tokens.surfaceVariant,
+      onSecondaryContainer: tokens.onSurface,
       tertiary: tokens.tertiary,
+      onTertiary: onTertiary,
+      tertiaryContainer: tokens.accentContainer,
+      onTertiaryContainer: onTertiary,
       error: tokens.error,
       onError: tokens.onError,
       scrim: tokens.scrim,
@@ -53,6 +61,18 @@ sealed class ColorPalette {
       onSurface: tokens.onSurface,
       onSurfaceVariant: tokens.onSurfaceVariant,
       outline: tokens.outline,
+      outlineVariant: tokens.outline,
+      // Drive Material 3's own surface ramp from our tokens (menus, sheets,
+      // dropdowns, filled fields) so nothing reads the seed-derived defaults —
+      // and kill the M3 elevation tint app-wide (cards/app bars stay flat).
+      surfaceTint: Colors.transparent,
+      surfaceContainerLowest: tokens.surface,
+      surfaceContainerLow: tokens.surface,
+      surfaceContainer: tokens.surfaceVariant,
+      surfaceContainerHigh: tokens.card,
+      surfaceContainerHighest: tokens.surfaceVariant,
+      inverseSurface: tokens.onSurface,
+      onInverseSurface: tokens.surface,
     );
   }
 }
@@ -63,86 +83,86 @@ final class ModernPalette extends ColorPalette {
   @override
   String get name => 'modern';
 
-  // Phase 25 restyle — "Claude Design" language (user-chosen): a deep, calm,
-  // trustworthy blue primary, a warm coral accent (favorites/CTAs), clean
-  // cool-neutral surfaces, and a distinct GREEN verified-agency badge (trust is
-  // the product). Values ported 1:1 from UiUX/CLaude Design/tokens.css. WCAG AA.
+  // Phase 32 redesign — "Premium-airy" light language (from the Al Nujom Design
+  // System). Warm cream surfaces (#FAF6EF) + crisp white cards and an airy 4px
+  // rhythm; the brand stars-blue stays the PRIMARY (trust + AA-legible links,
+  // icons, active states), GOLD (#C2A14D) is elevated to the premium/featured
+  // signature (tertiary — featured badges, price/premium accents), coral marks
+  // favorites, and the green/WhatsApp trust signals are preserved. Warm ink
+  // ramp. Gold is never used as link/label text (fails contrast) — only as a
+  // fill behind dark ink or as a badge tint. WCAG AA on cream.
   @override
   AppPaletteTokens get _lightTokens => const AppPaletteTokens(
     primary: Color(0xFF13507D),
     onPrimary: Color(0xFFFFFFFF),
-    primaryContainer: Color(0xFFD7E6F3),
+    primaryContainer: Color(0xFFDCE8F3),
     onPrimaryContainer: Color(0xFF082B44),
     accent: Color(0xFFF4795B),
     onAccent: Color(0xFFFFFFFF),
-    accentContainer: Color(0xFFFBE2DA),
-    secondary: Color(0xFF0F172A),
+    accentContainer: Color(0xFFFBE5DC),
+    secondary: Color(0xFF1A1714),
     onSecondary: Color(0xFFFFFFFF),
-    tertiary: Color(0xFFC8842F),
+    tertiary: Color(0xFFC2A14D),
     success: Color(0xFF2E9E6B),
     warning: Color(0xFFC98318),
     error: Color(0xFFD23F3F),
-    surface: Color(0xFFF6F8FB),
-    surfaceVariant: Color(0xFFECF1F6),
+    surface: Color(0xFFFAF6EF),
+    surfaceVariant: Color(0xFFF1EADD),
     card: Color(0xFFFFFFFF),
-    outline: Color(0xFFD8E0E8),
-    outlineStrong: Color(0xFF64748B),
-    onSurface: Color(0xFF14202B),
-    onSurfaceVariant: Color(0xFF475663),
-    // Phase polish (Impeccable) — was #74838F (3.66:1 on surface, below the AA
-    // 4.5:1 body minimum); darkened to #5F6C78 (5.06:1) so muted text
-    // (timestamps, location, placeholders) is legible. Stays clearly lighter
-    // than onSurfaceVariant (#475663, 7.1:1) to preserve the text hierarchy.
-    textMuted: Color(0xFF5F6C78),
+    outline: Color(0xFFEADFCD),
+    outlineStrong: Color(0xFFD2C6B2),
+    onSurface: Color(0xFF1A1714),
+    onSurfaceVariant: Color(0xFF5C5346),
+    // Warm equivalent of the old #5F6C78 muted: #6E6456 ≈ 5.0:1 on cream
+    // (#FAF6EF), still clearly lighter than onSurfaceVariant (#5C5346 ≈ 7.5:1)
+    // so the timestamp/location/placeholder hierarchy holds.
+    textMuted: Color(0xFF6E6456),
     verified: Color(0xFF1F7A4D),
     verifiedContainer: Color(0xFFDCF0E5),
-    // Phase 25 premium uplift — explicit semantic foregrounds + over-photo /
-    // modal overlay tokens (close the "filledSuccess assumes white" gap and the
-    // 6 hardcoded Colors.white/black over-photo violations).
     onError: Color(0xFFFFFFFF),
     onSuccess: Color(0xFFFFFFFF),
     onPhoto: Color(0xFFFFFFFF),
-    photoOverlay: Color(0x8C0B1118),
+    // Warm dark scrim base for over-photo chips + the bottom image gradient.
+    photoOverlay: Color(0x8C160F0A),
     scrim: Color(0x66000000),
-    // Phase 28 — WhatsApp contact CTA (brand green, same tier as success).
     whatsapp: Color(0xFF1DAB61),
     onWhatsapp: Color(0xFFFFFFFF),
   );
 
+  // Phase 32 redesign — DS "Dark" direction: midnight-navy surfaces (#0B1020),
+  // elevated #161C2D cards, an electric-blue (#3B82F6) primary that glows on key
+  // CTAs / the active nav (glow added at the widget layer), a warm gold featured
+  // accent, coral favorites, and the green/WhatsApp trust signals. WCAG AA.
   @override
   AppPaletteTokens get _darkTokens => const AppPaletteTokens(
-    primary: Color(0xFF6BB0E6),
-    onPrimary: Color(0xFF062339),
-    primaryContainer: Color(0xFF15466B),
-    onPrimaryContainer: Color(0xFFCFE6F8),
+    primary: Color(0xFF3B82F6),
+    onPrimary: Color(0xFFFFFFFF),
+    primaryContainer: Color(0xFF18233E),
+    onPrimaryContainer: Color(0xFFCFE0FB),
     accent: Color(0xFFFF8E72),
     onAccent: Color(0xFF3A1207),
-    accentContainer: Color(0xFF5A271A),
-    secondary: Color(0xFFE2E8F0),
+    accentContainer: Color(0xFF4A2114),
+    secondary: Color(0xFFE7ECF5),
     onSecondary: Color(0xFF0B1220),
-    tertiary: Color(0xFFE2A856),
+    tertiary: Color(0xFFD9B86A),
     success: Color(0xFF4CB587),
     warning: Color(0xFFE2B25A),
     error: Color(0xFFF0706E),
-    surface: Color(0xFF0E141A),
-    surfaceVariant: Color(0xFF1A222B),
-    card: Color(0xFF161E26),
-    outline: Color(0xFF2B3640),
-    outlineStrong: Color(0xFF94A3B8),
-    onSurface: Color(0xFFE9EFF4),
-    onSurfaceVariant: Color(0xFFAAB7C2),
-    textMuted: Color(0xFF7E8C98),
+    surface: Color(0xFF0B1020),
+    surfaceVariant: Color(0xFF161C2D),
+    card: Color(0xFF161C2D),
+    outline: Color(0xFF252E44),
+    outlineStrong: Color(0xFF38446A),
+    onSurface: Color(0xFFEAF0FB),
+    onSurfaceVariant: Color(0xFF9FABC4),
+    textMuted: Color(0xFF8694AC),
     verified: Color(0xFF57C48C),
     verifiedContainer: Color(0xFF163A2A),
-    // Phase 25 premium uplift — dark-mode semantic foregrounds read on the
-    // lighter dark success/error fills; over-photo tokens stay theme-independent.
     onError: Color(0xFF420A0A),
     onSuccess: Color(0xFF04231A),
     onPhoto: Color(0xFFFFFFFF),
-    photoOverlay: Color(0x8C0B1118),
+    photoOverlay: Color(0x8C05080F),
     scrim: Color(0x99000000),
-    // Phase 28 — brighter brand green on dark surfaces, dark foreground
-    // (mirrors the success/onSuccess dark-mode pattern).
     whatsapp: Color(0xFF25D366),
     onWhatsapp: Color(0xFF05301B),
   );

@@ -246,3 +246,8 @@ UiUX/
 # Phase 12 plan-time scratch files (gitignored per tasks.md T005/T006)
 specs/012-listing-approval/.phase10-trigger-bodies.sql
 specs/012-listing-approval/.phase4-log-audit-body.sql
+
+# redesign scratch artifacts
+/Al Nujom Design System.zip
+/redesign-directions*.png
+/.playwright-mcp/

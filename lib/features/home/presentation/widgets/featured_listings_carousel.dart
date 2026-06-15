@@ -95,7 +95,10 @@ class FeaturedListingsCarousel extends StatelessWidget {
   static double _cardHeight(BuildContext context) {
     final heroHeight = _cardWidth * 9 / 16;
     final scale = MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 1.6);
-    return heroHeight + 200.0 * scale.toDouble();
+    // Body allowance covers price + 2-line title + location + the specs strip +
+    // the timestamp/agency footer + card margins. Bumped from 200 → 232 to clear
+    // a 17px bottom overflow seen on cards that carry the full specs strip.
+    return heroHeight + 232.0 * scale.toDouble();
   }
 }
 
