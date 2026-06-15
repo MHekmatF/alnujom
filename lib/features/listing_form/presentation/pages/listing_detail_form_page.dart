@@ -19,12 +19,24 @@ import '../widgets/publish_success_dialog.dart';
 import '../widgets/step_media.dart';
 import '../widgets/submit_failure_dialog.dart';
 
-/// Which CREATE-flow layout the publisher last chose, persisted for the app
-/// session (a process-lifetime [ValueNotifier], reset on a cold start). The
-/// in-page [AppSegmentedControl] toggle on [ListingFormPage] reads + writes it;
-/// `true` = the single-scroll detail view (the default), `false` = the classic
-/// stepper. EDIT mode ignores this and always uses the stepper.
-final ValueNotifier<bool> createFlowUsesDetailView = ValueNotifier<bool>(true);
+/// The three CREATE-flow layouts the publisher can switch between via the
+/// in-page toggle on [ListingFormPage]. EDIT mode ignores this (always stepper).
+enum CreateFormStyle {
+  /// Phase 32 — fast single-scroll form, DS big-field aesthetic (the default).
+  express,
+
+  /// Phase 031 — single scroll mirroring the read-only listing-details page.
+  detail,
+
+  /// The original seven-step stepper.
+  classic,
+}
+
+/// Which CREATE-flow layout the publisher last chose, held for the app session
+/// (a process-lifetime [ValueNotifier], reset on a cold start). Defaults to the
+/// new [CreateFormStyle.express] flow.
+final ValueNotifier<CreateFormStyle> createFormStyle =
+    ValueNotifier<CreateFormStyle>(CreateFormStyle.express);
 
 /// Phase 031 (WS-A) — detail-style CREATE form.
 ///
