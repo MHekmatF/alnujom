@@ -19,6 +19,7 @@ import '../../domain/entities/listing_form_state.dart';
 import '../bloc/listing_form_bloc.dart';
 import '../bloc/listing_form_event.dart';
 import 'listing_detail_form_page.dart';
+import 'listing_express_form_page.dart';
 import '../widgets/step_basics.dart';
 import '../widgets/step_details.dart';
 import '../widgets/step_location.dart';
@@ -77,13 +78,15 @@ class _CreateFlowSwitcher extends StatelessWidget {
     final colors = AppColors.of(context);
     final elevation = AppElevation.of(context);
 
-    return ValueListenableBuilder<bool>(
-      valueListenable: createFlowUsesDetailView,
-      builder: (context, detailView, _) {
+    return ValueListenableBuilder<CreateFormStyle>(
+      valueListenable: createFormStyle,
+      builder: (context, style, _) {
         final toggle = Container(
           decoration: BoxDecoration(
             color: colors.surface,
-            boxShadow: detailView ? elevation.level1 : elevation.level0,
+            boxShadow: style != CreateFormStyle.classic
+                ? elevation.level1
+                : elevation.level0,
           ),
           child: SafeArea(
             bottom: false,
@@ -94,19 +97,24 @@ class _CreateFlowSwitcher extends StatelessWidget {
                 AppSpacing.lg,
                 AppSpacing.sm,
               ),
-              child: AppSegmentedControl<bool>(
-                value: detailView,
-                onChanged: (v) => createFlowUsesDetailView.value = v,
+              child: AppSegmentedControl<CreateFormStyle>(
+                value: style,
+                onChanged: (v) => createFormStyle.value = v,
                 segments: [
-                  AppSegmentedSegment<bool>(
+                  AppSegmentedSegment<CreateFormStyle>(
+                    icon: LucideIcons.zap,
+                    label: l10n.createToggleExpress,
+                    value: CreateFormStyle.express,
+                  ),
+                  AppSegmentedSegment<CreateFormStyle>(
                     icon: LucideIcons.layout_panel_top,
                     label: l10n.createToggleDetailView,
-                    value: true,
+                    value: CreateFormStyle.detail,
                   ),
-                  AppSegmentedSegment<bool>(
+                  AppSegmentedSegment<CreateFormStyle>(
                     icon: LucideIcons.list_ordered,
                     label: l10n.createToggleClassicSteps,
-                    value: false,
+                    value: CreateFormStyle.classic,
                   ),
                 ],
               ),
@@ -114,36 +122,41 @@ class _CreateFlowSwitcher extends StatelessWidget {
           ),
         );
 
-        if (detailView) {
-          // Detail view owns its own chrome (title bar + body + submit bar).
-          return Scaffold(
-            backgroundColor: colors.surface,
-            appBar: AppBar(
-              backgroundColor: colors.surface,
-              elevation: 0,
-              title: Text(l10n.formDetailPageTitle),
-              leading: AppButton.iconButton(
-                icon: Icons.arrow_back,
-                label: l10n.listingFormBackButton,
-                onPressed: () => context.go(AppRoutes.shellHome),
-              ),
-            ),
-            body: Column(
-              children: [
-                toggle,
-                const Expanded(child: ListingDetailFormPage()),
-              ],
-            ),
+        // Classic stepper keeps its own Scaffold (per-step app bar + bottom
+        // nav). The toggle strip rides above it as a slim mode selector.
+        if (style == CreateFormStyle.classic) {
+          return Column(
+            children: [
+              Material(color: colors.surface, child: toggle),
+              const Expanded(child: _ListingFormBody()),
+            ],
           );
         }
 
-        // Classic stepper keeps its own Scaffold (per-step app bar + bottom
-        // nav). The toggle strip rides above it as a slim mode selector.
-        return Column(
-          children: [
-            Material(color: colors.surface, child: toggle),
-            const Expanded(child: _ListingFormBody()),
-          ],
+        // Express + Detail share the same chrome (title bar + toggle + body);
+        // only the form body differs.
+        return Scaffold(
+          backgroundColor: colors.surface,
+          appBar: AppBar(
+            backgroundColor: colors.surface,
+            elevation: 0,
+            title: Text(l10n.formDetailPageTitle),
+            leading: AppButton.iconButton(
+              icon: Icons.arrow_back,
+              label: l10n.listingFormBackButton,
+              onPressed: () => context.go(AppRoutes.shellHome),
+            ),
+          ),
+          body: Column(
+            children: [
+              toggle,
+              Expanded(
+                child: style == CreateFormStyle.express
+                    ? const ListingExpressFormPage()
+                    : const ListingDetailFormPage(),
+              ),
+            ],
+          ),
         );
       },
     );

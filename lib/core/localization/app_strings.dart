@@ -6245,6 +6245,12 @@ final class _DebugAppLocalizations extends AppLocalizations {
   String get createToggleClassicSteps =>
       _resolve("createToggleClassicSteps", (loc) => loc.createToggleClassicSteps);
   @override
+  String get createToggleExpress =>
+      _resolve("createToggleExpress", (loc) => loc.createToggleExpress);
+  @override
+  String get createExpressHint =>
+      _resolve("createExpressHint", (loc) => loc.createExpressHint);
+  @override
   String get formDetailPageTitle =>
       _resolve("formDetailPageTitle", (loc) => loc.formDetailPageTitle);
   @override
