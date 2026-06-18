@@ -6,15 +6,15 @@ void main() {
   group('ModernPalette light tokens', () {
     final tokens = const ModernPalette().lightTokens();
 
-    test('primary', () => expect(tokens.primary, const Color(0xFF0F766E)));
+    test('primary', () => expect(tokens.primary, const Color(0xFF1F4FE6)));
     test('onPrimary', () => expect(tokens.onPrimary, const Color(0xFFFFFFFF)));
     test(
       'primaryContainer',
-      () => expect(tokens.primaryContainer, const Color(0xFFCCFBF1)),
+      () => expect(tokens.primaryContainer, const Color(0xFFDCE6FB)),
     );
     test(
       'onPrimaryContainer',
-      () => expect(tokens.onPrimaryContainer, const Color(0xFF0A4A45)),
+      () => expect(tokens.onPrimaryContainer, const Color(0xFF11317A)),
     );
     test('accent', () => expect(tokens.accent, const Color(0xFFF4795B)));
     test('onAccent', () => expect(tokens.onAccent, const Color(0xFFFFFFFF)));
@@ -62,15 +62,15 @@ void main() {
   group('ModernPalette dark tokens', () {
     final tokens = const ModernPalette().darkTokens();
 
-    test('primary', () => expect(tokens.primary, const Color(0xFF2DD4BF)));
-    test('onPrimary', () => expect(tokens.onPrimary, const Color(0xFF04231F)));
+    test('primary', () => expect(tokens.primary, const Color(0xFF5896FF)));
+    test('onPrimary', () => expect(tokens.onPrimary, const Color(0xFF06122B)));
     test(
       'primaryContainer',
-      () => expect(tokens.primaryContainer, const Color(0xFF134E4A)),
+      () => expect(tokens.primaryContainer, const Color(0xFF16315F)),
     );
     test(
       'onPrimaryContainer',
-      () => expect(tokens.onPrimaryContainer, const Color(0xFF99F6E4)),
+      () => expect(tokens.onPrimaryContainer, const Color(0xFFCFE0FF)),
     );
     test('accent', () => expect(tokens.accent, const Color(0xFFFF8E72)));
     test('onAccent', () => expect(tokens.onAccent, const Color(0xFF3A1207)));

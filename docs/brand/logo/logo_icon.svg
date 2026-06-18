@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+    <rect x="150" y="180" width="66" height="212" rx="5" fill="#1F4FE6"/>
+    <rect x="346" y="150" width="66" height="242" rx="5" fill="#1F4FE6"/>
+    <rect x="166" y="160" width="34" height="22" rx="3" fill="#1F4FE6"/>
+    <rect x="362" y="130" width="34" height="22" rx="3" fill="#1F4FE6"/><polygon points="216,180 282,180 412,392 346,392" fill="#1F4FE6"/>
+    <rect x="208" y="180" width="8" height="212" fill="#0E1A2E" opacity="0.45"/>
+    <rect x="404" y="150" width="8" height="242" fill="#0E1A2E" opacity="0.45"/><rect x="160" y="232" width="40" height="7" rx="3.5" fill="#FFFFFF" opacity="0.9"/><rect x="160" y="296" width="40" height="7" rx="3.5" fill="#FFFFFF" opacity="0.9"/><rect x="160" y="352" width="40" height="7" rx="3.5" fill="#FFFFFF" opacity="0.9"/><rect x="352" y="190" width="40" height="7" rx="3.5" fill="#FFFFFF" opacity="0.9"/><rect x="352" y="248" width="40" height="7" rx="3.5" fill="#FFFFFF" opacity="0.9"/><rect x="352" y="306" width="40" height="7" rx="3.5" fill="#FFFFFF" opacity="0.9"/><path d="M379.0,72.0L385.1,89.6L403.7,90.0L388.9,101.2L394.3,119.0L379.0,108.4L363.7,119.0L369.1,101.2L354.3,90.0L372.9,89.6Z" fill="#9AA4B2"/></svg>

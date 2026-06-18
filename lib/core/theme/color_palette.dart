@@ -83,21 +83,20 @@ final class ModernPalette extends ColorPalette {
   @override
   String get name => 'modern';
 
-  // Phase 32 redesign — "Airy" light language (from the Al Nujom Design System).
-  // Cool off-white surfaces (#F5F7FA) + crisp white cards and an airy 4px
-  // rhythm; a fresh TEAL (#0F766E) is the PRIMARY UI accent (links, icons,
-  // active states, price — AA-legible as text on the cool surface), GOLD
-  // (#C2A14D) stays the premium/featured signature (tertiary — featured badges
-  // only), coral marks favorites, and the green/WhatsApp trust signals are
-  // preserved. Slate ink ramp (#0F172A → #475569 → #64748B). Gold is never used
-  // as link/label text (fails contrast) — only as a fill behind dark ink or a
-  // badge tint. WCAG AA on the cool surface.
+  // Phase 033 — "Steel & Star" light language, matched to the orbit logo. Cool
+  // off-white surfaces (#F5F7FA) + crisp white cards; a confident royal BLUE
+  // (#1F4FE6) is the PRIMARY UI accent (links, icons, active states, price —
+  // AA-legible as text on the cool surface), GOLD (#C2A14D) stays the
+  // premium/featured signature (tertiary — featured badges only), coral marks
+  // favorites, and the green/WhatsApp trust signals are preserved. Slate ink
+  // ramp (#0F172A → #475569 → #64748B). Gold is never used as link/label text
+  // (fails contrast) — only as a fill behind dark ink or a badge tint. WCAG AA.
   @override
   AppPaletteTokens get _lightTokens => const AppPaletteTokens(
-    primary: Color(0xFF0F766E),
+    primary: Color(0xFF1F4FE6),
     onPrimary: Color(0xFFFFFFFF),
-    primaryContainer: Color(0xFFCCFBF1),
-    onPrimaryContainer: Color(0xFF0A4A45),
+    primaryContainer: Color(0xFFDCE6FB),
+    onPrimaryContainer: Color(0xFF11317A),
     accent: Color(0xFFF4795B),
     onAccent: Color(0xFFFFFFFF),
     accentContainer: Color(0xFFFBE5DC),
@@ -130,17 +129,17 @@ final class ModernPalette extends ColorPalette {
     onWhatsapp: Color(0xFFFFFFFF),
   );
 
-  // Phase 32 redesign — DS dark surfaces (midnight-navy #0B1020 + elevated
-  // #161C2D cards) carrying the Airy TEAL accent for brand consistency with
-  // light: a bright teal (#2DD4BF) primary that glows on key CTAs / the active
-  // nav (glow added at the widget layer) and takes DARK ink (#04231F) on fills,
+  // Phase 033 — dark midnight-navy surfaces (#0B1020 + elevated #161C2D cards)
+  // carrying the Steel & Star BLUE accent for consistency with light + the orbit
+  // logo: a bright azure (#5896FF) primary that glows on key CTAs / the active
+  // nav (glow added at the widget layer) and takes DARK ink (#06122B) on fills,
   // a warm gold featured accent, coral favorites, green/WhatsApp trust. WCAG AA.
   @override
   AppPaletteTokens get _darkTokens => const AppPaletteTokens(
-    primary: Color(0xFF2DD4BF),
-    onPrimary: Color(0xFF04231F),
-    primaryContainer: Color(0xFF134E4A),
-    onPrimaryContainer: Color(0xFF99F6E4),
+    primary: Color(0xFF5896FF),
+    onPrimary: Color(0xFF06122B),
+    primaryContainer: Color(0xFF16315F),
+    onPrimaryContainer: Color(0xFFCFE0FF),
     accent: Color(0xFFFF8E72),
     onAccent: Color(0xFF3A1207),
     accentContainer: Color(0xFF4A2114),
