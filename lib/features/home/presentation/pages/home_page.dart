@@ -32,6 +32,7 @@ import '../../../currencies/domain/usecases/list_currencies.dart';
 import '../../../favorites/presentation/bloc/favorites_cubit.dart';
 import '../../../inquiries/presentation/bloc/inquiries_unread_cubit.dart';
 import '../../../notifications/presentation/bloc/notification_badge_cubit.dart';
+import '../../../../core/widgets/app_network_image.dart';
 import '../bloc/featured_listings_cubit.dart';
 import '../bloc/home_bloc.dart';
 import '../bloc/home_event.dart';
@@ -44,7 +45,6 @@ import '../../../reels/presentation/widgets/reels_rail.dart';
 import '../widgets/featured_listings_carousel.dart';
 import '../widgets/hero_search_bar.dart';
 import '../widgets/home_listing_card.dart';
-import '../../../notifications/presentation/widgets/notification_bell_action.dart';
 import '../widgets/map_entry_tile.dart';
 import '../widgets/property_type_shortcut_row.dart';
 
@@ -179,12 +179,11 @@ class _HomeViewState extends State<_HomeView> {
         ),
         title: const BrandMark(withWordmark: true, size: 30),
         actions: const [
-          // Phase 25 — slimmed Home chrome: only locale/theme + notifications
-          // remain in the bar. Profile/sign-in is now the Profile tab, and the
-          // inquiries-inbox + admin-panel entries moved into the Profile menu.
+          // Phase 33 restyle — the notification bell moves down into the photo-
+          // forward header row (a 42px circular button); the bar keeps only the
+          // locale/theme toggles. Profile/sign-in is the Profile tab.
           LocaleToggleAction(),
           ThemeToggleAction(),
-          NotificationBellAction(),
         ],
       ),
       body: FutureBuilder<List<Currency>>(
@@ -404,9 +403,11 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-/// Phase 25 (Claude Design) — personalized home hero greeting. Renders the
-/// signed-in user's first name when available, otherwise an anonymous welcome,
-/// with a fixed subtitle. Purely presentational (no navigation/logic).
+/// Phase 33 restyle — the photo-forward home **header row**. A small italic
+/// accent greeting (brand-primary) sits over a bold name/title line on the
+/// start side, with a circular avatar + a circular notification bell on the
+/// end side. Reuses the existing greeting strings, the avatar from the auth
+/// profile, and the [NotificationBadgeCubit] count + routing — purely visual.
 class _HomeGreeting extends StatelessWidget {
   const _HomeGreeting();
 
@@ -418,12 +419,14 @@ class _HomeGreeting extends StatelessWidget {
 
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
-        final name = switch (state) {
-          Authenticated(:final profile) => _firstName(
-            profile.fullName ?? profile.username ?? '',
-          ),
+        final profile = switch (state) {
+          Authenticated(:final profile) => profile,
           _ => null,
         };
+        final name = _firstName(
+          profile?.fullName ?? profile?.username ?? '',
+        );
+        // Accent line = the localized greeting (e.g. "Hi Ahmad," / "Welcome,").
         final greeting = (name != null && name.isNotEmpty)
             ? l10n.home_greeting_named(name)
             : l10n.home_greeting_welcome;
@@ -437,16 +440,40 @@ class _HomeGreeting extends StatelessWidget {
               AppSpacing.lg,
               AppSpacing.xs,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Bold display-scale welcome — the loudest line on first paint.
-                Text(greeting, style: styles.displayMedium),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  l10n.home_greeting_subtitle,
-                  style: styles.bodyLarge.copyWith(color: colors.textMuted),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Small italic brand-accent greeting line.
+                      Text(
+                        greeting,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: styles.labelLarge.copyWith(
+                          color: colors.primary,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xxs),
+                      // Bold ~22px subtitle line — the loudest line on first
+                      // paint.
+                      Text(
+                        l10n.home_greeting_subtitle,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: styles.headlineMedium,
+                      ),
+                    ],
+                  ),
                 ),
+                const SizedBox(width: AppSpacing.md),
+                _HomeAvatar(avatarUrl: profile?.avatarUrl),
+                const SizedBox(width: AppSpacing.sm),
+                const _HomeHeaderBell(),
               ],
             ),
           ),
@@ -461,6 +488,101 @@ class _HomeGreeting extends StatelessWidget {
     final trimmed = full.trim();
     if (trimmed.isEmpty) return null;
     return trimmed.split(RegExp(r'\s+')).first;
+  }
+}
+
+/// A 46px circular avatar for the home header. Renders the user's avatar photo
+/// when present, otherwise a neutral person glyph on a recessed surface.
+class _HomeAvatar extends StatelessWidget {
+  const _HomeAvatar({required this.avatarUrl});
+
+  final String? avatarUrl;
+
+  static const double _size = 46;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    return Container(
+      width: _size,
+      height: _size,
+      decoration: BoxDecoration(
+        color: colors.surfaceVariant,
+        shape: BoxShape.circle,
+        border: Border.all(color: colors.outline),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: (avatarUrl != null && avatarUrl!.isNotEmpty)
+          ? AppNetworkImage(url: avatarUrl)
+          : Icon(
+              Icons.person_outline,
+              size: AppSpacing.xl,
+              color: colors.textMuted,
+            ),
+    );
+  }
+}
+
+/// A 42px circular notification bell for the home header — a bordered surface
+/// chip with a small coral dot when there are unread notifications. Reuses the
+/// shared [NotificationBadgeCubit] count and routes to /notifications on tap.
+class _HomeHeaderBell extends StatelessWidget {
+  const _HomeHeaderBell();
+
+  static const double _size = 42;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+
+    return BlocProvider.value(
+      value: getIt<NotificationBadgeCubit>(),
+      child: BlocBuilder<NotificationBadgeCubit, NotificationBadgeState>(
+        builder: (context, state) {
+          return Tooltip(
+            message: l10n.notification_bell_tooltip,
+            child: Material(
+              color: colors.surface,
+              shape: CircleBorder(side: BorderSide(color: colors.outline)),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: () => context.push(AppRoutes.notifications),
+                child: SizedBox(
+                  width: _size,
+                  height: _size,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    clipBehavior: Clip.none,
+                    children: [
+                      Icon(
+                        Icons.notifications_none_outlined,
+                        size: AppSpacing.xl,
+                        color: colors.onSurface,
+                      ),
+                      if (state.count > 0)
+                        PositionedDirectional(
+                          top: AppSpacing.sm,
+                          end: AppSpacing.md,
+                          child: Container(
+                            width: AppSpacing.sm,
+                            height: AppSpacing.sm,
+                            decoration: BoxDecoration(
+                              color: colors.accent,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: colors.surface),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 }
 

@@ -37,7 +37,7 @@ class FeaturedHeroCard extends StatelessWidget {
   final HomeListingCard card;
   final Map<String, Currency> currenciesByCode;
 
-  static const double _height = 300;
+  static const double _height = 304;
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +112,9 @@ class FeaturedHeroCard extends StatelessWidget {
                               card.title.isEmpty ? '—' : card.title,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: styles.titleLarge.copyWith(
+                              // ~21px bold over the photo — the loudest line on
+                              // the hero card.
+                              style: styles.headlineMedium.copyWith(
                                 color: colors.onPhoto,
                               ),
                             ),

@@ -21,6 +21,7 @@ import '../../domain/entities/listing_form_state.dart';
 import '../bloc/listing_form_bloc.dart';
 import '../bloc/listing_form_event.dart';
 import '../util/listing_enum_labels.dart';
+import 'express_form_fields.dart' show expressDecoration;
 import 'step_details.dart' show kAmenitiesCatalog;
 import 'step_section.dart';
 
@@ -78,10 +79,7 @@ class _DetailFormTitleSectionState extends State<DetailFormTitleSection> {
               onSubmitted: (_) => FocusScope.of(context).nextFocus(),
               onChanged: (v) =>
                   context.read<ListingFormBloc>().add(FieldChanged.title(v)),
-              decoration: InputDecoration(
-                hintText: l10n.fieldLabelTitle,
-                border: const OutlineInputBorder(),
-              ),
+              decoration: expressDecoration(context, hint: l10n.fieldLabelTitle),
             ),
           ],
         );
@@ -105,6 +103,7 @@ class DetailFormClassificationSection extends StatelessWidget {
       builder: (context, state) {
         final listing = state.draftListing;
         if (listing == null) return const SizedBox.shrink();
+        final colors = AppColors.of(context);
         return StepSection(
           icon: Icons.category_outlined,
           title: l10n.formDetailClassificationSectionTitle,
@@ -114,7 +113,8 @@ class DetailFormClassificationSection extends StatelessWidget {
             DropdownButtonFormField<ListingPurpose>(
               initialValue: listing.purpose,
               isExpanded: true,
-              decoration: const InputDecoration(border: OutlineInputBorder()),
+              decoration: expressDecoration(context),
+              icon: Icon(Icons.expand_more, color: colors.textMuted),
               items: ListingPurpose.values
                   .map(
                     (p) => DropdownMenuItem(
@@ -134,7 +134,8 @@ class DetailFormClassificationSection extends StatelessWidget {
             DropdownButtonFormField<PropertyType>(
               initialValue: listing.propertyType,
               isExpanded: true,
-              decoration: const InputDecoration(border: OutlineInputBorder()),
+              decoration: expressDecoration(context),
+              icon: Icon(Icons.expand_more, color: colors.textMuted),
               items: PropertyType.values
                   .map(
                     (p) => DropdownMenuItem(
@@ -228,6 +229,7 @@ class _DetailFormPriceSectionState extends State<DetailFormPriceSection> {
                 );
               });
             }
+            final colors = AppColors.of(context);
             return StepSection(
               icon: Icons.payments_outlined,
               title: l10n.formDetailPriceSectionTitle,
@@ -237,9 +239,8 @@ class _DetailFormPriceSectionState extends State<DetailFormPriceSection> {
                 DropdownButtonFormField<String>(
                   initialValue: price?.currencyCode ?? selected.code,
                   isExpanded: true,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                  ),
+                  decoration: expressDecoration(context),
+                  icon: Icon(Icons.expand_more, color: colors.textMuted),
                   items: currencies
                       .map(
                         (c) => DropdownMenuItem(
@@ -271,10 +272,7 @@ class _DetailFormPriceSectionState extends State<DetailFormPriceSection> {
                   inputFormatters: <TextInputFormatter>[
                     FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                   ],
-                  decoration: InputDecoration(
-                    border: const OutlineInputBorder(),
-                    errorText: _amountError,
-                  ),
+                  decoration: expressDecoration(context, error: _amountError),
                   onChanged: (v) {
                     final parsed = Decimal.tryParse(v);
                     final activeCurrency = currencies.firstWhere(
@@ -365,7 +363,7 @@ class _DetailFormLocationSectionState extends State<DetailFormLocationSection> {
               onChanged: (v) => context.read<ListingFormBloc>().add(
                 FieldChanged.addressText(v),
               ),
-              decoration: const InputDecoration(border: OutlineInputBorder()),
+              decoration: expressDecoration(context, collapseHeight: true),
             ),
           ],
         );
@@ -437,10 +435,7 @@ class _DetailFormFactsSectionState extends State<DetailFormFactsSection> {
               inputFormatters: <TextInputFormatter>[
                 FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
               ],
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(),
-                errorText: _areaSizeError,
-              ),
+              decoration: expressDecoration(context, error: _areaSizeError),
               onChanged: (v) {
                 final parsed = double.tryParse(v);
                 final error = AreaSizeValidator.validate(parsed, l10n);
@@ -522,7 +517,7 @@ class _DetailNumericField extends StatelessWidget {
           inputFormatters: <TextInputFormatter>[
             FilteringTextInputFormatter.digitsOnly,
           ],
-          decoration: const InputDecoration(border: OutlineInputBorder()),
+          decoration: expressDecoration(context),
           onChanged: (v) => onParsed(int.tryParse(v)),
         ),
       ],
@@ -679,7 +674,7 @@ class _DetailFormDescriptionSectionState
               onChanged: (v) => context.read<ListingFormBloc>().add(
                 FieldChanged.description(v),
               ),
-              decoration: const InputDecoration(border: OutlineInputBorder()),
+              decoration: expressDecoration(context, collapseHeight: true),
             ),
           ],
         );
@@ -730,6 +725,7 @@ class _DetailFormContactSectionState extends State<DetailFormContactSection> {
           _whatsappController.text = listing.whatsapp ?? '';
           _seeded = true;
         }
+        final colors = AppColors.of(context);
         return StepSection(
           icon: Icons.contact_phone_outlined,
           title: l10n.formDetailContactSectionTitle,
@@ -743,10 +739,7 @@ class _DetailFormContactSectionState extends State<DetailFormContactSection> {
             TextField(
               controller: _phoneController,
               keyboardType: TextInputType.phone,
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(),
-                errorText: _phoneError,
-              ),
+              decoration: expressDecoration(context, error: _phoneError),
               onChanged: (v) {
                 final result = PhoneValidator.validateAndNormalize(v, l10n);
                 setState(() {
@@ -762,10 +755,7 @@ class _DetailFormContactSectionState extends State<DetailFormContactSection> {
             TextField(
               controller: _whatsappController,
               keyboardType: TextInputType.phone,
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(),
-                errorText: _whatsappError,
-              ),
+              decoration: expressDecoration(context, error: _whatsappError),
               onChanged: (v) {
                 final result = PhoneValidator.validateAndNormalize(v, l10n);
                 setState(() {
@@ -781,7 +771,8 @@ class _DetailFormContactSectionState extends State<DetailFormContactSection> {
             DropdownButtonFormField<LocationVisibility>(
               initialValue: listing.locationVisibility,
               isExpanded: true,
-              decoration: const InputDecoration(border: OutlineInputBorder()),
+              decoration: expressDecoration(context),
+              icon: Icon(Icons.expand_more, color: colors.textMuted),
               items: LocationVisibility.values
                   .map(
                     (v) => DropdownMenuItem(
@@ -803,7 +794,8 @@ class _DetailFormContactSectionState extends State<DetailFormContactSection> {
             DropdownButtonFormField<ContactNameVisibility>(
               initialValue: listing.contactNameVisibility,
               isExpanded: true,
-              decoration: const InputDecoration(border: OutlineInputBorder()),
+              decoration: expressDecoration(context),
+              icon: Icon(Icons.expand_more, color: colors.textMuted),
               items: ContactNameVisibility.values
                   .map(
                     (v) => DropdownMenuItem(

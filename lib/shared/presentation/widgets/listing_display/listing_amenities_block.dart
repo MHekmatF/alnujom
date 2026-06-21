@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
 import '../../../../l10n/app_localizations.dart';
 
 /// Phase 12 Q8=A shared widget — renders amenities as a `Wrap` of chips.
@@ -23,19 +27,29 @@ class ListingAmenitiesBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (amenities.isEmpty) return const SizedBox.shrink();
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     final l10n = AppLocalizations.of(context)!;
 
     return Wrap(
       spacing: AppSpacing.sm,
       runSpacing: AppSpacing.sm,
       children: [
+        // DS amenity pills: a soft card fill, hairline outline, pill shape.
         for (final key in amenities)
           Chip(
-            label: Text(_amenityLabel(key, l10n)),
-            backgroundColor: theme.colorScheme.surfaceContainerHighest,
-            side: BorderSide.none,
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+            label: Text(
+              _amenityLabel(key, l10n),
+              style: styles.labelMedium.copyWith(color: colors.onSurface),
+            ),
+            backgroundColor: colors.card,
+            side: BorderSide(color: colors.outline),
+            shape: RoundedRectangleBorder(
+              borderRadius: appRadius(AppRadii.pill),
+            ),
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: AppSpacing.sm,
+            ),
           ),
       ],
     );

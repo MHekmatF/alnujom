@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
 import '../../../../features/locations/domain/entities/area.dart';
 import '../../../../features/locations/domain/entities/city.dart';
 import '../../../../features/locations/domain/entities/governorate.dart';
@@ -25,7 +27,8 @@ class ListingLocationBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     final locale = Localizations.localeOf(context);
 
     final joined = [
@@ -37,15 +40,21 @@ class ListingLocationBlock extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // DS location row: a primary-tinted pin leading muted location text.
         Row(
           children: [
             Icon(
               Icons.location_on_outlined,
-              size: 20,
-              color: theme.colorScheme.primary,
+              size: AppSpacing.lg,
+              color: colors.primary,
             ),
             const SizedBox(width: AppSpacing.sm),
-            Expanded(child: Text(joined, style: theme.textTheme.bodyLarge)),
+            Expanded(
+              child: Text(
+                joined,
+                style: styles.bodyMedium.copyWith(color: colors.textMuted),
+              ),
+            ),
           ],
         ),
         if (addressText != null && addressText!.trim().isNotEmpty) ...[
@@ -54,9 +63,7 @@ class ListingLocationBlock extends StatelessWidget {
             padding: const EdgeInsetsDirectional.only(start: AppSpacing.xl),
             child: Text(
               addressText!,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
+              style: styles.bodyMedium.copyWith(color: colors.textMuted),
             ),
           ),
         ],

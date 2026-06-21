@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
 import '../../../../features/currencies/domain/entities/currency.dart';
 import '../../../../features/listing_form/domain/entities/listing_price.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -30,7 +32,8 @@ class ListingPriceBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context);
 
@@ -64,12 +67,11 @@ class ListingPriceBlock extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // DS: the asking price leads big + bold in the primary text colour
+        // (the prior teal/primary tint moved to the tag chip + accents).
         Text(
           primaryStr,
-          style: theme.textTheme.headlineSmall?.copyWith(
-            color: theme.colorScheme.primary,
-            fontWeight: FontWeight.w600,
-          ),
+          style: styles.displayMedium.copyWith(color: colors.onSurface),
         ),
         for (final s in secondaries) ...[
           const SizedBox(height: AppSpacing.xs),
@@ -84,9 +86,7 @@ class ListingPriceBlock extends StatelessWidget {
               );
               return Text(
                 l10n.priceOriginallyWas(str),
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
+                style: styles.bodyMedium.copyWith(color: colors.textMuted),
               );
             },
           ),

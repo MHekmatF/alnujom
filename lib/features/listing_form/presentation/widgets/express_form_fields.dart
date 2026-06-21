@@ -58,32 +58,65 @@ class ExpressField extends StatelessWidget {
   }
 }
 
+/// Minimum height for the DS `.field-big` shell (~58 in the design). Driven
+/// through [InputDecoration.constraints] so single-line fields read tall and
+/// soft regardless of font metrics.
+const double _kExpressFieldMinHeight = 58;
+
+/// Minimum height for a segmented purpose pill (~52 in the design).
+const double _kPurposePillHeight = 52;
+
 /// Shared big-field decoration (tall, filled, rounded) so the express fields
-/// read taller + softer than the default inputs.
-InputDecoration expressDecoration(BuildContext context, {String? hint, String? error}) {
+/// read taller + softer than the default inputs — the DS `.field-big` look:
+/// `surfaceVariant` fill, 1.5px `outline` border, md radius, `primary` on focus.
+///
+/// [suffix] renders a unit token (e.g. م²) pinned at the end in muted bold; pass
+/// [collapseHeight] for multi-line fields so the min-height clamp is dropped.
+InputDecoration expressDecoration(
+  BuildContext context, {
+  String? hint,
+  String? error,
+  Widget? suffix,
+  bool collapseHeight = false,
+}) {
   final colors = AppColors.of(context);
   final styles = AppTextStyles.of(context);
+  OutlineInputBorder border(Color color) => OutlineInputBorder(
+    borderRadius: appRadius(AppRadii.md),
+    borderSide: BorderSide(color: color, width: 1.5),
+  );
   return InputDecoration(
     hintText: hint,
     hintStyle: styles.bodyLarge.copyWith(color: colors.textMuted),
     errorText: error,
     filled: true,
     fillColor: colors.surfaceVariant,
+    suffixIcon: suffix,
+    constraints: collapseHeight
+        ? null
+        : const BoxConstraints(minHeight: _kExpressFieldMinHeight),
     contentPadding: const EdgeInsetsDirectional.symmetric(
       horizontal: AppSpacing.lg,
-      vertical: AppSpacing.lg,
+      vertical: AppSpacing.md,
     ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: appRadius(AppRadii.md),
-      borderSide: BorderSide(color: colors.outline),
-    ),
-    border: OutlineInputBorder(
-      borderRadius: appRadius(AppRadii.md),
-      borderSide: BorderSide(color: colors.outline),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: appRadius(AppRadii.md),
-      borderSide: BorderSide(color: colors.primary, width: 1.5),
+    enabledBorder: border(colors.outline),
+    border: border(colors.outline),
+    focusedBorder: border(colors.primary),
+    errorBorder: border(colors.error),
+    focusedErrorBorder: border(colors.error),
+  );
+}
+
+/// A unit suffix (e.g. م²) for the price/area big fields — muted + bold, pinned
+/// at the field's end edge.
+Widget _expressUnitSuffix(BuildContext context, String unit) {
+  final colors = AppColors.of(context);
+  final styles = AppTextStyles.of(context);
+  return Padding(
+    padding: const EdgeInsetsDirectional.only(end: AppSpacing.lg),
+    child: Text(
+      unit,
+      style: styles.labelLarge.copyWith(color: colors.textMuted),
     ),
   );
 }
@@ -210,6 +243,7 @@ class ExpressClassification extends StatelessWidget {
                 initialValue: listing.propertyType,
                 isExpanded: true,
                 decoration: expressDecoration(context),
+                icon: Icon(Icons.expand_more, color: colors.textMuted),
                 style: styles.bodyLarge.copyWith(color: colors.onSurface),
                 items: [
                   for (final t in PropertyType.values)
@@ -256,16 +290,27 @@ class _PurposePill extends StatelessWidget {
         borderRadius: appRadius(AppRadii.md),
         onTap: onTap,
         child: Container(
-          constraints: const BoxConstraints(minWidth: AppSpacing.xxxl),
+          constraints: const BoxConstraints(
+            minWidth: AppSpacing.xxxl,
+            minHeight: _kPurposePillHeight,
+          ),
           padding: const EdgeInsetsDirectional.symmetric(
             horizontal: AppSpacing.lg,
-            vertical: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
+          decoration: BoxDecoration(
+            borderRadius: appRadius(AppRadii.md),
+            // Selected pills lose the border (filled primary); idle pills carry
+            // the 1.5px outline of the DS segmented control.
+            border: selected
+                ? null
+                : Border.all(color: colors.outline, width: 1.5),
           ),
           alignment: Alignment.center,
           child: Text(
             label,
             style: styles.labelLarge.copyWith(
-              color: selected ? colors.onPrimary : colors.onSurfaceVariant,
+              color: selected ? colors.onPrimary : colors.textMuted,
             ),
           ),
         ),
@@ -319,6 +364,9 @@ class _ExpressPriceAreaState extends State<ExpressPriceArea> {
           future: _currencies,
           builder: (context, snap) {
             final currencies = snap.data ?? const <Currency>[];
+            final currencyCode =
+                price?.currencyCode ??
+                (currencies.isNotEmpty ? currencies.first.code : null);
             if (currencies.isNotEmpty && !_currencyAuto && price == null) {
               _currencyAuto = true;
               WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -343,7 +391,12 @@ class _ExpressPriceAreaState extends State<ExpressPriceArea> {
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                       ],
-                      decoration: expressDecoration(context),
+                      decoration: expressDecoration(
+                        context,
+                        suffix: currencyCode == null
+                            ? null
+                            : _expressUnitSuffix(context, currencyCode),
+                      ),
                       onChanged: (v) {
                         final parsed = Decimal.tryParse(v);
                         if (parsed != null) {
@@ -370,7 +423,7 @@ class _ExpressPriceAreaState extends State<ExpressPriceArea> {
                       ],
                       decoration: expressDecoration(
                         context,
-                        hint: l10n.spec_area_unit,
+                        suffix: _expressUnitSuffix(context, l10n.spec_area_unit),
                       ),
                       onChanged: (v) => context.read<ListingFormBloc>().add(
                         FieldChanged.areaSize(double.tryParse(v)),
@@ -442,7 +495,7 @@ class _ExpressLocationState extends State<ExpressLocation> {
               child: TextField(
                 controller: _address,
                 maxLines: 2,
-                decoration: expressDecoration(context),
+                decoration: expressDecoration(context, collapseHeight: true),
                 onChanged: (v) => context.read<ListingFormBloc>().add(
                   FieldChanged.addressText(v),
                 ),
