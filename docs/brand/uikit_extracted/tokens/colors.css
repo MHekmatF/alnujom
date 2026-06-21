@@ -1,0 +1,138 @@
+/* ============================================================
+   Al Nujom — Color tokens
+   ------------------------------------------------------------
+   Two layers:
+   1. BRAND CONSTANTS  — the canonical Al Nujom identity colors
+      ported from the production app (lib/core/theme/color_palette.dart,
+      "Modern / Claude Design" palette). Stars-blue is the mark color.
+   2. SEMANTIC THEME SCOPES — four art-directed surface palettes
+      from the design brief. Apply one of the `.theme-*` classes to
+      a screen root to retheme every semantic token beneath it.
+   ============================================================ */
+
+:root {
+  /* ---- Brand constants (the logo / identity, theme-independent) ---- */
+  --brand-stars-blue: #13507D;   /* the N mark + calligraphy */
+  --brand-stars-blue-deep: #082B44;
+  --brand-coral: #F4795B;        /* favorites / energetic accent */
+  --brand-verified: #1F7A4D;     /* trust — verified-agency green */
+  --brand-verified-bg: #DCF0E5;
+  --brand-whatsapp: #1DAB61;     /* WhatsApp contact CTA (Syria's #1 channel) */
+  --brand-gold: #C2A14D;         /* premium / featured accent */
+
+  /* ---- Semantic defaults (mirror the "Premium" direction) ---- */
+  --bg: #FAF6EF;
+  --surface: #FFFFFF;
+  --card: #FFFFFF;
+  --ink: #1A1714;
+  --ink-muted: #7A7065;
+  --ink-faint: #A89E92;
+  --border: #ECE4D6;
+  --border-strong: #D9CDB8;
+  --accent: #C2A14D;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #F3EAD2;
+  --on-photo: #FFFFFF;
+  --photo-scrim: rgba(20, 16, 10, 0.55); /* @kind color */
+  --shadow-sm: 0 1px 3px rgba(38, 28, 12, 0.06);
+  --shadow-md: 0 6px 20px rgba(38, 28, 12, 0.08);
+  --shadow-lg: 0 18px 44px rgba(38, 28, 12, 0.12);
+
+  /* Status (shared across themes) */
+  --success: #2E9E6B;
+  --warning: #C98318;
+  --danger: #D23F3F;
+}
+
+/* ============================================================
+   1 · PREMIUM  (Home) — warm cream, ink brown, gold. Editorial.
+   ============================================================ */
+.theme-premium {
+  --bg: #FAF6EF;
+  --surface: #FFFFFF;
+  --card: #FFFFFF;
+  --ink: #1A1714;
+  --ink-muted: #7A7065;
+  --ink-faint: #A89E92;
+  --border: #ECE4D6;
+  --border-strong: #D9CDB8;
+  --accent: #C2A14D;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #F4ECD6;
+  --on-photo: #FFFFFF;
+  --photo-scrim: linear-gradient(180deg, rgba(20,16,10,0) 38%, rgba(20,16,10,0.62) 100%); /* @kind other */
+  --shadow-sm: 0 1px 3px rgba(38, 28, 12, 0.06);
+  --shadow-md: 0 8px 24px rgba(38, 28, 12, 0.09);
+  --shadow-lg: 0 18px 44px rgba(38, 28, 12, 0.12);
+}
+
+/* ============================================================
+   2 · AIRY  (Listing detail) — white + cool grey, teal, soft.
+   ============================================================ */
+.theme-airy {
+  --bg: #F5F7FA;
+  --surface: #FFFFFF;
+  --card: #FFFFFF;
+  --ink: #0F172A;
+  --ink-muted: #64748B;
+  --ink-faint: #94A3B8;
+  --border: #E6EBF1;
+  --border-strong: #CBD5E1;
+  --accent: #0EA5A4;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #DAF3F2;
+  --on-photo: #FFFFFF;
+  --photo-scrim: linear-gradient(180deg, rgba(15,23,42,0) 50%, rgba(15,23,42,0.45) 100%); /* @kind other */
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 8px 28px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 20px 48px rgba(15, 23, 42, 0.10);
+}
+
+/* ============================================================
+   3 · DARK  (Search results) — midnight navy, electric blue glow.
+   ============================================================ */
+.theme-dark {
+  --bg: #0B1020;
+  --surface: #0F1424;
+  --card: #161C2D;
+  --ink: #EAF0FB;
+  --ink-muted: #97A3BC;
+  --ink-faint: #61708E;
+  --border: #232B40;
+  --border-strong: #344063;
+  --accent: #3B82F6;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #18233E;
+  --on-photo: #FFFFFF;
+  --photo-scrim: linear-gradient(180deg, rgba(5,8,18,0) 45%, rgba(5,8,18,0.65) 100%); /* @kind other */
+  --glow: 0 0 0 1px rgba(59, 130, 246, 0.45), 0 6px 22px rgba(59, 130, 246, 0.30); /* @kind shadow */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 18px 46px rgba(0, 0, 0, 0.55);
+}
+
+/* ============================================================
+   4 · BOLD  (Add listing) — deep navy, hot orange, glowing inputs.
+   ============================================================ */
+.theme-bold {
+  --bg: #0A1A3F;
+  --surface: #0C1F49;
+  --card: #10245A;
+  --ink: #F2F6FF;
+  --ink-muted: #9FB2D6;
+  --ink-faint: #5F76A6;
+  --border: #1F3A78;
+  --border-strong: #2C4C93;
+  --accent: #FF6B35;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #15306B;
+  --input-bg: #10245A;
+  --input-border: #1F3A78;
+  --on-photo: #FFFFFF;
+  --photo-scrim: linear-gradient(180deg, rgba(5,12,30,0) 45%, rgba(5,12,30,0.7) 100%); /* @kind other */
+  --accent-grad: linear-gradient(135deg, #FF8A4B 0%, #FF6B35 55%, #F2541B 100%); /* @kind other */
+  --glow: 0 0 0 2px rgba(255, 107, 53, 0.35), 0 6px 20px rgba(255, 107, 53, 0.28); /* @kind shadow */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 18px 46px rgba(0, 0, 0, 0.5);
+}

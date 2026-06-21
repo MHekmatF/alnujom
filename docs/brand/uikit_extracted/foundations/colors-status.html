@@ -1,0 +1,27 @@
+<!-- @dsCard group="Colors" viewport="700x150" name="Status colors" subtitle="Success · Warning · Danger — shared across themes" -->
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin: 0; font-family: var(--font-ui); background: #fff; }
+  .wrap { padding: 22px 24px; }
+  .row { display: flex; gap: 14px; }
+  .sw { flex: 1; display: flex; align-items: center; gap: 11px; }
+  .dot { width: 40px; height: 40px; border-radius: var(--radius-sm); }
+  .name { font-size: 13px; font-weight: 700; color: #1A1714; }
+  .hex { font-size: 11px; color: #8A8A8A; font-family: ui-monospace, monospace; margin-top: 2px; direction: ltr; }
+  .ar { font-size: 11.5px; color: #5F6C78; margin-top: 2px; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="row">
+      <div class="sw"><div class="dot" style="background:var(--success)"></div><div><div class="name">Success</div><div class="hex">#2E9E6B</div><div class="ar">نشط / موافَق</div></div></div>
+      <div class="sw"><div class="dot" style="background:var(--warning)"></div><div><div class="name">Warning</div><div class="hex">#C98318</div><div class="ar">قيد المراجعة</div></div></div>
+      <div class="sw"><div class="dot" style="background:var(--danger)"></div><div><div class="name">Danger</div><div class="hex">#D23F3F</div><div class="ar">مرفوض / حذف</div></div></div>
+    </div>
+  </div>
+</body>
+</html>

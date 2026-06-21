@@ -101,6 +101,17 @@ flutter:
     - assets/onboarding/
     - assets/lottie/
   fonts:
+    # Phase 033 — Tajawal: the design-system Arabic typeface (UI + body + headings).
+    - family: Tajawal
+      fonts:
+        - asset: assets/fonts/Tajawal-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Tajawal-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Tajawal-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Tajawal-ExtraBold.ttf
+          weight: 800
     - family: Cairo
       fonts:
         - asset: assets/fonts/Cairo-VariableFont_slnt_wght.ttf

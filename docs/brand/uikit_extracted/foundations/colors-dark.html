@@ -1,0 +1,35 @@
+<!-- @dsCard group="Colors" viewport="700x200" name="Dark theme" subtitle=".theme-dark — midnight · electric-blue glow" -->
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin: 0; font-family: var(--font-ui); }
+  .wrap { padding: 20px 24px; background: var(--bg); }
+  .row { display: flex; gap: 12px; }
+  .sw { flex: 1; }
+  .chip { height: 58px; border-radius: var(--radius-md); border: 1px solid var(--border); }
+  .name { font-size: 12px; font-weight: 700; margin-top: 8px; color: var(--ink); }
+  .hex { font-size: 10.5px; color: var(--ink-muted); font-family: ui-monospace, monospace; margin-top: 2px; direction: ltr; }
+  .demo { margin-top: 14px; display: flex; align-items: center; gap: 12px; }
+  .btn { background: var(--accent); color: var(--accent-ink); font-weight: 700; font-size: 13px; padding: 10px 20px; border-radius: var(--radius-md); box-shadow: var(--glow); }
+  h4 { margin: 0; font-size: 19px; color: var(--ink); font-weight: 800; }
+</style>
+</head>
+<body class="theme-dark">
+  <div class="wrap">
+    <div class="row">
+      <div class="sw"><div class="chip" style="background:var(--bg)"></div><div class="name">base</div><div class="hex">#0B1020</div></div>
+      <div class="sw"><div class="chip" style="background:var(--card)"></div><div class="name">card</div><div class="hex">#161C2D</div></div>
+      <div class="sw"><div class="chip" style="background:var(--border-strong)"></div><div class="name">border</div><div class="hex">#344063</div></div>
+      <div class="sw"><div class="chip" style="background:var(--accent)"></div><div class="name">accent</div><div class="hex">#3B82F6</div></div>
+      <div class="sw"><div class="chip" style="background:var(--ink)"></div><div class="name">ink</div><div class="hex">#EAF0FB</div></div>
+    </div>
+    <div class="demo">
+      <h4>نتائج البحث</h4>
+      <span class="btn">تصفية</span>
+    </div>
+  </div>
+</body>
+</html>
