@@ -50,6 +50,7 @@ import 'package:latlong2/latlong.dart' show LatLng;
 import '../../../../core/di/injection.dart';
 import '../../../../core/settings/lite_mode.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/elevation.dart';
 import '../../../../core/theme/motion.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
@@ -348,13 +349,20 @@ class _EmptyDatasetBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
-    return Material(
-      elevation: 2,
-      borderRadius: appRadius(AppRadii.sm),
-      color: colors.surface.withValues(alpha: 0.92),
+    final elevation = AppElevation.of(context);
+    // DS floating chrome over the tiles — a rounded `surface` pill with a
+    // hairline outline and the token shadow so it reads as the same family as
+    // the other on-map controls.
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.surface.withValues(alpha: 0.96),
+        borderRadius: appRadius(AppRadii.pill),
+        border: Border.all(color: colors.outline),
+        boxShadow: elevation.level2,
+      ),
       child: Padding(
         padding: const EdgeInsetsDirectional.symmetric(
-          horizontal: AppSpacing.md,
+          horizontal: AppSpacing.lg,
           vertical: AppSpacing.sm,
         ),
         child: Row(
@@ -363,10 +371,15 @@ class _EmptyDatasetBanner extends StatelessWidget {
             Icon(
               LucideIcons.info,
               size: AppSpacing.lg,
-              color: colors.onSurfaceVariant,
+              color: colors.primary,
             ),
             const SizedBox(width: AppSpacing.sm),
-            Flexible(child: Text(message, style: styles.labelMedium)),
+            Flexible(
+              child: Text(
+                message,
+                style: styles.labelMedium.copyWith(color: colors.onSurface),
+              ),
+            ),
           ],
         ),
       ),

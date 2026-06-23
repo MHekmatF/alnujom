@@ -3,8 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/elevation.dart';
+import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -144,62 +147,61 @@ class _PrivateViewState extends State<_PrivateView> {
         return Scaffold(
           appBar: AppBar(title: Text(l10n.profile_private_section_title)),
           body: SingleChildScrollView(
-            padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
+            padding: const EdgeInsetsDirectional.fromSTEB(
+              AppSpacing.lg,
+              AppSpacing.lg,
+              AppSpacing.lg,
+              AppSpacing.xxl,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  l10n.profile_private_legal_name,
-                  style: styles.titleMedium,
+                // ── Identity (Vault-stored legal name + national ID) ────────
+                _PrivateSection(
+                  title: l10n.profile_private_section_title,
+                  children: [
+                    _ContactField(
+                      controller: _legalNameController,
+                      label: l10n.profile_private_legal_name,
+                    ),
+                    _ContactField(
+                      controller: _nationalIdController,
+                      label: l10n.profile_private_national_id,
+                    ),
+                  ],
                 ),
-                const SizedBox(height: AppSpacing.sm),
-                TextField(
-                  controller: _legalNameController,
-                  decoration: InputDecoration(
-                    labelText: l10n.profile_private_legal_name,
-                  ),
+
+                // ── Private contact methods ─────────────────────────────────
+                _PrivateSection(
+                  title: l10n.profile_private_contact_methods_title,
+                  children: [
+                    _ContactField(
+                      controller: _whatsappController,
+                      label: l10n.profile_private_contact_methods_whatsapp,
+                    ),
+                    _ContactField(
+                      controller: _telegramController,
+                      label: l10n.profile_private_contact_methods_telegram,
+                    ),
+                    _ContactField(
+                      controller: _signalController,
+                      label: l10n.profile_private_contact_methods_signal,
+                    ),
+                    _ContactField(
+                      controller: _privateEmailController,
+                      label:
+                          l10n.profile_private_contact_methods_private_email,
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                    _ContactField(
+                      controller: _secondaryPhoneController,
+                      label:
+                          l10n.profile_private_contact_methods_secondary_phone,
+                      keyboardType: TextInputType.phone,
+                    ),
+                  ],
                 ),
-                const SizedBox(height: AppSpacing.lg),
-                Text(
-                  l10n.profile_private_national_id,
-                  style: styles.titleMedium,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                TextField(
-                  controller: _nationalIdController,
-                  decoration: InputDecoration(
-                    labelText: l10n.profile_private_national_id,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                Text(
-                  l10n.profile_private_contact_methods_title,
-                  style: styles.titleMedium,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                _ContactField(
-                  controller: _whatsappController,
-                  label: l10n.profile_private_contact_methods_whatsapp,
-                ),
-                _ContactField(
-                  controller: _telegramController,
-                  label: l10n.profile_private_contact_methods_telegram,
-                ),
-                _ContactField(
-                  controller: _signalController,
-                  label: l10n.profile_private_contact_methods_signal,
-                ),
-                _ContactField(
-                  controller: _privateEmailController,
-                  label: l10n.profile_private_contact_methods_private_email,
-                  keyboardType: TextInputType.emailAddress,
-                ),
-                _ContactField(
-                  controller: _secondaryPhoneController,
-                  label: l10n.profile_private_contact_methods_secondary_phone,
-                  keyboardType: TextInputType.phone,
-                ),
-                const SizedBox(height: AppSpacing.xl),
+
                 if (_piiError != null) ...[
                   Text(
                     _piiError!,
@@ -243,12 +245,65 @@ class _ContactField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      decoration: InputDecoration(labelText: label),
+    );
+  }
+}
+
+/// A titled section card grouping a set of input fields — the same idiom as the
+/// profile + nav-drawer sections (bold muted header over a 1px-outlined card),
+/// so the private page reads consistently with the rest of the profile area.
+class _PrivateSection extends StatelessWidget {
+  const _PrivateSection({required this.title, required this.children});
+
+  final String title;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    final elevation = AppElevation.of(context);
+
     return Padding(
-      padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.md),
-      child: TextField(
-        controller: controller,
-        keyboardType: keyboardType,
-        decoration: InputDecoration(labelText: label),
+      padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.xl),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsetsDirectional.only(
+              start: AppSpacing.xs,
+              bottom: AppSpacing.sm,
+            ),
+            child: Text(
+              title,
+              style: styles.labelLarge.copyWith(color: colors.textMuted),
+            ),
+          ),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: colors.card,
+              borderRadius: appRadius(AppRadii.lg),
+              border: Border.all(color: colors.outline),
+              boxShadow: elevation.level1,
+            ),
+            child: Padding(
+              padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (var i = 0; i < children.length; i++) ...[
+                    if (i > 0) const SizedBox(height: AppSpacing.md),
+                    children[i],
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

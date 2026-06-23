@@ -4,9 +4,11 @@
 // Phase polish (Impeccable) — uses the shared EmptyState so it teaches the
 // interface (guiding subtext + a "Browse listings" CTA) and stays consistent.
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/lottie_illustration.dart';
@@ -20,17 +22,17 @@ class MyReportsEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final scheme = Theme.of(context).colorScheme;
+    final colors = AppColors.of(context);
 
     return EmptyState(
       illustration: LottieIllustration(
         asset: 'assets/lottie/empty_stars.json',
         size: AppSpacing.xxxl * 2.5,
-        color: scheme.onSurfaceVariant,
+        color: colors.textMuted,
         fallback: Icon(
-          Icons.flag_outlined,
+          LucideIcons.flag,
           size: AppSpacing.xxxl * 2,
-          color: scheme.onSurfaceVariant,
+          color: colors.textMuted,
         ),
       ),
       headline: l10n.reports_my_empty_state,

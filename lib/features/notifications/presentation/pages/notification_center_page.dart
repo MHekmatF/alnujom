@@ -10,9 +10,11 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/localization/app_strings.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
+import '../../domain/entities/app_notification.dart';
 import '../bloc/notification_badge_cubit.dart';
 import '../bloc/notifications_cubit.dart';
 import '../widgets/notification_deep_link_resolver.dart';
@@ -63,10 +65,27 @@ class _NotificationCenterViewState extends State<_NotificationCenterView> {
     }
   }
 
+  /// Flattens the newest-first notification list into a render list where each
+  /// new calendar day is preceded by a muted date header. Localized day labels
+  /// come from [MaterialLocalizations] (no new l10n keys).
+  List<_Row> _buildRows(List<AppNotification> notifications) {
+    final rows = <_Row>[];
+    DateTime? currentDay;
+    for (final n in notifications) {
+      final local = n.createdAt.toLocal();
+      final day = DateTime(local.year, local.month, local.day);
+      if (currentDay == null || day != currentDay) {
+        currentDay = day;
+        rows.add(_DateHeaderRow(day));
+      }
+      rows.add(_NotificationRow(n));
+    }
+    return rows;
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppStrings.of(context).loc;
-    final colors = AppColors.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -108,30 +127,33 @@ class _NotificationCenterViewState extends State<_NotificationCenterView> {
                   headline: l10n.notification_empty_state,
                 );
               }
+              // Flatten the list into day-grouped rows (a muted date header
+              // before each new calendar day, then its notification tiles).
+              final rows = _buildRows(state.notifications);
               return RefreshIndicator(
                 onRefresh: () => context.read<NotificationsCubit>().load(),
-                child: ListView.separated(
+                child: ListView.builder(
                   controller: _scrollController,
-                  itemCount:
-                      state.notifications.length + (state.isPaginating ? 1 : 0),
-                  separatorBuilder: (_, __) =>
-                      Divider(height: 1, color: colors.divider),
+                  itemCount: rows.length + (state.isPaginating ? 1 : 0),
                   itemBuilder: (context, index) {
-                    if (index >= state.notifications.length) {
+                    if (index >= rows.length) {
                       return const Padding(
                         padding: EdgeInsetsDirectional.all(AppSpacing.lg),
                         child: AppSpinner(),
                       );
                     }
-                    final notification = state.notifications[index];
-                    return NotificationTile(
-                      notification: notification,
-                      onTap: () => NotificationDeepLinkResolver.resolve(
-                        context: context,
+                    final row = rows[index];
+                    return switch (row) {
+                      _DateHeaderRow(:final day) => _DateHeader(day: day),
+                      _NotificationRow(:final notification) => NotificationTile(
                         notification: notification,
-                        updateCubit: true,
+                        onTap: () => NotificationDeepLinkResolver.resolve(
+                          context: context,
+                          notification: notification,
+                          updateCubit: true,
+                        ),
                       ),
-                    );
+                    };
                   },
                 ),
               );
@@ -145,3 +167,53 @@ class _NotificationCenterViewState extends State<_NotificationCenterView> {
 // ---------------------------------------------------------------------------
 // Private sub-widgets
 // ---------------------------------------------------------------------------
+
+/// A muted day header that introduces each calendar-day group in the list.
+class _DateHeader extends StatelessWidget {
+  const _DateHeader({required this.day});
+
+  final DateTime day;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    // Fully localized (ar/en) without new l10n keys.
+    final label = MaterialLocalizations.of(context).formatFullDate(day);
+
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.sm,
+      ),
+      child: Text(
+        label,
+        style: styles.labelMedium.copyWith(
+          color: colors.textMuted,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Render-row model — a flat list of day headers + notification rows so the
+// grouped list keeps a single ListView (pagination + spinner sentinel intact).
+// ---------------------------------------------------------------------------
+
+sealed class _Row {
+  const _Row();
+}
+
+class _DateHeaderRow extends _Row {
+  const _DateHeaderRow(this.day);
+  final DateTime day;
+}
+
+class _NotificationRow extends _Row {
+  const _NotificationRow(this.notification);
+  final AppNotification notification;
+}

@@ -7,7 +7,7 @@ import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
-import '../../../../core/widgets/app_spinner.dart';
+import '../../../../core/widgets/app_button.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
@@ -81,24 +81,20 @@ class MaintenanceScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xl),
-                    FilledButton.icon(
+                    AppButton.filledPrimary(
+                      label: l10n.maintenance_retry,
+                      loading: isRetrying,
                       onPressed: isRetrying
                           ? null
                           : () => context.read<AppSettingsCubit>().load(),
-                      icon: isRetrying
-                          ? AppSpinner(
-                              size: AppSpacing.lg,
-                              color: colors.onPrimary,
-                            )
-                          : const Icon(Icons.refresh),
-                      label: Text(l10n.maintenance_retry),
                     ),
                     if (showSignIn) ...[
                       const SizedBox(height: AppSpacing.sm),
-                      TextButton.icon(
+                      AppButton(
+                        label: l10n.auth_required_sign_in_action,
+                        variant: AppButtonVariant.text,
+                        icon: Icons.login,
                         onPressed: () => context.go(AppRoutes.login),
-                        icon: const Icon(Icons.login),
-                        label: Text(l10n.auth_required_sign_in_action),
                       ),
                     ],
                     if (contact.hasAny) ...[

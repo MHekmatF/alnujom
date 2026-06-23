@@ -22,7 +22,6 @@ import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/press_scale.dart';
-import '../../../../core/widgets/status_pill.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/crm_lead.dart';
 import '../../domain/entities/crm_reminder.dart';
@@ -296,9 +295,9 @@ class _LeadCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
-            StatusPill(
+            _StagePill(
               label: crmStageLabel(lead.stage, l10n),
-              color: crmStageColor(lead.stage, colors),
+              tint: crmStageColor(lead.stage, colors),
             ),
           ],
         ),
@@ -312,6 +311,33 @@ class _LeadCard extends StatelessWidget {
     if (days <= 0) return l10n.crmRelativeToday;
     if (days == 1) return l10n.crmRelativeYesterday;
     return l10n.crmRelativeDaysAgo(days);
+  }
+}
+
+/// Phase 33 — a soft-tinted CRM stage pill for the lead rows (tinted background
+/// + same-token ink + hairline tint border). Quieter than the solid
+/// [StatusPill] so a list of leads reads calm.
+class _StagePill extends StatelessWidget {
+  const _StagePill({required this.label, required this.tint});
+
+  final String label;
+  final Color tint;
+
+  @override
+  Widget build(BuildContext context) {
+    final styles = AppTextStyles.of(context);
+    return Container(
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: tint.withValues(alpha: 0.12),
+        borderRadius: appRadius(AppRadii.pill),
+        border: Border.all(color: tint.withValues(alpha: 0.30)),
+      ),
+      child: Text(label, style: styles.labelMedium.copyWith(color: tint)),
+    );
   }
 }
 

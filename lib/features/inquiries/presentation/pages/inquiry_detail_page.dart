@@ -10,8 +10,10 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
@@ -92,70 +94,93 @@ class _InquiryDetailBody extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Status badge
-          InboxStatusBadge(status: inquiry.status),
-          const SizedBox(height: AppSpacing.lg),
-
-          // Sender name
-          Text(
-            inquiry.senderName.isNotEmpty
-                ? inquiry.senderName
-                : l10n.inquiry_inbox_anonymous_sender_label,
-            style: styles.titleMedium,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-
-          // Callback phone row
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.inquiry_detail_callback_phone_label,
-                      style: styles.labelMedium.copyWith(
-                        color: colors.textMuted,
-                      ),
-                    ),
-                    Text(displayPhone, style: styles.bodyMedium),
-                  ],
-                ),
-              ),
-              if (inquiry.decryptedPhone != null)
-                Tooltip(
-                  message: l10n.inquiry_detail_tap_to_call_action,
-                  child: IconButton(
-                    icon: const Icon(Icons.phone_outlined),
-                    onPressed: () =>
-                        launchUrl(Uri.parse('tel:${inquiry.decryptedPhone}')),
+          // Header card: status pill, sender name, and the callback phone with
+          // a call affordance — grouped in a DS surface.
+          AppSurface(
+            radius: AppRadii.lg,
+            elevated: true,
+            padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                InboxStatusBadge(status: inquiry.status),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  inquiry.senderName.isNotEmpty
+                      ? inquiry.senderName
+                      : l10n.inquiry_inbox_anonymous_sender_label,
+                  style: styles.titleMedium.copyWith(
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-            ],
+                const SizedBox(height: AppSpacing.md),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.inquiry_detail_callback_phone_label,
+                            style: styles.labelMedium.copyWith(
+                              color: colors.textMuted,
+                            ),
+                          ),
+                          Text(displayPhone, style: styles.bodyMedium),
+                        ],
+                      ),
+                    ),
+                    if (inquiry.decryptedPhone != null)
+                      Tooltip(
+                        message: l10n.inquiry_detail_tap_to_call_action,
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.phone_outlined,
+                            color: colors.primary,
+                          ),
+                          onPressed: () => launchUrl(
+                            Uri.parse('tel:${inquiry.decryptedPhone}'),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.md),
 
-          // Message
-          Text(inquiry.message, style: styles.bodyMedium),
-          const SizedBox(height: AppSpacing.lg),
+          // Message body in its own card surface.
+          AppSurface(
+            radius: AppRadii.lg,
+            padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+            child: Text(inquiry.message, style: styles.bodyLarge),
+          ),
+          const SizedBox(height: AppSpacing.md),
 
-          // Listing reference (tappable)
-          InkWell(
+          // Listing reference (tappable) — a DS surface row with a chevron.
+          AppSurface(
+            radius: AppRadii.lg,
+            padding: const EdgeInsetsDirectional.all(AppSpacing.md),
             onTap: () =>
                 context.push(AppRoutes.listingDetailsFor(inquiry.listingId)),
             child: Row(
               children: [
-                const Icon(Icons.home_outlined, size: AppSpacing.lg),
+                Icon(
+                  Icons.home_outlined,
+                  size: AppSpacing.lg,
+                  color: colors.primary,
+                ),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
                     inquiry.listingTitle,
-                    style: styles.bodyMedium.copyWith(
-                      color: colors.primary,
-                      decoration: TextDecoration.underline,
-                    ),
+                    style: styles.bodyMedium.copyWith(color: colors.primary),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                const SizedBox(width: AppSpacing.sm),
                 Text(
                   l10n.inquiry_detail_listing_link_label,
                   style: styles.labelMedium.copyWith(color: colors.primary),
@@ -221,30 +246,32 @@ class _StatusMutationButtons extends StatelessWidget {
       runSpacing: AppSpacing.sm,
       children: [
         if (visibleTransitions.contains(InquiryStatus.responded))
-          ElevatedButton(
+          AppButton.filledPrimary(
+            label: l10n.inquiry_detail_mark_responded_action,
             onPressed: () => bloc.add(const MarkResponded()),
-            child: Text(l10n.inquiry_detail_mark_responded_action),
           ),
         if (visibleTransitions.contains(InquiryStatus.closed) &&
             inquiry.status != InquiryStatus.new_)
-          OutlinedButton(
+          AppButton(
+            label: l10n.inquiry_detail_mark_closed_action,
+            variant: AppButtonVariant.outlined,
             onPressed: () => bloc.add(const MarkClosed()),
-            child: Text(l10n.inquiry_detail_mark_closed_action),
           ),
         // Reopen paths (Q2=B): closed/responded → seen.
         if (visibleTransitions.contains(InquiryStatus.seen) &&
             (inquiry.status == InquiryStatus.closed ||
                 inquiry.status == InquiryStatus.responded))
-          OutlinedButton(
+          AppButton(
+            label: l10n.inquiry_detail_reopen_to_seen_action,
+            variant: AppButtonVariant.outlined,
             onPressed: () => bloc.add(const ReopenToSeen()),
-            child: Text(l10n.inquiry_detail_reopen_to_seen_action),
           ),
         // Reopen directly to responded (closed → responded per Q2=B).
         if (visibleTransitions.contains(InquiryStatus.responded) &&
             inquiry.status == InquiryStatus.closed)
-          ElevatedButton(
+          AppButton.filledPrimary(
+            label: l10n.inquiry_detail_reopen_to_responded_action,
             onPressed: () => bloc.add(const ReopenToResponded()),
-            child: Text(l10n.inquiry_detail_reopen_to_responded_action),
           ),
       ],
     );

@@ -5,9 +5,14 @@
 // renders nothing for non-reporters / anon / error. FR-023. Phase 2 tokens.
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/report_status.dart';
 import '../cubit/listing_report_status_cubit.dart';
@@ -48,8 +53,8 @@ class _BannerBody extends StatelessWidget {
         if (report == null) return const SizedBox.shrink();
 
         final l10n = AppLocalizations.of(context)!;
-        final theme = Theme.of(context);
-        final scheme = theme.colorScheme;
+        final colors = AppColors.of(context);
+        final styles = AppTextStyles.of(context);
 
         return Container(
           width: double.infinity,
@@ -59,27 +64,25 @@ class _BannerBody extends StatelessWidget {
           ),
           padding: const EdgeInsetsDirectional.symmetric(
             horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm,
+            vertical: AppSpacing.md,
           ),
           decoration: BoxDecoration(
-            color: scheme.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(AppSpacing.sm),
-            border: Border.all(color: scheme.outlineVariant),
+            color: colors.card,
+            borderRadius: appRadius(AppRadii.lg),
+            border: Border.all(color: colors.outline),
           ),
           child: Row(
             children: [
               Icon(
-                Icons.flag_outlined,
+                LucideIcons.flag,
                 size: AppSpacing.lg,
-                color: scheme.onSurfaceVariant,
+                color: colors.textMuted,
               ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
                   l10n.report_banner_status(_statusLabel(l10n, report.status)),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
+                  style: styles.bodyMedium.copyWith(color: colors.textMuted),
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),

@@ -14,7 +14,7 @@
 // first closes the drawer, then navigates.
 //
 // Token-only (AppColors.of / AppTextStyles.of / AppSpacing / appRadius /
-// AppElevation / AppGradients). RTL-safe (EdgeInsetsDirectional / start-end).
+// AppElevation). RTL-safe (EdgeInsetsDirectional / start-end).
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
@@ -26,10 +26,10 @@ import '../security/permission_checker.dart';
 import '../security/permission_keys.dart';
 import '../theme/colors.dart';
 import '../theme/elevation.dart';
-import '../theme/gradients.dart';
 import '../theme/radii.dart';
 import '../theme/spacing.dart';
 import '../theme/typography.dart';
+import 'app_network_image.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/bloc/auth_state.dart';
 import '../../features/chat/presentation/bloc/conversations_cubit.dart';
@@ -243,8 +243,9 @@ class AppNavDrawer extends StatelessWidget {
 
 // ── Header variants ───────────────────────────────────────────────────────────
 
-/// A compact signed-in identity strip: gradient brand-washed surface holding
-/// the avatar (initials), the display name + optional handle.
+/// A compact signed-in identity strip: a solid brand-primary (royal-blue/navy)
+/// panel holding the avatar (photo or initials), the display name + optional
+/// handle, rendered in `onPrimary` for a confident branded header.
 class _DrawerIdentityStrip extends StatelessWidget {
   const _DrawerIdentityStrip({required this.profile});
 
@@ -254,7 +255,6 @@ class _DrawerIdentityStrip extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
-    final gradients = AppGradients.of(context);
 
     final displayName =
         profile.fullName ??
@@ -270,12 +270,13 @@ class _DrawerIdentityStrip extends StatelessWidget {
           bottomEnd: Radius.circular(AppRadii.xl),
         ),
         child: DecoratedBox(
-          decoration: BoxDecoration(gradient: gradients.featuredTint),
+          decoration: BoxDecoration(color: colors.primary),
           child: Padding(
             padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
             child: Row(
               children: [
                 _DrawerAvatar(
+                  avatarUrl: profile.avatarUrl,
                   initials: _initials(
                     profile.fullName ?? profile.username ?? '؟',
                   ),
@@ -288,7 +289,7 @@ class _DrawerIdentityStrip extends StatelessWidget {
                       Text(
                         displayName,
                         style: styles.titleMedium.copyWith(
-                          color: colors.onSurface,
+                          color: colors.onPrimary,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -300,7 +301,7 @@ class _DrawerIdentityStrip extends StatelessWidget {
                             context,
                           )!.profile_username_handle(profile.username!),
                           style: styles.bodyMedium.copyWith(
-                            color: colors.textMuted,
+                            color: colors.onPrimary.withValues(alpha: 0.75),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -318,8 +319,9 @@ class _DrawerIdentityStrip extends StatelessWidget {
   }
 }
 
-/// An anonymous-visitor header: a brand-washed strip with a sign-in CTA that
-/// routes to /login (mirrors the home empty-state sign-in target).
+/// An anonymous-visitor header: a solid brand-primary (royal-blue/navy) panel
+/// with a sign-in CTA that routes to /login (mirrors the home empty-state
+/// sign-in target), rendered in `onPrimary` to match the signed-in strip.
 class _DrawerSignInCta extends StatelessWidget {
   const _DrawerSignInCta();
 
@@ -328,7 +330,6 @@ class _DrawerSignInCta extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
-    final gradients = AppGradients.of(context);
 
     return Container(
       margin: const EdgeInsetsDirectional.only(bottom: AppSpacing.lg),
@@ -337,7 +338,7 @@ class _DrawerSignInCta extends StatelessWidget {
           bottomEnd: Radius.circular(AppRadii.xl),
         ),
         child: DecoratedBox(
-          decoration: BoxDecoration(gradient: gradients.featuredTint),
+          decoration: BoxDecoration(color: colors.primary),
           child: PressScale(
             child: Material(
               type: MaterialType.transparency,
@@ -356,11 +357,14 @@ class _DrawerSignInCta extends StatelessWidget {
                         alignment: AlignmentDirectional.center,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: colors.primaryContainer,
+                          color: colors.onPrimary.withValues(alpha: 0.18),
+                          border: Border.all(
+                            color: colors.onPrimary.withValues(alpha: 0.45),
+                          ),
                         ),
                         child: Icon(
                           LucideIcons.log_in,
-                          color: colors.onPrimaryContainer,
+                          color: colors.onPrimary,
                           size: AppSpacing.xl,
                         ),
                       ),
@@ -372,7 +376,7 @@ class _DrawerSignInCta extends StatelessWidget {
                             Text(
                               l10n.navDrawerSignInCta,
                               style: styles.titleMedium.copyWith(
-                                color: colors.onSurface,
+                                color: colors.onPrimary,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -381,7 +385,7 @@ class _DrawerSignInCta extends StatelessWidget {
                             Text(
                               l10n.navDrawerSignInSubtitle,
                               style: styles.bodyMedium.copyWith(
-                                color: colors.textMuted,
+                                color: colors.onPrimary.withValues(alpha: 0.75),
                               ),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
@@ -393,7 +397,7 @@ class _DrawerSignInCta extends StatelessWidget {
                       Icon(
                         LucideIcons.chevron_right,
                         size: AppSpacing.xl,
-                        color: colors.textMuted,
+                        color: colors.onPrimary.withValues(alpha: 0.75),
                       ),
                     ],
                   ),
@@ -407,29 +411,36 @@ class _DrawerSignInCta extends StatelessWidget {
   }
 }
 
-/// The avatar circle (up-to-two-character initials) for the identity strip.
+/// The avatar circle for the identity strip, sitting on the brand-primary
+/// header panel. Renders the avatar photo when set, otherwise up-to-two-
+/// character initials in `onPrimary` over a translucent wash.
 class _DrawerAvatar extends StatelessWidget {
-  const _DrawerAvatar({required this.initials});
+  const _DrawerAvatar({required this.initials, this.avatarUrl});
 
   final String initials;
+  final String? avatarUrl;
 
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
+    final hasPhoto = avatarUrl != null && avatarUrl!.isNotEmpty;
     return Container(
       width: AppSpacing.xxxl,
       height: AppSpacing.xxxl,
       alignment: AlignmentDirectional.center,
+      clipBehavior: hasPhoto ? Clip.antiAlias : Clip.none,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: colors.primaryContainer,
-        border: Border.all(color: colors.primary.withValues(alpha: 0.18)),
+        color: colors.onPrimary.withValues(alpha: 0.18),
+        border: Border.all(color: colors.onPrimary.withValues(alpha: 0.45)),
       ),
-      child: Text(
-        initials,
-        style: styles.titleMedium.copyWith(color: colors.onPrimaryContainer),
-      ),
+      child: hasPhoto
+          ? AppNetworkImage(url: avatarUrl)
+          : Text(
+              initials,
+              style: styles.titleMedium.copyWith(color: colors.onPrimary),
+            ),
     );
   }
 }

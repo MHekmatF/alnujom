@@ -16,10 +16,14 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
+import '../../../../core/widgets/error_state.dart';
+import '../../../../core/widgets/press_scale.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/inquiry.dart';
 import '../../domain/entities/inquiry_status.dart';
@@ -157,21 +161,11 @@ class _AdminInboxBody extends StatelessWidget {
 
     return switch (state) {
       InquiryInboxLoading() => const AppSpinner.page(),
-      InquiryInboxError(:final failure) => Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.error_outline, size: AppSpacing.xxxl),
-            const SizedBox(height: AppSpacing.lg),
-            Text(failure.message),
-            const SizedBox(height: AppSpacing.lg),
-            ElevatedButton(
-              onPressed: () => context.read<InquiryInboxBloc>().add(
-                const InquiryInboxRefreshRequested(),
-              ),
-              child: const Icon(Icons.refresh),
-            ),
-          ],
+      InquiryInboxError(:final failure) => ErrorState(
+        title: failure.message,
+        variant: ErrorStateVariant.network,
+        onRetry: () => context.read<InquiryInboxBloc>().add(
+          const InquiryInboxRefreshRequested(),
         ),
       ),
       InquiryInboxLoaded(inquiries: final inquiries, hasMore: final hasMore) =>
@@ -226,52 +220,56 @@ class _AdminInquiryRowTile extends StatelessWidget {
         ? l10n.inquiry_inbox_anonymous_sender_label
         : inquiry.senderName;
 
-    return Card(
-      margin: const EdgeInsetsDirectional.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
+    return Padding(
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.sm,
       ),
-      child: InkWell(
-        onTap: () => context.push(AppRoutes.inquiryDetailFor(inquiry.id)),
-        child: Padding(
+      child: PressScale(
+        child: AppSurface(
+          onTap: () => context.push(AppRoutes.inquiryDetailFor(inquiry.id)),
           padding: const EdgeInsetsDirectional.all(AppSpacing.md),
-          child: Row(
+          radius: AppRadii.lg,
+          elevated: true,
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              InboxStatusBadge(status: inquiry.status),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(displayName, style: styles.titleMedium),
-                    const SizedBox(height: AppSpacing.xxs),
-                    Text(
-                      displayPhone,
-                      style: styles.bodyMedium.copyWith(
-                        color: colors.textMuted,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xxs),
-                    Text(
-                      inquiry.listingTitle,
-                      style: styles.bodyMedium.copyWith(
-                        color: colors.textMuted,
+              // Header row: sender name (bold) + status pill.
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Text(
+                      displayName,
+                      style: styles.titleMedium.copyWith(
+                        fontWeight: FontWeight.w700,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: AppSpacing.xs),
-                    InquiryMessageSnippet(message: inquiry.message),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      matLoc.formatCompactDate(inquiry.createdAt.toLocal()),
-                      style: styles.labelMedium.copyWith(
-                        color: colors.textMuted,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  InboxStatusBadge(status: inquiry.status),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xxs),
+              Text(
+                displayPhone,
+                style: styles.bodyMedium.copyWith(color: colors.textMuted),
+              ),
+              const SizedBox(height: AppSpacing.xxs),
+              Text(
+                inquiry.listingTitle,
+                style: styles.bodyMedium.copyWith(color: colors.textMuted),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              InquiryMessageSnippet(message: inquiry.message),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                matLoc.formatCompactDate(inquiry.createdAt.toLocal()),
+                style: styles.labelMedium.copyWith(color: colors.textMuted),
               ),
             ],
           ),

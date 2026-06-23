@@ -2,19 +2,26 @@
 //
 // Phase 18 (spec/018-reports-moderation) Sub-Phase H (T043).
 // Canonical localized ReportStatus pill. Phase 9 reuses this widget.
-// Phase 2 tokens only; no inline hex/font-size/padding.
+// Phase 33 — restyled to the royal-blue design system: a soft-tinted status
+// pill (token color at low alpha background + the same token as foreground)
+// using AppColors / AppTextStyles / AppSpacing / appRadius only.
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/radii.dart';
+import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/report_status.dart';
 
 /// A small status chip that visualises a [ReportStatus] using token colors.
 ///
-/// Token mapping (Phase 2 colorScheme):
-///   newReport   → secondaryContainer / onSecondaryContainer
-///   reviewing   → tertiaryContainer  / onTertiaryContainer
-///   resolved    → primaryContainer   / onPrimaryContainer
-///   dismissed   → surfaceContainerHighest / onSurface (muted)
+/// Phase 33 DS mapping (soft-tinted pill — tinted background + token ink):
+///   newReport   → primary (the active/just-filed state)
+///   reviewing   → warning (admin is looking at it)
+///   resolved    → success (closed favourably)
+///   dismissed   → muted (closed, no action)
 class ReportStatusChip extends StatelessWidget {
   const ReportStatusChip(this.status, {super.key});
 
@@ -23,7 +30,8 @@ class ReportStatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final scheme = Theme.of(context).colorScheme;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
 
     final label = switch (status) {
       ReportStatus.newReport => l10n.report_status_new,
@@ -32,34 +40,27 @@ class ReportStatusChip extends StatelessWidget {
       ReportStatus.dismissed => l10n.report_status_dismissed,
     };
 
-    final (background, foreground) = switch (status) {
-      ReportStatus.newReport => (
-          scheme.secondaryContainer,
-          scheme.onSecondaryContainer,
-        ),
-      ReportStatus.reviewing => (
-          scheme.tertiaryContainer,
-          scheme.onTertiaryContainer,
-        ),
-      ReportStatus.resolved => (
-          scheme.primaryContainer,
-          scheme.onPrimaryContainer,
-        ),
-      ReportStatus.dismissed => (
-          scheme.surfaceContainerHighest,
-          scheme.onSurface,
-        ),
+    final tint = switch (status) {
+      ReportStatus.newReport => colors.primary,
+      ReportStatus.reviewing => colors.warning,
+      ReportStatus.resolved => colors.success,
+      ReportStatus.dismissed => colors.textMuted,
     };
 
-    return Chip(
-      label: Text(label),
-      backgroundColor: background,
-      labelStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: foreground,
-          ),
-      side: BorderSide.none,
-      padding: EdgeInsets.zero,
-      visualDensity: VisualDensity.compact,
+    return Container(
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: tint.withValues(alpha: 0.12),
+        borderRadius: appRadius(AppRadii.pill),
+        border: Border.all(color: tint.withValues(alpha: 0.30)),
+      ),
+      child: Text(
+        label,
+        style: styles.labelMedium.copyWith(color: tint),
+      ),
     );
   }
 }

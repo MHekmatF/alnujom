@@ -8,6 +8,7 @@ import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/brand_mark.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -155,11 +156,9 @@ class _OnboardingViewState extends State<_OnboardingView> {
                               height: AppSpacing.sm,
                               decoration: BoxDecoration(
                                 color: i == step
-                                    ? colors.accent
+                                    ? colors.primary
                                     : colors.onPhoto.withValues(alpha: 0.5),
-                                borderRadius: BorderRadius.circular(
-                                  AppRadii.pill,
-                                ),
+                                borderRadius: appRadius(AppRadii.pill),
                               ),
                             );
                           }),
@@ -194,6 +193,9 @@ class _SlideBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The legibility scrim is derived from the dark `scrim` token so the brand
+    // bar (top) and headline/CTA (bottom) stay readable over any slide photo.
+    final scrim = AppColors.of(context).scrim.withValues(alpha: 1);
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -204,9 +206,9 @@ class _SlideBackground extends StatelessWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Colors.black.withValues(alpha: 0.45),
-                Colors.black.withValues(alpha: 0.15),
-                Colors.black.withValues(alpha: 0.88),
+                scrim.withValues(alpha: 0.45),
+                scrim.withValues(alpha: 0.15),
+                scrim.withValues(alpha: 0.88),
               ],
               stops: const [0.0, 0.35, 1.0],
             ),

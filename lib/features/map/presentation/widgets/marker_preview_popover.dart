@@ -1,9 +1,14 @@
 // lib/features/map/presentation/widgets/marker_preview_popover.dart
 //
-// Phase 15 Sub-Phase E (T048) — bottom-anchored Card popover surfacing the
+// Phase 15 Sub-Phase E (T048) — bottom-anchored card popover surfacing the
 // minimal preview projection of the tapped marker per FR-001. Tap →
 // `context.go(AppRoutes.listingDetailsFor(marker.id))` (Phase 13 route
 // helper).
+//
+// Restyled in the Phase-33 royal-blue DS pass to match the home listing card:
+// a rounded, hairline-outlined, softly-shadowed `colors.card` surface holding a
+// thumbnail, the title, a soft-primary purpose tag + property-type chip, and a
+// bold blue DS price line. No data / routing / logic change — purely visual.
 //
 // Price formatting (R-65 / Phase 13 home-feed parity):
 //   • Resolve [Currency] from `getIt<ListCurrencies>()` (FutureBuilder).
@@ -20,8 +25,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/elevation.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/money.dart';
 import '../../../../shared/presentation/money_formatter.dart';
@@ -56,109 +65,131 @@ class _MarkerPreviewPopoverState extends State<MarkerPreviewPopover> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    final elevation = AppElevation.of(context);
     final locale = Localizations.localeOf(context);
 
-    return Card(
+    // DS card surface — matches the home listing card chrome (radius lg,
+    // hairline outline, soft level-2 lift) so the on-map preview reads as the
+    // same family of card.
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.card,
+        borderRadius: appRadius(AppRadii.lg),
+        border: Border.all(color: colors.outline),
+        boxShadow: elevation.level2,
+      ),
       clipBehavior: Clip.antiAlias,
-      margin: EdgeInsets.zero,
-      child: InkWell(
-        onTap: () => context.go(AppRoutes.listingDetailsFor(widget.marker.id)),
-        child: Padding(
-          padding: const EdgeInsetsDirectional.all(AppSpacing.md),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _PopoverImage(imageUrl: widget.marker.mainImagePath, l10n: l10n),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      widget.marker.title.isEmpty ? '—' : widget.marker.title,
-                      style: theme.textTheme.titleSmall,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Wrap(
-                      spacing: AppSpacing.xs,
-                      runSpacing: AppSpacing.xs,
-                      children: [
-                        _Badge(
-                          label: _propertyTypeLabel(
-                            l10n,
-                            widget.marker.propertyType,
-                          ),
-                        ),
-                        _Badge(
-                          label: _purposeLabel(l10n, widget.marker.purpose),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    FutureBuilder<List<Currency>>(
-                      future: _currenciesFuture,
-                      builder: (context, snap) {
-                        final byCode = <String, Currency>{
-                          for (final c in snap.data ?? const <Currency>[])
-                            c.code: c,
-                        };
-                        return Text(
-                          _formatPrice(byCode, locale),
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        );
-                      },
-                    ),
-                    if (widget.marker.isApproximate) ...[
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: () =>
+              context.go(AppRoutes.listingDetailsFor(widget.marker.id)),
+          child: Padding(
+            padding: const EdgeInsetsDirectional.all(AppSpacing.md),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _PopoverImage(imageUrl: widget.marker.mainImagePath, l10n: l10n),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        widget.marker.title.isEmpty ? '—' : widget.marker.title,
+                        style: styles.titleMedium,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       const SizedBox(height: AppSpacing.xs),
-                      Row(
+                      Wrap(
+                        spacing: AppSpacing.xs,
+                        runSpacing: AppSpacing.xs,
                         children: [
-                          Icon(
-                            Icons.info_outline,
-                            size: 14,
-                            color: theme.colorScheme.onSurfaceVariant,
+                          _Tag(
+                            label: _purposeLabel(l10n, widget.marker.purpose),
+                            color: colors.primary,
+                            background: colors.primaryContainer,
                           ),
-                          const SizedBox(width: AppSpacing.xs),
-                          Flexible(
-                            child: Text(
-                              l10n.map_marker_approximate_location_label,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                                fontStyle: FontStyle.italic,
+                          _Tag(
+                            label: _propertyTypeLabel(
+                              l10n,
+                              widget.marker.propertyType,
+                            ),
+                            color: colors.onSurfaceVariant,
+                            background: colors.surfaceVariant,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      FutureBuilder<List<Currency>>(
+                        future: _currenciesFuture,
+                        builder: (context, snap) {
+                          final byCode = <String, Currency>{
+                            for (final c in snap.data ?? const <Currency>[])
+                              c.code: c,
+                          };
+                          // Bold blue DS price line — the loudest figure in the
+                          // preview (matches the home-card price treatment).
+                          return Text(
+                            _formatPrice(byCode, locale),
+                            textDirection: TextDirection.ltr,
+                            textAlign: TextAlign.start,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: styles.priceMedium,
+                          );
+                        },
+                      ),
+                      if (widget.marker.isApproximate) ...[
+                        const SizedBox(height: AppSpacing.xs),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.info_outline,
+                              size: AppSpacing.lg,
+                              color: colors.textMuted,
+                            ),
+                            const SizedBox(width: AppSpacing.xs),
+                            Flexible(
+                              child: Text(
+                                l10n.map_marker_approximate_location_label,
+                                style: styles.labelMedium.copyWith(
+                                  color: colors.textMuted,
+                                ),
                               ),
                             ),
+                          ],
+                        ),
+                      ],
+                      const SizedBox(height: AppSpacing.sm),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          FavoriteHeartButton(listingId: widget.marker.id),
+                          TextButton(
+                            onPressed: () => context.go(
+                              AppRoutes.listingDetailsFor(widget.marker.id),
+                            ),
+                            child: Text(l10n.map_marker_view_details_action),
                           ),
                         ],
                       ),
                     ],
-                    const SizedBox(height: AppSpacing.sm),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        FavoriteHeartButton(listingId: widget.marker.id),
-                        TextButton(
-                          onPressed: () => context.go(
-                            AppRoutes.listingDetailsFor(widget.marker.id),
-                          ),
-                          child: Text(l10n.map_marker_view_details_action),
-                        ),
-                      ],
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.close),
-                tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
-                onPressed: () =>
-                    context.read<MapBloc>().add(const PopoverDismissed()),
-              ),
-            ],
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                  color: colors.onSurfaceVariant,
+                  onPressed: () =>
+                      context.read<MapBloc>().add(const PopoverDismissed()),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -229,30 +260,30 @@ class _PopoverImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final colors = AppColors.of(context);
     final placeholder = Container(
       width: _kSize,
       height: _kSize,
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(AppRadii.sm),
+        color: colors.surfaceVariant,
+        borderRadius: appRadius(AppRadii.md),
       ),
       child: Icon(
         Icons.image_not_supported_outlined,
-        color: scheme.onSurfaceVariant,
+        color: colors.onSurfaceVariant,
         semanticLabel: l10n.map_marker_image_unavailable,
       ),
     );
     if (imageUrl == null || imageUrl!.isEmpty) return placeholder;
     return ClipRRect(
-      borderRadius: BorderRadius.circular(AppRadii.sm),
+      borderRadius: appRadius(AppRadii.md),
       child: CachedNetworkImage(
         imageUrl: imageUrl!,
         width: _kSize,
         height: _kSize,
         fit: BoxFit.cover,
         placeholder: (context, _) => ColoredBox(
-          color: scheme.surfaceContainerHighest,
+          color: colors.surfaceVariant,
           child: const SizedBox(width: _kSize, height: _kSize),
         ),
         errorWidget: (context, _, __) => placeholder,
@@ -261,29 +292,34 @@ class _PopoverImage extends StatelessWidget {
   }
 }
 
-class _Badge extends StatelessWidget {
-  const _Badge({required this.label});
+/// A soft tinted DS tag chip (pill) — a [background] fill with [color] text.
+/// Used for the purpose (soft-primary) and property-type (soft-neutral) signals
+/// on the preview card.
+class _Tag extends StatelessWidget {
+  const _Tag({
+    required this.label,
+    required this.color,
+    required this.background,
+  });
 
   final String label;
+  final Color color;
+  final Color background;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    return Container(
-      padding: const EdgeInsetsDirectional.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
-      ),
+    final styles = AppTextStyles.of(context);
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: scheme.secondaryContainer,
-        borderRadius: BorderRadius.circular(AppRadii.sm),
+        color: background,
+        borderRadius: appRadius(AppRadii.pill),
       ),
-      child: Text(
-        label,
-        style: theme.textTheme.bodySmall?.copyWith(
-          color: scheme.onSecondaryContainer,
+      child: Padding(
+        padding: const EdgeInsetsDirectional.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: AppSpacing.xxs,
         ),
+        child: Text(label, style: styles.labelMedium.copyWith(color: color)),
       ),
     );
   }

@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/listing/rejection_reason.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/app_button.dart';
 import '../../../../l10n/app_localizations.dart';
 
 /// Phase 12 / US2 — Rejection-reason banner shown above each Rejected card
@@ -36,21 +41,22 @@ class RejectionReasonBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     final hasDetail = detail != null && detail!.trim().isNotEmpty;
     final timeAgo = _formatTimeAgo(l10n, rejectedAt);
     final presetLabel = _presetLabel(l10n, preset);
 
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      margin: const EdgeInsets.symmetric(
+      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+      margin: const EdgeInsetsDirectional.symmetric(
         horizontal: AppSpacing.lg,
         vertical: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: scheme.errorContainer,
-        borderRadius: BorderRadius.circular(AppRadii.md),
+        color: colors.error.withValues(alpha: 0.08),
+        borderRadius: appRadius(AppRadii.lg),
+        border: Border.all(color: colors.error.withValues(alpha: 0.30)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,17 +65,15 @@ class RejectionReasonBanner extends StatelessWidget {
           Row(
             children: [
               Icon(
-                Icons.info_outline,
-                size: 16,
-                color: scheme.onErrorContainer,
+                LucideIcons.info,
+                size: AppSpacing.lg,
+                color: colors.error,
               ),
               const SizedBox(width: AppSpacing.xs),
               Expanded(
                 child: Text(
                   l10n.publisherRejectionAttribution(timeAgo),
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: scheme.onErrorContainer,
-                  ),
+                  style: styles.labelMedium.copyWith(color: colors.error),
                 ),
               ),
             ],
@@ -78,10 +82,7 @@ class RejectionReasonBanner extends StatelessWidget {
           // Preset label.
           Text(
             presetLabel,
-            style: theme.textTheme.titleSmall?.copyWith(
-              color: scheme.onErrorContainer,
-              fontWeight: FontWeight.w600,
-            ),
+            style: styles.titleMedium.copyWith(color: colors.onSurface),
           ),
           // Quoted detail block — defensive: omitted when detail is empty.
           if (hasDetail) ...[
@@ -95,16 +96,14 @@ class RejectionReasonBanner extends StatelessWidget {
               decoration: BoxDecoration(
                 border: BorderDirectional(
                   start: BorderSide(
-                    color: scheme.onErrorContainer.withValues(alpha: 0.5),
-                    width: 3,
+                    color: colors.error.withValues(alpha: 0.5),
+                    width: AppSpacing.xxs,
                   ),
                 ),
               ),
               child: Text(
                 detail!,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: scheme.onErrorContainer,
-                ),
+                style: styles.bodyMedium.copyWith(color: colors.onSurface),
               ),
             ),
           ],
@@ -116,16 +115,20 @@ class RejectionReasonBanner extends StatelessWidget {
             spacing: AppSpacing.sm,
             runSpacing: AppSpacing.xs,
             children: [
-              FilledButton.tonal(
+              AppButton(
+                label: l10n.publisherRejectionResubmit,
+                variant: AppButtonVariant.tonal,
+                size: AppButtonSize.dense,
                 onPressed: () =>
                     context.push('/publisher/listings/$listingId/edit'),
-                child: Text(l10n.publisherRejectionResubmit),
               ),
-              TextButton(
+              AppButton(
+                label: l10n.publisherRejectionViewHistory,
+                variant: AppButtonVariant.text,
+                size: AppButtonSize.dense,
                 onPressed: () => context.push(
                   '/publisher/listings/$listingId/moderation-history',
                 ),
-                child: Text(l10n.publisherRejectionViewHistory),
               ),
             ],
           ),

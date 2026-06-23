@@ -3,13 +3,18 @@
 // Phase 15 Sub-Phase E (T046) — OSM tile-provider attribution per
 // contracts/phase15-map-page-composition.md §Attribution widget. Always
 // visible at the bottom-start of the map overlay (FR-008, SC-007).
+// Restyled in the Phase-33 royal-blue DS pass to read the colour/type tokens
+// (AppColors / AppTextStyles) directly.
 //
 // FR-019 / R-94 compliance: OSMF public-tile policy requires visible
 // attribution on every map surface.
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
 import '../../../../l10n/app_localizations.dart';
 
 class OsmAttributionWidget extends StatelessWidget {
@@ -18,7 +23,8 @@ class OsmAttributionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     return Container(
       padding: const EdgeInsetsDirectional.symmetric(
         horizontal: AppSpacing.sm,
@@ -27,14 +33,13 @@ class OsmAttributionWidget extends StatelessWidget {
       decoration: BoxDecoration(
         // Theme-aware translucent surface so the text reads on both light
         // and dark OSM tile palettes.
-        color: theme.colorScheme.surface.withValues(alpha: 0.85),
-        borderRadius: BorderRadius.circular(AppRadii.sm),
+        color: colors.surface.withValues(alpha: 0.85),
+        borderRadius: appRadius(AppRadii.sm),
+        border: Border.all(color: colors.outline),
       ),
       child: Text(
         l10n.map_osm_attribution,
-        style: theme.textTheme.bodySmall?.copyWith(
-          color: theme.colorScheme.onSurface,
-        ),
+        style: styles.labelMedium.copyWith(color: colors.onSurface),
       ),
     );
   }

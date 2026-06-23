@@ -29,6 +29,7 @@ import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_nav_drawer.dart';
+import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/main_bottom_nav.dart';
 import '../../../../core/widgets/press_scale.dart';
@@ -230,6 +231,7 @@ class _IdentityHeader extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _Avatar(
+                      avatarUrl: profile.avatarUrl,
                       initials: _initials(
                         profile.fullName ?? profile.username ?? '؟',
                       ),
@@ -316,30 +318,38 @@ class _IdentityHeader extends StatelessWidget {
   }
 }
 
-/// Avatar circle with up-to-two-character initials, tinted with the brand
+/// Avatar circle. Renders the user's avatar photo when set (matching the home
+/// header), otherwise up-to-two-character initials tinted with the brand
 /// primary container.
 class _Avatar extends StatelessWidget {
-  const _Avatar({required this.initials});
+  const _Avatar({required this.initials, this.avatarUrl});
 
   final String initials;
+  final String? avatarUrl;
 
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
+    final hasPhoto = avatarUrl != null && avatarUrl!.isNotEmpty;
     return Container(
       width: AppSpacing.xxxl + AppSpacing.lg,
       height: AppSpacing.xxxl + AppSpacing.lg,
       alignment: AlignmentDirectional.center,
+      clipBehavior: hasPhoto ? Clip.antiAlias : Clip.none,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: colors.primaryContainer,
         border: Border.all(color: colors.primary.withValues(alpha: 0.18)),
       ),
-      child: Text(
-        initials,
-        style: styles.titleLarge.copyWith(color: colors.onPrimaryContainer),
-      ),
+      child: hasPhoto
+          ? AppNetworkImage(url: avatarUrl)
+          : Text(
+              initials,
+              style: styles.titleLarge.copyWith(
+                color: colors.onPrimaryContainer,
+              ),
+            ),
     );
   }
 }
@@ -431,19 +441,27 @@ class _StatusBadge extends StatelessWidget {
       AccountStatus.deleted => status.name,
     };
 
+    // Approved reads as a trusted "verified" pill (dedicated DS verified token);
+    // the other states keep their semantic warning/error/muted tones.
+    final isApproved = status == AccountStatus.approved;
+
     final color = switch (status) {
-      AccountStatus.approved => colors.success,
+      AccountStatus.approved => colors.verified,
       AccountStatus.pending => colors.warning,
       AccountStatus.rejected || AccountStatus.suspended => colors.error,
       _ => colors.textMuted,
     };
 
     final icon = switch (status) {
-      AccountStatus.approved => Icons.verified_outlined,
+      AccountStatus.approved => Icons.verified,
       AccountStatus.pending => Icons.hourglass_empty_outlined,
       AccountStatus.rejected || AccountStatus.suspended => Icons.block_outlined,
       _ => Icons.info_outline,
     };
+
+    final background = isApproved
+        ? colors.verifiedContainer
+        : color.withValues(alpha: 0.12);
 
     return Container(
       padding: const EdgeInsetsDirectional.symmetric(
@@ -451,7 +469,7 @@ class _StatusBadge extends StatelessWidget {
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
+        color: background,
         borderRadius: appRadius(AppRadii.pill),
         border: Border.all(color: color.withValues(alpha: 0.45)),
       ),

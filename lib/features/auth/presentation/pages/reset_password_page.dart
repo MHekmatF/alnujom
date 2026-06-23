@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_logo.dart';
+import '../widgets/auth_text_field.dart';
 import '../widgets/auth_trust_note.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/phone_number.dart';
@@ -52,7 +56,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
 
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
@@ -74,65 +79,76 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           final isLoading = _submitting || state is Authenticating;
 
           return Scaffold(
-            appBar: AppBar(title: Text(l10n.reset_password_title)),
-            body: SingleChildScrollView(
-              padding: const EdgeInsets.all(AppSpacing.xl),
-              child: _submitted
-                  ? _GenericResponse(
-                      message: l10n.reset_password_generic_response,
-                    )
-                  : Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const SizedBox(height: AppSpacing.md),
-                          const Center(child: AppLogo()),
-                          const SizedBox(height: AppSpacing.xl),
-                          TextFormField(
-                            controller: _phoneController,
-                            keyboardType: TextInputType.phone,
-                            decoration: InputDecoration(
-                              labelText: l10n.reset_password_phone_label,
-                            ),
-                            validator: (v) {
-                              if (v == null || v.trim().isEmpty) {
-                                return l10n.phone_required;
-                              }
-                              if (PhoneNumber.tryParse(v.trim()) == null) {
-                                return l10n.phone_invalid;
-                              }
-                              return null;
-                            },
-                            onChanged: (_) =>
-                                setState(() => _submitted = false),
-                          ),
-                          const SizedBox(height: AppSpacing.xl),
-                          AppButton.filledPrimary(
-                            label: l10n.reset_password_submit,
-                            loading: isLoading,
-                            expanded: true,
-                            onPressed: isLoading ? null : _submit,
-                          ),
-                          const SizedBox(height: AppSpacing.sm),
-                          if (state is AuthError)
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                top: AppSpacing.sm,
+            backgroundColor: colors.surface,
+            appBar: AppBar(
+              backgroundColor: colors.surface,
+              elevation: 0,
+              title: Text(l10n.reset_password_title),
+            ),
+            body: SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsetsDirectional.symmetric(
+                  horizontal: AppSpacing.xl,
+                  vertical: AppSpacing.lg,
+                ),
+                child: _submitted
+                    ? _GenericResponse(
+                        message: l10n.reset_password_generic_response,
+                      )
+                    : Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const SizedBox(height: AppSpacing.lg),
+                            const Center(child: AppLogo()),
+                            const SizedBox(height: AppSpacing.xxl),
+                            AuthField(
+                              label: l10n.reset_password_phone_label,
+                              child: TextFormField(
+                                controller: _phoneController,
+                                keyboardType: TextInputType.phone,
+                                decoration: authFieldDecoration(context),
+                                validator: (v) {
+                                  if (v == null || v.trim().isEmpty) {
+                                    return l10n.phone_required;
+                                  }
+                                  if (PhoneNumber.tryParse(v.trim()) == null) {
+                                    return l10n.phone_invalid;
+                                  }
+                                  return null;
+                                },
+                                onChanged: (_) =>
+                                    setState(() => _submitted = false),
                               ),
-                              child: Text(
-                                l10n.network_error,
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: theme.colorScheme.error,
+                            ),
+                            const SizedBox(height: AppSpacing.xl),
+                            AppButton.filledPrimary(
+                              label: l10n.reset_password_submit,
+                              loading: isLoading,
+                              expanded: true,
+                              onPressed: isLoading ? null : _submit,
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            if (state is AuthError)
+                              Padding(
+                                padding: const EdgeInsetsDirectional.only(
+                                  top: AppSpacing.sm,
                                 ),
-                                textAlign: TextAlign.center,
+                                child: Text(
+                                  l10n.network_error,
+                                  style: styles.bodyMedium.copyWith(
+                                    color: colors.error,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
                               ),
-                            ),
-                          const SizedBox(height: AppSpacing.lg),
-                          AuthTrustNote(text: l10n.auth_trust_note),
-                        ],
+                            const SizedBox(height: AppSpacing.lg),
+                            AuthTrustNote(text: l10n.auth_trust_note),
+                          ],
+                        ),
                       ),
-                    ),
+              ),
             ),
           );
         },
@@ -148,7 +164,8 @@ class _GenericResponse extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -158,18 +175,18 @@ class _GenericResponse extends StatelessWidget {
           height: AppSpacing.xxxl + AppSpacing.lg,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: theme.colorScheme.primary.withValues(alpha: 0.10),
+            color: colors.primaryContainer,
           ),
           child: Icon(
-            Icons.mark_email_read_outlined,
+            LucideIcons.mail_check,
             size: AppSpacing.xxl,
-            color: theme.colorScheme.primary,
+            color: colors.onPrimaryContainer,
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
         Text(
           message,
-          style: theme.textTheme.bodyLarge,
+          style: styles.bodyLarge.copyWith(color: colors.onSurface),
           textAlign: TextAlign.center,
         ),
       ],

@@ -262,51 +262,54 @@ class _InquiryRowTile extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsetsDirectional.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.sm,
       ),
       child: PressScale(
         child: AppSurface(
           onTap: () => context.push(AppRoutes.inquiryDetailFor(inquiry.id)),
           padding: const EdgeInsetsDirectional.all(AppSpacing.md),
           radius: AppRadii.lg,
-          child: Row(
+          elevated: true,
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              InboxStatusBadge(status: inquiry.status),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(displayName, style: styles.titleMedium),
-                    const SizedBox(height: AppSpacing.xxs),
-                    Text(
-                      displayPhone,
-                      style: styles.bodyMedium.copyWith(
-                        color: colors.textMuted,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xxs),
-                    Text(
-                      inquiry.listingTitle,
-                      style: styles.bodyMedium.copyWith(
-                        color: colors.textMuted,
+              // Header row: sender name (bold) + status pill + timestamp.
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Text(
+                      displayName,
+                      style: styles.titleMedium.copyWith(
+                        fontWeight: FontWeight.w700,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: AppSpacing.xs),
-                    InquiryMessageSnippet(message: inquiry.message),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      formattedDate,
-                      style: styles.labelMedium.copyWith(
-                        color: colors.textMuted,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  InboxStatusBadge(status: inquiry.status),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xxs),
+              Text(
+                displayPhone,
+                style: styles.bodyMedium.copyWith(color: colors.textMuted),
+              ),
+              const SizedBox(height: AppSpacing.xxs),
+              Text(
+                inquiry.listingTitle,
+                style: styles.bodyMedium.copyWith(color: colors.textMuted),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              InquiryMessageSnippet(message: inquiry.message),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                formattedDate,
+                style: styles.labelMedium.copyWith(color: colors.textMuted),
               ),
             ],
           ),

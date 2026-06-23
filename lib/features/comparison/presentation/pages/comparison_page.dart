@@ -162,6 +162,13 @@ class _ComparisonBody extends StatelessWidget {
       ),
     ];
 
+    // For each fact row, decide whether the columns disagree — differing
+    // values are highlighted in brand-blue so the contrast pops at a glance.
+    final rowDiffers = [
+      for (final row in rows)
+        items.map((it) => row.valueOf(it)).toSet().length > 1,
+    ];
+
     return SingleChildScrollView(
       padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.xl),
       child: Row(
@@ -179,6 +186,7 @@ class _ComparisonBody extends StatelessWidget {
                     _PropertyColumn(
                       item: item,
                       rows: rows,
+                      rowDiffers: rowDiffers,
                       width: columnWidth,
                     ),
                 ],
@@ -211,19 +219,31 @@ class _LabelColumn extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Spacer matching the header (image + title + price) height region.
+          // Spacer matching the header (image + title + price) height region so
+          // the labels line up with the value rows across the gutter.
           const SizedBox(height: _kHeaderHeight),
-          for (final row in rows)
+          for (var i = 0; i < rows.length; i++)
             Container(
               height: _kRowHeight,
               alignment: AlignmentDirectional.centerStart,
+              decoration: BoxDecoration(
+                border: i == rows.length - 1
+                    ? null
+                    : BorderDirectional(
+                        bottom: BorderSide(color: colors.outline),
+                      ),
+              ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(row.icon, size: AppSpacing.lg, color: colors.textMuted),
+                  Icon(
+                    rows[i].icon,
+                    size: AppSpacing.lg,
+                    color: colors.textMuted,
+                  ),
                   const SizedBox(width: AppSpacing.xs),
                   Text(
-                    row.label,
+                    rows[i].label,
                     style: styles.labelMedium.copyWith(color: colors.textMuted),
                   ),
                 ],
@@ -244,11 +264,16 @@ class _PropertyColumn extends StatelessWidget {
   const _PropertyColumn({
     required this.item,
     required this.rows,
+    required this.rowDiffers,
     required this.width,
   });
 
   final ComparisonItem item;
   final List<_FactRow> rows;
+
+  /// Per-row flag — `true` when the columns disagree on that fact (so this
+  /// column's value gets the brand-blue highlight).
+  final List<bool> rowDiffers;
   final double width;
 
   @override
@@ -284,7 +309,18 @@ class _PropertyColumn extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        _ColumnHero(item: item, l10n: l10n),
+                        Stack(
+                          children: [
+                            _ColumnHero(item: item, l10n: l10n),
+                            // Over-photo remove affordance (mirrors the card
+                            // chip idiom) — drops this column from the compare.
+                            PositionedDirectional(
+                              top: AppSpacing.xs,
+                              end: AppSpacing.xs,
+                              child: _RemoveColumnButton(item: item),
+                            ),
+                          ],
+                        ),
                         Expanded(
                           child: Padding(
                             padding: const EdgeInsetsDirectional.all(
@@ -331,22 +367,6 @@ class _PropertyColumn extends StatelessWidget {
                 ),
               ),
             ),
-            // --- Remove this column from the comparison ---
-            Align(
-              alignment: AlignmentDirectional.centerEnd,
-              child: IconButton(
-                visualDensity: VisualDensity.compact,
-                tooltip: l10n.comparisonRemoveColumn,
-                icon: Icon(
-                  LucideIcons.circle_x,
-                  size: AppSpacing.lg,
-                  color: colors.textMuted,
-                ),
-                onPressed: () =>
-                    context.read<ComparisonCubit>().removeById(item.id),
-              ),
-            ),
-            Divider(height: AppSpacing.xxs, color: colors.divider),
             // --- Aligned fact values ---
             for (var i = 0; i < rows.length; i++)
               Container(
@@ -356,11 +376,21 @@ class _PropertyColumn extends StatelessWidget {
                   horizontal: AppSpacing.sm,
                 ),
                 decoration: BoxDecoration(
-                  color: i.isEven ? colors.surfaceVariant : colors.card,
+                  // Hairline dividers between rows (DS table idiom) — the last
+                  // row carries none so it sits flush with the card edge.
+                  border: i == rows.length - 1
+                      ? null
+                      : BorderDirectional(
+                          bottom: BorderSide(color: colors.outline),
+                        ),
                 ),
                 child: Text(
                   rows[i].valueOf(item),
-                  style: styles.bodyMedium.copyWith(color: colors.onSurface),
+                  // Values are bold; differing values pop in brand-blue.
+                  style: styles.bodyMedium.copyWith(
+                    color: rowDiffers[i] ? colors.primary : colors.onSurface,
+                    fontWeight: FontWeight.w700,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -376,6 +406,41 @@ class _PropertyColumn extends StatelessWidget {
       Localizations.localeOf(context).toLanguageTag(),
     )..maximumFractionDigits = 0;
     return fmt.format(amount);
+  }
+}
+
+/// A round, over-photo "remove this column" affordance — a dark glass circle
+/// with a light X, matching the card chip idiom. Reads the shared cubit.
+class _RemoveColumnButton extends StatelessWidget {
+  const _RemoveColumnButton({required this.item});
+
+  final ComparisonItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+
+    return Material(
+      color: colors.photoOverlay,
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: () => context.read<ComparisonCubit>().removeById(item.id),
+        child: Tooltip(
+          message: l10n.comparisonRemoveColumn,
+          child: SizedBox(
+            width: kAppMinTouchTarget,
+            height: kAppMinTouchTarget,
+            child: Icon(
+              LucideIcons.x,
+              size: AppSpacing.lg,
+              color: colors.onPhoto,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
