@@ -29,9 +29,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/motion.dart';
+import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/segmented_control.dart' as seg;
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/app_toast.dart';
@@ -146,11 +149,8 @@ class _SearchPageViewState extends State<_SearchPageView> {
         leading: Navigator.canPop(context)
             ? const DeepLinkAwareBackButton()
             : null,
-        title: _SearchBar(
-          autofocus: widget.autofocusSearchBar,
-          initialQuery: widget.initialQuery,
-          onFocusEmptyChanged: _onFocusEmptyChanged,
-        ),
+        // The bold screen title lives in the body header (_ResultsCountHeader);
+        // the app bar stays chrome-only (back + saved searches).
         titleSpacing: 0,
         actions: [
           IconButton(
@@ -162,6 +162,13 @@ class _SearchPageViewState extends State<_SearchPageView> {
       ),
       body: Column(
         children: [
+          const _ResultsCountHeader(),
+          // Search input (50dp) + a solid-primary square filter button.
+          _SearchInputRow(
+            autofocus: widget.autofocusSearchBar,
+            initialQuery: widget.initialQuery,
+            onFocusEmptyChanged: _onFocusEmptyChanged,
+          ),
           const _SortAndFiltersRow(),
           const _ActiveFilterChips(),
           const _DisplayModeBar(),
@@ -192,6 +199,184 @@ class _SearchPageViewState extends State<_SearchPageView> {
         ],
       ),
       bottomNavigationBar: const MainBottomNav(current: MainTab.none),
+    );
+  }
+}
+
+/// The screen header: a bold title with a results-count line in the brand
+/// primary beneath it. The title is always shown (it is the screen's heading);
+/// the count line appears once a search has run and tracks the loaded results.
+class _ResultsCountHeader extends StatelessWidget {
+  const _ResultsCountHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    return BlocBuilder<SearchBloc, SearchState>(
+      buildWhen: (p, c) =>
+          p.results.length != c.results.length ||
+          (p.status == SearchStatus.initial) !=
+              (c.status == SearchStatus.initial),
+      builder: (context, state) {
+        final showCount = state.status != SearchStatus.initial;
+        return Padding(
+          padding: const EdgeInsetsDirectional.only(
+            start: AppSpacing.lg,
+            end: AppSpacing.lg,
+            top: AppSpacing.md,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l10n.nav_search, style: styles.headlineMedium),
+              if (showCount) ...[
+                const SizedBox(height: AppSpacing.xxs),
+                Text(
+                  l10n.search_results_count(state.results.length),
+                  style: styles.labelLarge.copyWith(color: colors.primary),
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// The search input row: a 50dp rounded input (card fill, hairline outline,
+/// leading search glyph) hosting the existing [_SearchBar] TextField, beside a
+/// 50dp solid-primary square filter button that opens the filter sheet.
+class _SearchInputRow extends StatelessWidget {
+  const _SearchInputRow({
+    required this.autofocus,
+    required this.initialQuery,
+    required this.onFocusEmptyChanged,
+  });
+
+  static const double _fieldHeight = 50;
+
+  final bool autofocus;
+  final String? initialQuery;
+  final ValueChanged<bool> onFocusEmptyChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    return Padding(
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.sm,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              height: _fieldHeight,
+              decoration: BoxDecoration(
+                color: colors.card,
+                borderRadius: appRadius(AppRadii.md),
+                border: Border.all(color: colors.outline),
+              ),
+              child: Row(
+                children: [
+                  const SizedBox(width: AppSpacing.md),
+                  Icon(Icons.search, color: colors.textMuted),
+                  Expanded(
+                    child: _SearchBar(
+                      autofocus: autofocus,
+                      initialQuery: initialQuery,
+                      onFocusEmptyChanged: onFocusEmptyChanged,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          BlocBuilder<SearchBloc, SearchState>(
+            buildWhen: (p, c) => p.filters.isEmpty != c.filters.isEmpty,
+            builder: (context, state) => _FilterButton(
+              size: _fieldHeight,
+              active: !state.filters.isEmpty,
+              onTap: () => _openFilterSheet(context, state.filters),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _openFilterSheet(BuildContext context, FilterState filters) {
+    final bloc = context.read<SearchBloc>();
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => SearchFilterSheet(
+        initialFilters: filters,
+        onApply: (f) => bloc.add(SearchFiltersApplied(filters: f)),
+      ),
+    );
+  }
+}
+
+/// The solid-primary square filter button beside the search input. A small
+/// accent dot signals when any filter is active (the chip strip lists which).
+class _FilterButton extends StatelessWidget {
+  const _FilterButton({
+    required this.size,
+    required this.active,
+    required this.onTap,
+  });
+
+  final double size;
+  final bool active;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    return Tooltip(
+      message: l10n.search_filters_button,
+      child: Material(
+        color: colors.primary,
+        borderRadius: appRadius(AppRadii.md),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: SizedBox(
+            width: size,
+            height: size,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Icon(
+                  Icons.tune,
+                  size: AppSpacing.xl,
+                  color: colors.onPrimary,
+                ),
+                if (active)
+                  PositionedDirectional(
+                    top: AppSpacing.sm,
+                    end: AppSpacing.sm,
+                    child: Container(
+                      width: AppSpacing.sm,
+                      height: AppSpacing.sm,
+                      decoration: BoxDecoration(
+                        color: colors.accent,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: colors.onPrimary),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -426,39 +611,14 @@ class _SortAndFiltersRow extends StatelessWidget {
               ],
             ),
           ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Phase 15 G3: "Show on map" entry point per
-              // contracts/phase15-search-show-on-map.md. Always visible;
-              // no state mutation on SearchBloc. Icon-only to fit narrow
-              // viewports (the labeled variant overflowed on 336dp-wide
-              // screens alongside the sort control + filters button).
-              IconButton(
-                onPressed: () => _openMap(context),
-                icon: const Icon(Icons.map_outlined),
-                tooltip: l10n.search_results_show_on_map_action,
-              ),
-              BlocBuilder<SearchBloc, SearchState>(
-                buildWhen: (p, c) => p.filters.isEmpty != c.filters.isEmpty,
-                builder: (context, state) {
-                  final highlight = !state.filters.isEmpty;
-                  final color = highlight
-                      ? Theme.of(context).colorScheme.primary
-                      : null;
-                  return TextButton.icon(
-                    onPressed: () => _openFilterSheet(context, state.filters),
-                    icon: Icon(Icons.tune, color: color),
-                    label: Text(
-                      l10n.search_filters_button,
-                      style: AppTextStyles.of(
-                        context,
-                      ).labelLarge.copyWith(color: color),
-                    ),
-                  );
-                },
-              ),
-            ],
+          // Phase 15 G3: "Show on map" entry point per
+          // contracts/phase15-search-show-on-map.md. Always visible; no state
+          // mutation on SearchBloc. (Filter access moved to the solid-primary
+          // square button beside the search input.)
+          IconButton(
+            onPressed: () => _openMap(context),
+            icon: const Icon(Icons.map_outlined),
+            tooltip: l10n.search_results_show_on_map_action,
           ),
         ],
       ),
@@ -475,18 +635,6 @@ class _SortAndFiltersRow extends StatelessWidget {
       extra: MapEntryFromSearch(
         filterState: filters,
         showFilterAlert: filters.hasAnyActiveFilter,
-      ),
-    );
-  }
-
-  void _openFilterSheet(BuildContext context, FilterState filters) {
-    final bloc = context.read<SearchBloc>();
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (_) => SearchFilterSheet(
-        initialFilters: filters,
-        onApply: (f) => bloc.add(SearchFiltersApplied(filters: f)),
       ),
     );
   }
@@ -517,10 +665,10 @@ class _ActiveFilterChips extends StatelessWidget {
           chips.add(
             Padding(
               padding: const EdgeInsetsDirectional.only(end: AppSpacing.sm),
-              child: InputChip(
-                label: Text(label),
-                onDeleted: () =>
-                    bloc.add(SearchFiltersApplied(filters: cleared)),
+              child: _FilterPill(
+                label: label,
+                selected: true,
+                onTap: () => bloc.add(SearchFiltersApplied(filters: cleared)),
               ),
             ),
           );
@@ -580,11 +728,13 @@ class _ActiveFilterChips extends StatelessWidget {
 
         if (chips.isEmpty) return const SizedBox.shrink();
 
-        // Trailing "clear all" — keeps the query (bar owns its own clear).
+        // Trailing "clear all" — an unselected pill (keeps the query; the bar
+        // owns its own clear).
         chips.add(
-          ActionChip(
-            label: Text(l10n.search_empty_clear_filters),
-            onPressed: () => bloc.add(
+          _FilterPill(
+            label: l10n.search_empty_clear_filters,
+            selected: false,
+            onTap: () => bloc.add(
               SearchFiltersApplied(filters: FilterState(query: f.query)),
             ),
           ),
@@ -599,12 +749,65 @@ class _ActiveFilterChips extends StatelessWidget {
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsetsDirectional.symmetric(
-              horizontal: AppSpacing.md,
+              horizontal: AppSpacing.lg,
             ),
             child: Row(children: chips),
           ),
         );
       },
+    );
+  }
+}
+
+/// A filter-strip pill. Selected (an active filter dimension) = solid primary
+/// fill + onPrimary bold text + a trailing ✕ to clear that dimension.
+/// Unselected (the "clear all" action) = card fill + 1px outline + onSurface
+/// text. Height 38, pill radius — matches the design-system chip strip.
+class _FilterPill extends StatelessWidget {
+  const _FilterPill({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  static const double _height = 38;
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    final fg = selected ? colors.onPrimary : colors.onSurface;
+    return Material(
+      color: selected ? colors.primary : colors.card,
+      borderRadius: appRadius(AppRadii.pill),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          height: _height,
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: AppSpacing.md,
+          ),
+          decoration: BoxDecoration(
+            borderRadius: appRadius(AppRadii.pill),
+            border: selected ? null : Border.all(color: colors.outline),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(label, style: styles.labelLarge.copyWith(color: fg)),
+              if (selected) ...[
+                const SizedBox(width: AppSpacing.xs),
+                Icon(Icons.close, size: AppSpacing.lg, color: fg),
+              ],
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -844,7 +1047,7 @@ class _ResultsListView extends StatelessWidget {
   }
 }
 
-/// Shimmer placeholder rows (116dp, matching [SearchResultCard]) shown while the
+/// Shimmer placeholder rows (132dp, matching [SearchResultCard]) shown while the
 /// first search page loads.
 class _SearchSkeleton extends StatelessWidget {
   const _SearchSkeleton();
@@ -859,7 +1062,7 @@ class _SearchSkeleton extends StatelessWidget {
       itemCount: 6,
       itemBuilder: (_, __) => const Padding(
         padding: EdgeInsetsDirectional.only(bottom: AppSpacing.sm),
-        child: SizedBox(height: 116, child: LoadingState.card()),
+        child: SizedBox(height: 132, child: LoadingState.card()),
       ),
     );
   }

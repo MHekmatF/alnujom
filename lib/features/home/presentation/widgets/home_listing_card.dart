@@ -11,7 +11,6 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_network_image.dart';
-import '../../../../core/widgets/glass_pill.dart';
 import '../../../../core/widgets/hero_tags.dart';
 import '../../../../core/widgets/press_scale.dart';
 import '../../../../core/widgets/property_specs.dart';
@@ -25,11 +24,12 @@ import '../../../favorites/presentation/widgets/favorite_heart_button.dart';
 import '../../../listing_form/domain/entities/listing.dart';
 import '../../domain/entities/home_listing_card.dart';
 
-/// Phase 13 home-feed card, restyled in Phase 25 to the Claude Design
-/// `an-card`: a photo-forward (16:10) hero with a frosted type pill and a
-/// semantic sale/rent status pill over the image, a coral favorite chip, then
-/// a body with a prominent price, title, location, and a green verified-agency
-/// footer. No data / routing / logic change — purely visual.
+/// Phase 13 home-feed card, restyled in Phase 33 to the photo-forward feed
+/// card: a rounded (radius lg, hairline-outlined, softly-shadowed) card with a
+/// 16:9 photo carrying a small purpose tag at the top-start and a coral
+/// favourite heart at the top-end, then a body of title → location → a bold
+/// blue price → a compact beds/baths/area spec row, with the verified-agency
+/// footer preserved beneath. No data / routing / logic change — purely visual.
 class HomeListingCardTile extends StatelessWidget {
   const HomeListingCardTile({
     super.key,
@@ -72,12 +72,12 @@ class HomeListingCardTile extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: colors.card,
-        borderRadius: appRadius(AppRadii.xl),
+        borderRadius: appRadius(AppRadii.lg),
         border: Border.all(color: colors.outline),
-        boxShadow: elevation.level2,
+        boxShadow: elevation.level1,
       ),
       child: ClipRRect(
-        borderRadius: appRadius(AppRadii.xl),
+        borderRadius: appRadius(AppRadii.lg),
         child: Material(
           type: MaterialType.transparency,
           child: InkWell(
@@ -89,7 +89,6 @@ class HomeListingCardTile extends StatelessWidget {
                   imageUrl: card.mainImageUrl,
                   l10n: l10n,
                   listingId: card.id,
-                  typeLabel: _propertyTypeLabel(l10n, card.propertyType),
                   purposeLabel: _purposeLabel(l10n, card.purpose),
                   purposeColor: _purposeColor(colors, card.purpose),
                   isFeatured: card.isFeatured,
@@ -97,23 +96,17 @@ class HomeListingCardTile extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsetsDirectional.fromSTEB(
                     AppSpacing.lg,
-                    AppSpacing.lg,
+                    AppSpacing.md,
                     AppSpacing.lg,
                     AppSpacing.md,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Price leads the body — the largest, boldest line on the
-                      // card. Currency suffix is lighter so the amount carries.
-                      _PriceLine(
-                        text: _formatPrice(locale),
-                        styles: styles,
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
+                      // Title leads the body — a tight, bold listing name.
                       Text(
                         card.title.isEmpty ? '—' : card.title,
-                        style: styles.titleLarge,
+                        style: styles.titleMedium,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -138,26 +131,20 @@ class HomeListingCardTile extends StatelessWidget {
                           ),
                         ],
                       ),
-                      // Key facts sit in a recessed strip so the beds/baths/area
-                      // read as a distinct, scannable block under the location.
+                      const SizedBox(height: AppSpacing.sm),
+                      // Bold blue price — the loudest figure in the body.
+                      _PriceLine(
+                        text: _formatPrice(locale),
+                        styles: styles,
+                      ),
+                      // Compact beds/baths/area row beneath the price.
                       if (hasSpecs) ...[
-                        const SizedBox(height: AppSpacing.md),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsetsDirectional.symmetric(
-                            horizontal: AppSpacing.md,
-                            vertical: AppSpacing.sm,
-                          ),
-                          decoration: BoxDecoration(
-                            color: colors.surfaceVariant,
-                            borderRadius: appRadius(AppRadii.md),
-                          ),
-                          child: PropertySpecsRow(
-                            rooms: card.rooms,
-                            bathrooms: card.bathrooms,
-                            areaSize: card.areaSize,
-                            color: colors.onSurface,
-                          ),
+                        const SizedBox(height: AppSpacing.sm),
+                        PropertySpecsRow(
+                          rooms: card.rooms,
+                          bathrooms: card.bathrooms,
+                          areaSize: card.areaSize,
+                          color: colors.textMuted,
                         ),
                       ],
                       // Phase 19 (FR-022) — verified-agency footer; rendered
@@ -260,27 +247,6 @@ class HomeListingCardTile extends StatelessWidget {
     return l10n.adminQueueSubmittedAtDays(delta.inDays);
   }
 
-  String _propertyTypeLabel(AppLocalizations l10n, PropertyType type) {
-    switch (type) {
-      case PropertyType.apartment:
-        return l10n.propertyTypeApartment;
-      case PropertyType.villa:
-        return l10n.propertyTypeVilla;
-      case PropertyType.land:
-        return l10n.propertyTypeLand;
-      case PropertyType.shop:
-        return l10n.propertyTypeShop;
-      case PropertyType.office:
-        return l10n.propertyTypeOffice;
-      case PropertyType.farm:
-        return l10n.propertyTypeFarm;
-      case PropertyType.warehouse:
-        return l10n.propertyTypeWarehouse;
-      case PropertyType.other:
-        return l10n.propertyTypeOther;
-    }
-  }
-
   String _purposeLabel(AppLocalizations l10n, ListingPurpose purpose) {
     switch (purpose) {
       case ListingPurpose.sale:
@@ -295,9 +261,9 @@ class HomeListingCardTile extends StatelessWidget {
   }
 }
 
-/// The card's headline price. Rendered LTR (numerals + currency symbol read
-/// left-to-right even in RTL) at the bold [AppTextStyles.priceLarge] scale so
-/// the money is unmistakably the loudest element in the card body.
+/// The card's blue price line. Rendered LTR (numerals + currency symbol read
+/// left-to-right even in RTL) at the bold [AppTextStyles.priceMedium] scale —
+/// the brand-primary colour reads it as money, not body text.
 class _PriceLine extends StatelessWidget {
   const _PriceLine({required this.text, required this.styles});
 
@@ -312,9 +278,9 @@ class _PriceLine extends StatelessWidget {
       textAlign: TextAlign.start,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      // priceLarge defaults to the brand-primary colour so the amount reads as
+      // priceMedium defaults to the brand-primary colour so the amount reads as
       // money, not body text.
-      style: styles.priceLarge,
+      style: styles.priceMedium,
     );
   }
 }
@@ -324,7 +290,6 @@ class _Hero extends StatelessWidget {
     required this.imageUrl,
     required this.l10n,
     required this.listingId,
-    required this.typeLabel,
     required this.purposeLabel,
     required this.purposeColor,
     required this.isFeatured,
@@ -333,7 +298,6 @@ class _Hero extends StatelessWidget {
   final String? imageUrl;
   final AppLocalizations l10n;
   final String listingId;
-  final String typeLabel;
   final String purposeLabel;
   final Color purposeColor;
   final bool isFeatured;
@@ -379,31 +343,28 @@ class _Hero extends StatelessWidget {
             style: FavoriteHeartStyle.onImage,
           ),
         ),
-        // Featured-listings treatment — a small brand-tinted "مميّز / Featured"
-        // pill at the top-start of the photo (opposite the favorite chip), so a
-        // promoted listing reads as special even within the regular feed.
-        if (isFeatured)
-          PositionedDirectional(
-            top: AppSpacing.md,
-            start: AppSpacing.md,
-            child: StatusPill(
-              label: l10n.home_featured_badge,
-              // Premium "مميّز" signal — solid GOLD with dark ink (gold fails
-              // contrast under white). Matches AppBadge.featured everywhere.
-              color: AppColors.of(context).tertiary,
-              foreground: Theme.of(context).colorScheme.onTertiary,
-              icon: LucideIcons.star,
-            ),
-          ),
+        // Top-start: the purpose tag (sale/rent), with the gold "مميّز /
+        // Featured" pill stacked above it for promoted listings so a featured
+        // card still reads as special within the regular feed.
         PositionedDirectional(
-          bottom: AppSpacing.md,
+          top: AppSpacing.md,
           start: AppSpacing.md,
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
+              if (isFeatured) ...[
+                StatusPill(
+                  label: l10n.home_featured_badge,
+                  // Premium "مميّز" signal — solid GOLD with dark ink (gold
+                  // fails contrast under white). Matches AppBadge.featured.
+                  color: AppColors.of(context).tertiary,
+                  foreground: Theme.of(context).colorScheme.onTertiary,
+                  icon: LucideIcons.star,
+                ),
+                const SizedBox(height: AppSpacing.xs),
+              ],
               StatusPill(label: purposeLabel, color: purposeColor),
-              const SizedBox(width: AppSpacing.xs),
-              GlassPill(label: typeLabel),
             ],
           ),
         ),

@@ -37,8 +37,10 @@ final class AppTextStyles {
     Color? primaryColor,
   }) {
     final isArabic = locale.languageCode.toLowerCase() == 'ar';
-    final displayFamily = isArabic ? 'Cairo' : 'Inter';
-    final bodyFamily = isArabic ? 'IBMPlexSansArabic' : 'Inter';
+    // Phase 033 — Tajawal is the design-system Arabic typeface (carries UI,
+    // body, and headings). Latin stays Inter.
+    final displayFamily = isArabic ? 'Tajawal' : 'Inter';
+    final bodyFamily = isArabic ? 'Tajawal' : 'Inter';
     final secondary = secondaryTextColor ?? textColor;
     final primary = primaryColor ?? textColor;
 

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
@@ -50,7 +52,12 @@ class FeaturedListingsCarousel extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _FeaturedSectionHeader(title: l10n.home_featured_section_title),
+              _FeaturedSectionHeader(
+                title: l10n.home_featured_section_title,
+                seeAllLabel: l10n.reels_see_all,
+                // "See all" → browse the full property catalogue (Search).
+                onSeeAll: () => context.go(AppRoutes.search),
+              ),
               FeaturedHeroCard(card: hero, currenciesByCode: currenciesByCode),
               if (rest.isNotEmpty)
                 Padding(
@@ -88,12 +95,18 @@ class FeaturedListingsCarousel extends StatelessWidget {
   }
 }
 
-/// Section header for the featured block — a gold sparkle tile + bold title,
-/// tying the section to the gold مميّز badge on the cards.
+/// Section header for the featured block — a gold sparkle tile + bold title +
+/// a "see all" link, tying the section to the gold مميّز badge on the cards.
 class _FeaturedSectionHeader extends StatelessWidget {
-  const _FeaturedSectionHeader({required this.title});
+  const _FeaturedSectionHeader({
+    required this.title,
+    required this.seeAllLabel,
+    required this.onSeeAll,
+  });
 
   final String title;
+  final String seeAllLabel;
+  final VoidCallback onSeeAll;
 
   @override
   Widget build(BuildContext context) {
@@ -124,6 +137,13 @@ class _FeaturedSectionHeader extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(child: Text(title, style: styles.titleLarge)),
+          TextButton(
+            onPressed: onSeeAll,
+            child: Text(
+              seeAllLabel,
+              style: styles.labelLarge.copyWith(color: colors.primary),
+            ),
+          ),
         ],
       ),
     );

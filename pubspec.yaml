@@ -101,6 +101,17 @@ flutter:
     - assets/onboarding/
     - assets/lottie/
   fonts:
+    # Phase 033 — Tajawal: the design-system Arabic typeface (UI + body + headings).
+    - family: Tajawal
+      fonts:
+        - asset: assets/fonts/Tajawal-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Tajawal-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Tajawal-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Tajawal-ExtraBold.ttf
+          weight: 800
     - family: Cairo
       fonts:
         - asset: assets/fonts/Cairo-VariableFont_slnt_wght.ttf
@@ -130,31 +141,29 @@ flutter:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: false
-  # Legacy (non-adaptive) icon: the white star mark on the deep-blue brand
-  # background (opaque). The adaptive icon composes the transparent white mark
-  # over the same brand background.
-  image_path: "assets/branding/icon_legacy.png"
-  # Phase 26 rebrand — the blue "N" emblem reads on a white field (the logo is
-  # designed on white); the transparent emblem composes over it.
-  adaptive_icon_background: "#FFFFFF"
-  adaptive_icon_foreground: "assets/branding/icon.png"
+  # Phase 033 — new "orbit" emblem (silver skyline + stars + orbit ring) on the
+  # brand navy. Legacy icon = the full emblem-on-navy square; the adaptive icon
+  # composes the transparent emblem foreground over the same navy.
+  image_path: "assets/branding/app_icon_orbit.png"
+  adaptive_icon_background: "#0B182B"
+  adaptive_icon_foreground: "assets/branding/icon_fg_orbit.png"
   min_sdk_android: 24
 
 # Phase 24 RB — flutter_native_splash config (R-212; light + dark)
 # Phase 25 — repalette to the Claude Design brand (deep blue + dark navy).
 # Generates splash drawables + values/values-night
 flutter_native_splash:
-  # Phase 26 rebrand — the full logo (emblem + النجوم wordmark + tagline) on
-  # white in both modes; the artwork carries its own white field, so the splash
-  # background is white in light and dark.
-  color: "#FFFFFF"
-  image: assets/branding/splash_full.png
-  color_dark: "#FFFFFF"
-  image_dark: assets/branding/splash_full.png
+  # Phase 033 — orbit emblem + ALNUJOM REAL ESTATE wordmark on brand navy
+  # (#0B182B), light + dark identical. Pre-Android-12 uses the full-bleed
+  # portrait artwork; Android 12+ shows the emblem centered on the navy.
+  color: "#0B182B"
+  background_image: assets/branding/splash_orbit.png
+  color_dark: "#0B182B"
+  background_image_dark: assets/branding/splash_orbit.png
   android: true
   ios: false
   android_12:
-    color: "#FFFFFF"
-    image: assets/branding/icon.png
-    color_dark: "#FFFFFF"
-    image_dark: assets/branding/icon.png
+    color: "#0B182B"
+    image: assets/branding/icon_fg_orbit.png
+    color_dark: "#0B182B"
+    image_dark: assets/branding/icon_fg_orbit.png

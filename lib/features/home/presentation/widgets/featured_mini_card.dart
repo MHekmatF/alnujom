@@ -61,7 +61,7 @@ class FeaturedMiniCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(
-                    height: 108,
+                    height: 104,
                     width: double.infinity,
                     child: Stack(
                       fit: StackFit.expand,

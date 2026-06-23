@@ -9,6 +9,7 @@ import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/motion.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
 import '../../../../core/widgets/empty_state.dart';
@@ -17,12 +18,18 @@ import '../../../../core/widgets/hero_tags.dart';
 import '../../../../core/widgets/reduce_motion.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../features/listing_form/domain/entities/listing.dart'
-    show Listing, ListingPurposeDb, LocationVisibility, PropertyTypeDb;
+    show
+        Listing,
+        ListingPurpose,
+        ListingPurposeDb,
+        LocationVisibility,
+        PropertyTypeDb;
 import '../../../../features/map/domain/entities/map_entry_context.dart';
 import '../../../../features/map/domain/entities/marker_coordinates.dart';
 import '../../../../features/currencies/domain/entities/currency.dart';
 import '../../../../features/listing_form/domain/entities/listing_media.dart';
 import '../../../../features/listing_form/domain/entities/listing_price.dart';
+import '../../../../features/listing_form/presentation/util/listing_enum_labels.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/presentation/widgets/listing_display/listing_amenities_block.dart';
 import '../../../../shared/presentation/widgets/listing_display/listing_description_block.dart';
@@ -277,12 +284,14 @@ class _SuccessBodyState extends State<_SuccessBody> {
                       // Phase 21: listing details banner (collapses to zero height
                       // when no eligible ads — FR-012; no reflow on the details layout).
                       const AdSlot(placement: AdPlacement.listingDetailsBanner),
-                      // 3. Listing title — headlineMedium is a theme-set Cairo slot
-                      // (headlineSmall is unset and would fall back to the default
-                      // non-Arabic font).
+                      // DS: a soft-primary sale/rent tag chip leads the body,
+                      // sitting just above the title (purely visual signal).
+                      _PurposeTagChip(purpose: aggregate.listing.purpose),
+                      const SizedBox(height: AppSpacing.sm),
+                      // 3. Listing title — DS headlineMedium (Tajawal display slot).
                       Text(
                         aggregate.listing.title,
-                        style: theme.textTheme.headlineMedium,
+                        style: AppTextStyles.of(context).headlineMedium,
                       ),
                       if (aggregate.publisher.fullName.isNotEmpty) ...[
                         const SizedBox(height: AppSpacing.xs),
@@ -692,6 +701,42 @@ class _PanoramaPillButton extends StatelessWidget {
         onTap: onTap,
         borderRadius: appRadius(AppRadii.pill),
         child: GlassPill(label: l10n.panoramaTourBadge, icon: Icons.threesixty),
+      ),
+    );
+  }
+}
+
+/// DS sale/rent **tag chip** — a soft-primary pill (primaryContainer fill,
+/// primary text, bold) that signals the listing's purpose at the top of the
+/// body. Purely visual; the label reuses the shared [listingPurposeLabel].
+class _PurposeTagChip extends StatelessWidget {
+  const _PurposeTagChip({required this.purpose});
+
+  final ListingPurpose purpose;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    final l10n = AppLocalizations.of(context)!;
+
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colors.primaryContainer,
+          borderRadius: appRadius(AppRadii.pill),
+        ),
+        child: Padding(
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.xs,
+          ),
+          child: Text(
+            listingPurposeLabel(purpose, l10n),
+            style: styles.labelMedium.copyWith(color: colors.primary),
+          ),
+        ),
       ),
     );
   }

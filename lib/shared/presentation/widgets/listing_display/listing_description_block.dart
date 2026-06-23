@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
 import '../../../../l10n/app_localizations.dart';
 
 /// Phase 12 Q8=A shared widget — multi-line description text with ~10-line
@@ -27,7 +29,8 @@ class _ListingDescriptionBlockState extends State<ListingDescriptionBlock> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     final l10n = AppLocalizations.of(context)!;
 
     if (widget.description.trim().isEmpty) {
@@ -42,7 +45,12 @@ class _ListingDescriptionBlockState extends State<ListingDescriptionBlock> {
           alignment: AlignmentDirectional.topStart,
           child: Text(
             widget.description,
-            style: theme.textTheme.bodyLarge,
+            // DS: relaxed, airy body copy in the muted text colour with a
+            // generous ~1.85 line-height so long Arabic descriptions breathe.
+            style: styles.bodyMedium.copyWith(
+              color: colors.textMuted,
+              height: 1.85,
+            ),
             maxLines: _expanded ? null : widget.collapsedMaxLines,
             overflow: _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
           ),
