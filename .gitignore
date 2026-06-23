@@ -251,3 +251,8 @@ specs/012-listing-approval/.phase4-log-audit-body.sql
 /Al Nujom Design System.zip
 /redesign-directions*.png
 /.playwright-mcp/
+
+# Phase 033 brand exploration artifacts — kept locally, not in the repo
+docs/brand/uikit_extracted/
+docs/brand/logo/
+docs/brand/*.zip
