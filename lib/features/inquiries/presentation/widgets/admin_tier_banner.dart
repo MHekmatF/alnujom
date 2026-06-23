@@ -2,9 +2,13 @@
 //
 // Phase 16 Sub-Phase F (T068) — Banner rendered at the top of the admin
 // inquiry oversight page to visually distinguish it from the publisher inbox.
+// Restyled to the royal-blue DS: a soft primary-container strip with a
+// hairline bottom outline. Token-only.
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
 import '../../../../l10n/app_localizations.dart';
 
 class AdminTierBanner extends StatelessWidget {
@@ -12,11 +16,17 @@ class AdminTierBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     final l10n = AppLocalizations.of(context)!;
 
-    return Material(
-      color: colorScheme.tertiaryContainer,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colors.primaryContainer,
+        border: BorderDirectional(
+          bottom: BorderSide(color: colors.outline),
+        ),
+      ),
       child: Padding(
         padding: const EdgeInsetsDirectional.symmetric(
           horizontal: AppSpacing.lg,
@@ -27,14 +37,14 @@ class AdminTierBanner extends StatelessWidget {
             Icon(
               Icons.admin_panel_settings_outlined,
               size: AppSpacing.lg,
-              color: colorScheme.onTertiaryContainer,
+              color: colors.onPrimaryContainer,
             ),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(
                 l10n.admin_inquiries_tier_banner,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onTertiaryContainer,
+                style: styles.bodyMedium.copyWith(
+                  color: colors.onPrimaryContainer,
                 ),
               ),
             ),

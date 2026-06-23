@@ -25,6 +25,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/marker_coordinates.dart';
 import '../bloc/map_bloc.dart';
 import '../bloc/map_event.dart';
+import 'map_control_button.dart';
 
 class CenterOnMyLocationFab extends StatelessWidget {
   const CenterOnMyLocationFab({super.key});
@@ -34,11 +35,14 @@ class CenterOnMyLocationFab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return FloatingActionButton(
-      heroTag: 'centerOnMyLocationFab',
+    // DS map-control button — a circular surface chip (not the brand-primary
+    // FAB) so the on-map controls read as quiet chrome over the tiles: a
+    // `surface` fill, hairline outline, and an `onSurface` icon, lifted by the
+    // token shadow.
+    return MapControlButton(
       tooltip: l10n.map_fab_center_on_me_tooltip,
+      icon: LucideIcons.locate_fixed,
       onPressed: () => _handleTap(context),
-      child: const Icon(LucideIcons.locate_fixed),
     );
   }
 

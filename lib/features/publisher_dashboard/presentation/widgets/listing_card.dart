@@ -6,9 +6,13 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/elevation.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/press_scale.dart';
 import '../../../../core/widgets/property_specs.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/money.dart';
@@ -70,92 +74,113 @@ class ListingCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    final elevation = AppElevation.of(context);
     final listing = publisherListing.listing;
     final price = publisherListing.primaryPrice;
 
-    return Card(
-      margin: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.sm,
-      ),
-      child: InkWell(
-        onTap: () => _onTap(context),
-        child: Padding(
-          padding: const EdgeInsetsDirectional.all(AppSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Text(
-                      listing.title.isEmpty
-                          ? l10n.myListingsEmptyTitle
-                          : listing.title,
-                      style: Theme.of(context).textTheme.titleMedium,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+    return PressScale(
+      child: Container(
+        margin: const EdgeInsetsDirectional.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.sm,
+        ),
+        decoration: BoxDecoration(
+          color: colors.card,
+          borderRadius: appRadius(AppRadii.lg),
+          border: Border.all(color: colors.outline),
+          boxShadow: elevation.level1,
+        ),
+        child: ClipRRect(
+          borderRadius: appRadius(AppRadii.lg),
+          child: Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              onTap: () => _onTap(context),
+              child: Padding(
+                padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            listing.title.isEmpty
+                                ? l10n.myListingsEmptyTitle
+                                : listing.title,
+                            style: styles.titleMedium,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.sm),
+                        StatusBadge(status: listing.status),
+                      ],
                     ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  StatusBadge(status: listing.status),
-                ],
+                    if (price != null) ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        _formatPrice(price.amount, price.currencyCode, locale),
+                        textDirection: TextDirection.ltr,
+                        textAlign: TextAlign.start,
+                        style: styles.priceMedium,
+                      ),
+                    ],
+                    if (_locationLabel(locale).isNotEmpty) ...[
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        _locationLabel(locale),
+                        style: styles.bodyMedium.copyWith(
+                          color: colors.textMuted,
+                        ),
+                      ),
+                    ],
+                    if (PropertySpecsRow.hasAnyOf(
+                      rooms: listing.rooms,
+                      bathrooms: listing.bathrooms,
+                      areaSize: listing.areaSize,
+                    )) ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      PropertySpecsRow(
+                        rooms: listing.rooms,
+                        bathrooms: listing.bathrooms,
+                        areaSize: listing.areaSize,
+                        color: colors.textMuted,
+                      ),
+                    ],
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      _formatDate(listing.createdAt),
+                      style: styles.labelMedium.copyWith(
+                        color: colors.textMuted,
+                      ),
+                    ),
+                    _ExpirySection(listing: listing),
+                    // Phase 031 (WS-B) — approved listings: surface either the
+                    // "Edit in review" badge (an open pending revision exists)
+                    // or the "Edit (needs approval)" affordance hint.
+                    if (publisherListing.isRevisionEditable) ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      _RevisionHint(editInReview: editInReview),
+                    ],
+                    if (publisherListing.hasRejectionReason &&
+                        !hideLegacyRejectionBlock) ...[
+                      const SizedBox(height: AppSpacing.md),
+                      RejectionReasonBlock(
+                        reason: publisherListing
+                            .latestStatusHistoryEntry!
+                            .reason!,
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      ResubmitCta(listingId: listing.id),
+                    ],
+                  ],
+                ),
               ),
-              const SizedBox(height: AppSpacing.sm),
-              if (price != null)
-                Text(
-                  _formatPrice(price.amount, price.currencyCode, locale),
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
-                ),
-              const SizedBox(height: AppSpacing.xs),
-              if (_locationLabel(locale).isNotEmpty)
-                Text(
-                  _locationLabel(locale),
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              if (PropertySpecsRow.hasAnyOf(
-                rooms: listing.rooms,
-                bathrooms: listing.bathrooms,
-                areaSize: listing.areaSize,
-              )) ...[
-                const SizedBox(height: AppSpacing.sm),
-                PropertySpecsRow(
-                  rooms: listing.rooms,
-                  bathrooms: listing.bathrooms,
-                  areaSize: listing.areaSize,
-                  color: AppColors.of(context).textMuted,
-                ),
-              ],
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                _formatDate(listing.createdAt),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-              _ExpirySection(listing: listing),
-              // Phase 031 (WS-B) — approved listings: surface either the
-              // "Edit in review" badge (an open pending revision exists) or the
-              // "Edit (needs approval)" affordance hint.
-              if (publisherListing.isRevisionEditable) ...[
-                const SizedBox(height: AppSpacing.sm),
-                _RevisionHint(editInReview: editInReview),
-              ],
-              if (publisherListing.hasRejectionReason &&
-                  !hideLegacyRejectionBlock) ...[
-                const SizedBox(height: AppSpacing.md),
-                RejectionReasonBlock(
-                  reason: publisherListing.latestStatusHistoryEntry!.reason!,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                ResubmitCta(listingId: listing.id),
-              ],
-            ],
+            ),
           ),
         ),
       ),
@@ -230,8 +255,8 @@ class _RevisionHint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final palette = AppColors.of(context);
-    final scheme = Theme.of(context).colorScheme;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
 
     if (editInReview) {
       return Align(
@@ -242,8 +267,9 @@ class _RevisionHint extends StatelessWidget {
             vertical: AppSpacing.xs,
           ),
           decoration: BoxDecoration(
-            color: palette.warning.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(AppRadii.sm),
+            color: colors.warning.withValues(alpha: 0.12),
+            borderRadius: appRadius(AppRadii.pill),
+            border: Border.all(color: colors.warning.withValues(alpha: 0.30)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -251,15 +277,12 @@ class _RevisionHint extends StatelessWidget {
               Icon(
                 LucideIcons.clock,
                 size: AppSpacing.md,
-                color: palette.warning,
+                color: colors.warning,
               ),
               const SizedBox(width: AppSpacing.xs),
               Text(
                 l10n.myListingsEditInReviewBadge,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: palette.warning,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: styles.labelMedium.copyWith(color: colors.warning),
               ),
             ],
           ),
@@ -272,15 +295,13 @@ class _RevisionHint extends StatelessWidget {
         Icon(
           LucideIcons.square_pen,
           size: AppSpacing.md,
-          color: scheme.onSurfaceVariant,
+          color: colors.textMuted,
         ),
         const SizedBox(width: AppSpacing.xs),
         Expanded(
           child: Text(
             l10n.myListingsEditNeedsApproval,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: scheme.onSurfaceVariant,
-            ),
+            style: styles.labelMedium.copyWith(color: colors.textMuted),
           ),
         ),
       ],
@@ -302,6 +323,7 @@ class _ExpirySection extends StatelessWidget {
 
     final l10n = AppLocalizations.of(context)!;
     final palette = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     final color = info.expired ? palette.error : palette.warning;
     final label = info.expired
         ? l10n.myListingsExpiredLabel
@@ -319,10 +341,7 @@ class _ExpirySection extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: styles.labelMedium.copyWith(color: color),
                 ),
               ),
             ],

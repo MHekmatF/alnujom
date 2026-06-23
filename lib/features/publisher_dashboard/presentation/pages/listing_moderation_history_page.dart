@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/listing/rejection_reason.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/elevation.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../listing_form/domain/entities/listing.dart';
@@ -88,11 +91,12 @@ class _ModerationHistoryView extends StatelessWidget {
                       style: AppTextStyles.of(context).bodyLarge,
                     ),
                     const SizedBox(height: AppSpacing.md),
-                    FilledButton(
+                    AppButton(
+                      label: l10n.errorRetryAction,
+                      variant: AppButtonVariant.outlined,
                       onPressed: () => context
                           .read<ModerationHistoryCubit>()
                           .load(listingId),
-                      child: Text(l10n.errorRetryAction),
                     ),
                   ],
                 ),
@@ -116,79 +120,81 @@ class _HistoryEntryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
+    final elevation = AppElevation.of(context);
     final hasDetail =
         entry.rejectionDetail != null &&
         entry.rejectionDetail!.trim().isNotEmpty;
 
-    return Card(
-      margin: const EdgeInsetsDirectional.only(bottom: AppSpacing.sm),
-      shape: RoundedRectangleBorder(borderRadius: appRadius(AppRadii.md)),
-      child: Padding(
-        padding: const EdgeInsetsDirectional.all(AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Status arc: Previous → New
-            Row(
-              children: [
-                if (entry.previousStatus == null)
-                  _StatusPill(label: l10n.publisherHistoryFirstEntry)
-                else ...[
-                  _StatusPill(label: _statusLabel(entry.previousStatus!)),
-                  Padding(
-                    padding: const EdgeInsetsDirectional.symmetric(
-                      horizontal: AppSpacing.xs,
-                    ),
-                    child: Icon(
-                      Icons.arrow_forward,
-                      size: AppSpacing.lg,
-                      color: colors.onSurfaceVariant,
-                    ),
+    return Container(
+      margin: const EdgeInsetsDirectional.only(bottom: AppSpacing.md),
+      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: colors.card,
+        borderRadius: appRadius(AppRadii.lg),
+        border: Border.all(color: colors.outline),
+        boxShadow: elevation.level1,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Status arc: Previous → New
+          Row(
+            children: [
+              if (entry.previousStatus == null)
+                _StatusPill(label: l10n.publisherHistoryFirstEntry)
+              else ...[
+                _StatusPill(label: _statusLabel(entry.previousStatus!)),
+                Padding(
+                  padding: const EdgeInsetsDirectional.symmetric(
+                    horizontal: AppSpacing.xs,
                   ),
-                ],
-                _StatusPill(label: _statusLabel(entry.newStatus), isNew: true),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            // Timestamp + admin attribution (NEVER the admin's actual name).
-            Text(
-              '${_formatTimestamp(entry.changedAt)} • ${l10n.publisherHistoryAdminTeam}',
-              style: styles.labelMedium.copyWith(
-                color: colors.onSurfaceVariant,
-              ),
-            ),
-            // Rejection preset + detail block.
-            if (entry.hasRejection) ...[
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                _presetLabel(entry.rejectionPreset!),
-                style: styles.titleMedium.copyWith(color: colors.onSurface),
-              ),
-              if (hasDetail) ...[
-                const SizedBox(height: AppSpacing.xs),
-                Container(
-                  padding: const EdgeInsetsDirectional.only(
-                    start: AppSpacing.md,
-                    top: AppSpacing.xs,
-                    bottom: AppSpacing.xs,
-                  ),
-                  decoration: BoxDecoration(
-                    border: BorderDirectional(
-                      start: BorderSide(
-                        color: colors.onSurfaceVariant.withValues(alpha: 0.5),
-                        width: 3,
-                      ),
-                    ),
-                  ),
-                  child: Text(
-                    entry.rejectionDetail!,
-                    style: styles.bodyMedium.copyWith(color: colors.onSurface),
+                  child: Icon(
+                    LucideIcons.move_right,
+                    size: AppSpacing.lg,
+                    color: colors.textMuted,
                   ),
                 ),
               ],
+              _StatusPill(label: _statusLabel(entry.newStatus), isNew: true),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          // Timestamp + admin attribution (NEVER the admin's actual name).
+          Text(
+            '${_formatTimestamp(entry.changedAt)} • ${l10n.publisherHistoryAdminTeam}',
+            style: styles.labelMedium.copyWith(color: colors.textMuted),
+          ),
+          // Rejection preset + detail block.
+          if (entry.hasRejection) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              _presetLabel(entry.rejectionPreset!),
+              style: styles.titleMedium.copyWith(color: colors.onSurface),
+            ),
+            if (hasDetail) ...[
+              const SizedBox(height: AppSpacing.xs),
+              Container(
+                padding: const EdgeInsetsDirectional.only(
+                  start: AppSpacing.md,
+                  top: AppSpacing.xs,
+                  bottom: AppSpacing.xs,
+                ),
+                decoration: BoxDecoration(
+                  border: BorderDirectional(
+                    start: BorderSide(
+                      color: colors.textMuted.withValues(alpha: 0.5),
+                      width: AppSpacing.xxs,
+                    ),
+                  ),
+                ),
+                child: Text(
+                  entry.rejectionDetail!,
+                  style: styles.bodyMedium.copyWith(color: colors.onSurface),
+                ),
+              ),
             ],
           ],
-        ),
+        ],
       ),
     );
   }
@@ -257,20 +263,22 @@ class _StatusPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
+    // The resulting (new) status reads as the active brand state; the previous
+    // status is a neutral, muted soft-tint.
+    final tint = isNew ? colors.primary : colors.textMuted;
     return Container(
       padding: const EdgeInsetsDirectional.symmetric(
         horizontal: AppSpacing.sm,
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: isNew ? colors.primaryContainer : colors.surfaceVariant,
-        borderRadius: appRadius(AppRadii.sm),
+        color: tint.withValues(alpha: 0.12),
+        borderRadius: appRadius(AppRadii.pill),
+        border: Border.all(color: tint.withValues(alpha: 0.30)),
       ),
       child: Text(
         label,
-        style: styles.labelMedium.copyWith(
-          color: isNew ? colors.onPrimaryContainer : colors.onSurfaceVariant,
-        ),
+        style: styles.labelMedium.copyWith(color: tint),
       ),
     );
   }

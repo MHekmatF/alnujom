@@ -74,46 +74,58 @@ class SupportContactRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
-    return InkWell(
-      borderRadius: appRadius(AppRadii.md),
-      onTap: () =>
-          unawaited(launchUrl(launchUri, mode: LaunchMode.externalApplication)),
-      child: Padding(
-        padding: const EdgeInsetsDirectional.symmetric(vertical: AppSpacing.sm),
-        child: Row(
-          children: [
-            // Leading icon in a soft brand-tinted square (profile-row idiom).
-            Container(
-              width: AppSpacing.xxl + AppSpacing.sm,
-              height: AppSpacing.xxl + AppSpacing.sm,
-              alignment: AlignmentDirectional.center,
-              decoration: BoxDecoration(
-                color: colors.primary.withValues(alpha: 0.12),
-                borderRadius: appRadius(AppRadii.md),
+    return Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        onTap: () => unawaited(
+          launchUrl(launchUri, mode: LaunchMode.externalApplication),
+        ),
+        child: Padding(
+          padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+          child: Row(
+            children: [
+              // Leading icon in a soft brand-tinted square (profile-row idiom).
+              Container(
+                width: AppSpacing.xxl + AppSpacing.sm,
+                height: AppSpacing.xxl + AppSpacing.sm,
+                alignment: AlignmentDirectional.center,
+                decoration: BoxDecoration(
+                  color: colors.primary.withValues(alpha: 0.12),
+                  borderRadius: appRadius(AppRadii.md),
+                ),
+                child: Icon(icon, color: colors.primary, size: AppSpacing.xl),
               ),
-              child: Icon(icon, color: colors.primary, size: AppSpacing.xl),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(label, style: styles.titleMedium),
-                  const SizedBox(height: AppSpacing.xxs),
-                  Text(
-                    value,
-                    style: styles.bodyMedium.copyWith(color: colors.textMuted),
-                  ),
-                ],
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: styles.titleMedium,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: AppSpacing.xxs),
+                    Text(
+                      value,
+                      style: styles.bodyMedium.copyWith(
+                        color: colors.textMuted,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Icon(
-              Icons.open_in_new,
-              size: AppSpacing.lg,
-              color: colors.textMuted,
-            ),
-          ],
+              const SizedBox(width: AppSpacing.sm),
+              Icon(
+                Icons.open_in_new,
+                size: AppSpacing.lg,
+                color: colors.textMuted,
+              ),
+            ],
+          ),
         ),
       ),
     );

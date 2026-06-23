@@ -13,6 +13,7 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 
 import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
@@ -21,7 +22,6 @@ import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
-import '../../../../core/widgets/status_pill.dart';
 import '../../../crm/presentation/widgets/add_to_crm_action.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/viewing.dart';
@@ -236,7 +236,7 @@ class _ViewingCard extends StatelessWidget {
     );
   }
 
-  StatusPill _statusPill(
+  _SoftStatusPill _statusPill(
     BuildContext context,
     AppLocalizations l10n,
     AppColors colors,
@@ -251,7 +251,7 @@ class _ViewingCard extends StatelessWidget {
         colors.textMuted,
       ),
     };
-    return StatusPill(label: label, color: color);
+    return _SoftStatusPill(label: label, color: color);
   }
 
   static List<Widget> _interspersed(List<Widget> actions) {
@@ -261,5 +261,35 @@ class _ViewingCard extends StatelessWidget {
       out.add(actions[i]);
     }
     return out;
+  }
+}
+
+/// Phase-33 DS soft-tinted status pill for the viewing rows: a low-alpha tint
+/// of the status [color] as the fill, the same colour (at full strength) for
+/// the label, and a faint outline of it — a quieter, more "airy" read than the
+/// shared solid [StatusPill], matching the new design system's status chips.
+class _SoftStatusPill extends StatelessWidget {
+  const _SoftStatusPill({required this.label, required this.color});
+
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final styles = AppTextStyles.of(context);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: appRadius(AppRadii.pill),
+        border: Border.all(color: color.withValues(alpha: 0.32)),
+      ),
+      child: Padding(
+        padding: const EdgeInsetsDirectional.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: AppSpacing.xxs,
+        ),
+        child: Text(label, style: styles.labelMedium.copyWith(color: color)),
+      ),
+    );
   }
 }

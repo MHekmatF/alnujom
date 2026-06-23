@@ -31,86 +31,98 @@ class NotificationTile extends StatelessWidget {
     final l10n = AppStrings.of(context).loc;
     final isUnread = notification.isUnread;
 
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        color: isUnread ? colors.primaryContainer.withAlpha(0x26) : null,
-        padding: const EdgeInsetsDirectional.fromSTEB(
-          AppSpacing.lg,
-          AppSpacing.md,
-          AppSpacing.lg,
-          AppSpacing.md,
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Type icon
-            Container(
-              width: AppSpacing.xxl,
-              height: AppSpacing.xxl,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: isUnread
-                    ? colors.primary.withAlpha(0x1A)
-                    : colors.surfaceVariant,
+    return Material(
+      type: MaterialType.transparency,
+      // Unread rows carry a subtle brand-blue wash so they read as "new" at a
+      // glance; read rows stay on the page surface.
+      color: isUnread ? colors.primaryContainer : null,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(
+            AppSpacing.lg,
+            AppSpacing.md,
+            AppSpacing.lg,
+            AppSpacing.md,
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Type icon in a soft primaryContainer circle (DS list-row idiom).
+              Container(
+                width: AppSpacing.xxl,
+                height: AppSpacing.xxl,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isUnread ? colors.surface : colors.primaryContainer,
+                ),
+                child: Icon(
+                  _iconForType(notification.type),
+                  size: AppSpacing.lg,
+                  color: colors.primary,
+                ),
               ),
-              child: Icon(
-                _iconForType(notification.type),
-                size: AppSpacing.lg,
-                color: isUnread ? colors.primary : colors.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            // Title + optional body + relative time
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _titleForType(notification.type, l10n),
-                    style: isUnread
-                        ? textStyles.labelLarge
-                        : textStyles.bodyMedium,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (_bodyForType(notification.type, notification.params, l10n)
-                      case final body?) ...[
-                    const SizedBox(height: AppSpacing.xs),
+              const SizedBox(width: AppSpacing.md),
+              // Title + optional body + relative time
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Text(
-                      body,
-                      style: textStyles.bodyMedium.copyWith(
-                        color: colors.textMuted,
+                      _titleForType(notification.type, l10n),
+                      // Bold title; unread is heavier still so it stands out.
+                      style: textStyles.titleMedium.copyWith(
+                        fontWeight: isUnread
+                            ? FontWeight.w700
+                            : FontWeight.w600,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    if (_bodyForType(
+                          notification.type,
+                          notification.params,
+                          l10n,
+                        )
+                        case final body?) ...[
+                      const SizedBox(height: AppSpacing.xxs),
+                      Text(
+                        body,
+                        style: textStyles.bodyMedium.copyWith(
+                          color: colors.textMuted,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      _relativeTime(notification.createdAt, l10n),
+                      style: textStyles.labelMedium.copyWith(
+                        color: colors.textMuted,
+                      ),
+                    ),
                   ],
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    _relativeTime(notification.createdAt, l10n),
-                    style: textStyles.labelMedium,
-                  ),
-                ],
-              ),
-            ),
-            // Unread dot
-            if (isUnread)
-              Padding(
-                padding: const EdgeInsetsDirectional.only(
-                  start: AppSpacing.sm,
-                  top: AppSpacing.xs,
-                ),
-                child: Container(
-                  width: AppSpacing.sm,
-                  height: AppSpacing.sm,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: colors.primary,
-                  ),
                 ),
               ),
-          ],
+              // Unread dot
+              if (isUnread)
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(
+                    start: AppSpacing.sm,
+                    top: AppSpacing.xs,
+                  ),
+                  child: Container(
+                    width: AppSpacing.sm,
+                    height: AppSpacing.sm,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: colors.primary,
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

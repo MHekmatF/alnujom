@@ -102,6 +102,7 @@ class _ConversationTile extends StatelessWidget {
     return PressScale(
       child: AppSurface(
         radius: AppRadii.lg,
+        elevated: true,
         padding: const EdgeInsetsDirectional.all(AppSpacing.md),
         onTap: () {
           Navigator.of(context).push(
@@ -117,15 +118,24 @@ class _ConversationTile extends StatelessWidget {
           );
         },
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(
-              borderRadius: appRadius(AppRadii.md),
-              child: SizedBox(
-                width: AppSpacing.xxxl,
-                height: AppSpacing.xxxl,
-                child: AppNetworkImage(
-                  url: conversation.listingImageUrl,
-                  semanticLabel: title,
+            // Listing thumbnail avatar — a clean rounded square with a hairline
+            // outline so it reads as a tile even when the image is missing.
+            DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: appRadius(AppRadii.md),
+                border: Border.all(color: colors.outline),
+              ),
+              child: ClipRRect(
+                borderRadius: appRadius(AppRadii.md),
+                child: SizedBox(
+                  width: AppSpacing.xxxl,
+                  height: AppSpacing.xxxl,
+                  child: AppNetworkImage(
+                    url: conversation.listingImageUrl,
+                    semanticLabel: title,
+                  ),
                 ),
               ),
             ),
@@ -138,9 +148,12 @@ class _ConversationTile extends StatelessWidget {
                     title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: styles.titleMedium,
+                    style: styles.titleMedium.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.xxs),
+                  // Role line, styled like a muted last-message preview.
                   Text(
                     subtitle,
                     maxLines: 1,

@@ -8,17 +8,21 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/elevation.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
+import '../../../../core/widgets/error_state.dart';
+import '../../../../core/widgets/press_scale.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/report.dart';
 import '../../domain/entities/report_reason.dart';
@@ -79,23 +83,11 @@ class _ErrorBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.error_outline, size: AppSpacing.xxxl),
-          const SizedBox(height: AppSpacing.lg),
-          ElevatedButton.icon(
-            icon: const Icon(Icons.refresh),
-            label: Text(
-              MaterialLocalizations.of(context).refreshIndicatorSemanticLabel,
-            ),
-            onPressed: () => context.read<MyReportsBloc>().add(
-              const MyReportsRefreshRequested(),
-            ),
-          ),
-        ],
-      ),
+    final l10n = AppLocalizations.of(context)!;
+    return ErrorState(
+      title: l10n.reports_my_title,
+      onRetry: () =>
+          context.read<MyReportsBloc>().add(const MyReportsRefreshRequested()),
     );
   }
 }
@@ -155,75 +147,90 @@ class _ReportCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
+    final elevation = AppElevation.of(context);
 
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      margin: const EdgeInsetsDirectional.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.sm,
-      ),
-      child: InkWell(
-        onTap: () => context.push(AppRoutes.listingDetailsFor(item.listingId)),
-        child: Padding(
-          padding: const EdgeInsetsDirectional.all(AppSpacing.md),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Thumbnail
-              ClipRRect(
-                borderRadius: appRadius(AppRadii.sm),
-                child: SizedBox(
-                  width: AppSpacing.xxxl + AppSpacing.xl,
-                  height: AppSpacing.xxxl + AppSpacing.xl,
-                  child: item.mainImagePath != null
-                      ? CachedNetworkImage(
-                          imageUrl: item.mainImagePath!,
-                          fit: BoxFit.cover,
-                          placeholder: (_, __) =>
-                              ColoredBox(color: colors.surfaceVariant),
-                          errorWidget: (_, __, ___) => ColoredBox(
-                            color: colors.surfaceVariant,
-                            child: Icon(
-                              Icons.broken_image_outlined,
-                              color: colors.onSurfaceVariant,
-                            ),
-                          ),
-                        )
-                      : ColoredBox(
-                          color: colors.surfaceVariant,
-                          child: Icon(
-                            Icons.image_not_supported_outlined,
-                            color: colors.onSurfaceVariant,
-                          ),
-                        ),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              // Details
-              Expanded(
-                child: Column(
+    return PressScale(
+      child: Container(
+        margin: const EdgeInsetsDirectional.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.sm,
+        ),
+        decoration: BoxDecoration(
+          color: colors.card,
+          borderRadius: appRadius(AppRadii.lg),
+          border: Border.all(color: colors.outline),
+          boxShadow: elevation.level1,
+        ),
+        child: ClipRRect(
+          borderRadius: appRadius(AppRadii.lg),
+          child: Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              onTap: () =>
+                  context.push(AppRoutes.listingDetailsFor(item.listingId)),
+              child: Padding(
+                padding: const EdgeInsetsDirectional.all(AppSpacing.md),
+                child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (item.listingTitle.isNotEmpty)
-                      Text(
-                        item.listingTitle,
-                        style: styles.titleMedium,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      _reasonLabel(l10n, item.reason),
-                      style: styles.bodyMedium.copyWith(
-                        color: colors.onSurfaceVariant,
+                    // Thumbnail
+                    ClipRRect(
+                      borderRadius: appRadius(AppRadii.md),
+                      child: SizedBox(
+                        width: AppSpacing.xxxl + AppSpacing.xl,
+                        height: AppSpacing.xxxl + AppSpacing.xl,
+                        child: item.mainImagePath != null
+                            ? CachedNetworkImage(
+                                imageUrl: item.mainImagePath!,
+                                fit: BoxFit.cover,
+                                placeholder: (_, __) =>
+                                    ColoredBox(color: colors.surfaceVariant),
+                                errorWidget: (_, __, ___) => ColoredBox(
+                                  color: colors.surfaceVariant,
+                                  child: Icon(
+                                    LucideIcons.image_off,
+                                    color: colors.textMuted,
+                                  ),
+                                ),
+                              )
+                            : ColoredBox(
+                                color: colors.surfaceVariant,
+                                child: Icon(
+                                  LucideIcons.image,
+                                  color: colors.textMuted,
+                                ),
+                              ),
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.xs),
-                    ReportStatusChip(item.status),
+                    const SizedBox(width: AppSpacing.md),
+                    // Details
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (item.listingTitle.isNotEmpty)
+                            Text(
+                              item.listingTitle,
+                              style: styles.titleMedium,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          const SizedBox(height: AppSpacing.xs),
+                          Text(
+                            _reasonLabel(l10n, item.reason),
+                            style: styles.bodyMedium.copyWith(
+                              color: colors.textMuted,
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          ReportStatusChip(item.status),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
-            ],
+            ),
           ),
         ),
       ),

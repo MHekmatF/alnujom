@@ -162,9 +162,28 @@ class _MessageBubble extends StatelessWidget {
     final locale = Localizations.localeOf(context).toString();
 
     final mine = message.isMine;
-    final bubbleColor = mine ? colors.primaryContainer : colors.surfaceVariant;
-    final textColor = mine ? colors.onPrimaryContainer : colors.onSurface;
+    // Outgoing = solid brand-blue with on-primary ink. Incoming = a soft card
+    // surface with a hairline outline (the DS received-bubble treatment).
+    final bubbleColor = mine ? colors.primary : colors.card;
+    final textColor = mine ? colors.onPrimary : colors.onSurface;
     final time = DateFormat.jm(locale).format(message.createdAt.toLocal());
+
+    // Asymmetric "tail": the corner on the sender's side is tightened so the
+    // bubble points back at its author. Mirrors automatically under RTL because
+    // BorderRadiusDirectional resolves start/end against the text direction.
+    final tail = mine
+        ? const BorderRadiusDirectional.only(
+            topStart: Radius.circular(AppRadii.lg),
+            topEnd: Radius.circular(AppRadii.lg),
+            bottomStart: Radius.circular(AppRadii.lg),
+            bottomEnd: Radius.circular(AppRadii.sm),
+          )
+        : const BorderRadiusDirectional.only(
+            topStart: Radius.circular(AppRadii.lg),
+            topEnd: Radius.circular(AppRadii.lg),
+            bottomStart: Radius.circular(AppRadii.sm),
+            bottomEnd: Radius.circular(AppRadii.lg),
+          );
 
     return Padding(
       padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.sm),
@@ -184,7 +203,8 @@ class _MessageBubble extends StatelessWidget {
               ),
               decoration: BoxDecoration(
                 color: bubbleColor,
-                borderRadius: appRadius(AppRadii.lg),
+                borderRadius: tail,
+                border: mine ? null : Border.all(color: colors.outline),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,11 +215,28 @@ class _MessageBubble extends StatelessWidget {
                     style: styles.bodyLarge.copyWith(color: textColor),
                   ),
                   const SizedBox(height: AppSpacing.xxs),
-                  Text(
-                    time,
-                    style: styles.labelMedium.copyWith(
-                      color: textColor.withValues(alpha: 0.7),
-                    ),
+                  // Footer: muted/small timestamp, plus a read indicator on the
+                  // outgoing side (single tick = sent, double = read).
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        time,
+                        style: styles.labelMedium.copyWith(
+                          color: textColor.withValues(alpha: 0.7),
+                        ),
+                      ),
+                      if (mine) ...[
+                        const SizedBox(width: AppSpacing.xs),
+                        Icon(
+                          message.readAt != null
+                              ? Icons.done_all
+                              : Icons.done,
+                          size: AppSpacing.md,
+                          color: textColor.withValues(alpha: 0.7),
+                        ),
+                      ],
+                    ],
                   ),
                 ],
               ),
@@ -237,52 +274,69 @@ class _Composer extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: colors.surface,
-          border: BorderDirectional(top: BorderSide(color: colors.divider)),
+          border: BorderDirectional(top: BorderSide(color: colors.outline)),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
+            // DS field: rounded card fill with a 1px outline, matching the
+            // app's input idiom.
             Expanded(
-              child: Container(
+              child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: colors.surfaceVariant,
-                  borderRadius: appRadius(AppRadii.lg),
+                  color: colors.card,
+                  borderRadius: appRadius(AppRadii.xl),
+                  border: Border.all(color: colors.outline),
                 ),
-                padding: const EdgeInsetsDirectional.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: AppSpacing.xs,
-                ),
-                child: TextField(
-                  controller: controller,
-                  minLines: 1,
-                  maxLines: 5,
-                  maxLength: 2000,
-                  // Suppress the built-in maxLength counter (token-clean: no
-                  // empty-string literal in the decoration).
-                  buildCounter:
-                      (
-                        _, {
-                        required int currentLength,
-                        required bool isFocused,
-                        int? maxLength,
-                      }) => null,
-                  textInputAction: TextInputAction.newline,
-                  keyboardType: TextInputType.multiline,
-                  style: styles.bodyLarge,
-                  decoration: InputDecoration(
-                    isDense: true,
-                    border: InputBorder.none,
-                    hintText: l10n.chatComposerHint,
-                    hintStyle: styles.bodyLarge.copyWith(color: hintColor),
+                child: Padding(
+                  padding: const EdgeInsetsDirectional.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.xs,
+                  ),
+                  child: TextField(
+                    controller: controller,
+                    minLines: 1,
+                    maxLines: 5,
+                    maxLength: 2000,
+                    // Suppress the built-in maxLength counter (token-clean: no
+                    // empty-string literal in the decoration).
+                    buildCounter:
+                        (
+                          _, {
+                          required int currentLength,
+                          required bool isFocused,
+                          int? maxLength,
+                        }) => null,
+                    textInputAction: TextInputAction.newline,
+                    keyboardType: TextInputType.multiline,
+                    style: styles.bodyLarge,
+                    decoration: InputDecoration(
+                      isDense: true,
+                      border: InputBorder.none,
+                      hintText: l10n.chatComposerHint,
+                      hintStyle: styles.bodyLarge.copyWith(color: hintColor),
+                    ),
                   ),
                 ),
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
-            IconButton.filled(
-              onPressed: onSend,
-              icon: const Icon(Icons.send),
-              tooltip: l10n.chatComposerSend,
+            // Circular brand-blue send button.
+            Material(
+              color: colors.primary,
+              shape: const CircleBorder(),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: onSend,
+                child: Tooltip(
+                  message: l10n.chatComposerSend,
+                  child: SizedBox(
+                    width: kAppMinTouchTarget,
+                    height: kAppMinTouchTarget,
+                    child: Icon(Icons.send, color: colors.onPrimary),
+                  ),
+                ),
+              ),
             ),
           ],
         ),

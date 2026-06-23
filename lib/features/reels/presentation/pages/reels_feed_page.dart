@@ -10,8 +10,11 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/settings/lite_mode.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/elevation.dart';
+import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_dialog.dart';
 import '../../../../core/widgets/app_spinner.dart';
@@ -253,18 +256,6 @@ class _ReelsFeedBodyState extends State<ReelsFeedBody> {
 
     return Scaffold(
       backgroundColor: colors.scrim,
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        foregroundColor: colors.onPhoto,
-        title: Text(
-          l10n.reels_section_title,
-          style: AppTextStyles.of(context).titleMedium.copyWith(
-            color: colors.onPhoto,
-          ),
-        ),
-      ),
       body: BlocConsumer<ReelsFeedCubit, ReelsFeedState>(
         listenWhen: (prev, next) =>
             prev.reels.isEmpty && next.reels.isNotEmpty,
@@ -293,7 +284,16 @@ class _ReelsFeedBodyState extends State<ReelsFeedBody> {
               );
             case ReelsFeedStatus.loaded:
             case ReelsFeedStatus.loadingMore:
-              return _buildFeed(context, state.reels);
+              // The vertical feed sits edge-to-edge; the glass top bar
+              // (title pill) floats over it inside a SafeArea so it clears
+              // the status bar / notch in both orientations.
+              return Stack(
+                fit: StackFit.expand,
+                children: [
+                  _buildFeed(context, state.reels),
+                  const _ReelsTopBar(),
+                ],
+              );
           }
         },
       ),
@@ -327,8 +327,35 @@ class _ReelsFeedBodyState extends State<ReelsFeedBody> {
   }
 }
 
-/// The bottom overlay on each reel: title, location, a price [GlassPill], and a
-/// "View listing" CTA that routes to the listing's detail page.
+/// The floating glass top bar over the feed — a brand-tinted "Reels" title
+/// pill drawn from the photo-overlay tokens so it lifts off the video in both
+/// themes. Replaces the old transparent [AppBar] (matches the panorama-viewer
+/// chrome idiom).
+class _ReelsTopBar extends StatelessWidget {
+  const _ReelsTopBar();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsetsDirectional.all(AppSpacing.md),
+        child: Align(
+          alignment: AlignmentDirectional.topStart,
+          child: GlassPill(
+            icon: LucideIcons.clapperboard,
+            label: l10n.reels_section_title,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The bottom overlay on each reel: a royal-blue price pill, the title, the
+/// location, and a "View listing" CTA that routes to the listing's detail
+/// page. Sits over a bottom-anchored scrim so the over-video text stays legible
+/// on bright footage.
 class _ReelOverlay extends StatelessWidget {
   const _ReelOverlay({required this.reel});
 
@@ -367,8 +394,7 @@ class _ReelOverlay extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (reel.hasPrice) ...[
-                  GlassPill(
-                    icon: LucideIcons.tag,
+                  _PricePill(
                     label: l10n.priceWithCurrency(
                       reel.priceAmount!,
                       reel.priceCurrency!,
@@ -416,6 +442,51 @@ class _ReelOverlay extends StatelessWidget {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The over-video price chip — a solid royal-blue ([colors.primary]) pill with
+/// a price-tag glyph, lifted off the footage by the elevation token. Reads as
+/// the brand's signal color rather than the neutral glass used elsewhere on the
+/// reel, so the price is the first thing the eye lands on.
+class _PricePill extends StatelessWidget {
+  const _PricePill({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    final elevation = AppElevation.of(context);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colors.primary,
+        borderRadius: appRadius(AppRadii.pill),
+        boxShadow: elevation.level1,
+      ),
+      child: Padding(
+        padding: const EdgeInsetsDirectional.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.xs,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              LucideIcons.tag,
+              size: AppSpacing.md,
+              color: colors.onPrimary,
+            ),
+            const SizedBox(width: AppSpacing.xs),
+            Text(
+              label,
+              style: styles.labelLarge.copyWith(color: colors.onPrimary),
+            ),
+          ],
         ),
       ),
     );

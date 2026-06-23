@@ -2,14 +2,20 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/errors/result.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/app_toast.dart';
+import '../../../../core/widgets/empty_state.dart';
+import '../../../../core/widgets/error_state.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../currencies/domain/entities/currency.dart';
 import '../../../currencies/domain/usecases/list_currencies.dart';
@@ -289,26 +295,12 @@ class _EmptyBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              l10n.myListingsEmptyTitle,
-              style: Theme.of(context).textTheme.titleMedium,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            FilledButton(
-              onPressed: () =>
-                  context.goNamed(AppRouteNames.publisherListingsCreate),
-              child: Text(l10n.myListingsEmptyCtaCreateFirst),
-            ),
-          ],
-        ),
-      ),
+    return EmptyState(
+      icon: LucideIcons.list_plus,
+      headline: l10n.myListingsEmptyTitle,
+      ctaLabel: l10n.myListingsEmptyCtaCreateFirst,
+      onCtaPressed: () =>
+          context.goNamed(AppRouteNames.publisherListingsCreate),
     );
   }
 }
@@ -501,16 +493,17 @@ class _BannerSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final colors = AppColors.of(context);
     return Container(
-      height: 72,
-      margin: const EdgeInsets.symmetric(
+      height: AppSpacing.xxxl + AppSpacing.xl,
+      margin: const EdgeInsetsDirectional.symmetric(
         horizontal: AppSpacing.lg,
         vertical: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: scheme.errorContainer.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(AppSpacing.sm),
+        color: colors.error.withValues(alpha: 0.08),
+        borderRadius: appRadius(AppRadii.lg),
+        border: Border.all(color: colors.error.withValues(alpha: 0.20)),
       ),
     );
   }
@@ -524,34 +517,11 @@ class _ErrorBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              l10n.myListingsErrorPrefix,
-              style: Theme.of(context).textTheme.titleMedium,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              message,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.error,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            FilledButton(
-              onPressed: () =>
-                  context.read<MyListingsBloc>().add(const LoadMyListings()),
-              child: const Icon(Icons.refresh),
-            ),
-          ],
-        ),
-      ),
+    return ErrorState(
+      title: l10n.myListingsErrorPrefix,
+      message: message,
+      onRetry: () =>
+          context.read<MyListingsBloc>().add(const LoadMyListings()),
     );
   }
 }

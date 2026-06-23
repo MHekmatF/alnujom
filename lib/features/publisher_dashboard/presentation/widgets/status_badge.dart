@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../listing_form/domain/entities/listing.dart';
 
@@ -22,48 +24,35 @@ class StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final scheme = Theme.of(context).colorScheme;
     final palette = AppColors.of(context);
-    final (Color bg, Color fg) = switch (status) {
-      ListingStatus.draft || ListingStatus.paused => (
-        scheme.surfaceContainerHighest,
-        scheme.onSurface,
-      ),
-      ListingStatus.pendingReview => (
-        palette.warning.withValues(alpha: 0.15),
-        palette.warning,
-      ),
-      ListingStatus.approved => (
-        palette.success.withValues(alpha: 0.15),
-        palette.success,
-      ),
-      ListingStatus.rejected => (
-        scheme.errorContainer,
-        scheme.onErrorContainer,
-      ),
+    final styles = AppTextStyles.of(context);
+
+    // Phase 33 — soft-tinted DS pill: one token tint drives both a low-alpha
+    // background and the ink, with a hairline tint border. draft/paused stay
+    // neutral (muted ink on the card-tone surface).
+    final Color tint = switch (status) {
+      ListingStatus.draft || ListingStatus.paused => palette.textMuted,
+      ListingStatus.pendingReview => palette.warning,
+      ListingStatus.approved => palette.success,
+      ListingStatus.rejected => palette.error,
       ListingStatus.sold ||
       ListingStatus.rented ||
       ListingStatus.expired ||
-      ListingStatus.deleted => (
-        scheme.surfaceContainerHigh,
-        scheme.onSurfaceVariant,
-      ),
+      ListingStatus.deleted => palette.textMuted,
     };
     return Container(
-      padding: const EdgeInsets.symmetric(
+      padding: const EdgeInsetsDirectional.symmetric(
         horizontal: AppSpacing.sm,
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(AppRadii.sm),
+        color: tint.withValues(alpha: 0.12),
+        borderRadius: appRadius(AppRadii.pill),
+        border: Border.all(color: tint.withValues(alpha: 0.30)),
       ),
       child: Text(
         labelFor(status, l10n),
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: fg,
-          fontWeight: FontWeight.w600,
-        ),
+        style: styles.labelMedium.copyWith(color: tint),
       ),
     );
   }

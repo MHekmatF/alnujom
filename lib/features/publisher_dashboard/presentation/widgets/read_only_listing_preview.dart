@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../listing_form/domain/entities/listing.dart';
 import '../../../listing_form/presentation/util/listing_enum_labels.dart';
@@ -67,7 +70,7 @@ class _ReadOnlyListingPreviewState extends State<ReadOnlyListingPreview> {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.readOnlyPreviewTitle)),
       body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,7 +78,7 @@ class _ReadOnlyListingPreviewState extends State<ReadOnlyListingPreview> {
               Expanded(
                 child: Text(
                   listing.title,
-                  style: Theme.of(context).textTheme.headlineSmall,
+                  style: AppTextStyles.of(context).headlineMedium,
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
@@ -148,22 +151,25 @@ class _Row extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+      padding: const EdgeInsetsDirectional.symmetric(vertical: AppSpacing.xs),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 140,
+            width: AppSpacing.xxxl * 3,
             child: Text(
               label,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+              style: styles.labelMedium.copyWith(color: colors.textMuted),
             ),
           ),
           Expanded(
-            child: Text(value, style: Theme.of(context).textTheme.bodyMedium),
+            child: Text(
+              value,
+              style: styles.bodyMedium.copyWith(color: colors.onSurface),
+            ),
           ),
         ],
       ),
@@ -178,14 +184,19 @@ class _ApprovedBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsetsDirectional.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(AppRadii.md),
+        color: colors.surfaceVariant,
+        borderRadius: appRadius(AppRadii.lg),
+        border: Border.all(color: colors.outline),
       ),
-      child: Text(message, style: Theme.of(context).textTheme.bodyMedium),
+      child: Text(
+        message,
+        style: styles.bodyMedium.copyWith(color: colors.onSurface),
+      ),
     );
   }
 }

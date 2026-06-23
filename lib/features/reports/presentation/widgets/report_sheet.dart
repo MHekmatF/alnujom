@@ -4,7 +4,6 @@
 // Modal bottom sheet: reason dropdown + optional note + submit/cancel.
 // Phase 2 tokens only; no inline hex/font-size/padding.
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/injection.dart';
@@ -12,6 +11,7 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_dropdown.dart';
+import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/report_reason.dart';
@@ -108,16 +108,12 @@ class _ReportSheetBodyState extends State<_ReportSheetBody> {
                 },
               ),
               const SizedBox(height: AppSpacing.md),
-              // Optional note
-              TextField(
+              // Optional note — DS field. The 1000-char cap is enforced by the
+              // cubit's noteChanged().
+              AppTextField(
                 controller: _noteController,
-                decoration: InputDecoration(
-                  hintText: l10n.report_note_field_hint,
-                  border: const OutlineInputBorder(),
-                ),
+                label: l10n.report_note_field_hint,
                 maxLines: 3,
-                minLines: 2,
-                inputFormatters: [LengthLimitingTextInputFormatter(1000)],
                 onChanged: (note) =>
                     context.read<ReportSubmissionCubit>().noteChanged(note),
               ),
