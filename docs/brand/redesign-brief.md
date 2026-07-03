@@ -125,6 +125,50 @@ Make it the single best, most cohesive version you can.
 
 ---
 
+## FOLLOW-UP PROMPT #2 (paste into the SAME Claude Design chat)
+
+Decision: instead of picking ONE home direction, ALL THREE become user-switchable
+view modes (like OpenSooq/Bayut list-grid switch). This prompt adds the switcher
++ the screens the first artifact skipped (login/signup/notifications).
+
+### English version
+
+```text
+In the exact same design system and style, add the following:
+
+1) A VIEW-MODE SWITCHER: we will NOT pick one home direction — we want all
+three as user-switchable view modes. Design a small view-toggle button (icon)
+that sits above the listings feed on Home and Search results. It opens a choice
+of 3 modes: "Comfortable" (big photos, airy spacing), "Balanced" (the current
+default), and "Compact" (dense rows, more info per row, a WhatsApp button on
+every row). Show the SAME listings feed three times side by side in the three
+modes with the switcher visible, and show the listing card in each mode
+(including the green "Verified" badge and the gold "Featured" badge).
+
+2) A Login screen (phone/email + password + continue as guest) and a Sign-up
+screen.
+
+3) A Notifications list screen (new listing matching a saved search, message
+reply, verification status update, viewing-appointment reminder).
+
+Same colors, same Tajawal font, same components, full RTL Arabic content like
+the rest of the artifact.
+```
+
+### Arabic version (same content)
+
+```text
+في نفس النظام والتصميم تماماً، أضف ما يلي:
+
+١) مبدّل طريقة العرض: لن نختار اتجاهاً واحداً للرئيسية — بل الاتجاهات الثلاثة معاً كأوضاع عرض يبدّلها المستخدم بنفسه. صمّم زراً صغيراً (أيقونة تبديل العرض) يظهر فوق قائمة العقارات في الرئيسية ونتائج البحث، يفتح اختياراً بين ٣ أوضاع: «مريح» (صور كبيرة ومساحات واسعة)، «متوازن» (الوضع الحالي الافتراضي)، «مضغوط» (صفوف كثيفة بمعلومات أكثر وزر واتساب على كل صف). اعرض نفس قائمة العقارات ثلاث مرات جنباً إلى جنب بالأوضاع الثلاثة مع المبدّل ظاهراً، وبيّن بطاقة العقار في كل وضع (مع شارة «موثّق» و«مميّز» الذهبية).
+
+٢) شاشة تسجيل الدخول (هاتف/بريد + كلمة مرور + دخول كزائر) وشاشة إنشاء حساب.
+
+٣) شاشة قائمة الإشعارات (عقار جديد يطابق بحثاً محفوظاً، رد على رسالة، تحديث حالة التوثيق، تذكير موعد معاينة).
+
+بنفس الألوان والخط والمكونات، RTL كاملاً.
+```
+
 ## After the founder picks
 
 1. Founder runs the prompt, scrolls the artifact, picks the Home direction
