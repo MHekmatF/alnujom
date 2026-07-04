@@ -18,6 +18,10 @@ import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/locale_toggle_action.dart';
+import '../../../../core/settings/listing_view_mode.dart';
+import '../../../../core/widgets/ds/ds_listing_card.dart';
+import '../../../../core/widgets/ds/ds_listing_card_data.dart';
+import '../../../../core/widgets/ds/listing_view_mode_switcher.dart';
 import '../../../../core/widgets/main_bottom_nav.dart';
 import '../../../../core/widgets/publish_fab.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
@@ -25,7 +29,9 @@ import '../../../../core/widgets/star_refresh_indicator.dart';
 import '../../../../core/widgets/theme_toggle_action.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/account_status.dart';
+import '../../../../shared/domain/value_objects/money.dart';
 import '../../../../shared/domain/value_objects/publisher_status.dart';
+import '../../../../shared/presentation/money_formatter.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../../currencies/domain/entities/currency.dart';
@@ -43,9 +49,9 @@ import '../../../ads/presentation/widgets/ad_slot.dart';
 import '../../../recently_viewed/presentation/bloc/recently_viewed_cubit.dart';
 import '../../../recently_viewed/presentation/widgets/recently_viewed_carousel.dart';
 import '../../../reels/presentation/widgets/reels_rail.dart';
+import '../../domain/entities/home_listing_card.dart';
 import '../widgets/featured_listings_carousel.dart';
 import '../widgets/hero_search_bar.dart';
-import '../widgets/home_listing_card.dart';
 import '../widgets/map_entry_tile.dart';
 import '../widgets/property_type_shortcut_row.dart';
 
@@ -57,7 +63,7 @@ import '../widgets/property_type_shortcut_row.dart';
 /// 2. [HeroSearchBar] (Q1=A stub).
 /// 3. [PropertyTypeShortcutRow] (Q1=A stub).
 /// 4. Section header `home_latest_listings_header`.
-/// 5. `RefreshIndicator`-wrapped `ListView.builder` of [HomeListingCardTile]
+/// 5. `RefreshIndicator`-wrapped `ListView.builder` of [DsListingCard]
 ///    widgets, driven by [HomeBloc]. Cursor pagination + infinite scroll.
 ///
 /// Empty-state CTA branches on auth state per FR-019:
@@ -256,7 +262,10 @@ class _HomeViewState extends State<_HomeView> {
         // on empty / failure / loading, mirroring the FeaturedListingsCarousel.
         const SliverToBoxAdapter(child: ReelsRail()),
         SliverToBoxAdapter(
-          child: _SectionHeader(title: l10n.home_latest_listings_header),
+          child: _SectionHeader(
+            title: l10n.home_latest_listings_header,
+            trailing: const ListingViewModeSwitcher(),
+          ),
         ),
         ..._buildFeedSlivers(context, state, currenciesByCode, l10n),
       ],
@@ -315,10 +324,9 @@ class _HomeViewState extends State<_HomeView> {
                 // Don't replay the entrance cascade on a pull-to-refresh
                 // rebuild; first load + appended pages still animate.
                 enabled: state.status != HomeFeedStatus.refreshing,
-                child: HomeListingCardTile(
+                child: _FeedCard(
                   card: card,
                   currenciesByCode: currenciesByCode,
-                  displayCurrencyCode: null,
                 ),
               );
             },
@@ -337,7 +345,7 @@ class _HomeViewState extends State<_HomeView> {
 }
 
 /// Card-shaped shimmer placeholder shown while the first feed page loads —
-/// an image block plus a price and title line, mirroring [HomeListingCardTile].
+/// an image block plus a price and title line, mirroring the feed card.
 class _HomeCardSkeleton extends StatelessWidget {
   const _HomeCardSkeleton();
 
@@ -370,9 +378,12 @@ class _HomeCardSkeleton extends StatelessWidget {
 /// so the "Latest listings" block reads as a deliberate section start rather
 /// than a stray line of text. Purely presentational.
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title});
+  const _SectionHeader({required this.title, this.trailing});
 
   final String title;
+
+  /// Optional trailing action (e.g. the feed's [ListingViewModeSwitcher]).
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -398,10 +409,80 @@ class _SectionHeader extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(child: Text(title, style: styles.titleLarge)),
+          if (trailing != null) ...[
+            const SizedBox(width: AppSpacing.sm),
+            trailing!,
+          ],
         ],
       ),
     );
   }
+}
+
+/// Phase 035 — a feed row that maps a [HomeListingCard] into the unified
+/// [DsListingCard] and re-renders at the user's chosen [ListingViewMode].
+class _FeedCard extends StatelessWidget {
+  const _FeedCard({required this.card, required this.currenciesByCode});
+
+  final HomeListingCard card;
+  final Map<String, Currency> currenciesByCode;
+
+  @override
+  Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context);
+    final data = _toCardData(card, currenciesByCode, locale);
+    return ValueListenableBuilder<ListingViewMode>(
+      valueListenable: ListingViewModePref.notifier,
+      builder: (context, mode, _) => Padding(
+        padding: const EdgeInsetsDirectional.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.xs,
+        ),
+        child: DsListingCard(data: data, mode: mode),
+      ),
+    );
+  }
+}
+
+DsListingCardData _toCardData(
+  HomeListingCard card,
+  Map<String, Currency> byCode,
+  Locale locale,
+) {
+  final currency = byCode[card.primaryPrice.currencyCode];
+  final priceText = currency == null
+      ? '${card.primaryPrice.amount} ${card.primaryPrice.currencyCode}'
+      : MoneyFormatter.format(
+          Money(
+            amount: card.primaryPrice.amount,
+            currencyCode: card.primaryPrice.currencyCode,
+          ),
+          locale: locale,
+          currency: currency,
+        );
+  final location = [
+    if (card.governorateNameLocalized.isNotEmpty &&
+        card.governorateNameLocalized != '—')
+      card.governorateNameLocalized,
+    if (card.cityNameLocalized.isNotEmpty && card.cityNameLocalized != '—')
+      card.cityNameLocalized,
+  ].join(' • ');
+  return DsListingCardData(
+    id: card.id,
+    title: card.title,
+    priceText: priceText,
+    purpose: card.purpose,
+    locationText: location.isEmpty ? '—' : location,
+    imageUrl: card.mainImageUrl,
+    rooms: card.rooms,
+    bathrooms: card.bathrooms,
+    areaSize: card.areaSize,
+    isFeatured: card.isFeatured,
+    agencyId: card.agencyId,
+    agencyName: card.agencyName,
+    agencyLogoUrl: card.agencyLogoUrl,
+    publishedAt: card.publishedAt,
+  );
 }
 
 /// Phase 33 restyle — the photo-forward home **header row**. A small italic

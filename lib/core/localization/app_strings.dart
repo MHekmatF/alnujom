@@ -4495,6 +4495,40 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('nav_messages', (loc) => loc.nav_messages);
 
   @override
+  String get detail_verified_badge =>
+      _resolve('detail_verified_badge', (loc) => loc.detail_verified_badge);
+
+  @override
+  String get view_mode_title =>
+      _resolve('view_mode_title', (loc) => loc.view_mode_title);
+
+  @override
+  String get view_mode_comfortable =>
+      _resolve('view_mode_comfortable', (loc) => loc.view_mode_comfortable);
+
+  @override
+  String get view_mode_comfortable_desc => _resolve(
+    'view_mode_comfortable_desc',
+    (loc) => loc.view_mode_comfortable_desc,
+  );
+
+  @override
+  String get view_mode_balanced =>
+      _resolve('view_mode_balanced', (loc) => loc.view_mode_balanced);
+
+  @override
+  String get view_mode_balanced_desc =>
+      _resolve('view_mode_balanced_desc', (loc) => loc.view_mode_balanced_desc);
+
+  @override
+  String get view_mode_compact =>
+      _resolve('view_mode_compact', (loc) => loc.view_mode_compact);
+
+  @override
+  String get view_mode_compact_desc =>
+      _resolve('view_mode_compact_desc', (loc) => loc.view_mode_compact_desc);
+
+  @override
   String get home_greeting_welcome =>
       _resolve('home_greeting_welcome', (loc) => loc.home_greeting_welcome);
 
