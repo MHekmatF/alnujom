@@ -1558,6 +1558,8 @@
   "@view_mode_compact": { "description": "Phase 035 — feed density: dense rows." },
   "view_mode_compact_desc": "صفوف كثيفة + واتساب",
   "@view_mode_compact_desc": { "description": "Phase 035 — compact mode description." },
+  "auth_continue_as_guest": "الدخول كزائر",
+  "@auth_continue_as_guest": { "description": "Phase 035 — login: enter the app without an account (Home + listings are public)." },
   "nav_publish": "نشر",
   "@nav_publish": { "description": "Phase 25 — Bottom navigation bar label for the Publish (create listing) action; shown only to approved publishers." },
   "home_greeting_welcome": "أهلاً بك،",

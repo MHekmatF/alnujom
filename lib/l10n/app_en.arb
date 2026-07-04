@@ -1638,6 +1638,8 @@
   "@view_mode_compact": { "description": "Phase 035 — feed density: dense rows." },
   "view_mode_compact_desc": "Dense rows + WhatsApp",
   "@view_mode_compact_desc": { "description": "Phase 035 — compact mode description." },
+  "auth_continue_as_guest": "Browse as guest",
+  "@auth_continue_as_guest": { "description": "Phase 035 — login: enter the app without an account (Home + listings are public)." },
   "home_greeting_welcome": "Welcome,",
   "@home_greeting_welcome": { "description": "Phase 25 — Home hero greeting for anonymous (signed-out) users." },
   "home_greeting_named": "Hi {name},",

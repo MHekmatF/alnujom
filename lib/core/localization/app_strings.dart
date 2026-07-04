@@ -4529,6 +4529,12 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('view_mode_compact_desc', (loc) => loc.view_mode_compact_desc);
 
   @override
+  String get auth_continue_as_guest => _resolve(
+    'auth_continue_as_guest',
+    (loc) => loc.auth_continue_as_guest,
+  );
+
+  @override
   String get home_greeting_welcome =>
       _resolve('home_greeting_welcome', (loc) => loc.home_greeting_welcome);
 

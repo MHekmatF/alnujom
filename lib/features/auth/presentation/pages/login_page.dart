@@ -199,6 +199,16 @@ class _LoginPageState extends State<LoginPage> {
                         onPressed: () => context.push(AppRoutes.register),
                         child: Text(l10n.login_no_account),
                       ),
+                      // Phase 035 — browse the app without an account (Home +
+                      // listings are anonymous-readable). Design "الدخول كزائر".
+                      TextButton.icon(
+                        style: TextButton.styleFrom(
+                          foregroundColor: colors.textMuted,
+                        ),
+                        onPressed: () => context.go(AppRoutes.home),
+                        icon: const Icon(Icons.storefront_outlined, size: 18),
+                        label: Text(l10n.auth_continue_as_guest),
+                      ),
                       const SizedBox(height: AppSpacing.lg),
                       AuthTrustNote(text: l10n.auth_trust_note),
                     ],
