@@ -41,6 +41,7 @@ import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/main_bottom_nav.dart';
+import '../../../../core/widgets/publish_fab.dart';
 import '../../../../core/widgets/reduce_motion.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../features/map/domain/entities/map_entry_context.dart';
@@ -198,7 +199,8 @@ class _SearchPageViewState extends State<_SearchPageView> {
           ),
         ],
       ),
-      bottomNavigationBar: const MainBottomNav(current: MainTab.none),
+      bottomNavigationBar: const MainBottomNav(current: MainTab.search),
+      floatingActionButton: const PublishFab(),
     );
   }
 }

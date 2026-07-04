@@ -33,6 +33,7 @@ import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/main_bottom_nav.dart';
 import '../../../../core/widgets/press_scale.dart';
+import '../../../../core/widgets/publish_fab.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/entities/profile.dart';
 import '../../../../shared/domain/value_objects/account_status.dart';
@@ -92,6 +93,7 @@ class _ProfileView extends StatelessWidget {
 
         return Scaffold(
           bottomNavigationBar: const MainBottomNav(current: MainTab.profile),
+          floatingActionButton: const PublishFab(),
           // Phase 030 (W5) — the relocated tool sections (Selling / Admin /
           // Activity / Reports) live in this app-wide navigation drawer. The
           // profile body below is now a focused identity + account surface.

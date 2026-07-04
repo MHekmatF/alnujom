@@ -14,11 +14,14 @@ import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/app_nav_drawer.dart';
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
+import '../../../../core/widgets/main_bottom_nav.dart';
 import '../../../../core/widgets/press_scale.dart';
+import '../../../../core/widgets/publish_fab.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/conversation.dart';
 import '../bloc/chat_thread_cubit.dart';
@@ -45,6 +48,11 @@ class _ConversationsListPageState extends State<ConversationsListPage> {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.chatConversationsTitle)),
+      // Phase 035 — Messages is now a primary tab: host the app drawer, the
+      // 5-tab bottom nav (Messages active), and the floating publish FAB.
+      drawer: const AppNavDrawer(),
+      bottomNavigationBar: const MainBottomNav(current: MainTab.chat),
+      floatingActionButton: const PublishFab(),
       body: BlocBuilder<ConversationsCubit, ConversationsState>(
         builder: (context, state) {
           switch (state.status) {

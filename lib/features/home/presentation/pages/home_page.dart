@@ -19,6 +19,7 @@ import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/locale_toggle_action.dart';
 import '../../../../core/widgets/main_bottom_nav.dart';
+import '../../../../core/widgets/publish_fab.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../core/widgets/star_refresh_indicator.dart';
 import '../../../../core/widgets/theme_toggle_action.dart';
@@ -213,10 +214,10 @@ class _HomeViewState extends State<_HomeView> {
           );
         },
       ),
-      // Phase 25 — the publish entry now lives in the persistent bottom nav
-      // (a prominent accent action for approved publishers) instead of a
-      // floating action button.
+      // Phase 035 — the publish entry is a floating Extended FAB above the
+      // 5-tab bottom nav (publishers only; self-gates to nothing otherwise).
       bottomNavigationBar: const MainBottomNav(current: MainTab.home),
+      floatingActionButton: const PublishFab(),
     );
   }
 

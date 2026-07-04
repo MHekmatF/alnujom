@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/bloc/auth_state.dart';
 import '../../l10n/app_localizations.dart';
-import '../../shared/domain/value_objects/account_status.dart';
-import '../../shared/domain/value_objects/publisher_status.dart';
 import '../routing/app_router.dart';
 import '../theme/colors.dart';
-import '../theme/elevation.dart';
 import '../theme/motion.dart';
 import '../theme/radii.dart';
 import '../theme/spacing.dart';
@@ -21,11 +17,12 @@ import 'reduce_motion.dart';
 
 /// The primary destinations of the public app shell.
 ///
-/// Phase 030 (W4): the Search tab was replaced by [reels]; Search is still
-/// reachable from the Home search bar but is no longer a tab (it renders the
-/// bar under [none], which highlights nothing). New visual order:
-/// Home · Reels · [+Publish] · Favorites · Profile.
-enum MainTab { home, reels, favorites, profile, none }
+/// Phase 035 (redesign): the app moves to the 5-tab information architecture —
+/// Home · Search+Map · Saved · Messages · Account. Reels is no longer a tab
+/// (it survives as the Home video-tours rail + the `/reels` deep route). The
+/// "أضف عقار" publish action is no longer a bar slot; it is a floating
+/// [PublishFab] mounted on each tab host's `Scaffold.floatingActionButton`.
+enum MainTab { home, search, favorites, chat, profile, none }
 
 /// Phase 33 restyle — the persistent bottom navigation bar shared by the four
 /// primary surfaces (home / reels / favorites / profile).
@@ -60,15 +57,12 @@ class MainBottomNav extends StatelessWidget {
             authState is PendingApproval ||
             authState is Rejected ||
             authState is Suspended;
-        final isApprovedPublisher =
-            authState is Authenticated &&
-            authState.profile.accountStatus == AccountStatus.approved &&
-            authState.profile.publisherStatus == PublisherStatus.approved;
 
         final highlightNone = current == MainTab.none;
 
-        // The slot list — a parallel of tabs so the prominent "Publish" action
-        // can sit between Reels and Favorites without ever being a tab.
+        // Phase 035 — five equal tabs: Home · Search+Map · Saved · Messages ·
+        // Account. Messages + Account are auth-gated (anonymous taps route to
+        // sign-in). The publish action is now the floating [PublishFab].
         final slots = <Widget>[
           _NavTab(
             icon: Icons.home_outlined,
@@ -79,26 +73,13 @@ class MainBottomNav extends StatelessWidget {
             onTap: () => context.go(AppRoutes.home),
           ),
           _NavTab(
-            icon: LucideIcons.video,
-            selectedIcon: LucideIcons.video,
-            label: l10n.nav_reels,
-            selected: !highlightNone && current == MainTab.reels,
-            bounce: !reduce && current == MainTab.reels,
-            onTap: () => context.go(AppRoutes.reels),
+            icon: Icons.search_rounded,
+            selectedIcon: Icons.travel_explore,
+            label: l10n.nav_search_map,
+            selected: !highlightNone && current == MainTab.search,
+            bounce: !reduce && current == MainTab.search,
+            onTap: () => context.go(AppRoutes.search),
           ),
-        ];
-
-        if (isApprovedPublisher) {
-          slots.add(
-            _PublishFab(
-              label: l10n.nav_publish,
-              onTap: () =>
-                  context.pushNamed(AppRouteNames.publisherListingsCreate),
-            ),
-          );
-        }
-
-        slots.addAll([
           _NavTab(
             icon: Icons.favorite_border,
             selectedIcon: Icons.favorite,
@@ -108,17 +89,27 @@ class MainBottomNav extends StatelessWidget {
             onTap: () => context.go(AppRoutes.favorites),
           ),
           _NavTab(
+            icon: Icons.chat_bubble_outline_rounded,
+            selectedIcon: Icons.chat_bubble_rounded,
+            label: l10n.nav_messages,
+            selected: !highlightNone && current == MainTab.chat,
+            bounce: !reduce && current == MainTab.chat,
+            // Anonymous users tapping Messages are sent to sign-in.
+            onTap: () =>
+                context.go(isSignedIn ? AppRoutes.chat : AppRoutes.login),
+          ),
+          _NavTab(
             icon: Icons.person_outline,
             selectedIcon: Icons.person,
             label: l10n.profile_title,
             selected: !highlightNone && current == MainTab.profile,
             bounce: !reduce && current == MainTab.profile,
-            // Anonymous users tapping Profile are sent to sign-in instead of
+            // Anonymous users tapping Account are sent to sign-in instead of
             // the (auth-only) profile screen.
             onTap: () =>
                 context.go(isSignedIn ? AppRoutes.profile : AppRoutes.login),
           ),
-        ]);
+        ];
 
         return DecoratedBox(
           decoration: BoxDecoration(
@@ -226,56 +217,3 @@ class _NavTab extends StatelessWidget {
   }
 }
 
-/// The publishers-only "Publish" action — an elevated rounded-square FAB lifted
-/// above the bar (the in-bar successor to the old publish FloatingActionButton).
-class _PublishFab extends StatelessWidget {
-  const _PublishFab({required this.label, required this.onTap});
-
-  final String label;
-  final VoidCallback onTap;
-
-  static const double _size = 50;
-  static const double _lift = 20;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-    final elevation = AppElevation.of(context);
-
-    return Center(
-      child: Transform.translate(
-        offset: const Offset(0, -_lift),
-        child: Tooltip(
-          message: label,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: appRadius(AppRadii.lg),
-              boxShadow: elevation.level2,
-            ),
-            child: Material(
-              color: colors.primary,
-              borderRadius: appRadius(AppRadii.lg),
-              clipBehavior: Clip.antiAlias,
-              child: InkWell(
-                onTap: onTap,
-                child: Container(
-                  width: _size,
-                  height: _size,
-                  decoration: BoxDecoration(
-                    borderRadius: appRadius(AppRadii.lg),
-                    border: Border.all(color: colors.card, width: 3),
-                  ),
-                  child: Icon(
-                    Icons.add_rounded,
-                    color: colors.onPrimary,
-                    size: AppSpacing.xl,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}

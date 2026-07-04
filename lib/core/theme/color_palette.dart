@@ -105,14 +105,15 @@ final class ModernPalette extends ColorPalette {
     tertiary: Color(0xFFC2A14D),
     success: Color(0xFF2E9E6B),
     warning: Color(0xFFC98318),
-    error: Color(0xFFD23F3F),
+    // Phase 035 — align to the design-system swatches (exact-value nudges).
+    error: Color(0xFFD64545),
     surface: Color(0xFFF5F7FA),
-    surfaceVariant: Color(0xFFEAEFF5),
+    surfaceVariant: Color(0xFFE9EDF3),
     card: Color(0xFFFFFFFF),
-    outline: Color(0xFFE2E8F0),
+    outline: Color(0xFFE4E9F0),
     outlineStrong: Color(0xFFCBD5E1),
-    onSurface: Color(0xFF0F172A),
-    onSurfaceVariant: Color(0xFF475569),
+    onSurface: Color(0xFF0B182B),
+    onSurfaceVariant: Color(0xFF5B6B80),
     // Slate muted (#64748B ≈ 4.6:1 on #F5F7FA), clearly lighter than
     // onSurfaceVariant (#475569 ≈ 7:1) so the timestamp/location/placeholder
     // hierarchy holds.
@@ -136,7 +137,9 @@ final class ModernPalette extends ColorPalette {
   // a warm gold featured accent, coral favorites, green/WhatsApp trust. WCAG AA.
   @override
   AppPaletteTokens get _darkTokens => const AppPaletteTokens(
-    primary: Color(0xFF5896FF),
+    // Phase 035 — align the dark surfaces to the design's navy (#0B182B) and
+    // deepen the azure primary a touch to match the DS swatch.
+    primary: Color(0xFF4D7CFF),
     onPrimary: Color(0xFF06122B),
     primaryContainer: Color(0xFF16315F),
     onPrimaryContainer: Color(0xFFCFE0FF),
@@ -149,15 +152,15 @@ final class ModernPalette extends ColorPalette {
     success: Color(0xFF4CB587),
     warning: Color(0xFFE2B25A),
     error: Color(0xFFF0706E),
-    surface: Color(0xFF0B1020),
-    surfaceVariant: Color(0xFF161C2D),
-    card: Color(0xFF161C2D),
-    outline: Color(0xFF252E44),
+    surface: Color(0xFF0B182B),
+    surfaceVariant: Color(0xFF13233B),
+    card: Color(0xFF13233B),
+    outline: Color(0xFF22344E),
     outlineStrong: Color(0xFF38446A),
     onSurface: Color(0xFFEAF0FB),
-    onSurfaceVariant: Color(0xFF9FABC4),
+    onSurfaceVariant: Color(0xFF8FA0B5),
     textMuted: Color(0xFF8694AC),
-    verified: Color(0xFF57C48C),
+    verified: Color(0xFF4CC08A),
     verifiedContainer: Color(0xFF163A2A),
     onError: Color(0xFF420A0A),
     onSuccess: Color(0xFF04231A),

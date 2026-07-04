@@ -256,3 +256,6 @@ specs/012-listing-approval/.phase4-log-audit-body.sql
 docs/brand/uikit_extracted/
 docs/brand/logo/
 docs/brand/*.zip
+
+# Phase 035 — Claude Design source artifacts (kept locally, not in git)
+New design/

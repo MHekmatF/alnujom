@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../debug/theme_gallery_page.dart';
@@ -16,6 +17,8 @@ import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/auth/presentation/pages/rejected_page.dart';
 import '../../features/auth/presentation/pages/reset_password_page.dart';
 import '../../features/auth/presentation/pages/suspended_page.dart';
+import '../../features/chat/presentation/bloc/conversations_cubit.dart';
+import '../../features/chat/presentation/pages/conversations_list_page.dart';
 import '../../features/currencies/presentation/pages/currencies_list_page.dart';
 import '../../features/currencies/presentation/pages/currency_form_page.dart';
 import '../../features/currencies/presentation/pages/exchange_rate_history_page.dart';
@@ -133,6 +136,8 @@ abstract final class AppRoutes {
   static const adminInquiries = '/admin/inquiries';
   // Phase 17 FR-020: authenticated favorites page route.
   static const favorites = '/favorites';
+  // Phase 035: authenticated Messages (chat) tab route.
+  static const chat = '/chat';
   // Phase 18 FR-022: authenticated My-Reports page route.
   static const reports = '/reports';
   // Phase 18 FR-019: admin moderation queue route.
@@ -236,6 +241,8 @@ abstract final class AppRouteNames {
   static const adminInquiries = 'admin-inquiries';
   // Phase 17 FR-020: authenticated favorites page route name.
   static const favorites = 'favorites';
+  // Phase 035: authenticated Messages (chat) tab route name.
+  static const chat = 'chat';
   // Phase 18 FR-022: authenticated My-Reports page route name.
   static const reports = 'reports';
   // Phase 18 FR-019: admin moderation queue route name.
@@ -675,6 +682,20 @@ GoRouter buildAppRouter({
         redirect: (context, state) =>
             authBloc.state is Unauthenticated ? AppRoutes.login : null,
         builder: (context, state) => const FavoritesPage(),
+      ),
+
+      // ─── Phase 035 — authenticated Messages (chat) tab ───
+      // Requires sign-in; anonymous deep-links redirect to /login (mirrors
+      // favorites). Provides the ConversationsCubit above the list page.
+      GoRoute(
+        path: AppRoutes.chat,
+        name: AppRouteNames.chat,
+        redirect: (context, state) =>
+            authBloc.state is Unauthenticated ? AppRoutes.login : null,
+        builder: (context, state) => BlocProvider<ConversationsCubit>(
+          create: (_) => getIt<ConversationsCubit>(),
+          child: const ConversationsListPage(),
+        ),
       ),
 
       // ─── Phase 18 — authenticated My-Reports page ───
