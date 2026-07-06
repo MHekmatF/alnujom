@@ -52,6 +52,8 @@ import '../../../reels/presentation/widgets/reels_rail.dart';
 import '../../domain/entities/home_listing_card.dart';
 import '../widgets/featured_listings_carousel.dart';
 import '../widgets/hero_search_bar.dart';
+import '../widgets/home_transaction_toggle.dart';
+import '../widgets/home_trust_strip.dart';
 import '../widgets/map_entry_tile.dart';
 import '../widgets/property_type_shortcut_row.dart';
 
@@ -241,6 +243,9 @@ class _HomeViewState extends State<_HomeView> {
         // Phase 25 (Claude Design) — personalized welcome above the search bar.
         const SliverToBoxAdapter(child: _HomeGreeting()),
         const SliverToBoxAdapter(child: HeroSearchBar()),
+        // Phase 035 — the design's transaction-mode quick-filter (للبيع/للإيجار/
+        // يومي); each opens Search pre-filtered by that deal type.
+        const SliverToBoxAdapter(child: HomeTransactionToggle()),
         const SliverToBoxAdapter(child: PropertyTypeShortcutRow()),
         // Phase 15 G1: Map entry tile — R-91 slot (between shortcut row and header).
         const SliverToBoxAdapter(child: MapEntryTile()),
@@ -261,6 +266,9 @@ class _HomeViewState extends State<_HomeView> {
         // Self-wired (hosts its own ReelsRailCubit) and hides itself entirely
         // on empty / failure / loading, mirroring the FeaturedListingsCarousel.
         const SliverToBoxAdapter(child: ReelsRail()),
+        // Phase 035 — trust strip reinforcing the safety positioning, above the
+        // main feed.
+        const SliverToBoxAdapter(child: HomeTrustStrip()),
         SliverToBoxAdapter(
           child: _SectionHeader(
             title: l10n.home_latest_listings_header,

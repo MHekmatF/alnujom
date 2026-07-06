@@ -4535,6 +4535,14 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get home_trust_headline =>
+      _resolve('home_trust_headline', (loc) => loc.home_trust_headline);
+
+  @override
+  String get home_trust_sub =>
+      _resolve('home_trust_sub', (loc) => loc.home_trust_sub);
+
+  @override
   String get home_greeting_welcome =>
       _resolve('home_greeting_welcome', (loc) => loc.home_greeting_welcome);
 
