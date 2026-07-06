@@ -30,11 +30,16 @@ class DsListingCard extends StatelessWidget {
   const DsListingCard({
     required this.data,
     this.mode = ListingViewMode.balanced,
+    this.onTap,
     super.key,
   });
 
   final DsListingCardData data;
   final ListingViewMode mode;
+
+  /// Overrides the default tap behaviour (navigate to the listing detail via
+  /// `context.go`). Search passes `context.push` here so its stack survives.
+  final VoidCallback? onTap;
 
   // Design-system image geometry (px), per view mode.
   static const double _comfortableImageH = 210;
@@ -50,8 +55,13 @@ class DsListingCard extends StatelessWidget {
     };
   }
 
-  void _openDetail(BuildContext context) =>
-      context.go(AppRoutes.listingDetailsFor(data.id));
+  void _openDetail(BuildContext context) {
+    if (onTap != null) {
+      onTap!();
+      return;
+    }
+    context.go(AppRoutes.listingDetailsFor(data.id));
+  }
 
   // ── Shared bits ────────────────────────────────────────────────────────
 

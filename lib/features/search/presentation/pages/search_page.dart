@@ -62,7 +62,10 @@ import '../widgets/recent_searches_panel.dart';
 import '../widgets/save_search_dialog.dart';
 import '../widgets/search_filter_sheet.dart';
 import '../widgets/search_map_view.dart';
-import '../widgets/search_result_card.dart';
+import '../../../../core/settings/listing_view_mode.dart';
+import '../../../../core/widgets/ds/ds_listing_card.dart';
+import '../../../../core/widgets/ds/ds_listing_card_data.dart';
+import '../../domain/entities/search_result_item.dart';
 
 class SearchPage extends StatelessWidget {
   const SearchPage({
@@ -1042,9 +1045,56 @@ class _ResultsListView extends StatelessWidget {
         }
         return StaggeredListItem(
           index: itemIndex,
-          child: SearchResultCard(item: state.results[itemIndex]),
+          child: _SearchFeedCard(item: state.results[itemIndex]),
         );
       },
+    );
+  }
+}
+
+/// Phase 035 — maps a [SearchResultItem] into the unified [DsListingCard] at the
+/// user's chosen [ListingViewMode]. Uses `context.push` so the search stack (and
+/// [SearchBloc]) survives the back-navigation from the detail page.
+class _SearchFeedCard extends StatelessWidget {
+  const _SearchFeedCard({required this.item});
+
+  final SearchResultItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+    final gov = isAr ? item.governorateNameAr : item.governorateNameEn;
+    final city = isAr ? item.cityNameAr : item.cityNameEn;
+    final location = [
+      gov,
+      city,
+    ].where((s) => s.isNotEmpty).join('، ');
+    final data = DsListingCardData(
+      id: item.id,
+      title: item.title,
+      priceText: l10n.priceWithCurrency(
+        item.primaryAmount.toStringAsFixed(0),
+        item.primaryCurrency,
+      ),
+      purpose: item.purpose,
+      locationText: location.isEmpty ? '—' : location,
+      imageUrl: item.mainImagePath,
+      agencyId: item.agencyId,
+      agencyName: item.agencyName,
+      agencyLogoUrl: item.agencyLogoUrl,
+      publishedAt: item.publishedAt,
+    );
+    return ValueListenableBuilder<ListingViewMode>(
+      valueListenable: ListingViewModePref.notifier,
+      builder: (context, mode, _) => Padding(
+        padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.sm),
+        child: DsListingCard(
+          data: data,
+          mode: mode,
+          onTap: () => context.push(AppRoutes.listingDetailsFor(item.id)),
+        ),
+      ),
     );
   }
 }
