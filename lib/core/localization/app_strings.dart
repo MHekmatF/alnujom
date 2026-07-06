@@ -4543,6 +4543,72 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('home_trust_sub', (loc) => loc.home_trust_sub);
 
   @override
+  String get deed_green => _resolve('deed_green', (loc) => loc.deed_green);
+
+  @override
+  String get deed_red => _resolve('deed_red', (loc) => loc.deed_red);
+
+  @override
+  String get deed_temporary =>
+      _resolve('deed_temporary', (loc) => loc.deed_temporary);
+
+  @override
+  String get deed_agricultural =>
+      _resolve('deed_agricultural', (loc) => loc.deed_agricultural);
+
+  @override
+  String get deed_court_ruling =>
+      _resolve('deed_court_ruling', (loc) => loc.deed_court_ruling);
+
+  @override
+  String get finish_on_bone =>
+      _resolve('finish_on_bone', (loc) => loc.finish_on_bone);
+
+  @override
+  String get finish_normal =>
+      _resolve('finish_normal', (loc) => loc.finish_normal);
+
+  @override
+  String get finish_deluxe =>
+      _resolve('finish_deluxe', (loc) => loc.finish_deluxe);
+
+  @override
+  String get finish_super_deluxe =>
+      _resolve('finish_super_deluxe', (loc) => loc.finish_super_deluxe);
+
+  @override
+  String get filter_deed_type =>
+      _resolve('filter_deed_type', (loc) => loc.filter_deed_type);
+
+  @override
+  String get filter_finish_level =>
+      _resolve('filter_finish_level', (loc) => loc.filter_finish_level);
+
+  @override
+  String get filter_verified_only =>
+      _resolve('filter_verified_only', (loc) => loc.filter_verified_only);
+
+  @override
+  String get detail_field_verified_title => _resolve(
+    'detail_field_verified_title',
+    (loc) => loc.detail_field_verified_title,
+  );
+
+  @override
+  String get detail_field_verified_body => _resolve(
+    'detail_field_verified_body',
+    (loc) => loc.detail_field_verified_body,
+  );
+
+  @override
+  String get detail_deed_label =>
+      _resolve('detail_deed_label', (loc) => loc.detail_deed_label);
+
+  @override
+  String get detail_finish_label =>
+      _resolve('detail_finish_label', (loc) => loc.detail_finish_label);
+
+  @override
   String get home_greeting_welcome =>
       _resolve('home_greeting_welcome', (loc) => loc.home_greeting_welcome);
 

@@ -32,7 +32,7 @@ class SupabaseHomeFeedDatasource {
   static const String _cardSelect =
       'id, title, property_type, purpose, governorate_id, city_id, published_at, '
       'rooms, bathrooms, area_size, floor, '
-      'featured_until, '
+      'featured_until, deed_type, finish_level, verification_status, verified_at, '
       'listing_prices!inner(currency_code, amount, is_primary), '
       'listing_media(storage_path, ordering, is_main, kind), '
       'governorate:governorates(display_name), '

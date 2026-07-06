@@ -4,7 +4,9 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/radii.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../shared/presentation/deed_finish_labels.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/range_slider_field.dart';
 import '../../../../core/widgets/segmented_control.dart';
@@ -61,6 +63,11 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
   // Owner-vs-agency lister filter: null = all, false = owner, true = agency.
   bool? _isAgency;
 
+  // Phase 035 Stage 3 — Syria-native + verification filters.
+  String? _deedType;
+  String? _finishLevel;
+  bool _verifiedOnly = false;
+
   // Location data
   List<GovernorateWithCityCount> _governorates = [];
   List<CityWithAreaCount> _cities = [];
@@ -95,6 +102,9 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
       _kAreaMax,
     );
     _isAgency = widget.initialFilters.isAgency;
+    _deedType = widget.initialFilters.deedType;
+    _finishLevel = widget.initialFilters.finishLevel;
+    _verifiedOnly = widget.initialFilters.verifiedOnly ?? false;
 
     _loadGovernorates();
     _loadCurrencies();
@@ -198,6 +208,12 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                 _buildPropertyTypeSection(context),
                 const SizedBox(height: 16),
                 _buildListerTypeSection(context),
+                const SizedBox(height: 16),
+                _buildVerifiedSection(context),
+                const SizedBox(height: 16),
+                _buildDeedSection(context),
+                const SizedBox(height: 16),
+                _buildFinishSection(context),
                 const SizedBox(height: 16),
                 _buildLocationSection(context),
                 const SizedBox(height: 16),
@@ -329,6 +345,87 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
               label: l10n.search_filter_lister_type_agency,
               value: true,
             ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  /// Phase 035 — "الموثّقة فقط / Verified only" toggle. Uses the verified-green
+  /// so the semantic tie to the موثّق badge is explicit.
+  Widget _buildVerifiedSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    return Row(
+      children: [
+        Icon(Icons.verified_outlined, size: AppSpacing.xl, color: colors.verified),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Text(
+            l10n.filter_verified_only,
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
+        ),
+        Switch(
+          value: _verifiedOnly,
+          activeThumbColor: colors.verified,
+          onChanged: (v) => setState(() => _verifiedOnly = v),
+        ),
+      ],
+    );
+  }
+
+  /// Phase 035 — deed-type (الطابو) single-select chip group.
+  Widget _buildDeedSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return _buildChipGroup(
+      label: l10n.filter_deed_type,
+      values: kDeedTypes,
+      selected: _deedType,
+      labelFor: (v) => deedTypeLabel(l10n, v),
+      onSelected: (v) => setState(() => _deedType = v),
+    );
+  }
+
+  /// Phase 035 — finish-level (الكسوة) single-select chip group.
+  Widget _buildFinishSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return _buildChipGroup(
+      label: l10n.filter_finish_level,
+      values: kFinishLevels,
+      selected: _finishLevel,
+      labelFor: (v) => finishLevelLabel(l10n, v),
+      onSelected: (v) => setState(() => _finishLevel = v),
+    );
+  }
+
+  /// A labelled single-select chip group (tapping the active chip clears it).
+  Widget _buildChipGroup({
+    required String label,
+    required List<String> values,
+    required String? selected,
+    required String Function(String) labelFor,
+    required void Function(String?) onSelected,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: Theme.of(context).textTheme.labelLarge,
+          textAlign: TextAlign.start,
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          children: [
+            for (final v in values)
+              ChoiceChip(
+                label: Text(labelFor(v)),
+                selected: selected == v,
+                onSelected: (isSel) => onSelected(isSel ? v : null),
+              ),
           ],
         ),
       ],
@@ -629,6 +726,9 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
             _bathroomsMode = CountFilterMode.exactly;
             _areaRange = const RangeValues(0, _kAreaMax);
             _isAgency = null;
+            _deedType = null;
+            _finishLevel = null;
+            _verifiedOnly = false;
           }),
           child: Text(l10n.search_filter_reset),
         ),
@@ -664,6 +764,9 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
               areaSizeMin: areaMin,
               areaSizeMax: areaMax,
               isAgency: _isAgency,
+              deedType: _deedType,
+              finishLevel: _finishLevel,
+              verifiedOnly: _verifiedOnly ? true : null,
             );
             widget.onApply(newFilters);
             Navigator.of(context).pop();

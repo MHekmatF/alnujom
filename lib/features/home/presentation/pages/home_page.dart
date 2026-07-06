@@ -31,6 +31,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/account_status.dart';
 import '../../../../shared/domain/value_objects/money.dart';
 import '../../../../shared/domain/value_objects/publisher_status.dart';
+import '../../../../shared/presentation/deed_finish_labels.dart';
 import '../../../../shared/presentation/money_formatter.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
@@ -438,7 +439,12 @@ class _FeedCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context);
-    final data = _toCardData(card, currenciesByCode, locale);
+    final data = _toCardData(
+      card,
+      currenciesByCode,
+      locale,
+      AppLocalizations.of(context)!,
+    );
     return ValueListenableBuilder<ListingViewMode>(
       valueListenable: ListingViewModePref.notifier,
       builder: (context, mode, _) => Padding(
@@ -456,6 +462,7 @@ DsListingCardData _toCardData(
   HomeListingCard card,
   Map<String, Currency> byCode,
   Locale locale,
+  AppLocalizations l10n,
 ) {
   final currency = byCode[card.primaryPrice.currencyCode];
   final priceText = currency == null
@@ -490,6 +497,10 @@ DsListingCardData _toCardData(
     agencyName: card.agencyName,
     agencyLogoUrl: card.agencyLogoUrl,
     publishedAt: card.publishedAt,
+    isVerified: card.isVerified,
+    deedLabel: card.deedType == null
+        ? null
+        : deedTypeLabel(l10n, card.deedType),
   );
 }
 

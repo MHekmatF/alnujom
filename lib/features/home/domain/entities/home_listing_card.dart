@@ -39,6 +39,10 @@ class HomeListingCard extends Equatable {
     this.areaSize,
     this.floor,
     this.isFeatured = false,
+    this.deedType,
+    this.finishLevel,
+    this.verificationStatus,
+    this.verifiedAt,
   });
 
   final String id;
@@ -87,6 +91,16 @@ class HomeListingCard extends Equatable {
   /// `true` only when their (newly-projected) `featured_until` is still active.
   final bool isFeatured;
 
+  /// Phase 035 Stage 3 — Syria-native attributes + field verification. All
+  /// nullable; the card renders the deed chip / موثّق badge only when present.
+  final String? deedType;
+  final String? finishLevel;
+  final String? verificationStatus;
+  final DateTime? verifiedAt;
+
+  /// Whether the listing is field-verified (drives the موثّق badge).
+  bool get isVerified => verificationStatus == 'verified';
+
   @override
   List<Object?> get props => [
     id,
@@ -107,5 +121,9 @@ class HomeListingCard extends Equatable {
     areaSize,
     floor,
     isFeatured,
+    deedType,
+    finishLevel,
+    verificationStatus,
+    verifiedAt,
   ];
 }

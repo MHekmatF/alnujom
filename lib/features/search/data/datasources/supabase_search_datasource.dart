@@ -164,6 +164,17 @@ class SupabaseSearchDatasource {
     if (filters.isAgency != null) {
       params['p_is_agency'] = filters.isAgency;
     }
+    // Phase 035 Stage 3 — Syria-native + verification filters (only when set,
+    // so the RPC's DEFAULT NULL keeps them inactive otherwise).
+    if (filters.deedType != null) {
+      params['p_deed_type'] = filters.deedType;
+    }
+    if (filters.finishLevel != null) {
+      params['p_finish_level'] = filters.finishLevel;
+    }
+    if (filters.verifiedOnly == true) {
+      params['p_verified_only'] = true;
+    }
 
     params['p_sort'] = _sortToRpc(sort);
 

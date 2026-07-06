@@ -34,6 +34,10 @@ class HomeListingCardDto {
     this.areaSize,
     this.floor,
     this.isFeatured = false,
+    this.deedType,
+    this.finishLevel,
+    this.verificationStatus,
+    this.verifiedAt,
   });
 
   final String id;
@@ -81,6 +85,14 @@ class HomeListingCardDto {
   /// `featured_until` column on the feed, or forced `true` by the dedicated
   /// featured datasource query (`SupabaseHomeFeedDatasource.fetchFeatured`).
   final bool isFeatured;
+
+  /// Phase 035 Stage 3 — Syria-native attributes + field-verification (columns
+  /// on `listings`, projected by the feed select). All nullable; the card lights
+  /// up the موثّق badge / deed chip only when present.
+  final String? deedType;
+  final String? finishLevel;
+  final String? verificationStatus;
+  final DateTime? verifiedAt;
 
   /// Parses the embedded-selects projection shape from
   /// `SupabaseHomeFeedDatasource.fetchPage`. Defensive against missing
@@ -171,6 +183,10 @@ class HomeListingCardDto {
       areaSize: _toDouble(row['area_size']),
       floor: _toInt(row['floor']),
       isFeatured: _parseFeatured(row['featured_until']),
+      deedType: row['deed_type'] as String?,
+      finishLevel: row['finish_level'] as String?,
+      verificationStatus: row['verification_status'] as String?,
+      verifiedAt: _toDateTime(row['verified_at']),
     );
   }
 
@@ -197,6 +213,10 @@ class HomeListingCardDto {
       areaSize: areaSize,
       floor: floor,
       isFeatured: isFeatured,
+      deedType: deedType,
+      finishLevel: finishLevel,
+      verificationStatus: verificationStatus,
+      verifiedAt: verifiedAt,
     );
   }
 
@@ -222,6 +242,10 @@ class HomeListingCardDto {
       areaSize: areaSize,
       floor: floor,
       isFeatured: isFeatured,
+      deedType: deedType,
+      finishLevel: finishLevel,
+      verificationStatus: verificationStatus,
+      verifiedAt: verifiedAt,
     );
   }
 
@@ -265,6 +289,10 @@ class HomeListingCardDto {
       areaSize: areaSize,
       floor: floor,
       isFeatured: isFeatured,
+      deedType: deedType,
+      finishLevel: finishLevel,
+      verificationStatus: verificationStatus,
+      verifiedAt: verifiedAt,
     );
   }
 
@@ -292,6 +320,10 @@ class HomeListingCardDto {
       areaSize: areaSize,
       floor: floor,
       isFeatured: value,
+      deedType: deedType,
+      finishLevel: finishLevel,
+      verificationStatus: verificationStatus,
+      verifiedAt: verifiedAt,
     );
   }
 }
@@ -366,5 +398,10 @@ bool _parseFeatured(Object? raw) {
 double? _toDouble(Object? raw) {
   if (raw is num) return raw.toDouble();
   if (raw is String) return double.tryParse(raw);
+  return null;
+}
+
+DateTime? _toDateTime(Object? raw) {
+  if (raw is String && raw.isNotEmpty) return DateTime.tryParse(raw);
   return null;
 }
