@@ -1,6 +1,9 @@
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../currencies/domain/entities/currency.dart';
 import '../../../../shared/domain/value_objects/money.dart';
@@ -20,6 +23,8 @@ class PricePreviewSubline extends StatelessWidget {
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context);
     final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     final money = Money(amount: amount, currencyCode: currency.code);
     final formatted = MoneyFormatter.format(
       money,
@@ -31,13 +36,12 @@ class PricePreviewSubline extends StatelessWidget {
       children: [
         Text(
           l10n.pricePreviewLabel,
-          style: Theme.of(context).textTheme.bodySmall,
+          style: styles.bodyMedium.copyWith(color: colors.textMuted),
         ),
+        const SizedBox(width: AppSpacing.xs),
         Text(
           formatted,
-          style: Theme.of(
-            context,
-          ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+          style: styles.titleMedium.copyWith(color: colors.onSurface),
         ),
       ],
     );

@@ -9,6 +9,7 @@ import '../../domain/entities/listing_form_state.dart';
 import '../bloc/listing_form_bloc.dart';
 import '../bloc/listing_form_event.dart';
 import '../util/listing_enum_labels.dart';
+import 'express_form_fields.dart' show expressDecoration;
 import 'revision_banner.dart';
 import 'step_section.dart';
 
@@ -57,17 +58,14 @@ class _StepBasicsState extends State<StepBasics> {
               onSubmitted: (_) => FocusScope.of(context).nextFocus(),
               onChanged: (v) =>
                   context.read<ListingFormBloc>().add(FieldChanged.title(v)),
-              decoration: InputDecoration(
-                hintText: l10n.fieldLabelTitle,
-                border: const OutlineInputBorder(),
-              ),
+              decoration: expressDecoration(context, hint: l10n.fieldLabelTitle),
             ),
             const FieldGap(),
             FieldLabel(label: l10n.fieldLabelPurpose, required: true),
             DropdownButtonFormField<ListingPurpose>(
               initialValue: listing.purpose,
               isExpanded: true,
-              decoration: const InputDecoration(border: OutlineInputBorder()),
+              decoration: expressDecoration(context),
               items: ListingPurpose.values
                   .map(
                     (p) => DropdownMenuItem(
@@ -87,7 +85,7 @@ class _StepBasicsState extends State<StepBasics> {
             DropdownButtonFormField<PropertyType>(
               initialValue: listing.propertyType,
               isExpanded: true,
-              decoration: const InputDecoration(border: OutlineInputBorder()),
+              decoration: expressDecoration(context),
               items: PropertyType.values
                   .map(
                     (p) => DropdownMenuItem(

@@ -98,15 +98,15 @@ class MediaThumbnail extends StatelessWidget {
             if (!_isGhost &&
                 media!.isMain &&
                 media!.kind == ListingMediaKind.image)
-              Positioned(
+              PositionedDirectional(
                 top: AppSpacing.sm,
-                right: AppSpacing.sm,
+                end: AppSpacing.sm,
                 child: _MainBadge(),
               ),
             if (!_isGhost)
-              Positioned(
+              PositionedDirectional(
                 top: AppSpacing.sm,
-                left: AppSpacing.sm,
+                start: AppSpacing.sm,
                 child: _OrderingBadge(ordering: media!.ordering),
               ),
             // Spec 026 — 360°/virtual-tour mark on the thumbnail (bottom-start)
