@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
@@ -9,7 +10,9 @@ import '../../shared/domain/value_objects/account_status.dart';
 import '../../shared/domain/value_objects/publisher_status.dart';
 import '../routing/app_router.dart';
 import '../theme/colors.dart';
+import '../theme/radii.dart';
 import '../theme/typography.dart';
+import '_widget_support.dart';
 
 /// Phase 035 — the "أضف عقار / Publish" action, now a floating Extended FAB that
 /// sits above the [MainBottomNav] on every primary tab surface (matching the
@@ -38,10 +41,14 @@ class PublishFab extends StatelessWidget {
         if (!isApprovedPublisher) return const SizedBox.shrink();
 
         return FloatingActionButton.extended(
-          onPressed: () =>
-              context.pushNamed(AppRouteNames.publisherListingsCreate),
+          onPressed: () {
+            HapticFeedback.selectionClick();
+            context.pushNamed(AppRouteNames.publisherListingsCreate);
+          },
+          tooltip: l10n.nav_publish,
           backgroundColor: colors.primary,
           foregroundColor: colors.onPrimary,
+          shape: RoundedRectangleBorder(borderRadius: appRadius(AppRadii.pill)),
           icon: const Icon(Icons.add_home_rounded),
           label: Text(
             l10n.nav_publish,

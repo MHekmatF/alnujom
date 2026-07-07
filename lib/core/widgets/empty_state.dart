@@ -51,10 +51,13 @@ class EmptyState extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (art != null) ...[art, const SizedBox(height: AppSpacing.lg)],
-              Text(
-                headline,
-                textAlign: TextAlign.center,
-                style: styles.titleLarge,
+              Semantics(
+                header: true,
+                child: Text(
+                  headline,
+                  textAlign: TextAlign.center,
+                  style: styles.titleLarge,
+                ),
               ),
               if (body != null) ...[
                 const SizedBox(height: AppSpacing.sm),

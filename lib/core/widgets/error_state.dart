@@ -44,10 +44,13 @@ class ErrorState extends StatelessWidget {
                 color: colors.error,
               ),
               const SizedBox(height: AppSpacing.md),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: styles.titleLarge,
+              Semantics(
+                header: true,
+                child: Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: styles.titleLarge,
+                ),
               ),
               if (message != null) ...[
                 const SizedBox(height: AppSpacing.sm),

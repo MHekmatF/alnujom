@@ -119,8 +119,9 @@ class _LoadingStateState extends State<LoadingState>
 }
 
 /// Translates a [LinearGradient] horizontally across its bounds so the bright
-/// band sweeps left→right (value 0→1 maps the highlight from off-left to
-/// off-right).
+/// band sweeps with the reading direction (LTR: value 0→1 maps the highlight
+/// from off-left to off-right; RTL flips the sign so it sweeps off-right to
+/// off-left, matching Arabic surfaces).
 class _SweepGradientTransform extends GradientTransform {
   const _SweepGradientTransform(this.value);
 
@@ -128,7 +129,8 @@ class _SweepGradientTransform extends GradientTransform {
 
   @override
   Matrix4? transform(Rect bounds, {TextDirection? textDirection}) {
-    final dx = bounds.width * (value * 2 - 1);
+    final sign = textDirection == TextDirection.rtl ? -1.0 : 1.0;
+    final dx = bounds.width * (value * 2 - 1) * sign;
     return Matrix4.translationValues(dx, 0, 0);
   }
 }

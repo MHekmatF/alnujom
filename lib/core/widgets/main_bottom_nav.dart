@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -165,7 +166,11 @@ class _NavTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
-    final fg = selected ? colors.primary : colors.textMuted;
+    // Icon keeps the intentionally-quiet muted tint when inactive; the tiny
+    // 10.5px label uses a higher-contrast token so it clears the small-text
+    // 4.5:1 bar in both themes.
+    final iconColor = selected ? colors.primary : colors.textMuted;
+    final labelColor = selected ? colors.primary : colors.onSurfaceVariant;
 
     Widget glyph = Icon(selected ? selectedIcon : icon, size: _iconSize);
     if (bounce) {
@@ -179,39 +184,48 @@ class _NavTab extends StatelessWidget {
           );
     }
 
-    return InkWell(
-      onTap: onTap,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Tiny pill indicator above the selected tab (transparent otherwise
-          // so the row never reflows between selected states).
-          Container(
-            width: _indicatorWidth,
-            height: _indicatorHeight,
-            decoration: BoxDecoration(
-              color: selected ? colors.primary : Colors.transparent,
-              borderRadius: appRadius(AppRadii.pill),
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Tiny pill indicator above the selected tab (transparent otherwise
+            // so the row never reflows between selected states).
+            Container(
+              width: _indicatorWidth,
+              height: _indicatorHeight,
+              decoration: BoxDecoration(
+                color: selected ? colors.primary : Colors.transparent,
+                borderRadius: appRadius(AppRadii.pill),
+              ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          IconTheme(
-            data: IconThemeData(color: fg, size: _iconSize),
-            child: glyph,
-          ),
-          const SizedBox(height: AppSpacing.xxs),
-          Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: styles.labelMedium.copyWith(
-              fontSize: _labelSize,
-              color: fg,
-              fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+            const SizedBox(height: AppSpacing.xs),
+            IconTheme(
+              data: IconThemeData(color: iconColor, size: _iconSize),
+              child: glyph,
             ),
-          ),
-        ],
+            const SizedBox(height: AppSpacing.xxs),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: styles.labelMedium.copyWith(
+                fontSize: _labelSize,
+                color: labelColor,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
