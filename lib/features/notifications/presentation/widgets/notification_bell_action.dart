@@ -11,7 +11,9 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/localization/app_strings.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
 import '../bloc/notification_badge_cubit.dart';
 
 class NotificationBellAction extends StatelessWidget {
@@ -26,7 +28,9 @@ class NotificationBellAction extends StatelessWidget {
       child: BlocBuilder<NotificationBadgeCubit, NotificationBadgeState>(
         builder: (context, state) {
           return IconButton(
-            tooltip: l10n.notification_bell_tooltip,
+            tooltip: state.count > 0
+                ? l10n.notification_unread_count_a11y(state.count)
+                : l10n.notification_bell_tooltip,
             icon: _BellWithBadge(count: state.count),
             onPressed: () => context.push(AppRoutes.notifications),
           );
@@ -65,23 +69,24 @@ class _Badge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.xs),
+      padding: const EdgeInsets.all(AppSpacing.xxs),
       constraints: const BoxConstraints(
         minWidth: AppSpacing.lg,
         minHeight: AppSpacing.lg,
       ),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: colorScheme.error,
+        color: colors.error,
       ),
       alignment: Alignment.center,
       child: Text(
         count > 99 ? '99+' : '$count',
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: colorScheme.onError,
-          fontSize: 10,
+        style: styles.labelMedium.copyWith(
+          color: colors.onError,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );

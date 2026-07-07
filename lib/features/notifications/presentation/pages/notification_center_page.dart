@@ -4,6 +4,7 @@
 // unread styling, mark-all-read action, tap → resolver + MarkNotificationRead.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/injection.dart';
@@ -14,6 +15,8 @@ import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
+import '../../../../core/widgets/loading_state.dart';
+import '../../../../core/widgets/staggered_list_item.dart';
 import '../../domain/entities/app_notification.dart';
 import '../bloc/notification_badge_cubit.dart';
 import '../bloc/notifications_cubit.dart';
@@ -95,12 +98,14 @@ class _NotificationCenterViewState extends State<_NotificationCenterView> {
             builder: (context, state) {
               final hasUnread = state.notifications.any((n) => n.isUnread);
               if (!hasUnread) return const SizedBox.shrink();
-              return TextButton(
+              return TextButton.icon(
                 onPressed: () {
+                  HapticFeedback.selectionClick();
                   context.read<NotificationsCubit>().markAllRead();
                   getIt<NotificationBadgeCubit>().clear();
                 },
-                child: Text(l10n.notification_mark_all_read),
+                icon: const Icon(Icons.done_all),
+                label: Text(l10n.notification_mark_all_read),
               );
             },
           ),
@@ -111,7 +116,7 @@ class _NotificationCenterViewState extends State<_NotificationCenterView> {
           switch (state.status) {
             case NotificationsStatus.initial:
             case NotificationsStatus.loading:
-              return const AppSpinner.page();
+              return const _NotificationsSkeleton();
 
             case NotificationsStatus.error:
               return ErrorState(
@@ -125,12 +130,15 @@ class _NotificationCenterViewState extends State<_NotificationCenterView> {
                 return EmptyState(
                   icon: Icons.notifications_none_outlined,
                   headline: l10n.notification_empty_state,
+                  body: l10n.notification_empty_state_body,
                 );
               }
               // Flatten the list into day-grouped rows (a muted date header
               // before each new calendar day, then its notification tiles).
+              final colors = AppColors.of(context);
               final rows = _buildRows(state.notifications);
               return RefreshIndicator(
+                color: colors.primary,
                 onRefresh: () => context.read<NotificationsCubit>().load(),
                 child: ListView.builder(
                   controller: _scrollController,
@@ -145,12 +153,16 @@ class _NotificationCenterViewState extends State<_NotificationCenterView> {
                     final row = rows[index];
                     return switch (row) {
                       _DateHeaderRow(:final day) => _DateHeader(day: day),
-                      _NotificationRow(:final notification) => NotificationTile(
-                        notification: notification,
-                        onTap: () => NotificationDeepLinkResolver.resolve(
-                          context: context,
+                      _NotificationRow(:final notification) => StaggeredListItem(
+                        index: index,
+                        enabled: !state.isPaginating,
+                        child: NotificationTile(
                           notification: notification,
-                          updateCubit: true,
+                          onTap: () => NotificationDeepLinkResolver.resolve(
+                            context: context,
+                            notification: notification,
+                            updateCubit: true,
+                          ),
                         ),
                       ),
                     };
@@ -178,8 +190,7 @@ class _DateHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
-    // Fully localized (ar/en) without new l10n keys.
-    final label = MaterialLocalizations.of(context).formatFullDate(day);
+    final label = _dateLabel(context);
 
     return Padding(
       padding: const EdgeInsetsDirectional.fromSTEB(
@@ -194,6 +205,59 @@ class _DateHeader extends StatelessWidget {
           color: colors.textMuted,
           fontWeight: FontWeight.w700,
         ),
+      ),
+    );
+  }
+
+  /// Relative label for the two freshest buckets (Today/Yesterday); older
+  /// groups keep the full localized (ar/en) date. Presentational only.
+  String _dateLabel(BuildContext context) {
+    final l10n = AppStrings.of(context).loc;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    if (day == today) return l10n.notification_date_today;
+    if (day == yesterday) return l10n.notification_date_yesterday;
+    return MaterialLocalizations.of(context).formatFullDate(day);
+  }
+}
+
+/// Skeleton placeholder that mirrors the tile (avatar + two copy lines) so the
+/// list layout is preserved during the initial/refresh load instead of a bare
+/// centered spinner. Non-scrollable — it sits under the real ListView.
+class _NotificationsSkeleton extends StatelessWidget {
+  const _NotificationsSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
+      ),
+      itemCount: 7,
+      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.lg),
+      itemBuilder: (_, __) => const Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          LoadingState.avatar(),
+          SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                LoadingState.line(),
+                SizedBox(height: AppSpacing.xs),
+                FractionallySizedBox(
+                  alignment: AlignmentDirectional.centerStart,
+                  widthFactor: 0.5,
+                  child: LoadingState.line(),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

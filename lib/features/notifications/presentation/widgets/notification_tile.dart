@@ -38,90 +38,102 @@ class NotificationTile extends StatelessWidget {
       color: isUnread ? colors.primaryContainer : null,
       child: InkWell(
         onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(
-            AppSpacing.lg,
-            AppSpacing.md,
-            AppSpacing.lg,
-            AppSpacing.md,
+        child: DecoratedBox(
+          // Inset-free hairline restores rhythm between dense read rows.
+          decoration: BoxDecoration(
+            border: BorderDirectional(
+              bottom: BorderSide(color: colors.divider),
+            ),
           ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Type icon in a soft primaryContainer circle (DS list-row idiom).
-              Container(
-                width: AppSpacing.xxl,
-                height: AppSpacing.xxl,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: isUnread ? colors.surface : colors.primaryContainer,
+          child: Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(
+              AppSpacing.lg,
+              AppSpacing.md,
+              AppSpacing.lg,
+              AppSpacing.md,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Type icon in a soft neutral circle; the glyph carries a
+                // semantic status color (success/error/brand) for triage.
+                Container(
+                  width: AppSpacing.xxl,
+                  height: AppSpacing.xxl,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isUnread ? colors.surface : colors.surfaceVariant,
+                  ),
+                  child: Icon(
+                    _iconForType(notification.type),
+                    size: AppSpacing.lg,
+                    color: _colorForType(colors, notification.type),
+                  ),
                 ),
-                child: Icon(
-                  _iconForType(notification.type),
-                  size: AppSpacing.lg,
-                  color: colors.primary,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              // Title + optional body + relative time
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _titleForType(notification.type, l10n),
-                      // Bold title; unread is heavier still so it stands out.
-                      style: textStyles.titleMedium.copyWith(
-                        fontWeight: isUnread
-                            ? FontWeight.w700
-                            : FontWeight.w600,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (_bodyForType(
-                          notification.type,
-                          notification.params,
-                          l10n,
-                        )
-                        case final body?) ...[
-                      const SizedBox(height: AppSpacing.xxs),
+                const SizedBox(width: AppSpacing.md),
+                // Title + optional body + relative time
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        body,
-                        style: textStyles.bodyMedium.copyWith(
-                          color: colors.textMuted,
+                        _titleForType(notification.type, l10n),
+                        // Bold title; unread is heavier still so it stands out.
+                        style: textStyles.titleMedium.copyWith(
+                          fontWeight: isUnread
+                              ? FontWeight.w700
+                              : FontWeight.w600,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
+                      if (_bodyForType(
+                            notification.type,
+                            notification.params,
+                            l10n,
+                          )
+                          case final body?) ...[
+                        const SizedBox(height: AppSpacing.xxs),
+                        Text(
+                          body,
+                          style: textStyles.bodyMedium.copyWith(
+                            color: colors.textMuted,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        _relativeTime(notification.createdAt, l10n),
+                        style: textStyles.labelMedium.copyWith(
+                          color: colors.textMuted,
+                        ),
+                      ),
                     ],
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      _relativeTime(notification.createdAt, l10n),
-                      style: textStyles.labelMedium.copyWith(
-                        color: colors.textMuted,
+                  ),
+                ),
+                // Unread dot — announced to assistive tech as "unread".
+                if (isUnread)
+                  Padding(
+                    padding: const EdgeInsetsDirectional.only(
+                      start: AppSpacing.sm,
+                      top: AppSpacing.xs,
+                    ),
+                    child: Semantics(
+                      label: l10n.notification_unread_a11y,
+                      child: Container(
+                        width: AppSpacing.sm,
+                        height: AppSpacing.sm,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: colors.primary,
+                        ),
                       ),
                     ),
-                  ],
-                ),
-              ),
-              // Unread dot
-              if (isUnread)
-                Padding(
-                  padding: const EdgeInsetsDirectional.only(
-                    start: AppSpacing.sm,
-                    top: AppSpacing.xs,
                   ),
-                  child: Container(
-                    width: AppSpacing.sm,
-                    height: AppSpacing.sm,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: colors.primary,
-                    ),
-                  ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -145,6 +157,23 @@ class NotificationTile extends StatelessWidget {
       case NotificationType.savedSearchMatch:
         // Phase 25 — bell/search-style mark for a saved-search match alert.
         return LucideIcons.bell_ring;
+    }
+  }
+
+  /// Semantic glyph color: approvals read success-green, rejections error-red,
+  /// everything else stays brand-blue — so triage is possible at a glance.
+  Color _colorForType(AppColors colors, NotificationType type) {
+    switch (type) {
+      case NotificationType.accountApproved:
+      case NotificationType.listingApproved:
+        return colors.success;
+      case NotificationType.accountRejected:
+      case NotificationType.listingRejected:
+        return colors.error;
+      case NotificationType.inquiryReceived:
+      case NotificationType.agencyInvitation:
+      case NotificationType.savedSearchMatch:
+        return colors.primary;
     }
   }
 
