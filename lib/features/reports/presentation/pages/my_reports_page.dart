@@ -7,6 +7,7 @@
 // Tap → listing details page (FR-022 / SC-007). Phase 2 tokens only.
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
@@ -22,7 +23,9 @@ import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
 import '../../../../core/widgets/error_state.dart';
+import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/press_scale.dart';
+import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/report.dart';
 import '../../domain/entities/report_reason.dart';
@@ -59,7 +62,7 @@ class _MyReportsView extends StatelessWidget {
       body: BlocBuilder<MyReportsBloc, MyReportsState>(
         builder: (context, state) {
           return switch (state) {
-            MyReportsLoading() => const AppSpinner.page(),
+            MyReportsLoading() => const _ReportsLoadingSkeleton(),
             MyReportsError(:final failure) => _ErrorBody(failure: failure),
             MyReportsLoaded(:final items, :final hasMore) =>
               items.isEmpty
@@ -126,8 +129,34 @@ class _LoadedBody extends StatelessWidget {
             );
           }
 
-          return _ReportCard(item: items[index]);
+          return StaggeredListItem(
+            index: index,
+            child: _ReportCard(item: items[index]),
+          );
         },
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Loading skeleton (list-shape preview)
+// ---------------------------------------------------------------------------
+
+class _ReportsLoadingSkeleton extends StatelessWidget {
+  const _ReportsLoadingSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      padding: const EdgeInsetsDirectional.symmetric(vertical: AppSpacing.sm),
+      itemCount: 6,
+      itemBuilder: (context, _) => const Padding(
+        padding: EdgeInsetsDirectional.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.sm,
+        ),
+        child: LoadingState.card(),
       ),
     );
   }
@@ -166,13 +195,16 @@ class _ReportCard extends StatelessWidget {
           child: Material(
             type: MaterialType.transparency,
             child: InkWell(
-              onTap: () =>
-                  context.push(AppRoutes.listingDetailsFor(item.listingId)),
+              onTap: () {
+                HapticFeedback.selectionClick();
+                context.push(AppRoutes.listingDetailsFor(item.listingId));
+              },
               child: Padding(
                 padding: const EdgeInsetsDirectional.all(AppSpacing.md),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                child: MergeSemantics(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                     // Thumbnail
                     ClipRRect(
                       borderRadius: appRadius(AppRadii.md),
@@ -227,7 +259,8 @@ class _ReportCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

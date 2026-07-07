@@ -47,6 +47,13 @@ class ReportStatusChip extends StatelessWidget {
       ReportStatus.dismissed => colors.textMuted,
     };
 
+    // The muted 'dismissed' tint is the lowest-contrast state; lift its ink to
+    // onSurfaceVariant so the label stays legible (AA) while the background and
+    // border keep the muted look. Other states read fine using the tint itself.
+    final ink = status == ReportStatus.dismissed
+        ? colors.onSurfaceVariant
+        : tint;
+
     return Container(
       padding: const EdgeInsetsDirectional.symmetric(
         horizontal: AppSpacing.sm,
@@ -59,7 +66,7 @@ class ReportStatusChip extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: styles.labelMedium.copyWith(color: tint),
+        style: styles.labelMedium.copyWith(color: ink),
       ),
     );
   }
