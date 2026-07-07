@@ -29,6 +29,7 @@ class ReelPlayer extends StatefulWidget {
     required this.muted,
     required this.muteHintVisible,
     required this.posterSemanticLabel,
+    required this.muteToggleSemanticLabel,
     required this.onToggleMute,
   });
 
@@ -42,6 +43,9 @@ class ReelPlayer extends StatefulWidget {
   /// to false after a short delay).
   final bool muteHintVisible;
   final String posterSemanticLabel;
+
+  /// Announced by TalkBack for the full-screen tap-to-mute gesture surface.
+  final String muteToggleSemanticLabel;
   final VoidCallback onToggleMute;
 
   @override
@@ -82,46 +86,55 @@ class _ReelPlayerState extends State<ReelPlayer> {
     final ready = controller != null && controller.value.isInitialized;
     final reduce = reduceMotion(context);
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: widget.onToggleMute,
-      child: ColoredBox(
-        color: colors.scrim,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // Poster — always rendered beneath; the video fades in over it.
-            if (widget.posterUrl != null)
-              AppNetworkImage(
-                url: widget.posterUrl,
-                placeholderStyle: AppImagePlaceholder.flat,
-                semanticLabel: widget.posterSemanticLabel,
-              ),
-            if (ready)
-              AnimatedOpacity(
-                opacity: 1,
-                duration: reduce ? Duration.zero : AppMotion.base,
-                curve: AppMotion.curve,
-                child: FittedBox(
-                  fit: BoxFit.cover,
-                  clipBehavior: Clip.hardEdge,
-                  child: SizedBox(
-                    width: controller.value.size.width,
-                    height: controller.value.size.height,
-                    child: VideoPlayer(controller),
+    return Semantics(
+      button: true,
+      label: widget.muteToggleSemanticLabel,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: widget.onToggleMute,
+        child: ColoredBox(
+          color: colors.scrim,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Poster — always rendered beneath; the video fades in over it.
+              if (widget.posterUrl != null)
+                AppNetworkImage(
+                  url: widget.posterUrl,
+                  placeholderStyle: AppImagePlaceholder.flat,
+                  semanticLabel: widget.posterSemanticLabel,
+                ),
+              if (ready)
+                // A genuine 0->1 fade-in on first mount (AnimatedOpacity only
+                // animates on a value change, so mounting at opacity 1 was a
+                // hard cut). Honors reduced motion.
+                TweenAnimationBuilder<double>(
+                  tween: Tween<double>(begin: 0, end: 1),
+                  duration: reduce ? Duration.zero : AppMotion.base,
+                  curve: AppMotion.curve,
+                  builder: (context, value, child) =>
+                      Opacity(opacity: value, child: child),
+                  child: FittedBox(
+                    fit: BoxFit.cover,
+                    clipBehavior: Clip.hardEdge,
+                    child: SizedBox(
+                      width: controller.value.size.width,
+                      height: controller.value.size.height,
+                      child: VideoPlayer(controller),
+                    ),
                   ),
                 ),
+              // Centered mute/unmute hint glyph — fades out shortly after a tap.
+              Center(
+                child: AnimatedOpacity(
+                  opacity: widget.muteHintVisible ? 1 : 0,
+                  duration: reduce ? Duration.zero : AppMotion.base,
+                  curve: AppMotion.curve,
+                  child: _MuteGlyph(muted: widget.muted),
+                ),
               ),
-            // Centered mute/unmute hint glyph — fades out shortly after a tap.
-            Center(
-              child: AnimatedOpacity(
-                opacity: widget.muteHintVisible ? 1 : 0,
-                duration: reduce ? Duration.zero : AppMotion.base,
-                curve: AppMotion.curve,
-                child: _MuteGlyph(muted: widget.muted),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

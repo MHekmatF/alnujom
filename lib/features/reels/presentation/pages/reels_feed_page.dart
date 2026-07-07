@@ -267,20 +267,33 @@ class _ReelsFeedBodyState extends State<ReelsFeedBody> {
           switch (state.status) {
             case ReelsFeedStatus.initial:
             case ReelsFeedStatus.loading:
-              return const Center(child: AppSpinner.page());
+              // Informational states render on an opaque themed surface — the
+              // Scaffold's scrim background is a translucent black meant only
+              // for the video pages, and would drop themed text/icons below
+              // the contrast target in light mode.
+              return ColoredBox(
+                color: colors.surface,
+                child: const Center(child: AppSpinner.page()),
+              );
             case ReelsFeedStatus.failure:
-              return ErrorState(
-                title: l10n.reels_load_error,
-                variant: ErrorStateVariant.network,
-                onRetry: () => context.read<ReelsFeedCubit>().loadInitial(
-                  locale: Localizations.localeOf(context),
+              return ColoredBox(
+                color: colors.surface,
+                child: ErrorState(
+                  title: l10n.reels_load_error,
+                  variant: ErrorStateVariant.network,
+                  onRetry: () => context.read<ReelsFeedCubit>().loadInitial(
+                    locale: Localizations.localeOf(context),
+                  ),
                 ),
               );
             case ReelsFeedStatus.empty:
-              return EmptyState(
-                icon: Icons.videocam_off_outlined,
-                headline: l10n.reels_empty_headline,
-                body: widget.emptyBody,
+              return ColoredBox(
+                color: colors.surface,
+                child: EmptyState(
+                  icon: Icons.videocam_off_outlined,
+                  headline: l10n.reels_empty_headline,
+                  body: widget.emptyBody,
+                ),
               );
             case ReelsFeedStatus.loaded:
             case ReelsFeedStatus.loadingMore:
@@ -291,7 +304,7 @@ class _ReelsFeedBodyState extends State<ReelsFeedBody> {
                 fit: StackFit.expand,
                 children: [
                   _buildFeed(context, state.reels),
-                  const _ReelsTopBar(),
+                  _ReelsTopBar(muted: _muted, onToggleMute: _toggleMute),
                 ],
               );
           }
@@ -317,6 +330,8 @@ class _ReelsFeedBodyState extends State<ReelsFeedBody> {
               muted: _muted,
               muteHintVisible: index == _current && _muteHintVisible,
               posterSemanticLabel: AppLocalizations.of(context)!.image_unavailable,
+              muteToggleSemanticLabel:
+                  AppLocalizations.of(context)!.reels_mute_toggle,
               onToggleMute: _toggleMute,
             ),
             _ReelOverlay(reel: reel),
@@ -332,7 +347,10 @@ class _ReelsFeedBodyState extends State<ReelsFeedBody> {
 /// themes. Replaces the old transparent [AppBar] (matches the panorama-viewer
 /// chrome idiom).
 class _ReelsTopBar extends StatelessWidget {
-  const _ReelsTopBar();
+  const _ReelsTopBar({required this.muted, required this.onToggleMute});
+
+  final bool muted;
+  final VoidCallback onToggleMute;
 
   @override
   Widget build(BuildContext context) {
@@ -342,9 +360,78 @@ class _ReelsTopBar extends StatelessWidget {
         padding: const EdgeInsetsDirectional.all(AppSpacing.md),
         child: Align(
           alignment: AlignmentDirectional.topStart,
-          child: GlassPill(
-            icon: LucideIcons.clapperboard,
-            label: l10n.reels_section_title,
+          child: Row(
+            children: [
+              // A visible exit only on the pushed fullscreen feed (rail entry);
+              // the persistent bottom-nav tab (canPop == false) stays clean.
+              if (Navigator.of(context).canPop()) ...[
+                _ReelChipButton(
+                  icon: Directionality.of(context) == TextDirection.rtl
+                      ? LucideIcons.arrow_right
+                      : LucideIcons.arrow_left,
+                  semanticLabel: l10n.reels_close,
+                  onTap: () => Navigator.of(context).maybePop(),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+              ],
+              GlassPill(
+                icon: LucideIcons.clapperboard,
+                label: l10n.reels_section_title,
+              ),
+              const Spacer(),
+              // Persistent audio-state indicator + discrete >=48dp toggle so
+              // the muted-by-default feed advertises its state and offers an
+              // explicit control (not only the whole-screen tap hint).
+              _ReelChipButton(
+                icon: muted ? LucideIcons.volume_off : LucideIcons.volume_2,
+                semanticLabel: l10n.reels_mute_toggle,
+                onTap: onToggleMute,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A 48dp glass circle over the video — the top-bar's mute and close chips.
+/// Dark photo-overlay fill + [AppColors.onPhoto] icon (theme-independent, like
+/// [GlassPill]), lifted by the level-1 elevation token and announced as a
+/// button. Presentation-only: it reflects/toggles existing feed state.
+class _ReelChipButton extends StatelessWidget {
+  const _ReelChipButton({
+    required this.icon,
+    required this.semanticLabel,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String semanticLabel;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final elevation = AppElevation.of(context);
+    return Semantics(
+      button: true,
+      label: semanticLabel,
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkResponse(
+          onTap: onTap,
+          radius: kAppMinTouchTarget / 2,
+          child: Container(
+            width: kAppMinTouchTarget,
+            height: kAppMinTouchTarget,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: colors.photoOverlay,
+              shape: BoxShape.circle,
+              boxShadow: elevation.level1,
+            ),
+            child: Icon(icon, color: colors.onPhoto, size: AppSpacing.lg),
           ),
         ),
       ),
@@ -435,7 +522,10 @@ class _ReelOverlay extends StatelessWidget {
                 const SizedBox(height: AppSpacing.md),
                 AppButton(
                   label: l10n.reels_view_listing,
-                  icon: LucideIcons.arrow_right,
+                  icon: Directionality.of(context) == TextDirection.rtl
+                      ? LucideIcons.arrow_left
+                      : LucideIcons.arrow_right,
+                  expanded: true,
                   onPressed: () =>
                       context.push(AppRoutes.listingDetailsFor(reel.listingId)),
                 ),
