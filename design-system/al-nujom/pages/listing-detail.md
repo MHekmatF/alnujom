@@ -1,0 +1,52 @@
+# Listing Detail Page Overrides
+
+> **PROJECT:** Al Nujom
+> **Generated:** 2026-07-07 07:35:19
+> **Page Type:** Product Detail
+
+> ⚠️ **IMPORTANT:** Rules in this file **override** the Master file (`design-system/MASTER.md`).
+> Only deviations from the Master are documented here. For all other rules, refer to the Master.
+
+---
+
+## Page-Specific Rules
+
+### Layout Overrides
+
+- **Max Width:** 1400px or full-width
+- **Grid:** 12-column grid for data flexibility
+- **Sections:** 1. Intro (Vertical), 2. The Journey (Horizontal Track), 3. Detail Reveal, 4. Vertical Footer
+
+### Spacing Overrides
+
+- **Content Density:** High — optimize for information display
+
+### Typography Overrides
+
+- No overrides — use Master typography
+
+### Color Overrides
+
+- **Strategy:** Continuous palette transition. Chapter colors. Progress bar #000000.
+
+### Component Overrides
+
+- Avoid: Unoptimized full-size images
+- Avoid: No visual feedback on current location
+- Avoid: Default keyboard for all inputs
+
+---
+
+## Page-Specific Components
+
+- No unique components for this page
+
+---
+
+## Recommendations
+
+- Effects: Drill-down expand animations, breadcrumb click transitions, smooth detail reveal, level change smooth, data reload animation
+- Performance: Use appropriate size and format (WebP)
+- Navigation: Highlight active nav item with color/underline
+- Forms: Use inputmode attribute
+- CTA Placement: Floating Sticky CTA or End of Horizontal Track

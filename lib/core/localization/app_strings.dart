@@ -6546,4 +6546,67 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String get adminRevisionFieldContactVisibility =>
       _resolve("adminRevisionFieldContactVisibility", (loc) => loc.adminRevisionFieldContactVisibility);
+
+
+  @override
+  String get search_error_title => _resolve('search_error_title', (loc) => loc.search_error_title);
+  @override
+  String get map_marker_semantics_label => _resolve('map_marker_semantics_label', (loc) => loc.map_marker_semantics_label);
+  @override
+  String get map_loading_label => _resolve('map_loading_label', (loc) => loc.map_loading_label);
+  @override
+  String get chatMessageSent => _resolve('chatMessageSent', (loc) => loc.chatMessageSent);
+  @override
+  String get chatMessageRead => _resolve('chatMessageRead', (loc) => loc.chatMessageRead);
+  @override
+  String get profileLoadErrorTitle => _resolve('profileLoadErrorTitle', (loc) => loc.profileLoadErrorTitle);
+  @override
+  String get profilePrivateSecurityNote => _resolve('profilePrivateSecurityNote', (loc) => loc.profilePrivateSecurityNote);
+  @override
+  String get reels_mute_toggle => _resolve('reels_mute_toggle', (loc) => loc.reels_mute_toggle);
+  @override
+  String get reels_close => _resolve('reels_close', (loc) => loc.reels_close);
+  @override
+  String get onboarding_next => _resolve('onboarding_next', (loc) => loc.onboarding_next);
+  @override
+  String get password_show => _resolve('password_show', (loc) => loc.password_show);
+  @override
+  String get password_hide => _resolve('password_hide', (loc) => loc.password_hide);
+  @override
+  String get mediaEmptyStateTitle => _resolve('mediaEmptyStateTitle', (loc) => loc.mediaEmptyStateTitle);
+  @override
+  String get mediaEmptyStateHint => _resolve('mediaEmptyStateHint', (loc) => loc.mediaEmptyStateHint);
+  @override
+  String get myListingsEmptyBody => _resolve('myListingsEmptyBody', (loc) => loc.myListingsEmptyBody);
+  @override
+  String get myListingsFilteredEmptyTitle => _resolve('myListingsFilteredEmptyTitle', (loc) => loc.myListingsFilteredEmptyTitle);
+  @override
+  String get myListingsFilteredEmptyShowAll => _resolve('myListingsFilteredEmptyShowAll', (loc) => loc.myListingsFilteredEmptyShowAll);
+  @override
+  String get myListingsUntitledListing => _resolve('myListingsUntitledListing', (loc) => loc.myListingsUntitledListing);
+  @override
+  String get comparisonEmptyTitle => _resolve('comparisonEmptyTitle', (loc) => loc.comparisonEmptyTitle);
+  @override
+  String get comparisonMaxReached => _resolve('comparisonMaxReached', (loc) => loc.comparisonMaxReached);
+  @override
+  String get notification_unread_a11y => _resolve('notification_unread_a11y', (loc) => loc.notification_unread_a11y);
+  @override
+  String notification_unread_count_a11y(int count) =>
+      _resolve('notification_unread_count_a11y', (loc) => loc.notification_unread_count_a11y(count));
+  @override
+  String get notification_date_today => _resolve('notification_date_today', (loc) => loc.notification_date_today);
+  @override
+  String get notification_date_yesterday => _resolve('notification_date_yesterday', (loc) => loc.notification_date_yesterday);
+  @override
+  String get notification_empty_state_body => _resolve('notification_empty_state_body', (loc) => loc.notification_empty_state_body);
+  @override
+  String get assistantTyping => _resolve('assistantTyping', (loc) => loc.assistantTyping);
+  @override
+  String get assistantTrySuggestions => _resolve('assistantTrySuggestions', (loc) => loc.assistantTrySuggestions);
+  @override
+  String get about_empty_title => _resolve('about_empty_title', (loc) => loc.about_empty_title);
+  @override
+  String get report_sheet_subtitle => _resolve('report_sheet_subtitle', (loc) => loc.report_sheet_subtitle);
+  @override
+  String get report_banner_status_label => _resolve('report_banner_status_label', (loc) => loc.report_banner_status_label);
 }
