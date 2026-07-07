@@ -10,6 +10,7 @@ import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_spinner.dart';
+import '../../../../core/widgets/app_text_field.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/phone_number.dart';
 import '../../domain/entities/private_contact_methods.dart';
@@ -159,6 +160,7 @@ class _PrivateViewState extends State<_PrivateView> {
                 // ── Identity (Vault-stored legal name + national ID) ────────
                 _PrivateSection(
                   title: l10n.profile_private_section_title,
+                  subtitle: l10n.profilePrivateSecurityNote,
                   children: [
                     _ContactField(
                       controller: _legalNameController,
@@ -245,10 +247,10 @@ class _ContactField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
+    return AppTextField(
+      label: label,
       controller: controller,
       keyboardType: keyboardType,
-      decoration: InputDecoration(labelText: label),
     );
   }
 }
@@ -257,9 +259,14 @@ class _ContactField extends StatelessWidget {
 /// profile + nav-drawer sections (bold muted header over a 1px-outlined card),
 /// so the private page reads consistently with the rest of the profile area.
 class _PrivateSection extends StatelessWidget {
-  const _PrivateSection({required this.title, required this.children});
+  const _PrivateSection({
+    required this.title,
+    required this.children,
+    this.subtitle,
+  });
 
   final String title;
+  final String? subtitle;
   final List<Widget> children;
 
   @override
@@ -283,6 +290,17 @@ class _PrivateSection extends StatelessWidget {
               style: styles.labelLarge.copyWith(color: colors.textMuted),
             ),
           ),
+          if (subtitle != null)
+            Padding(
+              padding: const EdgeInsetsDirectional.only(
+                start: AppSpacing.xs,
+                bottom: AppSpacing.sm,
+              ),
+              child: Text(
+                subtitle!,
+                style: styles.bodyMedium.copyWith(color: colors.textMuted),
+              ),
+            ),
           DecoratedBox(
             decoration: BoxDecoration(
               color: colors.card,

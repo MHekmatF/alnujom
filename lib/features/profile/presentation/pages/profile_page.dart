@@ -31,9 +31,11 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_nav_drawer.dart';
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/app_spinner.dart';
+import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/main_bottom_nav.dart';
 import '../../../../core/widgets/press_scale.dart';
 import '../../../../core/widgets/publish_fab.dart';
+import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/entities/profile.dart';
 import '../../../../shared/domain/value_objects/account_status.dart';
@@ -84,8 +86,10 @@ class _ProfileView extends StatelessWidget {
           return Scaffold(
             appBar: AppBar(title: Text(l10n.profile_title)),
             bottomNavigationBar: const MainBottomNav(current: MainTab.profile),
-            body: _NullProfileState(
+            body: ErrorState(
+              title: l10n.profileLoadErrorTitle,
               message: state.failure?.message ?? l10n.unknown_auth_error,
+              variant: ErrorStateVariant.network,
               onRetry: () => context.read<ProfileCubit>().load(),
             ),
           );
@@ -100,12 +104,6 @@ class _ProfileView extends StatelessWidget {
           drawer: const AppNavDrawer(),
           appBar: AppBar(
             title: Text(l10n.profile_title),
-            actions: [
-              TextButton(
-                onPressed: () => context.push(AppRoutes.profileEdit),
-                child: Text(l10n.profile_edit_button),
-              ),
-            ],
           ),
           body: SingleChildScrollView(
             padding: const EdgeInsetsDirectional.fromSTEB(
@@ -118,12 +116,17 @@ class _ProfileView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // ── Premium identity header ────────────────────────────────
-                _IdentityHeader(profile: profile, roles: state.roles),
+                StaggeredListItem(
+                  index: 0,
+                  child: _IdentityHeader(profile: profile, roles: state.roles),
+                ),
 
                 // ── Account ────────────────────────────────────────────────
-                _ProfileSection(
-                  title: l10n.profileSectionAccount,
-                  children: [
+                StaggeredListItem(
+                  index: 1,
+                  child: _ProfileSection(
+                    title: l10n.profileSectionAccount,
+                    children: [
                     _ProfileRow(
                       icon: Icons.lock_outline,
                       title: l10n.profile_private_section_title,
@@ -150,7 +153,8 @@ class _ProfileView extends StatelessWidget {
                         onChanged: (value) => LiteMode.set(value),
                       ),
                     ),
-                  ],
+                    ],
+                  ),
                 ),
 
                 // Phase 030 (W5) — the tool sections previously listed here
@@ -161,8 +165,10 @@ class _ProfileView extends StatelessWidget {
 
                 // ── Sign out (destructive, visually separated) ─────────────
                 const SizedBox(height: AppSpacing.sm),
-                _SignOutButton(
-                  onSignOut: () {
+                StaggeredListItem(
+                  index: 2,
+                  child: _SignOutButton(
+                    onSignOut: () {
                     // Dispatch logout first so the AuthBloc transitions to
                     // Unauthenticated before we leave the page. Then pop the
                     // pushed /profile route off the stack manually — relying on
@@ -172,6 +178,7 @@ class _ProfileView extends StatelessWidget {
                     context.read<AuthBloc>().add(const LogoutRequested());
                     context.go(AppRoutes.home);
                   },
+                  ),
                 ),
               ],
             ),
@@ -635,15 +642,16 @@ class _ProfileSwitchRow extends StatelessWidget {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
 
-    return Material(
-      type: MaterialType.transparency,
-      child: InkWell(
-        onTap: () => onChanged(!value),
-        child: Padding(
-          padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
-          child: Row(
-            children: [
-              _RowIcon(icon: icon, tint: colors.primary),
+    return PressScale(
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: () => onChanged(!value),
+          child: Padding(
+            padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+            child: Row(
+              children: [
+                _RowIcon(icon: icon, tint: colors.primary),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
@@ -671,6 +679,7 @@ class _ProfileSwitchRow extends StatelessWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }
@@ -752,43 +761,6 @@ class _SignOutButton extends StatelessWidget {
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-// ── Null-profile error state ───────────────────────────────────────────────────
-
-class _NullProfileState extends StatelessWidget {
-  const _NullProfileState({required this.message, required this.onRetry});
-
-  final String message;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final colors = AppColors.of(context);
-    final styles = AppTextStyles.of(context);
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              message,
-              style: styles.bodyLarge.copyWith(color: colors.error),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            AppButton.filledPrimary(
-              label: l10n.errorRetryAction,
-              onPressed: onRetry,
-            ),
-          ],
         ),
       ),
     );
