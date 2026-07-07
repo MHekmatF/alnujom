@@ -18,12 +18,13 @@ import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
-import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/press_scale.dart';
+import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/inquiry.dart';
 import '../../domain/entities/inquiry_status.dart';
 import '../bloc/inquiry_inbox_bloc.dart';
+import '../widgets/inbox_skeleton.dart';
 import '../widgets/inbox_status_badge.dart';
 import '../widgets/inquiry_message_snippet.dart';
 
@@ -148,7 +149,7 @@ class _InboxBody extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return switch (state) {
-      InquiryInboxLoading() => const _InboxSkeleton(),
+      InquiryInboxLoading() => const InboxSkeleton(),
       InquiryInboxError(:final failure) => ErrorState(
         title: failure.message,
         variant: ErrorStateVariant.network,
@@ -187,54 +188,14 @@ class _InboxBody extends StatelessWidget {
                       );
                     }
 
-                    return _InquiryRowTile(inquiry: inquiries[index]);
+                    return StaggeredListItem(
+                      index: index,
+                      child: _InquiryRowTile(inquiry: inquiries[index]),
+                    );
                   },
                 ),
               ),
     };
-  }
-}
-
-/// Loading skeleton — shimmer card rows shaped like the inbox tiles, matching
-/// the favorites-page skeleton idiom.
-class _InboxSkeleton extends StatelessWidget {
-  const _InboxSkeleton();
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsetsDirectional.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.sm,
-      ),
-      itemCount: 6,
-      itemBuilder: (_, __) => const Padding(
-        padding: EdgeInsetsDirectional.only(bottom: AppSpacing.md),
-        child: AppSurface(
-          padding: EdgeInsetsDirectional.all(AppSpacing.lg),
-          radius: AppRadii.lg,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              FractionallySizedBox(
-                alignment: AlignmentDirectional.centerStart,
-                widthFactor: 0.45,
-                child: LoadingState.heading(),
-              ),
-              SizedBox(height: AppSpacing.sm),
-              LoadingState.line(),
-              SizedBox(height: AppSpacing.sm),
-              FractionallySizedBox(
-                alignment: AlignmentDirectional.centerStart,
-                widthFactor: 0.7,
-                child: LoadingState.line(),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }
 
@@ -278,6 +239,20 @@ class _InquiryRowTile extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (inquiry.status == InquiryStatus.new_) ...[
+                    Container(
+                      width: AppSpacing.sm,
+                      height: AppSpacing.sm,
+                      margin: const EdgeInsetsDirectional.only(
+                        end: AppSpacing.sm,
+                        top: AppSpacing.xs,
+                      ),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: colors.primary,
+                      ),
+                    ),
+                  ],
                   Expanded(
                     child: Text(
                       displayName,
@@ -298,11 +273,25 @@ class _InquiryRowTile extends StatelessWidget {
                 style: styles.bodyMedium.copyWith(color: colors.textMuted),
               ),
               const SizedBox(height: AppSpacing.xxs),
-              Text(
-                inquiry.listingTitle,
-                style: styles.bodyMedium.copyWith(color: colors.textMuted),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              Row(
+                children: [
+                  Icon(
+                    LucideIcons.house,
+                    size: AppSpacing.md,
+                    color: colors.textMuted,
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  Expanded(
+                    child: Text(
+                      inquiry.listingTitle,
+                      style: styles.bodyMedium.copyWith(
+                        color: colors.textMuted,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: AppSpacing.xs),
               InquiryMessageSnippet(message: inquiry.message),
