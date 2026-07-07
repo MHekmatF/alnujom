@@ -48,16 +48,10 @@ import '../bloc/home_state.dart';
 import '../../../ads/domain/entities/ad_placement.dart';
 import '../../../ads/presentation/widgets/ad_slot.dart';
 import '../../../recently_viewed/presentation/bloc/recently_viewed_cubit.dart';
-import '../../../recently_viewed/presentation/widgets/recently_viewed_carousel.dart';
-import '../../../reels/presentation/widgets/reels_rail.dart';
 import '../../domain/entities/home_listing_card.dart';
 import '../widgets/featured_listings_carousel.dart';
 import '../widgets/hero_search_bar.dart';
 import '../widgets/home_categories_section.dart';
-import '../widgets/home_popular_searches.dart';
-import '../widgets/home_transaction_toggle.dart';
-import '../widgets/home_trust_strip.dart';
-import '../widgets/home_verified_rail.dart';
 
 /// Phase 13 — public HomePage per FR-013 + contracts/
 /// phase13-home-page-composition.md.
@@ -242,53 +236,19 @@ class _HomeViewState extends State<_HomeView> {
     return CustomScrollView(
       controller: _scrollController,
       slivers: [
-        // Phase 25 (Claude Design) — personalized welcome above the search bar.
+        // Design-matched Home (New design/ §02 "استكشف — الرئيسية") — lean &
+        // listings-first: greeting → search → categories → featured → the
+        // property feed. The popular-search chips, transaction toggle, verified/
+        // recently/reels rails, top ad and trust strip were folded OUT of the
+        // primary path so listings surface almost immediately (the design's
+        // "Listings visible immediately"). Those widgets stay in the codebase.
         const SliverToBoxAdapter(child: _HomeGreeting()),
         const SliverToBoxAdapter(child: HeroSearchBar()),
-        // ui-ux-pro-max Marketplace guidance — popular-search suggestion chips
-        // under the hero search bar (search-as-CTA, reduce friction).
-        const SliverToBoxAdapter(child: HomePopularSearches()),
-        // Phase 035 — the design's transaction-mode quick-filter (للبيع/للإيجار/
-        // يومي); each opens Search pre-filtered by that deal type.
-        const SliverToBoxAdapter(child: HomeTransactionToggle()),
-        // ui-ux-pro-max Home redesign — the visual "التصنيفات" section (icon
-        // tiles + عرض الكل) flows straight into the browse rails (the map tile
-        // moved to the dedicated Search+Map tab; content-priority: reach
-        // listings sooner).
         const SliverToBoxAdapter(child: HomeCategoriesSection()),
-        // Featured-listings treatment — the "✨ عقارات مميّزة" carousel. Hides
-        // itself entirely when there are no active featured listings.
         SliverToBoxAdapter(
           child: FeaturedListingsCarousel(currenciesByCode: currenciesByCode),
         ),
-        // Phase 035 (Home revamp) — horizontal rail of field-verified listings
-        // (trust signal). Hides itself when the feed has no verified listings.
-        SliverToBoxAdapter(
-          child: HomeVerifiedRail(
-            listings: state.listings,
-            currenciesByCode: currenciesByCode,
-          ),
-        ),
-        // Recently-viewed: the "شوهد مؤخراً / Recently viewed" row. Hides itself
-        // when empty.
-        const SliverToBoxAdapter(child: RecentlyViewedCarousel()),
-        // Phase 029 (Reels W4) — the "Reels" rail of vertical video posters.
-        // Self-wired; hides itself on empty / failure / loading.
-        const SliverToBoxAdapter(child: ReelsRail()),
-        // ui-ux-pro-max Home redesign — a single ad slot moved BELOW the browse
-        // rails (out of the hero→categories→featured flow) so it no longer
-        // breaks the primary browse path. Collapses to zero height when no ads.
-        const SliverToBoxAdapter(
-          child: AdSlot(placement: AdPlacement.homeTopBanner),
-        ),
-        // Phase 035 — trust strip reinforcing the safety positioning, above the
-        // main feed.
-        const SliverToBoxAdapter(child: HomeTrustStrip()),
-        // A breather that resets the vertical rhythm after the mid-page rails +
-        // trust strip, so the primary "Latest listings" browse feed reads as a
-        // deliberate section start (skill: content-priority / section framing).
-        // Presentation-only.
-        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xl)),
+        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
         SliverToBoxAdapter(
           child: _SectionHeader(
             title: l10n.home_latest_listings_header,
