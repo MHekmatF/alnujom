@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 import '../../settings/listing_view_mode.dart';
 import '../../theme/colors.dart';
@@ -38,16 +39,22 @@ class ListingViewModeSwitcher extends StatelessWidget {
                 child: _ModeRow(mode: m, selected: m == mode),
               ),
           ],
-          child: Container(
-            width: AppSpacing.xxl,
-            height: AppSpacing.xxl,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: colors.card,
-              borderRadius: appRadius(AppRadii.md),
-              border: Border.all(color: colors.primary, width: 1.5),
+          child: AppTapTarget(
+            child: Container(
+              width: AppSpacing.xxl,
+              height: AppSpacing.xxl,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: colors.card,
+                borderRadius: appRadius(AppRadii.md),
+                border: Border.all(color: colors.primary, width: 1.5),
+              ),
+              child: Icon(
+                _iconFor(mode),
+                size: AppSpacing.xl,
+                color: colors.primary,
+              ),
             ),
-            child: Icon(_iconFor(mode), size: AppSpacing.xl, color: colors.primary),
           ),
         );
       },
@@ -116,7 +123,7 @@ class _ModeRow extends StatelessWidget {
 }
 
 IconData _iconFor(ListingViewMode mode) => switch (mode) {
-  ListingViewMode.comfortable => Icons.view_agenda_outlined,
-  ListingViewMode.balanced => Icons.view_day_outlined,
-  ListingViewMode.compact => Icons.view_list_outlined,
+  ListingViewMode.comfortable => LucideIcons.gallery_vertical,
+  ListingViewMode.balanced => LucideIcons.rows_2,
+  ListingViewMode.compact => LucideIcons.list,
 };

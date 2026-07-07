@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 
 import '../../../features/favorites/presentation/widgets/favorite_heart_button.dart';
 import '../../../features/listing_form/domain/entities/listing.dart';
@@ -105,7 +106,11 @@ class DsListingCard extends StatelessWidget {
           foreground: colors.onSuccess,
           icon: LucideIcons.badge_check,
         ),
-      StatusPill(label: _purposeLabel(l10n), color: _purposeColor(colors)),
+      StatusPill(
+        label: _purposeLabel(l10n),
+        color: _purposeColor(colors),
+        foreground: _purposeForeground(context),
+      ),
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -124,13 +129,14 @@ class DsListingCard extends StatelessWidget {
     required double? height,
     required double? width,
     required double radius,
+    BorderRadiusGeometry? borderRadius,
   }) {
     final l10n = AppLocalizations.of(context)!;
     return SizedBox(
       height: height,
       width: width,
       child: ClipRRect(
-        borderRadius: appRadius(radius),
+        borderRadius: borderRadius ?? appRadius(radius),
         child: AppNetworkImage(
           url: data.imageUrl,
           heroTag: listingImageHeroTag(data.id),
@@ -152,8 +158,12 @@ class DsListingCard extends StatelessWidget {
   Widget _metaLine(BuildContext context, {int maxLines = 1}) {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    final numFmt = NumberFormat.decimalPattern(
+      Localizations.localeOf(context).toLanguageTag(),
+    );
     return Text(
-      _metaText(),
+      _metaText(l10n, numFmt),
       style: styles.labelMedium.copyWith(color: colors.textMuted),
       maxLines: maxLines,
       overflow: TextOverflow.ellipsis,
@@ -200,10 +210,10 @@ class DsListingCard extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsetsDirectional.fromSTEB(
-              AppSpacing.xs,
+              AppSpacing.md,
               AppSpacing.sm,
-              AppSpacing.xs,
-              AppSpacing.xs,
+              AppSpacing.md,
+              AppSpacing.md,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -357,6 +367,9 @@ class DsListingCard extends StatelessWidget {
                   height: null,
                   width: _compactThumbW,
                   radius: AppRadii.sm,
+                  borderRadius: const BorderRadiusDirectional.horizontal(
+                    start: Radius.circular(AppRadii.lg),
+                  ),
                 ),
                 PositionedDirectional(
                   top: AppSpacing.sm,
@@ -457,7 +470,11 @@ class DsListingCard extends StatelessWidget {
         icon: LucideIcons.badge_check,
       );
     }
-    return StatusPill(label: _purposeLabel(l10n), color: _purposeColor(colors));
+    return StatusPill(
+      label: _purposeLabel(l10n),
+      color: _purposeColor(colors),
+      foreground: _purposeForeground(context),
+    );
   }
 
   Widget _compactStatusLine(BuildContext context) {
@@ -508,12 +525,14 @@ class DsListingCard extends StatelessWidget {
 
   // ── Helpers ─────────────────────────────────────────────────────────────
 
-  String _metaText() {
+  String _metaText(AppLocalizations l10n, NumberFormat numFmt) {
     final parts = <String>[
       if (data.locationText.isNotEmpty && data.locationText != '—')
         data.locationText,
-      if (data.rooms != null) '${data.rooms} غرف',
-      if (data.areaSize != null) '${data.areaSize!.round()} م²',
+      if (data.rooms != null)
+        '${numFmt.format(data.rooms)} ${l10n.spec_rooms_label}',
+      if (data.areaSize != null)
+        '${numFmt.format(data.areaSize!.round())} ${l10n.spec_area_unit}',
       if (data.deedLabel != null) data.deedLabel!,
     ];
     return parts.isEmpty ? '—' : parts.join(' · ');
@@ -532,6 +551,16 @@ class DsListingCard extends StatelessWidget {
     ListingPurpose.dailyRent => colors.accent,
     ListingPurpose.investment => colors.tertiary,
   };
+
+  Color _purposeForeground(BuildContext context) {
+    final colors = AppColors.of(context);
+    return switch (data.purpose) {
+      ListingPurpose.sale => colors.onPrimary,
+      ListingPurpose.rent => colors.onSuccess,
+      ListingPurpose.dailyRent => colors.onAccent,
+      ListingPurpose.investment => Theme.of(context).colorScheme.onTertiary,
+    };
+  }
 }
 
 /// The compact-row 40×40 WhatsApp square. Opens the listing detail (where the
