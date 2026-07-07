@@ -127,6 +127,7 @@ final class AppTextStyles {
         lineHeight: 28,
         weight: FontWeight.w700,
         color: primary,
+        tabular: true,
       ),
       priceMedium: _style(
         family: displayFamily,
@@ -134,6 +135,7 @@ final class AppTextStyles {
         lineHeight: 22,
         weight: FontWeight.w700,
         color: primary,
+        tabular: true,
       ),
       // Currency suffix beside a price — smaller + lighter than the number so
       // the amount leads and the unit (ل.س / USD) supports it.
@@ -144,6 +146,7 @@ final class AppTextStyles {
         weight: FontWeight.w600,
         color: primary,
         letterSpacing: 0.2,
+        tabular: true,
       ),
     );
   }
@@ -169,6 +172,7 @@ final class AppTextStyles {
     required FontWeight weight,
     required Color color,
     double letterSpacing = 0,
+    bool tabular = false,
   }) {
     return TextStyle(
       fontFamily: family,
@@ -177,6 +181,12 @@ final class AppTextStyles {
       fontWeight: weight,
       letterSpacing: letterSpacing,
       color: color,
+      // ui-ux-pro-max `number-tabular` rule — tabular (monospaced) figures for
+      // prices so digits align in columns and don't cause layout shift when the
+      // amount changes.
+      fontFeatures: tabular
+          ? const [FontFeature.tabularFigures()]
+          : null,
     );
   }
 }
