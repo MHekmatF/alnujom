@@ -8,6 +8,7 @@
 // Token-only styling (no inline hex / TextStyle / numeric insets). RTL-safe;
 // numbers render in the active locale's numerals via intl NumberFormat.
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
@@ -22,7 +23,9 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_network_image.dart';
+import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/press_scale.dart';
+import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../core/widgets/status_pill.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../listing_form/domain/entities/listing.dart';
@@ -44,7 +47,6 @@ class ComparisonPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final colors = AppColors.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -67,7 +69,7 @@ class ComparisonPage extends StatelessWidget {
         builder: (context, state) {
           final items = state.items;
           if (items.length < ComparisonCubit.minToCompare) {
-            return _EmptyHint(l10n: l10n, colors: colors);
+            return _EmptyHint(l10n: l10n);
           }
           return _ComparisonBody(items: items, columnWidth: _columnWidth);
         },
@@ -81,34 +83,18 @@ class ComparisonPage extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _EmptyHint extends StatelessWidget {
-  const _EmptyHint({required this.l10n, required this.colors});
+  const _EmptyHint({required this.l10n});
 
   final AppLocalizations l10n;
-  final AppColors colors;
 
   @override
   Widget build(BuildContext context) {
-    final styles = AppTextStyles.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              LucideIcons.scale,
-              size: AppSpacing.xxxl,
-              color: colors.textMuted,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              l10n.comparisonEmptyHint,
-              textAlign: TextAlign.center,
-              style: styles.bodyMedium.copyWith(color: colors.textMuted),
-            ),
-          ],
-        ),
-      ),
+    // Shared empty-state chrome: soft tinted-circle glyph, headline + body
+    // hierarchy, and a reduced-motion-aware fade/slide entrance.
+    return EmptyState(
+      icon: LucideIcons.scale,
+      headline: l10n.comparisonEmptyTitle,
+      body: l10n.comparisonEmptyHint,
     );
   }
 }
@@ -182,12 +168,15 @@ class _ComparisonBody extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  for (final item in items)
-                    _PropertyColumn(
-                      item: item,
-                      rows: rows,
-                      rowDiffers: rowDiffers,
-                      width: columnWidth,
+                  for (var i = 0; i < items.length; i++)
+                    StaggeredListItem(
+                      index: i,
+                      child: _PropertyColumn(
+                        item: items[i],
+                        rows: rows,
+                        rowDiffers: rowDiffers,
+                        width: columnWidth,
+                      ),
                     ),
                 ],
               ),
@@ -230,7 +219,7 @@ class _LabelColumn extends StatelessWidget {
                 border: i == rows.length - 1
                     ? null
                     : BorderDirectional(
-                        bottom: BorderSide(color: colors.outline),
+                        bottom: BorderSide(color: colors.divider),
                       ),
               ),
               child: Row(
@@ -244,7 +233,9 @@ class _LabelColumn extends StatelessWidget {
                   const SizedBox(width: AppSpacing.xs),
                   Text(
                     rows[i].label,
-                    style: styles.labelMedium.copyWith(color: colors.textMuted),
+                    style: styles.labelMedium.copyWith(
+                      color: colors.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -381,15 +372,19 @@ class _PropertyColumn extends StatelessWidget {
                   border: i == rows.length - 1
                       ? null
                       : BorderDirectional(
-                          bottom: BorderSide(color: colors.outline),
+                          bottom: BorderSide(color: colors.divider),
                         ),
                 ),
                 child: Text(
                   rows[i].valueOf(item),
-                  // Values are bold; differing values pop in brand-blue.
+                  // Differing values pop in brand-blue AND a heavier weight so
+                  // the cue is perceivable without colour; matching values
+                  // recede to a lighter weight.
                   style: styles.bodyMedium.copyWith(
                     color: rowDiffers[i] ? colors.primary : colors.onSurface,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: rowDiffers[i]
+                        ? FontWeight.w700
+                        : FontWeight.w500,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -426,7 +421,10 @@ class _RemoveColumnButton extends StatelessWidget {
       shape: const CircleBorder(),
       child: InkWell(
         customBorder: const CircleBorder(),
-        onTap: () => context.read<ComparisonCubit>().removeById(item.id),
+        onTap: () {
+          HapticFeedback.selectionClick();
+          context.read<ComparisonCubit>().removeById(item.id);
+        },
         child: Tooltip(
           message: l10n.comparisonRemoveColumn,
           child: SizedBox(

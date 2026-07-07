@@ -10,6 +10,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 
@@ -65,11 +66,18 @@ class CompareToggleButton extends StatelessWidget {
                   shape: const CircleBorder(),
                   child: InkWell(
                     customBorder: const CircleBorder(),
-                    onTap: blocked ? null : () => cubit.toggle(item),
+                    onTap: blocked
+                        ? null
+                        : () {
+                            HapticFeedback.selectionClick();
+                            cubit.toggle(item);
+                          },
                     child: Tooltip(
                       message: selected
                           ? l10n.comparisonRemoveFromCompare
-                          : l10n.comparisonAddToCompare,
+                          : (blocked
+                                ? l10n.comparisonMaxReached
+                                : l10n.comparisonAddToCompare),
                       child: SizedBox(
                         width: kAppMinTouchTarget,
                         height: kAppMinTouchTarget,
