@@ -4,6 +4,7 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/app_button.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
@@ -22,14 +23,6 @@ class SuspendedPage extends StatelessWidget {
         backgroundColor: colors.surface,
         elevation: 0,
         title: Text(l10n.suspended_title),
-        actions: [
-          TextButton(
-            style: TextButton.styleFrom(foregroundColor: colors.primary),
-            onPressed: () =>
-                context.read<AuthBloc>().add(const LogoutRequested()),
-            child: Text(l10n.sign_out),
-          ),
-        ],
       ),
       body: SafeArea(
         child: Padding(
@@ -39,6 +32,12 @@ class SuspendedPage extends StatelessWidget {
             tone: AuthStatusTone.warning,
             title: l10n.suspended_title,
             message: l10n.suspended_body,
+            action: AppButton(
+              label: l10n.sign_out,
+              variant: AppButtonVariant.outlined,
+              onPressed: () =>
+                  context.read<AuthBloc>().add(const LogoutRequested()),
+            ),
           ),
         ),
       ),

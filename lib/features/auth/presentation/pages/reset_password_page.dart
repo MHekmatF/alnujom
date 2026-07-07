@@ -7,6 +7,7 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_logo.dart';
+import '../widgets/auth_status_message.dart';
 import '../widgets/auth_text_field.dart';
 import '../widgets/auth_trust_note.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -92,7 +93,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   vertical: AppSpacing.lg,
                 ),
                 child: _submitted
-                    ? _GenericResponse(
+                    ? AuthStatusMessage(
+                        icon: LucideIcons.mail_check,
                         message: l10n.reset_password_generic_response,
                       )
                     : Form(
@@ -153,43 +155,6 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           );
         },
       ),
-    );
-  }
-}
-
-class _GenericResponse extends StatelessWidget {
-  const _GenericResponse({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-    final styles = AppTextStyles.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        const SizedBox(height: AppSpacing.xxxl),
-        Container(
-          width: AppSpacing.xxxl + AppSpacing.lg,
-          height: AppSpacing.xxxl + AppSpacing.lg,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: colors.primaryContainer,
-          ),
-          child: Icon(
-            LucideIcons.mail_check,
-            size: AppSpacing.xxl,
-            color: colors.onPrimaryContainer,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        Text(
-          message,
-          style: styles.bodyLarge.copyWith(color: colors.onSurface),
-          textAlign: TextAlign.center,
-        ),
-      ],
     );
   }
 }
