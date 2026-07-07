@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../settings/lite_mode.dart';
 import '../theme/colors.dart';
 import '../theme/motion.dart';
+import '../theme/spacing.dart';
 import 'loading_state.dart';
 import 'reduce_motion.dart';
 
@@ -50,7 +51,7 @@ class AppNetworkImage extends StatelessWidget {
 
     Widget result;
     if (url == null || url!.isEmpty) {
-      result = _fallback(colors, Icons.image_not_supported_outlined);
+      result = _fallback(colors, Icons.apartment_rounded);
     } else {
       // Data saver (lite mode): when ON, decode/fetch at a reduced resolution so
       // less data is pulled over the wire and less memory is spent decoding.
@@ -73,7 +74,7 @@ class AppNetworkImage extends StatelessWidget {
               ? const LoadingState.card()
               : ColoredBox(color: colors.surfaceVariant),
           errorWidget: (context, _, __) =>
-              _fallback(colors, Icons.broken_image_outlined),
+              _fallback(colors, Icons.apartment_rounded),
         ),
       );
     }
@@ -87,8 +88,26 @@ class AppNetworkImage extends StatelessWidget {
     return result;
   }
 
-  Widget _fallback(AppColors colors, IconData icon) => ColoredBox(
-    color: colors.surfaceVariant,
-    child: Center(child: Icon(icon, color: colors.onSurfaceVariant)),
+  // A branded "no photo yet" placeholder — a soft tonal gradient with a muted
+  // property glyph — so photo-less or failed listings read as intentional
+  // rather than broken (real-estate feeds live on imagery).
+  Widget _fallback(AppColors colors, IconData icon) => DecoratedBox(
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        begin: AlignmentDirectional.topStart,
+        end: AlignmentDirectional.bottomEnd,
+        colors: [
+          colors.surfaceVariant,
+          Color.alphaBlend(colors.primary.withAlpha(0x1F), colors.card),
+        ],
+      ),
+    ),
+    child: Center(
+      child: Icon(
+        icon,
+        color: colors.primary.withAlpha(0x7A),
+        size: AppSpacing.xxxl,
+      ),
+    ),
   );
 }
