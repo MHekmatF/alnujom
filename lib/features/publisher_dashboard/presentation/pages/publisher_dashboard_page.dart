@@ -173,7 +173,7 @@ class _SummarySection extends StatelessWidget {
         return const _StatGridSkeleton();
       case PublisherDashboardSummaryError(:final message):
         return SizedBox(
-          height: 240,
+          height: AppSpacing.xxxl * 5,
           child: ErrorState(
             title: l10n.publisherDashboardSummaryError,
             message: message,

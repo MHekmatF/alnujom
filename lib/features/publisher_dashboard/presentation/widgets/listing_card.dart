@@ -109,7 +109,7 @@ class ListingCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             listing.title.isEmpty
-                                ? l10n.myListingsEmptyTitle
+                                ? l10n.myListingsUntitledListing
                                 : listing.title,
                             style: styles.titleMedium,
                             maxLines: 2,
@@ -152,11 +152,21 @@ class ListingCard extends StatelessWidget {
                       ),
                     ],
                     const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      _formatDate(listing.createdAt),
-                      style: styles.labelMedium.copyWith(
-                        color: colors.textMuted,
-                      ),
+                    Row(
+                      children: [
+                        Icon(
+                          LucideIcons.calendar,
+                          size: AppSpacing.md,
+                          color: colors.textMuted,
+                        ),
+                        const SizedBox(width: AppSpacing.xs),
+                        Text(
+                          _formatDate(listing.createdAt),
+                          style: styles.labelMedium.copyWith(
+                            color: colors.textMuted,
+                          ),
+                        ),
+                      ],
                     ),
                     _ExpirySection(listing: listing),
                     // Phase 031 (WS-B) — approved listings: surface either the

@@ -16,6 +16,8 @@ import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
+import '../../../../core/widgets/loading_state.dart';
+import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../currencies/domain/entities/currency.dart';
 import '../../../currencies/domain/usecases/list_currencies.dart';
@@ -108,14 +110,14 @@ class _MyListingsViewState extends State<_MyListingsView> {
                   child: BlocBuilder<MyListingsBloc, MyListingsState>(
                     builder: (context, state) {
                       if (state.loading && state.listings.isEmpty) {
-                        return const AppSpinner.page();
+                        return const _MyListingsSkeleton();
                       }
                       if (state.errorMessage != null &&
                           state.listings.isEmpty) {
                         return _ErrorBody(message: state.errorMessage!);
                       }
                       if (state.listings.isEmpty) {
-                        return const _EmptyBody();
+                        return _EmptyBody(statusFilter: state.statusFilter);
                       }
                       return _LocationLabelsHost(
                         listings: state.listings,
@@ -145,11 +147,14 @@ class _MyListingsViewState extends State<_MyListingsView> {
                                   );
                                 }
                                 final pl = state.listings[index];
-                                return _ListingRow(
-                                  publisherListing: pl,
-                                  currenciesByCode: currenciesByCode,
-                                  governoratesById: governorates,
-                                  areasById: areas,
+                                return StaggeredListItem(
+                                  index: index,
+                                  child: _ListingRow(
+                                    publisherListing: pl,
+                                    currenciesByCode: currenciesByCode,
+                                    governoratesById: governorates,
+                                    areasById: areas,
+                                  ),
                                 );
                               },
                             ),
@@ -290,17 +295,54 @@ class _LocationLabelsHostState extends State<_LocationLabelsHost> {
 }
 
 class _EmptyBody extends StatelessWidget {
-  const _EmptyBody();
+  const _EmptyBody({this.statusFilter});
+
+  final ListingStatus? statusFilter;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    if (statusFilter != null) {
+      // Filtered-empty: the publisher HAS listings, just none in this status.
+      // Offer an exit affordance that reuses the existing filter event.
+      return EmptyState(
+        icon: LucideIcons.funnel_x,
+        headline: l10n.myListingsFilteredEmptyTitle,
+        ctaLabel: l10n.myListingsFilteredEmptyShowAll,
+        onCtaPressed: () => context.read<MyListingsBloc>().add(
+          const ChangeStatusFilter(null),
+        ),
+      );
+    }
     return EmptyState(
       icon: LucideIcons.list_plus,
       headline: l10n.myListingsEmptyTitle,
+      body: l10n.myListingsEmptyBody,
       ctaLabel: l10n.myListingsEmptyCtaCreateFirst,
       onCtaPressed: () =>
           context.goNamed(AppRouteNames.publisherListingsCreate),
+    );
+  }
+}
+
+/// Card-shaped skeletons shown during the initial load (state.loading &&
+/// listings.isEmpty) — preserves the list layout instead of flashing a bare
+/// centred spinner, matching the sibling publisher dashboard's skeletons.
+class _MyListingsSkeleton extends StatelessWidget {
+  const _MyListingsSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: 5,
+      itemBuilder: (context, _) => const Padding(
+        padding: EdgeInsetsDirectional.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.sm,
+        ),
+        child: LoadingState.card(),
+      ),
     );
   }
 }
