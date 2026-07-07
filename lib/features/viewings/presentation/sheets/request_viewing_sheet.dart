@@ -257,6 +257,12 @@ class _PickerField extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(width: AppSpacing.sm),
+          Icon(
+            LucideIcons.chevron_down,
+            size: AppSpacing.xl,
+            color: colors.textMuted,
+          ),
         ],
       ),
     );

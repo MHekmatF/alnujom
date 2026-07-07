@@ -18,10 +18,11 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
+import '../../../../core/widgets/loading_state.dart';
+import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../crm/presentation/widgets/add_to_crm_action.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/viewing.dart';
@@ -52,7 +53,13 @@ class _ViewingsListPageState extends State<ViewingsListPage> {
           switch (state.status) {
             case ViewingsStatus.initial:
             case ViewingsStatus.loading:
-              return const AppSpinner.page();
+              return ListView.separated(
+                padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+                itemCount: 5,
+                separatorBuilder: (_, __) =>
+                    const SizedBox(height: AppSpacing.md),
+                itemBuilder: (_, __) => const LoadingState.card(),
+              );
             case ViewingsStatus.error:
               return ErrorState(
                 title: l10n.viewingsListErrorTitle,
@@ -66,13 +73,21 @@ class _ViewingsListPageState extends State<ViewingsListPage> {
                   body: l10n.viewingsListEmptyBody,
                 );
               }
-              return ListView.separated(
-                padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
-                itemCount: state.viewings.length,
-                separatorBuilder: (_, __) =>
-                    const SizedBox(height: AppSpacing.md),
-                itemBuilder: (context, i) =>
-                    _ViewingCard(viewing: state.viewings[i]),
+              final colors = AppColors.of(context);
+              return RefreshIndicator(
+                color: colors.primary,
+                onRefresh: () => context.read<ViewingsCubit>().load(),
+                child: ListView.separated(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+                  itemCount: state.viewings.length,
+                  separatorBuilder: (_, __) =>
+                      const SizedBox(height: AppSpacing.md),
+                  itemBuilder: (context, i) => StaggeredListItem(
+                    index: i,
+                    child: _ViewingCard(viewing: state.viewings[i]),
+                  ),
+                ),
               );
           }
         },
@@ -103,75 +118,79 @@ class _ViewingCard extends StatelessWidget {
 
     return AppSurface(
       padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Text(
-                  title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: styles.titleMedium,
+      child: Semantics(
+        container: true,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: styles.titleMedium,
+                  ),
                 ),
+                const SizedBox(width: AppSpacing.sm),
+                pill,
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Row(
+              children: [
+                Icon(
+                  LucideIcons.clock,
+                  size: AppSpacing.lg,
+                  color: colors.primary,
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Text(
+                    when,
+                    style: styles.bodyLarge.copyWith(
+                      color: colors.onSurface,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            if (viewing.note != null && viewing.note!.trim().isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                viewing.note!.trim(),
+                style: styles.bodyMedium.copyWith(color: colors.textMuted),
               ),
-              const SizedBox(width: AppSpacing.sm),
-              pill,
             ],
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Row(
-            children: [
-              Icon(
-                LucideIcons.clock,
-                size: AppSpacing.lg,
-                color: colors.onSurfaceVariant,
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: Text(
-                  when,
-                  style: styles.bodyMedium.copyWith(
-                    color: colors.onSurfaceVariant,
+            if (actions.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.md),
+              Row(children: _interspersed(actions)),
+            ],
+            // Phase 29 (F1) — publisher-only "Add to CRM": attach this viewing's
+            // requester as a lead (resolved + ownership-checked server-side).
+            if (viewing.amIPublisher) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: AppButton(
+                  label: l10n.crmAddToCrmAction,
+                  variant: AppButtonVariant.text,
+                  size: AppButtonSize.dense,
+                  icon: LucideIcons.handshake,
+                  onPressed: () => addToCrm(
+                    context,
+                    source: CrmLeadSource.viewing,
+                    sourceId: viewing.id,
+                    displayName: viewing.listingTitle,
                   ),
                 ),
               ),
             ],
-          ),
-          if (viewing.note != null && viewing.note!.trim().isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              viewing.note!.trim(),
-              style: styles.bodyMedium.copyWith(color: colors.textMuted),
-            ),
           ],
-          if (actions.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.md),
-            Row(children: _interspersed(actions)),
-          ],
-          // Phase 29 (F1) — publisher-only "Add to CRM": attach this viewing's
-          // requester as a lead (resolved + ownership-checked server-side).
-          if (viewing.amIPublisher) ...[
-            const SizedBox(height: AppSpacing.sm),
-            Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: AppButton(
-                label: l10n.crmAddToCrmAction,
-                variant: AppButtonVariant.text,
-                size: AppButtonSize.dense,
-                icon: LucideIcons.handshake,
-                onPressed: () => addToCrm(
-                  context,
-                  source: CrmLeadSource.viewing,
-                  sourceId: viewing.id,
-                  displayName: viewing.listingTitle,
-                ),
-              ),
-            ),
-          ],
-        ],
+        ),
       ),
     );
   }
@@ -248,7 +267,7 @@ class _ViewingCard extends StatelessWidget {
       ViewingStatus.declined => (l10n.viewingStatusDeclined, colors.error),
       ViewingStatus.cancelled => (
         l10n.viewingStatusCancelled,
-        colors.textMuted,
+        colors.onSurfaceVariant,
       ),
     };
     return _SoftStatusPill(label: label, color: color);
