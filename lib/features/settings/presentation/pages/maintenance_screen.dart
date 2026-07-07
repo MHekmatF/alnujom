@@ -8,6 +8,7 @@ import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
@@ -57,62 +58,74 @@ class MaintenanceScreen extends StatelessWidget {
             child: Center(
               child: SingleChildScrollView(
                 padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.build_outlined,
-                      size: AppSpacing.xxxl + AppSpacing.lg,
-                      color: colors.primary,
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    Text(
-                      l10n.maintenance_title,
-                      textAlign: TextAlign.center,
-                      style: styles.headlineMedium,
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    Text(
-                      message,
-                      textAlign: TextAlign.center,
-                      style: styles.bodyLarge.copyWith(
-                        color: colors.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xl),
-                    AppButton.filledPrimary(
-                      label: l10n.maintenance_retry,
-                      loading: isRetrying,
-                      onPressed: isRetrying
-                          ? null
-                          : () => context.read<AppSettingsCubit>().load(),
-                    ),
-                    if (showSignIn) ...[
-                      const SizedBox(height: AppSpacing.sm),
-                      AppButton(
-                        label: l10n.auth_required_sign_in_action,
-                        variant: AppButtonVariant.text,
-                        icon: Icons.login,
-                        onPressed: () => context.go(AppRoutes.login),
-                      ),
-                    ],
-                    if (contact.hasAny) ...[
-                      const SizedBox(height: AppSpacing.xl),
-                      Divider(color: colors.divider),
-                      const SizedBox(height: AppSpacing.sm),
-                      Align(
-                        alignment: AlignmentDirectional.centerStart,
-                        child: Text(
-                          l10n.maintenance_support_heading,
-                          style: styles.labelLarge.copyWith(
-                            color: colors.onSurfaceVariant,
-                          ),
+                child: StaggeredListItem(
+                  index: 0,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: AppSpacing.xxxl + AppSpacing.xl,
+                        height: AppSpacing.xxxl + AppSpacing.xl,
+                        alignment: AlignmentDirectional.center,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: colors.primary.withValues(alpha: 0.10),
+                        ),
+                        child: Icon(
+                          Icons.build_outlined,
+                          size: AppSpacing.xxxl,
+                          color: colors.primary,
                         ),
                       ),
-                      ..._buildContactRows(l10n, contact),
+                      const SizedBox(height: AppSpacing.lg),
+                      Text(
+                        l10n.maintenance_title,
+                        textAlign: TextAlign.center,
+                        style: styles.headlineMedium,
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      Text(
+                        message,
+                        textAlign: TextAlign.center,
+                        style: styles.bodyLarge.copyWith(
+                          color: colors.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xl),
+                      AppButton.filledPrimary(
+                        label: l10n.maintenance_retry,
+                        loading: isRetrying,
+                        onPressed: isRetrying
+                            ? null
+                            : () => context.read<AppSettingsCubit>().load(),
+                      ),
+                      if (showSignIn) ...[
+                        const SizedBox(height: AppSpacing.sm),
+                        AppButton(
+                          label: l10n.auth_required_sign_in_action,
+                          variant: AppButtonVariant.text,
+                          icon: Icons.login,
+                          onPressed: () => context.go(AppRoutes.login),
+                        ),
+                      ],
+                      if (contact.hasAny) ...[
+                        const SizedBox(height: AppSpacing.xl),
+                        Divider(color: colors.divider),
+                        const SizedBox(height: AppSpacing.sm),
+                        Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: Text(
+                            l10n.maintenance_support_heading,
+                            style: styles.labelLarge.copyWith(
+                              color: colors.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                        ..._buildContactRows(l10n, contact),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
             ),

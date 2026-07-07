@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -10,6 +11,8 @@ import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/empty_state.dart';
+import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/support_contact.dart';
 import '../bloc/app_settings_cubit.dart';
@@ -27,8 +30,6 @@ class AboutSupportPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final colors = AppColors.of(context);
-    final styles = AppTextStyles.of(context);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.about_title)),
@@ -41,19 +42,38 @@ class AboutSupportPage extends StatelessWidget {
           final hasAnything = contact.hasAny || hasLinks;
 
           if (!hasAnything) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-                child: Text(
-                  l10n.about_no_info,
-                  textAlign: TextAlign.center,
-                  style: styles.bodyMedium.copyWith(
-                    color: colors.onSurfaceVariant,
-                  ),
-                ),
-              ),
+            return EmptyState(
+              icon: Icons.support_agent,
+              headline: l10n.about_empty_title,
+              body: l10n.about_no_info,
             );
           }
+
+          final sections = <Widget>[
+            if (contact.hasAny)
+              _SettingsSection(
+                title: l10n.about_support_heading,
+                children: _buildContactRows(l10n, contact),
+              ),
+            if (hasLinks)
+              _SettingsSection(
+                title: l10n.about_legal_heading,
+                children: [
+                  if (_hasAny(settings.termsUrl))
+                    _LinkTile(
+                      icon: Icons.description_outlined,
+                      label: l10n.about_terms,
+                      url: settings.termsUrl!,
+                    ),
+                  if (_hasAny(settings.privacyUrl))
+                    _LinkTile(
+                      icon: Icons.privacy_tip_outlined,
+                      label: l10n.about_privacy,
+                      url: settings.privacyUrl!,
+                    ),
+                ],
+              ),
+          ];
 
           return ListView(
             padding: const EdgeInsetsDirectional.fromSTEB(
@@ -63,29 +83,8 @@ class AboutSupportPage extends StatelessWidget {
               AppSpacing.xxl,
             ),
             children: [
-              if (contact.hasAny)
-                _SettingsSection(
-                  title: l10n.about_support_heading,
-                  children: _buildContactRows(l10n, contact),
-                ),
-              if (hasLinks)
-                _SettingsSection(
-                  title: l10n.about_legal_heading,
-                  children: [
-                    if (_hasAny(settings.termsUrl))
-                      _LinkTile(
-                        icon: Icons.description_outlined,
-                        label: l10n.about_terms,
-                        url: settings.termsUrl!,
-                      ),
-                    if (_hasAny(settings.privacyUrl))
-                      _LinkTile(
-                        icon: Icons.privacy_tip_outlined,
-                        label: l10n.about_privacy,
-                        url: settings.privacyUrl!,
-                      ),
-                  ],
-                ),
+              for (var i = 0; i < sections.length; i++)
+                StaggeredListItem(index: i, child: sections[i]),
             ],
           );
         },
@@ -146,6 +145,7 @@ class _LinkTile extends StatelessWidget {
       type: MaterialType.transparency,
       child: InkWell(
         onTap: () {
+          HapticFeedback.selectionClick();
           final uri = Uri.tryParse(url);
           if (uri != null) {
             unawaited(launchUrl(uri, mode: LaunchMode.externalApplication));

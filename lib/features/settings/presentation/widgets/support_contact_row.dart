@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/theme/colors.dart';
@@ -77,9 +78,12 @@ class SupportContactRow extends StatelessWidget {
     return Material(
       type: MaterialType.transparency,
       child: InkWell(
-        onTap: () => unawaited(
-          launchUrl(launchUri, mode: LaunchMode.externalApplication),
-        ),
+        onTap: () {
+          HapticFeedback.selectionClick();
+          unawaited(
+            launchUrl(launchUri, mode: LaunchMode.externalApplication),
+          );
+        },
         child: Padding(
           padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
           child: Row(

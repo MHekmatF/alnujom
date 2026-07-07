@@ -10,6 +10,7 @@ import '../../../../../core/di/injection.dart';
 import '../../../../../core/theme/spacing.dart';
 import '../../../../../core/widgets/app_spinner.dart';
 import '../../../../../core/widgets/app_toast.dart';
+import '../../../../../core/widgets/error_state.dart';
 import '../../../../../features/currencies/domain/entities/currency.dart';
 import '../../../../../features/currencies/domain/usecases/list_currencies.dart';
 import '../../../../../features/listing_form/domain/entities/listing.dart';
@@ -58,18 +59,9 @@ class _AppSettingsEditorView extends StatelessWidget {
             return const AppSpinner.page();
           }
           if (state is AppSettingsEditorError) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(l10n.settingsEditorLoadError),
-                  const SizedBox(height: AppSpacing.md),
-                  FilledButton(
-                    onPressed: () => ctx.read<AppSettingsEditorCubit>().load(),
-                    child: Text(l10n.settingsEditorRetry),
-                  ),
-                ],
-              ),
+            return ErrorState(
+              title: l10n.settingsEditorLoadError,
+              onRetry: () => ctx.read<AppSettingsEditorCubit>().load(),
             );
           }
           if (state is AppSettingsEditorLoaded) {
