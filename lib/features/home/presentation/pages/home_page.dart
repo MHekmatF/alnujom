@@ -53,10 +53,11 @@ import '../../../reels/presentation/widgets/reels_rail.dart';
 import '../../domain/entities/home_listing_card.dart';
 import '../widgets/featured_listings_carousel.dart';
 import '../widgets/hero_search_bar.dart';
+import '../widgets/home_categories_section.dart';
 import '../widgets/home_transaction_toggle.dart';
 import '../widgets/home_trust_strip.dart';
+import '../widgets/home_verified_rail.dart';
 import '../widgets/map_entry_tile.dart';
-import '../widgets/property_type_shortcut_row.dart';
 
 /// Phase 13 — public HomePage per FR-013 + contracts/
 /// phase13-home-page-composition.md.
@@ -247,8 +248,10 @@ class _HomeViewState extends State<_HomeView> {
         // Phase 035 — the design's transaction-mode quick-filter (للبيع/للإيجار/
         // يومي); each opens Search pre-filtered by that deal type.
         const SliverToBoxAdapter(child: HomeTransactionToggle()),
-        const SliverToBoxAdapter(child: PropertyTypeShortcutRow()),
-        // Phase 15 G1: Map entry tile — R-91 slot (between shortcut row and header).
+        // Phase 035 (Home revamp) — the visual "التصنيفات" section (icon tiles +
+        // عرض الكل) replaces the thin chip row.
+        const SliverToBoxAdapter(child: HomeCategoriesSection()),
+        // Phase 15 G1: Map entry tile — R-91 slot.
         const SliverToBoxAdapter(child: MapEntryTile()),
         // Phase 21: home top banner (collapses to zero height when no ads — FR-012).
         const SliverToBoxAdapter(
@@ -259,6 +262,14 @@ class _HomeViewState extends State<_HomeView> {
         // there are no active featured listings or the load failed.
         SliverToBoxAdapter(
           child: FeaturedListingsCarousel(currenciesByCode: currenciesByCode),
+        ),
+        // Phase 035 (Home revamp) — horizontal rail of field-verified listings
+        // (trust signal). Hides itself when the feed has no verified listings.
+        SliverToBoxAdapter(
+          child: HomeVerifiedRail(
+            listings: state.listings,
+            currenciesByCode: currenciesByCode,
+          ),
         ),
         // Recently-viewed: the "شوهد مؤخراً / Recently viewed" row, just under the
         // featured carousel. Backed by local storage; hides itself when empty.

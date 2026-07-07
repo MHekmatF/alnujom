@@ -4609,6 +4609,24 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('detail_finish_label', (loc) => loc.detail_finish_label);
 
   @override
+  String get home_categories_title =>
+      _resolve('home_categories_title', (loc) => loc.home_categories_title);
+
+  @override
+  String get home_see_all =>
+      _resolve('home_see_all', (loc) => loc.home_see_all);
+
+  @override
+  String get home_verified_rail_title => _resolve(
+    'home_verified_rail_title',
+    (loc) => loc.home_verified_rail_title,
+  );
+
+  @override
+  String get ad_sponsored_label =>
+      _resolve('ad_sponsored_label', (loc) => loc.ad_sponsored_label);
+
+  @override
   String get home_greeting_welcome =>
       _resolve('home_greeting_welcome', (loc) => loc.home_greeting_welcome);
 
