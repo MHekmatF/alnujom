@@ -54,6 +54,7 @@ import '../../domain/entities/home_listing_card.dart';
 import '../widgets/featured_listings_carousel.dart';
 import '../widgets/hero_search_bar.dart';
 import '../widgets/home_categories_section.dart';
+import '../widgets/home_popular_searches.dart';
 import '../widgets/home_transaction_toggle.dart';
 import '../widgets/home_trust_strip.dart';
 import '../widgets/home_verified_rail.dart';
@@ -245,6 +246,9 @@ class _HomeViewState extends State<_HomeView> {
         // Phase 25 (Claude Design) — personalized welcome above the search bar.
         const SliverToBoxAdapter(child: _HomeGreeting()),
         const SliverToBoxAdapter(child: HeroSearchBar()),
+        // ui-ux-pro-max Marketplace guidance — popular-search suggestion chips
+        // under the hero search bar (search-as-CTA, reduce friction).
+        const SliverToBoxAdapter(child: HomePopularSearches()),
         // Phase 035 — the design's transaction-mode quick-filter (للبيع/للإيجار/
         // يومي); each opens Search pre-filtered by that deal type.
         const SliverToBoxAdapter(child: HomeTransactionToggle()),

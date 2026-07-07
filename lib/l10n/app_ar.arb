@@ -1604,6 +1604,8 @@
   "@home_verified_rail_title": { "description": "Phase 035 — Home verified-listings rail title." },
   "ad_sponsored_label": "إعلان",
   "@ad_sponsored_label": { "description": "Phase 035 — ad banner 'sponsored' disclosure label." },
+  "home_popular_searches": "شائع:",
+  "@home_popular_searches": { "description": "Phase 035 — label before the popular-search suggestion chips." },
   "nav_publish": "نشر",
   "@nav_publish": { "description": "Phase 25 — Bottom navigation bar label for the Publish (create listing) action; shown only to approved publishers." },
   "home_greeting_welcome": "أهلاً بك،",

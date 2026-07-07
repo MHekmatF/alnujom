@@ -1684,6 +1684,8 @@
   "@home_verified_rail_title": { "description": "Phase 035 — Home verified-listings rail title." },
   "ad_sponsored_label": "Sponsored",
   "@ad_sponsored_label": { "description": "Phase 035 — ad banner 'sponsored' disclosure label." },
+  "home_popular_searches": "Popular:",
+  "@home_popular_searches": { "description": "Phase 035 — label before the popular-search suggestion chips." },
   "home_greeting_welcome": "Welcome,",
   "@home_greeting_welcome": { "description": "Phase 25 — Home hero greeting for anonymous (signed-out) users." },
   "home_greeting_named": "Hi {name},",
