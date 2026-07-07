@@ -41,6 +41,7 @@ import '../bloc/listing_details_bloc.dart';
 import '../widgets/affordability_calculator.dart';
 import '../widgets/buyer_safety_banner.dart';
 import '../widgets/contact_block.dart';
+import '../widgets/listing_verification_section.dart';
 import '../widgets/listing_details_skeleton.dart';
 import '../widgets/listing_facts_block.dart';
 import '../widgets/market_insights_section.dart';
@@ -325,6 +326,15 @@ class _SuccessBodyState extends State<_SuccessBody> {
                       //     floor·type) right under the title/price. Collapses to
                       //     nothing when the listing has none of these.
                       ListingFactsBlock(listing: aggregate.listing),
+                      const SizedBox(height: AppSpacing.md),
+                      // Phase 035 Stage 3 — field-verification trust block +
+                      // deed (الطابو) / finish (الكسوة) tiles. Self-hides when
+                      // none of the data is present.
+                      ListingVerificationSection(
+                        isVerified: aggregate.isVerified,
+                        deedType: aggregate.deedType,
+                        finishLevel: aggregate.finishLevel,
+                      ),
                       const SizedBox(height: AppSpacing.md),
                       // 4c. Premium uplift — financing ("حاسبة التمويل")
                       //     calculator, expandable, seeded with the primary price.

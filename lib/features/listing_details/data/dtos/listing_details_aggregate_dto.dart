@@ -28,6 +28,10 @@ class ListingDetailsAggregateDto {
     required this.city,
     required this.area,
     required this.publisher,
+    this.deedType,
+    this.finishLevel,
+    this.verificationStatus,
+    this.verifiedAt,
   });
 
   final Listing listing;
@@ -37,6 +41,10 @@ class ListingDetailsAggregateDto {
   final Governorate governorate;
   final City city;
   final Area area;
+  final String? deedType;
+  final String? finishLevel;
+  final String? verificationStatus;
+  final DateTime? verifiedAt;
   final PublisherSummary publisher;
 
   /// Parses the raw PostgREST embedded-selects JSON per data-model.md §3.1.
@@ -161,6 +169,12 @@ class ListingDetailsAggregateDto {
       city: city,
       area: area,
       publisher: publisher,
+      deedType: json['deed_type'] as String?,
+      finishLevel: json['finish_level'] as String?,
+      verificationStatus: json['verification_status'] as String?,
+      verifiedAt: json['verified_at'] is String
+          ? DateTime.tryParse(json['verified_at'] as String)
+          : null,
     );
   }
 
@@ -174,6 +188,10 @@ class ListingDetailsAggregateDto {
       city: city,
       area: area,
       publisher: publisher,
+      deedType: deedType,
+      finishLevel: finishLevel,
+      verificationStatus: verificationStatus,
+      verifiedAt: verifiedAt,
     );
   }
 

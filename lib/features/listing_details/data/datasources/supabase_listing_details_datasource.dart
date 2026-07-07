@@ -32,6 +32,7 @@ class SupabaseListingDetailsDatasource {
       area_size, rooms, bathrooms, floor, published_at,
       publisher_user_id, agency_id, address_text, latitude, longitude,
       status, created_at, updated_at, expires_at,
+      deed_type, finish_level, verification_status, verified_at,
       listing_details(listing_id, description, amenities, year_built, furnished, parking, created_at, updated_at),
       listing_prices(id, listing_id, currency_code, amount, is_primary, created_at),
       listing_media(id, listing_id, storage_path, ordering, is_main, kind, external_url, watermarked, created_at, updated_at),
