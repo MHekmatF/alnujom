@@ -96,7 +96,7 @@ class SellerReviewsSection extends StatelessWidget {
                 Expanded(
                   child: Text(
                     l10n.reviews_section_title,
-                    style: styles.titleLarge.copyWith(color: colors.onSurface),
+                    style: styles.titleMedium.copyWith(color: colors.onSurface),
                   ),
                 ),
                 if (state.hasRating)

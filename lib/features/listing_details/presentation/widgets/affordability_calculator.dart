@@ -7,6 +7,7 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 
 import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/motion.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
@@ -129,7 +130,8 @@ class _AffordabilityCalculatorState extends State<AffordabilityCalculator> {
             ),
           ),
           AnimatedSize(
-            duration: const Duration(milliseconds: 200),
+            duration: AppMotion.base,
+            curve: AppMotion.curve,
             alignment: AlignmentDirectional.topStart,
             child: _expanded
                 ? _body(context, l10n, colors, styles)

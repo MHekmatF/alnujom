@@ -6,6 +6,7 @@ import '../../../../core/analytics/analytics_service.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/gradients.dart';
 import '../../../../core/theme/motion.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
@@ -262,6 +263,11 @@ class _SuccessBodyState extends State<_SuccessBody> {
             SliverAppBar(
               pinned: true,
               expandedHeight: galleryHeight,
+              backgroundColor: Colors.transparent,
+              surfaceTintColor: Colors.transparent,
+              scrolledUnderElevation: 0,
+              elevation: 0,
+              foregroundColor: AppColors.of(context).onPhoto,
               leading: const DeepLinkAwareBackButton(),
               flexibleSpace: FlexibleSpaceBar(
                 collapseMode: CollapseMode.parallax,
@@ -652,12 +658,30 @@ class _GalleryWithVideoTapState extends State<_GalleryWithVideoTap> {
       child: Stack(
         alignment: AlignmentDirectional.bottomCenter,
         children: [
-          GestureDetector(
-            // FR-027: only intercept taps when the visible item is a video.
-            onTap: videoMedia != null
-                ? () => ListingDetailsVideoLauncher.launch(videoMedia)
+          Semantics(
+            button: videoMedia != null,
+            label: videoMedia != null
+                ? AppLocalizations.of(context)!.mediaGalleryVideoPlay
                 : null,
-            child: gallery,
+            child: GestureDetector(
+              // FR-027: only intercept taps when the visible item is a video.
+              onTap: videoMedia != null
+                  ? () => ListingDetailsVideoLauncher.launch(videoMedia)
+                  : null,
+              child: gallery,
+            ),
+          ),
+          // DS a11y: a token top scrim so the over-photo affordances (back
+          // arrow + 360 pill) stay legible on bright imagery. IgnorePointer so
+          // the gallery/video taps below still register.
+          Positioned.fill(
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: AppGradients.of(context).photoTopScrim,
+                ),
+              ),
+            ),
           ),
           // Spec 026 — 360°/virtual-tour affordance. When the listing has any
           // panorama row, a frosted "360°" pill sits at the top-END (the
@@ -710,7 +734,15 @@ class _PanoramaPillButton extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: appRadius(AppRadii.pill),
-        child: GlassPill(label: l10n.panoramaTourBadge, icon: Icons.threesixty),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: kAppMinTouchTarget),
+          child: Center(
+            child: GlassPill(
+              label: l10n.panoramaTourBadge,
+              icon: Icons.threesixty,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -744,7 +776,7 @@ class _PurposeTagChip extends StatelessWidget {
           ),
           child: Text(
             listingPurposeLabel(purpose, l10n),
-            style: styles.labelMedium.copyWith(color: colors.primary),
+            style: styles.labelMedium.copyWith(color: colors.onPrimaryContainer),
           ),
         ),
       ),

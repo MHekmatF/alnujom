@@ -122,7 +122,7 @@ class _SimilarListingsBody extends StatelessWidget {
           ),
           child: Text(
             l10n.listing_details_similar_title,
-            style: styles.titleLarge.copyWith(color: colors.onSurface),
+            style: styles.titleMedium.copyWith(color: colors.onSurface),
           ),
         );
 

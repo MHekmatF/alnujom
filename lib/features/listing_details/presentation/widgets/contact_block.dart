@@ -81,9 +81,10 @@ class ContactBlock extends StatelessWidget {
           final colors = AppColors.of(context);
           final styles = AppTextStyles.of(context);
 
-          // Secondary actions (Call + Message + Viewing) share a row; each
-          // can shrink.
-          final secondary = <Widget>[
+          // Secondary actions. Call (when present) + Message share the top
+          // row; Request-a-viewing takes a full-width row beneath so its longer
+          // Arabic label never truncates. Same handlers / visibility as before.
+          final rowOneButtons = <Widget>[
             // Call CTA — visible only when phone is set (FR-001a).
             if (state.showCall)
               Expanded(
@@ -105,19 +106,17 @@ class ContactBlock extends StatelessWidget {
                 ),
               ),
             ),
-            // Request-a-viewing CTA — opens the date/time request sheet. The
-            // block is hidden for self-contact, so no self-viewing.
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => _onRequestViewingPressed(context),
-                icon: const Icon(Icons.calendar_today_outlined),
-                label: Text(
-                  l10n.viewingRequestAction,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ),
           ];
+          // Request-a-viewing CTA — full-width row beneath the pair; opens the
+          // date/time request sheet. Hidden for self-contact, so no self-viewing.
+          final viewingButton = OutlinedButton.icon(
+            onPressed: () => _onRequestViewingPressed(context),
+            icon: const Icon(Icons.calendar_today_outlined),
+            label: Text(
+              l10n.viewingRequestAction,
+              overflow: TextOverflow.ellipsis,
+            ),
+          );
 
           // WhatsApp CTA — Phase 28: promoted to the MOST prominent contact
           // action — a full-width brand-green button with a localized
@@ -162,13 +161,12 @@ class ContactBlock extends StatelessWidget {
             children: [
               const SellerTrustSummary(),
               if (whatsappCta != null) whatsappCta,
-              if (whatsappCta != null &&
-                  (primary != null || secondary.isNotEmpty))
-                const SizedBox(height: AppSpacing.sm),
+              if (whatsappCta != null) const SizedBox(height: AppSpacing.sm),
               if (primary != null) primary,
-              if (primary != null && secondary.isNotEmpty)
-                const SizedBox(height: AppSpacing.sm),
-              if (secondary.isNotEmpty) Row(children: _interspersed(secondary)),
+              if (primary != null) const SizedBox(height: AppSpacing.sm),
+              Row(children: _interspersed(rowOneButtons)),
+              const SizedBox(height: AppSpacing.sm),
+              SizedBox(width: double.infinity, child: viewingButton),
             ],
           );
 
@@ -183,7 +181,7 @@ class ContactBlock extends StatelessWidget {
                 Text(
                   l10n.contact_section_title,
                   style: styles.titleMedium.copyWith(
-                    color: colors.onSurfaceVariant,
+                    color: colors.onSurface,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.sm),
@@ -204,7 +202,7 @@ class ContactBlock extends StatelessWidget {
               Text(
                 l10n.contact_section_title,
                 style: styles.titleMedium.copyWith(
-                  color: colors.onSurfaceVariant,
+                  color: colors.onSurface,
                 ),
               ),
               const SizedBox(height: AppSpacing.sm),

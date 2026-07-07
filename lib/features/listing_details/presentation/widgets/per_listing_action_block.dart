@@ -154,7 +154,7 @@ class _ActionButton extends StatelessWidget {
     return Expanded(
       child: OutlinedButton.icon(
         onPressed: onPressed,
-        icon: Icon(icon, size: 20),
+        icon: Icon(icon, size: AppSpacing.xl),
         label: Text(
           label,
           style: theme.textTheme.labelMedium,
