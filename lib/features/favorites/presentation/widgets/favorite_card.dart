@@ -119,14 +119,14 @@ class FavoriteCard extends StatelessWidget {
                               Icon(
                                 LucideIcons.map_pin,
                                 size: AppSpacing.lg,
-                                color: colors.textMuted,
+                                color: colors.onSurfaceVariant,
                               ),
                               const SizedBox(width: AppSpacing.xs),
                               Expanded(
                                 child: Text(
                                   location,
                                   style: styles.bodyMedium.copyWith(
-                                    color: colors.textMuted,
+                                    color: colors.onSurfaceVariant,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
