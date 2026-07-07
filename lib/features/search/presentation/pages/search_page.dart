@@ -39,6 +39,7 @@ import '../../../../core/widgets/segmented_control.dart' as seg;
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
+import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/main_bottom_nav.dart';
 import '../../../../core/widgets/publish_fab.dart';
@@ -319,6 +320,7 @@ class _SearchInputRow extends StatelessWidget {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       builder: (_) => SearchFilterSheet(
         initialFilters: filters,
         onApply: (f) => bloc.add(SearchFiltersApplied(filters: f)),
@@ -404,9 +406,11 @@ class _DisplayModeBar extends StatelessWidget {
           return const SizedBox.shrink();
         }
         return Padding(
-          padding: const EdgeInsetsDirectional.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.xs,
+          padding: const EdgeInsetsDirectional.only(
+            start: AppSpacing.lg,
+            end: AppSpacing.sm,
+            top: AppSpacing.xs,
+            bottom: AppSpacing.xs,
           ),
           child: Row(
             children: [
@@ -591,10 +595,14 @@ class _SortAndFiltersRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     return Padding(
-      padding: const EdgeInsetsDirectional.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.xs,
+      padding: const EdgeInsetsDirectional.only(
+        start: AppSpacing.lg,
+        end: AppSpacing.sm,
+        top: AppSpacing.xs,
+        bottom: AppSpacing.xs,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -606,12 +614,12 @@ class _SortAndFiltersRow extends StatelessWidget {
                 Flexible(
                   child: Text(
                     l10n.search_sort_label,
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: styles.labelMedium.copyWith(color: colors.textMuted),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: AppSpacing.xs),
                 const Flexible(child: InlineSortControl()),
               ],
             ),
@@ -767,15 +775,14 @@ class _ActiveFilterChips extends StatelessWidget {
 /// A filter-strip pill. Selected (an active filter dimension) = solid primary
 /// fill + onPrimary bold text + a trailing ✕ to clear that dimension.
 /// Unselected (the "clear all" action) = card fill + 1px outline + onSurface
-/// text. Height 38, pill radius — matches the design-system chip strip.
+/// text. Pill radius, a 48dp minimum touch target — matches the design-system
+/// chip strip.
 class _FilterPill extends StatelessWidget {
   const _FilterPill({
     required this.label,
     required this.selected,
     required this.onTap,
   });
-
-  static const double _height = 38;
 
   final String label;
   final bool selected;
@@ -786,30 +793,35 @@ class _FilterPill extends StatelessWidget {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
     final fg = selected ? colors.onPrimary : colors.onSurface;
-    return Material(
-      color: selected ? colors.primary : colors.card,
-      borderRadius: appRadius(AppRadii.pill),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Container(
-          height: _height,
-          padding: const EdgeInsetsDirectional.symmetric(
-            horizontal: AppSpacing.md,
-          ),
-          decoration: BoxDecoration(
-            borderRadius: appRadius(AppRadii.pill),
-            border: selected ? null : Border.all(color: colors.outline),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(label, style: styles.labelLarge.copyWith(color: fg)),
-              if (selected) ...[
-                const SizedBox(width: AppSpacing.xs),
-                Icon(Icons.close, size: AppSpacing.lg, color: fg),
+    return Semantics(
+      button: true,
+      selected: selected,
+      child: Material(
+        color: selected ? colors.primary : colors.card,
+        borderRadius: appRadius(AppRadii.pill),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Container(
+            constraints: const BoxConstraints(minHeight: kAppMinTouchTarget),
+            alignment: AlignmentDirectional.center,
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: AppSpacing.md,
+            ),
+            decoration: BoxDecoration(
+              borderRadius: appRadius(AppRadii.pill),
+              border: selected ? null : Border.all(color: colors.outline),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(label, style: styles.labelLarge.copyWith(color: fg)),
+                if (selected) ...[
+                  const SizedBox(width: AppSpacing.xs),
+                  Icon(Icons.close, size: AppSpacing.lg, color: fg),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),
@@ -869,16 +881,17 @@ class _ResultsArea extends StatelessWidget {
         // skeleton into results (or empty/error), but list→list during
         // pagination is the same type, so it updates in place without a fade.
         final child = switch (state.status) {
-          SearchStatus.initial => Center(child: Text(l10n.search_placeholder)),
+          SearchStatus.initial => const _SearchSkeleton(),
           SearchStatus.loading =>
             state.results.isEmpty
                 ? const _SearchSkeleton()
                 : _ResultsListView(state: state),
           SearchStatus.failure =>
             state.results.isEmpty
-                ? _ErrorView(
+                ? ErrorState(
+                    title: l10n.search_error_title,
                     message: l10n.search_error_message,
-                    retryLabel: l10n.search_error_retry,
+                    variant: ErrorStateVariant.network,
                     onRetry: () => context.read<SearchBloc>().add(
                       const SearchRefreshRequested(),
                     ),
@@ -899,35 +912,6 @@ class _ResultsArea extends StatelessWidget {
   }
 }
 
-class _ErrorView extends StatelessWidget {
-  const _ErrorView({
-    required this.message,
-    required this.retryLabel,
-    required this.onRetry,
-  });
-
-  final String message;
-  final String retryLabel;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(message, textAlign: TextAlign.center),
-            const SizedBox(height: 8),
-            TextButton(onPressed: onRetry, child: Text(retryLabel)),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _EmptyView extends StatelessWidget {
   const _EmptyView({required this.state});
 
@@ -936,6 +920,8 @@ class _EmptyView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
@@ -947,24 +933,26 @@ class _EmptyView extends StatelessWidget {
               height: AppSpacing.xxxl + AppSpacing.lg,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Theme.of(
-                  context,
-                ).colorScheme.primary.withValues(alpha: 0.10),
+                color: colors.primary.withValues(alpha: 0.10),
               ),
               child: Icon(
                 Icons.search_off,
                 size: AppSpacing.xxl,
-                color: Theme.of(context).colorScheme.primary,
+                color: colors.primary,
               ),
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
               l10n.search_empty_title,
-              style: Theme.of(context).textTheme.titleLarge,
+              style: styles.titleLarge,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.xs),
-            Text(l10n.search_empty_subtitle, textAlign: TextAlign.center),
+            Text(
+              l10n.search_empty_subtitle,
+              style: styles.bodyMedium.copyWith(color: colors.textMuted),
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: AppSpacing.sm),
             TextButton(
               onPressed: () => context.read<SearchBloc>().add(
@@ -1024,17 +1012,23 @@ class _ResultsListView extends StatelessWidget {
         }
         final offsetIndex = index - adTrail;
         if (showArabicHint && offsetIndex == 0) {
+          final colors = AppColors.of(context);
+          final styles = AppTextStyles.of(context);
           return Container(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             padding: const EdgeInsetsDirectional.symmetric(
               horizontal: AppSpacing.lg,
               vertical: AppSpacing.sm,
             ),
             margin: const EdgeInsetsDirectional.only(bottom: AppSpacing.sm),
+            decoration: BoxDecoration(
+              color: colors.surfaceVariant,
+              borderRadius: appRadius(AppRadii.md),
+            ),
             child: Text(
               l10n.search_arabic_hint(
                 _suggestionFromQuery(state.filters.query!),
               ),
+              style: styles.bodyMedium.copyWith(color: colors.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
           );
@@ -1099,23 +1093,35 @@ class _SearchFeedCard extends StatelessWidget {
   }
 }
 
-/// Shimmer placeholder rows (132dp, matching [SearchResultCard]) shown while the
-/// first search page loads.
+/// Shimmer placeholder rows shown while the first search page loads. Mode-aware
+/// so the skeleton height approximates the [DsListingCard] the feed will render
+/// (tall photo card in comfortable/balanced, dense row in compact) instead of a
+/// fixed block that jumps size on the skeleton→results swap.
 class _SearchSkeleton extends StatelessWidget {
   const _SearchSkeleton();
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: const EdgeInsetsDirectional.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
-      ),
-      itemCount: 6,
-      itemBuilder: (_, __) => const Padding(
-        padding: EdgeInsetsDirectional.only(bottom: AppSpacing.sm),
-        child: SizedBox(height: 132, child: LoadingState.card()),
-      ),
+    return ValueListenableBuilder<ListingViewMode>(
+      valueListenable: ListingViewModePref.notifier,
+      builder: (context, mode, _) {
+        final height = switch (mode) {
+          ListingViewMode.comfortable => 300.0,
+          ListingViewMode.balanced => 272.0,
+          ListingViewMode.compact => 128.0,
+        };
+        return ListView.builder(
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
+          itemCount: 6,
+          itemBuilder: (_, __) => Padding(
+            padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.sm),
+            child: SizedBox(height: height, child: const LoadingState.card()),
+          ),
+        );
+      },
     );
   }
 }
