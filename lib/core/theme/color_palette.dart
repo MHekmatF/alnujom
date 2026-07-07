@@ -93,7 +93,7 @@ final class ModernPalette extends ColorPalette {
   // (fails contrast) — only as a fill behind dark ink or a badge tint. WCAG AA.
   @override
   AppPaletteTokens get _lightTokens => const AppPaletteTokens(
-    primary: Color(0xFF1F4FE6),
+    primary: Color(0xFF2456E6),
     onPrimary: Color(0xFFFFFFFF),
     primaryContainer: Color(0xFFDCE6FB),
     onPrimaryContainer: Color(0xFF11317A),
@@ -105,19 +105,19 @@ final class ModernPalette extends ColorPalette {
     tertiary: Color(0xFFC2A14D),
     success: Color(0xFF2E9E6B),
     warning: Color(0xFFC98318),
-    // Phase 035 — align to the design-system swatches (exact-value nudges).
+    // Phase 035 — blue+grey "cool slate": cooler grey surfaces so white cards
+    // lift; blue stays the sparing accent (not a fill on chips/tiles).
     error: Color(0xFFD64545),
-    surface: Color(0xFFF5F7FA),
-    surfaceVariant: Color(0xFFE9EDF3),
+    surface: Color(0xFFE7ECF2),
+    surfaceVariant: Color(0xFFDFE6EF),
     card: Color(0xFFFFFFFF),
-    outline: Color(0xFFE4E9F0),
-    outlineStrong: Color(0xFFCBD5E1),
-    onSurface: Color(0xFF0B182B),
-    onSurfaceVariant: Color(0xFF5B6B80),
-    // Slate muted (#64748B ≈ 4.6:1 on #F5F7FA), clearly lighter than
-    // onSurfaceVariant (#475569 ≈ 7:1) so the timestamp/location/placeholder
-    // hierarchy holds.
-    textMuted: Color(0xFF64748B),
+    outline: Color(0xFFD3DBE6),
+    outlineStrong: Color(0xFFBECAD9),
+    onSurface: Color(0xFF0E1726),
+    onSurfaceVariant: Color(0xFF5E6B7D),
+    // Muted slate — lighter than onSurfaceVariant so the timestamp/location/
+    // placeholder hierarchy holds on the cool-slate surface.
+    textMuted: Color(0xFF7C8A9D),
     verified: Color(0xFF1F7A4D),
     verifiedContainer: Color(0xFFDCF0E5),
     onError: Color(0xFFFFFFFF),
@@ -137,11 +137,11 @@ final class ModernPalette extends ColorPalette {
   // a warm gold featured accent, coral favorites, green/WhatsApp trust. WCAG AA.
   @override
   AppPaletteTokens get _darkTokens => const AppPaletteTokens(
-    // Phase 035 — align the dark surfaces to the design's navy (#0B182B) and
-    // deepen the azure primary a touch to match the DS swatch.
-    primary: Color(0xFF4D7CFF),
-    onPrimary: Color(0xFF06122B),
-    primaryContainer: Color(0xFF16315F),
+    // Phase 035 — blue+grey "cool slate" dark: lifted navy-charcoal surfaces so
+    // cards separate off the background; brighter azure as the sparing accent.
+    primary: Color(0xFF5B8CFF),
+    onPrimary: Color(0xFF08122B),
+    primaryContainer: Color(0xFF1B2C52),
     onPrimaryContainer: Color(0xFFCFE0FF),
     accent: Color(0xFFFF8E72),
     onAccent: Color(0xFF3A1207),
@@ -152,11 +152,11 @@ final class ModernPalette extends ColorPalette {
     success: Color(0xFF4CB587),
     warning: Color(0xFFE2B25A),
     error: Color(0xFFF0706E),
-    surface: Color(0xFF0B182B),
-    surfaceVariant: Color(0xFF13233B),
-    card: Color(0xFF13233B),
-    outline: Color(0xFF22344E),
-    outlineStrong: Color(0xFF38446A),
+    surface: Color(0xFF0E1522),
+    surfaceVariant: Color(0xFF1E293B),
+    card: Color(0xFF182233),
+    outline: Color(0xFF28344C),
+    outlineStrong: Color(0xFF3A4760),
     onSurface: Color(0xFFEAF0FB),
     onSurfaceVariant: Color(0xFF8FA0B5),
     textMuted: Color(0xFF8694AC),

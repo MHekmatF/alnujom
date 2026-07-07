@@ -112,8 +112,11 @@ class _CategoryTile extends StatelessWidget {
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: colors.primaryContainer,
+                  // Blue+grey: grey tile, blue glyph — blue reads as a sparing
+                  // accent instead of a fill.
+                  color: colors.surfaceVariant,
                   borderRadius: appRadius(AppRadii.lg),
+                  border: Border.all(color: colors.outline),
                 ),
                 child: Icon(
                   _icon(type),
