@@ -14,6 +14,7 @@
 // RTL-correct via directional geometry throughout.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
@@ -66,6 +67,7 @@ class _AssistantViewState extends State<_AssistantView> {
   void _onSend() {
     final text = _composer.text;
     if (text.trim().isEmpty) return;
+    HapticFeedback.selectionClick();
     context.read<AssistantCubit>().send(text);
     _composer.clear();
   }
@@ -209,11 +211,16 @@ class _TypingBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const _AssistantBubble(
-      child: SizedBox(
-        width: AppSpacing.xxl,
-        height: AppSpacing.lg,
-        child: AppSpinner(size: AppSpacing.lg),
+    final l10n = AppLocalizations.of(context)!;
+    return Semantics(
+      label: l10n.assistantTyping,
+      container: true,
+      child: const _AssistantBubble(
+        child: SizedBox(
+          width: AppSpacing.xxl,
+          height: AppSpacing.lg,
+          child: AppSpinner(size: AppSpacing.lg),
+        ),
       ),
     );
   }
@@ -414,29 +421,56 @@ class _QuickReplies extends StatelessWidget {
         horizontal: AppSpacing.lg,
         vertical: AppSpacing.xs,
       ),
-      child: Align(
-        alignment: AlignmentDirectional.centerStart,
-        child: Wrap(
-          spacing: AppSpacing.xs,
-          runSpacing: AppSpacing.xs,
-          children: [
-            for (final suggestion in suggestions)
-              AppSurface(
-                onTap: () => onTap(suggestion),
-                color: colors.card,
-                borderColor: colors.outlineStrong,
-                radius: AppRadii.pill,
-                padding: const EdgeInsetsDirectional.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: AppSpacing.xs,
-                ),
-                child: Text(
-                  suggestion,
-                  style: styles.labelLarge.copyWith(color: colors.primary),
-                ),
-              ),
-          ],
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Lead-in: signals the chips below are tappable example prompts and
+          // separates them from the display-only fragment chips.
+          Padding(
+            padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.xs),
+            child: Text(
+              l10n.assistantTrySuggestions,
+              style: styles.labelMedium.copyWith(color: colors.textMuted),
+            ),
+          ),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: Wrap(
+              spacing: AppSpacing.xs,
+              runSpacing: AppSpacing.xs,
+              children: [
+                for (final suggestion in suggestions)
+                  AppSurface(
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      onTap(suggestion);
+                    },
+                    color: colors.card,
+                    borderColor: colors.outlineStrong,
+                    radius: AppRadii.pill,
+                    padding: const EdgeInsetsDirectional.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.sm,
+                    ),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        minHeight: AppSpacing.xxl,
+                      ),
+                      child: Center(
+                        widthFactor: 1,
+                        child: Text(
+                          suggestion,
+                          style: styles.labelLarge.copyWith(
+                            color: colors.primary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -541,10 +575,18 @@ class _Composer extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
-            IconButton.filled(
-              onPressed: onSend,
-              icon: const Icon(LucideIcons.send),
-              tooltip: l10n.chatComposerSend,
+            // Disabled when the field is empty — reflects the cubit's existing
+            // no-op on empty input so an empty tap is no longer a dead press.
+            ValueListenableBuilder<TextEditingValue>(
+              valueListenable: controller,
+              builder: (context, value, _) {
+                final canSend = value.text.trim().isNotEmpty;
+                return IconButton.filled(
+                  onPressed: canSend ? onSend : null,
+                  icon: const Icon(LucideIcons.send),
+                  tooltip: l10n.chatComposerSend,
+                );
+              },
             ),
           ],
         ),

@@ -21,6 +21,7 @@ import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
+import '../../../../core/widgets/press_scale.dart';
 import '../../../crm/presentation/widgets/add_to_crm_action.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/message.dart';
@@ -157,6 +158,7 @@ class _MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
     final locale = Localizations.localeOf(context).toString();
@@ -166,6 +168,11 @@ class _MessageBubble extends StatelessWidget {
     // surface with a hairline outline (the DS received-bubble treatment).
     final bubbleColor = mine ? colors.primary : colors.card;
     final textColor = mine ? colors.onPrimary : colors.onSurface;
+    // Muted footer ink: on-primary at 0.7 over the brand bubble, the dedicated
+    // muted token over the incoming card surface.
+    final footerColor = mine
+        ? textColor.withValues(alpha: 0.7)
+        : colors.onSurfaceVariant;
     final time = DateFormat.jm(locale).format(message.createdAt.toLocal());
 
     // Asymmetric "tail": the corner on the sender's side is tightened so the
@@ -222,18 +229,21 @@ class _MessageBubble extends StatelessWidget {
                     children: [
                       Text(
                         time,
-                        style: styles.labelMedium.copyWith(
-                          color: textColor.withValues(alpha: 0.7),
-                        ),
+                        style: styles.labelMedium.copyWith(color: footerColor),
                       ),
                       if (mine) ...[
                         const SizedBox(width: AppSpacing.xs),
-                        Icon(
-                          message.readAt != null
-                              ? Icons.done_all
-                              : Icons.done,
-                          size: AppSpacing.md,
-                          color: textColor.withValues(alpha: 0.7),
+                        Semantics(
+                          label: message.readAt != null
+                              ? l10n.chatMessageRead
+                              : l10n.chatMessageSent,
+                          child: Icon(
+                            message.readAt != null
+                                ? Icons.done_all
+                                : Icons.done,
+                            size: AppSpacing.lg,
+                            color: footerColor,
+                          ),
                         ),
                       ],
                     ],
@@ -274,7 +284,7 @@ class _Composer extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: colors.surface,
-          border: BorderDirectional(top: BorderSide(color: colors.outline)),
+          border: BorderDirectional(top: BorderSide(color: colors.divider)),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
@@ -291,7 +301,7 @@ class _Composer extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsetsDirectional.symmetric(
                     horizontal: AppSpacing.md,
-                    vertical: AppSpacing.xs,
+                    vertical: AppSpacing.sm,
                   ),
                   child: TextField(
                     controller: controller,
@@ -321,22 +331,47 @@ class _Composer extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
-            // Circular brand-blue send button.
-            Material(
-              color: colors.primary,
-              shape: const CircleBorder(),
-              clipBehavior: Clip.antiAlias,
-              child: InkWell(
-                onTap: onSend,
-                child: Tooltip(
-                  message: l10n.chatComposerSend,
-                  child: SizedBox(
-                    width: kAppMinTouchTarget,
-                    height: kAppMinTouchTarget,
-                    child: Icon(Icons.send, color: colors.onPrimary),
+            // Circular send button — brand-blue + tactile press only when the
+            // field has text; otherwise a muted, non-tappable surface. The
+            // empty-send path was already a guarded no-op, so this merely
+            // reflects the existing state visually.
+            ValueListenableBuilder<TextEditingValue>(
+              valueListenable: controller,
+              builder: (context, value, _) {
+                final canSend = value.text.trim().isNotEmpty;
+                return PressScale(
+                  enabled: canSend,
+                  child: Material(
+                    color: canSend ? colors.primary : colors.surfaceVariant,
+                    shape: const CircleBorder(),
+                    clipBehavior: Clip.antiAlias,
+                    child: InkWell(
+                      onTap: canSend ? onSend : null,
+                      child: Tooltip(
+                        message: l10n.chatComposerSend,
+                        child: SizedBox(
+                          width: kAppMinTouchTarget,
+                          height: kAppMinTouchTarget,
+                          // Icons.send doesn't auto-mirror; flip it under RTL so
+                          // it points toward the outgoing (end) edge.
+                          child: Transform.scale(
+                            scaleX:
+                                Directionality.of(context) == TextDirection.rtl
+                                ? -1
+                                : 1,
+                            child: Icon(
+                              Icons.send,
+                              color: canSend
+                                  ? colors.onPrimary
+                                  : colors.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
           ],
         ),

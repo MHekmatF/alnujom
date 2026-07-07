@@ -16,12 +16,13 @@ import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_nav_drawer.dart';
 import '../../../../core/widgets/app_network_image.dart';
-import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
+import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/main_bottom_nav.dart';
 import '../../../../core/widgets/press_scale.dart';
 import '../../../../core/widgets/publish_fab.dart';
+import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/conversation.dart';
 import '../bloc/chat_thread_cubit.dart';
@@ -58,7 +59,16 @@ class _ConversationsListPageState extends State<ConversationsListPage> {
           switch (state.status) {
             case ConversationsStatus.initial:
             case ConversationsStatus.loading:
-              return const AppSpinner.page();
+              return ListView.separated(
+                padding: const EdgeInsetsDirectional.symmetric(
+                  horizontal: AppSpacing.lg,
+                  vertical: AppSpacing.sm,
+                ),
+                itemCount: 6,
+                separatorBuilder: (_, __) =>
+                    const SizedBox(height: AppSpacing.sm),
+                itemBuilder: (_, __) => const _ConversationSkeleton(),
+              );
             case ConversationsStatus.error:
               return ErrorState(
                 title: l10n.chatConversationsErrorTitle,
@@ -80,8 +90,12 @@ class _ConversationsListPageState extends State<ConversationsListPage> {
                 itemCount: state.conversations.length,
                 separatorBuilder: (_, __) =>
                     const SizedBox(height: AppSpacing.sm),
-                itemBuilder: (context, i) =>
-                    _ConversationTile(conversation: state.conversations[i]),
+                itemBuilder: (context, i) => StaggeredListItem(
+                  index: i,
+                  child: _ConversationTile(
+                    conversation: state.conversations[i],
+                  ),
+                ),
               );
           }
         },
@@ -180,6 +194,47 @@ class _ConversationTile extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Skeleton placeholder shaped like a [_ConversationTile] (avatar block + two
+/// shimmer lines) — shown while the conversation list loads so the layout is
+/// previewed instead of a bare spinner.
+class _ConversationSkeleton extends StatelessWidget {
+  const _ConversationSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return const AppSurface(
+      radius: AppRadii.lg,
+      elevated: true,
+      padding: EdgeInsetsDirectional.all(AppSpacing.md),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: AppSpacing.xxxl,
+            height: AppSpacing.xxxl,
+            child: LoadingState.card(),
+          ),
+          SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                LoadingState.line(),
+                SizedBox(height: AppSpacing.sm),
+                FractionallySizedBox(
+                  alignment: AlignmentDirectional.centerStart,
+                  widthFactor: 0.5,
+                  child: LoadingState.line(),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
