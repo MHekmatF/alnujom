@@ -18,6 +18,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/elevation.dart';
 import '../../../../core/theme/typography.dart';
 
 class ExactMarkerPin extends StatelessWidget {
@@ -96,18 +97,15 @@ class ClusterBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
+    final elevation = AppElevation.of(context);
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: colors.primary,
         border: Border.all(color: colors.onPrimary, width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: colors.scrim.withValues(alpha: 0.3),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        // DS token lift so the badge reads as the same floating family as the
+        // map controls/popover (replaces a one-off inline BoxShadow).
+        boxShadow: elevation.level1,
       ),
       alignment: Alignment.center,
       child: Text(
