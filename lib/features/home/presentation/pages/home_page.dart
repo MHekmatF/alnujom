@@ -58,7 +58,6 @@ import '../widgets/home_popular_searches.dart';
 import '../widgets/home_transaction_toggle.dart';
 import '../widgets/home_trust_strip.dart';
 import '../widgets/home_verified_rail.dart';
-import '../widgets/map_entry_tile.dart';
 
 /// Phase 13 — public HomePage per FR-013 + contracts/
 /// phase13-home-page-composition.md.
@@ -252,18 +251,13 @@ class _HomeViewState extends State<_HomeView> {
         // Phase 035 — the design's transaction-mode quick-filter (للبيع/للإيجار/
         // يومي); each opens Search pre-filtered by that deal type.
         const SliverToBoxAdapter(child: HomeTransactionToggle()),
-        // Phase 035 (Home revamp) — the visual "التصنيفات" section (icon tiles +
-        // عرض الكل) replaces the thin chip row.
+        // ui-ux-pro-max Home redesign — the visual "التصنيفات" section (icon
+        // tiles + عرض الكل) flows straight into the browse rails (the map tile
+        // moved to the dedicated Search+Map tab; content-priority: reach
+        // listings sooner).
         const SliverToBoxAdapter(child: HomeCategoriesSection()),
-        // Phase 15 G1: Map entry tile — R-91 slot.
-        const SliverToBoxAdapter(child: MapEntryTile()),
-        // Phase 21: home top banner (collapses to zero height when no ads — FR-012).
-        const SliverToBoxAdapter(
-          child: AdSlot(placement: AdPlacement.homeTopBanner),
-        ),
-        // Featured-listings treatment — the "✨ عقارات مميّزة" carousel sits at the
-        // TOP of the feed (above the regular list). Hides itself entirely when
-        // there are no active featured listings or the load failed.
+        // Featured-listings treatment — the "✨ عقارات مميّزة" carousel. Hides
+        // itself entirely when there are no active featured listings.
         SliverToBoxAdapter(
           child: FeaturedListingsCarousel(currenciesByCode: currenciesByCode),
         ),
@@ -275,13 +269,18 @@ class _HomeViewState extends State<_HomeView> {
             currenciesByCode: currenciesByCode,
           ),
         ),
-        // Recently-viewed: the "شوهد مؤخراً / Recently viewed" row, just under the
-        // featured carousel. Backed by local storage; hides itself when empty.
+        // Recently-viewed: the "شوهد مؤخراً / Recently viewed" row. Hides itself
+        // when empty.
         const SliverToBoxAdapter(child: RecentlyViewedCarousel()),
         // Phase 029 (Reels W4) — the "Reels" rail of vertical video posters.
-        // Self-wired (hosts its own ReelsRailCubit) and hides itself entirely
-        // on empty / failure / loading, mirroring the FeaturedListingsCarousel.
+        // Self-wired; hides itself on empty / failure / loading.
         const SliverToBoxAdapter(child: ReelsRail()),
+        // ui-ux-pro-max Home redesign — a single ad slot moved BELOW the browse
+        // rails (out of the hero→categories→featured flow) so it no longer
+        // breaks the primary browse path. Collapses to zero height when no ads.
+        const SliverToBoxAdapter(
+          child: AdSlot(placement: AdPlacement.homeTopBanner),
+        ),
         // Phase 035 — trust strip reinforcing the safety positioning, above the
         // main feed.
         const SliverToBoxAdapter(child: HomeTrustStrip()),
