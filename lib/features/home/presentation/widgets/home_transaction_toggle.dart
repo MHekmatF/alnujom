@@ -97,16 +97,23 @@ class _Segment extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsetsDirectional.symmetric(
-              vertical: AppSpacing.sm,
-            ),
-            child: Text(
-              label,
-              textAlign: TextAlign.center,
-              style: styles.labelLarge.copyWith(
-                color: emphasized ? colors.onPrimary : colors.onSurfaceVariant,
-                fontWeight: FontWeight.w800,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: kAppMinTouchTarget),
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsetsDirectional.symmetric(
+                  vertical: AppSpacing.sm,
+                ),
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: styles.labelLarge.copyWith(
+                    color: emphasized
+                        ? colors.onPrimary
+                        : colors.onSurfaceVariant,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
               ),
             ),
           ),

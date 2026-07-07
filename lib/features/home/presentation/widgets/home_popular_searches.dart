@@ -59,7 +59,7 @@ class HomePopularSearches extends StatelessWidget {
     return Padding(
       padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.xs),
       child: SizedBox(
-        height: MediaQuery.textScalerOf(context).scale(40),
+        height: MediaQuery.textScalerOf(context).scale(kAppMinTouchTarget),
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsetsDirectional.symmetric(

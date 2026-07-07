@@ -57,7 +57,9 @@ class HomeTrustStrip extends StatelessWidget {
                   const SizedBox(height: AppSpacing.xxs),
                   Text(
                     l10n.home_trust_sub,
-                    style: styles.labelMedium.copyWith(color: colors.textMuted),
+                    style: styles.labelMedium.copyWith(
+                      color: colors.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),

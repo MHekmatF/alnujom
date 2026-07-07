@@ -72,7 +72,11 @@ class HomeVerifiedRail extends StatelessWidget {
                   AppRoutes.search,
                   extra: const FilterState(verifiedOnly: true),
                 ),
-                child: Padding(
+                child: Container(
+                  constraints: const BoxConstraints(
+                    minHeight: kAppMinTouchTarget,
+                  ),
+                  alignment: AlignmentDirectional.center,
                   padding: const EdgeInsetsDirectional.symmetric(
                     horizontal: AppSpacing.sm,
                     vertical: AppSpacing.xxs,
@@ -90,7 +94,7 @@ class HomeVerifiedRail extends StatelessWidget {
           ),
         ),
         SizedBox(
-          height: 214,
+          height: MediaQuery.textScalerOf(context).scale(214),
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsetsDirectional.symmetric(

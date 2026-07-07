@@ -173,7 +173,9 @@ class _SeeAllButton extends StatelessWidget {
     return InkWell(
       borderRadius: appRadius(AppRadii.pill),
       onTap: onTap,
-      child: Padding(
+      child: Container(
+        constraints: const BoxConstraints(minHeight: kAppMinTouchTarget),
+        alignment: AlignmentDirectional.center,
         padding: const EdgeInsetsDirectional.symmetric(
           horizontal: AppSpacing.sm,
           vertical: AppSpacing.xxs,
@@ -189,7 +191,9 @@ class _SeeAllButton extends StatelessWidget {
               ),
             ),
             Icon(
-              Icons.chevron_left,
+              Directionality.of(context) == TextDirection.rtl
+                  ? Icons.chevron_left
+                  : Icons.chevron_right,
               size: AppSpacing.lg,
               color: colors.primary,
             ),

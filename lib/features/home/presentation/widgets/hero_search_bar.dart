@@ -23,7 +23,7 @@ class HeroSearchBar extends StatelessWidget {
   static const double _barHeight = 54;
 
   /// The trailing circular action buttons (filter + assistant).
-  static const double _actionSize = 40;
+  static const double _actionSize = kAppMinTouchTarget;
 
   @override
   Widget build(BuildContext context) {
@@ -84,12 +84,15 @@ class HeroSearchBar extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.sm),
           // Solid-primary circular filter button.
-          _RoundAction(
-            size: _actionSize,
-            background: colors.primary,
-            foreground: colors.onPrimary,
-            icon: Icons.tune,
-            onTap: () => context.go(AppRoutes.search),
+          Tooltip(
+            message: l10n.search_filters_button,
+            child: _RoundAction(
+              size: _actionSize,
+              background: colors.primary,
+              foreground: colors.onPrimary,
+              icon: Icons.tune,
+              onTap: () => context.go(AppRoutes.search),
+            ),
           ),
           const SizedBox(width: AppSpacing.sm),
           // Phase 28 (WS-6) — smart search assistant entry point.

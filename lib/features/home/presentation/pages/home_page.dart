@@ -191,7 +191,7 @@ class _HomeViewState extends State<_HomeView> {
         title: const BrandMark(withWordmark: true, size: 30),
         actions: const [
           // Phase 33 restyle — the notification bell moves down into the photo-
-          // forward header row (a 42px circular button); the bar keeps only the
+          // forward header row (a 48px circular button); the bar keeps only the
           // locale/theme toggles. Profile/sign-in is the Profile tab.
           LocaleToggleAction(),
           ThemeToggleAction(),
@@ -284,6 +284,11 @@ class _HomeViewState extends State<_HomeView> {
         // Phase 035 — trust strip reinforcing the safety positioning, above the
         // main feed.
         const SliverToBoxAdapter(child: HomeTrustStrip()),
+        // A breather that resets the vertical rhythm after the mid-page rails +
+        // trust strip, so the primary "Latest listings" browse feed reads as a
+        // deliberate section start (skill: content-priority / section framing).
+        // Presentation-only.
+        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xl)),
         SliverToBoxAdapter(
           child: _SectionHeader(
             title: l10n.home_latest_listings_header,
@@ -606,14 +611,14 @@ class _HomeGreeting extends StatelessWidget {
   }
 }
 
-/// A 46px circular avatar for the home header. Renders the user's avatar photo
+/// A 48px circular avatar for the home header. Renders the user's avatar photo
 /// when present, otherwise a neutral person glyph on a recessed surface.
 class _HomeAvatar extends StatelessWidget {
   const _HomeAvatar({required this.avatarUrl});
 
   final String? avatarUrl;
 
-  static const double _size = 46;
+  static const double _size = kAppMinTouchTarget;
 
   @override
   Widget build(BuildContext context) {
@@ -638,13 +643,13 @@ class _HomeAvatar extends StatelessWidget {
   }
 }
 
-/// A 42px circular notification bell for the home header — a bordered surface
+/// A 48px circular notification bell for the home header — a bordered surface
 /// chip with a small coral dot when there are unread notifications. Reuses the
 /// shared [NotificationBadgeCubit] count and routes to /notifications on tap.
 class _HomeHeaderBell extends StatelessWidget {
   const _HomeHeaderBell();
 
-  static const double _size = 42;
+  static const double _size = kAppMinTouchTarget;
 
   @override
   Widget build(BuildContext context) {
