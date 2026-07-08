@@ -540,24 +540,14 @@ class _HomeGreeting extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Small italic brand-accent greeting line.
+                      // Design #8 — a calm greeting line (the search bar carries
+                      // the "find your property" intent, so the big subtitle is
+                      // dropped for a quieter header).
                       Text(
                         greeting,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: styles.labelLarge.copyWith(
-                          color: colors.primary,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.xxs),
-                      // Bold ~22px subtitle line — the loudest line on first
-                      // paint.
-                      Text(
-                        l10n.home_greeting_subtitle,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: styles.headlineMedium,
+                        style: styles.titleLarge.copyWith(color: colors.primary),
                       ),
                     ],
                   ),
