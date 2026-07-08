@@ -4,19 +4,19 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/gradients.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/glass.dart';
 import '../../../../core/widgets/press_scale.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../listing_form/domain/entities/listing.dart';
 
-/// Phase 035 (Home revamp) — the "التصنيفات / Categories" section: a bold
-/// section header with a "عرض الكل" action (opens the full browse) over a
-/// horizontal strip of icon tiles. Each tile opens Search pre-filtered by that
-/// [PropertyType]. Replaces the thin chip row for a more prominent, scannable
-/// category browse.
+/// Design #8 "Glass / Depth" — the category filter chips row directly under the
+/// search bar: an "الكل" chip (indigo-gradient, selected) followed by frosted-
+/// glass type chips. Each opens Search pre-filtered by that [PropertyType].
 class HomeCategoriesSection extends StatelessWidget {
   const HomeCategoriesSection({super.key});
 
@@ -34,106 +34,33 @@ class HomeCategoriesSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final colors = AppColors.of(context);
-    final styles = AppTextStyles.of(context);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(
-            AppSpacing.lg,
-            AppSpacing.lg,
-            AppSpacing.lg,
-            AppSpacing.sm,
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.sm),
+      child: SizedBox(
+        height: MediaQuery.textScalerOf(context).scale(46),
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: AppSpacing.lg,
           ),
-          child: Row(
-            children: [
-              Container(
-                width: AppSpacing.xs,
-                height: AppSpacing.xl,
-                decoration: BoxDecoration(
-                  color: colors.primary,
-                  borderRadius: appRadius(AppRadii.pill),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Text(l10n.home_categories_title, style: styles.titleLarge),
-              ),
-              _SeeAllButton(
-                label: l10n.home_see_all,
+          itemCount: _types.length + 1,
+          separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
+          itemBuilder: (context, i) {
+            if (i == 0) {
+              return _Chip(
+                label: l10n.filterChipAll,
+                selected: true,
                 onTap: () => context.go(AppRoutes.search),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(
-          height: MediaQuery.textScalerOf(context).scale(96),
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsetsDirectional.symmetric(
-              horizontal: AppSpacing.lg,
-            ),
-            itemCount: _types.length,
-            separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.md),
-            itemBuilder: (context, i) => _CategoryTile(type: _types[i]),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _CategoryTile extends StatelessWidget {
-  const _CategoryTile({required this.type});
-
-  final PropertyType type;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final colors = AppColors.of(context);
-    final styles = AppTextStyles.of(context);
-
-    return PressScale(
-      child: InkWell(
-        borderRadius: appRadius(AppRadii.lg),
-        onTap: () {
-          HapticFeedback.selectionClick();
-          context.go(AppRoutes.search, extra: type);
-        },
-        child: SizedBox(
-          width: 68,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  // Blue+grey: grey tile, blue glyph — blue reads as a sparing
-                  // accent instead of a fill.
-                  color: colors.surfaceVariant,
-                  borderRadius: appRadius(AppRadii.lg),
-                  border: Border.all(color: colors.outline),
-                ),
-                child: Icon(
-                  _icon(type),
-                  color: colors.primary,
-                  size: AppSpacing.xl,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                _label(l10n, type),
-                style: styles.labelMedium.copyWith(color: colors.onSurface),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
+              );
+            }
+            final type = _types[i - 1];
+            return _Chip(
+              label: _label(l10n, type),
+              selected: false,
+              onTap: () => context.go(AppRoutes.search, extra: type),
+            );
+          },
         ),
       ),
     );
@@ -149,58 +76,72 @@ class _CategoryTile extends StatelessWidget {
     PropertyType.warehouse => l10n.propertyTypeWarehouse,
     PropertyType.other => l10n.propertyTypeOther,
   };
-
-  IconData _icon(PropertyType type) => switch (type) {
-    PropertyType.apartment => Icons.apartment,
-    PropertyType.villa => Icons.villa_outlined,
-    PropertyType.land => Icons.landscape_outlined,
-    PropertyType.shop => Icons.storefront_outlined,
-    PropertyType.office => Icons.business_center_outlined,
-    PropertyType.farm => Icons.agriculture_outlined,
-    PropertyType.warehouse => Icons.warehouse_outlined,
-    PropertyType.other => Icons.category_outlined,
-  };
 }
 
-/// A compact "عرض الكل / View all" text action used by Home section headers.
-class _SeeAllButton extends StatelessWidget {
-  const _SeeAllButton({required this.label, required this.onTap});
+class _Chip extends StatelessWidget {
+  const _Chip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
 
   final String label;
+  final bool selected;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
-    return InkWell(
-      borderRadius: appRadius(AppRadii.pill),
-      onTap: onTap,
-      child: Container(
-        constraints: const BoxConstraints(minHeight: kAppMinTouchTarget),
-        alignment: AlignmentDirectional.center,
+    final gradients = AppGradients.of(context);
+
+    final text = Text(
+      label,
+      style: styles.labelLarge.copyWith(
+        color: selected ? colors.onPrimary : colors.onSurface,
+        fontWeight: FontWeight.w800,
+      ),
+    );
+
+    final content = Center(
+      child: Padding(
         padding: const EdgeInsetsDirectional.symmetric(
-          horizontal: AppSpacing.sm,
-          vertical: AppSpacing.xxs,
+          horizontal: AppSpacing.lg,
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              label,
-              style: styles.labelLarge.copyWith(
-                color: colors.primary,
-                fontWeight: FontWeight.w700,
-              ),
+        child: text,
+      ),
+    );
+
+    void handleTap() {
+      HapticFeedback.selectionClick();
+      onTap();
+    }
+
+    if (selected) {
+      return PressScale(
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: appRadius(AppRadii.md),
+          clipBehavior: Clip.antiAlias,
+          child: Ink(
+            decoration: BoxDecoration(
+              gradient: gradients.primaryGradient,
+              borderRadius: appRadius(AppRadii.md),
             ),
-            Icon(
-              Directionality.of(context) == TextDirection.rtl
-                  ? Icons.chevron_left
-                  : Icons.chevron_right,
-              size: AppSpacing.lg,
-              color: colors.primary,
-            ),
-          ],
+            child: InkWell(onTap: handleTap, child: content),
+          ),
+        ),
+      );
+    }
+
+    return PressScale(
+      child: GlassPanel(
+        radius: AppRadii.md,
+        blur: 12,
+        tintOpacity: 0.78,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(onTap: handleTap, child: content),
         ),
       ),
     );
