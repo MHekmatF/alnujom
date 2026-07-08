@@ -9,11 +9,14 @@ import '../../features/auth/presentation/bloc/auth_state.dart';
 import '../../l10n/app_localizations.dart';
 import '../routing/app_router.dart';
 import '../theme/colors.dart';
+import '../theme/elevation.dart';
+import '../theme/gradients.dart';
 import '../theme/motion.dart';
 import '../theme/radii.dart';
 import '../theme/spacing.dart';
 import '../theme/typography.dart';
 import '_widget_support.dart';
+import 'glass.dart';
 import 'reduce_motion.dart';
 
 /// The primary destinations of the public app shell.
@@ -25,30 +28,21 @@ import 'reduce_motion.dart';
 /// [PublishFab] mounted on each tab host's `Scaffold.floatingActionButton`.
 enum MainTab { home, search, favorites, chat, profile, none }
 
-/// Phase 33 restyle — the persistent bottom navigation bar shared by the four
-/// primary surfaces (home / reels / favorites / profile).
-///
-/// A custom bar (not Material's [NavigationBar]) so it can match the design
-/// system: a 76px [AppColors.card] bar with a hairline top border, each tab a
-/// 23px icon over a 10.5px label, the active tab tinted [AppColors.primary]
-/// with a tiny pill indicator above it. Approved publishers get a prominent
-/// elevated rounded-square **Publish** action in the centre that floats above
-/// the bar and pushes the create-listing form — it never becomes a selected
-/// tab. Tab switches use `context.go` so each destination is a clean stack
-/// root; deep pages (listing details, agency, etc.) push full-screen over it.
+/// Design #8 "Glass / Depth" — a **floating frosted-glass** bottom bar: rounded,
+/// blurred, lifted off the page with a soft shadow. The active tab shows its
+/// icon inside an indigo-gradient rounded-square chip with an indigo label;
+/// inactive tabs are a muted icon + label. Tab switches use `context.go` so each
+/// destination is a clean stack root.
 class MainBottomNav extends StatelessWidget {
   const MainBottomNav({super.key, required this.current});
 
   /// The destination this bar is rendered under (drives the selected slot).
   final MainTab current;
 
-  /// The height of the bar's content (excluding the bottom safe-area inset).
-  static const double _barHeight = 76;
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final colors = AppColors.of(context);
+    final elevation = AppElevation.of(context);
     final reduce = reduceMotion(context);
 
     return BlocBuilder<AuthBloc, AuthState>(
@@ -61,9 +55,6 @@ class MainBottomNav extends StatelessWidget {
 
         final highlightNone = current == MainTab.none;
 
-        // Phase 035 — five equal tabs: Home · Search+Map · Saved · Messages ·
-        // Account. Messages + Account are auth-gated (anonymous taps route to
-        // sign-in). The publish action is now the floating [PublishFab].
         final slots = <Widget>[
           _NavTab(
             icon: Icons.home_outlined,
@@ -95,7 +86,6 @@ class MainBottomNav extends StatelessWidget {
             label: l10n.nav_messages,
             selected: !highlightNone && current == MainTab.chat,
             bounce: !reduce && current == MainTab.chat,
-            // Anonymous users tapping Messages are sent to sign-in.
             onTap: () =>
                 context.go(isSignedIn ? AppRoutes.chat : AppRoutes.login),
           ),
@@ -105,29 +95,37 @@ class MainBottomNav extends StatelessWidget {
             label: l10n.profile_title,
             selected: !highlightNone && current == MainTab.profile,
             bounce: !reduce && current == MainTab.profile,
-            // Anonymous users tapping Account are sent to sign-in instead of
-            // the (auth-only) profile screen.
             onTap: () =>
                 context.go(isSignedIn ? AppRoutes.profile : AppRoutes.login),
           ),
         ];
 
-        return DecoratedBox(
-          decoration: BoxDecoration(
-            color: colors.card,
-            border: BorderDirectional(
-              top: BorderSide(color: colors.outline),
-            ),
+        return Padding(
+          padding: const EdgeInsetsDirectional.only(
+            start: AppSpacing.lg,
+            end: AppSpacing.lg,
+            bottom: AppSpacing.sm,
           ),
           child: SafeArea(
             top: false,
-            child: SizedBox(
-              height: _barHeight,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  for (final slot in slots) Expanded(child: slot),
-                ],
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: appRadius(AppRadii.xl),
+                boxShadow: elevation.level2,
+              ),
+              child: GlassPanel(
+                radius: AppRadii.xl,
+                blur: 24,
+                tintOpacity: 0.82,
+                child: SizedBox(
+                  height: 64,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      for (final slot in slots) Expanded(child: slot),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -137,9 +135,8 @@ class MainBottomNav extends StatelessWidget {
   }
 }
 
-/// A single bottom-nav tab — a 23px icon over a 10.5px label, tinted
-/// [AppColors.primary] when selected (with a tiny pill indicator above it and
-/// a bolder label) and [AppColors.textMuted] otherwise.
+/// A single floating-glass nav tab — the active tab wraps its icon in an
+/// indigo-gradient chip; inactive tabs are a muted icon + label.
 class _NavTab extends StatelessWidget {
   const _NavTab({
     required this.icon,
@@ -157,32 +154,43 @@ class _NavTab extends StatelessWidget {
   final bool bounce;
   final VoidCallback onTap;
 
-  static const double _iconSize = 23;
+  static const double _iconSize = 22;
   static const double _labelSize = 10.5;
-  static const double _indicatorWidth = 16;
-  static const double _indicatorHeight = 3;
+  static const double _chipW = 46;
+  static const double _chipH = 32;
 
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
-    // Icon keeps the intentionally-quiet muted tint when inactive; the tiny
-    // 10.5px label uses a higher-contrast token so it clears the small-text
-    // 4.5:1 bar in both themes.
-    final iconColor = selected ? colors.primary : colors.textMuted;
-    final labelColor = selected ? colors.primary : colors.onSurfaceVariant;
+    final gradients = AppGradients.of(context);
 
-    Widget glyph = Icon(selected ? selectedIcon : icon, size: _iconSize);
+    Widget glyph = Icon(
+      selected ? selectedIcon : icon,
+      size: _iconSize,
+      color: selected ? colors.onPrimary : colors.textMuted,
+    );
     if (bounce) {
-      glyph = glyph
-          .animate()
-          .scaleXY(
-            begin: 0.8,
-            end: 1.0,
-            duration: AppMotion.slow,
-            curve: Curves.easeOutBack,
-          );
+      glyph = glyph.animate().scaleXY(
+        begin: 0.8,
+        end: 1.0,
+        duration: AppMotion.slow,
+        curve: Curves.easeOutBack,
+      );
     }
+
+    final iconSlot = selected
+        ? Container(
+            width: _chipW,
+            height: _chipH,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              gradient: gradients.primaryGradient,
+              borderRadius: appRadius(AppRadii.md),
+            ),
+            child: glyph,
+          )
+        : SizedBox(height: _chipH, child: Center(child: glyph));
 
     return Semantics(
       button: true,
@@ -190,6 +198,7 @@ class _NavTab extends StatelessWidget {
       label: label,
       excludeSemantics: true,
       child: InkWell(
+        borderRadius: appRadius(AppRadii.md),
         onTap: () {
           HapticFeedback.selectionClick();
           onTap();
@@ -198,21 +207,7 @@ class _NavTab extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Tiny pill indicator above the selected tab (transparent otherwise
-            // so the row never reflows between selected states).
-            Container(
-              width: _indicatorWidth,
-              height: _indicatorHeight,
-              decoration: BoxDecoration(
-                color: selected ? colors.primary : Colors.transparent,
-                borderRadius: appRadius(AppRadii.pill),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            IconTheme(
-              data: IconThemeData(color: iconColor, size: _iconSize),
-              child: glyph,
-            ),
+            iconSlot,
             const SizedBox(height: AppSpacing.xxs),
             Text(
               label,
@@ -220,8 +215,8 @@ class _NavTab extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: styles.labelMedium.copyWith(
                 fontSize: _labelSize,
-                color: labelColor,
-                fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                color: selected ? colors.primary : colors.onSurfaceVariant,
+                fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
               ),
             ),
           ],
@@ -230,4 +225,3 @@ class _NavTab extends StatelessWidget {
     );
   }
 }
-

@@ -4,33 +4,27 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
-import '../../../../core/theme/elevation.dart';
+import '../../../../core/theme/gradients.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/glass.dart';
 import '../../../../l10n/app_localizations.dart';
 
-/// Phase 14 — hero search bar; tapping navigates to SearchPage (SC-011).
-/// Phase 33 restyle — a clean 54px pill (surface fill, hairline outline, soft
-/// shadow) with a leading search glyph and placeholder, plus a solid-primary
-/// circular filter button at the trailing edge. The smart-assistant entry is
-/// preserved alongside it.
+/// Design #8 "Glass / Depth" — a frosted-glass search pill with a leading search
+/// glyph + placeholder, an indigo-gradient filter button, and a glass smart-
+/// assistant button. Tapping the pill opens Search with the keyboard focused.
 class HeroSearchBar extends StatelessWidget {
   const HeroSearchBar({super.key});
 
-  /// The pill / filter-button height — a comfortable, tappable bar.
-  static const double _barHeight = 54;
-
-  /// The trailing circular action buttons (filter + assistant).
-  static const double _actionSize = kAppMinTouchTarget;
+  static const double _barHeight = 56;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
-    final elevation = AppElevation.of(context);
 
     return Padding(
       padding: const EdgeInsetsDirectional.symmetric(
@@ -40,19 +34,13 @@ class HeroSearchBar extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: colors.surface,
-                borderRadius: appRadius(AppRadii.pill),
-                border: Border.all(color: colors.outline),
-                boxShadow: elevation.level1,
-              ),
+            child: GlassPanel(
+              radius: AppRadii.lg,
+              blur: 14,
+              tintOpacity: 0.80,
               child: Material(
                 color: Colors.transparent,
-                borderRadius: appRadius(AppRadii.pill),
                 child: InkWell(
-                  borderRadius: appRadius(AppRadii.pill),
-                  // Typing intent → open Search with the keyboard focused.
                   onTap: () => context.go('${AppRoutes.search}?focus=1'),
                   child: SizedBox(
                     height: _barHeight,
@@ -83,25 +71,19 @@ class HeroSearchBar extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
-          // Solid-primary circular filter button.
           Tooltip(
             message: l10n.search_filters_button,
-            child: _RoundAction(
-              size: _actionSize,
-              background: colors.primary,
-              foreground: colors.onPrimary,
+            child: _GradientAction(
+              size: _barHeight,
               icon: Icons.tune,
               onTap: () => context.go(AppRoutes.search),
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
-          // Phase 28 (WS-6) — smart search assistant entry point.
           Tooltip(
             message: l10n.assistantTitle,
-            child: _RoundAction(
-              size: _actionSize,
-              background: colors.primaryContainer,
-              foreground: colors.onPrimaryContainer,
+            child: _GlassAction(
+              size: _barHeight,
               icon: LucideIcons.sparkles,
               onTap: () => context.push(AppRoutes.assistant),
             ),
@@ -112,34 +94,72 @@ class HeroSearchBar extends StatelessWidget {
   }
 }
 
-/// A circular icon button used for the search bar's trailing actions.
-class _RoundAction extends StatelessWidget {
-  const _RoundAction({
+/// A rounded-square indigo-gradient action button (the filter entry).
+class _GradientAction extends StatelessWidget {
+  const _GradientAction({
     required this.size,
-    required this.background,
-    required this.foreground,
     required this.icon,
     required this.onTap,
   });
 
   final double size;
-  final Color background;
-  final Color foreground;
   final IconData icon;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final gradients = AppGradients.of(context);
     return Material(
-      color: background,
-      shape: const CircleBorder(),
+      color: Colors.transparent,
+      borderRadius: appRadius(AppRadii.lg),
       clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: SizedBox(
-          width: size,
-          height: size,
-          child: Icon(icon, size: AppSpacing.xl, color: foreground),
+      child: Ink(
+        decoration: BoxDecoration(
+          gradient: gradients.primaryGradient,
+          borderRadius: appRadius(AppRadii.lg),
+        ),
+        child: InkWell(
+          onTap: onTap,
+          child: SizedBox(
+            width: size,
+            height: size,
+            child: Icon(icon, size: AppSpacing.xl, color: colors.onPrimary),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A rounded-square frosted-glass action button (the assistant entry).
+class _GlassAction extends StatelessWidget {
+  const _GlassAction({
+    required this.size,
+    required this.icon,
+    required this.onTap,
+  });
+
+  final double size;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    return GlassPanel(
+      radius: AppRadii.lg,
+      blur: 14,
+      tintOpacity: 0.80,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          child: SizedBox(
+            width: size,
+            height: size,
+            child: Icon(icon, size: AppSpacing.xl, color: colors.primary),
+          ),
         ),
       ),
     );
