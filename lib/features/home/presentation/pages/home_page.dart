@@ -7,6 +7,7 @@ import '../../../../core/analytics/analytics_service.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/gradients.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
@@ -168,11 +169,21 @@ class _HomeViewState extends State<_HomeView> {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context);
 
-    return Scaffold(
+    return Container(
+      // Design #8 "Glass / Depth" — the soft indigo→lavender page wash the whole
+      // screen floats over; scaffold + app bar are transparent so it shows.
+      decoration: BoxDecoration(
+        gradient: AppGradients.of(context).screenBackground,
+      ),
+      child: Scaffold(
+      backgroundColor: Colors.transparent,
       // Phase 030 (W5) — app navigation drawer (opens from the start side =
       // RIGHT under RTL). Hosts the tool sections relocated off the Profile tab.
       drawer: const AppNavDrawer(),
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
         // Phase 030 (W5) — hamburger affordance opening the nav drawer. Wrapped
         // in a Builder so Scaffold.of(context) resolves the enclosing Scaffold.
         leading: Builder(
@@ -222,6 +233,7 @@ class _HomeViewState extends State<_HomeView> {
       // 5-tab bottom nav (publishers only; self-gates to nothing otherwise).
       bottomNavigationBar: const MainBottomNav(current: MainTab.home),
       floatingActionButton: const PublishFab(),
+      ),
     );
   }
 

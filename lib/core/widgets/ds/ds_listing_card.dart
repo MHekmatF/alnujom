@@ -16,21 +16,21 @@ import '../../theme/spacing.dart';
 import '../../theme/typography.dart';
 import '../_widget_support.dart';
 import '../app_network_image.dart';
+import '../glass.dart';
 import '../hero_tags.dart';
 import '../press_scale.dart';
-import '../property_specs.dart';
-import '../status_pill.dart';
 import 'ds_listing_card_data.dart';
 
-/// Phase 035 — the unified listing card used by every feed (Home, Search,
-/// Favorites, Recently-viewed). One widget, three densities driven by
-/// [ListingViewMode]; the operator-verification slots (verified badge,
-/// freshness, deed) render only when their [DsListingCardData] fields are
-/// present, so it degrades gracefully before the Stage-3 backend lands.
+/// Design #8 "Glass / Depth" — the unified listing card used by every feed
+/// (Home, Search, Favorites, Recently-viewed): a floating white card with a big
+/// photo (over-photo verified badge, glass heart, purpose pill), an Arabic
+/// title + location, a bold indigo price, an icon spec row, and a WhatsApp
+/// contact button. The [mode] is presentational-only for now (kept for API
+/// compatibility) — one premium look regardless of density.
 class DsListingCard extends StatelessWidget {
   const DsListingCard({
     required this.data,
-    this.mode = ListingViewMode.balanced,
+    this.mode = ListingViewMode.comfortable,
     this.onTap,
     super.key,
   });
@@ -42,18 +42,124 @@ class DsListingCard extends StatelessWidget {
   /// `context.go`). Search passes `context.push` here so its stack survives.
   final VoidCallback? onTap;
 
-  // Design-system image geometry (px), per view mode.
-  static const double _comfortableImageH = 210;
-  static const double _balancedImageH = 180;
-  static const double _compactThumbW = 110;
+  static const double _photoH = 214;
+  static const BorderRadiusDirectional _photoRadius =
+      BorderRadiusDirectional.vertical(top: Radius.circular(AppRadii.xl));
 
   @override
   Widget build(BuildContext context) {
-    return switch (mode) {
-      ListingViewMode.comfortable => _buildComfortable(context),
-      ListingViewMode.balanced => _buildBalanced(context),
-      ListingViewMode.compact => _buildCompact(context),
-    };
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    final elevation = AppElevation.of(context);
+    final gradients = AppGradients.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    final hasSpecs =
+        data.rooms != null || data.bathrooms != null || data.areaSize != null;
+
+    return PressScale(
+      child: Container(
+        decoration: BoxDecoration(
+          color: colors.card,
+          borderRadius: appRadius(AppRadii.xl),
+          border: Border.all(color: colors.outline),
+          boxShadow: elevation.level2,
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            onTap: () => _openDetail(context),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // ── Photo ─────────────────────────────────────────────────
+                SizedBox(
+                  height: _photoH,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      ClipRRect(
+                        borderRadius: _photoRadius,
+                        child: AppNetworkImage(
+                          url: data.imageUrl,
+                          heroTag: listingImageHeroTag(data.id),
+                          semanticLabel: l10n.image_unavailable,
+                        ),
+                      ),
+                      DecoratedBox(
+                        decoration:
+                            BoxDecoration(gradient: gradients.photoTopScrim),
+                      ),
+                      DecoratedBox(
+                        decoration:
+                            BoxDecoration(gradient: gradients.photoScrim),
+                      ),
+                      PositionedDirectional(
+                        top: AppSpacing.md,
+                        start: AppSpacing.md,
+                        end: AppSpacing.md,
+                        child: Row(
+                          children: [
+                            if (data.isVerified == true) _verifiedBadge(context),
+                            const Spacer(),
+                            FavoriteHeartButton(
+                              listingId: data.id,
+                              style: FavoriteHeartStyle.onImage,
+                            ),
+                          ],
+                        ),
+                      ),
+                      PositionedDirectional(
+                        bottom: AppSpacing.md,
+                        start: AppSpacing.md,
+                        child: _purposePill(context),
+                      ),
+                    ],
+                  ),
+                ),
+                // ── Body ──────────────────────────────────────────────────
+                Padding(
+                  padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  data.title.isEmpty ? '—' : data.title,
+                                  style: styles.titleMedium,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: AppSpacing.xs),
+                                _locationRow(context),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
+                          _priceLine(styles),
+                        ],
+                      ),
+                      if (hasSpecs) ...[
+                        const SizedBox(height: AppSpacing.md),
+                        _specsRow(context),
+                      ],
+                      const SizedBox(height: AppSpacing.md),
+                      _whatsappButton(context, l10n),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   void _openDetail(BuildContext context) {
@@ -64,447 +170,8 @@ class DsListingCard extends StatelessWidget {
     context.go(AppRoutes.listingDetailsFor(data.id));
   }
 
-  // ── Shared bits ────────────────────────────────────────────────────────
-
-  Widget _cardShell(BuildContext context, {required Widget child}) {
-    final colors = AppColors.of(context);
-    final elevation = AppElevation.of(context);
-    return PressScale(
-      child: Container(
-        decoration: BoxDecoration(
-          color: colors.card,
-          borderRadius: appRadius(AppRadii.lg),
-          border: Border.all(color: colors.outline),
-          boxShadow: elevation.level1,
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Material(
-          type: MaterialType.transparency,
-          child: InkWell(onTap: () => _openDetail(context), child: child),
-        ),
-      ),
-    );
-  }
-
-  /// The over-image badge cluster (leading edge): gold مميّز stacked over the
-  /// verified pill (when verified) over the transaction-mode pill.
-  Widget _imageBadges(BuildContext context, {bool small = false}) {
+  Widget _verifiedBadge(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final colors = AppColors.of(context);
-    final pills = <Widget>[
-      if (data.isFeatured)
-        StatusPill(
-          label: l10n.home_featured_badge,
-          color: colors.tertiary,
-          foreground: Theme.of(context).colorScheme.onTertiary,
-          icon: LucideIcons.star,
-        ),
-      if (data.isVerified == true)
-        StatusPill(
-          label: data.verifiedAgoText ?? l10n.detail_verified_badge,
-          color: colors.verified,
-          foreground: colors.onSuccess,
-          icon: LucideIcons.badge_check,
-        ),
-      StatusPill(
-        label: _purposeLabel(l10n),
-        color: _purposeColor(colors),
-        foreground: _purposeForeground(context),
-      ),
-    ];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        for (var i = 0; i < pills.length; i++) ...[
-          if (i > 0) SizedBox(height: small ? AppSpacing.xxs : AppSpacing.xs),
-          pills[i],
-        ],
-      ],
-    );
-  }
-
-  Widget _image(
-    BuildContext context, {
-    required double? height,
-    required double? width,
-    required double radius,
-    BorderRadiusGeometry? borderRadius,
-  }) {
-    final l10n = AppLocalizations.of(context)!;
-    return SizedBox(
-      height: height,
-      width: width,
-      child: ClipRRect(
-        borderRadius: borderRadius ?? appRadius(radius),
-        child: AppNetworkImage(
-          url: data.imageUrl,
-          heroTag: listingImageHeroTag(data.id),
-          semanticLabel: l10n.image_unavailable,
-        ),
-      ),
-    );
-  }
-
-  Widget _priceLine(AppTextStyles styles, {bool large = true}) => Text(
-    data.priceText,
-    textDirection: TextDirection.ltr,
-    textAlign: TextAlign.start,
-    maxLines: 1,
-    overflow: TextOverflow.ellipsis,
-    style: large ? styles.priceLarge : styles.priceMedium,
-  );
-
-  Widget _metaLine(BuildContext context, {int maxLines = 1}) {
-    final colors = AppColors.of(context);
-    final styles = AppTextStyles.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    final numFmt = NumberFormat.decimalPattern(
-      Localizations.localeOf(context).toLanguageTag(),
-    );
-    return Text(
-      _metaText(l10n, numFmt),
-      style: styles.labelMedium.copyWith(color: colors.textMuted),
-      maxLines: maxLines,
-      overflow: TextOverflow.ellipsis,
-    );
-  }
-
-  // ── Mode 1 — Comfortable (photo-first) ──────────────────────────────────
-
-  Widget _buildComfortable(BuildContext context) {
-    final styles = AppTextStyles.of(context);
-    final gradients = AppGradients.of(context);
-    return _cardShell(
-      context,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Stack(
-            children: [
-              _image(
-                context,
-                height: _comfortableImageH,
-                width: double.infinity,
-                radius: AppRadii.lg,
-              ),
-              Positioned.fill(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(gradient: gradients.photoTopScrim),
-                ),
-              ),
-              PositionedDirectional(
-                top: AppSpacing.md,
-                start: AppSpacing.md,
-                child: _imageBadges(context),
-              ),
-              PositionedDirectional(
-                top: AppSpacing.md,
-                end: AppSpacing.md,
-                child: FavoriteHeartButton(
-                  listingId: data.id,
-                  style: FavoriteHeartStyle.onImage,
-                ),
-              ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(
-              AppSpacing.md,
-              AppSpacing.sm,
-              AppSpacing.md,
-              AppSpacing.md,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        data.title.isEmpty ? '—' : data.title,
-                        style: styles.titleMedium,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    _priceLine(styles),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                _metaLine(context),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ── Mode 2 — Balanced (default) ─────────────────────────────────────────
-
-  Widget _buildBalanced(BuildContext context) {
-    final colors = AppColors.of(context);
-    final styles = AppTextStyles.of(context);
-    final gradients = AppGradients.of(context);
-    final hasSpecs = PropertySpecsRow.hasAnyOf(
-      rooms: data.rooms,
-      bathrooms: data.bathrooms,
-      areaSize: data.areaSize?.toDouble(),
-    );
-    return _cardShell(
-      context,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Stack(
-            children: [
-              _image(
-                context,
-                height: _balancedImageH,
-                width: double.infinity,
-                radius: AppRadii.lg,
-              ),
-              Positioned.fill(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(gradient: gradients.photoScrim),
-                ),
-              ),
-              Positioned.fill(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(gradient: gradients.photoTopScrim),
-                ),
-              ),
-              PositionedDirectional(
-                top: AppSpacing.md,
-                start: AppSpacing.md,
-                child: _imageBadges(context),
-              ),
-              PositionedDirectional(
-                top: AppSpacing.md,
-                end: AppSpacing.md,
-                child: FavoriteHeartButton(
-                  listingId: data.id,
-                  style: FavoriteHeartStyle.onImage,
-                ),
-              ),
-              if (data.verifiedAgoText != null && data.isVerified == true)
-                PositionedDirectional(
-                  bottom: AppSpacing.md,
-                  end: AppSpacing.md,
-                  child: _freshnessPill(context),
-                ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _priceLine(styles),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  data.title.isEmpty ? '—' : data.title,
-                  style: styles.titleMedium,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Row(
-                  children: [
-                    Icon(
-                      LucideIcons.map_pin,
-                      size: AppSpacing.lg,
-                      color: colors.textMuted,
-                    ),
-                    const SizedBox(width: AppSpacing.xs),
-                    Expanded(
-                      child: Text(
-                        data.locationText,
-                        style: styles.bodyMedium.copyWith(
-                          color: colors.textMuted,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-                if (hasSpecs) ...[
-                  const SizedBox(height: AppSpacing.sm),
-                  PropertySpecsRow(
-                    rooms: data.rooms,
-                    bathrooms: data.bathrooms,
-                    areaSize: data.areaSize?.toDouble(),
-                    color: colors.textMuted,
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ── Mode 3 — Compact (dense rows + WhatsApp) ────────────────────────────
-
-  Widget _buildCompact(BuildContext context) {
-    final colors = AppColors.of(context);
-    final styles = AppTextStyles.of(context);
-    return _cardShell(
-      context,
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Stack(
-              children: [
-                _image(
-                  context,
-                  height: null,
-                  width: _compactThumbW,
-                  radius: AppRadii.sm,
-                  borderRadius: const BorderRadiusDirectional.horizontal(
-                    start: Radius.circular(AppRadii.lg),
-                  ),
-                ),
-                PositionedDirectional(
-                  top: AppSpacing.sm,
-                  end: AppSpacing.sm,
-                  child: _compactBadge(context),
-                ),
-              ],
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsetsDirectional.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: AppSpacing.sm,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Flexible(child: _priceLine(styles, large: false)),
-                        if (data.pricePerMeterText != null) ...[
-                          const SizedBox(width: AppSpacing.xs),
-                          Text(
-                            data.pricePerMeterText!,
-                            style: styles.labelMedium.copyWith(
-                              color: colors.textMuted,
-                            ),
-                            textDirection: TextDirection.ltr,
-                          ),
-                        ],
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.xxs),
-                    Text(
-                      data.title.isEmpty ? '—' : data.title,
-                      style: styles.labelLarge.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: AppSpacing.xxs),
-                    _metaLine(context),
-                    if (data.verifiedAgoText != null) ...[
-                      const SizedBox(height: AppSpacing.xxs),
-                      _compactStatusLine(context),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-            _compactActions(context),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _compactActions(BuildContext context) {
-    final colors = AppColors.of(context);
-    return Container(
-      padding: const EdgeInsetsDirectional.symmetric(
-        horizontal: AppSpacing.md,
-      ),
-      decoration: BoxDecoration(
-        border: BorderDirectional(start: BorderSide(color: colors.outline)),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          FavoriteHeartButton(listingId: data.id),
-          const SizedBox(height: AppSpacing.sm),
-          _WhatsappSquare(onTap: () => _openDetail(context)),
-        ],
-      ),
-    );
-  }
-
-  Widget _compactBadge(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final colors = AppColors.of(context);
-    if (data.isFeatured) {
-      return StatusPill(
-        label: l10n.home_featured_badge,
-        color: colors.tertiary,
-        foreground: Theme.of(context).colorScheme.onTertiary,
-        icon: LucideIcons.star,
-      );
-    }
-    if (data.isVerified == true) {
-      return StatusPill(
-        label: l10n.detail_verified_badge,
-        color: colors.verified,
-        foreground: colors.onSuccess,
-        icon: LucideIcons.badge_check,
-      );
-    }
-    return StatusPill(
-      label: _purposeLabel(l10n),
-      color: _purposeColor(colors),
-      foreground: _purposeForeground(context),
-    );
-  }
-
-  Widget _compactStatusLine(BuildContext context) {
-    final colors = AppColors.of(context);
-    final styles = AppTextStyles.of(context);
-    final verified = data.isVerified == true;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          verified ? LucideIcons.clock : Icons.help_outline,
-          size: AppSpacing.md,
-          color: verified ? colors.verified : colors.textMuted,
-        ),
-        const SizedBox(width: AppSpacing.xxs),
-        Flexible(
-          child: Text(
-            data.verifiedAgoText!,
-            style: styles.labelMedium.copyWith(
-              color: verified ? colors.verified : colors.textMuted,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _freshnessPill(BuildContext context) {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
     return Container(
@@ -513,29 +180,172 @@ class DsListingCard extends StatelessWidget {
         vertical: AppSpacing.xxs,
       ),
       decoration: BoxDecoration(
-        color: colors.photoOverlay,
-        borderRadius: appRadius(AppRadii.pill),
+        color: colors.verified,
+        borderRadius: appRadius(AppRadii.sm),
       ),
-      child: Text(
-        data.verifiedAgoText!,
-        style: styles.labelMedium.copyWith(color: colors.onPhoto),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            LucideIcons.badge_check,
+            size: AppSpacing.md,
+            color: colors.onSuccess,
+          ),
+          const SizedBox(width: AppSpacing.xxs),
+          Text(
+            l10n.detail_verified_badge,
+            style: styles.labelMedium.copyWith(
+              color: colors.onSuccess,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  // ── Helpers ─────────────────────────────────────────────────────────────
+  Widget _purposePill(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    return GlassPanel(
+      onDark: true,
+      radius: AppRadii.sm,
+      blur: 12,
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xxs,
+      ),
+      child: Text(
+        _purposeLabel(l10n),
+        style: styles.labelMedium.copyWith(
+          color: colors.onPhoto,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
 
-  String _metaText(AppLocalizations l10n, NumberFormat numFmt) {
-    final parts = <String>[
-      if (data.locationText.isNotEmpty && data.locationText != '—')
-        data.locationText,
+  Widget _locationRow(BuildContext context) {
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    return Row(
+      children: [
+        Icon(LucideIcons.map_pin, size: AppSpacing.md, color: colors.primary),
+        const SizedBox(width: AppSpacing.xxs),
+        Expanded(
+          child: Text(
+            data.locationText,
+            style: styles.labelMedium.copyWith(color: colors.textMuted),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _priceLine(AppTextStyles styles) => Text(
+    data.priceText,
+    textDirection: TextDirection.ltr,
+    textAlign: TextAlign.end,
+    maxLines: 1,
+    overflow: TextOverflow.ellipsis,
+    style: styles.priceLarge,
+  );
+
+  Widget _specsRow(BuildContext context) {
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    final numFmt = NumberFormat.decimalPattern(
+      Localizations.localeOf(context).toLanguageTag(),
+    );
+
+    Widget item(IconData icon, String text) => Expanded(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: AppSpacing.lg, color: colors.primary),
+          const SizedBox(width: AppSpacing.xs),
+          Flexible(
+            child: Text(
+              text,
+              style: styles.labelMedium.copyWith(color: colors.onSurfaceVariant),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    final specs = <Widget>[
       if (data.rooms != null)
-        '${numFmt.format(data.rooms)} ${l10n.spec_rooms_label}',
+        item(
+          LucideIcons.bed_double,
+          '${numFmt.format(data.rooms)} ${l10n.spec_rooms_label}',
+        ),
+      if (data.bathrooms != null)
+        item(LucideIcons.bath, numFmt.format(data.bathrooms)),
       if (data.areaSize != null)
-        '${numFmt.format(data.areaSize!.round())} ${l10n.spec_area_unit}',
-      if (data.deedLabel != null) data.deedLabel!,
+        item(
+          LucideIcons.ruler,
+          '${numFmt.format(data.areaSize!.round())} ${l10n.spec_area_unit}',
+        ),
     ];
-    return parts.isEmpty ? '—' : parts.join(' · ');
+
+    final row = <Widget>[];
+    for (var i = 0; i < specs.length; i++) {
+      if (i > 0) {
+        row.add(
+          Container(width: 1, height: AppSpacing.lg, color: colors.outline),
+        );
+      }
+      row.add(specs[i]);
+    }
+
+    return Container(
+      padding: const EdgeInsetsDirectional.only(top: AppSpacing.md),
+      decoration: BoxDecoration(
+        border: BorderDirectional(top: BorderSide(color: colors.outline)),
+      ),
+      child: Row(children: row),
+    );
+  }
+
+  Widget _whatsappButton(BuildContext context, AppLocalizations l10n) {
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    return Material(
+      color: colors.whatsapp,
+      borderRadius: appRadius(AppRadii.md),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => _openDetail(context),
+        child: SizedBox(
+          height: kAppMinTouchTarget,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                LucideIcons.message_circle,
+                size: AppSpacing.xl,
+                color: colors.onWhatsapp,
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                l10n.cta_whatsapp,
+                style: styles.labelLarge.copyWith(
+                  color: colors.onWhatsapp,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   String _purposeLabel(AppLocalizations l10n) => switch (data.purpose) {
@@ -544,52 +354,4 @@ class DsListingCard extends StatelessWidget {
     ListingPurpose.dailyRent => l10n.listingPurposeDailyRent,
     ListingPurpose.investment => l10n.listingPurposeInvestment,
   };
-
-  Color _purposeColor(AppColors colors) => switch (data.purpose) {
-    ListingPurpose.sale => colors.primary,
-    ListingPurpose.rent => colors.verified,
-    ListingPurpose.dailyRent => colors.accent,
-    ListingPurpose.investment => colors.tertiary,
-  };
-
-  Color _purposeForeground(BuildContext context) {
-    final colors = AppColors.of(context);
-    return switch (data.purpose) {
-      ListingPurpose.sale => colors.onPrimary,
-      ListingPurpose.rent => colors.onSuccess,
-      ListingPurpose.dailyRent => colors.onAccent,
-      ListingPurpose.investment => Theme.of(context).colorScheme.onTertiary,
-    };
-  }
-}
-
-/// The compact-row 40×40 WhatsApp square. Opens the listing detail (where the
-/// verified contact lives) until Stage 3 threads a direct-launch phone into the
-/// feed data.
-class _WhatsappSquare extends StatelessWidget {
-  const _WhatsappSquare({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-    return Material(
-      color: colors.whatsapp,
-      borderRadius: appRadius(AppRadii.md),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: SizedBox(
-          width: AppSpacing.xxxl,
-          height: AppSpacing.xxxl,
-          child: Icon(
-            LucideIcons.message_circle,
-            size: AppSpacing.xl,
-            color: colors.onWhatsapp,
-          ),
-        ),
-      ),
-    );
-  }
 }
