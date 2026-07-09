@@ -105,7 +105,11 @@ final class ModernPalette extends ColorPalette {
     secondary: Color(0xFF0F172A),
     onSecondary: Color(0xFFFFFFFF),
     tertiary: Color(0xFFC2A14D),
-    success: Color(0xFF2E9E6B),
+    // 035 craft wave — ONE UI green: success == verified (#1F9D57). The old
+    // set shipped three near-identical greens (success #2E9E6B, verified
+    // #1F9D57, whatsapp #1DAB61) that co-rendered on a single card and read
+    // as a colour mistake. WhatsApp keeps its brand green as the exception.
+    success: Color(0xFF1F9D57),
     warning: Color(0xFFC98318),
     error: Color(0xFFD64545),
     surface: Color(0xFFF2F4FC),
@@ -147,7 +151,8 @@ final class ModernPalette extends ColorPalette {
     secondary: Color(0xFFE7ECF5),
     onSecondary: Color(0xFF0B1220),
     tertiary: Color(0xFFD9B86A),
-    success: Color(0xFF4CB587),
+    // 035 craft wave — success == verified in dark too (see light note).
+    success: Color(0xFF4CC08A),
     warning: Color(0xFFE2B25A),
     error: Color(0xFFF0706E),
     surface: Color(0xFF0E1020),

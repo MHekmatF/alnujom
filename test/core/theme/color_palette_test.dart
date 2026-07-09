@@ -6,21 +6,21 @@ void main() {
   group('ModernPalette light tokens', () {
     final tokens = const ModernPalette().lightTokens();
 
-    test('primary', () => expect(tokens.primary, const Color(0xFF1F4FE6)));
+    test('primary', () => expect(tokens.primary, const Color(0xFF4F46E5)));
     test('onPrimary', () => expect(tokens.onPrimary, const Color(0xFFFFFFFF)));
     test(
       'primaryContainer',
-      () => expect(tokens.primaryContainer, const Color(0xFFDCE6FB)),
+      () => expect(tokens.primaryContainer, const Color(0xFFEEF0FF)),
     );
     test(
       'onPrimaryContainer',
-      () => expect(tokens.onPrimaryContainer, const Color(0xFF11317A)),
+      () => expect(tokens.onPrimaryContainer, const Color(0xFF3730A3)),
     );
-    test('accent', () => expect(tokens.accent, const Color(0xFFF4795B)));
+    test('accent', () => expect(tokens.accent, const Color(0xFFFF5A76)));
     test('onAccent', () => expect(tokens.onAccent, const Color(0xFFFFFFFF)));
     test(
       'accentContainer',
-      () => expect(tokens.accentContainer, const Color(0xFFFBE5DC)),
+      () => expect(tokens.accentContainer, const Color(0xFFFFE1E8)),
     );
     test('secondary', () => expect(tokens.secondary, const Color(0xFF0F172A)));
     test(
@@ -28,27 +28,27 @@ void main() {
       () => expect(tokens.onSecondary, const Color(0xFFFFFFFF)),
     );
     test('tertiary', () => expect(tokens.tertiary, const Color(0xFFC2A14D)));
-    test('success', () => expect(tokens.success, const Color(0xFF2E9E6B)));
+    test('success', () => expect(tokens.success, const Color(0xFF1F9D57)));
     test('warning', () => expect(tokens.warning, const Color(0xFFC98318)));
     test('error', () => expect(tokens.error, const Color(0xFFD64545)));
-    test('surface', () => expect(tokens.surface, const Color(0xFFF5F7FA)));
+    test('surface', () => expect(tokens.surface, const Color(0xFFF2F4FC)));
     test(
       'surfaceVariant',
-      () => expect(tokens.surfaceVariant, const Color(0xFFE9EDF3)),
+      () => expect(tokens.surfaceVariant, const Color(0xFFE7ECF8)),
     );
     test('card', () => expect(tokens.card, const Color(0xFFFFFFFF)));
-    test('outline', () => expect(tokens.outline, const Color(0xFFE4E9F0)));
+    test('outline', () => expect(tokens.outline, const Color(0xFFE4E7F2)));
     test(
       'outlineStrong',
-      () => expect(tokens.outlineStrong, const Color(0xFFCBD5E1)),
+      () => expect(tokens.outlineStrong, const Color(0xFFCDD3E6)),
     );
-    test('onSurface', () => expect(tokens.onSurface, const Color(0xFF0B182B)));
+    test('onSurface', () => expect(tokens.onSurface, const Color(0xFF0E1524)));
     test(
       'onSurfaceVariant',
-      () => expect(tokens.onSurfaceVariant, const Color(0xFF5B6B80)),
+      () => expect(tokens.onSurfaceVariant, const Color(0xFF3B4256)),
     );
-    test('textMuted', () => expect(tokens.textMuted, const Color(0xFF64748B)));
-    test('verified', () => expect(tokens.verified, const Color(0xFF1F7A4D)));
+    test('textMuted', () => expect(tokens.textMuted, const Color(0xFF8A90A2)));
+    test('verified', () => expect(tokens.verified, const Color(0xFF1F9D57)));
     test(
       'verifiedContainer',
       () => expect(tokens.verifiedContainer, const Color(0xFFDCF0E5)),
@@ -62,21 +62,21 @@ void main() {
   group('ModernPalette dark tokens', () {
     final tokens = const ModernPalette().darkTokens();
 
-    test('primary', () => expect(tokens.primary, const Color(0xFF4D7CFF)));
-    test('onPrimary', () => expect(tokens.onPrimary, const Color(0xFF06122B)));
+    test('primary', () => expect(tokens.primary, const Color(0xFF818CF8)));
+    test('onPrimary', () => expect(tokens.onPrimary, const Color(0xFF1E1B4B)));
     test(
       'primaryContainer',
-      () => expect(tokens.primaryContainer, const Color(0xFF16315F)),
+      () => expect(tokens.primaryContainer, const Color(0xFF312E81)),
     );
     test(
       'onPrimaryContainer',
-      () => expect(tokens.onPrimaryContainer, const Color(0xFFCFE0FF)),
+      () => expect(tokens.onPrimaryContainer, const Color(0xFFE0E7FF)),
     );
-    test('accent', () => expect(tokens.accent, const Color(0xFFFF8E72)));
-    test('onAccent', () => expect(tokens.onAccent, const Color(0xFF3A1207)));
+    test('accent', () => expect(tokens.accent, const Color(0xFFFF7A8F)));
+    test('onAccent', () => expect(tokens.onAccent, const Color(0xFF430713)));
     test(
       'accentContainer',
-      () => expect(tokens.accentContainer, const Color(0xFF4A2114)),
+      () => expect(tokens.accentContainer, const Color(0xFF4A1420)),
     );
     test('secondary', () => expect(tokens.secondary, const Color(0xFFE7ECF5)));
     test(
@@ -84,26 +84,26 @@ void main() {
       () => expect(tokens.onSecondary, const Color(0xFF0B1220)),
     );
     test('tertiary', () => expect(tokens.tertiary, const Color(0xFFD9B86A)));
-    test('success', () => expect(tokens.success, const Color(0xFF4CB587)));
+    test('success', () => expect(tokens.success, const Color(0xFF4CC08A)));
     test('warning', () => expect(tokens.warning, const Color(0xFFE2B25A)));
     test('error', () => expect(tokens.error, const Color(0xFFF0706E)));
-    test('surface', () => expect(tokens.surface, const Color(0xFF0B182B)));
+    test('surface', () => expect(tokens.surface, const Color(0xFF0E1020)));
     test(
       'surfaceVariant',
-      () => expect(tokens.surfaceVariant, const Color(0xFF13233B)),
+      () => expect(tokens.surfaceVariant, const Color(0xFF1A1E33)),
     );
-    test('card', () => expect(tokens.card, const Color(0xFF13233B)));
-    test('outline', () => expect(tokens.outline, const Color(0xFF22344E)));
+    test('card', () => expect(tokens.card, const Color(0xFF171A2E)));
+    test('outline', () => expect(tokens.outline, const Color(0xFF2A2F4A)));
     test(
       'outlineStrong',
-      () => expect(tokens.outlineStrong, const Color(0xFF38446A)),
+      () => expect(tokens.outlineStrong, const Color(0xFF3C4266)),
     );
-    test('onSurface', () => expect(tokens.onSurface, const Color(0xFFEAF0FB)));
+    test('onSurface', () => expect(tokens.onSurface, const Color(0xFFEAECF7)));
     test(
       'onSurfaceVariant',
-      () => expect(tokens.onSurfaceVariant, const Color(0xFF8FA0B5)),
+      () => expect(tokens.onSurfaceVariant, const Color(0xFFA6ACC4)),
     );
-    test('textMuted', () => expect(tokens.textMuted, const Color(0xFF8694AC)));
+    test('textMuted', () => expect(tokens.textMuted, const Color(0xFF7E85A0)));
     test('verified', () => expect(tokens.verified, const Color(0xFF4CC08A)));
     test(
       'verifiedContainer',

@@ -18,7 +18,6 @@ import '../../../../core/widgets/brand_mark.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
-import '../../../../core/widgets/locale_toggle_action.dart';
 import '../../../../core/settings/listing_view_mode.dart';
 import '../../../../core/widgets/ds/ds_listing_card.dart';
 import '../../../../core/widgets/ds/ds_listing_card_data.dart';
@@ -27,13 +26,13 @@ import '../../../../core/widgets/main_bottom_nav.dart';
 import '../../../../core/widgets/publish_fab.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../core/widgets/star_refresh_indicator.dart';
-import '../../../../core/widgets/theme_toggle_action.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/account_status.dart';
 import '../../../../shared/domain/value_objects/money.dart';
 import '../../../../shared/domain/value_objects/publisher_status.dart';
 import '../../../../shared/presentation/deed_finish_labels.dart';
 import '../../../../shared/presentation/money_formatter.dart';
+import '../../../../shared/util/location_line.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../../currencies/domain/entities/currency.dart';
@@ -41,7 +40,6 @@ import '../../../currencies/domain/usecases/list_currencies.dart';
 import '../../../favorites/presentation/bloc/favorites_cubit.dart';
 import '../../../inquiries/presentation/bloc/inquiries_unread_cubit.dart';
 import '../../../notifications/presentation/bloc/notification_badge_cubit.dart';
-import '../../../../core/widgets/app_network_image.dart';
 import '../bloc/featured_listings_cubit.dart';
 import '../bloc/home_bloc.dart';
 import '../bloc/home_event.dart';
@@ -176,63 +174,46 @@ class _HomeViewState extends State<_HomeView> {
         gradient: AppGradients.of(context).screenBackground,
       ),
       child: Scaffold(
-      backgroundColor: Colors.transparent,
-      // Phase 030 (W5) — app navigation drawer (opens from the start side =
-      // RIGHT under RTL). Hosts the tool sections relocated off the Profile tab.
-      drawer: const AppNavDrawer(),
-      appBar: AppBar(
         backgroundColor: Colors.transparent,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        // Phase 030 (W5) — hamburger affordance opening the nav drawer. Wrapped
-        // in a Builder so Scaffold.of(context) resolves the enclosing Scaffold.
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(LucideIcons.menu),
-            tooltip: l10n.navDrawerMenuTooltip,
-            onPressed: () => Scaffold.of(context).openDrawer(),
-          ),
+        // Phase 030 (W5) — app navigation drawer (opens from the start side =
+        // RIGHT under RTL). Hosts the tool sections relocated off the Profile tab.
+        // 035 craft wave — the old AppBar row (hamburger + wordmark + locale/theme
+        // toggles) is gone: Home now has ONE header row (see _HomeGreeting).
+        // Locale/theme switching lives in Settings; the drawer opens from the
+        // header's menu tile.
+        drawer: const AppNavDrawer(),
+        body: FutureBuilder<List<Currency>>(
+          future: _currenciesFuture,
+          builder: (context, currencySnap) {
+            final currenciesByCode = <String, Currency>{
+              for (final c in currencySnap.data ?? const <Currency>[])
+                c.code: c,
+            };
+            return BlocBuilder<HomeBloc, HomeState>(
+              builder: (context, state) {
+                return StarRefreshIndicator(
+                  onRefresh: () async {
+                    // Capture cubits before the awaits (no BuildContext across
+                    // async gaps).
+                    final featured = context.read<FeaturedListingsCubit>();
+                    final recent = context.read<RecentlyViewedCubit>();
+                    context.read<HomeBloc>().add(
+                      HomeFeedRefreshRequested(locale: locale),
+                    );
+                    // Featured-listings + recently-viewed also reload on refresh.
+                    await featured.load(locale: locale);
+                    await recent.load();
+                  },
+                  child: _buildBody(context, state, currenciesByCode, l10n),
+                );
+              },
+            );
+          },
         ),
-        title: const BrandMark(withWordmark: true, size: 30),
-        actions: const [
-          // Phase 33 restyle — the notification bell moves down into the photo-
-          // forward header row (a 48px circular button); the bar keeps only the
-          // locale/theme toggles. Profile/sign-in is the Profile tab.
-          LocaleToggleAction(),
-          ThemeToggleAction(),
-        ],
-      ),
-      body: FutureBuilder<List<Currency>>(
-        future: _currenciesFuture,
-        builder: (context, currencySnap) {
-          final currenciesByCode = <String, Currency>{
-            for (final c in currencySnap.data ?? const <Currency>[]) c.code: c,
-          };
-          return BlocBuilder<HomeBloc, HomeState>(
-            builder: (context, state) {
-              return StarRefreshIndicator(
-                onRefresh: () async {
-                  // Capture cubits before the awaits (no BuildContext across
-                  // async gaps).
-                  final featured = context.read<FeaturedListingsCubit>();
-                  final recent = context.read<RecentlyViewedCubit>();
-                  context.read<HomeBloc>().add(
-                    HomeFeedRefreshRequested(locale: locale),
-                  );
-                  // Featured-listings + recently-viewed also reload on refresh.
-                  await featured.load(locale: locale);
-                  await recent.load();
-                },
-                child: _buildBody(context, state, currenciesByCode, l10n),
-              );
-            },
-          );
-        },
-      ),
-      // Phase 035 — the publish entry is a floating Extended FAB above the
-      // 5-tab bottom nav (publishers only; self-gates to nothing otherwise).
-      bottomNavigationBar: const MainBottomNav(current: MainTab.home),
-      floatingActionButton: const PublishFab(),
+        // Phase 035 — the publish entry is a floating Extended FAB above the
+        // 5-tab bottom nav (publishers only; self-gates to nothing otherwise).
+        bottomNavigationBar: const MainBottomNav(current: MainTab.home),
+        floatingActionButton: const PublishFab(),
       ),
     );
   }
@@ -244,31 +225,40 @@ class _HomeViewState extends State<_HomeView> {
     AppLocalizations l10n,
   ) {
     // Always render the static chrome (search + chips + header) so the user
-    // sees something during the initial load + during refresh.
-    return CustomScrollView(
-      controller: _scrollController,
-      slivers: [
-        // Design-matched Home (New design/ §02 "استكشف — الرئيسية") — lean &
-        // listings-first: greeting → search → categories → featured → the
-        // property feed. The popular-search chips, transaction toggle, verified/
-        // recently/reels rails, top ad and trust strip were folded OUT of the
-        // primary path so listings surface almost immediately (the design's
-        // "Listings visible immediately"). Those widgets stay in the codebase.
-        const SliverToBoxAdapter(child: _HomeGreeting()),
-        const SliverToBoxAdapter(child: HeroSearchBar()),
-        const SliverToBoxAdapter(child: HomeCategoriesSection()),
-        SliverToBoxAdapter(
-          child: FeaturedListingsCarousel(currenciesByCode: currenciesByCode),
-        ),
-        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
-        SliverToBoxAdapter(
-          child: _SectionHeader(
-            title: l10n.home_latest_listings_header,
-            trailing: const ListingViewModeSwitcher(),
+    // sees something during the initial load + during refresh. SafeArea (top
+    // only) because the Scaffold no longer mounts an AppBar.
+    return SafeArea(
+      bottom: false,
+      child: CustomScrollView(
+        controller: _scrollController,
+        slivers: [
+          // Design-matched Home (New design/ §02 "استكشف — الرئيسية") — lean &
+          // listings-first: greeting → search → categories → featured → the
+          // property feed. The popular-search chips, transaction toggle, verified/
+          // recently/reels rails, top ad and trust strip were folded OUT of the
+          // primary path so listings surface almost immediately (the design's
+          // "Listings visible immediately"). Those widgets stay in the codebase.
+          const SliverToBoxAdapter(child: _HomeGreeting()),
+          const SliverToBoxAdapter(child: HeroSearchBar()),
+          const SliverToBoxAdapter(child: HomeCategoriesSection()),
+          SliverToBoxAdapter(
+            child: FeaturedListingsCarousel(currenciesByCode: currenciesByCode),
           ),
-        ),
-        ..._buildFeedSlivers(context, state, currenciesByCode, l10n),
-      ],
+          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
+          SliverToBoxAdapter(
+            child: _SectionHeader(
+              title: l10n.home_latest_listings_header,
+              trailing: const ListingViewModeSwitcher(),
+            ),
+          ),
+          ..._buildFeedSlivers(context, state, currenciesByCode, l10n),
+          // Clearance so the floating publish FAB never covers the last card's
+          // content (035 craft wave — it used to sit on the price row).
+          const SliverToBoxAdapter(
+            child: SizedBox(height: AppSpacing.xxxl + AppSpacing.xl),
+          ),
+        ],
+      ),
     );
   }
 
@@ -466,13 +456,11 @@ DsListingCardData _toCardData(
           locale: locale,
           currency: currency,
         );
-  final location = [
-    if (card.governorateNameLocalized.isNotEmpty &&
-        card.governorateNameLocalized != '—')
-      card.governorateNameLocalized,
-    if (card.cityNameLocalized.isNotEmpty && card.cityNameLocalized != '—')
-      card.cityNameLocalized,
-  ].join(' • ');
+  final location = listingLocationLine(
+    governorate: card.governorateNameLocalized,
+    city: card.cityNameLocalized,
+    area: card.areaNameLocalized,
+  );
   return DsListingCardData(
     id: card.id,
     title: card.title,
@@ -492,6 +480,7 @@ DsListingCardData _toCardData(
     deedLabel: card.deedType == null
         ? null
         : deedTypeLabel(l10n, card.deedType),
+    whatsappPhone: card.whatsapp ?? card.phone,
   );
 }
 
@@ -506,101 +495,72 @@ class _HomeGreeting extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final colors = AppColors.of(context);
-    final styles = AppTextStyles.of(context);
 
-    return BlocBuilder<AuthBloc, AuthState>(
-      builder: (context, state) {
-        final profile = switch (state) {
-          Authenticated(:final profile) => profile,
-          _ => null,
-        };
-        final name = _firstName(
-          profile?.fullName ?? profile?.username ?? '',
-        );
-        // Accent line = the localized greeting (e.g. "Hi Ahmad," / "Welcome,").
-        final greeting = (name != null && name.isNotEmpty)
-            ? l10n.home_greeting_named(name)
-            : l10n.home_greeting_welcome;
-
-        return StaggeredListItem(
-          index: 0,
-          child: Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(
-              AppSpacing.lg,
-              AppSpacing.xl,
-              AppSpacing.lg,
-              AppSpacing.xs,
+    // 035 craft wave — ONE header row for Home: menu tile (drawer) + brand +
+    // notification bell. The old page stacked TWO headers (an AppBar with
+    // hamburger/wordmark/locale/theme toggles above a greeting row with a
+    // decorative non-interactive avatar); locale/theme now live in Settings
+    // and the avatar/greeting are gone.
+    return StaggeredListItem(
+      index: 0,
+      child: Padding(
+        padding: const EdgeInsetsDirectional.fromSTEB(
+          AppSpacing.lg,
+          AppSpacing.md,
+          AppSpacing.lg,
+          AppSpacing.xs,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Builder(
+              builder: (context) => _HeaderIconTile(
+                icon: LucideIcons.menu,
+                tooltip: l10n.navDrawerMenuTooltip,
+                onTap: () => Scaffold.of(context).openDrawer(),
+              ),
             ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Design #8 — a calm greeting line (the search bar carries
-                      // the "find your property" intent, so the big subtitle is
-                      // dropped for a quieter header).
-                      Text(
-                        greeting,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: styles.titleLarge.copyWith(color: colors.primary),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                _HomeAvatar(avatarUrl: profile?.avatarUrl),
-                const SizedBox(width: AppSpacing.sm),
-                const _HomeHeaderBell(),
-              ],
-            ),
-          ),
-        );
-      },
+            const SizedBox(width: AppSpacing.md),
+            const BrandMark(withWordmark: true, size: 30),
+            const Spacer(),
+            const _HomeHeaderBell(),
+          ],
+        ),
+      ),
     );
-  }
-
-  /// First whitespace-delimited token of a display name (the design shows just
-  /// the given name); null/empty when there's nothing to show.
-  static String? _firstName(String full) {
-    final trimmed = full.trim();
-    if (trimmed.isEmpty) return null;
-    return trimmed.split(RegExp(r'\s+')).first;
   }
 }
 
-/// A 48px circular avatar for the home header. Renders the user's avatar photo
-/// when present, otherwise a neutral person glyph on a recessed surface.
-class _HomeAvatar extends StatelessWidget {
-  const _HomeAvatar({required this.avatarUrl});
+/// A 48px bordered square tile for header utility actions (matches the bell).
+class _HeaderIconTile extends StatelessWidget {
+  const _HeaderIconTile({
+    required this.icon,
+    required this.tooltip,
+    required this.onTap,
+  });
 
-  final String? avatarUrl;
-
-  static const double _size = kAppMinTouchTarget;
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    return Container(
-      width: _size,
-      height: _size,
-      decoration: BoxDecoration(
-        color: colors.surfaceVariant,
-        shape: BoxShape.circle,
-        border: Border.all(color: colors.outline),
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: colors.surface,
+        shape: CircleBorder(side: BorderSide(color: colors.outline)),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: SizedBox(
+            width: kAppMinTouchTarget,
+            height: kAppMinTouchTarget,
+            child: Icon(icon, size: AppSpacing.xl, color: colors.onSurface),
+          ),
+        ),
       ),
-      clipBehavior: Clip.antiAlias,
-      child: (avatarUrl != null && avatarUrl!.isNotEmpty)
-          ? AppNetworkImage(url: avatarUrl)
-          : Icon(
-              Icons.person_outline,
-              size: AppSpacing.xl,
-              color: colors.textMuted,
-            ),
     );
   }
 }
@@ -638,7 +598,7 @@ class _HomeHeaderBell extends StatelessWidget {
                     clipBehavior: Clip.none,
                     children: [
                       Icon(
-                        Icons.notifications_none_outlined,
+                        LucideIcons.bell,
                         size: AppSpacing.xl,
                         color: colors.onSurface,
                       ),

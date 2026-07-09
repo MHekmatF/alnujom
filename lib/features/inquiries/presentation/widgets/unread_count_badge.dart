@@ -10,6 +10,7 @@ import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
+import '../../../../shared/util/localized_numbers.dart';
 
 class UnreadCountBadge extends StatelessWidget {
   const UnreadCountBadge({required this.count, super.key});
@@ -22,6 +23,7 @@ class UnreadCountBadge extends StatelessWidget {
 
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
+    final locale = Localizations.localeOf(context);
 
     return Container(
       padding: const EdgeInsetsDirectional.symmetric(
@@ -38,12 +40,11 @@ class UnreadCountBadge extends StatelessWidget {
       ),
       alignment: Alignment.center,
       child: Text(
-        count > 99 ? '99+' : '$count',
+        count > 99
+            ? '${formatLocalizedNumber(99, locale)}+'
+            : formatLocalizedNumber(count, locale),
         textAlign: TextAlign.center,
-        style: styles.labelMedium.copyWith(
-          color: colors.onPrimary,
-          fontWeight: FontWeight.w700,
-        ),
+        style: styles.labelMedium.copyWith(color: colors.onPrimary),
       ),
     );
   }

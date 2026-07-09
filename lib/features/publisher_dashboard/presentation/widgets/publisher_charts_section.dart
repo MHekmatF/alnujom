@@ -9,8 +9,8 @@
 //
 // The three RPC-backed series come from a self-provided PublisherChartsCubit;
 // the listings-by-status series is derived from the [counts] passed in by the
-// dashboard. Token-clean + Arabic-first RTL; values use NumberFormat in the
-// active locale (Arabic-Indic digits under `ar`).
+// dashboard. Token-clean + Arabic-first RTL; values use `formatLocalizedNumber`
+// (Arabic-Indic digits under `ar`).
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart' hide TextDirection;
@@ -26,6 +26,7 @@ import '../../../../core/widgets/charts/token_bar_chart.dart';
 import '../../../../core/widgets/charts/token_hbar_list.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/util/localized_numbers.dart';
 import '../../domain/entities/publisher_dashboard_counts.dart';
 import '../bloc/publisher_charts_cubit.dart';
 import '../bloc/publisher_charts_state.dart';
@@ -53,9 +54,9 @@ class _ChartsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final locale = Localizations.localeOf(context).toLanguageTag();
+    final numLocale = Localizations.localeOf(context);
+    final locale = numLocale.toLanguageTag();
     final colors = AppColors.of(context);
-    final fmt = NumberFormat.decimalPattern(locale);
 
     return BlocBuilder<PublisherChartsCubit, PublisherChartsState>(
       builder: (context, state) {
@@ -70,19 +71,28 @@ class _ChartsView extends StatelessWidget {
               TokenHbarItem(
                 label: l10n.publisherChartsStatusActive,
                 value: counts.activeListings,
-                valueLabel: fmt.format(counts.activeListings),
+                valueLabel: formatLocalizedNumber(
+                  counts.activeListings,
+                  numLocale,
+                ),
                 barColor: colors.success,
               ),
               TokenHbarItem(
                 label: l10n.publisherChartsStatusPending,
                 value: counts.pendingListings,
-                valueLabel: fmt.format(counts.pendingListings),
+                valueLabel: formatLocalizedNumber(
+                  counts.pendingListings,
+                  numLocale,
+                ),
                 barColor: colors.warning,
               ),
               TokenHbarItem(
                 label: l10n.publisherChartsStatusRejected,
                 value: counts.rejectedListings,
-                valueLabel: fmt.format(counts.rejectedListings),
+                valueLabel: formatLocalizedNumber(
+                  counts.rejectedListings,
+                  numLocale,
+                ),
                 barColor: colors.error,
               ),
             ],
@@ -154,7 +164,7 @@ class _ChartsView extends StatelessWidget {
                         (s) => TokenHbarItem(
                           label: _viewingStatusLabel(s.status, l10n),
                           value: s.total,
-                          valueLabel: fmt.format(s.total),
+                          valueLabel: formatLocalizedNumber(s.total, numLocale),
                           barColor: _viewingStatusColor(s.status, colors),
                         ),
                       )

@@ -15,6 +15,7 @@ import '../../../../core/widgets/status_pill.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/money.dart';
 import '../../../../shared/presentation/money_formatter.dart';
+import '../../../../shared/util/location_line.dart';
 import '../../../currencies/domain/entities/currency.dart';
 import '../../../search/domain/entities/filter_state.dart';
 import '../../domain/entities/home_listing_card.dart';
@@ -222,13 +223,11 @@ class _RailCard extends StatelessWidget {
   }
 
   String _location(HomeListingCard c) {
-    final parts = <String>[
-      if (c.governorateNameLocalized.isNotEmpty &&
-          c.governorateNameLocalized != '—')
-        c.governorateNameLocalized,
-      if (c.cityNameLocalized.isNotEmpty && c.cityNameLocalized != '—')
-        c.cityNameLocalized,
-    ];
-    return parts.isEmpty ? '—' : parts.join(' · ');
+    final line = listingLocationLine(
+      governorate: c.governorateNameLocalized,
+      city: c.cityNameLocalized,
+      area: c.areaNameLocalized,
+    );
+    return line.isEmpty ? '—' : line;
   }
 }

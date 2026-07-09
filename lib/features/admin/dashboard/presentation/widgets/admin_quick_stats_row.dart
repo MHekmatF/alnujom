@@ -8,7 +8,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../../core/routing/app_router.dart';
 import '../../../../../core/theme/colors.dart';
@@ -16,6 +15,7 @@ import '../../../../../core/theme/spacing.dart';
 import '../../../../../core/widgets/loading_state.dart';
 import '../../../../../core/widgets/stat_card.dart';
 import '../../../../../l10n/app_localizations.dart';
+import '../../../../../shared/util/localized_numbers.dart';
 import '../../domain/entities/dashboard_counts.dart';
 
 /// Fixed width for each stat card in the scrolling row so the cards read as a
@@ -38,8 +38,7 @@ class AdminQuickStatsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final l10n = AppLocalizations.of(context)!;
-    final locale = Localizations.localeOf(context).toLanguageTag();
-    final fmt = NumberFormat.decimalPattern(locale);
+    final locale = Localizations.localeOf(context);
 
     if (isLoading && counts == null) {
       return const _StatsRowSkeleton();
@@ -52,7 +51,7 @@ class AdminQuickStatsRow extends StatelessWidget {
         _stat(
           context,
           icon: LucideIcons.user,
-          value: fmt.format(c.pendingUsers),
+          value: formatLocalizedNumber(c.pendingUsers!, locale),
           label: l10n.adminQuickStatPendingUsers,
           accent: colors.warning,
           route: AppRoutes.adminApprovals,
@@ -61,7 +60,7 @@ class AdminQuickStatsRow extends StatelessWidget {
         _stat(
           context,
           icon: LucideIcons.file_clock,
-          value: fmt.format(c.pendingListings),
+          value: formatLocalizedNumber(c.pendingListings!, locale),
           label: l10n.adminQuickStatPendingListings,
           accent: colors.warning,
           route: AppRoutes.adminListingReviewPending,
@@ -70,7 +69,7 @@ class AdminQuickStatsRow extends StatelessWidget {
         _stat(
           context,
           icon: LucideIcons.flag,
-          value: fmt.format(c.openReports),
+          value: formatLocalizedNumber(c.openReports!, locale),
           label: l10n.adminQuickStatOpenReports,
           accent: colors.error,
           route: AppRoutes.adminReports,
@@ -79,7 +78,7 @@ class AdminQuickStatsRow extends StatelessWidget {
         _stat(
           context,
           icon: LucideIcons.inbox,
-          value: fmt.format(c.newInquiries24h),
+          value: formatLocalizedNumber(c.newInquiries24h!, locale),
           label: l10n.adminQuickStatNewInquiries,
           accent: colors.primary,
           route: AppRoutes.adminInquiries,
@@ -88,7 +87,7 @@ class AdminQuickStatsRow extends StatelessWidget {
         _stat(
           context,
           icon: LucideIcons.circle_check_big,
-          value: fmt.format(c.activeListings),
+          value: formatLocalizedNumber(c.activeListings!, locale),
           label: l10n.adminQuickStatActiveListings,
           accent: colors.success,
           route: AppRoutes.adminListingReviewPending,

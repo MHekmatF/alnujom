@@ -19,9 +19,14 @@ class MoneyFormatter {
     final symbol = _resolveSymbol(currency, locale);
     final localeTag = locale.toLanguageTag();
 
+    // 035 craft wave: whole amounts drop their fraction digits entirely —
+    // `١٢٠٬٠٠٠٫٠٠ $` on a property card reads as filler, not precision.
+    // Fractional amounts keep the currency's configured decimals.
+    final isWhole = rounded == Decimal.fromBigInt(rounded.toBigInt());
+    final fractionDigits = isWhole ? 0 : currency.displayDecimals;
     final numFormat = intl.NumberFormat.decimalPattern(localeTag)
-      ..minimumFractionDigits = currency.displayDecimals
-      ..maximumFractionDigits = currency.displayDecimals;
+      ..minimumFractionDigits = fractionDigits
+      ..maximumFractionDigits = fractionDigits;
 
     if (locale.languageCode == 'ar') {
       // Arabic: amount then symbol, RTL bidi resolver handles visual order.

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../shared/util/localized_numbers.dart';
 import 'app_text_field.dart';
 
 class AppMultiLineField extends StatefulWidget {
@@ -17,12 +18,13 @@ class _AppMultiLineFieldState extends State<AppMultiLineField> {
 
   @override
   Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context);
     return AppTextField(
       label: widget.label,
       maxLines: null,
       helperText: widget.maxLength == null
           ? null
-          : '$_count/${widget.maxLength}',
+          : '${formatLocalizedNumber(_count, locale)}/${formatLocalizedNumber(widget.maxLength!, locale)}',
       onChanged: (value) => setState(() => _count = value.characters.length),
     );
   }

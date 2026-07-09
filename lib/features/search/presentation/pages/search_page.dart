@@ -45,8 +45,9 @@ import '../../../../core/widgets/main_bottom_nav.dart';
 import '../../../../core/widgets/publish_fab.dart';
 import '../../../../core/widgets/reduce_motion.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
-import '../../../../features/map/domain/entities/map_entry_context.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/util/localized_numbers.dart';
+import '../../../../shared/util/location_line.dart';
 import '../../../ads/domain/entities/ad_placement.dart';
 import '../../../ads/presentation/widgets/ad_slot.dart';
 import '../../../listing_form/domain/entities/listing.dart';
@@ -211,7 +212,9 @@ class _SearchPageViewState extends State<_SearchPageView> {
 
 /// The screen header: a bold title with a results-count line in the brand
 /// primary beneath it. The title is always shown (it is the screen's heading);
-/// the count line appears once a search has run and tracks the loaded results.
+/// the count line appears only when loaded results exist — while the first
+/// page loads the skeletons own the surface (no premature "no results"), and
+/// when a search comes back empty the [_EmptyView] below owns that message.
 class _ResultsCountHeader extends StatelessWidget {
   const _ResultsCountHeader();
 
@@ -221,12 +224,11 @@ class _ResultsCountHeader extends StatelessWidget {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
     return BlocBuilder<SearchBloc, SearchState>(
-      buildWhen: (p, c) =>
-          p.results.length != c.results.length ||
-          (p.status == SearchStatus.initial) !=
-              (c.status == SearchStatus.initial),
+      buildWhen: (p, c) => p.results.length != c.results.length,
       builder: (context, state) {
-        final showCount = state.status != SearchStatus.initial;
+        // The BLoC clears `results` on every fresh search's loading emit, so
+        // a non-empty list ⇔ the results ListView is what renders below.
+        final showCount = state.results.isNotEmpty;
         return Padding(
           padding: const EdgeInsetsDirectional.only(
             start: AppSpacing.lg,
@@ -360,11 +362,7 @@ class _FilterButton extends StatelessWidget {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                Icon(
-                  Icons.tune,
-                  size: AppSpacing.xl,
-                  color: colors.onPrimary,
-                ),
+                Icon(Icons.tune, size: AppSpacing.xl, color: colors.onPrimary),
                 if (active)
                   PositionedDirectional(
                     top: AppSpacing.sm,
@@ -435,10 +433,12 @@ class _DisplayModeBar extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              IconButton.filledTonal(
-                tooltip: l10n.search_save_this_search_action,
-                icon: const Icon(Icons.bookmark_add_outlined),
+              // A labeled action (not a bare bookmark glyph) so it cannot be
+              // mistaken for the app-bar "saved searches" bookmark icon.
+              TextButton.icon(
                 onPressed: () => _onSaveSearch(context, state.filters),
+                icon: const Icon(Icons.bookmark_add_outlined),
+                label: Text(l10n.search_save_this_search_action),
               ),
             ],
           ),
@@ -597,57 +597,30 @@ class _SortAndFiltersRow extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
+    // The map entry point lives solely in the list ⇄ map segmented control
+    // ([_DisplayModeBar]) — the former "Show on map" IconButton here was a
+    // redundant second (third, with the old bar segment) way to the same
+    // surface.
     return Padding(
       padding: const EdgeInsetsDirectional.only(
         start: AppSpacing.lg,
-        end: AppSpacing.sm,
+        end: AppSpacing.lg,
         top: AppSpacing.xs,
         bottom: AppSpacing.xs,
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Flexible(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Flexible(
-                  child: Text(
-                    l10n.search_sort_label,
-                    style: styles.labelMedium.copyWith(color: colors.textMuted),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.xs),
-                const Flexible(child: InlineSortControl()),
-              ],
+            child: Text(
+              l10n.search_sort_label,
+              style: styles.labelMedium.copyWith(color: colors.textMuted),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
-          // Phase 15 G3: "Show on map" entry point per
-          // contracts/phase15-search-show-on-map.md. Always visible; no state
-          // mutation on SearchBloc. (Filter access moved to the solid-primary
-          // square button beside the search input.)
-          IconButton(
-            onPressed: () => _openMap(context),
-            icon: const Icon(Icons.map_outlined),
-            tooltip: l10n.search_results_show_on_map_action,
-          ),
+          const SizedBox(width: AppSpacing.xs),
+          const Flexible(child: InlineSortControl()),
         ],
-      ),
-    );
-  }
-
-  /// Phase 15 G3: Navigate to MapPage with the current [FilterState] snapshot.
-  /// Reads the filter from [SearchBloc] without mutating it (R-77 BLoC
-  /// lifetime preserved — pressing back returns to identical search results).
-  void _openMap(BuildContext context) {
-    final filters = context.read<SearchBloc>().state.filters;
-    context.go(
-      AppRoutes.map,
-      extra: MapEntryFromSearch(
-        filterState: filters,
-        showFilterAlert: filters.hasAnyActiveFilter,
       ),
     );
   }
@@ -953,13 +926,18 @@ class _EmptyView extends StatelessWidget {
               style: styles.bodyMedium.copyWith(color: colors.textMuted),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: AppSpacing.sm),
-            TextButton(
-              onPressed: () => context.read<SearchBloc>().add(
-                const SearchFiltersApplied(filters: FilterState.empty),
+            // The clear-filters CTA only makes sense when something IS
+            // filtered (incl. a query) — on a virgin empty catalog it would
+            // be a dead button.
+            if (state.filters.hasAnyActiveFilter) ...[
+              const SizedBox(height: AppSpacing.sm),
+              TextButton(
+                onPressed: () => context.read<SearchBloc>().add(
+                  const SearchFiltersApplied(filters: FilterState.empty),
+                ),
+                child: Text(l10n.search_empty_clear_filters),
               ),
-              child: Text(l10n.search_empty_clear_filters),
-            ),
+            ],
             if (state.isArabicQuery)
               Padding(
                 padding: const EdgeInsetsDirectional.symmetric(
@@ -997,9 +975,14 @@ class _ResultsListView extends StatelessWidget {
     const adTrail = 1;
 
     return ListView.builder(
-      padding: const EdgeInsetsDirectional.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
+      // lg horizontal padding — same single screen margin as the header rows.
+      // Extra bottom clearance so the floating publish FAB never covers the
+      // last card's content (035 craft wave).
+      padding: const EdgeInsetsDirectional.only(
+        start: AppSpacing.lg,
+        end: AppSpacing.lg,
+        top: AppSpacing.sm,
+        bottom: AppSpacing.xxxl + AppSpacing.xl,
       ),
       itemCount: state.results.length + pagingTrail + hintTrail + adTrail,
       itemBuilder: (context, index) {
@@ -1057,18 +1040,17 @@ class _SearchFeedCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+    final locale = Localizations.localeOf(context);
+    final isAr = locale.languageCode == 'ar';
     final gov = isAr ? item.governorateNameAr : item.governorateNameEn;
     final city = isAr ? item.cityNameAr : item.cityNameEn;
-    final location = [
-      gov,
-      city,
-    ].where((s) => s.isNotEmpty).join('، ');
+    // Same dedupe rules as every other feed (kills 'دمشق، دمشق').
+    final location = listingLocationLine(governorate: gov, city: city);
     final data = DsListingCardData(
       id: item.id,
       title: item.title,
       priceText: l10n.priceWithCurrency(
-        item.primaryAmount.toStringAsFixed(0),
+        formatLocalizedNumber(item.primaryAmount.round(), locale),
         item.primaryCurrency,
       ),
       purpose: item.purpose,
@@ -1111,8 +1093,10 @@ class _SearchSkeleton extends StatelessWidget {
           ListingViewMode.compact => 128.0,
         };
         return ListView.builder(
+          // Mirrors _ResultsListView's lg margin so the skeleton→results
+          // crossfade doesn't shift horizontally.
           padding: const EdgeInsetsDirectional.symmetric(
-            horizontal: AppSpacing.md,
+            horizontal: AppSpacing.lg,
             vertical: AppSpacing.sm,
           ),
           itemCount: 6,

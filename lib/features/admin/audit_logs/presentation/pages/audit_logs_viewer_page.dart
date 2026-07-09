@@ -217,7 +217,7 @@ class _FieldRow extends StatelessWidget {
               text: labelText,
               style: styles.bodyMedium.copyWith(
                 color: colors.textMuted,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w700,
               ),
             ),
             TextSpan(text: value),
@@ -251,10 +251,7 @@ class _JsonBlock extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: styles.labelMedium.copyWith(fontWeight: FontWeight.bold),
-        ),
+        Text(label, style: styles.labelMedium),
         const SizedBox(height: AppSpacing.xs),
         Container(
           width: double.infinity,

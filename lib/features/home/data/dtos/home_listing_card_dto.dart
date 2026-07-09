@@ -25,6 +25,9 @@ class HomeListingCardDto {
     required this.mainImageUrl,
     required this.governorate,
     required this.city,
+    this.area,
+    this.phone,
+    this.whatsapp,
     this.agencyId,
     this.agencyName,
     this.agencyLogoPath,
@@ -60,6 +63,16 @@ class HomeListingCardDto {
   /// — Phase 8 governorate/city FKs are nullable on the listings row.
   final HomeListingLocationNameDto? governorate;
   final HomeListingLocationNameDto? city;
+
+  /// 035 craft wave — neighbourhood-level location for the card's
+  /// `city · area` line (supersedes Phase-13 FR-017's city-only minimalism,
+  /// per the approved artifact's card anatomy).
+  final HomeListingLocationNameDto? area;
+
+  /// 035 craft wave — listing contact numbers so the card's WhatsApp CTA can
+  /// launch WhatsApp directly instead of merely opening the detail page.
+  final String? phone;
+  final String? whatsapp;
 
   /// Phase 19 (FR-022) — owning agency badge fields. Only populated when the
   /// listing is under an `approved` agency (others stay null → no badge).
@@ -144,6 +157,7 @@ class HomeListingCardDto {
 
     final govMap = row['governorate'] as Map<String, dynamic>?;
     final cityMap = row['city'] as Map<String, dynamic>?;
+    final areaMap = row['area'] as Map<String, dynamic>?;
 
     // Phase 19 (FR-022) — embedded agency row. Surface the badge ONLY when the
     // agency is approved (others get null → no badge per FR-023).
@@ -175,6 +189,11 @@ class HomeListingCardDto {
       city: cityMap == null
           ? null
           : HomeListingLocationNameDto.fromDisplayName(cityMap['display_name']),
+      area: areaMap == null
+          ? null
+          : HomeListingLocationNameDto.fromDisplayName(areaMap['display_name']),
+      phone: row['phone'] as String?,
+      whatsapp: row['whatsapp'] as String?,
       agencyId: agencyId,
       agencyName: agencyName,
       agencyLogoPath: agencyLogoPath,
@@ -204,6 +223,9 @@ class HomeListingCardDto {
       mainImageUrl: url,
       governorate: governorate,
       city: city,
+      area: area,
+      phone: phone,
+      whatsapp: whatsapp,
       agencyId: agencyId,
       agencyName: agencyName,
       agencyLogoPath: agencyLogoPath,
@@ -233,6 +255,9 @@ class HomeListingCardDto {
       mainImageUrl: mainImageUrl,
       governorate: governorate,
       city: city,
+      area: area,
+      phone: phone,
+      whatsapp: whatsapp,
       agencyId: agencyId,
       agencyName: agencyName,
       agencyLogoPath: agencyLogoPath,
@@ -270,6 +295,9 @@ class HomeListingCardDto {
           ? '—'
           : governorate!.localizedName(locale),
       cityNameLocalized: city == null ? '—' : city!.localizedName(locale),
+      areaNameLocalized: area == null ? '' : area!.localizedName(locale),
+      phone: phone,
+      whatsapp: whatsapp,
       primaryPrice: ListingPrice(
         id: '$id:primary',
         listingId: id,
@@ -311,6 +339,9 @@ class HomeListingCardDto {
       mainImageUrl: mainImageUrl,
       governorate: governorate,
       city: city,
+      area: area,
+      phone: phone,
+      whatsapp: whatsapp,
       agencyId: agencyId,
       agencyName: agencyName,
       agencyLogoPath: agencyLogoPath,

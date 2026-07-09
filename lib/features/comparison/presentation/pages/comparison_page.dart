@@ -6,14 +6,12 @@
 // label column keeps the rows readable as the property columns scroll.
 //
 // Token-only styling (no inline hex / TextStyle / numeric insets). RTL-safe;
-// numbers render in the active locale's numerals via intl NumberFormat.
+// numbers render in the active locale's numerals via `formatLocalizedNumber`.
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
-// hide intl's TextDirection so it doesn't shadow dart:ui's.
-import 'package:intl/intl.dart' hide TextDirection;
 
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
@@ -28,6 +26,7 @@ import '../../../../core/widgets/press_scale.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../core/widgets/status_pill.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/util/localized_numbers.dart';
 import '../../../listing_form/domain/entities/listing.dart';
 import '../../domain/entities/comparison_item.dart';
 import '../cubit/comparison_cubit.dart';
@@ -382,9 +381,7 @@ class _PropertyColumn extends StatelessWidget {
                   // recede to a lighter weight.
                   style: styles.bodyMedium.copyWith(
                     color: rowDiffers[i] ? colors.primary : colors.onSurface,
-                    fontWeight: rowDiffers[i]
-                        ? FontWeight.w700
-                        : FontWeight.w500,
+                    fontWeight: rowDiffers[i] ? FontWeight.w700 : null,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -397,10 +394,7 @@ class _PropertyColumn extends StatelessWidget {
   }
 
   String _formatAmount(BuildContext context, num amount) {
-    final fmt = NumberFormat.decimalPattern(
-      Localizations.localeOf(context).toLanguageTag(),
-    )..maximumFractionDigits = 0;
-    return fmt.format(amount);
+    return formatLocalizedNumber(amount.round(), Localizations.localeOf(context));
   }
 }
 
@@ -506,24 +500,15 @@ class _FactRow {
 
 String _intOrDash(BuildContext context, int? value) {
   if (value == null) return '—';
-  final fmt = NumberFormat.decimalPattern(
-    Localizations.localeOf(context).toLanguageTag(),
-  );
-  return fmt.format(value);
+  return formatLocalizedNumber(value, Localizations.localeOf(context));
 }
 
-String _areaOrDash(
-  BuildContext context,
-  AppLocalizations l10n,
-  double? value,
-) {
+String _areaOrDash(BuildContext context, AppLocalizations l10n, double? value) {
   if (value == null) return '—';
-  final fmt = NumberFormat.decimalPattern(
-    Localizations.localeOf(context).toLanguageTag(),
-  );
+  final locale = Localizations.localeOf(context);
   final number = value == value.roundToDouble()
-      ? fmt.format(value.round())
-      : fmt.format(double.parse(value.toStringAsFixed(1)));
+      ? formatLocalizedNumber(value.round(), locale)
+      : formatLocalizedNumber(double.parse(value.toStringAsFixed(1)), locale);
   return '$number ${l10n.spec_area_unit}';
 }
 

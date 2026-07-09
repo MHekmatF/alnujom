@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/theme/spacing.dart';
+import '../../../../../shared/util/localized_numbers.dart';
 
 /// An enabled, navigable admin-dashboard grid tile.
 class DashboardTile extends StatelessWidget {
@@ -41,7 +42,7 @@ class DashboardTile extends StatelessWidget {
     // l10n-literals lint passes — the label itself is localized by the caller.
     final secondaryCaption =
         (secondaryCounter != null && secondaryCounterLabel != null)
-        ? '$secondaryCounter $secondaryCounterLabel'
+        ? '${formatLocalizedNumber(secondaryCounter!, Localizations.localeOf(context))} $secondaryCounterLabel'
         : null;
 
     return Card(
@@ -114,7 +115,7 @@ class _CounterBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSpacing.sm),
       ),
       child: Text(
-        count.toString(),
+        formatLocalizedNumber(count, Localizations.localeOf(context)),
         style: theme.textTheme.labelSmall?.copyWith(
           color: isZero ? colorScheme.onSurfaceVariant : colorScheme.onError,
         ),

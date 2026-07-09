@@ -110,9 +110,7 @@ class _InquiryDetailBody extends StatelessWidget {
                   inquiry.senderName.isNotEmpty
                       ? inquiry.senderName
                       : l10n.inquiry_inbox_anonymous_sender_label,
-                  style: styles.titleLarge.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: styles.titleLarge,
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Row(

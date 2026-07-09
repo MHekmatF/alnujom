@@ -153,18 +153,19 @@ class _NotificationCenterViewState extends State<_NotificationCenterView> {
                     final row = rows[index];
                     return switch (row) {
                       _DateHeaderRow(:final day) => _DateHeader(day: day),
-                      _NotificationRow(:final notification) => StaggeredListItem(
-                        index: index,
-                        enabled: !state.isPaginating,
-                        child: NotificationTile(
-                          notification: notification,
-                          onTap: () => NotificationDeepLinkResolver.resolve(
-                            context: context,
+                      _NotificationRow(:final notification) =>
+                        StaggeredListItem(
+                          index: index,
+                          enabled: !state.isPaginating,
+                          child: NotificationTile(
                             notification: notification,
-                            updateCubit: true,
+                            onTap: () => NotificationDeepLinkResolver.resolve(
+                              context: context,
+                              notification: notification,
+                              updateCubit: true,
+                            ),
                           ),
                         ),
-                      ),
                     };
                   },
                 ),
@@ -201,10 +202,7 @@ class _DateHeader extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: styles.labelMedium.copyWith(
-          color: colors.textMuted,
-          fontWeight: FontWeight.w700,
-        ),
+        style: styles.labelMedium.copyWith(color: colors.textMuted),
       ),
     );
   }

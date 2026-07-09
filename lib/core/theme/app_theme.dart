@@ -77,10 +77,7 @@ ThemeData buildAppTheme({
       bodySmall: textStyles.bodyMedium.copyWith(fontSize: 12, height: 16 / 12),
       labelLarge: textStyles.labelLarge,
       labelMedium: textStyles.labelMedium,
-      labelSmall: textStyles.labelMedium.copyWith(
-        fontSize: 11,
-        height: 14 / 11,
-      ),
+      labelSmall: textStyles.labelSmall,
     ),
     iconTheme: IconThemeData(color: colors.onSurface, size: AppSpacing.xl),
     appBarTheme: AppBarTheme(

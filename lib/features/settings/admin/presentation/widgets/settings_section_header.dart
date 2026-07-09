@@ -28,10 +28,7 @@ class SettingsSectionHeader extends StatelessWidget {
         children: [
           Text(
             title,
-            style: styles.titleMedium.copyWith(
-              color: colors.primary,
-              fontWeight: FontWeight.w700,
-            ),
+            style: styles.titleMedium.copyWith(color: colors.primary),
           ),
           Divider(height: AppSpacing.sm, color: colors.divider),
         ],

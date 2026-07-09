@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
@@ -27,6 +26,7 @@ import 'package:alnujom/features/crm/presentation/pages/crm_page.dart';
 
 import '../../../../core/widgets/stat_card.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/util/localized_numbers.dart';
 import '../../domain/entities/publisher_dashboard_counts.dart';
 import '../bloc/publisher_analytics_cubit.dart';
 import '../bloc/publisher_dashboard_summary_cubit.dart';
@@ -197,55 +197,54 @@ class _StatGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    final locale = Localizations.localeOf(context).toLanguageTag();
-    final fmt = NumberFormat.decimalPattern(locale);
+    final locale = Localizations.localeOf(context);
 
     final cards = <Widget>[
       StatCard(
         icon: LucideIcons.list,
-        value: fmt.format(counts.totalListings),
+        value: formatLocalizedNumber(counts.totalListings, locale),
         label: l10n.publisherDashboardStatTotalListings,
         accent: colors.primary,
         onTap: () => context.push(AppRoutes.publisherMyListings),
       ),
       StatCard(
         icon: LucideIcons.circle_check_big,
-        value: fmt.format(counts.activeListings),
+        value: formatLocalizedNumber(counts.activeListings, locale),
         label: l10n.publisherDashboardStatActiveListings,
         accent: colors.success,
         onTap: () => context.push(AppRoutes.publisherMyListings),
       ),
       StatCard(
         icon: LucideIcons.clock,
-        value: fmt.format(counts.pendingListings),
+        value: formatLocalizedNumber(counts.pendingListings, locale),
         label: l10n.publisherDashboardStatPendingListings,
         accent: colors.warning,
         onTap: () => context.push(AppRoutes.publisherMyListings),
       ),
       StatCard(
         icon: LucideIcons.circle_x,
-        value: fmt.format(counts.rejectedListings),
+        value: formatLocalizedNumber(counts.rejectedListings, locale),
         label: l10n.publisherDashboardStatRejectedListings,
         accent: colors.error,
         onTap: () => context.push(AppRoutes.publisherMyListings),
       ),
       StatCard(
         icon: LucideIcons.inbox,
-        value: fmt.format(counts.totalInquiries),
+        value: formatLocalizedNumber(counts.totalInquiries, locale),
         label: l10n.publisherDashboardStatTotalInquiries,
         accent: colors.primary,
         onTap: () => context.push(AppRoutes.inquiries),
       ),
       StatCard(
         icon: LucideIcons.message_square,
-        value: fmt.format(counts.newInquiries),
+        value: formatLocalizedNumber(counts.newInquiries, locale),
         label: l10n.publisherDashboardStatNewInquiries,
         accent: colors.accent,
         onTap: () => context.push(AppRoutes.inquiries),
       ),
       StatCard(
         icon: LucideIcons.trending_up,
-        value: fmt.format(counts.leadEventsTotal),
+        value: formatLocalizedNumber(counts.leadEventsTotal, locale),
         label: l10n.publisherDashboardStatLeadEvents,
         accent: colors.secondary,
       ),

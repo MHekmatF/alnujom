@@ -28,6 +28,7 @@ import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/util/localized_numbers.dart';
 import '../../domain/entities/publisher_lead_analytics.dart';
 import '../bloc/publisher_analytics_cubit.dart';
 import '../bloc/publisher_analytics_state.dart';
@@ -127,8 +128,7 @@ class _TotalHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
-    final locale = Localizations.localeOf(context).toLanguageTag();
-    final fmt = NumberFormat.decimalPattern(locale);
+    final locale = Localizations.localeOf(context);
 
     return Container(
       width: double.infinity,
@@ -166,7 +166,7 @@ class _TotalHeader extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  fmt.format(total),
+                  formatLocalizedNumber(total, locale),
                   style: styles.headlineLarge.copyWith(color: colors.onSurface),
                 ),
                 const SizedBox(height: AppSpacing.xs),
@@ -222,8 +222,7 @@ class _ListingBreakdownCard extends StatelessWidget {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
     final elevation = AppElevation.of(context);
-    final locale = Localizations.localeOf(context).toLanguageTag();
-    final fmt = NumberFormat.decimalPattern(locale);
+    final locale = Localizations.localeOf(context);
 
     return Container(
       padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
@@ -259,7 +258,9 @@ class _ListingBreakdownCard extends StatelessWidget {
                 const SizedBox(width: AppSpacing.xs),
               ],
               Text(
-                l10n.leadAnalyticsListingTotal(fmt.format(listing.total)),
+                l10n.leadAnalyticsListingTotal(
+                  formatLocalizedNumber(listing.total, locale),
+                ),
                 style: styles.labelLarge.copyWith(color: colors.primary),
               ),
             ],
@@ -270,7 +271,7 @@ class _ListingBreakdownCard extends StatelessWidget {
               Expanded(
                 child: _LeadCounter(
                   icon: LucideIcons.phone,
-                  value: fmt.format(listing.phoneCount),
+                  value: formatLocalizedNumber(listing.phoneCount, locale),
                   label: l10n.leadAnalyticsSourcePhone,
                   accent: colors.primary,
                 ),
@@ -278,7 +279,7 @@ class _ListingBreakdownCard extends StatelessWidget {
               Expanded(
                 child: _LeadCounter(
                   icon: LucideIcons.message_circle,
-                  value: fmt.format(listing.whatsappCount),
+                  value: formatLocalizedNumber(listing.whatsappCount, locale),
                   label: l10n.leadAnalyticsSourceWhatsapp,
                   accent: colors.success,
                 ),
@@ -286,7 +287,7 @@ class _ListingBreakdownCard extends StatelessWidget {
               Expanded(
                 child: _LeadCounter(
                   icon: LucideIcons.inbox,
-                  value: fmt.format(listing.inquiryCount),
+                  value: formatLocalizedNumber(listing.inquiryCount, locale),
                   label: l10n.leadAnalyticsSourceInquiry,
                   accent: colors.accent,
                 ),
@@ -294,7 +295,7 @@ class _ListingBreakdownCard extends StatelessWidget {
               Expanded(
                 child: _LeadCounter(
                   icon: LucideIcons.heart,
-                  value: fmt.format(listing.favoriteCount),
+                  value: formatLocalizedNumber(listing.favoriteCount, locale),
                   label: l10n.leadAnalyticsSourceFavorite,
                   accent: colors.error,
                 ),

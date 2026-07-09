@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
@@ -55,34 +56,34 @@ class MainBottomNav extends StatelessWidget {
 
         final highlightNone = current == MainTab.none;
 
+        // 035 craft wave — ONE icon family (Lucide, matching the content
+        // cards) and ONE metaphor per tab: selection is carried by the chip
+        // treatment, not by swapping to a different glyph (the old bar turned
+        // the Search magnifier into a globe when selected).
         final slots = <Widget>[
           _NavTab(
-            icon: Icons.home_outlined,
-            selectedIcon: Icons.home_rounded,
+            icon: LucideIcons.house,
             label: l10n.home_title,
             selected: !highlightNone && current == MainTab.home,
             bounce: !reduce && current == MainTab.home,
             onTap: () => context.go(AppRoutes.home),
           ),
           _NavTab(
-            icon: Icons.search_rounded,
-            selectedIcon: Icons.travel_explore,
+            icon: LucideIcons.search,
             label: l10n.nav_search_map,
             selected: !highlightNone && current == MainTab.search,
             bounce: !reduce && current == MainTab.search,
             onTap: () => context.go(AppRoutes.search),
           ),
           _NavTab(
-            icon: Icons.favorite_border,
-            selectedIcon: Icons.favorite,
+            icon: LucideIcons.heart,
             label: l10n.favorites_page_title,
             selected: !highlightNone && current == MainTab.favorites,
             bounce: !reduce && current == MainTab.favorites,
             onTap: () => context.go(AppRoutes.favorites),
           ),
           _NavTab(
-            icon: Icons.chat_bubble_outline_rounded,
-            selectedIcon: Icons.chat_bubble_rounded,
+            icon: LucideIcons.message_circle,
             label: l10n.nav_messages,
             selected: !highlightNone && current == MainTab.chat,
             bounce: !reduce && current == MainTab.chat,
@@ -90,8 +91,7 @@ class MainBottomNav extends StatelessWidget {
                 context.go(isSignedIn ? AppRoutes.chat : AppRoutes.login),
           ),
           _NavTab(
-            icon: Icons.person_outline,
-            selectedIcon: Icons.person,
+            icon: LucideIcons.user,
             label: l10n.profile_title,
             selected: !highlightNone && current == MainTab.profile,
             bounce: !reduce && current == MainTab.profile,
@@ -121,9 +121,7 @@ class MainBottomNav extends StatelessWidget {
                   height: 64,
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      for (final slot in slots) Expanded(child: slot),
-                    ],
+                    children: [for (final slot in slots) Expanded(child: slot)],
                   ),
                 ),
               ),
@@ -140,7 +138,6 @@ class MainBottomNav extends StatelessWidget {
 class _NavTab extends StatelessWidget {
   const _NavTab({
     required this.icon,
-    required this.selectedIcon,
     required this.label,
     required this.selected,
     required this.bounce,
@@ -148,14 +145,12 @@ class _NavTab extends StatelessWidget {
   });
 
   final IconData icon;
-  final IconData selectedIcon;
   final String label;
   final bool selected;
   final bool bounce;
   final VoidCallback onTap;
 
   static const double _iconSize = 22;
-  static const double _labelSize = 10.5;
   static const double _chipW = 46;
   static const double _chipH = 32;
 
@@ -166,7 +161,7 @@ class _NavTab extends StatelessWidget {
     final gradients = AppGradients.of(context);
 
     Widget glyph = Icon(
-      selected ? selectedIcon : icon,
+      icon,
       size: _iconSize,
       color: selected ? colors.onPrimary : colors.textMuted,
     );
@@ -190,7 +185,10 @@ class _NavTab extends StatelessWidget {
             ),
             child: glyph,
           )
-        : SizedBox(height: _chipH, child: Center(child: glyph));
+        : SizedBox(
+            height: _chipH,
+            child: Center(child: glyph),
+          );
 
     return Semantics(
       button: true,
@@ -213,10 +211,9 @@ class _NavTab extends StatelessWidget {
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: styles.labelMedium.copyWith(
-                fontSize: _labelSize,
+              style: styles.labelSmall.copyWith(
                 color: selected ? colors.primary : colors.onSurfaceVariant,
-                fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                fontWeight: selected ? FontWeight.w700 : null,
               ),
             ),
           ],

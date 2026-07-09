@@ -1,5 +1,6 @@
 // lib/features/search/presentation/widgets/search_filter_sheet.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/di/injection.dart';
@@ -12,6 +13,8 @@ import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/range_slider_field.dart';
 import '../../../../core/widgets/segmented_control.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/util/arabic_digits.dart';
+import '../../../../shared/util/localized_numbers.dart';
 import '../../../currencies/domain/entities/currency.dart';
 import '../../../currencies/domain/repositories/currencies_repository.dart';
 import '../../../listing_form/domain/entities/listing.dart';
@@ -386,7 +389,11 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
     final colors = AppColors.of(context);
     return Row(
       children: [
-        Icon(Icons.verified_outlined, size: AppSpacing.xl, color: colors.verified),
+        Icon(
+          LucideIcons.badge_check,
+          size: AppSpacing.xl,
+          color: colors.verified,
+        ),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: Text(
@@ -622,11 +629,18 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
 
   /// Compact, locale-aware money label. When [atCap] the upper-bound reads as
   /// "no max" (the slider's max position expresses an open-ended range).
+  /// Post-processed to Arabic-Indic digits under `ar` (intl's bundled `ar`
+  /// data keeps Western digits).
   String _formatPrice(double value, {bool atCap = false}) {
     final l10n = AppLocalizations.of(context)!;
     if (atCap) return l10n.search_filter_range_no_max;
-    final locale = Localizations.localeOf(context).toString();
-    return NumberFormat.compact(locale: locale).format(value.round());
+    final locale = Localizations.localeOf(context);
+    final compact = NumberFormat.compact(
+      locale: locale.toString(),
+    ).format(value.round());
+    return locale.languageCode == 'ar'
+        ? toArabicIndicNumerals(compact)
+        : compact;
   }
 
   Widget _buildRoomsSection(BuildContext context) {
@@ -665,8 +679,7 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
   }) {
     final l10n = AppLocalizations.of(context)!;
     final styles = AppTextStyles.of(context);
-    final locale = Localizations.localeOf(context).toString();
-    final numberFmt = NumberFormat.decimalPattern(locale);
+    final locale = Localizations.localeOf(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -686,8 +699,8 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
               ChoiceChip(
                 label: Text(
                   n == _kBedsBathsMax
-                      ? '${numberFmt.format(n)}+'
-                      : numberFmt.format(n),
+                      ? '${formatLocalizedNumber(n, locale)}+'
+                      : formatLocalizedNumber(n, locale),
                 ),
                 selected: value == n,
                 onSelected: (_) => onValueChanged(n),
@@ -732,9 +745,10 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
           formatValue: (v) => v >= _kAreaMax
               ? l10n.search_filter_range_no_max
               : l10n.search_filter_area_size_value(
-                  NumberFormat.decimalPattern(
-                    Localizations.localeOf(context).toString(),
-                  ).format(v.round()),
+                  formatLocalizedNumber(
+                    v.round(),
+                    Localizations.localeOf(context),
+                  ),
                 ),
           onChanged: (range) => setState(() => _areaRange = range),
         ),

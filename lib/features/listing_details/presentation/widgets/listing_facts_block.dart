@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/widgets/facts_grid.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/util/localized_numbers.dart';
 import '../../../listing_form/domain/entities/listing.dart';
 
 /// Premium uplift v2 — the listing-detail key-facts block.
@@ -20,33 +20,31 @@ class ListingFactsBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final numFmt = NumberFormat.decimalPattern(
-      Localizations.localeOf(context).toLanguageTag(),
-    );
+    final locale = Localizations.localeOf(context);
 
     final items = <FactItem>[
       if (listing.rooms != null)
         FactItem(
           icon: LucideIcons.bed,
-          value: numFmt.format(listing.rooms),
+          value: formatLocalizedNumber(listing.rooms!, locale),
           label: l10n.spec_rooms_label,
         ),
       if (listing.bathrooms != null)
         FactItem(
           icon: LucideIcons.bath,
-          value: numFmt.format(listing.bathrooms),
+          value: formatLocalizedNumber(listing.bathrooms!, locale),
           label: l10n.spec_baths_label,
         ),
       if (listing.areaSize != null)
         FactItem(
           icon: LucideIcons.ruler,
-          value: '${_formatArea(numFmt, listing.areaSize!)} ${l10n.spec_area_unit}',
+          value: '${_formatArea(locale, listing.areaSize!)} ${l10n.spec_area_unit}',
           label: l10n.spec_area_label,
         ),
       if (listing.floor != null)
         FactItem(
           icon: LucideIcons.layers,
-          value: numFmt.format(listing.floor),
+          value: formatLocalizedNumber(listing.floor!, locale),
           label: l10n.spec_floor_label,
         ),
       FactItem(
@@ -59,9 +57,11 @@ class ListingFactsBlock extends StatelessWidget {
     return FactsGrid(items: items);
   }
 
-  static String _formatArea(NumberFormat fmt, double value) {
-    if (value == value.roundToDouble()) return fmt.format(value.round());
-    return fmt.format(double.parse(value.toStringAsFixed(1)));
+  static String _formatArea(Locale locale, double value) {
+    if (value == value.roundToDouble()) {
+      return formatLocalizedNumber(value.round(), locale);
+    }
+    return formatLocalizedNumber(double.parse(value.toStringAsFixed(1)), locale);
   }
 
   String _propertyTypeLabel(AppLocalizations l10n, PropertyType type) {

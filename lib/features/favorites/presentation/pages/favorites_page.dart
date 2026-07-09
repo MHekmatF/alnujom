@@ -19,7 +19,6 @@ import '../../../../core/widgets/deep_link_aware_back_button.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/main_bottom_nav.dart';
-import '../../../../core/widgets/publish_fab.dart';
 import '../../../../core/widgets/reduce_motion.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../core/widgets/star_refresh_indicator.dart';
@@ -105,7 +104,6 @@ class _FavoritesView extends StatelessWidget {
         ],
       ),
       bottomNavigationBar: const MainBottomNav(current: MainTab.favorites),
-      floatingActionButton: const PublishFab(),
     );
   }
 }

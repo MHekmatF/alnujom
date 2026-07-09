@@ -72,7 +72,6 @@ class BrandMark extends StatelessWidget {
           wordmark,
           style: styles.headlineMedium.copyWith(
             color: color ?? colors.onSurface,
-            fontWeight: FontWeight.w800,
           ),
         ),
       ],

@@ -42,6 +42,12 @@ import '../../../../l10n/app_localizations.dart';
 /// canonical link). No sticky/pinned bottom bar — the CTA lives inline in the
 /// contact card.
 ///
+/// Phase 35 (035-redesign-ground-up) craft pass — per the approved mockup,
+/// exactly TWO high-emphasis actions remain: WhatsApp (green fill) + Call
+/// (outlined) side by side; Send-inquiry / Request-viewing / Message are
+/// demoted to quiet small text buttons in a row beneath. All handlers,
+/// visibility rules, and lead-event analytics are unchanged.
+///
 /// FR-001d: self-contact guard — when the signed-in user IS the publisher the
 /// widget collapses to `SizedBox.shrink()`.
 class ContactBlock extends StatelessWidget {
@@ -81,49 +87,15 @@ class ContactBlock extends StatelessWidget {
           final colors = AppColors.of(context);
           final styles = AppTextStyles.of(context);
 
-          // Secondary actions. Call (when present) + Message share the top
-          // row; Request-a-viewing takes a full-width row beneath so its longer
-          // Arabic label never truncates. Same handlers / visibility as before.
-          final rowOneButtons = <Widget>[
-            // Call CTA — visible only when phone is set (FR-001a).
-            if (state.showCall)
+          // Approved mockup: exactly TWO high-emphasis contact actions —
+          // WhatsApp (brand-green fill) + Call (outlined), side by side.
+          // WhatsApp keeps the Phase-28 pre-filled message and its
+          // disabled-without-number tooltip (Q1=B-refined preserved
+          // verbatim); Call keeps FR-001a visibility (only when phone set).
+          final primaryButtons = <Widget>[
+            if (state.showWhatsApp)
               Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () => _onCallPressed(context, state.phone!),
-                  icon: const Icon(Icons.phone_outlined),
-                  label: Text(l10n.cta_call, overflow: TextOverflow.ellipsis),
-                ),
-              ),
-            // In-app chat CTA — opens (or creates) a conversation with the
-            // publisher. The block is hidden for self-contact, so no self-msg.
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => _onMessagePressed(context),
-                icon: const Icon(Icons.forum_outlined),
-                label: Text(
-                  l10n.chatContactAction,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ),
-          ];
-          // Request-a-viewing CTA — full-width row beneath the pair; opens the
-          // date/time request sheet. Hidden for self-contact, so no self-viewing.
-          final viewingButton = OutlinedButton.icon(
-            onPressed: () => _onRequestViewingPressed(context),
-            icon: const Icon(Icons.calendar_today_outlined),
-            label: Text(
-              l10n.viewingRequestAction,
-              overflow: TextOverflow.ellipsis,
-            ),
-          );
-
-          // WhatsApp CTA — Phase 28: promoted to the MOST prominent contact
-          // action — a full-width brand-green button with a localized
-          // pre-filled message. Still always rendered while disabled without
-          // a number (Q1=B-refined preserved verbatim).
-          final whatsappCta = state.showWhatsApp
-              ? Tooltip(
+                child: Tooltip(
                   message: state.whatsappEnabled
                       ? ''
                       : l10n.contact_whatsapp_disabled_tooltip,
@@ -136,23 +108,53 @@ class ContactBlock extends StatelessWidget {
                         ? () => _onWhatsAppPressed(context, state.whatsapp!)
                         : null,
                   ),
-                )
-              : null;
-
-          // Send-inquiry — full-width (always present for non-self-contact
-          // per FR-001c), now seconded to the WhatsApp CTA.
-          final primary = state.showInquiry
-              ? AppButton(
-                  label: l10n.cta_send_inquiry,
-                  variant: AppButtonVariant.filledPrimary,
-                  icon: Icons.email_outlined,
+                ),
+              ),
+            if (state.showCall)
+              Expanded(
+                child: AppButton(
+                  label: l10n.cta_call,
+                  variant: AppButtonVariant.outlined,
+                  icon: Icons.phone_outlined,
                   expanded: true,
-                  onPressed: () => _onSendInquiryPressed(context),
-                )
-              : null;
+                  onPressed: () => _onCallPressed(context, state.phone!),
+                ),
+              ),
+          ];
 
-          // Stack the seller-trust summary (rating + response badge) above the
-          // WhatsApp + inquiry CTAs over the Call/Message/Viewing row. The
+          // In-app options demoted to quiet, small text buttons beneath the
+          // primary pair: Send inquiry (FR-001c), Request a viewing, and
+          // Message. Same handlers/visibility as before — only the visual
+          // emphasis changed. A Wrap keeps longer Arabic labels from
+          // truncating on narrow widths.
+          final quietActions = Wrap(
+            alignment: WrapAlignment.center,
+            spacing: AppSpacing.sm,
+            children: [
+              if (state.showInquiry)
+                TextButton.icon(
+                  onPressed: () => _onSendInquiryPressed(context),
+                  icon: const Icon(Icons.email_outlined, size: AppSpacing.lg),
+                  label: Text(l10n.cta_send_inquiry),
+                ),
+              TextButton.icon(
+                onPressed: () => _onRequestViewingPressed(context),
+                icon: const Icon(
+                  Icons.calendar_today_outlined,
+                  size: AppSpacing.lg,
+                ),
+                label: Text(l10n.viewingRequestAction),
+              ),
+              TextButton.icon(
+                onPressed: () => _onMessagePressed(context),
+                icon: const Icon(Icons.forum_outlined, size: AppSpacing.lg),
+                label: Text(l10n.chatContactAction),
+              ),
+            ],
+          );
+
+          // Stack the seller-trust summary (rating + response badge) above
+          // the WhatsApp + Call pair and the quiet text-button row. The
           // summary reads the page-provided SellerTrustCubit and collapses
           // when no data.
           final actionStack = Column(
@@ -160,13 +162,11 @@ class ContactBlock extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               const SellerTrustSummary(),
-              if (whatsappCta != null) whatsappCta,
-              if (whatsappCta != null) const SizedBox(height: AppSpacing.sm),
-              if (primary != null) primary,
-              if (primary != null) const SizedBox(height: AppSpacing.sm),
-              Row(children: _interspersed(rowOneButtons)),
-              const SizedBox(height: AppSpacing.sm),
-              SizedBox(width: double.infinity, child: viewingButton),
+              if (primaryButtons.isNotEmpty)
+                Row(children: _interspersed(primaryButtons)),
+              if (primaryButtons.isNotEmpty)
+                const SizedBox(height: AppSpacing.xs),
+              quietActions,
             ],
           );
 
@@ -180,9 +180,7 @@ class ContactBlock extends StatelessWidget {
               children: [
                 Text(
                   l10n.contact_section_title,
-                  style: styles.titleMedium.copyWith(
-                    color: colors.onSurface,
-                  ),
+                  style: styles.titleMedium.copyWith(color: colors.onSurface),
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 AgentCard(
@@ -201,9 +199,7 @@ class ContactBlock extends StatelessWidget {
             children: [
               Text(
                 l10n.contact_section_title,
-                style: styles.titleMedium.copyWith(
-                  color: colors.onSurface,
-                ),
+                style: styles.titleMedium.copyWith(color: colors.onSurface),
               ),
               const SizedBox(height: AppSpacing.sm),
               actionStack,

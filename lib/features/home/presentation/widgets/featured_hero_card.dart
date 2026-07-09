@@ -18,6 +18,8 @@ import '../../../../core/widgets/status_pill.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/money.dart';
 import '../../../../shared/presentation/money_formatter.dart';
+import '../../../../shared/util/localized_numbers.dart';
+import '../../../../shared/util/location_line.dart';
 import '../../../currencies/domain/entities/currency.dart';
 import '../../../favorites/presentation/widgets/favorite_heart_button.dart';
 import '../../domain/entities/home_listing_card.dart';
@@ -149,12 +151,12 @@ class FeaturedHeroCard extends StatelessWidget {
                                 color: colors.onPhoto,
                               ),
                             ),
-                            if (_specChips(l10n).isNotEmpty) ...[
+                            if (_specChips(l10n, locale).isNotEmpty) ...[
                               const SizedBox(height: AppSpacing.md),
                               Wrap(
                                 spacing: AppSpacing.sm,
                                 runSpacing: AppSpacing.xs,
-                                children: _specChips(l10n),
+                                children: _specChips(l10n, locale),
                               ),
                             ],
                           ],
@@ -171,29 +173,34 @@ class FeaturedHeroCard extends StatelessWidget {
     );
   }
 
-  List<Widget> _specChips(AppLocalizations l10n) {
+  List<Widget> _specChips(AppLocalizations l10n, Locale locale) {
     return [
       if (card.rooms != null)
-        GlassPill(label: '${card.rooms}', icon: LucideIcons.bed_double),
+        GlassPill(
+          label: formatLocalizedNumber(card.rooms!, locale),
+          icon: LucideIcons.bed_double,
+        ),
       if (card.bathrooms != null)
-        GlassPill(label: '${card.bathrooms}', icon: LucideIcons.bath),
+        GlassPill(
+          label: formatLocalizedNumber(card.bathrooms!, locale),
+          icon: LucideIcons.bath,
+        ),
       if (card.areaSize != null)
         GlassPill(
-          label: '${card.areaSize!.toStringAsFixed(0)} ${l10n.spec_area_unit}',
+          label:
+              '${formatLocalizedNumber(card.areaSize!.round(), locale)} ${l10n.spec_area_unit}',
           icon: LucideIcons.ruler,
         ),
     ];
   }
 
   String _locationLabel(HomeListingCard c) {
-    final parts = <String>[
-      if (c.governorateNameLocalized.isNotEmpty &&
-          c.governorateNameLocalized != '—')
-        c.governorateNameLocalized,
-      if (c.cityNameLocalized.isNotEmpty && c.cityNameLocalized != '—')
-        c.cityNameLocalized,
-    ];
-    return parts.isEmpty ? '—' : parts.join(' • ');
+    final line = listingLocationLine(
+      governorate: c.governorateNameLocalized,
+      city: c.cityNameLocalized,
+      area: c.areaNameLocalized,
+    );
+    return line.isEmpty ? '—' : line;
   }
 
   String _formatPrice(Locale locale) {

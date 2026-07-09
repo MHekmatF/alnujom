@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
-import 'package:intl/intl.dart';
 
 import '../theme/colors.dart';
 import '../theme/spacing.dart';
 import '../theme/typography.dart';
 import '../../l10n/app_localizations.dart';
+import '../../shared/util/localized_numbers.dart';
 
 /// Phase 25 uplift v2 — compact key-facts row (beds · baths · area) for property
 /// cards. Renders only the specs that are present (land has no rooms/baths).
@@ -37,9 +37,7 @@ class PropertySpecsRow extends StatelessWidget {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
     final l10n = AppLocalizations.of(context)!;
-    final numFmt = NumberFormat.decimalPattern(
-      Localizations.localeOf(context).toLanguageTag(),
-    );
+    final locale = Localizations.localeOf(context);
     final fg = color ?? colors.onSurfaceVariant;
     final textStyle = styles.labelMedium.copyWith(color: fg);
 
@@ -48,8 +46,9 @@ class PropertySpecsRow extends StatelessWidget {
       items.add(
         _SpecItem(
           icon: LucideIcons.bed,
-          value: numFmt.format(rooms),
-          semantic: '${numFmt.format(rooms)} ${l10n.spec_rooms_label}',
+          value: formatLocalizedNumber(rooms!, locale),
+          semantic:
+              '${formatLocalizedNumber(rooms!, locale)} ${l10n.spec_rooms_label}',
           style: textStyle,
           color: fg,
         ),
@@ -59,15 +58,16 @@ class PropertySpecsRow extends StatelessWidget {
       items.add(
         _SpecItem(
           icon: LucideIcons.bath,
-          value: numFmt.format(bathrooms),
-          semantic: '${numFmt.format(bathrooms)} ${l10n.spec_baths_label}',
+          value: formatLocalizedNumber(bathrooms!, locale),
+          semantic:
+              '${formatLocalizedNumber(bathrooms!, locale)} ${l10n.spec_baths_label}',
           style: textStyle,
           color: fg,
         ),
       );
     }
     if (areaSize != null) {
-      final area = '${_formatArea(numFmt, areaSize!)} ${l10n.spec_area_unit}';
+      final area = '${_formatArea(locale, areaSize!)} ${l10n.spec_area_unit}';
       items.add(
         _SpecItem(
           icon: LucideIcons.ruler,
@@ -88,9 +88,11 @@ class PropertySpecsRow extends StatelessWidget {
     return Row(mainAxisSize: MainAxisSize.min, children: children);
   }
 
-  static String _formatArea(NumberFormat fmt, double value) {
-    if (value == value.roundToDouble()) return fmt.format(value.round());
-    return fmt.format(double.parse(value.toStringAsFixed(1)));
+  static String _formatArea(Locale locale, double value) {
+    if (value == value.roundToDouble()) {
+      return formatLocalizedNumber(value.round(), locale);
+    }
+    return formatLocalizedNumber(double.parse(value.toStringAsFixed(1)), locale);
   }
 }
 

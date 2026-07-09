@@ -3,9 +3,6 @@ import 'dart:math' as math;
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
-// hide intl's TextDirection so it doesn't shadow dart:ui's.
-import 'package:intl/intl.dart' hide TextDirection;
-
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/motion.dart';
 import '../../../../core/theme/radii.dart';
@@ -13,6 +10,7 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/util/localized_numbers.dart';
 
 /// Premium uplift — listing-detail financing ("حاسبة التمويل") calculator.
 ///
@@ -24,7 +22,8 @@ import '../../../../l10n/app_localizations.dart';
 ///
 /// The estimate is shown in the LISTING'S OWN currency — there is NO conversion
 /// (the [currencyCode] suffix labels the primary price's currency verbatim).
-/// All figures render in the active locale's numerals via [NumberFormat].
+/// All figures render in the active locale's numerals via
+/// [formatLocalizedNumber].
 ///
 /// Self-contained + indicative only: it touches no BLoC, no network, no routing
 /// — purely a local helper for the buyer.
@@ -148,19 +147,15 @@ class _AffordabilityCalculatorState extends State<AffordabilityCalculator> {
     AppColors colors,
     AppTextStyles styles,
   ) {
-    final localeTag = Localizations.localeOf(context).toLanguageTag();
-    final intFmt = NumberFormat.decimalPattern(localeTag)
-      ..maximumFractionDigits = 0;
-    final percentFmt = NumberFormat.decimalPattern(localeTag)
-      ..maximumFractionDigits = 0;
+    final locale = Localizations.localeOf(context);
 
     String money(double value) => l10n.priceWithCurrency(
-      intFmt.format(value.round()),
+      formatLocalizedNumber(value.round(), locale),
       widget.currencyCode,
     );
     String percent(double value) =>
         l10n.listing_details_affordability_percent_value(
-          percentFmt.format(value.round()),
+          formatLocalizedNumber(value.round(), locale),
         );
 
     return Padding(
@@ -213,7 +208,7 @@ class _AffordabilityCalculatorState extends State<AffordabilityCalculator> {
           _PercentSlider(
             label: l10n.listing_details_affordability_term_label,
             valueText: l10n.listing_details_affordability_years(
-              intFmt.format(_termYears),
+              formatLocalizedNumber(_termYears, locale),
             ),
             min: _termMin,
             max: _termMax,

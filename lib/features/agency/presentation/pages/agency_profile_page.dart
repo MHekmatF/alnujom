@@ -9,7 +9,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart' hide TextDirection;
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
@@ -21,6 +20,7 @@ import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/util/localized_numbers.dart';
 import '../../domain/entities/agency.dart';
 import '../../domain/entities/agency_status.dart';
 import '../bloc/agency_listings_bloc.dart';
@@ -296,9 +296,6 @@ class _ListingRow extends StatelessWidget {
   /// Localized amount in the active locale's numerals (Arabic-Indic in ar),
   /// with no fractional part — mirrors the favorites/search card idiom.
   String _formatAmount(BuildContext context, num amount) {
-    final fmt = NumberFormat.decimalPattern(
-      Localizations.localeOf(context).toLanguageTag(),
-    )..maximumFractionDigits = 0;
-    return fmt.format(amount);
+    return formatLocalizedNumber(amount.round(), Localizations.localeOf(context));
   }
 }

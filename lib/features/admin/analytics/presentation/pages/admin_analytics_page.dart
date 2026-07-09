@@ -23,6 +23,7 @@ import '../../../../../core/widgets/error_state.dart';
 import '../../../../../core/widgets/loading_state.dart';
 import '../../../../../core/widgets/staggered_list_item.dart';
 import '../../../../../l10n/app_localizations.dart';
+import '../../../../../shared/util/localized_numbers.dart';
 import '../../domain/entities/admin_analytics.dart';
 import '../bloc/admin_analytics_cubit.dart';
 import '../bloc/admin_analytics_state.dart';
@@ -96,7 +97,6 @@ class _Body extends StatelessWidget {
         title: l10n.adminAnalyticsListingsByGovernorateTitle,
         emptyHint: l10n.adminAnalyticsEmptyHint,
         points: analytics.listingsByGovernorate,
-        locale: locale,
         isArabic: isArabic,
       ),
     ];
@@ -191,20 +191,18 @@ class _GovernorateHbarCard extends StatelessWidget {
     required this.title,
     required this.emptyHint,
     required this.points,
-    required this.locale,
     required this.isArabic,
   });
 
   final String title;
   final String emptyHint;
   final List<AdminGovernorateTotal> points;
-  final String locale;
   final bool isArabic;
 
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    final fmt = NumberFormat.decimalPattern(locale);
+    final numLocale = Localizations.localeOf(context);
 
     return AdminChartCard(
       title: title,
@@ -218,7 +216,7 @@ class _GovernorateHbarCard extends StatelessWidget {
           return TokenHbarItem(
             label: name,
             value: p.total,
-            valueLabel: fmt.format(p.total),
+            valueLabel: formatLocalizedNumber(p.total, numLocale),
             barColor: colors.accent,
           );
         }).toList(growable: false),

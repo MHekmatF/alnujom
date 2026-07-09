@@ -27,6 +27,9 @@ class HomeListingCard extends Equatable {
     required this.purpose,
     required this.governorateNameLocalized,
     required this.cityNameLocalized,
+    this.areaNameLocalized = '',
+    this.phone,
+    this.whatsapp,
     required this.primaryPrice,
     required this.mainImageStoragePath,
     required this.mainImageUrl,
@@ -51,6 +54,16 @@ class HomeListingCard extends Equatable {
   final ListingPurpose purpose;
   final String governorateNameLocalized;
   final String cityNameLocalized;
+
+  /// 035 craft wave — neighbourhood name for the `city · area` location line
+  /// (empty when the listing has no area row). Supersedes the Phase-13
+  /// FR-017 city-only note above, per the approved artifact's card anatomy.
+  final String areaNameLocalized;
+
+  /// 035 craft wave — listing contact numbers so feed cards can launch
+  /// WhatsApp directly (nullable; the card falls back to opening the detail).
+  final String? phone;
+  final String? whatsapp;
   final ListingPrice primaryPrice;
 
   /// Nullable per Phase 11 FR-022 zero-image defensive guard. A row with no
@@ -109,6 +122,9 @@ class HomeListingCard extends Equatable {
     purpose,
     governorateNameLocalized,
     cityNameLocalized,
+    areaNameLocalized,
+    phone,
+    whatsapp,
     primaryPrice,
     mainImageStoragePath,
     mainImageUrl,

@@ -32,6 +32,7 @@ import '../../../../features/listing_form/domain/entities/listing_media.dart';
 import '../../../../features/listing_form/domain/entities/listing_price.dart';
 import '../../../../features/listing_form/presentation/util/listing_enum_labels.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../favorites/presentation/widgets/favorite_heart_button.dart';
 import '../../../../shared/presentation/widgets/listing_display/listing_amenities_block.dart';
 import '../../../../shared/presentation/widgets/listing_display/listing_description_block.dart';
 import '../../../../shared/presentation/widgets/listing_display/listing_gallery.dart';
@@ -269,6 +270,18 @@ class _SuccessBodyState extends State<_SuccessBody> {
               elevation: 0,
               foregroundColor: AppColors.of(context).onPhoto,
               leading: const DeepLinkAwareBackButton(),
+              // 035 craft wave — favoriting lives HERE (the gallery heart,
+              // same affordance as the feed cards); the old duplicate
+              // Favorite button in the bottom action block was removed.
+              actions: [
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(end: AppSpacing.md),
+                  child: FavoriteHeartButton(
+                    listingId: aggregate.listing.id,
+                    style: FavoriteHeartStyle.onImage,
+                  ),
+                ),
+              ],
               flexibleSpace: FlexibleSpaceBar(
                 collapseMode: CollapseMode.parallax,
                 background: _GalleryWithVideoTap(
@@ -281,7 +294,7 @@ class _SuccessBodyState extends State<_SuccessBody> {
               child: StaggeredListItem(
                 index: 1,
                 child: Padding(
-                  padding: const EdgeInsetsDirectional.all(AppSpacing.md),
+                  padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -466,8 +479,8 @@ class _SuccessBodyState extends State<_SuccessBody> {
                         ),
                         const SizedBox(height: AppSpacing.md),
                       ],
-                      // 9. Per-listing action block — Favorite + Report live;
-                      //    Share now live (premium uplift v2) with title + price.
+                      // 9. Per-listing action block — quiet Share + Report text
+                      //    buttons (035: duplicate Favorite CTA removed).
                       PerListingActionBlock(
                         listingId: aggregate.listing.id,
                         shareTitle: aggregate.listing.title,
@@ -776,7 +789,9 @@ class _PurposeTagChip extends StatelessWidget {
           ),
           child: Text(
             listingPurposeLabel(purpose, l10n),
-            style: styles.labelMedium.copyWith(color: colors.onPrimaryContainer),
+            style: styles.labelMedium.copyWith(
+              color: colors.onPrimaryContainer,
+            ),
           ),
         ),
       ),

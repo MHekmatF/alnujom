@@ -14,6 +14,7 @@ import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
+import '../../../../shared/util/localized_numbers.dart';
 import '../bloc/notification_badge_cubit.dart';
 
 class NotificationBellAction extends StatelessWidget {
@@ -71,23 +72,20 @@ class _Badge extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
+    final locale = Localizations.localeOf(context);
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xxs),
       constraints: const BoxConstraints(
         minWidth: AppSpacing.lg,
         minHeight: AppSpacing.lg,
       ),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: colors.error,
-      ),
+      decoration: BoxDecoration(shape: BoxShape.circle, color: colors.error),
       alignment: Alignment.center,
       child: Text(
-        count > 99 ? '99+' : '$count',
-        style: styles.labelMedium.copyWith(
-          color: colors.onError,
-          fontWeight: FontWeight.w700,
-        ),
+        count > 99
+            ? '${formatLocalizedNumber(99, locale)}+'
+            : formatLocalizedNumber(count, locale),
+        style: styles.labelMedium.copyWith(color: colors.onError),
       ),
     );
   }

@@ -26,6 +26,7 @@ import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/util/localized_numbers.dart';
 import '../../domain/entities/agency.dart';
 import '../../domain/entities/agency_status.dart';
 import '../../domain/entities/agency_verification_request.dart';
@@ -238,7 +239,8 @@ class _VerificationFormState extends State<_VerificationForm> {
           AppButton(
             label: _evidenceUrls.isEmpty
                 ? l10n.agency_verify_documents_label
-                : '${l10n.agency_verify_documents_label} (${_evidenceUrls.length})',
+                : '${l10n.agency_verify_documents_label} '
+                      '(${formatLocalizedNumber(_evidenceUrls.length, Localizations.localeOf(context))})',
             variant: AppButtonVariant.outlined,
             icon: LucideIcons.paperclip,
             loading: _uploadingDoc,

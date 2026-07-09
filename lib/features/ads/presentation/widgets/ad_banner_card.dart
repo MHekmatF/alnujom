@@ -54,69 +54,67 @@ class AdBannerCard extends StatelessWidget {
             child: AspectRatio(
               aspectRatio: 16 / 5,
               child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    CachedNetworkImage(
-                      imageUrl: imageUrl,
-                      fit: BoxFit.cover,
-                      placeholder: (_, __) =>
-                          ColoredBox(color: colors.surfaceVariant),
-                      errorWidget: (_, __, ___) => ColoredBox(
-                        color: colors.surfaceVariant,
-                        child: Icon(
-                          Icons.image_not_supported_outlined,
-                          color: colors.textMuted,
+                fit: StackFit.expand,
+                children: [
+                  CachedNetworkImage(
+                    imageUrl: imageUrl,
+                    fit: BoxFit.cover,
+                    placeholder: (_, __) =>
+                        ColoredBox(color: colors.surfaceVariant),
+                    errorWidget: (_, __, ___) => ColoredBox(
+                      color: colors.surfaceVariant,
+                      child: Icon(
+                        Icons.image_not_supported_outlined,
+                        color: colors.textMuted,
+                      ),
+                    ),
+                  ),
+                  // Bottom scrim so a white caption stays legible on any image.
+                  if (caption != null && caption.isNotEmpty)
+                    Positioned.fill(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: gradients.photoScrim,
                         ),
                       ),
                     ),
-                    // Bottom scrim so a white caption stays legible on any image.
-                    if (caption != null && caption.isNotEmpty)
-                      Positioned.fill(
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            gradient: gradients.photoScrim,
-                          ),
-                        ),
-                      ),
-                    // "إعلان / Sponsored" label — honest ad disclosure.
+                  // "إعلان / Sponsored" label — honest ad disclosure.
+                  PositionedDirectional(
+                    top: AppSpacing.sm,
+                    start: AppSpacing.sm,
+                    child: _SponsoredChip(label: l10n.ad_sponsored_label),
+                  ),
+                  if (caption != null && caption.isNotEmpty)
                     PositionedDirectional(
-                      top: AppSpacing.sm,
-                      start: AppSpacing.sm,
-                      child: _SponsoredChip(label: l10n.ad_sponsored_label),
-                    ),
-                    if (caption != null && caption.isNotEmpty)
-                      PositionedDirectional(
-                        start: AppSpacing.md,
-                        end: AppSpacing.md,
-                        bottom: AppSpacing.sm,
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                caption,
-                                style: AppTextStyles.of(context).labelLarge
-                                    .copyWith(
-                                      color: colors.onPhoto,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                      start: AppSpacing.md,
+                      end: AppSpacing.md,
+                      bottom: AppSpacing.sm,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              caption,
+                              style: AppTextStyles.of(
+                                context,
+                              ).labelLarge.copyWith(color: colors.onPhoto),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            Icon(
-                              Icons.chevron_left,
-                              color: colors.onPhoto,
-                              size: AppSpacing.lg,
-                            ),
-                          ],
-                        ),
+                          ),
+                          Icon(
+                            Icons.chevron_left,
+                            color: colors.onPhoto,
+                            size: AppSpacing.lg,
+                          ),
+                        ],
                       ),
-                  ],
-                ),
+                    ),
+                ],
               ),
             ),
           ),
         ),
+      ),
     );
   }
 }

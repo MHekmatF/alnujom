@@ -21,7 +21,6 @@ import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/main_bottom_nav.dart';
 import '../../../../core/widgets/press_scale.dart';
-import '../../../../core/widgets/publish_fab.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/conversation.dart';
@@ -53,7 +52,6 @@ class _ConversationsListPageState extends State<ConversationsListPage> {
       // 5-tab bottom nav (Messages active), and the floating publish FAB.
       drawer: const AppNavDrawer(),
       bottomNavigationBar: const MainBottomNav(current: MainTab.chat),
-      floatingActionButton: const PublishFab(),
       body: BlocBuilder<ConversationsCubit, ConversationsState>(
         builder: (context, state) {
           switch (state.status) {
@@ -170,9 +168,7 @@ class _ConversationTile extends StatelessWidget {
                     title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: styles.titleMedium.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: styles.titleMedium,
                   ),
                   const SizedBox(height: AppSpacing.xxs),
                   // Role line, styled like a muted last-message preview.

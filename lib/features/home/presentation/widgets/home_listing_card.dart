@@ -18,6 +18,7 @@ import '../../../../core/widgets/status_pill.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/money.dart';
 import '../../../../shared/presentation/money_formatter.dart';
+import '../../../../shared/util/location_line.dart';
 import '../../../agency/presentation/widgets/agency_badge.dart';
 import '../../../currencies/domain/entities/currency.dart';
 import '../../../favorites/presentation/widgets/favorite_heart_button.dart';
@@ -66,129 +67,127 @@ class HomeListingCardTile extends StatelessWidget {
 
     return PressScale(
       child: Container(
-      margin: const EdgeInsetsDirectional.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.sm,
-      ),
-      decoration: BoxDecoration(
-        color: colors.card,
-        borderRadius: appRadius(AppRadii.lg),
-        border: Border.all(color: colors.outline),
-        boxShadow: elevation.level1,
-      ),
-      child: ClipRRect(
-        borderRadius: appRadius(AppRadii.lg),
-        child: Material(
-          type: MaterialType.transparency,
-          child: InkWell(
-            onTap: () => context.go(AppRoutes.listingDetailsFor(card.id)),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _Hero(
-                  imageUrl: card.mainImageUrl,
-                  l10n: l10n,
-                  listingId: card.id,
-                  purposeLabel: _purposeLabel(l10n, card.purpose),
-                  purposeColor: _purposeColor(colors, card.purpose),
-                  isFeatured: card.isFeatured,
-                ),
-                Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(
-                    AppSpacing.lg,
-                    AppSpacing.md,
-                    AppSpacing.lg,
-                    AppSpacing.md,
+        margin: const EdgeInsetsDirectional.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.sm,
+        ),
+        decoration: BoxDecoration(
+          color: colors.card,
+          borderRadius: appRadius(AppRadii.lg),
+          border: Border.all(color: colors.outline),
+          boxShadow: elevation.level1,
+        ),
+        child: ClipRRect(
+          borderRadius: appRadius(AppRadii.lg),
+          child: Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              onTap: () => context.go(AppRoutes.listingDetailsFor(card.id)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _Hero(
+                    imageUrl: card.mainImageUrl,
+                    l10n: l10n,
+                    listingId: card.id,
+                    purposeLabel: _purposeLabel(l10n, card.purpose),
+                    purposeColor: _purposeColor(colors, card.purpose),
+                    isFeatured: card.isFeatured,
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Title leads the body — a tight, bold listing name.
-                      Text(
-                        card.title.isEmpty ? '—' : card.title,
-                        style: styles.titleMedium,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      Row(
-                        children: [
-                          Icon(
-                            LucideIcons.map_pin,
-                            size: AppSpacing.lg,
-                            color: colors.textMuted,
-                          ),
-                          const SizedBox(width: AppSpacing.xs),
-                          Expanded(
-                            child: Text(
-                              _locationLabel(card),
-                              style: styles.bodyMedium.copyWith(
-                                color: colors.textMuted,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      // Bold blue price — the loudest figure in the body.
-                      _PriceLine(
-                        text: _formatPrice(locale),
-                        styles: styles,
-                      ),
-                      // Compact beds/baths/area row beneath the price.
-                      if (hasSpecs) ...[
-                        const SizedBox(height: AppSpacing.sm),
-                        PropertySpecsRow(
-                          rooms: card.rooms,
-                          bathrooms: card.bathrooms,
-                          areaSize: card.areaSize,
-                          color: colors.textMuted,
+                  Padding(
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                      AppSpacing.lg,
+                      AppSpacing.md,
+                      AppSpacing.lg,
+                      AppSpacing.md,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Title leads the body — a tight, bold listing name.
+                        Text(
+                          card.title.isEmpty ? '—' : card.title,
+                          style: styles.titleMedium,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ],
-                      // Phase 19 (FR-022) — verified-agency footer; rendered
-                      // only for approved agencies (no reflow otherwise per
-                      // FR-023), separated by a hairline divider.
-                      if (card.agencyId != null && card.agencyName != null) ...[
-                        const SizedBox(height: AppSpacing.md),
-                        Divider(height: 1, color: colors.outline),
-                        const SizedBox(height: AppSpacing.md),
+                        const SizedBox(height: AppSpacing.sm),
                         Row(
                           children: [
-                            Expanded(
-                              child: AgencyBadge(
-                                agencyId: card.agencyId!,
-                                agencyName: card.agencyName!,
-                                logoUrl: card.agencyLogoUrl,
-                              ),
+                            Icon(
+                              LucideIcons.map_pin,
+                              size: AppSpacing.lg,
+                              color: colors.textMuted,
                             ),
-                            const SizedBox(width: AppSpacing.sm),
-                            Text(
-                              _formatTimeSince(l10n, card.publishedAt),
-                              style: styles.labelMedium.copyWith(
-                                color: colors.textMuted,
+                            const SizedBox(width: AppSpacing.xs),
+                            Expanded(
+                              child: Text(
+                                _locationLabel(card),
+                                style: styles.bodyMedium.copyWith(
+                                  color: colors.textMuted,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
                         ),
-                      ] else ...[
-                        const SizedBox(height: AppSpacing.md),
-                        Text(
-                          _formatTimeSince(l10n, card.publishedAt),
-                          style: styles.labelMedium.copyWith(
+                        const SizedBox(height: AppSpacing.sm),
+                        // Bold blue price — the loudest figure in the body.
+                        _PriceLine(text: _formatPrice(locale), styles: styles),
+                        // Compact beds/baths/area row beneath the price.
+                        if (hasSpecs) ...[
+                          const SizedBox(height: AppSpacing.sm),
+                          PropertySpecsRow(
+                            rooms: card.rooms,
+                            bathrooms: card.bathrooms,
+                            areaSize: card.areaSize,
                             color: colors.textMuted,
                           ),
-                        ),
+                        ],
+                        // Phase 19 (FR-022) — verified-agency footer; rendered
+                        // only for approved agencies (no reflow otherwise per
+                        // FR-023), separated by a hairline divider.
+                        if (card.agencyId != null &&
+                            card.agencyName != null) ...[
+                          const SizedBox(height: AppSpacing.md),
+                          Divider(height: 1, color: colors.outline),
+                          const SizedBox(height: AppSpacing.md),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: AgencyBadge(
+                                  agencyId: card.agencyId!,
+                                  agencyName: card.agencyName!,
+                                  logoUrl: card.agencyLogoUrl,
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.sm),
+                              Text(
+                                _formatTimeSince(l10n, card.publishedAt),
+                                style: styles.labelMedium.copyWith(
+                                  color: colors.textMuted,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ] else ...[
+                          const SizedBox(height: AppSpacing.md),
+                          Text(
+                            _formatTimeSince(l10n, card.publishedAt),
+                            style: styles.labelMedium.copyWith(
+                              color: colors.textMuted,
+                            ),
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
-      ),
       ),
     );
   }
@@ -207,14 +206,12 @@ class HomeListingCardTile extends StatelessWidget {
   }
 
   String _locationLabel(HomeListingCard c) {
-    final parts = <String>[
-      if (c.governorateNameLocalized.isNotEmpty &&
-          c.governorateNameLocalized != '—')
-        c.governorateNameLocalized,
-      if (c.cityNameLocalized.isNotEmpty && c.cityNameLocalized != '—')
-        c.cityNameLocalized,
-    ];
-    return parts.isEmpty ? '—' : parts.join(' • ');
+    final line = listingLocationLine(
+      governorate: c.governorateNameLocalized,
+      city: c.cityNameLocalized,
+      area: c.areaNameLocalized,
+    );
+    return line.isEmpty ? '—' : line;
   }
 
   String _formatPrice(Locale locale) {

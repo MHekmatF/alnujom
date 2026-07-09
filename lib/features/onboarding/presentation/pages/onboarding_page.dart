@@ -152,7 +152,6 @@ class _OnboardingViewState extends State<_OnboardingView> {
                                 current.title,
                                 style: styles.displayMedium.copyWith(
                                   color: colors.onPhoto,
-                                  fontWeight: FontWeight.w800,
                                 ),
                               ),
                               const SizedBox(height: AppSpacing.md),
@@ -179,15 +178,12 @@ class _OnboardingViewState extends State<_OnboardingView> {
                                   margin: const EdgeInsetsDirectional.only(
                                     end: AppSpacing.xs,
                                   ),
-                                  width: active
-                                      ? AppSpacing.xl
-                                      : AppSpacing.sm,
+                                  width: active ? AppSpacing.xl : AppSpacing.sm,
                                   height: AppSpacing.sm,
                                   decoration: BoxDecoration(
                                     color: active
                                         ? colors.primary
-                                        : colors.onPhoto
-                                              .withValues(alpha: 0.5),
+                                        : colors.onPhoto.withValues(alpha: 0.5),
                                     borderRadius: appRadius(AppRadii.pill),
                                   ),
                                 );

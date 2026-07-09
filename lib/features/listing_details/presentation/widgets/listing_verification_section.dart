@@ -96,10 +96,7 @@ class _TrustBlock extends StatelessWidget {
               children: [
                 Text(
                   l10n.detail_field_verified_title,
-                  style: styles.titleMedium.copyWith(
-                    color: colors.verified,
-                    fontWeight: FontWeight.w800,
-                  ),
+                  style: styles.titleMedium.copyWith(color: colors.verified),
                 ),
                 const SizedBox(height: AppSpacing.xxs),
                 Text(
@@ -147,10 +144,7 @@ class _AttrTile extends StatelessWidget {
             style: styles.labelMedium.copyWith(color: colors.textMuted),
           ),
           const SizedBox(height: AppSpacing.xxs),
-          Text(
-            value,
-            style: styles.labelLarge.copyWith(fontWeight: FontWeight.w800),
-          ),
+          Text(value, style: styles.labelLarge),
         ],
       ),
     );

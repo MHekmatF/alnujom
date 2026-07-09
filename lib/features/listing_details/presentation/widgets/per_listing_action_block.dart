@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -9,15 +8,12 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../../../features/auth/presentation/bloc/auth_state.dart';
-import '../../../../features/favorites/presentation/bloc/favorites_cubit.dart';
 import '../../../../features/reports/presentation/widgets/report_sheet.dart';
 import '../../../../l10n/app_localizations.dart';
 
 /// Phase 13 (spec/013-home-and-details) — Per-listing action block.
 ///
-/// Favorite CTA rewired in Phase 17 (spec/017-favorites) to a live
-/// `BlocSelector`-driven toggle with the anonymous-aware `FavoritesCubit`
-/// branch. Report CTA rewired in Phase 18 (spec/018-reports-moderation) to
+/// Report CTA rewired in Phase 18 (spec/018-reports-moderation) to
 /// `_onReportTap`: anon → sign-in prompt + login route; signed-in → sheet.
 ///
 /// Premium uplift v2 — the Share CTA is now LIVE: it opens the OS share sheet
@@ -25,6 +21,11 @@ import '../../../../l10n/app_localizations.dart';
 /// listing. [shareTitle] / [sharePrice] are supplied by the detail page (which
 /// owns the localized title + formatted price); when absent the share text
 /// falls back to the deep link alone.
+///
+/// Phase 35 (035-redesign-ground-up) craft pass — the duplicate Favorite CTA
+/// was removed (favoriting lives on the listing-card / gallery heart), and
+/// Share + Report are demoted to small quiet text buttons in one row instead
+/// of three equal outlined buttons. Handlers unchanged.
 class PerListingActionBlock extends StatelessWidget {
   const PerListingActionBlock({
     super.key,
@@ -45,24 +46,11 @@ class PerListingActionBlock extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
+    // Quiet secondary utilities — two small text buttons in one row (the
+    // Favorite toggle lives on the listing-card / gallery heart, not here).
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // Favorite CTA — Phase 17 live toggle (Share + Report unchanged).
-        BlocSelector<FavoritesCubit, FavoritesState, bool>(
-          bloc: getIt<FavoritesCubit>(),
-          selector: (s) => s.favoritedIds.contains(listingId),
-          builder: (context, isFavorited) {
-            return _ActionButton(
-              icon: isFavorited ? Icons.favorite : Icons.favorite_border,
-              label: isFavorited
-                  ? l10n.favorite_unsave_label
-                  : l10n.favorite_heart_label,
-              onPressed: () => _onFavoriteTap(context),
-            );
-          },
-        ),
-        const SizedBox(width: AppSpacing.sm),
         // Share CTA — live via share_plus (premium uplift v2).
         _ActionButton(
           icon: Icons.share_outlined,
@@ -80,22 +68,9 @@ class PerListingActionBlock extends StatelessWidget {
     );
   }
 
-  /// Mirrors `FavoriteHeartButton._onTap` — anonymous branch shows prompt +
-  /// routes to login; authenticated branch toggles via the shared singleton.
-  void _onFavoriteTap(BuildContext context) {
-    final cubit = getIt<FavoritesCubit>();
-    if (!cubit.state.isSignedIn) {
-      final l10n = AppLocalizations.of(context)!;
-      AppToast.warning(context, l10n.favorite_sign_in_prompt);
-      context.push(AppRoutes.login);
-      return;
-    }
-    cubit.toggle(listingId);
-  }
-
   /// Phase 18 — anonymous branch: sign-in prompt snackbar + login route.
   /// Authenticated branch: open the ReportSheet modal bottom sheet.
-  /// Mirrors `_onFavoriteTap` auth-state pattern (FR-001 / FR-034).
+  /// Mirrors the favorites auth-state pattern (FR-001 / FR-034).
   void _onReportTap(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     if (getIt<AuthBloc>().state is! Authenticated) {
@@ -151,15 +126,15 @@ class _ActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Expanded(
-      child: OutlinedButton.icon(
-        onPressed: onPressed,
-        icon: Icon(icon, size: AppSpacing.xl),
-        label: Text(
-          label,
-          style: theme.textTheme.labelMedium,
-          overflow: TextOverflow.ellipsis,
-        ),
+    // Small quiet text button (035 craft pass) — was an Expanded outlined
+    // button when this row held three equal CTAs.
+    return TextButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, size: AppSpacing.lg),
+      label: Text(
+        label,
+        style: theme.textTheme.labelMedium,
+        overflow: TextOverflow.ellipsis,
       ),
     );
   }

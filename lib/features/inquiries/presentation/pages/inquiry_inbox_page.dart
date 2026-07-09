@@ -256,9 +256,7 @@ class _InquiryRowTile extends StatelessWidget {
                   Expanded(
                     child: Text(
                       displayName,
-                      style: styles.titleMedium.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                      style: styles.titleMedium,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),

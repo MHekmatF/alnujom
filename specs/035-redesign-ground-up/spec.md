@@ -41,6 +41,27 @@ the Phase-030 tabs (home/reels/favorites/profile + in-bar publish FAB).
   deed-type + finish-level columns + `search_listings` params + verified-first
   ranking, map draw-area query, saved-search alerts. Migrations via Supabase MCP.
 
+## UI-rescue plan (2026-07-09, supersedes the Glass-#8 detour)
+
+Diagnosis + staged plan in the session plan file; executed so far:
+
+- **Content kit + demo-data realism pass** ✅ — `mockups/content-kit.json` +
+  51 real property photos; live Supabase rewritten (16 approved realistic
+  listings, USD-integer prices, photos in `listing-images`, junk rejected,
+  reversed-text area name fixed). The single biggest perceived-quality win.
+- **GATE M (pending founder pick)** — three same-skeleton mockups
+  (`mockups/`, shots in `mockups/shots/`): **A** royal-blue flat (dossier
+  verbatim) · **B** disciplined Glass #8 · **C** blue flat + subtle depth.
+  Published as a claude.ai compare artifact. Founder picks ONE; then the
+  token/chrome swap (Gate T) + screen-by-screen rollout follow.
+- **Craft wave (direction-independent)** ✅ — see `STAGE2-CRAFT-WAVE.md`:
+  real 3-density card + real WhatsApp CTA, single Home header, FAB
+  overlap fixes, search XOR states, `city · area` location line (area now
+  projected by the home feed), ONE localized digit pipeline, whole-amount
+  prices drop `.00`, one green, one verified mark, one icon family in the
+  nav, weight-contrast type scale (body w400, inversion fixed, labelSmall
+  token), detail CTAs 8→2+quiet-row, gallery favorite heart.
+
 ## Stage 0 — what changed
 
 **Tokens** (`lib/core/theme/color_palette.dart`, `ModernPalette`): exact-value
