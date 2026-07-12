@@ -264,3 +264,4 @@ New design/
 /.agents/
 /skills-lock.json
 /.claude/skills/ui-ux-pro-max
+docs/release/compare-apks/*.apk
