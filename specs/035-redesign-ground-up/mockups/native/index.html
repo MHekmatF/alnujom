@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>النجوم — native M3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,300..500,0..1,0" rel="stylesheet">
+<style>
+/* =====================================================================
+   AlNujom — authentic Material 3 Android, marketplace anatomy.
+   Native components only: M3 NavigationBar (pill indicator), SearchBar,
+   SegmentedButton, FilterChip (check on selected), outlined Cards, FAB.
+   Fonts: Roboto (digits/latin) + Noto Sans Arabic (Android's Arabic).
+   Seed: royal blue #1F4FE6. Western digits (regional real-app norm).
+   ===================================================================== */
+* { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; }
+:root {
+  /* M3 scheme seeded from #1F4FE6 */
+  --primary:#1F4FE6; --on-primary:#FFFFFF;
+  --primary-container:#DCE1FF; --on-primary-container:#00174B;
+  --secondary-container:#DEE1F9; --on-secondary-container:#141B2C;
+  --surface:#FBF8FD; --surface-c-low:#F5F3F7; --surface-c:#EFEDF1; --surface-c-high:#E9E7EC;
+  --on-surface:#1B1B1F; --on-surface-var:#45464F;
+  --outline:#767680; --outline-var:#C6C5D0;
+  --inverse:#303034;
+  --green:#146C43; --green-container:#D3EFDF; --on-green-container:#0A3622;
+  --wa:#1DAB61;
+  --gold-container:#F5E3B9; --on-gold-container:#534000;
+  --error:#BA1A1A;
+  --scrim:rgba(0,0,0,.55);
+  --elev1:0 1px 2px rgba(0,0,0,.10), 0 1px 3px 1px rgba(0,0,0,.06);
+  --elev2:0 1px 2px rgba(0,0,0,.12), 0 2px 6px 2px rgba(0,0,0,.08);
+}
+.dark {
+  --primary:#B7C4FF; --on-primary:#00297A;
+  --primary-container:#003BAB; --on-primary-container:#DCE1FF;
+  --secondary-container:#414659; --on-secondary-container:#DEE1F9;
+  --surface:#131318; --surface-c-low:#1B1B21; --surface-c:#1F1F25; --surface-c-high:#2A2A31;
+  --on-surface:#E4E1E9; --on-surface-var:#C6C5D0;
+  --outline:#90909A; --outline-var:#45464F;
+  --inverse:#E4E1E9;
+  --green:#8AD5AB; --green-container:#0F5132; --on-green-container:#D3EFDF;
+  --wa:#25D366;
+  --gold-container:#5B4A11; --on-gold-container:#F5E3B9;
+  --error:#FFB4AB;
+  --elev1:0 1px 2px rgba(0,0,0,.4), 0 1px 3px 1px rgba(0,0,0,.3);
+  --elev2:0 1px 2px rgba(0,0,0,.45), 0 2px 6px 2px rgba(0,0,0,.35);
+}
+html { background:#2c3140; }
+body {
+  font-family:'Roboto','Noto Sans Arabic',sans-serif;
+  display:flex; justify-content:center;
+}
+.frame { width:412px; min-height:892px; background:var(--surface); color:var(--on-surface); position:relative; overflow:hidden; }
+
+.ms {
+  /* !important: generic descendant selectors (.fact span, .vcard span…) must
+     never override the icon font, or ligatures render as raw text. */
+  font-family:'Material Symbols Outlined' !important; font-weight:normal; font-style:normal;
+  font-size:24px; line-height:1; letter-spacing:normal; text-transform:none;
+  display:inline-block; white-space:nowrap; word-wrap:normal; direction:ltr;
+  font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;
+  -webkit-font-feature-settings:'liga'; -webkit-font-smoothing:antialiased; flex:none;
+}
+.ms.fill { font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24; }
+.ms.s20 { font-size:20px; font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 20; }
+.ms.s18 { font-size:18px; font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 20; }
+.ms.s16 { font-size:16px; font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 20; }
+
+/* ---------- Android status bar (clock LEFT — Android does not mirror it) ---------- */
+.status {
+  height:28px; display:flex; align-items:center; padding:0 14px 0 18px;
+  font-size:13.5px; font-weight:500; direction:ltr; color:var(--on-surface);
+}
+.status .sp { flex:1; }
+.status .ic { display:flex; align-items:center; gap:3px; }
+.status .ms { font-size:15px; }
+.batt { width:22px; height:11px; border:1.2px solid currentColor; border-radius:3px; position:relative; opacity:.9; }
+.batt::after { content:''; position:absolute; right:-3.4px; top:2.5px; width:2px; height:4px; background:currentColor; border-radius:0 1px 1px 0; }
+.batt i { position:absolute; inset:1.5px; right:30%; background:currentColor; border-radius:1px; }
+
+/* ---------- M3 top app bar (small, center-aligned none) ---------- */
+.appbar { height:64px; display:flex; align-items:center; padding:0 8px 0 4px; gap:4px; }
+.appbar .lead { display:flex; align-items:center; gap:10px; padding-inline-start:12px; }
+.logo {
+  width:30px; height:30px; border-radius:8px; background:var(--primary);
+  color:var(--on-primary); display:grid; place-items:center;
+}
+.logo .ms { font-size:18px; font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 20; }
+.appbar h1 { font-size:20px; font-weight:600; font-family:'Noto Sans Arabic',Roboto,sans-serif; }
+.appbar .sp { flex:1; }
+.iconbtn {
+  width:48px; height:48px; border-radius:99px; border:0; background:none;
+  color:var(--on-surface-var); display:grid; place-items:center; position:relative;
+}
+.iconbtn .badge {
+  position:absolute; top:10px; inset-inline-start:26px; min-width:15px; height:15px;
+  border-radius:99px; background:var(--error); color:#fff; font-size:10px; font-weight:500;
+  display:grid; place-items:center; padding:0 4px; direction:ltr;
+}
+.dark .iconbtn .badge { color:#131318; }
+
+/* ---------- M3 search bar ---------- */
+.searchwrap { padding:2px 16px 12px; }
+.searchbar {
+  height:56px; border-radius:28px; background:var(--surface-c-high);
+  display:flex; align-items:center; padding:0 16px; gap:14px;
+}
+.searchbar .ms { color:var(--on-surface-var); }
+.searchbar .ph { flex:1; font-size:15px; color:var(--on-surface-var); font-family:'Noto Sans Arabic',Roboto,sans-serif; }
+.searchbar .av {
+  width:30px; height:30px; border-radius:99px; background:var(--primary-container);
+  color:var(--on-primary-container); font-size:13px; font-weight:600;
+  display:grid; place-items:center; font-family:'Noto Sans Arabic',sans-serif;
+}
+
+/* ---------- M3 segmented button ---------- */
+.segwrap { padding:0 16px 12px; }
+.seg { display:flex; height:40px; border:1px solid var(--outline); border-radius:20px; overflow:hidden; }
+.seg button {
+  flex:1; border:0; background:none; font-family:'Noto Sans Arabic',Roboto,sans-serif;
+  font-size:14px; font-weight:500; color:var(--on-surface);
+  display:flex; align-items:center; justify-content:center; gap:6px;
+}
+.seg button + button { border-inline-start:1px solid var(--outline); }
+.seg button.on { background:var(--secondary-container); color:var(--on-secondary-container); }
+.seg .ms { font-size:18px; }
+
+/* ---------- M3 filter chips ---------- */
+.chips { display:flex; gap:8px; padding:0 16px 6px; overflow-x:auto; scrollbar-width:none; }
+.chips::-webkit-scrollbar { display:none; }
+.chip {
+  height:32px; padding:0 16px; border-radius:8px; border:1px solid var(--outline-var);
+  background:none; color:var(--on-surface-var); font-family:'Noto Sans Arabic',Roboto,sans-serif;
+  font-size:14px; font-weight:500; white-space:nowrap;
+  display:flex; align-items:center; gap:8px;
+}
+.chip.on { background:var(--secondary-container); border-color:transparent; color:var(--on-secondary-container); padding-inline-start:8px; }
+.chip .ms { font-size:18px; }
+
+/* ---------- section headers ---------- */
+.sec { display:flex; align-items:center; padding:14px 16px 10px; gap:8px; }
+.sec h2 { font-size:16px; font-weight:600; font-family:'Noto Sans Arabic',Roboto,sans-serif; }
+.sec .n { font-size:12px; color:var(--on-surface-var); }
+.sec .sp { flex:1; }
+.sec .txtbtn {
+  border:0; background:none; color:var(--primary); font-size:14px; font-weight:500;
+  font-family:'Noto Sans Arabic',Roboto,sans-serif; height:40px; padding:0 12px; border-radius:20px;
+}
+
+/* ---------- featured rail (elevated cards) ---------- */
+.rail { display:flex; gap:10px; padding:0 16px 4px; overflow-x:auto; scrollbar-width:none; }
+.rail::-webkit-scrollbar { display:none; }
+.fcard {
+  flex:none; width:220px; border-radius:12px; overflow:hidden;
+  background:var(--surface-c-low); box-shadow:var(--elev1);
+}
+.fcard .ph { position:relative; height:124px; }
+.fcard .ph img { width:100%; height:100%; object-fit:cover; display:block; }
+.fcard .bd { padding:10px 12px 12px; }
+.fprice { font-size:16px; font-weight:700; direction:ltr; text-align:start; unicode-bidi:isolate; }
+.fmeta { font-size:12px; color:var(--on-surface-var); margin-top:2px; }
+.ft { font-size:13px; margin-top:4px; font-family:'Noto Sans Arabic',Roboto,sans-serif;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+/* overlay chips */
+.ochip {
+  position:absolute; display:flex; align-items:center; gap:4px;
+  font-size:11px; font-weight:500; padding:4px 8px; border-radius:8px;
+  font-family:'Noto Sans Arabic',Roboto,sans-serif;
+}
+.ochip .ms { font-size:14px; }
+.ochip.gold { top:8px; inset-inline-start:8px; background:var(--gold-container); color:var(--on-gold-container); }
+.ochip.verify { top:8px; inset-inline-start:8px; background:var(--green-container); color:var(--on-green-container); }
+.ochip.count { bottom:8px; inset-inline-end:8px; background:var(--scrim); color:#fff; direction:ltr; }
+.heart {
+  position:absolute; top:4px; inset-inline-end:4px; width:40px; height:40px; border-radius:99px;
+  border:0; background:none; color:#fff; display:grid; place-items:center;
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.55));
+}
+
+/* ---------- listing cards (outlined M3) ---------- */
+.feed { padding:2px 16px 0; display:flex; flex-direction:column; gap:12px; }
+.card { border:1px solid var(--outline-var); border-radius:12px; background:var(--surface); overflow:hidden; }
+.card .ph { position:relative; height:200px; }
+.card .ph img { width:100%; height:100%; object-fit:cover; display:block; }
+.card .bd { padding:12px 14px 8px; }
+.price { font-size:18px; font-weight:700; direction:ltr; unicode-bidi:isolate; }
+.approx { font-size:12px; color:var(--on-surface-var); margin-inline-start:6px; }
+.specs { display:flex; align-items:center; gap:6px; margin-top:5px; font-size:13px; color:var(--on-surface-var); }
+.specs .ms { font-size:17px; }
+.specs b { font-weight:500; color:var(--on-surface); }
+.specs .dot { width:3px; height:3px; border-radius:99px; background:var(--outline-var); margin:0 2px; }
+.t { font-size:14px; margin-top:6px; font-family:'Noto Sans Arabic',Roboto,sans-serif;
+  color:var(--on-surface); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.loc { display:flex; align-items:center; gap:4px; margin-top:4px; font-size:12.5px; color:var(--on-surface-var); }
+.loc .ms { font-size:15px; }
+.loc .sp { flex:1; }
+.cardbar {
+  display:flex; align-items:center; padding:4px 6px 6px; margin-top:4px;
+  border-top:1px solid var(--surface-c);
+}
+.cardbar .who { display:flex; align-items:center; gap:8px; padding-inline-start:8px;
+  font-size:12.5px; color:var(--on-surface-var); font-family:'Noto Sans Arabic',Roboto,sans-serif; min-width:0; }
+.cardbar .who .ms { font-size:16px; color:var(--green); }
+.cardbar .sp { flex:1; }
+.tonalbtn {
+  height:36px; padding:0 14px; border-radius:18px; border:0;
+  background:var(--secondary-container); color:var(--on-secondary-container);
+  font-family:'Noto Sans Arabic',Roboto,sans-serif; font-size:13px; font-weight:500;
+  display:flex; align-items:center; gap:6px;
+}
+.tonalbtn .ms { font-size:17px; }
+.tonalbtn.wa { background:var(--green-container); color:var(--on-green-container); }
+.cardbar .tonalbtn + .tonalbtn { margin-inline-start:8px; }
+
+/* ---------- M3 navigation bar ---------- */
+.navpad { height:96px; }
+.m3nav {
+  position:absolute; bottom:0; inset-inline:0; height:80px;
+  background:var(--surface-c); display:flex; padding:10px 0 14px;
+}
+.m3nav button {
+  flex:1; border:0; background:none; font-family:'Noto Sans Arabic',Roboto,sans-serif;
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  font-size:12px; font-weight:500; color:var(--on-surface-var); position:relative;
+}
+.m3nav .pill {
+  width:64px; height:32px; border-radius:16px; display:grid; place-items:center;
+}
+.m3nav button.on .pill { background:var(--secondary-container); }
+.m3nav button.on { color:var(--on-surface); font-weight:600; }
+.m3nav button.on .ms { font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24; color:var(--on-secondary-container); }
+.m3nav .badge {
+  position:absolute; top:6px; inset-inline-start:calc(50% + 6px); min-width:15px; height:15px;
+  border-radius:99px; background:var(--error); color:#fff; font-size:10px; font-weight:500;
+  display:grid; place-items:center; padding:0 4px; direction:ltr; z-index:1;
+}
+.gesture { position:absolute; bottom:6px; left:50%; transform:translateX(-50%);
+  width:108px; height:4px; border-radius:99px; background:var(--on-surface); opacity:.28; z-index:5; }
+
+/* ---------- FAB ---------- */
+.fab {
+  position:absolute; bottom:96px; inset-inline-end:16px; height:56px; padding:0 20px;
+  border-radius:16px; border:0; background:var(--primary-container); color:var(--on-primary-container);
+  font-family:'Noto Sans Arabic',Roboto,sans-serif; font-size:14px; font-weight:600;
+  display:flex; align-items:center; gap:10px; box-shadow:var(--elev2);
+}
+
+/* ---------- detail ---------- */
+.gal { position:relative; height:290px; }
+.gal img { width:100%; height:100%; object-fit:cover; display:block; }
+.gal .top { position:absolute; top:36px; inset-inline:8px; display:flex; }
+.gal .top .sp { flex:1; }
+.circ {
+  width:44px; height:44px; border-radius:99px; border:0; margin:0 4px;
+  background:var(--surface); color:var(--on-surface);
+  display:grid; place-items:center; box-shadow:var(--elev1);
+}
+.gal .count { position:absolute; bottom:12px; inset-inline-end:12px; background:var(--scrim);
+  color:#fff; font-size:12px; font-weight:500; padding:4px 10px; border-radius:8px;
+  display:flex; align-items:center; gap:5px; direction:ltr; }
+.gal .count .ms { font-size:15px; }
+.gal .dots { position:absolute; bottom:14px; left:50%; transform:translateX(-50%); display:flex; gap:5px; }
+.gal .dots i { width:6px; height:6px; border-radius:99px; background:rgba(255,255,255,.6); }
+.gal .dots i.on { background:#fff; width:14px; }
+
+.dbody { padding:16px 16px 0; }
+.dprice { font-size:24px; font-weight:700; direction:ltr; unicode-bidi:isolate; }
+.dapprox { font-size:13px; color:var(--on-surface-var); margin-inline-start:8px; }
+.dchips { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+.achip {
+  height:30px; padding:0 12px; border-radius:8px; font-size:12.5px; font-weight:500;
+  display:flex; align-items:center; gap:5px; font-family:'Noto Sans Arabic',Roboto,sans-serif;
+}
+.achip .ms { font-size:16px; }
+.achip.green { background:var(--green-container); color:var(--on-green-container); }
+.achip.tonal { background:var(--secondary-container); color:var(--on-secondary-container); }
+.achip.plainc { border:1px solid var(--outline-var); color:var(--on-surface-var); }
+.dtitle { font-size:17px; font-weight:600; margin-top:12px; line-height:1.65;
+  font-family:'Noto Sans Arabic',Roboto,sans-serif; }
+.dloc { display:flex; align-items:center; gap:5px; margin-top:4px; font-size:13px; color:var(--on-surface-var); }
+.dloc .ms { font-size:16px; }
+
+.facts { display:flex; margin-top:14px; background:var(--surface-c-low); border-radius:12px; padding:14px 0; }
+.fact { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; }
+.fact + .fact { border-inline-start:1px solid var(--outline-var); }
+.fact .ms { font-size:22px; color:var(--on-surface-var); }
+.fact b { font-size:14px; font-weight:600; direction:ltr; }
+.fact span { font-size:11px; color:var(--on-surface-var); font-family:'Noto Sans Arabic',Roboto,sans-serif; }
+
+.vcard {
+  display:flex; gap:12px; align-items:flex-start; margin-top:12px;
+  background:var(--green-container); border-radius:12px; padding:14px;
+}
+.vcard .ms { color:var(--on-green-container); }
+.vcard b { font-size:13.5px; font-weight:600; color:var(--on-green-container); display:block;
+  font-family:'Noto Sans Arabic',Roboto,sans-serif; }
+.vcard span { font-size:12.5px; color:var(--on-green-container); opacity:.85; line-height:1.7;
+  font-family:'Noto Sans Arabic',Roboto,sans-serif; }
+
+.kv { margin-top:8px; }
+.kv .row { display:flex; align-items:center; padding:13px 2px; border-bottom:1px solid var(--surface-c); font-size:13.5px; }
+.kv .row:last-child { border-bottom:0; }
+.kv .ms { font-size:20px; color:var(--on-surface-var); margin-inline-end:14px; }
+.kv .k { color:var(--on-surface-var); flex:1; font-family:'Noto Sans Arabic',Roboto,sans-serif; }
+.kv .v { font-weight:500; font-family:'Noto Sans Arabic',Roboto,sans-serif; }
+
+.dsec { font-size:15px; font-weight:600; margin:16px 0 8px; font-family:'Noto Sans Arabic',Roboto,sans-serif; }
+.ddesc { font-size:13.5px; line-height:1.9; color:var(--on-surface-var); font-family:'Noto Sans Arabic',Roboto,sans-serif; }
+
+.dagent { margin-top:16px; background:var(--surface-c-low); border-radius:12px; padding:14px; }
+.dagent .r { display:flex; align-items:center; gap:12px; }
+.dagent .av { width:40px; height:40px; border-radius:99px; background:var(--primary-container);
+  color:var(--on-primary-container); display:grid; place-items:center; font-size:15px; font-weight:600;
+  font-family:'Noto Sans Arabic',sans-serif; }
+.dagent .who { flex:1; min-width:0; }
+.dagent .who b { font-size:14px; font-weight:600; display:flex; align-items:center; gap:5px;
+  font-family:'Noto Sans Arabic',Roboto,sans-serif; }
+.dagent .who b .ms { font-size:16px; color:var(--green); }
+.dagent .who span { font-size:12px; color:var(--on-surface-var); font-family:'Noto Sans Arabic',Roboto,sans-serif; }
+.dagent .ctas { display:flex; gap:10px; margin-top:14px; }
+.btn {
+  flex:1; height:40px; border-radius:20px; border:0; font-size:14px; font-weight:500;
+  font-family:'Noto Sans Arabic',Roboto,sans-serif;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.btn .ms { font-size:18px; }
+.btn.outl { border:1px solid var(--outline); background:none; color:var(--primary); }
+.btn.fill { background:var(--wa); color:#fff; }
+.dark .btn.fill { color:#06301C; }
+
+/* ---------- search screen ---------- */
+.chips.pad-b { padding-bottom:10px; }
+.resultrow { display:flex; align-items:center; padding:0 16px 8px; }
+.resultrow .n { font-size:13px; color:var(--on-surface-var); font-family:'Noto Sans Arabic',Roboto,sans-serif; }
+.resultrow .n b { color:var(--on-surface); font-weight:600; }
+.resultrow .sp { flex:1; }
+.resultrow .txtbtn { border:0; background:none; color:var(--on-surface-var); font-size:13px;
+  font-weight:500; height:36px; padding:0 10px; display:flex; align-items:center; gap:5px;
+  font-family:'Noto Sans Arabic',Roboto,sans-serif; }
+.resultrow .txtbtn .ms { font-size:18px; }
+</style>
+</head>
+<body>
+<div class="frame" id="frame">
+
+  <!-- ================== HOME ================== -->
+  <section data-screen="home">
+    <div class="status">
+      <span>10:36</span>
+      <span class="sp"></span>
+      <span class="ic">
+        <span class="ms" style="font-variation-settings:'FILL' 1">signal_cellular_alt</span>
+        <span class="ms" style="font-variation-settings:'FILL' 1">wifi</span>
+        <span class="batt"><i></i></span>
+      </span>
+    </div>
+
+    <div class="appbar">
+      <div class="lead">
+        <span class="logo"><span class="ms">star</span></span>
+        <h1>النجوم</h1>
+      </div>
+      <span class="sp"></span>
+      <button class="iconbtn"><span class="ms">favorite</span></button>
+      <button class="iconbtn">
+        <span class="ms">notifications</span>
+        <span class="badge">3</span>
+      </button>
+    </div>
+
+    <div class="searchwrap">
+      <div class="searchbar">
+        <span class="ms">search</span>
+        <span class="ph">ابحث: منطقة، مدينة، مشروع…</span>
+        <span class="ms">tune</span>
+      </div>
+    </div>
+
+    <div class="segwrap">
+      <div class="seg">
+        <button class="on"><span class="ms s18">check</span>للبيع</button>
+        <button>للإيجار</button>
+        <button>إيجار يومي</button>
+      </div>
+    </div>
+
+    <div class="chips">
+      <button class="chip on"><span class="ms">check</span>الكل</button>
+      <button class="chip">شقق</button>
+      <button class="chip">فلل</button>
+      <button class="chip">أراضٍ</button>
+      <button class="chip">محلات</button>
+      <button class="chip">مكاتب</button>
+    </div>
+
+    <div class="sec">
+      <h2>عقارات مميّزة</h2>
+      <span class="sp"></span>
+      <button class="txtbtn">عرض الكل</button>
+    </div>
+    <div class="rail" id="rail"></div>
+
+    <div class="sec">
+      <h2>أحدث الإعلانات</h2>
+      <span class="n">16 إعلاناً</span>
+      <span class="sp"></span>
+      <button class="txtbtn">عرض الكل</button>
+    </div>
+    <div class="feed" id="feed"></div>
+
+    <div class="navpad"></div>
+    <button class="fab"><span class="ms">add_home</span>أضف إعلانك</button>
+    <nav class="m3nav">
+      <button class="on"><span class="pill"><span class="ms">home</span></span>الرئيسية</button>
+      <button><span class="pill"><span class="ms">search</span></span>البحث</button>
+      <button><span class="pill"><span class="ms">favorite</span></span>المحفوظة</button>
+      <button><span class="badge">2</span><span class="pill"><span class="ms">chat_bubble</span></span>الرسائل</button>
+      <button><span class="pill"><span class="ms">person</span></span>حسابي</button>
+    </nav>
+    <span class="gesture"></span>
+  </section>
+
+  <!-- ================== DETAIL ================== -->
+  <section data-screen="detail" hidden>
+    <div class="status" style="position:absolute; inset-inline:0; top:0; z-index:4; color:#fff;">
+      <span>10:38</span><span class="sp"></span>
+      <span class="ic">
+        <span class="ms" style="font-variation-settings:'FILL' 1">signal_cellular_alt</span>
+        <span class="ms" style="font-variation-settings:'FILL' 1">wifi</span>
+        <span class="batt"><i></i></span>
+      </span>
+    </div>
+    <div class="gal">
+      <img src="../photos/living-luxury-1.jpg" alt="">
+      <div class="top">
+        <button class="circ"><span class="ms">arrow_forward</span></button>
+        <span class="sp"></span>
+        <button class="circ"><span class="ms">share</span></button>
+        <button class="circ"><span class="ms">favorite</span></button>
+      </div>
+      <span class="count"><span class="ms">photo_library</span>1/9</span>
+      <span class="dots"><i class="on"></i><i></i><i></i><i></i><i></i></span>
+    </div>
+
+    <div class="dbody">
+      <div><span class="dprice">$210,000</span><span class="dapprox">≈ 2.7 مليار ل.س</span></div>
+      <div class="dchips">
+        <span class="achip green"><span class="ms">verified</span>موثّق ميدانياً</span>
+        <span class="achip tonal">للبيع</span>
+        <span class="achip plainc">طابو أخضر</span>
+      </div>
+      <h1 class="dtitle">شقة دوبلكس مع تراس 40 م² في أبو رمانة</h1>
+      <div class="dloc"><span class="ms">location_on</span>دمشق، أبو رمانة · نُشر منذ 12 ساعة</div>
+
+      <div class="facts">
+        <div class="fact"><span class="ms">bed</span><b>4</b><span>غرف</span></div>
+        <div class="fact"><span class="ms">bathtub</span><b>3</b><span>حمّامات</span></div>
+        <div class="fact"><span class="ms">square_foot</span><b>220 م²</b><span>المساحة</span></div>
+        <div class="fact"><span class="ms">stairs</span><b>7</b><span>الطابق</span></div>
+      </div>
+
+      <div class="vcard">
+        <span class="ms">verified_user</span>
+        <div>
+          <b>تم التحقق ميدانياً من هذا العقار</b>
+          <span>زار فريقنا العقار وتأكّد من توفّره وصحة بياناته قبل 3 أيام.</span>
+        </div>
+      </div>
+
+      <h3 class="dsec">التفاصيل</h3>
+      <div class="kv">
+        <div class="row"><span class="ms">home_work</span><span class="k">نوع العقار</span><span class="v">شقة — دوبلكس</span></div>
+        <div class="row"><span class="ms">description</span><span class="k">الطابو</span><span class="v">طابو أخضر</span></div>
+        <div class="row"><span class="ms">imagesearch_roller</span><span class="k">الكسوة</span><span class="v">سوبر ديلوكس</span></div>
+        <div class="row"><span class="ms">payments</span><span class="k">سعر المتر</span><span class="v" style="direction:ltr">$955 / م²</span></div>
+      </div>
+
+      <h3 class="dsec">الوصف</h3>
+      <p class="ddesc">شقة دوبلكس مجدَّدة بالكامل مع تراس 40 م² مطل على الحديقة. إكساء سوبر ديلوكس، موقف سيارة خاص ومصعد. الطابع عدلي والنقل فوري.</p>
+
+      <div class="dagent">
+        <div class="r">
+          <span class="av">ش</span>
+          <div class="who">
+            <b>مكتب الشام العقاري<span class="ms">verified</span></b>
+            <span>وسيط موثّق · يرد عادةً خلال ساعة</span>
+          </div>
+          <button class="iconbtn"><span class="ms">chevron_left</span></button>
+        </div>
+        <div class="ctas">
+          <button class="btn outl"><span class="ms">call</span>اتصال</button>
+          <button class="btn outl"><span class="ms">chat</span>دردشة</button>
+          <button class="btn fill"><span class="ms">forum</span>واتساب</button>
+        </div>
+      </div>
+      <div style="height:24px"></div>
+    </div>
+  </section>
+
+  <!-- ================== SEARCH ================== -->
+  <section data-screen="search" hidden>
+    <div class="status">
+      <span>10:37</span><span class="sp"></span>
+      <span class="ic">
+        <span class="ms" style="font-variation-settings:'FILL' 1">signal_cellular_alt</span>
+        <span class="ms" style="font-variation-settings:'FILL' 1">wifi</span>
+        <span class="batt"><i></i></span>
+      </span>
+    </div>
+
+    <div class="searchwrap" style="padding-top:8px">
+      <div class="searchbar">
+        <span class="ms">arrow_forward</span>
+        <span class="ph" style="color:var(--on-surface);font-weight:500">شقق للبيع في المزة</span>
+        <span class="ms">close</span>
+      </div>
+    </div>
+
+    <div class="chips pad-b">
+      <button class="chip on"><span class="ms">tune</span>الفلاتر (3)</button>
+      <button class="chip on">شقق<span class="ms">close</span></button>
+      <button class="chip on">المزة<span class="ms">close</span></button>
+      <button class="chip">السعر</button>
+      <button class="chip">الغرف</button>
+      <button class="chip">الموثّقة فقط</button>
+    </div>
+
+    <div class="resultrow">
+      <span class="n"><b>24</b> نتيجة</span>
+      <span class="sp"></span>
+      <button class="txtbtn"><span class="ms">swap_vert</span>الأحدث</button>
+      <button class="txtbtn"><span class="ms">map</span>خريطة</button>
+    </div>
+
+    <div class="feed" id="sfeed"></div>
+    <div class="navpad"></div>
+    <nav class="m3nav">
+      <button><span class="pill"><span class="ms">home</span></span>الرئيسية</button>
+      <button class="on"><span class="pill"><span class="ms">search</span></span>البحث</button>
+      <button><span class="pill"><span class="ms">favorite</span></span>المحفوظة</button>
+      <button><span class="pill"><span class="ms">chat_bubble</span></span>الرسائل</button>
+      <button><span class="pill"><span class="ms">person</span></span>حسابي</button>
+    </nav>
+    <span class="gesture"></span>
+  </section>
+
+</div>
+<script>
+const F = [
+  { img:'../photos/living-luxury-1.jpg', p:'$210,000', meta:'4 غرف · 220 م²', t:'شقة دوبلكس مع تراس في أبو رمانة' },
+  { img:'../photos/villa-pool-1.jpg', p:'$340,000', meta:'5 غرف · 420 م²', t:'فيلا مودرن مع مسبح في مشروع دمر' },
+  { img:'../photos/living-bright-1.jpg', p:'$185,000', meta:'3 غرف · 180 م²', t:'شقة حديثة مع إطلالة في المالكي' },
+];
+document.getElementById('rail').innerHTML = F.map(x=>`
+  <article class="fcard">
+    <div class="ph">
+      <img src="${x.img}" alt="">
+      <span class="ochip gold"><span class="ms s16">star</span>مميّز</span>
+      <button class="heart"><span class="ms s20">favorite</span></button>
+    </div>
+    <div class="bd">
+      <div class="fprice">${x.p}</div>
+      <div class="fmeta">${x.meta}</div>
+      <div class="ft">${x.t}</div>
+    </div>
+  </article>`).join('');
+
+const L = [
+  { img:'../photos/living-spacious-1.jpg', p:'$120,000', approx:'≈ 1.6 مليار ل.س',
+    beds:5, baths:2, area:160, photos:4, t:'شقة 5 غرف واسعة في الحمدانية',
+    l:'حلب، الحمدانية', ago:'منذ يوم', agent:'مالك مباشر' },
+  { img:'../photos/living-family-1.jpg', p:'$145,000', approx:'≈ 1.9 مليار ل.س',
+    beds:3, baths:2, area:150, photos:3, t:'شقة عائلية إكساء ديلوكس في كفر سوسة',
+    l:'دمشق، كفر سوسة', ago:'منذ يومين', agent:'مكتب دمشق الحديثة' },
+  { img:'../photos/courtyard-1.jpg', p:'$150,000', approx:'≈ 2 مليار ل.س',
+    beds:3, baths:2, area:140, photos:3, t:'بيت عربي مرمم مع باحة في دمشق القديمة',
+    l:'دمشق، دمشق القديمة', ago:'منذ 3 أيام', agent:'مكتب الشام العقاري' },
+];
+const card = x => `
+  <article class="card">
+    <div class="ph">
+      <img src="${x.img}" alt="">
+      <span class="ochip verify"><span class="ms s16">verified</span>موثّق</span>
+      <button class="heart"><span class="ms">favorite</span></button>
+      <span class="ochip count"><span class="ms s16">photo_library</span>${x.photos}</span>
+    </div>
+    <div class="bd">
+      <div><span class="price">${x.p}</span><span class="approx">${x.approx}</span></div>
+      <div class="specs">
+        <span class="ms">bed</span><b>${x.beds}</b>
+        <span class="dot"></span>
+        <span class="ms">bathtub</span><b>${x.baths}</b>
+        <span class="dot"></span>
+        <span class="ms">square_foot</span><b>${x.area} م²</b>
+      </div>
+      <div class="t">${x.t}</div>
+      <div class="loc"><span class="ms">location_on</span>${x.l}<span class="sp"></span>${x.ago}</div>
+    </div>
+    <div class="cardbar">
+      <span class="who"><span class="ms">verified</span>${x.agent}</span>
+      <span class="sp"></span>
+      <button class="tonalbtn"><span class="ms">call</span>اتصال</button>
+      <button class="tonalbtn wa"><span class="ms">forum</span>واتساب</button>
+    </div>
+  </article>`;
+document.getElementById('feed').innerHTML = L.map(card).join('');
+const sf = document.getElementById('sfeed'); if (sf) sf.innerHTML = L.slice(0,2).map(card).join('');
+
+const q = new URLSearchParams(location.search);
+if ((q.get('theme')||'light') === 'dark') document.documentElement.classList.add('dark');
+const sc = q.get('screen') || 'home';
+document.querySelectorAll('[data-screen]').forEach(s => { s.hidden = s.dataset.screen !== sc; });
+/* crisp capture: ?zoom=3 renders at 3x */
+const z = +(q.get('zoom') || 1);
+if (z > 1) document.body.style.zoom = z;
+</script>
+</body>
+</html>
