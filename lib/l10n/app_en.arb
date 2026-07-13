@@ -763,6 +763,8 @@
   "home_app_bar_title": "AlNujom Real Estate",
   "home_sign_in_icon_tooltip": "Sign in",
   "home_search_bar_placeholder": "Search for property...",
+  "home_crown_location": "Damascus & suburbs",
+  "@home_crown_location": { "description": "City/region selector label in the Home blue crown header." },
   "home_latest_listings_header": "Latest listings",
   "home_no_listings_yet": "No listings yet — be the first to publish!",
   "home_no_more_listings": "No more listings",

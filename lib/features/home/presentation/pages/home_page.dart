@@ -1,27 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/analytics/analytics_service.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
-import '../../../../core/theme/gradients.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_nav_drawer.dart';
 import '../../../../core/widgets/app_spinner.dart';
-import '../../../../core/widgets/brand_mark.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/settings/listing_view_mode.dart';
 import '../../../../core/widgets/ds/ds_listing_card.dart';
 import '../../../../core/widgets/ds/ds_listing_card_data.dart';
-import '../../../../core/widgets/ds/listing_view_mode_switcher.dart';
 import '../../../../core/widgets/main_bottom_nav.dart';
 import '../../../../core/widgets/publish_fab.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
@@ -50,7 +47,6 @@ import '../../../recently_viewed/presentation/bloc/recently_viewed_cubit.dart';
 import '../../domain/entities/home_listing_card.dart';
 import '../widgets/featured_listings_carousel.dart';
 import '../widgets/hero_search_bar.dart';
-import '../widgets/home_categories_section.dart';
 
 /// Phase 13 — public HomePage per FR-013 + contracts/
 /// phase13-home-page-composition.md.
@@ -111,6 +107,9 @@ class _HomeViewState extends State<_HomeView> {
   late final Future<List<Currency>> _currenciesFuture;
   AppLifecycleListener? _lifecycleListener;
 
+  /// DC for-sale / rent / daily-rent segmented control selection.
+  int _segment = 0;
+
   /// Threshold (in pixels) from the bottom that triggers
   /// `HomeFeedNextPageRequested` per FR-016. Approximately 5 cards' worth.
   static const double _nextPageThreshold = 1200;
@@ -167,20 +166,19 @@ class _HomeViewState extends State<_HomeView> {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context);
 
-    return Container(
-      // Design #8 "Glass / Depth" — the soft indigo→lavender page wash the whole
-      // screen floats over; scaffold + app bar are transparent so it shows.
-      decoration: BoxDecoration(
-        gradient: AppGradients.of(context).screenBackground,
+    final colors = AppColors.of(context);
+    // DC "Blue Crown" — light status-bar icons over the deep-blue crown that
+    // sits at the top of the Home scroll.
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
+        systemNavigationBarColor: colors.card,
+        systemNavigationBarIconBrightness: Theme.of(context).brightness == Brightness.dark
+            ? Brightness.light
+            : Brightness.dark,
       ),
       child: Scaffold(
-        backgroundColor: Colors.transparent,
-        // Phase 030 (W5) — app navigation drawer (opens from the start side =
-        // RIGHT under RTL). Hosts the tool sections relocated off the Profile tab.
-        // 035 craft wave — the old AppBar row (hamburger + wordmark + locale/theme
-        // toggles) is gone: Home now has ONE header row (see _HomeGreeting).
-        // Locale/theme switching lives in Settings; the drawer opens from the
-        // header's menu tile.
+        backgroundColor: colors.surface,
         drawer: const AppNavDrawer(),
         body: FutureBuilder<List<Currency>>(
           future: _currenciesFuture,
@@ -224,45 +222,65 @@ class _HomeViewState extends State<_HomeView> {
     Map<String, Currency> currenciesByCode,
     AppLocalizations l10n,
   ) {
-    // Always render the static chrome (search + chips + header) so the user
-    // sees something during the initial load + during refresh. SafeArea (top
-    // only) because the Scaffold no longer mounts an AppBar.
-    return SafeArea(
-      bottom: false,
-      child: CustomScrollView(
-        controller: _scrollController,
-        slivers: [
-          // Design-matched Home (New design/ §02 "استكشف — الرئيسية") — lean &
-          // listings-first: greeting → search → categories → featured → the
-          // property feed. The popular-search chips, transaction toggle, verified/
-          // recently/reels rails, top ad and trust strip were folded OUT of the
-          // primary path so listings surface almost immediately (the design's
-          // "Listings visible immediately"). Those widgets stay in the codebase.
-          const SliverToBoxAdapter(child: _HomeGreeting()),
-          const SliverToBoxAdapter(child: HeroSearchBar()),
-          const SliverToBoxAdapter(child: HomeCategoriesSection()),
-          SliverToBoxAdapter(
-            child: FeaturedListingsCarousel(currenciesByCode: currenciesByCode),
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
-          SliverToBoxAdapter(
-            child: _SectionHeader(
-              title: l10n.home_latest_listings_header,
-              trailing: const ListingViewModeSwitcher(),
+    final colors = AppColors.of(context);
+    // DC "Blue Crown" — the deep-blue crown header scrolls at the very top, and
+    // a white sheet with rounded top corners overlaps it, carrying the category
+    // grid, the for-sale/rent segmented control, the featured rail and the feed.
+    return SingleChildScrollView(
+      controller: _scrollController,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const _HomeCrown(),
+          Transform.translate(
+            offset: const Offset(0, -18),
+            child: Container(
+              decoration: BoxDecoration(
+                color: colors.card,
+                borderRadius: const BorderRadiusDirectional.vertical(
+                  top: Radius.circular(AppRadii.sheet),
+                ),
+              ),
+              padding: const EdgeInsetsDirectional.only(top: AppSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _HomeCategoryGrid(
+                    onSelected: (_) => context.go(AppRoutes.search),
+                  ),
+                  Padding(
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                      AppSpacing.lg,
+                      AppSpacing.md,
+                      AppSpacing.lg,
+                      AppSpacing.xs,
+                    ),
+                    child: _HomePurposeSegmented(
+                      selected: _segment,
+                      onChanged: (i) => setState(() => _segment = i),
+                    ),
+                  ),
+                  FeaturedListingsCarousel(
+                    currenciesByCode: currenciesByCode,
+                  ),
+                  _DcSectionHeader(
+                    title: l10n.home_latest_listings_header,
+                    onSeeAll: () => context.go(AppRoutes.search),
+                  ),
+                  ..._feedChildren(context, state, currenciesByCode, l10n),
+                  // Clearance so the floating publish FAB never covers the last
+                  // card's content.
+                  const SizedBox(height: AppSpacing.xxxl + AppSpacing.xl),
+                ],
+              ),
             ),
-          ),
-          ..._buildFeedSlivers(context, state, currenciesByCode, l10n),
-          // Clearance so the floating publish FAB never covers the last card's
-          // content (035 craft wave — it used to sit on the price row).
-          const SliverToBoxAdapter(
-            child: SizedBox(height: AppSpacing.xxxl + AppSpacing.xl),
           ),
         ],
       ),
     );
   }
 
-  List<Widget> _buildFeedSlivers(
+  List<Widget> _feedChildren(
     BuildContext context,
     HomeState state,
     Map<String, Currency> currenciesByCode,
@@ -271,18 +289,11 @@ class _HomeViewState extends State<_HomeView> {
     switch (state.status) {
       case HomeFeedStatus.initial:
       case HomeFeedStatus.loading:
-        // Phase polish — card-shaped shimmer skeletons instead of a bare
-        // spinner, so the feed's shape is visible while it loads.
-        return [
-          SliverList.builder(
-            itemCount: 4,
-            itemBuilder: (_, __) => const _HomeCardSkeleton(),
-          ),
-        ];
+        return List.generate(3, (_) => const _HomeCardSkeleton());
       case HomeFeedStatus.error:
         return [
-          SliverFillRemaining(
-            hasScrollBody: false,
+          Padding(
+            padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
             child: ErrorState(
               title: l10n.error_could_not_load_listings,
               variant: ErrorStateVariant.network,
@@ -297,38 +308,24 @@ class _HomeViewState extends State<_HomeView> {
       case HomeFeedStatus.refreshing:
         if (state.listings.isEmpty && state.status == HomeFeedStatus.success) {
           return [
-            SliverFillRemaining(
-              hasScrollBody: false,
+            Padding(
+              padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
               child: _EmptyView(l10n: l10n),
             ),
           ];
         }
         return [
-          SliverList.separated(
-            itemCount: state.listings.length,
-            separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.xs),
-            itemBuilder: (context, index) {
-              final card = state.listings[index];
-              return StaggeredListItem(
-                index: index,
-                // Don't replay the entrance cascade on a pull-to-refresh
-                // rebuild; first load + appended pages still animate.
-                enabled: state.status != HomeFeedStatus.refreshing,
-                child: _FeedCard(
-                  card: card,
-                  currenciesByCode: currenciesByCode,
-                ),
-              );
-            },
-          ),
-          // Phase 21: home middle banner — once after the first feed page
-          // (R-176; not repeated on scroll).
-          const SliverToBoxAdapter(
-            child: AdSlot(placement: AdPlacement.homeMiddleBanner),
-          ),
-          SliverToBoxAdapter(
-            child: _FeedFooter(state: state, l10n: l10n),
-          ),
+          for (var index = 0; index < state.listings.length; index++)
+            StaggeredListItem(
+              index: index,
+              enabled: state.status != HomeFeedStatus.refreshing,
+              child: _FeedCard(
+                card: state.listings[index],
+                currenciesByCode: currenciesByCode,
+              ),
+            ),
+          const AdSlot(placement: AdPlacement.homeMiddleBanner),
+          _FeedFooter(state: state, l10n: l10n),
         ];
     }
   }
@@ -358,51 +355,6 @@ class _HomeCardSkeleton extends StatelessWidget {
             widthFactor: 0.65,
             child: SizedBox(height: AppSpacing.lg, child: LoadingState.row()),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Premium feed section header — a bold title preceded by a short accent rule
-/// so the "Latest listings" block reads as a deliberate section start rather
-/// than a stray line of text. Purely presentational.
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title, this.trailing});
-
-  final String title;
-
-  /// Optional trailing action (e.g. the feed's [ListingViewModeSwitcher]).
-  final Widget? trailing;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-    final styles = AppTextStyles.of(context);
-    return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(
-        AppSpacing.lg,
-        AppSpacing.lg,
-        AppSpacing.lg,
-        AppSpacing.sm,
-      ),
-      child: Row(
-        children: [
-          // Short brand-accent rule anchoring the section start.
-          Container(
-            width: AppSpacing.xs,
-            height: AppSpacing.xl,
-            decoration: BoxDecoration(
-              color: colors.primary,
-              borderRadius: appRadius(AppRadii.pill),
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(child: Text(title, style: styles.titleLarge)),
-          if (trailing != null) ...[
-            const SizedBox(width: AppSpacing.sm),
-            trailing!,
-          ],
         ],
       ),
     );
@@ -489,41 +441,167 @@ DsListingCardData _toCardData(
 /// start side, with a circular avatar + a circular notification bell on the
 /// end side. Reuses the existing greeting strings, the avatar from the auth
 /// profile, and the [NotificationBadgeCubit] count + routing — purely visual.
-class _HomeGreeting extends StatelessWidget {
-  const _HomeGreeting();
+/// DC "Blue Crown" — the deep-blue brand header at the top of Home: the star
+/// logo + brand, chat + notification actions, a city selector, and a white
+/// search field. It scrolls with the content; the white sheet below overlaps
+/// it by 18px so the blue peeks through the sheet's rounded top corners.
+class _HomeCrown extends StatelessWidget {
+  const _HomeCrown();
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    final topInset = MediaQuery.paddingOf(context).top;
 
-    // 035 craft wave — ONE header row for Home: menu tile (drawer) + brand +
-    // notification bell. The old page stacked TWO headers (an AppBar with
-    // hamburger/wordmark/locale/theme toggles above a greeting row with a
-    // decorative non-interactive avatar); locale/theme now live in Settings
-    // and the avatar/greeting are gone.
-    return StaggeredListItem(
-      index: 0,
-      child: Padding(
-        padding: const EdgeInsetsDirectional.fromSTEB(
-          AppSpacing.lg,
-          AppSpacing.md,
-          AppSpacing.lg,
-          AppSpacing.xs,
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Builder(
-              builder: (context) => _HeaderIconTile(
-                icon: LucideIcons.menu,
-                tooltip: l10n.navDrawerMenuTooltip,
-                onTap: () => Scaffold.of(context).openDrawer(),
+    return Container(
+      width: double.infinity,
+      color: colors.brandHeader,
+      padding: EdgeInsetsDirectional.only(
+        top: topInset + AppSpacing.sm,
+        start: AppSpacing.lg,
+        end: AppSpacing.lg,
+        bottom: AppSpacing.xl + AppSpacing.sm,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 33,
+                height: 33,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: colors.onBrandHeader,
+                  borderRadius: appRadius(AppRadii.sm),
+                ),
+                child: Icon(Icons.star, size: 22, color: colors.brandHeader),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                l10n.home_app_bar_title,
+                style: styles.titleLarge.copyWith(
+                  color: colors.onBrandHeader,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const Spacer(),
+              _CrownAction(
+                icon: Icons.chat_bubble_outline,
+                onTap: () => context.go(AppRoutes.chat),
+              ),
+              _CrownNotificationAction(
+                onTap: () => context.push(AppRoutes.notifications),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          InkWell(
+            onTap: () {},
+            borderRadius: appRadius(AppRadii.sm),
+            child: Padding(
+              padding: const EdgeInsetsDirectional.symmetric(
+                vertical: AppSpacing.xs,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.location_on,
+                    size: 18,
+                    color: colors.onBrandHeader,
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  Text(
+                    l10n.home_crown_location,
+                    style: styles.bodyMedium.copyWith(
+                      color: colors.onBrandHeader,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Icon(
+                    Icons.expand_more,
+                    size: 20,
+                    color: colors.onBrandHeader,
+                  ),
+                ],
               ),
             ),
-            const SizedBox(width: AppSpacing.md),
-            const BrandMark(withWordmark: true, size: 30),
-            const Spacer(),
-            const _HomeHeaderBell(),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Material(
+            color: colors.brandHeaderField,
+            borderRadius: appRadius(AppRadii.md),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: () => context.go(AppRoutes.search),
+              child: SizedBox(
+                height: 48,
+                child: Padding(
+                  padding: const EdgeInsetsDirectional.symmetric(
+                    horizontal: AppSpacing.md,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.search,
+                        size: 22,
+                        color: colors.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: Text(
+                          l10n.home_search_bar_placeholder,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: styles.bodyMedium.copyWith(
+                            color: colors.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Container(width: 1, height: 22, color: colors.outline),
+                      const SizedBox(width: AppSpacing.sm),
+                      Icon(Icons.tune, size: 23, color: colors.primary),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A 42px circular action button on the blue crown (white icon).
+class _CrownAction extends StatelessWidget {
+  const _CrownAction({required this.icon, required this.onTap, this.badge});
+
+  final IconData icon;
+  final VoidCallback onTap;
+  final Widget? badge;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    return InkWell(
+      onTap: onTap,
+      customBorder: const CircleBorder(),
+      child: SizedBox(
+        width: 42,
+        height: 42,
+        child: Stack(
+          alignment: Alignment.center,
+          clipBehavior: Clip.none,
+          children: [
+            Icon(icon, size: 24, color: colors.onBrandHeader),
+            if (badge != null)
+              PositionedDirectional(top: 5, end: 5, child: badge!),
           ],
         ),
       ),
@@ -531,98 +609,258 @@ class _HomeGreeting extends StatelessWidget {
   }
 }
 
-/// A 48px bordered square tile for header utility actions (matches the bell).
-class _HeaderIconTile extends StatelessWidget {
-  const _HeaderIconTile({
-    required this.icon,
-    required this.tooltip,
-    required this.onTap,
-  });
+/// The crown's notification bell with the live unread count badge.
+class _CrownNotificationAction extends StatelessWidget {
+  const _CrownNotificationAction({required this.onTap});
 
-  final IconData icon;
-  final String tooltip;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
+    return BlocProvider.value(
+      value: getIt<NotificationBadgeCubit>(),
+      child: BlocBuilder<NotificationBadgeCubit, NotificationBadgeState>(
+        builder: (context, state) {
+          return _CrownAction(
+            icon: Icons.notifications_none,
+            onTap: onTap,
+            badge: state.count > 0 ? _CountBadge(count: state.count) : null,
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// A small red count badge (crown actions + chat).
+class _CountBadge extends StatelessWidget {
+  const _CountBadge({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    return Tooltip(
-      message: tooltip,
-      child: Material(
-        color: colors.surface,
-        shape: CircleBorder(side: BorderSide(color: colors.outline)),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: SizedBox(
-            width: kAppMinTouchTarget,
-            height: kAppMinTouchTarget,
-            child: Icon(icon, size: AppSpacing.xl, color: colors.onSurface),
-          ),
+    final styles = AppTextStyles.of(context);
+    return Container(
+      constraints: const BoxConstraints(minWidth: 16),
+      height: 16,
+      padding: const EdgeInsetsDirectional.symmetric(horizontal: AppSpacing.xs),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: colors.error,
+        borderRadius: appRadius(AppRadii.pill),
+        border: Border.all(color: colors.brandHeader, width: 1.5),
+      ),
+      child: Text(
+        count > 9 ? '9+' : '$count',
+        style: styles.labelSmall.copyWith(
+          color: colors.onError,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );
   }
 }
 
-/// A 48px circular notification bell for the home header — a bordered surface
-/// chip with a small coral dot when there are unread notifications. Reuses the
-/// shared [NotificationBadgeCubit] count and routes to /notifications on tap.
-class _HomeHeaderBell extends StatelessWidget {
-  const _HomeHeaderBell();
+/// DC category grid — 8 property-type tiles in a 4-column layout, each a tonal
+/// rounded square with its icon and label. Tapping routes to search.
+class _HomeCategoryGrid extends StatelessWidget {
+  const _HomeCategoryGrid({required this.onSelected});
 
-  static const double _size = kAppMinTouchTarget;
+  final void Function(int index) onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final cats = <(IconData, String)>[
+      (Icons.apartment, l10n.propertyTypeApartment),
+      (Icons.villa, l10n.propertyTypeVilla),
+      (Icons.landscape, l10n.propertyTypeLand),
+      (Icons.storefront, l10n.propertyTypeShop),
+      (Icons.business_center, l10n.propertyTypeOffice),
+      (Icons.agriculture, l10n.propertyTypeFarm),
+      (Icons.warehouse, l10n.propertyTypeWarehouse),
+      (Icons.grid_view, l10n.propertyTypeOther),
+    ];
+    Widget row(int start) => Row(
+      children: [
+        for (var i = start; i < start + 4; i++)
+          Expanded(
+            child: _CategoryTile(
+              icon: cats[i].$1,
+              label: cats[i].$2,
+              onTap: () => onSelected(i),
+            ),
+          ),
+      ],
+    );
+    return Padding(
+      padding: const EdgeInsetsDirectional.symmetric(horizontal: AppSpacing.sm),
+      child: Column(
+        children: [row(0), const SizedBox(height: AppSpacing.xs), row(4)],
+      ),
+    );
+  }
+}
+
+class _CategoryTile extends StatelessWidget {
+  const _CategoryTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    return InkWell(
+      onTap: onTap,
+      borderRadius: appRadius(AppRadii.md),
+      child: Padding(
+        padding: const EdgeInsetsDirectional.symmetric(vertical: AppSpacing.sm),
+        child: Column(
+          children: [
+            Container(
+              width: 54,
+              height: 54,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: colors.primaryContainer,
+                borderRadius: appRadius(AppRadii.lg),
+              ),
+              child: Icon(icon, size: 27, color: colors.onPrimaryContainer),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: styles.labelMedium.copyWith(
+                color: colors.onSurface,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// DC pill segmented control — for-sale / rent / daily-rent, with a check on
+/// the selected segment.
+class _HomePurposeSegmented extends StatelessWidget {
+  const _HomePurposeSegmented({
+    required this.selected,
+    required this.onChanged,
+  });
+
+  final int selected;
+  final ValueChanged<int> onChanged;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final colors = AppColors.of(context);
-
-    return BlocProvider.value(
-      value: getIt<NotificationBadgeCubit>(),
-      child: BlocBuilder<NotificationBadgeCubit, NotificationBadgeState>(
-        builder: (context, state) {
-          return Tooltip(
-            message: l10n.notification_bell_tooltip,
-            child: Material(
-              color: colors.surface,
-              shape: CircleBorder(side: BorderSide(color: colors.outline)),
-              clipBehavior: Clip.antiAlias,
+    final styles = AppTextStyles.of(context);
+    final labels = [
+      l10n.listingPurposeSale,
+      l10n.listingPurposeRent,
+      l10n.listingPurposeDailyRent,
+    ];
+    return Container(
+      height: 42,
+      decoration: BoxDecoration(
+        border: Border.all(color: colors.outlineStrong),
+        borderRadius: appRadius(AppRadii.pill),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Row(
+        children: [
+          for (var i = 0; i < labels.length; i++)
+            Expanded(
               child: InkWell(
-                onTap: () => context.push(AppRoutes.notifications),
-                child: SizedBox(
-                  width: _size,
-                  height: _size,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    clipBehavior: Clip.none,
+                onTap: () => onChanged(i),
+                child: Container(
+                  alignment: Alignment.center,
+                  color: i == selected
+                      ? colors.secondaryContainer
+                      : Colors.transparent,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        LucideIcons.bell,
-                        size: AppSpacing.xl,
-                        color: colors.onSurface,
-                      ),
-                      if (state.count > 0)
-                        PositionedDirectional(
-                          top: AppSpacing.sm,
-                          end: AppSpacing.md,
-                          child: Container(
-                            width: AppSpacing.sm,
-                            height: AppSpacing.sm,
-                            decoration: BoxDecoration(
-                              color: colors.accent,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: colors.surface),
-                            ),
-                          ),
+                      if (i == selected) ...[
+                        Icon(
+                          Icons.check,
+                          size: 18,
+                          color: colors.onSecondaryContainer,
                         ),
+                        const SizedBox(width: AppSpacing.xs),
+                      ],
+                      Text(
+                        labels[i],
+                        style: styles.labelLarge.copyWith(
+                          color: i == selected
+                              ? colors.onSecondaryContainer
+                              : colors.onSurface,
+                          fontWeight: i == selected
+                              ? FontWeight.w700
+                              : FontWeight.w600,
+                        ),
+                      ),
                     ],
                   ),
                 ),
               ),
             ),
-          );
-        },
+        ],
+      ),
+    );
+  }
+}
+
+/// DC section header — a bold title with a trailing "see all" text button.
+class _DcSectionHeader extends StatelessWidget {
+  const _DcSectionHeader({required this.title, this.onSeeAll});
+
+  final String title;
+  final VoidCallback? onSeeAll;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.sm,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              title,
+              style: styles.titleMedium.copyWith(fontWeight: FontWeight.w700),
+            ),
+          ),
+          if (onSeeAll != null)
+            InkWell(
+              onTap: onSeeAll,
+              child: Text(
+                l10n.home_see_all,
+                style: styles.labelLarge.copyWith(color: colors.primary),
+              ),
+            ),
+        ],
       ),
     );
   }

@@ -2375,6 +2375,10 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get home_crown_location =>
+      _resolve('home_crown_location', (loc) => loc.home_crown_location);
+
+  @override
   String get home_latest_listings_header => _resolve(
     'home_latest_listings_header',
     (loc) => loc.home_latest_listings_header,

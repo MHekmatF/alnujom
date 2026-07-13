@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
@@ -10,30 +8,23 @@ import '../../features/auth/presentation/bloc/auth_state.dart';
 import '../../l10n/app_localizations.dart';
 import '../routing/app_router.dart';
 import '../theme/colors.dart';
-import '../theme/elevation.dart';
-import '../theme/gradients.dart';
-import '../theme/motion.dart';
 import '../theme/radii.dart';
 import '../theme/spacing.dart';
 import '../theme/typography.dart';
 import '_widget_support.dart';
-import 'glass.dart';
-import 'reduce_motion.dart';
 
 /// The primary destinations of the public app shell.
 ///
-/// Phase 035 (redesign): the app moves to the 5-tab information architecture —
-/// Home · Search+Map · Saved · Messages · Account. Reels is no longer a tab
-/// (it survives as the Home video-tours rail + the `/reels` deep route). The
-/// "أضف عقار" publish action is no longer a bar slot; it is a floating
-/// [PublishFab] mounted on each tab host's `Scaffold.floatingActionButton`.
+/// 5-tab IA — Home · Search+Map · Saved · Messages · Account. The "أضف عقار"
+/// publish action is a floating [PublishFab], not a bar slot.
 enum MainTab { home, search, favorites, chat, profile, none }
 
-/// Design #8 "Glass / Depth" — a **floating frosted-glass** bottom bar: rounded,
-/// blurred, lifted off the page with a soft shadow. The active tab shows its
-/// icon inside an indigo-gradient rounded-square chip with an indigo label;
-/// inactive tabs are a muted icon + label. Tab switches use `context.go` so each
-/// destination is a clean stack root.
+/// DC "Blue Crown" — a **standard Material bottom bar**: a full-width white
+/// surface flush to the bottom edge with a 1px top hairline (no glass, no
+/// blur, no floating pill). The selected tab shows its filled icon inside a
+/// tinted pill (`secondaryContainer`); unselected tabs are a muted outline
+/// icon + label. Tab switches use `context.go` so each destination is a clean
+/// stack root.
 class MainBottomNav extends StatelessWidget {
   const MainBottomNav({super.key, required this.current});
 
@@ -43,8 +34,7 @@ class MainBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final elevation = AppElevation.of(context);
-    final reduce = reduceMotion(context);
+    final colors = AppColors.of(context);
 
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, authState) {
@@ -54,76 +44,64 @@ class MainBottomNav extends StatelessWidget {
             authState is Rejected ||
             authState is Suspended;
 
-        final highlightNone = current == MainTab.none;
+        final none = current == MainTab.none;
 
-        // 035 craft wave — ONE icon family (Lucide, matching the content
-        // cards) and ONE metaphor per tab: selection is carried by the chip
-        // treatment, not by swapping to a different glyph (the old bar turned
-        // the Search magnifier into a globe when selected).
         final slots = <Widget>[
           _NavTab(
-            icon: LucideIcons.house,
+            iconOutline: Icons.home_outlined,
+            iconFilled: Icons.home,
             label: l10n.home_title,
-            selected: !highlightNone && current == MainTab.home,
-            bounce: !reduce && current == MainTab.home,
+            selected: !none && current == MainTab.home,
             onTap: () => context.go(AppRoutes.home),
           ),
           _NavTab(
-            icon: LucideIcons.search,
+            iconOutline: Icons.search,
+            iconFilled: Icons.search,
             label: l10n.nav_search_map,
-            selected: !highlightNone && current == MainTab.search,
-            bounce: !reduce && current == MainTab.search,
+            selected: !none && current == MainTab.search,
             onTap: () => context.go(AppRoutes.search),
           ),
           _NavTab(
-            icon: LucideIcons.heart,
+            iconOutline: Icons.bookmark_border,
+            iconFilled: Icons.bookmark,
             label: l10n.favorites_page_title,
-            selected: !highlightNone && current == MainTab.favorites,
-            bounce: !reduce && current == MainTab.favorites,
+            selected: !none && current == MainTab.favorites,
             onTap: () => context.go(AppRoutes.favorites),
           ),
           _NavTab(
-            icon: LucideIcons.message_circle,
+            iconOutline: Icons.forum_outlined,
+            iconFilled: Icons.forum,
             label: l10n.nav_messages,
-            selected: !highlightNone && current == MainTab.chat,
-            bounce: !reduce && current == MainTab.chat,
+            selected: !none && current == MainTab.chat,
             onTap: () =>
                 context.go(isSignedIn ? AppRoutes.chat : AppRoutes.login),
           ),
           _NavTab(
-            icon: LucideIcons.user,
+            iconOutline: Icons.person_outline,
+            iconFilled: Icons.person,
             label: l10n.profile_title,
-            selected: !highlightNone && current == MainTab.profile,
-            bounce: !reduce && current == MainTab.profile,
+            selected: !none && current == MainTab.profile,
             onTap: () =>
                 context.go(isSignedIn ? AppRoutes.profile : AppRoutes.login),
           ),
         ];
 
-        return Padding(
-          padding: const EdgeInsetsDirectional.only(
-            start: AppSpacing.lg,
-            end: AppSpacing.lg,
-            bottom: AppSpacing.sm,
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            color: colors.card,
+            border: BorderDirectional(
+              top: BorderSide(color: colors.outline),
+            ),
           ),
           child: SafeArea(
             top: false,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: appRadius(AppRadii.xl),
-                boxShadow: elevation.level2,
+            child: Padding(
+              padding: const EdgeInsetsDirectional.only(
+                top: AppSpacing.sm,
+                bottom: AppSpacing.sm,
               ),
-              child: GlassPanel(
-                radius: AppRadii.xl,
-                blur: 24,
-                tintOpacity: 0.82,
-                child: SizedBox(
-                  height: 64,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [for (final slot in slots) Expanded(child: slot)],
-                  ),
-                ),
+              child: Row(
+                children: [for (final slot in slots) Expanded(child: slot)],
               ),
             ),
           ),
@@ -133,61 +111,52 @@ class MainBottomNav extends StatelessWidget {
   }
 }
 
-/// A single floating-glass nav tab — the active tab wraps its icon in an
-/// indigo-gradient chip; inactive tabs are a muted icon + label.
+/// A single DC nav tab — selected wraps a filled icon in a tinted pill; the
+/// unselected state is a muted outline icon.
 class _NavTab extends StatelessWidget {
   const _NavTab({
-    required this.icon,
+    required this.iconOutline,
+    required this.iconFilled,
     required this.label,
     required this.selected,
-    required this.bounce,
     required this.onTap,
   });
 
-  final IconData icon;
+  final IconData iconOutline;
+  final IconData iconFilled;
   final String label;
   final bool selected;
-  final bool bounce;
   final VoidCallback onTap;
 
-  static const double _iconSize = 22;
-  static const double _chipW = 46;
-  static const double _chipH = 32;
+  static const double _iconSize = 23;
+  static const double _pillW = 62;
+  static const double _pillH = 32;
 
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
-    final gradients = AppGradients.of(context);
-
-    Widget glyph = Icon(
-      icon,
-      size: _iconSize,
-      color: selected ? colors.onPrimary : colors.textMuted,
-    );
-    if (bounce) {
-      glyph = glyph.animate().scaleXY(
-        begin: 0.8,
-        end: 1.0,
-        duration: AppMotion.slow,
-        curve: Curves.easeOutBack,
-      );
-    }
 
     final iconSlot = selected
         ? Container(
-            width: _chipW,
-            height: _chipH,
+            width: _pillW,
+            height: _pillH,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              gradient: gradients.primaryGradient,
-              borderRadius: appRadius(AppRadii.md),
+              color: colors.secondaryContainer,
+              borderRadius: appRadius(AppRadii.pill),
             ),
-            child: glyph,
+            child: Icon(
+              iconFilled,
+              size: _iconSize,
+              color: colors.onSecondaryContainer,
+            ),
           )
         : SizedBox(
-            height: _chipH,
-            child: Center(child: glyph),
+            height: _pillH,
+            child: Center(
+              child: Icon(iconOutline, size: _iconSize, color: colors.textMuted),
+            ),
           );
 
     return Semantics(
@@ -196,24 +165,23 @@ class _NavTab extends StatelessWidget {
       label: label,
       excludeSemantics: true,
       child: InkWell(
-        borderRadius: appRadius(AppRadii.md),
+        borderRadius: appRadius(AppRadii.pill),
         onTap: () {
           HapticFeedback.selectionClick();
           onTap();
         },
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
             iconSlot,
-            const SizedBox(height: AppSpacing.xxs),
+            const SizedBox(height: AppSpacing.xs),
             Text(
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: styles.labelSmall.copyWith(
-                color: selected ? colors.primary : colors.onSurfaceVariant,
-                fontWeight: selected ? FontWeight.w700 : null,
+                color: selected ? colors.onSurface : colors.textMuted,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
               ),
             ),
           ],

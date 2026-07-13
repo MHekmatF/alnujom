@@ -685,6 +685,8 @@
   "home_app_bar_title": "النجوم العقارية",
   "home_sign_in_icon_tooltip": "تسجيل الدخول",
   "home_search_bar_placeholder": "ابحث عن عقار...",
+  "home_crown_location": "دمشق وريفها",
+  "@home_crown_location": { "description": "City/region selector label in the Home blue crown header." },
   "home_latest_listings_header": "أحدث الإعلانات",
   "home_no_listings_yet": "لا توجد إعلانات بعد — كن أول من ينشر!",
   "home_no_more_listings": "لا توجد إعلانات أخرى",
