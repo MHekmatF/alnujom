@@ -4908,6 +4908,36 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get publisherDashboardCrownSubtitle => _resolve(
+    'publisherDashboardCrownSubtitle',
+    (loc) => loc.publisherDashboardCrownSubtitle,
+  );
+
+  @override
+  String get publisherManageSection => _resolve(
+    'publisherManageSection',
+    (loc) => loc.publisherManageSection,
+  );
+
+  @override
+  String get publisherDashboardInteractionsTitle => _resolve(
+    'publisherDashboardInteractionsTitle',
+    (loc) => loc.publisherDashboardInteractionsTitle,
+  );
+
+  @override
+  String get publisherDashboardChartRangeWeek => _resolve(
+    'publisherDashboardChartRangeWeek',
+    (loc) => loc.publisherDashboardChartRangeWeek,
+  );
+
+  @override
+  String get publisherDashboardChartTotalLabel => _resolve(
+    'publisherDashboardChartTotalLabel',
+    (loc) => loc.publisherDashboardChartTotalLabel,
+  );
+
+  @override
   String get publisherDashboardSummaryError => _resolve(
     'publisherDashboardSummaryError',
     (loc) => loc.publisherDashboardSummaryError,

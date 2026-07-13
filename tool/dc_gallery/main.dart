@@ -1,0 +1,294 @@
+// DC "Blue Crown" widget gallery — a STANDALONE dev harness (never shipped).
+//
+// Renders the new DC design-system widgets with mock data so their pixel-craft
+// can be eye-verified on the AVD (light/dark × ar/en) WITHOUT logging in or
+// touching the backend — the login-gated publisher screens can't otherwise be
+// seen. Lives under tool/ (outside lib/) so it is exempt from the l10n-literal
+// linter and can use literal demo strings.
+//
+// Build:  flutter build apk --debug -t tool/dc_gallery/main.dart --dart-define-from-file=.env.json
+// (Reinstall the real app afterwards.)
+import 'package:flutter/material.dart';
+
+import 'package:alnujom/core/theme/app_theme.dart';
+import 'package:alnujom/core/theme/color_palette.dart';
+import 'package:alnujom/core/theme/colors.dart';
+import 'package:alnujom/core/theme/radii.dart';
+import 'package:alnujom/core/theme/spacing.dart';
+import 'package:alnujom/core/theme/typography.dart';
+import 'package:alnujom/core/widgets/_widget_support.dart';
+import 'package:alnujom/core/widgets/charts/dc_bar_chart.dart';
+import 'package:alnujom/core/widgets/dc_crown_scaffold.dart';
+import 'package:alnujom/core/widgets/ds/dc_quick_link_tile.dart';
+import 'package:alnujom/core/widgets/ds/dc_stat_card.dart';
+
+void main() => runApp(const DcGalleryApp());
+
+class DcGalleryApp extends StatefulWidget {
+  const DcGalleryApp({super.key});
+
+  @override
+  State<DcGalleryApp> createState() => _DcGalleryAppState();
+}
+
+class _DcGalleryAppState extends State<DcGalleryApp> {
+  Brightness _brightness = Brightness.light;
+  Locale _locale = const Locale('ar');
+
+  void _toggleTheme() => setState(() {
+    _brightness = _brightness == Brightness.light
+        ? Brightness.dark
+        : Brightness.light;
+  });
+
+  void _toggleLocale() => setState(() {
+    _locale = _locale.languageCode == 'ar'
+        ? const Locale('en')
+        : const Locale('ar');
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: buildAppTheme(
+        palette: const ModernPalette(),
+        brightness: Brightness.light,
+        locale: _locale,
+      ),
+      darkTheme: buildAppTheme(
+        palette: const ModernPalette(),
+        brightness: Brightness.dark,
+        locale: _locale,
+      ),
+      themeMode: _brightness == Brightness.dark
+          ? ThemeMode.dark
+          : ThemeMode.light,
+      locale: _locale,
+      home: DcGalleryHome(
+        onToggleTheme: _toggleTheme,
+        onToggleLocale: _toggleLocale,
+        isArabic: _locale.languageCode == 'ar',
+      ),
+    );
+  }
+}
+
+class DcGalleryHome extends StatelessWidget {
+  const DcGalleryHome({
+    required this.onToggleTheme,
+    required this.onToggleLocale,
+    required this.isArabic,
+    super.key,
+  });
+
+  final VoidCallback onToggleTheme;
+  final VoidCallback onToggleLocale;
+  final bool isArabic;
+
+  @override
+  Widget build(BuildContext context) {
+    final ar = isArabic;
+    return DcCrownScaffold(
+      title: ar ? 'المعرض' : 'Gallery',
+      titleWidget: _Identity(
+        name: ar ? 'مكتب الشام العقاري' : 'Al Sham Real Estate',
+        subtitle: ar ? 'وكيل معتمد' : 'Verified agent',
+      ),
+      actions: [
+        DcCrownIconButton(icon: Icons.translate, onTap: onToggleLocale),
+        DcCrownIconButton(icon: Icons.brightness_6, onTap: onToggleTheme),
+      ],
+      body: ListView(
+        padding: const EdgeInsetsDirectional.fromSTEB(
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.xxl,
+        ),
+        children: [
+          _Label(ar ? 'بطاقات المؤشرات' : 'KPI cards'),
+          const SizedBox(height: AppSpacing.md),
+          GridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: 2,
+            mainAxisSpacing: AppSpacing.md,
+            crossAxisSpacing: AppSpacing.md,
+            childAspectRatio: 1.5,
+            children: [
+              DcStatCard(
+                icon: Icons.campaign,
+                value: '6',
+                label: ar ? 'إعلانات نشطة' : 'Active listings',
+                sub: ar ? 'من 8 إجمالاً' : 'of 8 total',
+                delta: '+1',
+                onTap: () {},
+              ),
+              DcStatCard(
+                icon: Icons.visibility,
+                value: '4,820',
+                label: ar ? 'مشاهدات الشهر' : 'Views this month',
+                delta: '+12%',
+                onTap: () {},
+              ),
+              DcStatCard(
+                icon: Icons.hourglass_empty,
+                value: '2',
+                label: ar ? 'قيد المراجعة' : 'Pending review',
+              ),
+              DcStatCard(
+                icon: Icons.trending_up,
+                value: '128',
+                label: ar ? 'تفاعلات العملاء' : 'Lead interactions',
+                delta: '-3%',
+                trendUp: false,
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          _Label(ar ? 'مخطط التفاعلات' : 'Interactions chart'),
+          const SizedBox(height: AppSpacing.md),
+          DcBarChart(
+            title: ar ? 'التفاعلات' : 'Interactions',
+            rangeLabel: ar ? 'آخر 7 أيام' : 'Last 7 days',
+            totalValue: '3,940',
+            totalLabel: ar ? 'الإجمالي' : 'Total',
+            bars: const [
+              DcBarChartBar(value: 420, label: '12'),
+              DcBarChartBar(value: 510, label: '13'),
+              DcBarChartBar(value: 380, label: '14'),
+              DcBarChartBar(value: 640, label: '15'),
+              DcBarChartBar(value: 590, label: '16'),
+              DcBarChartBar(value: 720, label: '17'),
+              DcBarChartBar(value: 680, label: '18'),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          _Label(ar ? 'روابط سريعة' : 'Quick links'),
+          const SizedBox(height: AppSpacing.md),
+          GridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: 3,
+            mainAxisSpacing: AppSpacing.sm,
+            crossAxisSpacing: AppSpacing.sm,
+            childAspectRatio: 0.92,
+            children: [
+              DcQuickLinkTile(
+                icon: Icons.apartment,
+                label: ar ? 'إعلاناتي' : 'My listings',
+                onTap: () {},
+              ),
+              DcQuickLinkTile(
+                icon: Icons.forum_outlined,
+                label: ar ? 'الاستفسارات' : 'Inquiries',
+                badgeLabel: '2',
+                onTap: () {},
+              ),
+              DcQuickLinkTile(
+                icon: Icons.event_outlined,
+                label: ar ? 'المعاينات' : 'Viewings',
+                badgeLabel: '1',
+                onTap: () {},
+              ),
+              DcQuickLinkTile(
+                icon: Icons.groups_outlined,
+                label: ar ? 'العملاء' : 'Customers',
+                onTap: () {},
+              ),
+              DcQuickLinkTile(
+                icon: Icons.bar_chart,
+                label: ar ? 'التحليلات' : 'Analytics',
+                onTap: () {},
+              ),
+              DcQuickLinkTile(
+                icon: Icons.fact_check_outlined,
+                label: ar ? 'المراجعة' : 'Moderation',
+                onTap: () {},
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Identity extends StatelessWidget {
+  const _Identity({required this.name, required this.subtitle});
+
+  final String name;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    final onHeader = colors.onBrandHeader;
+    return Row(
+      children: [
+        Container(
+          width: 42,
+          height: 42,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: onHeader.withValues(alpha: 0.16),
+            borderRadius: appRadius(AppRadii.md),
+          ),
+          child: Icon(Icons.storefront, size: 24, color: onHeader),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: styles.titleMedium.copyWith(
+                        color: onHeader,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.xxs),
+                  Icon(Icons.verified, size: 16, color: onHeader),
+                ],
+              ),
+              Text(
+                subtitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: styles.labelSmall.copyWith(
+                  color: onHeader.withValues(alpha: 0.72),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _Label extends StatelessWidget {
+  const _Label(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    return Text(
+      text,
+      style: styles.labelLarge.copyWith(color: colors.onSurface),
+    );
+  }
+}

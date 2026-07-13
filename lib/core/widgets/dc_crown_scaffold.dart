@@ -18,6 +18,7 @@ class DcCrownScaffold extends StatelessWidget {
   const DcCrownScaffold({
     required this.title,
     required this.body,
+    this.titleWidget,
     this.leading,
     this.actions,
     this.crownBottom,
@@ -31,6 +32,11 @@ class DcCrownScaffold extends StatelessWidget {
 
   final String title;
   final Widget body;
+
+  /// A bespoke crown title block (e.g. a two-line identity row with an avatar).
+  /// When provided it replaces the plain [title] Text; [title] is still required
+  /// for the accessibility label / fallback.
+  final Widget? titleWidget;
 
   /// Leading action (typically a [DcCrownIconButton] back button). Null on tab
   /// roots.
@@ -59,7 +65,7 @@ class DcCrownScaffold extends StatelessWidget {
     final styles = AppTextStyles.of(context);
     final topInset = MediaQuery.paddingOf(context).top;
 
-    final titleWidget = Text(
+    final titleText = Text(
       title,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
@@ -96,14 +102,16 @@ class DcCrownScaffold extends StatelessWidget {
                       const SizedBox(width: AppSpacing.xs),
                     ],
                     Expanded(
-                      child: leading == null
-                          ? Padding(
-                              padding: const EdgeInsetsDirectional.only(
-                                start: AppSpacing.sm,
-                              ),
-                              child: titleWidget,
-                            )
-                          : titleWidget,
+                      child: titleWidget != null
+                          ? titleWidget!
+                          : (leading == null
+                                ? Padding(
+                                    padding: const EdgeInsetsDirectional.only(
+                                      start: AppSpacing.sm,
+                                    ),
+                                    child: titleText,
+                                  )
+                                : titleText),
                     ),
                     if (actions != null) ...actions!,
                   ],
