@@ -2,21 +2,15 @@ import 'dart:ui' show Locale;
 
 import 'package:intl/intl.dart' as intl;
 
-import 'arabic_digits.dart';
-
-/// Phase 035 craft wave — ONE localized number pipeline for every on-screen
+/// DC "Blue Crown" design — ONE number pipeline for every on-screen
 /// count/measure (rooms, bathrooms, areas, result counts, floors…).
 ///
-/// Prices already go through `MoneyFormatter` (which post-processes to
-/// Arabic-Indic under `ar`); every other number previously used bare
-/// `NumberFormat.decimalPattern`, which keeps Western digits under `ar`
-/// because intl's bundled `ar` data does. The result was mixed digit systems
-/// on a single card (`٤٥٠٬٠٠٠ ل.س` price next to `120 م²` specs) — a top
-/// "beginner tell" from the 035 UI audit. Route ALL of them through here.
+/// The approved design (`AlNujom.dc.html`) uses **Western digits everywhere**
+/// ("210 م²", "$195,000", "منذ 3 أيام") — matching what real Arabic
+/// marketplace apps (Bayut, dubizzle, OpenSooq) ship. This supersedes the
+/// Stage-2 Arabic-Indic pass. We format with Western grouping (comma
+/// thousands) regardless of UI locale so the digits read identically to the
+/// design in both `ar` and `en`.
 String formatLocalizedNumber(num value, Locale locale) {
-  final formatted = intl.NumberFormat.decimalPattern(
-    locale.toLanguageTag(),
-  ).format(value);
-  if (locale.languageCode == 'ar') return toArabicIndicNumerals(formatted);
-  return formatted;
+  return intl.NumberFormat.decimalPattern('en').format(value);
 }

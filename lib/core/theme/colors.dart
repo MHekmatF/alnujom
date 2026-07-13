@@ -37,6 +37,13 @@ final class AppColors {
     required this.onWhatsapp,
     required this.divider,
     required this.disabledOverlay,
+    required this.brandHeader,
+    required this.onBrandHeader,
+    required this.brandHeaderField,
+    required this.secondaryContainer,
+    required this.onSecondaryContainer,
+    required this.verifiedBorder,
+    required this.goldContainer,
   });
 
   factory AppColors.fromTokens(AppPaletteTokens tokens) => AppColors._(
@@ -72,6 +79,13 @@ final class AppColors {
     onWhatsapp: tokens.onWhatsapp,
     divider: tokens.outline,
     disabledOverlay: tokens.onSurface.withAlpha(0x61),
+    brandHeader: tokens.brandHeader,
+    onBrandHeader: tokens.onBrandHeader,
+    brandHeaderField: tokens.brandHeaderField,
+    secondaryContainer: tokens.secondaryContainer,
+    onSecondaryContainer: tokens.onSecondaryContainer,
+    verifiedBorder: tokens.verifiedBorder,
+    goldContainer: tokens.goldContainer,
   );
 
   factory AppColors.of(BuildContext context) {
@@ -112,6 +126,14 @@ final class AppColors {
       onWhatsapp: tokens?.onWhatsapp ?? (tokens?.onSuccess ?? scheme.onPrimary),
       divider: scheme.outline,
       disabledOverlay: scheme.onSurface.withAlpha(0x61),
+      brandHeader: tokens?.brandHeader ?? scheme.primary,
+      onBrandHeader: tokens?.onBrandHeader ?? scheme.onPrimary,
+      brandHeaderField: tokens?.brandHeaderField ?? scheme.surface,
+      secondaryContainer: scheme.secondaryContainer,
+      onSecondaryContainer: scheme.onSecondaryContainer,
+      verifiedBorder:
+          tokens?.verifiedBorder ?? (tokens?.verified ?? scheme.tertiary),
+      goldContainer: tokens?.goldContainer ?? scheme.tertiaryContainer,
     );
   }
 
@@ -147,6 +169,13 @@ final class AppColors {
   final Color onWhatsapp;
   final Color divider;
   final Color disabledOverlay;
+  final Color brandHeader;
+  final Color onBrandHeader;
+  final Color brandHeaderField;
+  final Color secondaryContainer;
+  final Color onSecondaryContainer;
+  final Color verifiedBorder;
+  final Color goldContainer;
 
   @override
   bool operator ==(Object other) =>
@@ -183,7 +212,14 @@ final class AppColors {
           whatsapp == other.whatsapp &&
           onWhatsapp == other.onWhatsapp &&
           divider == other.divider &&
-          disabledOverlay == other.disabledOverlay;
+          disabledOverlay == other.disabledOverlay &&
+          brandHeader == other.brandHeader &&
+          onBrandHeader == other.onBrandHeader &&
+          brandHeaderField == other.brandHeaderField &&
+          secondaryContainer == other.secondaryContainer &&
+          onSecondaryContainer == other.onSecondaryContainer &&
+          verifiedBorder == other.verifiedBorder &&
+          goldContainer == other.goldContainer;
 
   @override
   int get hashCode => Object.hashAll([
@@ -219,6 +255,13 @@ final class AppColors {
     onWhatsapp,
     divider,
     disabledOverlay,
+    brandHeader,
+    onBrandHeader,
+    brandHeaderField,
+    secondaryContainer,
+    onSecondaryContainer,
+    verifiedBorder,
+    goldContainer,
   ]);
 }
 
@@ -242,6 +285,11 @@ final class AppColorTokens extends ThemeExtension<AppColorTokens> {
     required this.scrim,
     required this.whatsapp,
     required this.onWhatsapp,
+    required this.brandHeader,
+    required this.onBrandHeader,
+    required this.brandHeaderField,
+    required this.verifiedBorder,
+    required this.goldContainer,
   });
 
   factory AppColorTokens.fromPalette(AppPaletteTokens tokens) => AppColorTokens(
@@ -262,6 +310,11 @@ final class AppColorTokens extends ThemeExtension<AppColorTokens> {
     scrim: tokens.scrim,
     whatsapp: tokens.whatsapp,
     onWhatsapp: tokens.onWhatsapp,
+    brandHeader: tokens.brandHeader,
+    onBrandHeader: tokens.onBrandHeader,
+    brandHeaderField: tokens.brandHeaderField,
+    verifiedBorder: tokens.verifiedBorder,
+    goldContainer: tokens.goldContainer,
   );
 
   final Color accent;
@@ -281,6 +334,11 @@ final class AppColorTokens extends ThemeExtension<AppColorTokens> {
   final Color scrim;
   final Color whatsapp;
   final Color onWhatsapp;
+  final Color brandHeader;
+  final Color onBrandHeader;
+  final Color brandHeaderField;
+  final Color verifiedBorder;
+  final Color goldContainer;
 
   @override
   AppColorTokens copyWith({
@@ -301,6 +359,11 @@ final class AppColorTokens extends ThemeExtension<AppColorTokens> {
     Color? scrim,
     Color? whatsapp,
     Color? onWhatsapp,
+    Color? brandHeader,
+    Color? onBrandHeader,
+    Color? brandHeaderField,
+    Color? verifiedBorder,
+    Color? goldContainer,
   }) {
     return AppColorTokens(
       accent: accent ?? this.accent,
@@ -320,6 +383,11 @@ final class AppColorTokens extends ThemeExtension<AppColorTokens> {
       scrim: scrim ?? this.scrim,
       whatsapp: whatsapp ?? this.whatsapp,
       onWhatsapp: onWhatsapp ?? this.onWhatsapp,
+      brandHeader: brandHeader ?? this.brandHeader,
+      onBrandHeader: onBrandHeader ?? this.onBrandHeader,
+      brandHeaderField: brandHeaderField ?? this.brandHeaderField,
+      verifiedBorder: verifiedBorder ?? this.verifiedBorder,
+      goldContainer: goldContainer ?? this.goldContainer,
     );
   }
 
@@ -351,6 +419,11 @@ final class AppColorTokens extends ThemeExtension<AppColorTokens> {
       scrim: Color.lerp(scrim, other.scrim, t)!,
       whatsapp: Color.lerp(whatsapp, other.whatsapp, t)!,
       onWhatsapp: Color.lerp(onWhatsapp, other.onWhatsapp, t)!,
+      brandHeader: Color.lerp(brandHeader, other.brandHeader, t)!,
+      onBrandHeader: Color.lerp(onBrandHeader, other.onBrandHeader, t)!,
+      brandHeaderField: Color.lerp(brandHeaderField, other.brandHeaderField, t)!,
+      verifiedBorder: Color.lerp(verifiedBorder, other.verifiedBorder, t)!,
+      goldContainer: Color.lerp(goldContainer, other.goldContainer, t)!,
     );
   }
 }

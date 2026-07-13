@@ -48,8 +48,8 @@ sealed class ColorPalette {
       onPrimaryContainer: tokens.onPrimaryContainer,
       secondary: tokens.secondary,
       onSecondary: tokens.onSecondary,
-      secondaryContainer: tokens.surfaceVariant,
-      onSecondaryContainer: tokens.onSurface,
+      secondaryContainer: tokens.secondaryContainer,
+      onSecondaryContainer: tokens.onSecondaryContainer,
       tertiary: tokens.tertiary,
       onTertiary: onTertiary,
       tertiaryContainer: tokens.accentContainer,
@@ -93,43 +93,46 @@ final class ModernPalette extends ColorPalette {
   // (fails contrast) — only as a fill behind dark ink or a badge tint. WCAG AA.
   @override
   AppPaletteTokens get _lightTokens => const AppPaletteTokens(
-    // Phase 035 — "Glass / Depth" (design #8): INDIGO accent on a soft
-    // lavender-white gradient; white cards float with layered depth + glass.
-    primary: Color(0xFF4F46E5),
+    // DC "Blue Crown" (AlNujom.dc.html, founder-approved) — royal blue #1F4FE6
+    // on a cool blue-grey app bg; white cards + hairlines; a deep-blue crown
+    // header. Exact values transcribed in specs/035-.../DESIGN-DC.md.
+    primary: Color(0xFF1F4FE6),
     onPrimary: Color(0xFFFFFFFF),
-    primaryContainer: Color(0xFFEEF0FF),
-    onPrimaryContainer: Color(0xFF3730A3),
-    accent: Color(0xFFFF5A76),
+    primaryContainer: Color(0xFFE2E9FF), // --tonal
+    onPrimaryContainer: Color(0xFF123287), // --onTonal
+    accent: Color(0xFFFF5B6E), // saved-heart pink
     onAccent: Color(0xFFFFFFFF),
-    accentContainer: Color(0xFFFFE1E8),
+    accentContainer: Color(0xFFFFE1E6),
     secondary: Color(0xFF0F172A),
     onSecondary: Color(0xFFFFFFFF),
-    tertiary: Color(0xFFC2A14D),
-    // 035 craft wave — ONE UI green: success == verified (#1F9D57). The old
-    // set shipped three near-identical greens (success #2E9E6B, verified
-    // #1F9D57, whatsapp #1DAB61) that co-rendered on a single card and read
-    // as a colour mistake. WhatsApp keeps its brand green as the exception.
-    success: Color(0xFF1F9D57),
+    tertiary: Color(0xFF8A6912), // --gold (featured text/icon)
+    success: Color(0xFF0E7A3C), // --green == verified
     warning: Color(0xFFC98318),
-    error: Color(0xFFD64545),
-    surface: Color(0xFFF2F4FC),
-    surfaceVariant: Color(0xFFE7ECF8),
-    card: Color(0xFFFFFFFF),
-    outline: Color(0xFFE4E7F2),
-    outlineStrong: Color(0xFFCDD3E6),
-    onSurface: Color(0xFF0E1524),
-    onSurfaceVariant: Color(0xFF3B4256),
-    textMuted: Color(0xFF8A90A2),
-    verified: Color(0xFF1F9D57),
-    verifiedContainer: Color(0xFFDCF0E5),
+    error: Color(0xFFD93B3B), // --red (badges + errors)
+    surface: Color(0xFFEAEDF2), // --bg (scaffold)
+    surfaceVariant: Color(0xFFF2F4F9), // --surface2
+    card: Color(0xFFFFFFFF), // --surface
+    outline: Color(0xFFE7EAF1), // --divider (card borders, hairlines)
+    outlineStrong: Color(0xFFC6CAD6), // --outline (chip/segment/button borders)
+    onSurface: Color(0xFF1A1C22), // --on
+    onSurfaceVariant: Color(0xFF5B6070), // --onVar
+    textMuted: Color(0xFF5B6070),
+    verified: Color(0xFF0E7A3C),
+    verifiedContainer: Color(0xFFE4F3E9), // --greenC
     onError: Color(0xFFFFFFFF),
-    onSuccess: Color(0xFFFFFFFF),
+    onSuccess: Color(0xFF0A5A2C), // --onGreenC
     onPhoto: Color(0xFFFFFFFF),
-    // Cool slate-tinted dark scrim for over-photo chips + the image gradient.
-    photoOverlay: Color(0x8C0F172A),
-    scrim: Color(0x66000000),
-    whatsapp: Color(0xFF1DAB61),
+    photoOverlay: Color(0x6B0F121E), // --scrim rgba(15,18,30,.42)
+    scrim: Color(0x6B0F121E),
+    whatsapp: Color(0xFF1FA855), // --wa
     onWhatsapp: Color(0xFFFFFFFF),
+    brandHeader: Color(0xFF1A3FC4), // --header / --statusbg
+    onBrandHeader: Color(0xFFFFFFFF),
+    brandHeaderField: Color(0xFFFFFFFF), // --headerField
+    secondaryContainer: Color(0xFFDAE1F6), // --sec
+    onSecondaryContainer: Color(0xFF182C58), // --onSec
+    verifiedBorder: Color(0xFFC3E4CF), // --greenBorder
+    goldContainer: Color(0xFFFBEDC7), // --goldC
   );
 
   // Phase 033 — dark midnight-navy surfaces (#0B1020 + elevated #161C2D cards)
@@ -139,39 +142,45 @@ final class ModernPalette extends ColorPalette {
   // a warm gold featured accent, coral favorites, green/WhatsApp trust. WCAG AA.
   @override
   AppPaletteTokens get _darkTokens => const AppPaletteTokens(
-    // Phase 035 — "Glass / Depth" dark: deep indigo-navy surfaces, a bright
-    // indigo accent, cards lifted with layered depth + glass.
-    primary: Color(0xFF818CF8),
-    onPrimary: Color(0xFF1E1B4B),
-    primaryContainer: Color(0xFF312E81),
-    onPrimaryContainer: Color(0xFFE0E7FF),
-    accent: Color(0xFFFF7A8F),
-    onAccent: Color(0xFF430713),
+    // DC "Blue Crown" dark — near-black surfaces (#0C0C10), a bright azure
+    // primary (#AEC2FF) that takes dark ink on fills, a deep-navy crown.
+    primary: Color(0xFFAEC2FF),
+    onPrimary: Color(0xFF0A2063),
+    primaryContainer: Color(0xFF26356E), // --tonal dark
+    onPrimaryContainer: Color(0xFFDCE4FF), // --onTonal dark
+    accent: Color(0xFFFF5B6E), // saved-heart pink (both themes)
+    onAccent: Color(0xFFFFFFFF),
     accentContainer: Color(0xFF4A1420),
-    secondary: Color(0xFFE7ECF5),
+    secondary: Color(0xFFE7E8ED),
     onSecondary: Color(0xFF0B1220),
-    tertiary: Color(0xFFD9B86A),
-    // 035 craft wave — success == verified in dark too (see light note).
-    success: Color(0xFF4CC08A),
+    tertiary: Color(0xFFE6C56A), // --gold dark
+    success: Color(0xFF74D99A), // --green dark
     warning: Color(0xFFE2B25A),
-    error: Color(0xFFF0706E),
-    surface: Color(0xFF0E1020),
-    surfaceVariant: Color(0xFF1A1E33),
-    card: Color(0xFF171A2E),
-    outline: Color(0xFF2A2F4A),
-    outlineStrong: Color(0xFF3C4266),
-    onSurface: Color(0xFFEAECF7),
-    onSurfaceVariant: Color(0xFFA6ACC4),
-    textMuted: Color(0xFF7E85A0),
-    verified: Color(0xFF4CC08A),
-    verifiedContainer: Color(0xFF163A2A),
-    onError: Color(0xFF420A0A),
-    onSuccess: Color(0xFF04231A),
+    error: Color(0xFFFF6B6B), // --red dark
+    surface: Color(0xFF0C0C10), // --bg dark
+    surfaceVariant: Color(0xFF1C1D25), // --surface2 dark
+    card: Color(0xFF131318), // --surface dark
+    outline: Color(0xFF26272F), // --divider dark
+    outlineStrong: Color(0xFF3B3D48), // --outline dark
+    onSurface: Color(0xFFE7E8ED), // --on dark
+    onSurfaceVariant: Color(0xFFA7ABB8), // --onVar dark
+    textMuted: Color(0xFFA7ABB8),
+    verified: Color(0xFF74D99A),
+    verifiedContainer: Color(0xFF12331F), // --greenC dark
+    onError: Color(0xFF3A0A0A), // --onRed dark
+    onSuccess: Color(0xFFA9E9C0), // --onGreenC dark
     onPhoto: Color(0xFFFFFFFF),
-    photoOverlay: Color(0x8C05080F),
-    scrim: Color(0x99000000),
-    whatsapp: Color(0xFF25D366),
-    onWhatsapp: Color(0xFF05301B),
+    photoOverlay: Color(0x80000000), // --scrim dark rgba(0,0,0,.5)
+    scrim: Color(0x80000000),
+    whatsapp: Color(0xFF2AAE60), // --wa dark
+    onWhatsapp: Color(0xFFFFFFFF),
+    brandHeader: Color(0xFF12235E), // --header dark
+    onBrandHeader: Color(0xFFFFFFFF),
+    brandHeaderField: Color(0xFF20232C), // --headerField dark
+    secondaryContainer: Color(0xFF2A3352), // --sec dark
+    onSecondaryContainer: Color(0xFFDEE4FA), // --onSec dark
+    verifiedBorder: Color(0xFF1E4A30), // --greenBorder dark
+    goldContainer: Color(0xFF39300B), // --goldC dark
   );
 }
 
@@ -283,6 +292,16 @@ final class AppPaletteTokens {
     required this.scrim,
     required this.whatsapp,
     required this.onWhatsapp,
+    // DC design (Blue Crown) brand roles — optional with const defaults so the
+    // dev-only TrustPalette and older callers keep compiling. ModernPalette
+    // passes the exact values from DESIGN-DC.md.
+    this.brandHeader = const Color(0xFF1A3FC4),
+    this.onBrandHeader = const Color(0xFFFFFFFF),
+    this.brandHeaderField = const Color(0xFFFFFFFF),
+    this.secondaryContainer = const Color(0xFFDAE1F6),
+    this.onSecondaryContainer = const Color(0xFF182C58),
+    this.verifiedBorder = const Color(0xFFC3E4CF),
+    this.goldContainer = const Color(0xFFFBEDC7),
   });
 
   final Color primary;
@@ -337,4 +356,27 @@ final class AppPaletteTokens {
 
   /// Foreground on the [whatsapp] fill.
   final Color onWhatsapp;
+
+  /// DC "Blue Crown" — the deep-blue brand header zone (crown) + tinted status
+  /// bar. The signature of the design.
+  final Color brandHeader;
+
+  /// Foreground (logo/icons/text) on the [brandHeader] (white in both themes).
+  final Color onBrandHeader;
+
+  /// The search field that sits inside the [brandHeader] crown.
+  final Color brandHeaderField;
+
+  /// Selected-state container: segmented control, bottom-nav pill, toggle-on
+  /// chip, detail "للبيع" tag. Maps to Material `secondaryContainer`.
+  final Color secondaryContainer;
+
+  /// Foreground on [secondaryContainer].
+  final Color onSecondaryContainer;
+
+  /// Border of the field-verification card on the detail page (green tint).
+  final Color verifiedBorder;
+
+  /// Container behind the gold "مميّز" featured badge (foreground = [tertiary]).
+  final Color goldContainer;
 }
