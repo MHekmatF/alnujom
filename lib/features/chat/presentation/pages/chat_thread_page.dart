@@ -19,6 +19,7 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_spinner.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/press_scale.dart';
@@ -69,29 +70,28 @@ class _ChatThreadPageState extends State<ChatThreadPage> {
     final l10n = AppLocalizations.of(context)!;
     final colors = AppColors.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.listingTitle ?? l10n.chatThreadTitleFallback,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        actions: [
-          // Phase 29 (F1) — "Add to CRM": attach this conversation's buyer as a
-          // lead. The upsert RPC resolves the buyer + verifies the caller is the
-          // publisher server-side (a non-publisher tap surfaces an error toast).
-          IconButton(
-            icon: const Icon(Icons.handshake_outlined),
-            tooltip: l10n.crmAddToCrmAction,
-            onPressed: () => addToCrm(
-              context,
-              source: CrmLeadSource.conversation,
-              sourceId: widget.conversationId,
-              displayName: widget.listingTitle,
-            ),
-          ),
-        ],
+    return DcCrownScaffold(
+      title: widget.listingTitle ?? l10n.chatThreadTitleFallback,
+      dense: true,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () => Navigator.of(context).maybePop(),
       ),
+      actions: [
+        // Phase 29 (F1) — "Add to CRM": attach this conversation's buyer as a
+        // lead. The upsert RPC resolves the buyer + verifies the caller is the
+        // publisher server-side (a non-publisher tap surfaces an error toast).
+        DcCrownIconButton(
+          icon: Icons.handshake_outlined,
+          tooltip: l10n.crmAddToCrmAction,
+          onTap: () => addToCrm(
+            context,
+            source: CrmLeadSource.conversation,
+            sourceId: widget.conversationId,
+            displayName: widget.listingTitle,
+          ),
+        ),
+      ],
       body: Column(
         children: [
           Expanded(

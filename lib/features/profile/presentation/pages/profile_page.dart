@@ -31,6 +31,7 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_nav_drawer.dart';
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/app_spinner.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/main_bottom_nav.dart';
 import '../../../../core/widgets/press_scale.dart';
@@ -73,8 +74,8 @@ class _ProfileView extends StatelessWidget {
       builder: (context, state) {
         if (state.status == ProfileStatus.loading ||
             state.status == ProfileStatus.initial) {
-          return Scaffold(
-            appBar: AppBar(title: Text(l10n.profile_title)),
+          return DcCrownScaffold(
+            title: l10n.profile_title,
             body: const AppSpinner.page(),
             bottomNavigationBar: const MainBottomNav(current: MainTab.profile),
           );
@@ -82,8 +83,8 @@ class _ProfileView extends StatelessWidget {
 
         final profile = state.profile;
         if (profile == null) {
-          return Scaffold(
-            appBar: AppBar(title: Text(l10n.profile_title)),
+          return DcCrownScaffold(
+            title: l10n.profile_title,
             bottomNavigationBar: const MainBottomNav(current: MainTab.profile),
             body: ErrorState(
               title: l10n.profileLoadErrorTitle,
@@ -94,15 +95,13 @@ class _ProfileView extends StatelessWidget {
           );
         }
 
-        return Scaffold(
+        return DcCrownScaffold(
+          title: l10n.profile_title,
           bottomNavigationBar: const MainBottomNav(current: MainTab.profile),
           // Phase 030 (W5) — the relocated tool sections (Selling / Admin /
           // Activity / Reports) live in this app-wide navigation drawer. The
           // profile body below is now a focused identity + account surface.
           drawer: const AppNavDrawer(),
-          appBar: AppBar(
-            title: Text(l10n.profile_title),
-          ),
           body: SingleChildScrollView(
             padding: const EdgeInsetsDirectional.fromSTEB(
               AppSpacing.lg,
