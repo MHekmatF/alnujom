@@ -11,6 +11,7 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../core/widgets/segmented_control.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
@@ -125,27 +126,17 @@ class _CreateFlowSwitcher extends StatelessWidget {
         // Classic stepper keeps its own Scaffold (per-step app bar + bottom
         // nav). The toggle strip rides above it as a slim mode selector.
         if (style == CreateFormStyle.classic) {
-          return Column(
-            children: [
-              Material(color: colors.surface, child: toggle),
-              const Expanded(child: _ListingFormBody()),
-            ],
-          );
+          return _ListingFormBody(modeToggle: toggle);
         }
 
         // Express + Detail share the same chrome (title bar + toggle + body);
         // only the form body differs.
-        return Scaffold(
-          backgroundColor: colors.surface,
-          appBar: AppBar(
-            backgroundColor: colors.surface,
-            elevation: 0,
-            title: Text(l10n.formDetailPageTitle),
-            leading: AppButton.iconButton(
-              icon: Icons.arrow_back,
-              label: l10n.listingFormBackButton,
-              onPressed: () => context.go(AppRoutes.shellHome),
-            ),
+        return DcCrownScaffold(
+          title: l10n.formDetailPageTitle,
+          dense: true,
+          leading: DcCrownIconButton(
+            icon: Icons.arrow_forward,
+            onTap: () => context.go(AppRoutes.shellHome),
           ),
           body: Column(
             children: [
@@ -164,7 +155,11 @@ class _CreateFlowSwitcher extends StatelessWidget {
 }
 
 class _ListingFormBody extends StatelessWidget {
-  const _ListingFormBody();
+  const _ListingFormBody({this.modeToggle});
+
+  /// The classic stepper hosts the create-mode selector at the top of its white
+  /// sheet (below the DC crown); express/detail host their own.
+  final Widget? modeToggle;
 
   @override
   Widget build(BuildContext context) {
@@ -198,38 +193,27 @@ class _ListingFormBody extends StatelessWidget {
       builder: (context, state) {
         final colors = AppColors.of(context);
         final styles = AppTextStyles.of(context);
-        return Scaffold(
-          backgroundColor: colors.surface,
-          appBar: AppBar(
-            title: Text(
-              _titleForStep(state.currentStep, l10n),
-              style: styles.titleLarge.copyWith(color: colors.onSurface),
-            ),
-            leading: AppButton.iconButton(
-              icon: Icons.arrow_back,
-              label: l10n.listingFormBackButton,
-              onPressed: state.currentStep.previous == null
-                  ? () => context.go(AppRoutes.shellHome)
+        return DcCrownScaffold(
+          title: _titleForStep(state.currentStep, l10n),
+          dense: true,
+          leading: DcCrownIconButton(
+            icon: Icons.arrow_forward,
+            onTap: state.currentStep.previous == null
+                ? () => context.go(AppRoutes.shellHome)
+                : () => context.read<ListingFormBloc>().add(
+                    JumpToStep(state.currentStep.previous!),
+                  ),
+          ),
+          actions: [
+            DcCrownTextButton(
+              label: l10n.listingFormSaveAndExitButton,
+              onTap: state.saveInProgress
+                  ? () {}
                   : () => context.read<ListingFormBloc>().add(
-                      JumpToStep(state.currentStep.previous!),
+                      const SaveStepAndExit(),
                     ),
             ),
-            actions: [
-              Padding(
-                padding: const EdgeInsetsDirectional.only(end: AppSpacing.sm),
-                child: AppButton(
-                  label: l10n.listingFormSaveAndExitButton,
-                  variant: AppButtonVariant.text,
-                  size: AppButtonSize.dense,
-                  onPressed: state.saveInProgress
-                      ? null
-                      : () => context.read<ListingFormBloc>().add(
-                          const SaveStepAndExit(),
-                        ),
-                ),
-              ),
-            ],
-          ),
+          ],
           body: state.loadInProgress
               ? Center(child: appInlineSpinner(context))
               : !state.isReady
@@ -248,6 +232,7 @@ class _ListingFormBody extends StatelessWidget {
                 )
               : Column(
                   children: [
+                    if (modeToggle != null) modeToggle!,
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
                         AppSpacing.lg,
