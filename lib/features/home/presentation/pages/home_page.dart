@@ -13,6 +13,7 @@ import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_nav_drawer.dart';
 import '../../../../core/widgets/app_spinner.dart';
+import '../../../../core/widgets/crown_underline_tabs.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
@@ -530,89 +531,16 @@ class _HomeCrown extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
-          _CrownPurposeTabs(
-            selected: selectedPurpose,
+          CrownUnderlineTabs(
+            labels: [
+              l10n.listingPurposeSale,
+              l10n.listingPurposeRent,
+              l10n.listingPurposeDailyRent,
+            ],
+            selectedIndex: selectedPurpose,
             onChanged: onPurposeChanged,
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// DC purpose tabs — للبيع / للإيجار / إيجار يومي rendered as underline tabs on
-/// the blue crown (selected = white text + a 3px white underline; unselected =
-/// translucent white). Replaces the old full-width segmented pill.
-class _CrownPurposeTabs extends StatelessWidget {
-  const _CrownPurposeTabs({required this.selected, required this.onChanged});
-
-  final int selected;
-  final ValueChanged<int> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final labels = [
-      l10n.listingPurposeSale,
-      l10n.listingPurposeRent,
-      l10n.listingPurposeDailyRent,
-    ];
-    return Padding(
-      padding: const EdgeInsetsDirectional.symmetric(horizontal: AppSpacing.xs),
-      child: Row(
-        children: [
-          for (var i = 0; i < labels.length; i++) ...[
-            if (i > 0) const SizedBox(width: AppSpacing.xl),
-            _PurposeTab(
-              label: labels[i],
-              selected: i == selected,
-              onTap: () => onChanged(i),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _PurposeTab extends StatelessWidget {
-  const _PurposeTab({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-    final styles = AppTextStyles.of(context);
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.sm),
-        decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(
-              color: selected ? colors.onBrandHeader : Colors.transparent,
-              width: 3,
-            ),
-          ),
-        ),
-        child: Text(
-          label,
-          style: styles.titleMedium.copyWith(
-            fontSize: 15,
-            color: selected
-                ? colors.onBrandHeader
-                : colors.onBrandHeader.withValues(alpha: 0.6),
-            fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
-          ),
-        ),
       ),
     );
   }

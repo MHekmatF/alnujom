@@ -760,7 +760,7 @@
   "publisherHistoryStatusDeleted": "Deleted",
   "@publisherHistoryStatusDeleted": { "description": "Phase 12 / US6 — Status arc label for ListingStatus.deleted." },
 
-  "home_app_bar_title": "AlNujom Real Estate",
+  "home_app_bar_title": "AlNujom",
   "home_sign_in_icon_tooltip": "Sign in",
   "home_search_bar_placeholder": "Search for property...",
   "home_crown_location": "Damascus & suburbs",
