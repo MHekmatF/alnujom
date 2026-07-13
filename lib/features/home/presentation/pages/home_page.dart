@@ -18,18 +18,13 @@ import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/settings/listing_view_mode.dart';
 import '../../../../core/widgets/ds/ds_listing_card.dart';
-import '../../../../core/widgets/ds/ds_listing_card_data.dart';
 import '../../../../core/widgets/main_bottom_nav.dart';
 import '../../../../core/widgets/publish_fab.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../core/widgets/star_refresh_indicator.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/account_status.dart';
-import '../../../../shared/domain/value_objects/money.dart';
 import '../../../../shared/domain/value_objects/publisher_status.dart';
-import '../../../../shared/presentation/deed_finish_labels.dart';
-import '../../../../shared/presentation/money_formatter.dart';
-import '../../../../shared/util/location_line.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../../currencies/domain/entities/currency.dart';
@@ -46,7 +41,7 @@ import '../../../ads/presentation/widgets/ad_slot.dart';
 import '../../../recently_viewed/presentation/bloc/recently_viewed_cubit.dart';
 import '../../domain/entities/home_listing_card.dart';
 import '../widgets/featured_listings_carousel.dart';
-import '../widgets/hero_search_bar.dart';
+import '../widgets/home_card_mapper.dart';
 
 /// Phase 13 — public HomePage per FR-013 + contracts/
 /// phase13-home-page-composition.md.
@@ -231,7 +226,10 @@ class _HomeViewState extends State<_HomeView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const _HomeCrown(),
+          _HomeCrown(
+            selectedPurpose: _segment,
+            onPurposeChanged: (i) => setState(() => _segment = i),
+          ),
           Transform.translate(
             offset: const Offset(0, -18),
             child: Container(
@@ -248,20 +246,15 @@ class _HomeViewState extends State<_HomeView> {
                   _HomeCategoryGrid(
                     onSelected: (_) => context.go(AppRoutes.search),
                   ),
-                  Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(
-                      AppSpacing.lg,
-                      AppSpacing.md,
-                      AppSpacing.lg,
-                      AppSpacing.xs,
-                    ),
-                    child: _HomePurposeSegmented(
-                      selected: _segment,
-                      onChanged: (i) => setState(() => _segment = i),
-                    ),
-                  ),
+                  const SizedBox(height: AppSpacing.xs),
                   FeaturedListingsCarousel(
                     currenciesByCode: currenciesByCode,
+                  ),
+                  // DC: the sponsored slot sits between the featured rail and
+                  // the "latest" feed (renders nothing when no ad is served).
+                  const Padding(
+                    padding: EdgeInsetsDirectional.only(top: AppSpacing.sm),
+                    child: AdSlot(placement: AdPlacement.homeMiddleBanner),
                   ),
                   _DcSectionHeader(
                     title: l10n.home_latest_listings_header,
@@ -324,7 +317,6 @@ class _HomeViewState extends State<_HomeView> {
                 currenciesByCode: currenciesByCode,
               ),
             ),
-          const AdSlot(placement: AdPlacement.homeMiddleBanner),
           _FeedFooter(state: state, l10n: l10n),
         ];
     }
@@ -372,7 +364,7 @@ class _FeedCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context);
-    final data = _toCardData(
+    final data = homeCardToData(
       card,
       currenciesByCode,
       locale,
@@ -391,51 +383,6 @@ class _FeedCard extends StatelessWidget {
   }
 }
 
-DsListingCardData _toCardData(
-  HomeListingCard card,
-  Map<String, Currency> byCode,
-  Locale locale,
-  AppLocalizations l10n,
-) {
-  final currency = byCode[card.primaryPrice.currencyCode];
-  final priceText = currency == null
-      ? '${card.primaryPrice.amount} ${card.primaryPrice.currencyCode}'
-      : MoneyFormatter.format(
-          Money(
-            amount: card.primaryPrice.amount,
-            currencyCode: card.primaryPrice.currencyCode,
-          ),
-          locale: locale,
-          currency: currency,
-        );
-  final location = listingLocationLine(
-    governorate: card.governorateNameLocalized,
-    city: card.cityNameLocalized,
-    area: card.areaNameLocalized,
-  );
-  return DsListingCardData(
-    id: card.id,
-    title: card.title,
-    priceText: priceText,
-    purpose: card.purpose,
-    locationText: location.isEmpty ? '—' : location,
-    imageUrl: card.mainImageUrl,
-    rooms: card.rooms,
-    bathrooms: card.bathrooms,
-    areaSize: card.areaSize,
-    isFeatured: card.isFeatured,
-    agencyId: card.agencyId,
-    agencyName: card.agencyName,
-    agencyLogoUrl: card.agencyLogoUrl,
-    publishedAt: card.publishedAt,
-    isVerified: card.isVerified,
-    deedLabel: card.deedType == null
-        ? null
-        : deedTypeLabel(l10n, card.deedType),
-    whatsappPhone: card.whatsapp ?? card.phone,
-  );
-}
-
 /// Phase 33 restyle — the photo-forward home **header row**. A small italic
 /// accent greeting (brand-primary) sits over a bold name/title line on the
 /// start side, with a circular avatar + a circular notification bell on the
@@ -446,7 +393,14 @@ DsListingCardData _toCardData(
 /// search field. It scrolls with the content; the white sheet below overlaps
 /// it by 18px so the blue peeks through the sheet's rounded top corners.
 class _HomeCrown extends StatelessWidget {
-  const _HomeCrown();
+  const _HomeCrown({
+    required this.selectedPurpose,
+    required this.onPurposeChanged,
+  });
+
+  /// للبيع / للإيجار / إيجار يومي — the DC purpose tabs now live in the crown.
+  final int selectedPurpose;
+  final ValueChanged<int> onPurposeChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -458,11 +412,14 @@ class _HomeCrown extends StatelessWidget {
     return Container(
       width: double.infinity,
       color: colors.brandHeader,
+      // Bottom padding is tighter than before: the purpose tabs now sit at the
+      // crown's bottom edge and the white sheet overlaps it, so a smaller pad
+      // keeps the selected tab's underline clear of the sheet.
       padding: EdgeInsetsDirectional.only(
         top: topInset + AppSpacing.sm,
         start: AppSpacing.lg,
         end: AppSpacing.lg,
-        bottom: AppSpacing.xl + AppSpacing.sm,
+        bottom: AppSpacing.xl,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -572,7 +529,90 @@ class _HomeCrown extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(height: AppSpacing.lg),
+          _CrownPurposeTabs(
+            selected: selectedPurpose,
+            onChanged: onPurposeChanged,
+          ),
         ],
+      ),
+    );
+  }
+}
+
+/// DC purpose tabs — للبيع / للإيجار / إيجار يومي rendered as underline tabs on
+/// the blue crown (selected = white text + a 3px white underline; unselected =
+/// translucent white). Replaces the old full-width segmented pill.
+class _CrownPurposeTabs extends StatelessWidget {
+  const _CrownPurposeTabs({required this.selected, required this.onChanged});
+
+  final int selected;
+  final ValueChanged<int> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final labels = [
+      l10n.listingPurposeSale,
+      l10n.listingPurposeRent,
+      l10n.listingPurposeDailyRent,
+    ];
+    return Padding(
+      padding: const EdgeInsetsDirectional.symmetric(horizontal: AppSpacing.xs),
+      child: Row(
+        children: [
+          for (var i = 0; i < labels.length; i++) ...[
+            if (i > 0) const SizedBox(width: AppSpacing.xl),
+            _PurposeTab(
+              label: labels[i],
+              selected: i == selected,
+              onTap: () => onChanged(i),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _PurposeTab extends StatelessWidget {
+  const _PurposeTab({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.sm),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: selected ? colors.onBrandHeader : Colors.transparent,
+              width: 3,
+            ),
+          ),
+        ),
+        child: Text(
+          label,
+          style: styles.titleMedium.copyWith(
+            fontSize: 15,
+            color: selected
+                ? colors.onBrandHeader
+                : colors.onBrandHeader.withValues(alpha: 0.6),
+            fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+          ),
+        ),
       ),
     );
   }
@@ -748,78 +788,6 @@ class _CategoryTile extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-/// DC pill segmented control — for-sale / rent / daily-rent, with a check on
-/// the selected segment.
-class _HomePurposeSegmented extends StatelessWidget {
-  const _HomePurposeSegmented({
-    required this.selected,
-    required this.onChanged,
-  });
-
-  final int selected;
-  final ValueChanged<int> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final colors = AppColors.of(context);
-    final styles = AppTextStyles.of(context);
-    final labels = [
-      l10n.listingPurposeSale,
-      l10n.listingPurposeRent,
-      l10n.listingPurposeDailyRent,
-    ];
-    return Container(
-      height: 42,
-      decoration: BoxDecoration(
-        border: Border.all(color: colors.outlineStrong),
-        borderRadius: appRadius(AppRadii.pill),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Row(
-        children: [
-          for (var i = 0; i < labels.length; i++)
-            Expanded(
-              child: InkWell(
-                onTap: () => onChanged(i),
-                child: Container(
-                  alignment: Alignment.center,
-                  color: i == selected
-                      ? colors.secondaryContainer
-                      : Colors.transparent,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (i == selected) ...[
-                        Icon(
-                          Icons.check,
-                          size: 18,
-                          color: colors.onSecondaryContainer,
-                        ),
-                        const SizedBox(width: AppSpacing.xs),
-                      ],
-                      Text(
-                        labels[i],
-                        style: styles.labelLarge.copyWith(
-                          color: i == selected
-                              ? colors.onSecondaryContainer
-                              : colors.onSurface,
-                          fontWeight: i == selected
-                              ? FontWeight.w700
-                              : FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-        ],
       ),
     );
   }

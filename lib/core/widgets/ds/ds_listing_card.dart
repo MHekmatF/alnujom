@@ -409,7 +409,7 @@ class DsListingCard extends StatelessWidget {
         ),
         if (ago != null) ...[
           const SizedBox(width: AppSpacing.xs),
-          Text('·', style: style),
+          Text(l10n.list_dot_separator, style: style),
           const SizedBox(width: AppSpacing.xs),
           Text(ago, maxLines: 1, overflow: TextOverflow.ellipsis, style: style),
         ],

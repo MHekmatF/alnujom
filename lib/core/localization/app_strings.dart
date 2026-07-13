@@ -4631,6 +4631,14 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('ad_sponsored_label', (loc) => loc.ad_sponsored_label);
 
   @override
+  String get ad_learn_more =>
+      _resolve('ad_learn_more', (loc) => loc.ad_learn_more);
+
+  @override
+  String get list_dot_separator =>
+      _resolve('list_dot_separator', (loc) => loc.list_dot_separator);
+
+  @override
   String get home_popular_searches =>
       _resolve('home_popular_searches', (loc) => loc.home_popular_searches);
 

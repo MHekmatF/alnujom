@@ -265,3 +265,6 @@ New design/
 /skills-lock.json
 /.claude/skills/ui-ux-pro-max
 docs/release/compare-apks/*.apk
+
+# Claude Design raw handoff downloads (the unzipped project is committed under specs/)
+/AlNujom real estate marketplace-handoff*.zip
