@@ -8,7 +8,7 @@ import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_logo.dart';
+import '../../../../core/widgets/dc_auth_scaffold.dart';
 import '../widgets/auth_text_field.dart';
 import '../widgets/auth_trust_note.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -105,44 +105,25 @@ class _RegisterPageState extends State<RegisterPage> {
       child: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
           final isLoading = state is Authenticating;
-          return Scaffold(
-            backgroundColor: colors.surface,
-            appBar: AppBar(
-              backgroundColor: colors.surface,
-              elevation: 0,
-              title: Text(l10n.register_title),
-            ),
-            body: SafeArea(
-              child: SingleChildScrollView(
-                padding: const EdgeInsetsDirectional.symmetric(
-                  horizontal: AppSpacing.xl,
-                  vertical: AppSpacing.lg,
-                ),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const SizedBox(height: AppSpacing.lg),
-                      const Center(child: AppLogo()),
-                      const SizedBox(height: AppSpacing.xxl),
-                      Text(
-                        l10n.auth_register_headline,
-                        style: styles.headlineLarge.copyWith(
-                          color: colors.onSurface,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(
-                        l10n.auth_register_subtitle,
-                        style: styles.bodyMedium.copyWith(
-                          color: colors.textMuted,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: AppSpacing.xxl),
-                      AuthField(
+          return DcAuthScaffold(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    l10n.auth_register_headline,
+                    style: styles.headlineMedium.copyWith(
+                      color: colors.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    l10n.auth_register_subtitle,
+                    style: styles.bodyMedium.copyWith(color: colors.textMuted),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  AuthField(
                         label: l10n.register_phone_label,
                         child: TextFormField(
                           controller: _phoneController,
@@ -233,9 +214,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ],
                   ),
                 ),
-              ),
-            ),
-          );
+              );
         },
       ),
     );

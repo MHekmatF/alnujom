@@ -43,6 +43,7 @@ import '../bloc/listing_details_bloc.dart';
 import '../widgets/affordability_calculator.dart';
 import '../widgets/buyer_safety_banner.dart';
 import '../widgets/contact_block.dart';
+import '../widgets/detail_sticky_contact_bar.dart';
 import '../widgets/listing_verification_section.dart';
 import '../widgets/listing_details_skeleton.dart';
 import '../widgets/listing_facts_block.dart';
@@ -256,8 +257,13 @@ class _SuccessBodyState extends State<_SuccessBody> {
       create: (_) =>
           getIt<SellerTrustCubit>()..load(aggregate.listing.publisherUserId),
       child: Scaffold(
-        body: CustomScrollView(
-          slivers: [
+        // DC "Blue Crown" — the persistent bottom اتصال / دردشة / واتساب bar as a
+        // Stack overlay (NOT a bottomNavigationBar, which collapsed the sliver
+        // body's viewport); the scroll content adds bottom clearance for it.
+        body: Stack(
+          children: [
+            CustomScrollView(
+              slivers: [
             // 2. Parallax collapsing gallery + FR-027 video-tap overlay.
             //    Phase 12 Q8=A ListingGallery wrapped (not edited) per SC-016;
             //    it also owns the Hero destination flown from the home card.
@@ -441,6 +447,10 @@ class _SuccessBodyState extends State<_SuccessBody> {
                       //    surface seeded with the publisher's name + username.
                       ContactBlock(
                         listing: aggregate.listing,
+                        // The DC sticky bottom bar owns اتصال / واتساب; the
+                        // inline card keeps the agent header + trust + quiet
+                        // secondary actions.
+                        showPrimaryActions: false,
                         contactName: aggregate.publisher.fullName.isNotEmpty
                             ? aggregate.publisher.fullName
                             : null,
@@ -511,7 +521,15 @@ class _SuccessBodyState extends State<_SuccessBody> {
                 staggerIndex: 2,
               ),
             ),
-            const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
+            const SliverToBoxAdapter(child: SizedBox(height: 104)),
+              ],
+            ),
+            PositionedDirectional(
+              start: 0,
+              end: 0,
+              bottom: 0,
+              child: DetailStickyContactBar(listing: aggregate.listing),
+            ),
           ],
         ),
       ),
