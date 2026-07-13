@@ -19,7 +19,7 @@ import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/deep_link_aware_back_button.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../../../shared/util/localized_numbers.dart';
+import '../../../../shared/presentation/money_formatter.dart';
 import '../bloc/agency_listings_bloc.dart';
 
 class AgencyListingsPage extends StatelessWidget {
@@ -122,7 +122,6 @@ class _ListingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
     final id = row['id'] as String?;
@@ -180,9 +179,10 @@ class _ListingCard extends StatelessWidget {
                     if (amount != null) ...[
                       const SizedBox(height: AppSpacing.xs),
                       Text(
-                        l10n.priceWithCurrency(
-                          _formatAmount(context, amount as num),
+                        MoneyFormatter.formatAmount(
+                          amount as num,
                           currency,
+                          locale: Localizations.localeOf(context),
                         ),
                         style: styles.bodyMedium.copyWith(
                           color: colors.onSurfaceVariant,
@@ -199,9 +199,4 @@ class _ListingCard extends StatelessWidget {
     );
   }
 
-  /// Localized amount in the active locale's numerals (Arabic-Indic in ar),
-  /// with no fractional part — mirrors the favorites/search card idiom.
-  String _formatAmount(BuildContext context, num amount) {
-    return formatLocalizedNumber(amount.round(), Localizations.localeOf(context));
-  }
 }

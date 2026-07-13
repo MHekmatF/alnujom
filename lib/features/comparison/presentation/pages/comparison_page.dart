@@ -26,6 +26,7 @@ import '../../../../core/widgets/press_scale.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../core/widgets/status_pill.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/presentation/money_formatter.dart';
 import '../../../../shared/util/localized_numbers.dart';
 import '../../../listing_form/domain/entities/listing.dart';
 import '../../domain/entities/comparison_item.dart';
@@ -329,12 +330,10 @@ class _PropertyColumn extends StatelessWidget {
                                 if (item.primaryAmount != null &&
                                     item.primaryCurrency != null)
                                   Text(
-                                    l10n.priceWithCurrency(
-                                      _formatAmount(
-                                        context,
-                                        item.primaryAmount!,
-                                      ),
+                                    MoneyFormatter.formatAmount(
+                                      item.primaryAmount!,
                                       item.primaryCurrency!,
+                                      locale: Localizations.localeOf(context),
                                     ),
                                     textDirection: TextDirection.ltr,
                                     textAlign: TextAlign.start,
@@ -393,9 +392,6 @@ class _PropertyColumn extends StatelessWidget {
     );
   }
 
-  String _formatAmount(BuildContext context, num amount) {
-    return formatLocalizedNumber(amount.round(), Localizations.localeOf(context));
-  }
 }
 
 /// A round, over-photo "remove this column" affordance — a dark glass circle
