@@ -22,6 +22,7 @@ import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/glass_pill.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/presentation/money_formatter.dart';
 import '../../domain/entities/reel.dart';
 import '../bloc/reels_feed_cubit.dart';
 import '../widgets/reel_player.dart';
@@ -482,9 +483,10 @@ class _ReelOverlay extends StatelessWidget {
               children: [
                 if (reel.hasPrice) ...[
                   _PricePill(
-                    label: l10n.priceWithCurrency(
-                      reel.priceAmount!,
+                    label: MoneyFormatter.formatAmount(
+                      num.tryParse(reel.priceAmount!) ?? 0,
                       reel.priceCurrency!,
+                      locale: Localizations.localeOf(context),
                     ),
                   ),
                   const SizedBox(height: AppSpacing.md),
