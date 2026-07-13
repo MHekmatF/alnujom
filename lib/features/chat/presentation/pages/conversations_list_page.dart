@@ -16,6 +16,7 @@ import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_nav_drawer.dart';
 import '../../../../core/widgets/app_network_image.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
@@ -46,8 +47,8 @@ class _ConversationsListPageState extends State<ConversationsListPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.chatConversationsTitle)),
+    return DcCrownScaffold(
+      title: l10n.chatConversationsTitle,
       // Phase 035 — Messages is now a primary tab: host the app drawer, the
       // 5-tab bottom nav (Messages active), and the floating publish FAB.
       drawer: const AppNavDrawer(),

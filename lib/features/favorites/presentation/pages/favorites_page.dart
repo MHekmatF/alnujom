@@ -15,7 +15,7 @@ import '../../../comparison/presentation/cubit/comparison_cubit.dart';
 import '../../../comparison/presentation/widgets/compare_bottom_bar.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_spinner.dart';
-import '../../../../core/widgets/deep_link_aware_back_button.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/main_bottom_nav.dart';
@@ -60,16 +60,18 @@ class _FavoritesView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(
-        // No back arrow when opened as the Favorites bottom-nav tab root
-        // (nothing to pop — the bottom nav returns to Home); keep it when
-        // pushed (e.g. from the Profile menu or a deep-link).
-        leading: Navigator.canPop(context)
-            ? const DeepLinkAwareBackButton()
-            : null,
-        title: Text(l10n.favorites_page_title),
-      ),
+    return DcCrownScaffold(
+      title: l10n.favorites_page_title,
+      // No back arrow when opened as the Favorites bottom-nav tab root (nothing
+      // to pop — the bottom nav returns to Home); keep it when pushed (e.g. from
+      // the Profile menu or a deep-link).
+      leading: Navigator.canPop(context)
+          ? DcCrownIconButton(
+              icon: Icons.arrow_forward,
+              onTap: () => Navigator.of(context).maybePop(),
+            )
+          : null,
+      bottomNavigationBar: const MainBottomNav(current: MainTab.favorites),
       body: Stack(
         children: [
           BlocBuilder<FavoritesPageBloc, FavoritesPageState>(
@@ -103,7 +105,6 @@ class _FavoritesView extends StatelessWidget {
           ),
         ],
       ),
-      bottomNavigationBar: const MainBottomNav(current: MainTab.favorites),
     );
   }
 }

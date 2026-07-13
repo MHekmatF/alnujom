@@ -13,6 +13,7 @@ import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/app_spinner.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
@@ -90,27 +91,29 @@ class _NotificationCenterViewState extends State<_NotificationCenterView> {
   Widget build(BuildContext context) {
     final l10n = AppStrings.of(context).loc;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.notification_center_title),
-        actions: [
-          BlocBuilder<NotificationsCubit, NotificationsState>(
-            builder: (context, state) {
-              final hasUnread = state.notifications.any((n) => n.isUnread);
-              if (!hasUnread) return const SizedBox.shrink();
-              return TextButton.icon(
-                onPressed: () {
-                  HapticFeedback.selectionClick();
-                  context.read<NotificationsCubit>().markAllRead();
-                  getIt<NotificationBadgeCubit>().clear();
-                },
-                icon: const Icon(Icons.done_all),
-                label: Text(l10n.notification_mark_all_read),
-              );
-            },
-          ),
-        ],
+    return DcCrownScaffold(
+      title: l10n.notification_center_title,
+      dense: true,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () => Navigator.of(context).maybePop(),
       ),
+      actions: [
+        BlocBuilder<NotificationsCubit, NotificationsState>(
+          builder: (context, state) {
+            final hasUnread = state.notifications.any((n) => n.isUnread);
+            if (!hasUnread) return const SizedBox.shrink();
+            return DcCrownTextButton(
+              label: l10n.notification_mark_all_read,
+              onTap: () {
+                HapticFeedback.selectionClick();
+                context.read<NotificationsCubit>().markAllRead();
+                getIt<NotificationBadgeCubit>().clear();
+              },
+            );
+          },
+        ),
+      ],
       body: BlocBuilder<NotificationsCubit, NotificationsState>(
         builder: (context, state) {
           switch (state.status) {
