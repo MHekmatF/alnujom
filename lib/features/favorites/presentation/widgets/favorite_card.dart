@@ -26,7 +26,7 @@ import '../../../../core/widgets/press_scale.dart';
 import '../../../../core/widgets/property_specs.dart';
 import '../../../../core/widgets/status_pill.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../../../shared/util/localized_numbers.dart';
+import '../../../../shared/presentation/money_formatter.dart';
 import '../../../comparison/domain/entities/comparison_item.dart';
 import '../../../comparison/presentation/widgets/compare_toggle_button.dart';
 import '../../../listing_form/domain/entities/listing.dart';
@@ -81,9 +81,10 @@ class FavoriteCard extends StatelessWidget {
                         if (item.primaryAmount != null &&
                             item.primaryCurrency != null) ...[
                           Text(
-                            l10n.priceWithCurrency(
-                              _formatAmount(context, item.primaryAmount!),
+                            MoneyFormatter.formatAmount(
+                              item.primaryAmount!,
                               item.primaryCurrency!,
+                              locale: Localizations.localeOf(context),
                             ),
                             textDirection: TextDirection.ltr,
                             textAlign: TextAlign.start,
@@ -143,12 +144,6 @@ class FavoriteCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  /// Localized amount with the active locale's numerals (no fractional part —
-  /// favorites only carry the primary amount, not the full currency catalog).
-  String _formatAmount(BuildContext context, num amount) {
-    return formatLocalizedNumber(amount.round(), Localizations.localeOf(context));
   }
 
   String _locationLabel(FavoriteListing item) {

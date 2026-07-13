@@ -47,4 +47,47 @@ class MoneyFormatter {
     if (locale.languageCode == 'en' && currency.code == 'SYP') return 'SYP';
     return currency.symbol;
   }
+
+  /// Symbols for the codes the read-side surfaces carry when no full [Currency]
+  /// catalog is on hand (search results, favorites, recently-viewed, the detail
+  /// price shim). Keeps every card on the DC "$210,000" format instead of the
+  /// "210,000 USD" the raw code produced.
+  static const Map<String, String> _codeSymbols = {
+    'USD': r'$',
+    'EUR': '€',
+    'GBP': '£',
+    'TRY': '₺',
+  };
+
+  /// Resolves a display symbol from a bare currency [code]. `SYP` follows the
+  /// locale (ل.س / SYP); unknown codes fall back to the code itself.
+  static String symbolForCode(String code, {Locale? locale}) {
+    if (code == 'SYP') {
+      return locale?.languageCode == 'en' ? 'SYP' : 'ل.س';
+    }
+    return _codeSymbols[code] ?? code;
+  }
+
+  /// Formats a bare (amount, currencyCode) pair the DC way — Western digits with
+  /// comma grouping, an ASCII symbol ($) prefixed and word symbols (ل.س) trailed
+  /// — for the surfaces that don't have a [Currency] object. Mirrors [format].
+  static String formatAmount(
+    num amount,
+    String currencyCode, {
+    required Locale locale,
+  }) {
+    final symbol = symbolForCode(currencyCode, locale: locale);
+    final isWhole = amount == amount.roundToDouble();
+    final numFormat = intl.NumberFormat.decimalPattern('en')
+      ..minimumFractionDigits = 0
+      ..maximumFractionDigits = isWhole ? 0 : 2;
+    final isNegative = amount < 0;
+    final absStr = numFormat.format(amount.abs());
+    final sign = isNegative ? '-' : '';
+    final isAsciiSymbol =
+        symbol.length == 1 &&
+        symbol.codeUnitAt(0) >= 0x21 &&
+        symbol.codeUnitAt(0) <= 0x7E;
+    return isAsciiSymbol ? '$sign$symbol$absStr' : '$sign$absStr $symbol';
+  }
 }

@@ -96,12 +96,14 @@ class DcCrownScaffold extends StatelessWidget {
                       const SizedBox(width: AppSpacing.xs),
                     ],
                     Expanded(
-                      child: Padding(
-                        padding: EdgeInsetsDirectional.only(
-                          start: leading == null ? AppSpacing.sm : 0,
-                        ),
-                        child: titleWidget,
-                      ),
+                      child: leading == null
+                          ? Padding(
+                              padding: const EdgeInsetsDirectional.only(
+                                start: AppSpacing.sm,
+                              ),
+                              child: titleWidget,
+                            )
+                          : titleWidget,
                     ),
                     if (actions != null) ...actions!,
                   ],

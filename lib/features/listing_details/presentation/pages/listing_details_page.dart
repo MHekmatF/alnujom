@@ -555,7 +555,7 @@ class _SuccessBodyState extends State<_SuccessBody> {
       code: primary.currencyCode,
       nameAr: primary.currencyCode,
       nameEn: primary.currencyCode,
-      symbol: primary.currencyCode,
+      symbol: MoneyFormatter.symbolForCode(primary.currencyCode),
       isActive: true,
       sortOrder: 0,
       isSystem: false,

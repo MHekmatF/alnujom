@@ -45,6 +45,7 @@ import '../../../../core/widgets/publish_fab.dart';
 import '../../../../core/widgets/reduce_motion.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/presentation/money_formatter.dart';
 import '../../../../shared/util/localized_numbers.dart';
 import '../../../../shared/util/location_line.dart';
 import '../../../ads/domain/entities/ad_placement.dart';
@@ -1139,7 +1140,6 @@ class _SearchFeedCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context);
     final isAr = locale.languageCode == 'ar';
     final gov = isAr ? item.governorateNameAr : item.governorateNameEn;
@@ -1149,9 +1149,10 @@ class _SearchFeedCard extends StatelessWidget {
     final data = DsListingCardData(
       id: item.id,
       title: item.title,
-      priceText: l10n.priceWithCurrency(
-        formatLocalizedNumber(item.primaryAmount.round(), locale),
+      priceText: MoneyFormatter.formatAmount(
+        item.primaryAmount,
         item.primaryCurrency,
+        locale: locale,
       ),
       purpose: item.purpose,
       locationText: location.isEmpty ? '—' : location,
