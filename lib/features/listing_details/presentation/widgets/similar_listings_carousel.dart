@@ -132,7 +132,7 @@ class _SimilarListingsBody extends StatelessWidget {
             children: [
               header,
               SizedBox(
-                height: cardWidth * 0.95,
+                height: cardWidth * 1.12,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsetsDirectional.symmetric(
@@ -158,7 +158,7 @@ class _SimilarListingsBody extends StatelessWidget {
             children: [
               header,
               SizedBox(
-                height: cardWidth * 0.95,
+                height: cardWidth * 1.12,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsetsDirectional.symmetric(

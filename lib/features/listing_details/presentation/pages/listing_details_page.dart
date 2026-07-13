@@ -301,9 +301,6 @@ class _SuccessBodyState extends State<_SuccessBody> {
                       // Phase 18: Reporter status banner (renders nothing for non-
                       // reporters / anon). Self-contained: hosts its own cubit.
                       ReporterStatusBanner(listingId: aggregate.listing.id),
-                      // Phase 21: listing details banner (collapses to zero height
-                      // when no eligible ads — FR-012; no reflow on the details layout).
-                      const AdSlot(placement: AdPlacement.listingDetailsBanner),
                       // DS: a soft-primary sale/rent tag chip leads the body,
                       // sitting just above the title (purely visual signal).
                       _PurposeTagChip(purpose: aggregate.listing.purpose),
@@ -479,6 +476,12 @@ class _SuccessBodyState extends State<_SuccessBody> {
                         ),
                         const SizedBox(height: AppSpacing.md),
                       ],
+                      // Phase 21 / DC: the sponsored slot sits low in the page
+                      // (after the description), collapsing to zero height when
+                      // no eligible ad is served (FR-012, no reflow).
+                      const AdSlot(
+                        placement: AdPlacement.listingDetailsBanner,
+                      ),
                       // 9. Per-listing action block — quiet Share + Report text
                       //    buttons (035: duplicate Favorite CTA removed).
                       PerListingActionBlock(
