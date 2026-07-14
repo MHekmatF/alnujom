@@ -6238,6 +6238,36 @@ final class _DebugAppLocalizations extends AppLocalizations {
   String get adminAnalyticsError =>
       _resolve("adminAnalyticsError", (loc) => loc.adminAnalyticsError);
   @override
+  String get adminAnalyticsEvolutionTitle =>
+      _resolve("adminAnalyticsEvolutionTitle", (loc) => loc.adminAnalyticsEvolutionTitle);
+  @override
+  String get adminAnalyticsSeriesListings =>
+      _resolve("adminAnalyticsSeriesListings", (loc) => loc.adminAnalyticsSeriesListings);
+  @override
+  String get adminAnalyticsSeriesUsers =>
+      _resolve("adminAnalyticsSeriesUsers", (loc) => loc.adminAnalyticsSeriesUsers);
+  @override
+  String get adminAnalyticsKpiListingsMonth =>
+      _resolve("adminAnalyticsKpiListingsMonth", (loc) => loc.adminAnalyticsKpiListingsMonth);
+  @override
+  String get adminAnalyticsKpiNewUsers =>
+      _resolve("adminAnalyticsKpiNewUsers", (loc) => loc.adminAnalyticsKpiNewUsers);
+  @override
+  String get adminAnalyticsKpiLeads30d =>
+      _resolve("adminAnalyticsKpiLeads30d", (loc) => loc.adminAnalyticsKpiLeads30d);
+  @override
+  String get adminAnalyticsKpiActiveListings =>
+      _resolve("adminAnalyticsKpiActiveListings", (loc) => loc.adminAnalyticsKpiActiveListings);
+  @override
+  String get adminAnalyticsEngineLabel =>
+      _resolve("adminAnalyticsEngineLabel", (loc) => loc.adminAnalyticsEngineLabel);
+  @override
+  String get adminAnalyticsEngineNative =>
+      _resolve("adminAnalyticsEngineNative", (loc) => loc.adminAnalyticsEngineNative);
+  @override
+  String get adminAnalyticsEngineFlChart =>
+      _resolve("adminAnalyticsEngineFlChart", (loc) => loc.adminAnalyticsEngineFlChart);
+  @override
   String get publisherChartsSectionLabel =>
       _resolve("publisherChartsSectionLabel", (loc) => loc.publisherChartsSectionLabel);
   @override
