@@ -17,14 +17,14 @@ import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_spinner.dart';
-import '../../../../core/widgets/deep_link_aware_back_button.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../core/widgets/ds/dc_status_chip.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../crm/presentation/widgets/add_to_crm_action.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/inquiry.dart';
 import '../../domain/entities/inquiry_status.dart';
 import '../bloc/inquiry_detail_bloc.dart';
-import '../widgets/inbox_status_badge.dart';
 
 class InquiryDetailPage extends StatelessWidget {
   const InquiryDetailPage({super.key, required this.id});
@@ -49,10 +49,14 @@ class _InquiryDetailView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: const DeepLinkAwareBackButton(),
-        title: Text(l10n.inquiry_detail_app_bar_title),
+    return DcCrownScaffold(
+      title: l10n.inquiry_detail_app_bar_title,
+      dense: true,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () => context.canPop()
+            ? context.pop()
+            : context.go(AppRoutes.shellHome),
       ),
       body: BlocBuilder<InquiryDetailBloc, InquiryDetailState>(
         builder: (context, state) {
@@ -99,12 +103,14 @@ class _InquiryDetailBody extends StatelessWidget {
           // a call affordance — grouped in a DS surface.
           AppSurface(
             radius: AppRadii.lg,
-            elevated: true,
             padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                InboxStatusBadge(status: inquiry.status),
+                Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: _statusChip(inquiry.status, l10n),
+                ),
                 const SizedBox(height: AppSpacing.md),
                 Text(
                   inquiry.senderName.isNotEmpty
@@ -285,4 +291,19 @@ class _StatusMutationButtons extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Maps an inquiry status to a DC status chip.
+DcStatusChip _statusChip(InquiryStatus status, AppLocalizations l10n) {
+  final (label, tone) = switch (status) {
+    InquiryStatus.new_ => (l10n.inquiry_status_new, DcStatusTone.neutral),
+    InquiryStatus.seen => (l10n.inquiry_status_seen, DcStatusTone.neutral),
+    InquiryStatus.responded => (
+      l10n.inquiry_status_responded,
+      DcStatusTone.green,
+    ),
+    InquiryStatus.closed => (l10n.inquiry_status_closed, DcStatusTone.neutral),
+    InquiryStatus.spam => (l10n.inquiry_status_spam, DcStatusTone.red),
+  };
+  return DcStatusChip(label: label, tone: tone);
 }
