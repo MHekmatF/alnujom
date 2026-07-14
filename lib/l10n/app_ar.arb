@@ -1909,6 +1909,8 @@
   "@viewingDeclineAction": { "description": "Growth viewings — decline." },
   "viewingCancelAction": "إلغاء",
   "@viewingCancelAction": { "description": "Growth viewings — cancel." },
+  "viewingContactPublisher": "تواصل مع المُعلِن",
+  "@viewingContactPublisher": { "description": "My viewings card — label above the call/WhatsApp footer buttons." },
   "viewingConfirmedSuccess": "تم تأكيد المعاينة.",
   "@viewingConfirmedSuccess": { "description": "Growth viewings — confirmed success." },
   "viewingDeclinedSuccess": "تم رفض المعاينة.",

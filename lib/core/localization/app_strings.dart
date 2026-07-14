@@ -5834,6 +5834,11 @@ final class _DebugAppLocalizations extends AppLocalizations {
   String get viewingCancelAction =>
       _resolve('viewingCancelAction', (loc) => loc.viewingCancelAction);
   @override
+  String get viewingContactPublisher => _resolve(
+    'viewingContactPublisher',
+    (loc) => loc.viewingContactPublisher,
+  );
+  @override
   String get viewingConfirmedSuccess =>
       _resolve('viewingConfirmedSuccess', (loc) => loc.viewingConfirmedSuccess);
   @override

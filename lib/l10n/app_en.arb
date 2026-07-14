@@ -1987,6 +1987,8 @@
   "@viewingDeclineAction": { "description": "Growth viewings — decline." },
   "viewingCancelAction": "Cancel",
   "@viewingCancelAction": { "description": "Growth viewings — cancel." },
+  "viewingContactPublisher": "Contact publisher",
+  "@viewingContactPublisher": { "description": "My viewings card — label above the call/WhatsApp footer buttons." },
   "viewingConfirmedSuccess": "Viewing confirmed.",
   "@viewingConfirmedSuccess": { "description": "Growth viewings — confirmed success." },
   "viewingDeclinedSuccess": "Viewing declined.",

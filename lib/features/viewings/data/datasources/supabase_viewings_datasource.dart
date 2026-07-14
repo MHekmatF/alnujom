@@ -26,11 +26,13 @@ class SupabaseViewingsDatasource {
   /// mapping layer to compute `amIPublisher`.
   String? get currentUserId => _client.auth.currentUser?.id;
 
-  /// Embedded-selects projection: the viewing columns plus the listing title
-  /// (LEFT JOIN — the title surfaces the row heading).
+  /// Embedded-selects projection: the viewing columns plus the listing heading,
+  /// property type, public contact numbers and primary price (LEFT JOIN — the
+  /// «معايناتي» card renders the price line + call/WhatsApp footer from these).
   static const String _viewingSelect =
       'id, listing_id, publisher_user_id, scheduled_at, status, note, '
-      'listing:listings(title)';
+      'listing:listings(title, property_type, phone, whatsapp, '
+      'listing_prices(amount, currency_code, is_primary))';
 
   /// Loads every viewing the caller participates in (RLS scopes it to rows
   /// where auth.uid() is the requester or publisher), newest-first.
