@@ -31,7 +31,6 @@ import '../../../../../core/widgets/ds/dc_stat_card.dart';
 import '../../../../../core/widgets/error_state.dart';
 import '../../../../../core/widgets/loading_state.dart';
 import '../../../../../core/widgets/locale_toggle_action.dart';
-import '../../../../../core/widgets/staggered_list_item.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../../shared/util/localized_numbers.dart';
 import '../../domain/entities/admin_analytics.dart';
@@ -154,7 +153,7 @@ class _Body extends StatelessWidget {
       children: [
         for (var i = 0; i < sections.length; i++) ...[
           if (i > 0) const SizedBox(height: AppSpacing.lg),
-          StaggeredListItem(index: i, child: sections[i]),
+          sections[i],
         ],
       ],
     );
@@ -234,16 +233,19 @@ class _KpiGrid extends StatelessWidget {
       ),
     ];
 
-    Widget row(Widget a, Widget b) => Row(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Expanded(child: a),
-        const SizedBox(width: AppSpacing.md),
-        Expanded(child: b),
-      ],
+    Widget row(Widget a, Widget b) => IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(child: a),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(child: b),
+        ],
+      ),
     );
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         row(cards[0], cards[1]),
         const SizedBox(height: AppSpacing.md),
