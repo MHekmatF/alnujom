@@ -56,6 +56,8 @@ sealed class ColorPalette {
       onTertiaryContainer: onTertiary,
       error: tokens.error,
       onError: tokens.onError,
+      errorContainer: tokens.errorContainer,
+      onErrorContainer: tokens.onErrorContainer,
       scrim: tokens.scrim,
       surface: tokens.surface,
       onSurface: tokens.onSurface,
@@ -133,6 +135,8 @@ final class ModernPalette extends ColorPalette {
     onSecondaryContainer: Color(0xFF182C58), // --onSec
     verifiedBorder: Color(0xFFC3E4CF), // --greenBorder
     goldContainer: Color(0xFFFBEDC7), // --goldC
+    errorContainer: Color(0xFFFBE6E6), // --redC
+    onErrorContainer: Color(0xFFB42318), // --onRedC
   );
 
   // Phase 033 — dark midnight-navy surfaces (#0B1020 + elevated #161C2D cards)
@@ -181,6 +185,8 @@ final class ModernPalette extends ColorPalette {
     onSecondaryContainer: Color(0xFFDEE4FA), // --onSec dark
     verifiedBorder: Color(0xFF1E4A30), // --greenBorder dark
     goldContainer: Color(0xFF39300B), // --goldC dark
+    errorContainer: Color(0xFF3A1414), // --redC dark
+    onErrorContainer: Color(0xFFFF9B9B), // --onRedC dark
   );
 }
 
@@ -302,6 +308,8 @@ final class AppPaletteTokens {
     this.onSecondaryContainer = const Color(0xFF182C58),
     this.verifiedBorder = const Color(0xFFC3E4CF),
     this.goldContainer = const Color(0xFFFBEDC7),
+    this.errorContainer = const Color(0xFFFBE6E6),
+    this.onErrorContainer = const Color(0xFFB42318),
   });
 
   final Color primary;
@@ -379,4 +387,11 @@ final class AppPaletteTokens {
 
   /// Container behind the gold "مميّز" featured badge (foreground = [tertiary]).
   final Color goldContainer;
+
+  /// Container behind a soft "rejected / declined / error" status chip
+  /// (DC `--redC`). Foreground = [onErrorContainer].
+  final Color errorContainer;
+
+  /// Foreground (text/icon) on [errorContainer] (DC `--onRedC`).
+  final Color onErrorContainer;
 }

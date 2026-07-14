@@ -44,6 +44,8 @@ final class AppColors {
     required this.onSecondaryContainer,
     required this.verifiedBorder,
     required this.goldContainer,
+    required this.errorContainer,
+    required this.onErrorContainer,
   });
 
   factory AppColors.fromTokens(AppPaletteTokens tokens) => AppColors._(
@@ -86,6 +88,8 @@ final class AppColors {
     onSecondaryContainer: tokens.onSecondaryContainer,
     verifiedBorder: tokens.verifiedBorder,
     goldContainer: tokens.goldContainer,
+    errorContainer: tokens.errorContainer,
+    onErrorContainer: tokens.onErrorContainer,
   );
 
   factory AppColors.of(BuildContext context) {
@@ -134,6 +138,8 @@ final class AppColors {
       verifiedBorder:
           tokens?.verifiedBorder ?? (tokens?.verified ?? scheme.tertiary),
       goldContainer: tokens?.goldContainer ?? scheme.tertiaryContainer,
+      errorContainer: scheme.errorContainer,
+      onErrorContainer: scheme.onErrorContainer,
     );
   }
 
@@ -176,6 +182,8 @@ final class AppColors {
   final Color onSecondaryContainer;
   final Color verifiedBorder;
   final Color goldContainer;
+  final Color errorContainer;
+  final Color onErrorContainer;
 
   @override
   bool operator ==(Object other) =>
@@ -219,7 +227,9 @@ final class AppColors {
           secondaryContainer == other.secondaryContainer &&
           onSecondaryContainer == other.onSecondaryContainer &&
           verifiedBorder == other.verifiedBorder &&
-          goldContainer == other.goldContainer;
+          goldContainer == other.goldContainer &&
+          errorContainer == other.errorContainer &&
+          onErrorContainer == other.onErrorContainer;
 
   @override
   int get hashCode => Object.hashAll([
@@ -262,6 +272,8 @@ final class AppColors {
     onSecondaryContainer,
     verifiedBorder,
     goldContainer,
+    errorContainer,
+    onErrorContainer,
   ]);
 }
 

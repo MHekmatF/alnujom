@@ -21,6 +21,9 @@ import 'package:alnujom/core/widgets/charts/dc_bar_chart.dart';
 import 'package:alnujom/core/widgets/dc_crown_scaffold.dart';
 import 'package:alnujom/core/widgets/ds/dc_quick_link_tile.dart';
 import 'package:alnujom/core/widgets/ds/dc_stat_card.dart';
+import 'package:alnujom/core/widgets/ds/dc_meta_chip.dart';
+import 'package:alnujom/core/widgets/ds/dc_status_chip.dart';
+import 'package:alnujom/core/widgets/ds/dc_timeline.dart';
 
 void main() => runApp(const DcGalleryApp());
 
@@ -208,6 +211,123 @@ class DcGalleryHome extends StatelessWidget {
                 onTap: () {},
               ),
             ],
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          _Label(ar ? 'شارات الحالة' : 'Status chips'),
+          const SizedBox(height: AppSpacing.md),
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            children: [
+              DcStatusChip(
+                label: ar ? 'منشور' : 'Live',
+                tone: DcStatusTone.green,
+                icon: Icons.check_circle,
+              ),
+              DcStatusChip(
+                label: ar ? 'قيد المراجعة' : 'Pending',
+                tone: DcStatusTone.neutral,
+                icon: Icons.hourglass_empty,
+              ),
+              DcStatusChip(
+                label: ar ? 'مرفوض' : 'Rejected',
+                tone: DcStatusTone.red,
+                icon: Icons.cancel,
+              ),
+              DcStatusChip(
+                label: ar ? 'مسودّة' : 'Draft',
+                tone: DcStatusTone.outline,
+                icon: Icons.edit_outlined,
+              ),
+              DcStatusChip(
+                label: ar ? 'منتهٍ' : 'Expired',
+                tone: DcStatusTone.neutral,
+                icon: Icons.history,
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            children: [
+              DcStatusChip(
+                label: ar ? 'مغلق · ناجح' : 'Closed · won',
+                tone: DcStatusTone.green,
+                dot: true,
+              ),
+              DcStatusChip(
+                label: ar ? 'تفاوض' : 'Negotiating',
+                tone: DcStatusTone.neutral,
+                dot: true,
+              ),
+              DcStatusChip(
+                label: ar ? 'مغلق · خسارة' : 'Closed · lost',
+                tone: DcStatusTone.red,
+                dot: true,
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            children: [
+              DcMetaChip(
+                icon: Icons.forum_outlined,
+                label: ar ? 'محادثة' : 'Chat',
+              ),
+              DcMetaChip(
+                icon: Icons.mail_outline,
+                label: ar ? 'استفسار' : 'Inquiry',
+              ),
+              DcMetaChip(
+                icon: Icons.event_outlined,
+                label: ar ? 'معاينة' : 'Viewing',
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          _Label(ar ? 'سجل المراجعة' : 'Moderation timeline'),
+          const SizedBox(height: AppSpacing.md),
+          Container(
+            padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: appRadius(AppRadii.lg),
+              border: Border.all(color: AppColors.of(context).outline),
+            ),
+            child: DcModerationTimeline(
+              nodes: [
+                DcTimelineNode(
+                  icon: Icons.verified,
+                  tone: DcStatusTone.green,
+                  title: ar ? 'تم توثيق الإعلان ميدانياً' : 'Field-verified',
+                  time: ar ? 'اليوم · 2:14 م' : 'Today · 2:14 PM',
+                ),
+                DcTimelineNode(
+                  icon: Icons.check_circle,
+                  tone: DcStatusTone.green,
+                  title: ar ? 'تمت الموافقة والنشر' : 'Approved & published',
+                  time: ar ? 'أمس · 6:40 م' : 'Yesterday · 6:40 PM',
+                ),
+                DcTimelineNode(
+                  icon: Icons.cancel,
+                  tone: DcStatusTone.red,
+                  title: ar ? 'طُلب تعديل' : 'Revision requested',
+                  time: ar ? 'منذ 3 أيام' : '3 days ago',
+                  body: ar
+                      ? 'الصور غير واضحة — يرجى رفع صور أعلى جودة للواجهة.'
+                      : 'Photos are unclear — please upload higher-quality shots.',
+                ),
+                DcTimelineNode(
+                  icon: Icons.upload_file,
+                  tone: DcStatusTone.neutral,
+                  title: ar ? 'أُرسل الإعلان للمراجعة' : 'Submitted for review',
+                  time: ar ? 'منذ 4 أيام' : '4 days ago',
+                ),
+              ],
+            ),
           ),
         ],
       ),
