@@ -1,9 +1,10 @@
 // lib/features/crm/presentation/pages/crm_page.dart
 //
-// Phase 029 (F1) — the CRM pipeline page (Navigator-pushed; no go_router route).
-// Sections: a "due today" reminder banner, a horizontally-scrolling stage
-// filter chip row (All + 6 stages), a list of lead cards, and a FAB to add a
-// manual lead. Token-only + RTL-correct.
+// Phase 029 (F1) — the CRM pipeline page, restyled to the DC "Blue Crown"
+// system (`AlNujom - Publisher.dc.html` «العملاء المحتملون»): a crown header
+// with the stage filters as scrollable underline tabs, a "due today" reminder
+// banner, flat lead rows (avatar + name + last-activity + a DcStatusChip stage
+// dot-pill), and a FAB to add a manual lead. Behaviour-preserving.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -19,9 +20,11 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/app_toast.dart';
+import '../../../../core/widgets/crown_underline_tabs.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../core/widgets/ds/dc_status_chip.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
-import '../../../../core/widgets/press_scale.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/crm_lead.dart';
 import '../../domain/entities/crm_reminder.dart';
@@ -30,6 +33,19 @@ import '../bloc/crm_leads_cubit.dart';
 import '../bloc/lead_detail_cubit.dart';
 import '../widgets/crm_stage_styles.dart';
 import 'lead_detail_page.dart';
+
+/// The stage-filter tabs (null = "الكل" first, then the 6 ordered stages).
+final List<CrmStage?> _stageFilters = [null, ...CrmStage.ordered];
+
+/// Maps a CRM stage to a DC status tone: won→green, lost→red, else neutral.
+DcStatusTone crmStageTone(CrmStage stage) => switch (stage) {
+  CrmStage.won => DcStatusTone.green,
+  CrmStage.lost => DcStatusTone.red,
+  CrmStage.newLead ||
+  CrmStage.contacted ||
+  CrmStage.viewing ||
+  CrmStage.negotiation => DcStatusTone.neutral,
+};
 
 class CrmPage extends StatelessWidget {
   const CrmPage({super.key});
@@ -50,8 +66,27 @@ class _CrmView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.crmPageTitle)),
+    return DcCrownScaffold(
+      title: l10n.crmPageTitle,
+      dense: true,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () => Navigator.of(context).maybePop(),
+      ),
+      crownBottom: BlocBuilder<CrmLeadsCubit, CrmLeadsState>(
+        buildWhen: (a, b) => a.stageFilter != b.stageFilter,
+        builder: (context, state) => CrownUnderlineTabs(
+          scrollable: true,
+          fontSize: 14,
+          labels: [
+            for (final s in _stageFilters)
+              s == null ? l10n.crmFilterAll : crmStageLabel(s, l10n),
+          ],
+          selectedIndex: _stageFilters.indexOf(state.stageFilter),
+          onChanged: (i) =>
+              context.read<CrmLeadsCubit>().setStageFilter(_stageFilters[i]),
+        ),
+      ),
       floatingActionButton: Builder(
         builder: (context) => FloatingActionButton.extended(
           onPressed: () => _showAddLeadSheet(context),
@@ -120,7 +155,6 @@ class _CrmBody extends StatelessWidget {
                 permissionDenied: state.permissionDenied,
               ),
             ),
-          SliverToBoxAdapter(child: _StageFilterRow(active: state.stageFilter)),
           if (state.leads.isEmpty)
             SliverFillRemaining(
               hasScrollBody: false,
@@ -134,7 +168,7 @@ class _CrmBody extends StatelessWidget {
             SliverPadding(
               padding: const EdgeInsetsDirectional.fromSTEB(
                 AppSpacing.lg,
-                AppSpacing.sm,
+                AppSpacing.md,
                 AppSpacing.lg,
                 AppSpacing.xxxl,
               ),
@@ -184,7 +218,11 @@ class _DueTodayBanner extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(LucideIcons.bell, color: colors.warning, size: AppSpacing.lg),
+                Icon(
+                  LucideIcons.bell,
+                  color: colors.warning,
+                  size: AppSpacing.lg,
+                ),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
@@ -219,44 +257,6 @@ class _DueTodayBanner extends StatelessWidget {
   }
 }
 
-class _StageFilterRow extends StatelessWidget {
-  const _StageFilterRow({required this.active});
-
-  final CrmStage? active;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final cubit = context.read<CrmLeadsCubit>();
-
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsetsDirectional.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.sm,
-      ),
-      child: Row(
-        children: [
-          ChoiceChip(
-            label: Text(l10n.crmFilterAll),
-            selected: active == null,
-            onSelected: (_) => cubit.setStageFilter(null),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          for (final stage in CrmStage.ordered) ...[
-            ChoiceChip(
-              label: Text(crmStageLabel(stage, l10n)),
-              selected: active == stage,
-              onSelected: (_) => cubit.setStageFilter(stage),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
 class _LeadCard extends StatelessWidget {
   const _LeadCard({required this.lead});
 
@@ -267,39 +267,73 @@ class _LeadCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
+    final trimmedName = lead.displayName.trim();
+    final initial = trimmedName.isEmpty ? '؟' : trimmedName.substring(0, 1);
 
-    return PressScale(
-      child: AppSurface(
-        radius: AppRadii.lg,
-        padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+    return Material(
+      color: colors.card,
+      shape: RoundedRectangleBorder(
+        borderRadius: appRadius(AppRadii.lg),
+        side: BorderSide(color: colors.outline),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        borderRadius: appRadius(AppRadii.lg),
         onTap: () => _openDetail(context, lead),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    lead.displayName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: styles.titleMedium,
+        child: Padding(
+          padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: colors.primaryContainer,
+                  shape: BoxShape.circle,
+                ),
+                child: Text(
+                  initial,
+                  style: styles.titleMedium.copyWith(
+                    color: colors.onPrimaryContainer,
                   ),
-                  const SizedBox(height: AppSpacing.xxs),
-                  Text(
-                    l10n.crmLeadLastActivity(_relativeDay(context, lead.updatedAt)),
-                    style: styles.labelMedium.copyWith(color: colors.textMuted),
-                  ),
-                ],
+                ),
               ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            _StagePill(
-              label: crmStageLabel(lead.stage, l10n),
-              tint: crmStageColor(lead.stage, colors),
-            ),
-          ],
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      lead.displayName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: styles.titleMedium.copyWith(
+                        color: colors.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xxs),
+                    Text(
+                      l10n.crmLeadLastActivity(
+                        _relativeDay(context, lead.updatedAt),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: styles.labelMedium.copyWith(
+                        color: colors.textMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              DcStatusChip(
+                label: crmStageLabel(lead.stage, l10n),
+                tone: crmStageTone(lead.stage),
+                dot: true,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -311,33 +345,6 @@ class _LeadCard extends StatelessWidget {
     if (days <= 0) return l10n.crmRelativeToday;
     if (days == 1) return l10n.crmRelativeYesterday;
     return l10n.crmRelativeDaysAgo(days);
-  }
-}
-
-/// Phase 33 — a soft-tinted CRM stage pill for the lead rows (tinted background
-/// + same-token ink + hairline tint border). Quieter than the solid
-/// [StatusPill] so a list of leads reads calm.
-class _StagePill extends StatelessWidget {
-  const _StagePill({required this.label, required this.tint});
-
-  final String label;
-  final Color tint;
-
-  @override
-  Widget build(BuildContext context) {
-    final styles = AppTextStyles.of(context);
-    return Container(
-      padding: const EdgeInsetsDirectional.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: tint.withValues(alpha: 0.12),
-        borderRadius: appRadius(AppRadii.pill),
-        border: Border.all(color: tint.withValues(alpha: 0.30)),
-      ),
-      child: Text(label, style: styles.labelMedium.copyWith(color: tint)),
-    );
   }
 }
 
@@ -378,10 +385,7 @@ class _AddLeadSheet extends StatelessWidget {
               style: AppTextStyles.of(context).titleLarge,
             ),
             const SizedBox(height: AppSpacing.lg),
-            AppTextField(
-              controller: controller,
-              label: l10n.crmLeadNameLabel,
-            ),
+            AppTextField(controller: controller, label: l10n.crmLeadNameLabel),
             const SizedBox(height: AppSpacing.lg),
             AppButton.filledPrimary(
               label: l10n.crmAddLeadAction,

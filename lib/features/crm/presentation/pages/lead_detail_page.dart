@@ -21,6 +21,7 @@ import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_dialog.dart';
 import '../../../../core/widgets/app_spinner.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/empty_state.dart';
@@ -57,8 +58,14 @@ class _LeadDetailPageState extends State<LeadDetailPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.crmLeadDetailTitle)),
+    return DcCrownScaffold(
+      title: l10n.crmLeadDetailTitle,
+      dense: true,
+      titleWidget: _LeadCrownIdentity(name: widget.lead.displayName),
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () => Navigator.of(context).maybePop(),
+      ),
       body: BlocBuilder<LeadDetailCubit, LeadDetailState>(
         builder: (context, state) {
           switch (state.status) {
@@ -78,6 +85,52 @@ class _LeadDetailPageState extends State<LeadDetailPage> {
   }
 }
 
+/// The lead-detail crown identity: an avatar initial + the lead's name in white.
+class _LeadCrownIdentity extends StatelessWidget {
+  const _LeadCrownIdentity({required this.name});
+
+  final String name;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    final onHeader = colors.onBrandHeader;
+    final trimmed = name.trim();
+    final initial = trimmed.isEmpty ? '؟' : trimmed.substring(0, 1);
+
+    return Row(
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: onHeader.withValues(alpha: 0.16),
+            shape: BoxShape.circle,
+          ),
+          child: Text(
+            initial,
+            style: styles.titleMedium.copyWith(color: onHeader),
+          ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Text(
+            trimmed.isEmpty ? name : trimmed,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: styles.titleMedium.copyWith(
+              color: onHeader,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _Body extends StatelessWidget {
   const _Body({required this.state, required this.noteController});
 
@@ -92,9 +145,6 @@ class _Body extends StatelessWidget {
     return ListView(
       padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
       children: [
-        Text(state.lead.displayName, style: styles.headlineMedium),
-        const SizedBox(height: AppSpacing.lg),
-
         // Stage choice-chips.
         Text(l10n.crmStageSectionTitle, style: styles.labelLarge),
         const SizedBox(height: AppSpacing.sm),
