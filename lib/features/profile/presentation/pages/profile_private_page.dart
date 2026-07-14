@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/colors.dart';
-import '../../../../core/theme/elevation.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
@@ -11,6 +10,7 @@ import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/app_text_field.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/phone_number.dart';
 import '../../domain/entities/private_contact_methods.dart';
@@ -137,16 +137,26 @@ class _PrivateViewState extends State<_PrivateView> {
       builder: (context, state) {
         if (state.piiStatus == PiiStatus.loading ||
             state.piiStatus == PiiStatus.idle) {
-          return Scaffold(
-            appBar: AppBar(title: Text(l10n.profile_private_section_title)),
+          return DcCrownScaffold(
+            title: l10n.profile_private_section_title,
+            dense: true,
+            leading: DcCrownIconButton(
+              icon: Icons.arrow_forward,
+              onTap: () => Navigator.of(context).maybePop(),
+            ),
             body: const AppSpinner.page(),
           );
         }
 
         final isSaving = state.piiStatus == PiiStatus.saving;
 
-        return Scaffold(
-          appBar: AppBar(title: Text(l10n.profile_private_section_title)),
+        return DcCrownScaffold(
+          title: l10n.profile_private_section_title,
+          dense: true,
+          leading: DcCrownIconButton(
+            icon: Icons.arrow_forward,
+            onTap: () => Navigator.of(context).maybePop(),
+          ),
           body: SingleChildScrollView(
             padding: const EdgeInsetsDirectional.fromSTEB(
               AppSpacing.lg,
@@ -273,7 +283,6 @@ class _PrivateSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
-    final elevation = AppElevation.of(context);
 
     return Padding(
       padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.xl),
@@ -306,7 +315,6 @@ class _PrivateSection extends StatelessWidget {
               color: colors.card,
               borderRadius: appRadius(AppRadii.lg),
               border: Border.all(color: colors.outline),
-              boxShadow: elevation.level1,
             ),
             child: Padding(
               padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
