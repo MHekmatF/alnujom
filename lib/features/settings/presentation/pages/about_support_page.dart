@@ -6,11 +6,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/theme/colors.dart';
-import '../../../../core/theme/elevation.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -31,8 +31,13 @@ class AboutSupportPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.about_title)),
+    return DcCrownScaffold(
+      title: l10n.about_title,
+      dense: true,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () => Navigator.of(context).maybePop(),
+      ),
       body: BlocBuilder<AppSettingsCubit, AppSettingsState>(
         builder: (context, state) {
           final settings = state.settings;
@@ -204,7 +209,6 @@ class _SettingsSection extends StatelessWidget {
 
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
-    final elevation = AppElevation.of(context);
 
     return Padding(
       padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.xl),
@@ -226,7 +230,6 @@ class _SettingsSection extends StatelessWidget {
               color: colors.card,
               borderRadius: appRadius(AppRadii.lg),
               border: Border.all(color: colors.outline),
-              boxShadow: elevation.level1,
             ),
             child: ClipRRect(
               borderRadius: appRadius(AppRadii.lg),
