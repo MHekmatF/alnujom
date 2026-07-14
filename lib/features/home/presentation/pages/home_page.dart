@@ -428,6 +428,15 @@ class _HomeCrown extends StatelessWidget {
         children: [
           Row(
             children: [
+              // Opens the app navigation drawer (Dashboard / Admin / Messages /
+              // …). Without it the drawer is edge-swipe-only and undiscoverable.
+              Builder(
+                builder: (context) => _CrownAction(
+                  icon: Icons.menu,
+                  onTap: () => Scaffold.of(context).openDrawer(),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.xs),
               Container(
                 width: 33,
                 height: 33,
