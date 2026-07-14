@@ -17,12 +17,13 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 
 import '../../../../core/theme/colors.dart';
-import '../../../../core/theme/elevation.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/charts/token_bar_chart.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../core/widgets/ds/dc_stat_card.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
@@ -39,8 +40,13 @@ class LeadAnalyticsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.leadAnalyticsTitle)),
+    return DcCrownScaffold(
+      title: l10n.leadAnalyticsTitle,
+      dense: true,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () => Navigator.of(context).maybePop(),
+      ),
       body: BlocBuilder<PublisherAnalyticsCubit, PublisherAnalyticsState>(
         builder: (context, state) {
           return RefreshIndicator(
@@ -126,59 +132,12 @@ class _TotalHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-    final styles = AppTextStyles.of(context);
     final locale = Localizations.localeOf(context);
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        borderRadius: appRadius(AppRadii.lg),
-        gradient: LinearGradient(
-          begin: AlignmentDirectional.topStart,
-          end: AlignmentDirectional.bottomEnd,
-          colors: [
-            colors.primary.withValues(alpha: 0.14),
-            colors.accent.withValues(alpha: 0.06),
-          ],
-        ),
-        border: Border.all(color: colors.outline),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsetsDirectional.all(AppSpacing.md),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: colors.primary.withValues(alpha: 0.14),
-            ),
-            child: Icon(
-              LucideIcons.trending_up,
-              color: colors.primary,
-              size: AppSpacing.xl,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  formatLocalizedNumber(total, locale),
-                  style: styles.headlineLarge.copyWith(color: colors.onSurface),
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  l10n.leadAnalyticsTotalCaption,
-                  style: styles.bodyMedium.copyWith(color: colors.textMuted),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+    // Flat DC KPI card — replaces the BANNED gradient hero band.
+    return DcStatCard(
+      icon: Icons.trending_up,
+      value: formatLocalizedNumber(total, locale),
+      label: l10n.leadAnalyticsTotalCaption,
     );
   }
 }
@@ -221,7 +180,6 @@ class _ListingBreakdownCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
-    final elevation = AppElevation.of(context);
     final locale = Localizations.localeOf(context);
 
     return Container(
@@ -230,7 +188,6 @@ class _ListingBreakdownCard extends StatelessWidget {
         color: colors.card,
         borderRadius: appRadius(AppRadii.lg),
         border: Border.all(color: colors.outline),
-        boxShadow: elevation.level1,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
