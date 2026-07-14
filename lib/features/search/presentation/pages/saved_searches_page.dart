@@ -18,7 +18,7 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_dialog.dart';
-import '../../../../core/widgets/deep_link_aware_back_button.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
@@ -48,10 +48,13 @@ class _SavedSearchesView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Scaffold(
-      appBar: AppBar(
-        leading: const DeepLinkAwareBackButton(),
-        title: Text(l10n.search_saved_searches_title),
+    return DcCrownScaffold(
+      title: l10n.search_saved_searches_title,
+      dense: true,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () =>
+            context.canPop() ? context.pop() : context.go(AppRoutes.shellHome),
       ),
       body: BlocBuilder<SavedSearchesCubit, SavedSearchesState>(
         builder: (context, state) {
@@ -168,70 +171,73 @@ class _SavedSearchCard extends StatelessWidget {
     final dateLabel = DateFormat.yMMMd(locale).format(savedSearch.createdAt);
 
     return PressScale(
-      child: Card(
-        clipBehavior: Clip.antiAlias,
+      child: Container(
         margin: const EdgeInsetsDirectional.only(bottom: AppSpacing.sm),
-        shape: RoundedRectangleBorder(
-          borderRadius: appRadius(AppRadii.lg),
-          side: BorderSide(color: colors.outline),
-        ),
-        child: InkWell(
-          onTap: () => _apply(context, savedSearch.filters),
-          child: Padding(
-            padding: const EdgeInsetsDirectional.all(AppSpacing.md),
-            child: Row(
-              children: [
-                Container(
-                  width: AppSpacing.xxl + AppSpacing.sm,
-                  height: AppSpacing.xxl + AppSpacing.sm,
-                  decoration: BoxDecoration(
-                    color: colors.primaryContainer,
-                    borderRadius: appRadius(AppRadii.md),
+        child: Material(
+          color: colors.card,
+          clipBehavior: Clip.antiAlias,
+          shape: RoundedRectangleBorder(
+            borderRadius: appRadius(AppRadii.lg),
+            side: BorderSide(color: colors.outline),
+          ),
+          child: InkWell(
+            onTap: () => _apply(context, savedSearch.filters),
+            child: Padding(
+              padding: const EdgeInsetsDirectional.all(AppSpacing.md),
+              child: Row(
+                children: [
+                  Container(
+                    width: AppSpacing.xxl + AppSpacing.sm,
+                    height: AppSpacing.xxl + AppSpacing.sm,
+                    decoration: BoxDecoration(
+                      color: colors.primaryContainer,
+                      borderRadius: appRadius(AppRadii.md),
+                    ),
+                    child: Icon(
+                      LucideIcons.bookmark,
+                      color: colors.onPrimaryContainer,
+                      size: AppSpacing.lg,
+                    ),
                   ),
-                  child: Icon(
-                    LucideIcons.bookmark,
-                    color: colors.onPrimaryContainer,
-                    size: AppSpacing.lg,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        savedSearch.label,
-                        style: styles.titleMedium,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        summary.isEmpty
-                            ? l10n.search_saved_searches_all_listings
-                            : summary,
-                        style: styles.bodyMedium.copyWith(
-                          color: colors.textMuted,
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          savedSearch.label,
+                          style: styles.titleMedium,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        dateLabel,
-                        style: styles.labelMedium.copyWith(
-                          color: colors.textMuted,
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          summary.isEmpty
+                              ? l10n.search_saved_searches_all_listings
+                              : summary,
+                          style: styles.bodyMedium.copyWith(
+                            color: colors.textMuted,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          dateLabel,
+                          style: styles.labelMedium.copyWith(
+                            color: colors.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                IconButton(
-                  tooltip: l10n.search_saved_searches_delete,
-                  icon: Icon(LucideIcons.trash_2, color: colors.error),
-                  onPressed: () => _confirmDelete(context),
-                ),
-              ],
+                  IconButton(
+                    tooltip: l10n.search_saved_searches_delete,
+                    icon: Icon(LucideIcons.trash_2, color: colors.error),
+                    onPressed: () => _confirmDelete(context),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
