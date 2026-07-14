@@ -1544,6 +1544,18 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get listingFormUnderReviewChip => _resolve(
+    'listingFormUnderReviewChip',
+    (loc) => loc.listingFormUnderReviewChip,
+  );
+
+  @override
+  String get listingFormAddAnother => _resolve(
+    'listingFormAddAnother',
+    (loc) => loc.listingFormAddAnother,
+  );
+
+  @override
   String get listingFormLoadingMessage => _resolve(
     'listingFormLoadingMessage',
     (loc) => loc.listingFormLoadingMessage,

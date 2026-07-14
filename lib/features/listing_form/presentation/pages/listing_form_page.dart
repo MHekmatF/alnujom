@@ -181,9 +181,20 @@ class _ListingFormBody extends StatelessWidget {
           );
         }
         if (state.submitSucceeded) {
-          // Celebrate the publish (confetti + animated check), then return home.
-          showPublishSuccess(context).then((_) {
-            if (context.mounted) context.go(AppRoutes.shellHome);
+          // Celebrate the publish (confetti + animated check), then route by
+          // the user's choice: view my listings, add another, or (back) home.
+          showPublishSuccess(context).then((action) {
+            if (!context.mounted) return;
+            switch (action) {
+              case PublishSuccessAction.addAnother:
+                // pushReplacement (not go) so a fresh form page + bloc is built
+                // even when we were already on the create route.
+                context.pushReplacement(AppRoutes.publisherListingsCreate);
+              case PublishSuccessAction.viewListings:
+                context.go(AppRoutes.publisherMyListings);
+              case null:
+                context.go(AppRoutes.shellHome);
+            }
           });
         }
         if (state.savedAndExited) {

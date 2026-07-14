@@ -505,6 +505,10 @@
   "listingFormSaveAndExitButton": "Save & exit",
   "listingFormMediaPlaceholderBanner": "Photo and video upload is coming in the next release.",
   "listingFormSubmitSuccess": "Listing submitted for review.",
+  "listingFormUnderReviewChip": "Under review",
+  "@listingFormUnderReviewChip": { "description": "Publish-success — status pill: the listing is pending moderation." },
+  "listingFormAddAnother": "Add another listing",
+  "@listingFormAddAnother": { "description": "Publish-success — secondary action: start a new listing." },
   "listingFormLoadingMessage": "Loading your draft…",
 
   "fieldLabelTitle": "Title",

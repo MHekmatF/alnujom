@@ -54,8 +54,16 @@ class ListingExpressFormPage extends StatelessWidget {
           );
         }
         if (state.submitSucceeded) {
-          showPublishSuccess(context).then((_) {
-            if (context.mounted) context.go(AppRoutes.shellHome);
+          showPublishSuccess(context).then((action) {
+            if (!context.mounted) return;
+            switch (action) {
+              case PublishSuccessAction.addAnother:
+                context.pushReplacement(AppRoutes.publisherListingsCreate);
+              case PublishSuccessAction.viewListings:
+                context.go(AppRoutes.publisherMyListings);
+              case null:
+                context.go(AppRoutes.shellHome);
+            }
           });
         }
       },

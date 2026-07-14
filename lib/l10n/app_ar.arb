@@ -503,6 +503,10 @@
   "listingFormSaveAndExitButton": "حفظ وخروج",
   "listingFormMediaPlaceholderBanner": "رفع الصور والفيديو سيتوفر في الإصدار القادم.",
   "listingFormSubmitSuccess": "تم إرسال العقار للمراجعة.",
+  "listingFormUnderReviewChip": "قيد المراجعة",
+  "@listingFormUnderReviewChip": { "description": "Publish-success — status pill: the listing is pending moderation." },
+  "listingFormAddAnother": "إضافة إعلان آخر",
+  "@listingFormAddAnother": { "description": "Publish-success — secondary action: start a new listing." },
   "listingFormLoadingMessage": "جارٍ تحميل المسودة…",
 
   "fieldLabelTitle": "العنوان",
