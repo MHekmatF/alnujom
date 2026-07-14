@@ -224,39 +224,75 @@ class _ReviewTile extends StatelessWidget {
         (review.reviewerName != null && review.reviewerName!.isNotEmpty)
         ? review.reviewerName!
         : l10n.reviews_anonymous_reviewer;
+    final initial = reviewerLabel.trim().isEmpty
+        ? '؟'
+        : reviewerLabel.trim().substring(0, 1);
 
-    return AppSurface(
+    // DC review card: flat surface + hairline (no shadow), a tonal avatar-initial,
+    // name + stars, a trailing time, and the comment beneath.
+    return Container(
       padding: const EdgeInsetsDirectional.all(AppSpacing.md),
-      radius: AppRadii.md,
+      decoration: BoxDecoration(
+        color: colors.card,
+        borderRadius: appRadius(AppRadii.lg),
+        border: Border.all(color: colors.outline),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
+              Container(
+                width: 38,
+                height: 38,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: colors.primaryContainer,
+                  shape: BoxShape.circle,
+                ),
                 child: Text(
-                  reviewerLabel,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: styles.labelLarge.copyWith(color: colors.onSurface),
+                  initial,
+                  style: styles.labelLarge.copyWith(
+                    color: colors.onPrimaryContainer,
+                  ),
                 ),
               ),
-              RatingStars(value: review.rating.toDouble(), size: AppSpacing.md),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      reviewerLabel,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: styles.labelLarge.copyWith(color: colors.onSurface),
+                    ),
+                    const SizedBox(height: AppSpacing.xxs),
+                    RatingStars(
+                      value: review.rating.toDouble(),
+                      size: AppSpacing.md,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                _relativeDate(context, l10n, review.createdAt),
+                style: styles.labelMedium.copyWith(color: colors.textMuted),
+              ),
             ],
           ),
           if (review.comment != null && review.comment!.trim().isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.xs),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               review.comment!.trim(),
-              style: styles.bodyMedium.copyWith(color: colors.onSurfaceVariant),
+              style: styles.bodyMedium.copyWith(color: colors.onSurface),
             ),
           ],
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            _relativeDate(context, l10n, review.createdAt),
-            style: styles.labelMedium.copyWith(color: colors.textMuted),
-          ),
         ],
       ),
     );
