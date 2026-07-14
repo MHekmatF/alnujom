@@ -16,6 +16,7 @@ class CrownUnderlineTabs extends StatelessWidget {
     required this.selectedIndex,
     required this.onChanged,
     this.fontSize = 15,
+    this.scrollable = false,
     super.key,
   });
 
@@ -26,23 +27,35 @@ class CrownUnderlineTabs extends StatelessWidget {
   /// DC uses 15 on Home, 14 on Search/Saved.
   final double fontSize;
 
+  /// When true (e.g. the my-listings / CRM status filters, which have more tabs
+  /// than fit), the tab row scrolls horizontally instead of squeezing.
+  final bool scrollable;
+
   @override
   Widget build(BuildContext context) {
+    final row = Row(
+      mainAxisSize: scrollable ? MainAxisSize.min : MainAxisSize.max,
+      children: [
+        for (var i = 0; i < labels.length; i++) ...[
+          if (i > 0) const SizedBox(width: AppSpacing.xl),
+          _CrownTab(
+            label: labels[i],
+            selected: i == selectedIndex,
+            fontSize: fontSize,
+            onTap: () => onChanged(i),
+          ),
+        ],
+      ],
+    );
+
     return Padding(
       padding: const EdgeInsetsDirectional.symmetric(horizontal: AppSpacing.xs),
-      child: Row(
-        children: [
-          for (var i = 0; i < labels.length; i++) ...[
-            if (i > 0) const SizedBox(width: AppSpacing.xl),
-            _CrownTab(
-              label: labels[i],
-              selected: i == selectedIndex,
-              fontSize: fontSize,
-              onTap: () => onChanged(i),
-            ),
-          ],
-        ],
-      ),
+      child: scrollable
+          ? SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: row,
+            )
+          : row,
     );
   }
 }
