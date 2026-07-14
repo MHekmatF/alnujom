@@ -25,6 +25,7 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/app_toast.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../core/widgets/press_scale.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/agency.dart';
@@ -64,16 +65,19 @@ class _AgencyHomeView extends StatelessWidget {
         }
       },
       builder: (context, state) {
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(switch (state) {
-              AgencyHomeNone() ||
-              AgencyHomeCreating() ||
-              AgencyHomeCreateFailure() => l10n.agency_create_title,
-              AgencyHomeInvited() => l10n.agency_invitations_title,
-              _ => l10n.agency_profile_title,
-            }),
+        return DcCrownScaffold(
+          dense: true,
+          leading: DcCrownIconButton(
+            icon: Icons.arrow_forward,
+            onTap: () => Navigator.of(context).maybePop(),
           ),
+          title: switch (state) {
+            AgencyHomeNone() ||
+            AgencyHomeCreating() ||
+            AgencyHomeCreateFailure() => l10n.agency_create_title,
+            AgencyHomeInvited() => l10n.agency_invitations_title,
+            _ => l10n.agency_profile_title,
+          },
           body: switch (state) {
             AgencyHomeLoading() => const AppSpinner.page(),
             AgencyHomeError() => Center(child: Text(l10n.agency_generic_error)),
