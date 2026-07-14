@@ -517,7 +517,9 @@ class _EmptyChartCard extends StatelessWidget {
 
 // ─── Loading / error states ───────────────────────────────────────────────────
 
-/// First-load skeleton: a few card stubs.
+/// First-load skeleton: outlined KPI + chart cards that read clearly as
+/// "loading" on the sheet (the bare flat shimmer was near-invisible on the
+/// surface tone and looked like an empty screen).
 class _Skeleton extends StatelessWidget {
   const _Skeleton();
 
@@ -532,14 +534,58 @@ class _Skeleton extends StatelessWidget {
         AppSpacing.xxl,
       ),
       children: const [
-        LoadingState.card(),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(child: _SkeletonCard(height: 96)),
+            SizedBox(width: AppSpacing.md),
+            Expanded(child: _SkeletonCard(height: 96)),
+          ],
+        ),
+        SizedBox(height: AppSpacing.md),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(child: _SkeletonCard(height: 96)),
+            SizedBox(width: AppSpacing.md),
+            Expanded(child: _SkeletonCard(height: 96)),
+          ],
+        ),
         SizedBox(height: AppSpacing.lg),
-        LoadingState.card(),
+        _SkeletonCard(height: 232),
         SizedBox(height: AppSpacing.lg),
-        LoadingState.card(),
-        SizedBox(height: AppSpacing.lg),
-        LoadingState.card(),
+        _SkeletonCard(height: 208),
       ],
+    );
+  }
+}
+
+/// A flat outlined card with a short title-line shimmer over a body shimmer —
+/// the visible loading placeholder for a KPI/chart card.
+class _SkeletonCard extends StatelessWidget {
+  const _SkeletonCard({required this.height});
+
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    return Container(
+      height: height,
+      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: colors.card,
+        borderRadius: appRadius(AppRadii.lg),
+        border: Border.all(color: colors.outline),
+      ),
+      child: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(width: 96, child: LoadingState.line()),
+          SizedBox(height: AppSpacing.md),
+          Expanded(child: LoadingState.card()),
+        ],
+      ),
     );
   }
 }

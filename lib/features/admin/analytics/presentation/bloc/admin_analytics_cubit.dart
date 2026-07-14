@@ -43,25 +43,33 @@ class AdminAnalyticsCubit extends Cubit<AdminAnalyticsState> {
     final leadsResult = results[2] as Result<List<AdminDailyTotal>>;
     final govResult = results[3] as Result<List<AdminGovernorateTotal>>;
 
-    // Surface the first transport failure (a failing RPC fails the surface).
+    // Resilient: render whatever loaded. A single stalled/failed series just
+    // shows its own empty card — only a TOTAL wipe-out (every series failed,
+    // e.g. the network is down) fails the surface with a retry affordance.
+    String? firstFailureMessage;
+    var anySuccess = false;
     for (final r in results) {
-      if (r case FailureResult(:final failure)) {
-        emit(AdminAnalyticsError(failure.message));
-        return;
+      if (r is Success) {
+        anySuccess = true;
+      } else if (r case FailureResult(:final failure)) {
+        firstFailureMessage ??= failure.message;
       }
     }
+    if (!anySuccess) {
+      emit(AdminAnalyticsError(firstFailureMessage ?? ''));
+      return;
+    }
+
+    List<T> valueOr<T>(Result<List<T>> result) =>
+        result is Success<List<T>> ? result.value : <T>[];
 
     emit(
       AdminAnalyticsLoaded(
         AdminAnalytics(
-          listingsByMonth:
-              (listingsResult as Success<List<AdminMonthlyTotal>>).value,
-          profilesByMonth:
-              (profilesResult as Success<List<AdminMonthlyTotal>>).value,
-          leadEventsByDay:
-              (leadsResult as Success<List<AdminDailyTotal>>).value,
-          listingsByGovernorate:
-              (govResult as Success<List<AdminGovernorateTotal>>).value,
+          listingsByMonth: valueOr(listingsResult),
+          profilesByMonth: valueOr(profilesResult),
+          leadEventsByDay: valueOr(leadsResult),
+          listingsByGovernorate: valueOr(govResult),
         ),
       ),
     );
