@@ -5,13 +5,15 @@
 // Phase 2 tokens only; all strings via AppLocalizations.
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/app_spinner.dart';
-import '../../../../core/widgets/deep_link_aware_back_button.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/util/localized_numbers.dart';
 import '../bloc/agency_analytics_cubit.dart';
@@ -40,10 +42,13 @@ class _AgencyAnalyticsView extends StatelessWidget {
     // Render counters in the active locale's numerals (Arabic-Indic in ar).
     final locale = Localizations.localeOf(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: const DeepLinkAwareBackButton(),
-        title: Text(l10n.agency_analytics_title),
+    return DcCrownScaffold(
+      title: l10n.agency_analytics_title,
+      dense: true,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () =>
+            context.canPop() ? context.pop() : context.go(AppRoutes.shellHome),
       ),
       body: BlocBuilder<AgencyAnalyticsCubit, AgencyAnalyticsState>(
         builder: (context, state) {

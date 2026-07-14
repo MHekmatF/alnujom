@@ -17,7 +17,7 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_spinner.dart';
-import '../../../../core/widgets/deep_link_aware_back_button.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/presentation/money_formatter.dart';
 import '../bloc/agency_listings_bloc.dart';
@@ -46,10 +46,13 @@ class _AgencyListingsView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: const DeepLinkAwareBackButton(),
-        title: Text(l10n.agency_listings_title),
+    return DcCrownScaffold(
+      title: l10n.agency_listings_title,
+      dense: true,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () =>
+            context.canPop() ? context.pop() : context.go(AppRoutes.shellHome),
       ),
       body: BlocBuilder<AgencyListingsBloc, AgencyListingsState>(
         builder: (context, state) {
@@ -198,5 +201,4 @@ class _ListingCard extends StatelessWidget {
       ),
     );
   }
-
 }

@@ -18,7 +18,7 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_spinner.dart';
-import '../../../../core/widgets/deep_link_aware_back_button.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/presentation/money_formatter.dart';
 import '../../domain/entities/agency.dart';
@@ -59,10 +59,13 @@ class _AgencyProfileView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: const DeepLinkAwareBackButton(),
-        title: Text(l10n.agency_profile_title),
+    return DcCrownScaffold(
+      title: l10n.agency_profile_title,
+      dense: true,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () =>
+            context.canPop() ? context.pop() : context.go(AppRoutes.shellHome),
       ),
       body: BlocBuilder<AgencyVerificationCubit, AgencyVerificationState>(
         builder: (context, state) {
@@ -292,5 +295,4 @@ class _ListingRow extends StatelessWidget {
       ),
     );
   }
-
 }
