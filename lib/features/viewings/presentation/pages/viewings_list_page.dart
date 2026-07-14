@@ -1,11 +1,12 @@
 // lib/features/viewings/presentation/pages/viewings_list_page.dart
 //
-// Viewing scheduler — the caller's viewings, as token-styled cards. Each card
-// shows the listing title, the formatted scheduled date/time, an optional note,
-// and a status pill coloured by status. Member actions:
-//   - publisher + requested        → Confirm / Decline
+// Viewing scheduler — the caller's viewings, restyled to the DC "Blue Crown"
+// system (`AlNujom - Publisher.dc.html` «طلبات المعاينة»): a crown-headered list
+// of flat cards, each showing the listing, a DcStatusChip, the scheduled
+// date/time on a surface2 strip, an optional note, and the member actions:
+//   - publisher + requested          → Confirm / Decline
 //   - requester + requested|confirmed → Cancel
-// Empty/loading/error use the shared state widgets. Token-only + RTL-correct.
+// Behaviour-preserving. Token-only + RTL-correct.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -19,6 +20,8 @@ import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_toast.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../core/widgets/ds/dc_status_chip.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
@@ -46,8 +49,13 @@ class _ViewingsListPageState extends State<ViewingsListPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.viewingsListTitle)),
+    return DcCrownScaffold(
+      title: l10n.viewingsListTitle,
+      dense: true,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () => Navigator.of(context).maybePop(),
+      ),
       body: BlocBuilder<ViewingsCubit, ViewingsState>(
         builder: (context, state) {
           switch (state.status) {
@@ -113,44 +121,51 @@ class _ViewingCard extends StatelessWidget {
       locale,
     ).add_jm().format(viewing.scheduledAt.toLocal());
 
-    final pill = _statusPill(context, l10n, colors, viewing.status);
     final actions = _actionsFor(context, l10n);
 
-    return AppSurface(
+    return Container(
       padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
-      child: Semantics(
-        container: true,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Text(
-                    title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: styles.titleMedium,
-                  ),
+      decoration: BoxDecoration(
+        color: colors.card,
+        borderRadius: appRadius(AppRadii.lg),
+        border: Border.all(color: colors.outline),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: styles.titleMedium.copyWith(color: colors.onSurface),
                 ),
-                const SizedBox(width: AppSpacing.sm),
-                pill,
-              ],
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              _statusChip(l10n, viewing.status),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Container(
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
             ),
-            const SizedBox(height: AppSpacing.sm),
-            Row(
+            decoration: BoxDecoration(
+              color: colors.surfaceVariant,
+              borderRadius: appRadius(AppRadii.md),
+            ),
+            child: Row(
               children: [
-                Icon(
-                  LucideIcons.clock,
-                  size: AppSpacing.lg,
-                  color: colors.primary,
-                ),
+                Icon(Icons.event, size: 20, color: colors.primary),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
                     when,
-                    style: styles.bodyLarge.copyWith(
+                    style: styles.bodyMedium.copyWith(
                       color: colors.onSurface,
                       fontWeight: FontWeight.w600,
                     ),
@@ -158,46 +173,43 @@ class _ViewingCard extends StatelessWidget {
                 ),
               ],
             ),
-            if (viewing.note != null && viewing.note!.trim().isNotEmpty) ...[
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                viewing.note!.trim(),
-                style: styles.bodyMedium.copyWith(color: colors.textMuted),
-              ),
-            ],
-            if (actions.isNotEmpty) ...[
-              const SizedBox(height: AppSpacing.md),
-              Row(children: _interspersed(actions)),
-            ],
-            // Phase 29 (F1) — publisher-only "Add to CRM": attach this viewing's
-            // requester as a lead (resolved + ownership-checked server-side).
-            if (viewing.amIPublisher) ...[
-              const SizedBox(height: AppSpacing.sm),
-              Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: AppButton(
-                  label: l10n.crmAddToCrmAction,
-                  variant: AppButtonVariant.text,
-                  size: AppButtonSize.dense,
-                  icon: LucideIcons.handshake,
-                  onPressed: () => addToCrm(
-                    context,
-                    source: CrmLeadSource.viewing,
-                    sourceId: viewing.id,
-                    displayName: viewing.listingTitle,
-                  ),
+          ),
+          if (viewing.note != null && viewing.note!.trim().isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              viewing.note!.trim(),
+              style: styles.bodyMedium.copyWith(color: colors.textMuted),
+            ),
+          ],
+          if (actions.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.md),
+            Row(children: _interspersed(actions)),
+          ],
+          if (viewing.amIPublisher) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: AppButton(
+                label: l10n.crmAddToCrmAction,
+                variant: AppButtonVariant.text,
+                size: AppButtonSize.dense,
+                icon: LucideIcons.handshake,
+                onPressed: () => addToCrm(
+                  context,
+                  source: CrmLeadSource.viewing,
+                  sourceId: viewing.id,
+                  displayName: viewing.listingTitle,
                 ),
               ),
-            ],
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
 
   /// The member actions available on this row. Empty for terminal rows.
   List<Widget> _actionsFor(BuildContext context, AppLocalizations l10n) {
-    // Publisher reviewing a pending request → Confirm / Decline.
     if (viewing.amIPublisher && viewing.status == ViewingStatus.requested) {
       return [
         Expanded(
@@ -216,7 +228,6 @@ class _ViewingCard extends StatelessWidget {
         ),
       ];
     }
-    // Requester may cancel while the request is still live.
     if (!viewing.amIPublisher &&
         (viewing.status == ViewingStatus.requested ||
             viewing.status == ViewingStatus.confirmed)) {
@@ -255,22 +266,30 @@ class _ViewingCard extends StatelessWidget {
     );
   }
 
-  _SoftStatusPill _statusPill(
-    BuildContext context,
-    AppLocalizations l10n,
-    AppColors colors,
-    ViewingStatus status,
-  ) {
-    final (label, color) = switch (status) {
-      ViewingStatus.requested => (l10n.viewingStatusRequested, colors.warning),
-      ViewingStatus.confirmed => (l10n.viewingStatusConfirmed, colors.success),
-      ViewingStatus.declined => (l10n.viewingStatusDeclined, colors.error),
+  DcStatusChip _statusChip(AppLocalizations l10n, ViewingStatus status) {
+    final (label, tone, icon) = switch (status) {
+      ViewingStatus.requested => (
+        l10n.viewingStatusRequested,
+        DcStatusTone.neutral,
+        Icons.hourglass_empty,
+      ),
+      ViewingStatus.confirmed => (
+        l10n.viewingStatusConfirmed,
+        DcStatusTone.green,
+        Icons.event_available,
+      ),
+      ViewingStatus.declined => (
+        l10n.viewingStatusDeclined,
+        DcStatusTone.red,
+        Icons.event_busy,
+      ),
       ViewingStatus.cancelled => (
         l10n.viewingStatusCancelled,
-        colors.onSurfaceVariant,
+        DcStatusTone.neutral,
+        Icons.history,
       ),
     };
-    return _SoftStatusPill(label: label, color: color);
+    return DcStatusChip(label: label, tone: tone, icon: icon);
   }
 
   static List<Widget> _interspersed(List<Widget> actions) {
@@ -280,35 +299,5 @@ class _ViewingCard extends StatelessWidget {
       out.add(actions[i]);
     }
     return out;
-  }
-}
-
-/// Phase-33 DS soft-tinted status pill for the viewing rows: a low-alpha tint
-/// of the status [color] as the fill, the same colour (at full strength) for
-/// the label, and a faint outline of it — a quieter, more "airy" read than the
-/// shared solid [StatusPill], matching the new design system's status chips.
-class _SoftStatusPill extends StatelessWidget {
-  const _SoftStatusPill({required this.label, required this.color});
-
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    final styles = AppTextStyles.of(context);
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: appRadius(AppRadii.pill),
-        border: Border.all(color: color.withValues(alpha: 0.32)),
-      ),
-      child: Padding(
-        padding: const EdgeInsetsDirectional.symmetric(
-          horizontal: AppSpacing.sm,
-          vertical: AppSpacing.xxs,
-        ),
-        child: Text(label, style: styles.labelMedium.copyWith(color: color)),
-      ),
-    );
   }
 }
