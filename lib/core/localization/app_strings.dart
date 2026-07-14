@@ -5751,6 +5751,45 @@ final class _DebugAppLocalizations extends AppLocalizations {
   String get viewingSubmitButton =>
       _resolve('viewingSubmitButton', (loc) => loc.viewingSubmitButton);
   @override
+  String get viewingChooseDayLabel =>
+      _resolve('viewingChooseDayLabel', (loc) => loc.viewingChooseDayLabel);
+  @override
+  String get viewingChoosePeriodLabel => _resolve(
+    'viewingChoosePeriodLabel',
+    (loc) => loc.viewingChoosePeriodLabel,
+  );
+  @override
+  String get viewingSlotMorning =>
+      _resolve('viewingSlotMorning', (loc) => loc.viewingSlotMorning);
+  @override
+  String get viewingSlotNoon =>
+      _resolve('viewingSlotNoon', (loc) => loc.viewingSlotNoon);
+  @override
+  String get viewingSlotAfternoon =>
+      _resolve('viewingSlotAfternoon', (loc) => loc.viewingSlotAfternoon);
+  @override
+  String get viewingSlotEvening =>
+      _resolve('viewingSlotEvening', (loc) => loc.viewingSlotEvening);
+  @override
+  String get viewingConfirmRequestButton => _resolve(
+    'viewingConfirmRequestButton',
+    (loc) => loc.viewingConfirmRequestButton,
+  );
+  @override
+  String get viewingBookedTitle =>
+      _resolve('viewingBookedTitle', (loc) => loc.viewingBookedTitle);
+  @override
+  String get viewingBookedBody =>
+      _resolve('viewingBookedBody', (loc) => loc.viewingBookedBody);
+  @override
+  String get viewingEditRequestAction => _resolve(
+    'viewingEditRequestAction',
+    (loc) => loc.viewingEditRequestAction,
+  );
+  @override
+  String get viewingDoneAction =>
+      _resolve('viewingDoneAction', (loc) => loc.viewingDoneAction);
+  @override
   String get viewingRequestSuccess =>
       _resolve('viewingRequestSuccess', (loc) => loc.viewingRequestSuccess);
   @override
