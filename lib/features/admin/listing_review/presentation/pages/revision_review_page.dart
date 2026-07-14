@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../../core/di/injection.dart';
+import '../../../../../core/routing/app_router.dart';
 import '../../../../../core/theme/colors.dart';
 import '../../../../../core/theme/radii.dart';
 import '../../../../../core/theme/spacing.dart';
@@ -10,6 +12,7 @@ import '../../../../../core/widgets/_widget_support.dart';
 import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_spinner.dart';
 import '../../../../../core/widgets/app_toast.dart';
+import '../../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../../shared/presentation/widgets/listing_display/listing_gallery.dart';
 import '../../domain/entities/revision_diff.dart';
@@ -37,9 +40,7 @@ class RevisionReviewPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider<RevisionReviewBloc>(
       create: (_) => getIt<RevisionReviewBloc>()
-        ..add(
-          RevisionReviewLoad(revisionId: revisionId, listingId: listingId),
-        ),
+        ..add(RevisionReviewLoad(revisionId: revisionId, listingId: listingId)),
       child: const _RevisionReviewView(),
     );
   }
@@ -52,8 +53,14 @@ class _RevisionReviewView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.adminRevisionReviewTitle)),
+    return DcCrownScaffold(
+      title: l10n.adminRevisionReviewTitle,
+      dense: true,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () =>
+            context.canPop() ? context.pop() : context.go(AppRoutes.shellHome),
+      ),
       body: BlocConsumer<RevisionReviewBloc, RevisionReviewState>(
         listenWhen: (prev, curr) =>
             (curr.outcome != null && prev.outcome == null) ||

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../../core/di/injection.dart';
+import '../../../../../core/routing/app_router.dart';
 import '../../../../../core/theme/colors.dart';
 import '../../../../../core/theme/radii.dart';
 import '../../../../../core/theme/spacing.dart';
@@ -10,6 +12,7 @@ import '../../../../../core/theme/typography.dart';
 import '../../../../../core/widgets/_widget_support.dart';
 import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_spinner.dart';
+import '../../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../../core/widgets/loading_state.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../listing_form/domain/entities/pending_revision.dart';
@@ -77,8 +80,14 @@ class _PendingQueueViewState extends State<_PendingQueueView> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.adminQueueTitle)),
+    return DcCrownScaffold(
+      title: l10n.adminQueueTitle,
+      dense: true,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () =>
+            context.canPop() ? context.pop() : context.go(AppRoutes.shellHome),
+      ),
       body: Column(
         children: [
           const _PendingRevisionsSection(),
@@ -90,54 +99,53 @@ class _PendingQueueViewState extends State<_PendingQueueView> {
 
   Widget _buildQueueBody(BuildContext context, AppLocalizations l10n) {
     return BlocBuilder<PendingQueueBloc, PendingQueueState>(
-        builder: (ctx, state) {
-          if (state.isLoadingFirstPage && state.listings.isEmpty) {
-            return const _QueueSkeleton();
-          }
-          if (state.failure != null && state.listings.isEmpty) {
-            return _ErrorState(
-              message: state.failure!.message,
-              onRetry: () =>
-                  ctx.read<PendingQueueBloc>().add(const PendingQueueRefresh()),
-            );
-          }
-          if (state.isEmpty) {
-            return RefreshIndicator(
-              onRefresh: () async {
-                ctx.read<PendingQueueBloc>().add(const PendingQueueRefresh());
-              },
-              child: ListView(
-                children: [
-                  const SizedBox(height: AppSpacing.xxxl + AppSpacing.xxl),
-                  Center(child: Text(l10n.adminQueueEmpty)),
-                ],
-              ),
-            );
-          }
-
+      builder: (ctx, state) {
+        if (state.isLoadingFirstPage && state.listings.isEmpty) {
+          return const _QueueSkeleton();
+        }
+        if (state.failure != null && state.listings.isEmpty) {
+          return _ErrorState(
+            message: state.failure!.message,
+            onRetry: () =>
+                ctx.read<PendingQueueBloc>().add(const PendingQueueRefresh()),
+          );
+        }
+        if (state.isEmpty) {
           return RefreshIndicator(
             onRefresh: () async {
               ctx.read<PendingQueueBloc>().add(const PendingQueueRefresh());
             },
-            child: ListView.separated(
-              controller: _scrollController,
-              padding: const EdgeInsetsDirectional.all(AppSpacing.md),
-              itemCount:
-                  state.listings.length + (state.isLoadingNextPage ? 1 : 0),
-              separatorBuilder: (_, __) =>
-                  const SizedBox(height: AppSpacing.sm),
-              itemBuilder: (ctx, index) {
-                if (index >= state.listings.length) {
-                  return const Padding(
-                    padding: EdgeInsetsDirectional.all(AppSpacing.md),
-                    child: AppSpinner(),
-                  );
-                }
-                return PendingQueueCard(summary: state.listings[index]);
-              },
+            child: ListView(
+              children: [
+                const SizedBox(height: AppSpacing.xxxl + AppSpacing.xxl),
+                Center(child: Text(l10n.adminQueueEmpty)),
+              ],
             ),
           );
-        },
+        }
+
+        return RefreshIndicator(
+          onRefresh: () async {
+            ctx.read<PendingQueueBloc>().add(const PendingQueueRefresh());
+          },
+          child: ListView.separated(
+            controller: _scrollController,
+            padding: const EdgeInsetsDirectional.all(AppSpacing.md),
+            itemCount:
+                state.listings.length + (state.isLoadingNextPage ? 1 : 0),
+            separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+            itemBuilder: (ctx, index) {
+              if (index >= state.listings.length) {
+                return const Padding(
+                  padding: EdgeInsetsDirectional.all(AppSpacing.md),
+                  child: AppSpinner(),
+                );
+              }
+              return PendingQueueCard(summary: state.listings[index]);
+            },
+          ),
+        );
+      },
     );
   }
 }
@@ -167,10 +175,7 @@ class _PendingRevisionsSection extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                l10n.adminRevisionsSectionTitle,
-                style: styles.titleMedium,
-              ),
+              Text(l10n.adminRevisionsSectionTitle, style: styles.titleMedium),
               const SizedBox(height: AppSpacing.sm),
               for (final rev in state.revisions) ...[
                 _PendingRevisionCard(revision: rev),
@@ -195,9 +200,7 @@ class _PendingRevisionCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
-    final title = revision.proposedTitle.isEmpty
-        ? '—'
-        : revision.proposedTitle;
+    final title = revision.proposedTitle.isEmpty ? '—' : revision.proposedTitle;
 
     return Material(
       color: colors.surfaceVariant,
@@ -224,7 +227,9 @@ class _PendingRevisionCard extends StatelessWidget {
                     const SizedBox(height: AppSpacing.xs),
                     Text(
                       l10n.adminRevisionPendingSubtitle,
-                      style: styles.bodyMedium.copyWith(color: colors.textMuted),
+                      style: styles.bodyMedium.copyWith(
+                        color: colors.textMuted,
+                      ),
                     ),
                   ],
                 ),

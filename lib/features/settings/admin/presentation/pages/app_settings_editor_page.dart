@@ -5,11 +5,14 @@
 // Constitution IX: zero Supabase imports.
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../../core/di/injection.dart';
+import '../../../../../core/routing/app_router.dart';
 import '../../../../../core/theme/spacing.dart';
 import '../../../../../core/widgets/app_spinner.dart';
 import '../../../../../core/widgets/app_toast.dart';
+import '../../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../../core/widgets/error_state.dart';
 import '../../../../../features/currencies/domain/entities/currency.dart';
 import '../../../../../features/currencies/domain/usecases/list_currencies.dart';
@@ -41,8 +44,14 @@ class _AppSettingsEditorView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.settingsEditorTitle)),
+    return DcCrownScaffold(
+      title: l10n.settingsEditorTitle,
+      dense: true,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () =>
+            context.canPop() ? context.pop() : context.go(AppRoutes.shellHome),
+      ),
       body: BlocConsumer<AppSettingsEditorCubit, AppSettingsEditorState>(
         listener: (ctx, state) {
           if (state is AppSettingsEditorLoaded) {

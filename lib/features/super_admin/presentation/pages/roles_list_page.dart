@@ -7,8 +7,10 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/security/permission_checker.dart';
 import '../../../../core/security/permission_keys.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/app_toast.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/role_with_counts.dart';
@@ -50,19 +52,26 @@ class _RolesListView extends StatelessWidget {
       PermissionKeys.permissionsManage,
     );
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.superAdminRolesListTitle),
-        actions: [
-          if (canManage)
-            IconButton(
-              icon: const Icon(LucideIcons.user_plus),
-              tooltip: l10n.superAdminAssignRoleTitle,
-              // push (not go) so the back stack to the admin dashboard is kept.
-              onPressed: () => context.push(AppRoutes.superAdminAssign),
-            ),
-        ],
+    return DcCrownScaffold(
+      title: l10n.superAdminRolesListTitle,
+      dense: true,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () =>
+            context.canPop() ? context.pop() : context.go(AppRoutes.shellHome),
       ),
+      actions: [
+        if (canManage)
+          IconButton(
+            icon: Icon(
+              LucideIcons.user_plus,
+              color: AppColors.of(context).onBrandHeader,
+            ),
+            tooltip: l10n.superAdminAssignRoleTitle,
+            // push (not go) so the back stack to the admin dashboard is kept.
+            onPressed: () => context.push(AppRoutes.superAdminAssign),
+          ),
+      ],
       floatingActionButton: canCreate
           ? FloatingActionButton(
               onPressed: () async {

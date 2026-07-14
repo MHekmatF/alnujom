@@ -11,15 +11,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../../core/di/injection.dart';
 import '../../../../../core/errors/result.dart';
+import '../../../../../core/routing/app_router.dart';
 import '../../../../../core/theme/colors.dart';
 import '../../../../../core/theme/spacing.dart';
 import '../../../../../core/theme/typography.dart';
 import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_spinner.dart';
 import '../../../../../core/widgets/app_toast.dart';
+import '../../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../reports/domain/entities/report_reason.dart';
 import '../../../../reports/domain/entities/report_status.dart';
@@ -93,14 +96,26 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
           builder: (ctx) {
             final l10n = AppLocalizations.of(ctx)!;
             if (_loading) {
-              return Scaffold(
-                appBar: AppBar(title: Text(l10n.reports_queue_title)),
+              return DcCrownScaffold(
+                title: l10n.reports_queue_title,
+                dense: true,
+                leading: DcCrownIconButton(
+                  icon: Icons.arrow_forward,
+                  onTap: () =>
+                      ctx.canPop() ? ctx.pop() : ctx.go(AppRoutes.shellHome),
+                ),
                 body: const AppSpinner.page(),
               );
             }
             if (_error != null || _item == null) {
-              return Scaffold(
-                appBar: AppBar(title: Text(l10n.reports_queue_title)),
+              return DcCrownScaffold(
+                title: l10n.reports_queue_title,
+                dense: true,
+                leading: DcCrownIconButton(
+                  icon: Icons.arrow_forward,
+                  onTap: () =>
+                      ctx.canPop() ? ctx.pop() : ctx.go(AppRoutes.shellHome),
+                ),
                 body: Center(
                   child: Padding(
                     padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
@@ -180,8 +195,14 @@ class _ReportDetailView extends StatelessWidget {
 
     final isOpen = item.status.isOpen;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.reports_queue_title)),
+    return DcCrownScaffold(
+      title: l10n.reports_queue_title,
+      dense: true,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () =>
+            context.canPop() ? context.pop() : context.go(AppRoutes.shellHome),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsetsDirectional.all(AppSpacing.md),
         child: Column(
