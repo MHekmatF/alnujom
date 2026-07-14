@@ -83,7 +83,7 @@ class _WriteReviewSheetState extends State<WriteReviewSheet> {
           child: Material(
             color: colors.surface,
             borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(AppRadii.lg),
+              top: Radius.circular(AppRadii.xl),
             ),
             child: BlocBuilder<SellerTrustCubit, SellerTrustState>(
               builder: (context, state) {
