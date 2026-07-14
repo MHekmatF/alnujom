@@ -152,17 +152,24 @@ class AppButton extends StatelessWidget {
     final border = variant == AppButtonVariant.outlined
         ? BorderSide(color: colors.outlineStrong)
         : BorderSide.none;
+    // Scale the icon+label down to fit rather than overflow: in tight flexed
+    // slots (e.g. the 3-up sticky contact bar) a longer localized label can
+    // overshoot the button by a pixel or two — FittedBox absorbs that
+    // imperceptibly instead of painting a RenderFlex overflow stripe.
     final child = loading
         ? appInlineSpinner(context, color: foreground)
-        : Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (icon != null) ...[
-                Icon(icon, size: AppSpacing.xl),
-                const SizedBox(width: AppSpacing.sm),
+        : FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, size: AppSpacing.xl),
+                  const SizedBox(width: AppSpacing.sm),
+                ],
+                Text(label),
               ],
-              Text(label),
-            ],
+            ),
           );
 
     return PressScale(
