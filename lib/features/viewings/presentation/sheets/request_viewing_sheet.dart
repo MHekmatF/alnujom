@@ -171,7 +171,6 @@ class _RequestViewingBodyState extends State<_RequestViewingBody> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _grabHandle(colors),
           // Header: tonal-ish icon tile + title.
           Row(
             children: [
@@ -285,7 +284,6 @@ class _RequestViewingBodyState extends State<_RequestViewingBody> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _grabHandle(colors),
           Align(
             alignment: Alignment.center,
             child: Container(
@@ -366,17 +364,6 @@ class _RequestViewingBodyState extends State<_RequestViewingBody> {
     );
   }
 
-  Widget _grabHandle(AppColors colors) => Center(
-    child: Container(
-      width: AppSpacing.xxl,
-      height: AppSpacing.xs,
-      margin: const EdgeInsetsDirectional.only(bottom: AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: colors.outline,
-        borderRadius: appRadius(AppRadii.pill),
-      ),
-    ),
-  );
 }
 
 /// A single day chip in the horizontal strip: weekday abbreviation over the
