@@ -15,12 +15,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
-import '../../../../core/theme/elevation.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_network_image.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/press_scale.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
@@ -47,24 +47,28 @@ class ComparisonPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.comparisonPageTitle),
-        actions: [
-          BlocBuilder<ComparisonCubit, ComparisonState>(
-            buildWhen: (a, b) => a.count != b.count,
-            builder: (context, state) {
-              if (state.count == 0) return const SizedBox.shrink();
-              return IconButton(
-                tooltip: l10n.comparisonClearAll,
-                icon: const Icon(LucideIcons.trash_2),
-                onPressed: () => context.read<ComparisonCubit>().clear(),
-              );
-            },
-          ),
-        ],
+    return DcCrownScaffold(
+      title: l10n.comparisonPageTitle,
+      dense: true,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () => Navigator.of(context).maybePop(),
       ),
+      actions: [
+        BlocBuilder<ComparisonCubit, ComparisonState>(
+          buildWhen: (a, b) => a.count != b.count,
+          builder: (context, state) {
+            if (state.count == 0) return const SizedBox.shrink();
+            return IconButton(
+              tooltip: l10n.comparisonClearAll,
+              icon: Icon(LucideIcons.trash_2, color: colors.onBrandHeader),
+              onPressed: () => context.read<ComparisonCubit>().clear(),
+            );
+          },
+        ),
+      ],
       body: BlocBuilder<ComparisonCubit, ComparisonState>(
         builder: (context, state) {
           final items = state.items;
@@ -272,7 +276,6 @@ class _PropertyColumn extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
-    final elevation = AppElevation.of(context);
 
     return Container(
       width: width,
@@ -281,7 +284,6 @@ class _PropertyColumn extends StatelessWidget {
         color: colors.card,
         borderRadius: appRadius(AppRadii.lg),
         border: Border.all(color: colors.outline),
-        boxShadow: elevation.level1,
       ),
       child: ClipRRect(
         borderRadius: appRadius(AppRadii.lg),
