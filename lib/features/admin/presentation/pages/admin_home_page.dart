@@ -26,10 +26,13 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/dashboard_tile.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../core/widgets/ds/dc_quick_link_tile.dart';
 import '../../../../core/widgets/locale_toggle_action.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../debug/locations_smoke_test_tile.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/util/localized_numbers.dart';
 import '../../analytics/presentation/bloc/admin_analytics_cubit.dart';
 import '../../analytics/presentation/pages/admin_analytics_page.dart';
 import '../../dashboard/domain/entities/dashboard_counts.dart';
@@ -37,7 +40,6 @@ import '../../dashboard/domain/entities/dashboard_section.dart';
 import '../../dashboard/presentation/bloc/dashboard_cubit.dart';
 import '../../dashboard/presentation/bloc/dashboard_state.dart';
 import '../../dashboard/presentation/widgets/admin_quick_stats_row.dart';
-import '../../dashboard/presentation/widgets/admin_role_badge_header.dart';
 import '../../dashboard/presentation/widgets/dashboard_sections.dart';
 
 class AdminHomePage extends StatelessWidget {
@@ -107,11 +109,13 @@ class _AdminHomeViewState extends State<_AdminHomeView> with RouteAware {
         .where((s) => checker.any(s.permissionKeys))
         .toList(growable: false);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.admin_home_title),
-        actions: const [LocaleToggleAction()],
+    return DcCrownScaffold(
+      title: l10n.admin_home_title,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () => Navigator.of(context).maybePop(),
       ),
+      actions: const [LocaleToggleAction()],
       body: visibleSections.isEmpty
           ? _EmptyState(l10n: l10n)
           : BlocBuilder<DashboardCubit, DashboardState>(
@@ -125,18 +129,11 @@ class _AdminHomeViewState extends State<_AdminHomeView> with RouteAware {
                   child: CustomScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
                     slivers: [
-                      // ── Role-badge identity header ──────────────────────
-                      SliverToBoxAdapter(
-                        child: StaggeredListItem(
-                          index: 0,
-                          child: AdminRoleBadgeHeader(checker: checker),
-                        ),
-                      ),
                       // ── Quick-stats KPI strip ───────────────────────────
                       SliverToBoxAdapter(
                         child: Padding(
                           padding: const EdgeInsetsDirectional.only(
-                            top: AppSpacing.sm,
+                            top: AppSpacing.md,
                             bottom: AppSpacing.md,
                           ),
                           child: AdminQuickStatsRow(
@@ -240,16 +237,17 @@ class _AdminHomeViewState extends State<_AdminHomeView> with RouteAware {
           padding: const EdgeInsetsDirectional.symmetric(
             horizontal: AppSpacing.lg,
           ),
-          sliver: SliverList(
+          sliver: SliverGrid(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: AppSpacing.sm,
+              crossAxisSpacing: AppSpacing.sm,
+              childAspectRatio: 1.35,
+            ),
             delegate: SliverChildBuilderDelegate((context, index) {
               final section = inGroup[index];
               final tile = _buildSectionTile(context, section, counts, l10n);
-              return Padding(
-                padding: const EdgeInsetsDirectional.only(
-                  bottom: AppSpacing.md,
-                ),
-                child: StaggeredListItem(index: runningIndex++, child: tile),
-              );
+              return StaggeredListItem(index: runningIndex++, child: tile);
             }, childCount: inGroup.length),
           ),
         ),
@@ -265,38 +263,25 @@ class _AdminHomeViewState extends State<_AdminHomeView> with RouteAware {
     AppLocalizations l10n,
   ) {
     final label = _resolveLabel(section.labelKey, l10n);
-    final colors = AppColors.of(context);
 
     // Counter: null = not permitted → omit badge; 0 = permitted, nothing
-    // pending. AppDashboardTile hides badges that are null or <= 0.
+    // pending. The tile hides badges that are null or <= 0.
     final counter = counts != null
         ? _resolveCounter(section.counterKey, counts)
         : null;
 
     // Quick-action deep-link: counter tiles route to the filtered queue (FR-009).
     final quickRoute = _quickActionRoute(section.counterKey) ?? section.route!;
-    final subtitle = section.subtitleKey == null
-        ? null
-        : _resolveSubtitle(section.subtitleKey!, l10n);
 
-    return AppDashboardTile(
+    return DcQuickLinkTile(
       icon: section.icon,
-      title: label,
-      subtitle: subtitle,
-      badgeCount: counter,
-      accent: _groupAccent(section.group, colors),
+      label: label,
+      badgeLabel: (counter != null && counter > 0)
+          ? formatLocalizedNumber(counter, Localizations.localeOf(context))
+          : null,
       // Preserve the Phase 20 navigation behaviour (go_router push).
       onTap: () => context.push(quickRoute),
     );
-  }
-
-  Color _groupAccent(DashboardSectionGroup group, AppColors colors) {
-    return switch (group) {
-      DashboardSectionGroup.moderation => colors.primary,
-      DashboardSectionGroup.configuration => colors.secondary,
-      DashboardSectionGroup.insights => colors.accent,
-      DashboardSectionGroup.superAdmin => colors.error,
-    };
   }
 
   /// Maps symbolic counter key → DashboardCounts field.
@@ -373,35 +358,6 @@ class _AdminHomeViewState extends State<_AdminHomeView> with RouteAware {
     }
   }
 
-  /// Maps DashboardSection.subtitleKey → localized string.
-  String? _resolveSubtitle(String subtitleKey, AppLocalizations l10n) {
-    switch (subtitleKey) {
-      case 'adminSectionSubtitleApprovals':
-        return l10n.adminSectionSubtitleApprovals;
-      case 'adminSectionSubtitleListingReview':
-        return l10n.adminSectionSubtitleListingReview;
-      case 'adminSectionSubtitleReports':
-        return l10n.adminSectionSubtitleReports;
-      case 'adminSectionSubtitleAgencies':
-        return l10n.adminSectionSubtitleAgencies;
-      case 'adminSectionSubtitleInquiries':
-        return l10n.adminSectionSubtitleInquiries;
-      case 'adminSectionSubtitleLocations':
-        return l10n.adminSectionSubtitleLocations;
-      case 'adminSectionSubtitleCurrencies':
-        return l10n.adminSectionSubtitleCurrencies;
-      case 'adminSectionSubtitleAds':
-        return l10n.adminSectionSubtitleAds;
-      case 'adminSectionSubtitleSettings':
-        return l10n.adminSectionSubtitleSettings;
-      case 'adminSectionSubtitleAuditLogs':
-        return l10n.adminSectionSubtitleAuditLogs;
-      case 'adminSectionSubtitleSuperAdmin':
-        return l10n.adminSectionSubtitleSuperAdmin;
-      default:
-        return null;
-    }
-  }
 }
 
 // ── Group header ──────────────────────────────────────────────────────────────
