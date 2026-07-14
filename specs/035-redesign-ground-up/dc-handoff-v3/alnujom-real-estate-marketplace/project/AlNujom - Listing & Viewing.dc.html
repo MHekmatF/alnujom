@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&family=Roboto:wght@400;500;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..0&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;scrollbar-width:none}
+html,body{margin:0;padding:0}
+body{background:#C7CBD3;font-family:'Roboto','Noto Sans Arabic',sans-serif}
+a{color:#1F4FE6;text-decoration:none}a:hover{opacity:.85}
+::-webkit-scrollbar{width:0;height:0;display:none}
+input,textarea{font-family:'Noto Sans Arabic',sans-serif}
+@keyframes scr{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
+@keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes pop{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:#C7CBD3;display:flex;flex-direction:column;align-items:center;padding:26px 16px 44px;gap:14px;direction:rtl">
+
+  <!-- DEMO CONTROL BAR -->
+  <div style="width:400px;max-width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px">
+    <div style="display:flex;align-items:center;gap:8px;color:#3A3E4A">
+      <span style="font-family:'Material Symbols Outlined';font-size:20px;line-height:1;color:#1F4FE6;font-variation-settings:'FILL' 1">add_home_work</span>
+      <span style="font-weight:700;font-size:13px;font-family:'Noto Sans Arabic',sans-serif;white-space:nowrap">النجوم — إضافة إعلان وحجز معاينة</span>
+    </div>
+    <sc-if value="{{ themeLight }}" hint-placeholder-val="{{ true }}">
+      <button onClick="{{ onDark }}" style="display:flex;align-items:center;gap:6px;border:1px solid #C1C5CE;background:#fff;border-radius:9px;padding:7px 12px;font-size:12px;font-weight:600;color:#3A3E4A;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif;white-space:nowrap"><span style="font-family:'Material Symbols Outlined';font-size:17px;line-height:1">dark_mode</span>الوضع الداكن</button>
+    </sc-if>
+    <sc-if value="{{ themeDark }}">
+      <button onClick="{{ onLight }}" style="display:flex;align-items:center;gap:6px;border:1px solid #3A3E4A;background:#20242E;border-radius:9px;padding:7px 12px;font-size:12px;font-weight:600;color:#E7E8ED;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif;white-space:nowrap"><span style="font-family:'Material Symbols Outlined';font-size:17px;line-height:1">light_mode</span>الوضع الفاتح</button>
+    </sc-if>
+  </div>
+  <div style="width:400px;max-width:100%;display:flex;flex-direction:column;gap:9px;background:#fff;border:1px solid #D3D7DF;border-radius:14px;padding:11px 12px">
+    <sc-for list="{{ navGroups }}" as="g" hint-placeholder-count="4">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <span style="font-size:10px;font-weight:700;color:#8A8F9C;letter-spacing:.4px;font-family:'Noto Sans Arabic',sans-serif">{{ g.label }}</span>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="5">
+            <sc-if value="{{ it.active }}">
+              <button onClick="{{ it.onClick }}" style="border:1px solid #1F4FE6;background:#E7ECFF;border-radius:100px;padding:6px 12px;font-size:12px;font-weight:700;color:#123287;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif;white-space:nowrap">{{ it.label }}</button>
+            </sc-if>
+            <sc-if value="{{ it.inactive }}">
+              <button onClick="{{ it.onClick }}" style="border:1px solid #D3D7DF;background:#fff;border-radius:100px;padding:6px 12px;font-size:12px;font-weight:600;color:#4A4F5C;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif;white-space:nowrap" style-active="background:#F2F4F9">{{ it.label }}</button>
+            </sc-if>
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- PHONE -->
+  <div ref="{{ rootRef }}" style="--bg:#EAEDF2;--surface:#FFFFFF;--surface2:#F2F4F9;--tonal:#E2E9FF;--onTonal:#123287;--sec:#DAE1F6;--onSec:#182C58;--on:#1A1C22;--onVar:#5B6070;--outline:#C6CAD6;--divider:#E7EAF1;--primary:#1F4FE6;--onPrimary:#FFFFFF;--header:#1A3FC4;--headerField:#FFFFFF;--green:#0E7A3C;--greenC:#E4F3E9;--onGreenC:#0A5A2C;--wa:#1FA855;--gold:#8A6912;--goldC:#FBEDC7;--red:#D93B3B;--redC:#FBE6E6;--onRedC:#B42318;--onRed:#FFFFFF;--scrim:rgba(15,18,30,0.42);position:relative;width:400px;height:842px;background:#0A0A0C;border-radius:46px;box-shadow:0 26px 64px rgba(15,23,42,.4),0 6px 16px rgba(0,0,0,.22);flex-shrink:0">
+    <div style="position:absolute;inset:11px;border-radius:35px;overflow:hidden;background:var(--bg);direction:rtl">
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column">
+      <div style="flex:1;position:relative;overflow:hidden">
+
+      <!-- =========================== OK CONTENT =========================== -->
+      <sc-if value="{{ isOk }}" hint-placeholder-val="{{ true }}">
+
+      <!-- ============ FLOW A · WIZARD ============ -->
+      <sc-if value="{{ isWizard }}">
+      <div data-screen-label="{{ stepTitle }}" style="position:absolute;inset:0;display:flex;flex-direction:column;animation:fade .2s ease;background:var(--bg)">
+        <div style="flex-shrink:0;background:var(--header);padding:34px 8px 16px">
+          <div style="display:flex;align-items:center;gap:4px">
+            <sc-if value="{{ canPrev }}"><button onClick="{{ onPrev }}" style="width:40px;height:40px;border:0;background:transparent;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0" style-active="background:rgba(255,255,255,.14)"><span style="font-family:'Material Symbols Outlined';font-size:24px;line-height:1;color:#fff">arrow_forward</span></button></sc-if>
+            <sc-if value="{{ stepFirst }}"><button style="width:40px;height:40px;border:0;background:transparent;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0" style-active="background:rgba(255,255,255,.14)"><span style="font-family:'Material Symbols Outlined';font-size:24px;line-height:1;color:#fff">close</span></button></sc-if>
+            <div style="flex:1;padding-inline-start:4px"><div style="font-size:18px;font-weight:700;color:#fff;font-family:'Noto Sans Arabic',sans-serif">{{ stepTitle }}</div></div>
+            <span style="font-size:12px;font-weight:600;color:rgba(255,255,255,.8);font-family:'Noto Sans Arabic',sans-serif;margin-inline-end:8px">الخطوة {{ stepNum }} من 7</span>
+          </div>
+          <div style="margin-top:12px;height:5px;border-radius:100px;background:rgba(255,255,255,.22);overflow:hidden;margin-inline:4px"><div style="height:100%;border-radius:100px;background:#fff;width:{{ stepPct }};transition:width .3s ease"></div></div>
+        </div>
+
+        <div style="flex:1;overflow-y:auto;overflow-x:hidden;background:var(--surface);border-radius:20px 20px 0 0;margin-top:-14px;position:relative;z-index:2;padding:18px 16px 22px">
+
+          <!-- STEP 1 · MODE -->
+          <sc-if value="{{ isStep1 }}">
+            <div style="animation:scr .25s ease">
+              <div style="font-size:15px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">كيف تريد إضافة إعلانك؟</div>
+              <div style="margin-top:6px;font-size:13px;color:var(--onVar);line-height:1.7;font-family:'Noto Sans Arabic',sans-serif">اختر الإدخال السريع لنشرٍ عاجل بأقل التفاصيل، أو المفصّل لإعلانٍ أكمل وأكثر ظهوراً.</div>
+              <div style="margin-top:16px;display:flex;flex-direction:column;gap:11px">
+                <sc-for list="{{ modes }}" as="m" hint-placeholder-count="2">
+                  <sc-if value="{{ m.on }}">
+                    <button onClick="{{ m.onClick }}" style="display:flex;align-items:center;gap:13px;text-align:right;border:1.5px solid var(--primary);background:var(--tonal);border-radius:16px;padding:15px 14px;cursor:pointer">
+                      <div style="width:46px;height:46px;border-radius:12px;background:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="font-family:'Material Symbols Outlined';font-size:24px;line-height:1;color:var(--onPrimary)">{{ m.icon }}</span></div>
+                      <div style="flex:1"><div style="font-size:15px;font-weight:700;color:var(--onTonal);font-family:'Noto Sans Arabic',sans-serif">{{ m.title }}</div><div style="margin-top:2px;font-size:12px;color:var(--onTonal);opacity:.85;font-family:'Noto Sans Arabic',sans-serif">{{ m.sub }}</div></div>
+                      <span style="font-family:'Material Symbols Outlined';font-size:24px;line-height:1;color:var(--primary);font-variation-settings:'FILL' 1">radio_button_checked</span>
+                    </button>
+                  </sc-if>
+                  <sc-if value="{{ m.off }}">
+                    <button onClick="{{ m.onClick }}" style="display:flex;align-items:center;gap:13px;text-align:right;border:1px solid var(--outline);background:var(--surface);border-radius:16px;padding:15px 14px;cursor:pointer" style-active="background:var(--surface2)">
+                      <div style="width:46px;height:46px;border-radius:12px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="font-family:'Material Symbols Outlined';font-size:24px;line-height:1;color:var(--onVar)">{{ m.icon }}</span></div>
+                      <div style="flex:1"><div style="font-size:15px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">{{ m.title }}</div><div style="margin-top:2px;font-size:12px;color:var(--onVar);font-family:'Noto Sans Arabic',sans-serif">{{ m.sub }}</div></div>
+                      <span style="font-family:'Material Symbols Outlined';font-size:24px;line-height:1;color:var(--outline)">radio_button_unchecked</span>
+                    </button>
+                  </sc-if>
+                </sc-for>
+              </div>
+              <div style="margin-top:16px;display:flex;align-items:center;gap:10px;background:var(--surface2);border-radius:12px;padding:12px 13px">
+                <span style="font-family:'Material Symbols Outlined';font-size:20px;line-height:1;color:var(--onVar)">bookmark</span>
+                <span style="flex:1;font-size:12px;color:var(--on);line-height:1.6;font-family:'Noto Sans Arabic',sans-serif">يمكنك التوقّف في أي خطوة و<strong>المتابعة كمسودة</strong> — سنحفظ تقدّمك تلقائياً.</span>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- STEP 2 · TYPE & PURPOSE -->
+          <sc-if value="{{ isStep2 }}">
+            <div style="animation:scr .25s ease">
+              <div style="font-size:13px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">نوع العقار</div>
+              <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">
+                <sc-for list="{{ ptypes }}" as="p" hint-placeholder-count="7">
+                  <sc-if value="{{ p.on }}"><button onClick="{{ p.onClick }}" style="display:flex;flex-direction:column;align-items:center;gap:7px;padding:14px 6px;border:1.5px solid var(--primary);background:var(--tonal);border-radius:14px;cursor:pointer"><span style="font-family:'Material Symbols Outlined';font-size:26px;line-height:1;color:var(--onTonal);font-variation-settings:'FILL' 1">{{ p.icon }}</span><span style="font-size:12px;font-weight:700;color:var(--onTonal);font-family:'Noto Sans Arabic',sans-serif">{{ p.label }}</span></button></sc-if>
+                  <sc-if value="{{ p.off }}"><button onClick="{{ p.onClick }}" style="display:flex;flex-direction:column;align-items:center;gap:7px;padding:14px 6px;border:1px solid var(--outline);background:var(--surface);border-radius:14px;cursor:pointer" style-active="background:var(--surface2)"><span style="font-family:'Material Symbols Outlined';font-size:26px;line-height:1;color:var(--onVar)">{{ p.icon }}</span><span style="font-size:12px;font-weight:600;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">{{ p.label }}</span></button></sc-if>
+                </sc-for>
+              </div>
+              <div style="margin-top:20px;font-size:13px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">الغرض</div>
+              <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+                <sc-for list="{{ purposes }}" as="p" hint-placeholder-count="3">
+                  <sc-if value="{{ p.on }}"><button onClick="{{ p.onClick }}" style="display:flex;align-items:center;gap:6px;height:40px;padding:0 16px;border:0;border-radius:100px;background:var(--sec);color:var(--onSec);font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif"><span style="font-family:'Material Symbols Outlined';font-size:17px;line-height:1">check</span>{{ p.label }}</button></sc-if>
+                  <sc-if value="{{ p.off }}"><button onClick="{{ p.onClick }}" style="height:40px;padding:0 16px;border:1px solid var(--outline);border-radius:100px;background:var(--surface);color:var(--on);font-size:13px;font-weight:600;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif" style-active="background:var(--surface2)">{{ p.label }}</button></sc-if>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- STEP 3 · CORE DETAILS -->
+          <sc-if value="{{ isStep3 }}">
+            <div style="animation:scr .25s ease;display:flex;flex-direction:column;gap:16px">
+              <div>
+                <div style="font-size:12px;font-weight:700;color:var(--onVar);font-family:'Noto Sans Arabic',sans-serif;margin-bottom:7px">السعر (دولار أمريكي)</div>
+                <div style="display:flex;align-items:center;border:1px solid var(--outline);border-radius:12px;background:var(--surface2);overflow:hidden">
+                  <button onClick="{{ onPriceDown }}" style="width:48px;height:52px;border:0;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0" style-active="background:var(--divider)"><span style="font-family:'Material Symbols Outlined';font-size:22px;line-height:1;color:var(--onVar)">remove</span></button>
+                  <div style="flex:1;text-align:center"><span style="font-size:22px;font-weight:700;color:var(--on);font-family:'Roboto',sans-serif">{{ priceUsd }}</span></div>
+                  <button onClick="{{ onPriceUp }}" style="width:48px;height:52px;border:0;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0" style-active="background:var(--divider)"><span style="font-family:'Material Symbols Outlined';font-size:22px;line-height:1;color:var(--onVar)">add</span></button>
+                </div>
+                <div style="margin-top:6px;display:flex;align-items:center;gap:5px;color:var(--onVar);font-size:12px;font-family:'Roboto',sans-serif"><span style="font-family:'Material Symbols Outlined';font-size:15px;line-height:1">sync_alt</span><span>≈ {{ priceSyp }} ل.س</span></div>
+              </div>
+              <div>
+                <div style="font-size:12px;font-weight:700;color:var(--onVar);font-family:'Noto Sans Arabic',sans-serif;margin-bottom:9px">التفاصيل</div>
+                <div style="display:flex;gap:9px">
+                  <sc-for list="{{ steppers }}" as="s" hint-placeholder-count="3">
+                    <div style="flex:1;border:1px solid var(--divider);border-radius:12px;background:var(--surface);padding:11px 8px;text-align:center">
+                      <span style="font-family:'Material Symbols Outlined';font-size:19px;line-height:1;color:var(--onVar)">{{ s.icon }}</span>
+                      <div style="margin-top:3px;font-size:11px;color:var(--onVar);font-family:'Noto Sans Arabic',sans-serif">{{ s.label }}</div>
+                      <div style="margin-top:8px;display:flex;align-items:center;justify-content:center;gap:9px">
+                        <button onClick="{{ s.onDown }}" style="width:28px;height:28px;border:1px solid var(--outline);border-radius:8px;background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer" style-active="background:var(--surface2)"><span style="font-family:'Material Symbols Outlined';font-size:16px;line-height:1;color:var(--on)">remove</span></button>
+                        <span style="min-width:26px;font-size:15px;font-weight:700;color:var(--on);font-family:'Roboto',sans-serif">{{ s.value }}</span>
+                        <button onClick="{{ s.onUp }}" style="width:28px;height:28px;border:1px solid var(--outline);border-radius:8px;background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer" style-active="background:var(--surface2)"><span style="font-family:'Material Symbols Outlined';font-size:16px;line-height:1;color:var(--on)">add</span></button>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="display:flex;gap:10px">
+                <div style="flex:1"><div style="font-size:12px;font-weight:700;color:var(--onVar);font-family:'Noto Sans Arabic',sans-serif;margin-bottom:7px">الطابق</div><input defaultValue="الرابع" style="width:100%;height:48px;border:1px solid var(--outline);border-radius:12px;background:var(--surface2);padding:0 14px;font-size:14px;color:var(--on);outline:none"></div>
+                <div style="flex:1"><div style="font-size:12px;font-weight:700;color:var(--onVar);font-family:'Noto Sans Arabic',sans-serif;margin-bottom:7px">المساحة (م²)</div><input defaultValue="170" style="width:100%;height:48px;border:1px solid var(--outline);border-radius:12px;background:var(--surface2);padding:0 14px;font-size:14px;color:var(--on);outline:none;font-family:'Roboto',sans-serif;direction:ltr;text-align:right"></div>
+              </div>
+              <div><div style="font-size:12px;font-weight:700;color:var(--onVar);font-family:'Noto Sans Arabic',sans-serif;margin-bottom:7px">عنوان الإعلان</div><input defaultValue="شقة مطلّة في المزة فيلات" style="width:100%;height:48px;border:1px solid var(--outline);border-radius:12px;background:var(--surface2);padding:0 14px;font-size:14px;color:var(--on);outline:none"></div>
+              <div><div style="font-size:12px;font-weight:700;color:var(--onVar);font-family:'Noto Sans Arabic',sans-serif;margin-bottom:7px">الوصف</div><textarea rows="4" style="width:100%;border:1px solid var(--outline);border-radius:12px;background:var(--surface2);padding:12px 14px;font-size:14px;color:var(--on);outline:none;resize:none;line-height:1.7">شقة مطلّة في المزة فيلات، ثلاث غرف نوم وصالون واسع، تشطيب حديث ومصعد وموقف خاص وتدفئة مركزية.</textarea></div>
+            </div>
+          </sc-if>
+
+          <!-- STEP 4 · LOCATION + GPS -->
+          <sc-if value="{{ isStep4 }}">
+            <div style="animation:scr .25s ease;display:flex;flex-direction:column;gap:14px">
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <sc-for list="{{ cascades }}" as="c" hint-placeholder-count="3">
+                  <button style="width:100%;height:50px;border:1px solid var(--outline);border-radius:12px;background:var(--surface2);padding:0 14px;display:flex;align-items:center;gap:11px;cursor:pointer" style-active="background:var(--divider)">
+                    <span style="font-family:'Material Symbols Outlined';font-size:20px;line-height:1;color:var(--onVar)">{{ c.icon }}</span>
+                    <div style="flex:1;text-align:right"><div style="font-size:10px;color:var(--onVar);font-family:'Noto Sans Arabic',sans-serif">{{ c.label }}</div><div style="font-size:14px;font-weight:600;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">{{ c.value }}</div></div>
+                    <span style="font-family:'Material Symbols Outlined';font-size:22px;line-height:1;color:var(--onVar)">expand_more</span>
+                  </button>
+                </sc-for>
+              </div>
+              <div>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;font-weight:700;color:var(--onVar);font-family:'Noto Sans Arabic',sans-serif">حدّد الموقع على الخريطة</span><span style="font-size:11px;color:var(--onVar);font-family:'Noto Sans Arabic',sans-serif">اسحب الدبّوس</span></div>
+                <div ref="{{ mapRef }}" onPointerDown="{{ onMapMove }}" onPointerMove="{{ onMapMove }}" style="position:relative;height:200px;border-radius:14px;overflow:hidden;background:var(--surface2);border:1px solid var(--divider);cursor:crosshair;touch-action:none">
+                  <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,transparent 0 27px,var(--divider) 27px 28px),repeating-linear-gradient(90deg,transparent 0 27px,var(--divider) 27px 28px);opacity:.7"></div>
+                  <div style="position:absolute;top:38%;left:-5%;width:110%;height:9px;background:var(--outline);opacity:.35;transform:rotate(-4deg)"></div>
+                  <div style="position:absolute;top:0;bottom:0;left:44%;width:9px;background:var(--outline);opacity:.35"></div>
+                  <div style="position:absolute;top:{{ pinTop }};left:{{ pinLeft }};transform:translate(-50%,-100%);pointer-events:none;display:flex;flex-direction:column;align-items:center"><span style="font-family:'Material Symbols Outlined';font-size:40px;line-height:1;color:var(--primary);font-variation-settings:'FILL' 1;filter:drop-shadow(0 3px 5px rgba(0,0,0,.35))">location_on</span></div>
+                  <div style="position:absolute;bottom:9px;inset-inline-start:9px;background:var(--surface);border:1px solid var(--divider);border-radius:9px;padding:5px 10px;font-size:11px;font-weight:600;color:var(--on);font-family:'Roboto',sans-serif;direction:ltr">{{ lat }}, {{ lng }}</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:11px;background:var(--tonal);border-radius:14px;padding:13px 14px;align-items:flex-start">
+                <span style="font-family:'Material Symbols Outlined';font-size:24px;line-height:1;color:var(--onTonal);flex-shrink:0;font-variation-settings:'FILL' 1">verified</span>
+                <div><div style="font-size:13px;font-weight:700;color:var(--onTonal);font-family:'Noto Sans Arabic',sans-serif">التوثيق الميداني</div><div style="margin-top:3px;font-size:12px;color:var(--onTonal);opacity:.9;line-height:1.7;font-family:'Noto Sans Arabic',sans-serif">يزور فريق النجوم العقار للتحقّق من الموقع والصور، فيحصل إعلانك على شارة «موثّق» تزيد ثقة المشترين.</div>
+                  <button style="margin-top:9px;height:34px;padding:0 14px;border:1px solid var(--onTonal);border-radius:100px;background:transparent;color:var(--onTonal);font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif" style-active="background:rgba(0,0,0,.05)">اطلب توثيقاً ميدانياً</button>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- STEP 5 · MEDIA -->
+          <sc-if value="{{ isStep5 }}">
+            <div style="animation:scr .25s ease;display:flex;flex-direction:column;gap:18px">
+              <div>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><span style="font-size:13px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">الصور</span><span style="font-size:11px;color:var(--onVar);font-family:'Noto Sans Arabic',sans-serif">اضغط صورة لجعلها الغلاف · اسحب لإعادة الترتيب</span></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+                  <sc-for list="{{ photos }}" as="p" hint-placeholder-count="6">
+                    <button onClick="{{ p.onCover }}" style="position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;border:0;padding:0;cursor:pointer;background:var(--surface2)">
+                      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="font-family:'Material Symbols Outlined';font-size:26px;line-height:1;color:var(--outline)">image</span></div>
+                      <sc-if value="{{ p.cover }}"><div style="position:absolute;inset:0;border:2.5px solid var(--primary);border-radius:12px"></div><span style="position:absolute;top:5px;inset-inline-start:5px;display:inline-flex;align-items:center;gap:3px;background:var(--primary);color:var(--onPrimary);padding:2px 7px;border-radius:6px;font-size:9px;font-weight:700;font-family:'Noto Sans Arabic',sans-serif"><span style="font-family:'Material Symbols Outlined';font-size:11px;line-height:1;font-variation-settings:'FILL' 1">star</span>الغلاف</span></sc-if>
+                      <span style="position:absolute;top:5px;inset-inline-end:5px;width:20px;height:20px;background:var(--scrim);border-radius:50%;display:flex;align-items:center;justify-content:center"><span style="font-family:'Material Symbols Outlined';font-size:13px;line-height:1;color:#fff">drag_indicator</span></span>
+                    </button>
+                  </sc-for>
+                  <button style="aspect-ratio:1;border:1.5px dashed var(--outline);border-radius:12px;background:var(--surface2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer" style-active="background:var(--divider)"><span style="font-family:'Material Symbols Outlined';font-size:24px;line-height:1;color:var(--primary)">add_a_photo</span><span style="font-size:10px;font-weight:700;color:var(--primary);font-family:'Noto Sans Arabic',sans-serif">إضافة</span></button>
+                </div>
+              </div>
+              <div>
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px"><span style="font-size:13px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">مقطع فيديو</span><span style="background:var(--goldC);color:var(--gold);padding:1px 7px;border-radius:6px;font-size:9px;font-weight:700;font-family:'Noto Sans Arabic',sans-serif">جديد</span></div>
+                <sc-if value="{{ vNone }}">
+                  <button onClick="{{ onUploadVideo }}" style="width:100%;height:120px;border:1.5px dashed var(--outline);border-radius:14px;background:var(--surface2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer" style-active="background:var(--divider)"><span style="font-family:'Material Symbols Outlined';font-size:32px;line-height:1;color:var(--onVar)">videocam</span><span style="font-size:12px;font-weight:600;color:var(--onVar);font-family:'Noto Sans Arabic',sans-serif">رفع فيديو · بجودة 720p</span></button>
+                </sc-if>
+                <sc-if value="{{ vUploading }}">
+                  <div style="border:1px solid var(--divider);border-radius:14px;background:var(--surface);padding:13px;display:flex;gap:12px;align-items:center">
+                    <div style="width:66px;height:56px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="font-family:'Material Symbols Outlined';font-size:24px;line-height:1;color:var(--onVar)">movie</span></div>
+                    <div style="flex:1;min-width:0">
+                      <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:13px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">جارٍ الرفع…</span><span style="font-size:12px;font-weight:700;color:var(--primary);font-family:'Roboto',sans-serif">{{ videoPct }}</span></div>
+                      <div style="margin-top:8px;height:7px;border-radius:100px;background:var(--surface2);overflow:hidden"><div style="height:100%;border-radius:100px;background:var(--primary);width:{{ videoPct }}"></div></div>
+                      <div style="margin-top:6px;font-size:11px;color:var(--onVar);font-family:'Roboto',sans-serif;direction:ltr;text-align:right">villa_tour.mp4 · 42 MB</div>
+                    </div>
+                    <button onClick="{{ onRemoveVideo }}" style="width:32px;height:32px;border:0;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0"><span style="font-family:'Material Symbols Outlined';font-size:20px;line-height:1;color:var(--onVar)">close</span></button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ vProcessing }}">
+                  <div style="border:1px solid var(--divider);border-radius:14px;background:var(--surface);padding:13px;display:flex;gap:12px;align-items:center">
+                    <div style="position:relative;width:66px;height:56px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="width:22px;height:22px;border:2.5px solid var(--divider);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite"></span></div>
+                    <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">جارٍ معالجة الفيديو…</div><div style="margin-top:3px;font-size:11px;color:var(--onVar);line-height:1.6;font-family:'Noto Sans Arabic',sans-serif">نُحضّر جودات العرض — يمكنك متابعة بقية الخطوات.</div></div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ vReady }}">
+                  <div style="border:1px solid var(--divider);border-radius:14px;background:var(--surface);padding:11px;display:flex;gap:12px;align-items:center">
+                    <div style="position:relative;width:66px;height:56px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="font-family:'Material Symbols Outlined';font-size:26px;line-height:1;color:var(--on);font-variation-settings:'FILL' 1">play_circle</span></div>
+                    <div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:5px"><span style="font-size:13px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">جاهز للنشر</span><span style="display:inline-flex;align-items:center;gap:2px;background:var(--greenC);color:var(--onGreenC);padding:1px 7px;border-radius:6px;font-size:9px;font-weight:700;font-family:'Noto Sans Arabic',sans-serif"><span style="font-family:'Material Symbols Outlined';font-size:11px;line-height:1;font-variation-settings:'FILL' 1">check_circle</span>720p</span></div><div style="margin-top:3px;font-size:11px;color:var(--onVar);font-family:'Roboto',sans-serif;direction:ltr;text-align:right">villa_tour.mp4 · 0:38</div></div>
+                    <button onClick="{{ onRemoveVideo }}" style="width:32px;height:32px;border:1px solid var(--outline);border-radius:9px;background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0" style-active="background:var(--surface2)"><span style="font-family:'Material Symbols Outlined';font-size:18px;line-height:1;color:var(--onVar)">delete</span></button>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- STEP 6 · ATTRIBUTES -->
+          <sc-if value="{{ isStep6 }}">
+            <div style="animation:scr .25s ease;display:flex;flex-direction:column;gap:18px">
+              <div>
+                <div style="font-size:13px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif;margin-bottom:10px">سند الملكية</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                  <sc-for list="{{ deeds }}" as="d" hint-placeholder-count="3">
+                    <sc-if value="{{ d.on }}"><button onClick="{{ d.onClick }}" style="height:38px;padding:0 15px;border:0;border-radius:100px;background:var(--sec);color:var(--onSec);font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif">{{ d.label }}</button></sc-if>
+                    <sc-if value="{{ d.off }}"><button onClick="{{ d.onClick }}" style="height:38px;padding:0 15px;border:1px solid var(--outline);border-radius:100px;background:var(--surface);color:var(--on);font-size:13px;font-weight:600;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif" style-active="background:var(--surface2)">{{ d.label }}</button></sc-if>
+                  </sc-for>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:13px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif;margin-bottom:10px">التشطيب</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                  <sc-for list="{{ finishes }}" as="d" hint-placeholder-count="4">
+                    <sc-if value="{{ d.on }}"><button onClick="{{ d.onClick }}" style="height:38px;padding:0 15px;border:0;border-radius:100px;background:var(--sec);color:var(--onSec);font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif">{{ d.label }}</button></sc-if>
+                    <sc-if value="{{ d.off }}"><button onClick="{{ d.onClick }}" style="height:38px;padding:0 15px;border:1px solid var(--outline);border-radius:100px;background:var(--surface);color:var(--on);font-size:13px;font-weight:600;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif" style-active="background:var(--surface2)">{{ d.label }}</button></sc-if>
+                  </sc-for>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:13px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif;margin-bottom:10px">الميزات</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                  <sc-for list="{{ amenities }}" as="a" hint-placeholder-count="8">
+                    <sc-if value="{{ a.on }}"><button onClick="{{ a.onClick }}" style="display:flex;align-items:center;gap:6px;height:38px;padding:0 14px;border:0;border-radius:100px;background:var(--sec);color:var(--onSec);font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif"><span style="font-family:'Material Symbols Outlined';font-size:16px;line-height:1">{{ a.icon }}</span>{{ a.label }}</button></sc-if>
+                    <sc-if value="{{ a.off }}"><button onClick="{{ a.onClick }}" style="display:flex;align-items:center;gap:6px;height:38px;padding:0 14px;border:1px solid var(--outline);border-radius:100px;background:var(--surface);color:var(--on);font-size:12px;font-weight:600;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif" style-active="background:var(--surface2)"><span style="font-family:'Material Symbols Outlined';font-size:16px;line-height:1;color:var(--onVar)">{{ a.icon }}</span>{{ a.label }}</button></sc-if>
+                  </sc-for>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:13px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif;margin-bottom:10px">الخصوصية</div>
+                <div style="background:var(--surface);border:1px solid var(--divider);border-radius:14px;overflow:hidden">
+                  <div style="display:flex;align-items:center;gap:12px;padding:13px 14px">
+                    <span style="font-family:'Material Symbols Outlined';font-size:21px;line-height:1;color:var(--onVar)">call</span>
+                    <div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">إظهار رقم الهاتف</div><div style="font-size:11px;color:var(--onVar);font-family:'Noto Sans Arabic',sans-serif;margin-top:1px">يظهر زر الاتصال وواتساب في الإعلان</div></div>
+                    <sc-if value="{{ contactVisible }}"><button onClick="{{ onToggleContact }}" style="width:46px;height:28px;border:0;border-radius:100px;background:var(--primary);padding:3px;cursor:pointer;display:flex;justify-content:flex-end;flex-shrink:0"><span style="width:22px;height:22px;border-radius:50%;background:#fff"></span></button></sc-if>
+                    <sc-if value="{{ contactHidden }}"><button onClick="{{ onToggleContact }}" style="width:46px;height:28px;border:0;border-radius:100px;background:var(--outline);padding:3px;cursor:pointer;display:flex;justify-content:flex-start;flex-shrink:0"><span style="width:22px;height:22px;border-radius:50%;background:var(--surface)"></span></button></sc-if>
+                  </div>
+                  <div style="height:1px;background:var(--divider)"></div>
+                  <div style="display:flex;align-items:center;gap:12px;padding:13px 14px">
+                    <span style="font-family:'Material Symbols Outlined';font-size:21px;line-height:1;color:var(--onVar)">badge</span>
+                    <div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">إظهار الاسم</div><div style="font-size:11px;color:var(--onVar);font-family:'Noto Sans Arabic',sans-serif;margin-top:1px">أو النشر باسم المكتب فقط</div></div>
+                    <sc-if value="{{ nameVisible }}"><button onClick="{{ onToggleName }}" style="width:46px;height:28px;border:0;border-radius:100px;background:var(--primary);padding:3px;cursor:pointer;display:flex;justify-content:flex-end;flex-shrink:0"><span style="width:22px;height:22px;border-radius:50%;background:#fff"></span></button></sc-if>
+                    <sc-if value="{{ nameHidden }}"><button onClick="{{ onToggleName }}" style="width:46px;height:28px;border:0;border-radius:100px;background:var(--outline);padding:3px;cursor:pointer;display:flex;justify-content:flex-start;flex-shrink:0"><span style="width:22px;height:22px;border-radius:50%;background:var(--surface)"></span></button></sc-if>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- STEP 7 · REVIEW -->
+          <sc-if value="{{ isStep7 }}">
+            <div style="animation:scr .25s ease">
+              <div style="border:1px solid var(--divider);border-radius:16px;overflow:hidden;background:var(--surface)">
+                <div style="height:120px;background:var(--surface2);display:flex;align-items:center;justify-content:center;position:relative"><span style="font-family:'Material Symbols Outlined';font-size:34px;line-height:1;color:var(--outline)">image</span><span style="position:absolute;bottom:8px;inset-inline-end:8px;background:var(--scrim);color:#fff;padding:2px 9px;border-radius:100px;font-size:10px;font-weight:700;font-family:'Roboto',sans-serif">6 + فيديو</span></div>
+                <div style="padding:13px 14px">
+                  <div style="font-size:20px;font-weight:700;color:var(--on);font-family:'Roboto',sans-serif">{{ priceUsd }}</div>
+                  <div style="margin-top:4px;font-size:14px;font-weight:600;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">{{ reviewTitle }}</div>
+                  <div style="margin-top:12px;display:flex;flex-direction:column;gap:2px">
+                    <sc-for list="{{ summary }}" as="r" hint-placeholder-count="6">
+                      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--divider)">
+                        <span style="font-family:'Material Symbols Outlined';font-size:18px;line-height:1;color:var(--onVar)">{{ r.icon }}</span>
+                        <span style="flex:1;font-size:12px;color:var(--onVar);font-family:'Noto Sans Arabic',sans-serif">{{ r.label }}</span>
+                        <span style="font-size:13px;font-weight:600;color:var(--on);font-family:'Noto Sans Arabic',sans-serif;text-align:left">{{ r.value }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+              <div style="margin-top:14px;display:flex;gap:11px;background:var(--surface2);border-radius:14px;padding:13px 14px;align-items:flex-start">
+                <span style="font-family:'Material Symbols Outlined';font-size:22px;line-height:1;color:var(--onVar);flex-shrink:0">verified_user</span>
+                <div style="font-size:12px;color:var(--on);line-height:1.7;font-family:'Noto Sans Arabic',sans-serif"><strong>يُنشر بعد المراجعة.</strong> يراجع فريق النجوم الإعلان للتأكد من مطابقته للشروط، وعادةً يُعتمد خلال ساعات.</div>
+              </div>
+            </div>
+          </sc-if>
+
+        </div>
+
+        <div style="flex-shrink:0;background:var(--surface);border-top:1px solid var(--divider);padding:11px 14px 18px;display:flex;align-items:center;gap:9px">
+          <sc-if value="{{ stepFirst }}"><button style="height:48px;padding:0 16px;border:1px solid var(--outline);border-radius:100px;background:transparent;color:var(--on);font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif;display:flex;align-items:center;gap:6px" style-active="background:var(--surface2)"><span style="font-family:'Material Symbols Outlined';font-size:18px;line-height:1">bookmark</span>مسودة</button></sc-if>
+          <sc-if value="{{ canPrev }}"><button onClick="{{ onPrev }}" style="flex:1;height:48px;border:1px solid var(--outline);border-radius:100px;background:transparent;color:var(--on);font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif" style-active="background:var(--surface2)">السابق</button></sc-if>
+          <sc-if value="{{ notLast }}"><button onClick="{{ onNext }}" style="flex:2;height:48px;border:0;border-radius:100px;background:var(--primary);color:var(--onPrimary);font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px" style-active="transform:scale(.98)">التالي<span style="font-family:'Material Symbols Outlined';font-size:19px;line-height:1">arrow_back</span></button></sc-if>
+          <sc-if value="{{ stepLast }}"><button onClick="{{ onPublish }}" style="flex:2;height:48px;border:0;border-radius:100px;background:var(--primary);color:var(--onPrimary);font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px" style-active="transform:scale(.98)"><span style="font-family:'Material Symbols Outlined';font-size:19px;line-height:1">publish</span>نشر الإعلان</button></sc-if>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ============ FLOW A · SUCCESS ============ -->
+      <sc-if value="{{ isSuccess }}">
+      <div data-screen-label="تم النشر" style="position:absolute;inset:0;display:flex;flex-direction:column;animation:fade .25s ease;background:var(--bg)">
+        <div style="flex:1;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 26px;text-align:center">
+          <div style="width:104px;height:104px;border-radius:50%;background:var(--greenC);display:flex;align-items:center;justify-content:center;animation:pop .45s ease"><span style="font-family:'Material Symbols Outlined';font-size:56px;line-height:1;color:var(--onGreenC);font-variation-settings:'FILL' 1">check_circle</span></div>
+          <div style="margin-top:22px;font-size:21px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">تم استلام إعلانك</div>
+          <div style="margin-top:9px;font-size:14px;color:var(--onVar);line-height:1.8;font-family:'Noto Sans Arabic',sans-serif;max-width:280px">إعلانك «شقة مطلّة في المزة فيلات» قيد المراجعة الآن. سنُعلمك فور اعتماده — عادةً خلال ساعات قليلة.</div>
+          <div style="margin-top:20px;display:inline-flex;align-items:center;gap:6px;background:var(--surface2);color:var(--on);padding:7px 14px;border-radius:100px;font-size:12px;font-weight:700;font-family:'Noto Sans Arabic',sans-serif"><span style="font-family:'Material Symbols Outlined';font-size:16px;line-height:1;color:var(--onVar)">hourglass_top</span>قيد المراجعة · رقم ‎#5821</div>
+        </div>
+        <div style="flex-shrink:0;background:var(--surface);border-top:1px solid var(--divider);padding:13px 14px 20px;display:flex;flex-direction:column;gap:9px">
+          <button style="width:100%;height:48px;border:0;border-radius:100px;background:var(--primary);color:var(--onPrimary);font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif" style-active="transform:scale(.98)">عرض إعلاناتي</button>
+          <button onClick="{{ onGoWizard }}" style="width:100%;height:48px;border:1px solid var(--outline);border-radius:100px;background:transparent;color:var(--on);font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif" style-active="background:var(--surface2)">إضافة إعلان آخر</button>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ============ FLOW A · EDIT WITH REVISION ============ -->
+      <sc-if value="{{ isEditRevision }}">
+      <div data-screen-label="تعديل بمراجعة" style="position:absolute;inset:0;display:flex;flex-direction:column;animation:scr .2s ease;background:var(--bg)">
+        <div style="flex-shrink:0;background:var(--header);padding:34px 8px 16px;display:flex;align-items:center;gap:4px">
+          <button onClick="{{ onGoWizard }}" style="width:40px;height:40px;border:0;background:transparent;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0" style-active="background:rgba(255,255,255,.14)"><span style="font-family:'Material Symbols Outlined';font-size:24px;line-height:1;color:#fff">arrow_forward</span></button>
+          <span style="flex:1;font-size:18px;font-weight:700;color:#fff;font-family:'Noto Sans Arabic',sans-serif;padding-inline-start:4px">تعديل الإعلان</span>
+        </div>
+        <div style="flex:1;overflow-y:auto;overflow-x:hidden;background:var(--surface);border-radius:20px 20px 0 0;margin-top:-14px;position:relative;z-index:2;padding:16px 14px 20px">
+          <div style="display:flex;gap:11px;background:var(--sec);border-radius:14px;padding:13px 14px;align-items:flex-start">
+            <span style="font-family:'Material Symbols Outlined';font-size:23px;line-height:1;color:var(--onSec);flex-shrink:0">published_with_changes</span>
+            <div><div style="font-size:13px;font-weight:700;color:var(--onSec);font-family:'Noto Sans Arabic',sans-serif">التعديلات قيد المراجعة</div><div style="margin-top:3px;font-size:12px;color:var(--onSec);opacity:.9;line-height:1.7;font-family:'Noto Sans Arabic',sans-serif">يبقى الإعلان منشوراً بنسخته الحالية حتى تُعتمد تغييراتك، فلا تفقد ظهورك أثناء المراجعة.</div></div>
+          </div>
+          <div style="margin-top:14px;font-size:13px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">التغييرات المقترحة</div>
+          <div style="margin-top:11px;display:flex;flex-direction:column;gap:11px">
+            <sc-for list="{{ diffRows }}" as="d" hint-placeholder-count="3">
+              <div style="background:var(--surface);border:1px solid var(--divider);border-radius:14px;padding:12px 13px">
+                <div style="font-size:12px;font-weight:700;color:var(--onVar);font-family:'Noto Sans Arabic',sans-serif;margin-bottom:9px">{{ d.label }}</div>
+                <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:7px"><span style="font-family:'Material Symbols Outlined';font-size:16px;line-height:1.4;color:var(--onRedC);flex-shrink:0">remove</span><span style="flex:1;font-size:13px;color:var(--onRedC);text-decoration:line-through;text-decoration-color:var(--red);line-height:1.6;font-family:'Noto Sans Arabic',sans-serif">{{ d.old }}</span></div>
+                <div style="display:flex;align-items:flex-start;gap:8px;background:var(--greenC);border-radius:9px;padding:7px 9px"><span style="font-family:'Material Symbols Outlined';font-size:16px;line-height:1.4;color:var(--onGreenC);flex-shrink:0">add</span><span style="flex:1;font-size:13px;font-weight:600;color:var(--onGreenC);line-height:1.6;font-family:'Noto Sans Arabic',sans-serif">{{ d.new }}</span></div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="margin-top:14px;display:flex;align-items:center;gap:9px;background:var(--surface2);border-radius:12px;padding:11px 13px"><span style="font-family:'Material Symbols Outlined';font-size:19px;line-height:1;color:var(--onVar)">schedule</span><span style="flex:1;font-size:12px;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">أُرسلت التعديلات منذ 12 دقيقة — بانتظار مراجعة المشرف.</span></div>
+        </div>
+        <div style="flex-shrink:0;background:var(--surface);border-top:1px solid var(--divider);padding:11px 14px 18px;display:flex;gap:9px">
+          <button style="flex:1;height:48px;border:1px solid var(--outline);border-radius:100px;background:transparent;color:var(--on);font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif" style-active="background:var(--surface2)">سحب التعديلات</button>
+          <button onClick="{{ onGoWizard }}" style="flex:2;height:48px;border:0;border-radius:100px;background:var(--primary);color:var(--onPrimary);font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px" style-active="transform:scale(.98)"><span style="font-family:'Material Symbols Outlined';font-size:19px;line-height:1">edit</span>متابعة التعديل</button>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ============ FLOW B · REQUEST-A-VIEWING SHEET ============ -->
+      <sc-if value="{{ isBookSheet }}">
+      <div data-screen-label="طلب معاينة" style="position:absolute;inset:0;animation:fade .2s ease">
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg)">
+          <div style="flex-shrink:0;background:var(--header);padding:34px 8px 16px;display:flex;align-items:center;gap:4px">
+            <button style="width:40px;height:40px;border:0;background:transparent;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0" style-active="background:rgba(255,255,255,.14)"><span style="font-family:'Material Symbols Outlined';font-size:24px;line-height:1;color:#fff">arrow_forward</span></button>
+            <span style="flex:1;font-size:18px;font-weight:700;color:#fff;font-family:'Noto Sans Arabic',sans-serif;padding-inline-start:4px">تفاصيل العقار</span>
+          </div>
+          <div style="flex:1;overflow:hidden;background:var(--surface);border-radius:20px 20px 0 0;margin-top:-14px;position:relative;z-index:2;padding:16px 14px">
+            <div style="height:150px;border-radius:14px;background:var(--surface2);display:flex;align-items:center;justify-content:center"><span style="font-family:'Material Symbols Outlined';font-size:36px;line-height:1;color:var(--outline)">apartment</span></div>
+            <div style="margin-top:12px;font-size:20px;font-weight:700;color:var(--on);font-family:'Roboto',sans-serif">$120,000</div>
+            <div style="margin-top:4px;font-size:14px;font-weight:600;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">شقة مطلّة في المزة فيلات</div>
+            <div style="margin-top:4px;display:flex;align-items:center;gap:5px;color:var(--onVar);font-size:12px;font-family:'Noto Sans Arabic',sans-serif"><span style="font-family:'Material Symbols Outlined';font-size:15px;line-height:1">location_on</span>المزة، دمشق</div>
+          </div>
+        </div>
+        <div style="position:absolute;inset:0;background:var(--scrim)"></div>
+
+        <sc-if value="{{ notBooked }}">
+        <div style="position:absolute;inset-inline:0;bottom:0;background:var(--surface);border-radius:22px 22px 0 0;padding:8px 16px 22px;animation:sheetUp .3s cubic-bezier(.2,.8,.2,1);max-height:92%;overflow-y:auto;box-shadow:0 -8px 30px rgba(0,0,0,.2)">
+          <div style="width:38px;height:4px;border-radius:100px;background:var(--outline);margin:4px auto 14px"></div>
+          <div style="display:flex;align-items:center;gap:10px;padding-bottom:6px">
+            <div style="width:44px;height:44px;border-radius:11px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="font-family:'Material Symbols Outlined';font-size:22px;line-height:1;color:var(--outline)">apartment</span></div>
+            <div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">طلب معاينة</div><div style="font-size:12px;color:var(--onVar);font-family:'Noto Sans Arabic',sans-serif">شقة في المزة فيلات · مكتب الشام العقاري</div></div>
+          </div>
+          <div style="margin-top:14px;font-size:13px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">اختر اليوم</div>
+          <div style="margin-top:10px;display:flex;gap:8px;overflow-x:auto;padding-bottom:4px">
+            <sc-for list="{{ days }}" as="d" hint-placeholder-count="8">
+              <sc-if value="{{ d.on }}"><button onClick="{{ d.onClick }}" style="flex-shrink:0;width:58px;padding:9px 0;border:0;border-radius:14px;background:var(--primary);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px"><span style="font-size:11px;font-weight:600;color:var(--onPrimary);opacity:.85;font-family:'Noto Sans Arabic',sans-serif">{{ d.dow }}</span><span style="font-size:18px;font-weight:700;color:var(--onPrimary);font-family:'Roboto',sans-serif">{{ d.num }}</span></button></sc-if>
+              <sc-if value="{{ d.off }}"><button onClick="{{ d.onClick }}" style="flex-shrink:0;width:58px;padding:9px 0;border:1px solid var(--outline);border-radius:14px;background:var(--surface);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px" style-active="background:var(--surface2)"><span style="font-size:11px;font-weight:600;color:var(--onVar);font-family:'Noto Sans Arabic',sans-serif">{{ d.dow }}</span><span style="font-size:18px;font-weight:700;color:var(--on);font-family:'Roboto',sans-serif">{{ d.num }}</span></button></sc-if>
+            </sc-for>
+          </div>
+          <div style="margin-top:16px;font-size:13px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">اختر الفترة</div>
+          <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <sc-for list="{{ slots }}" as="sl" hint-placeholder-count="4">
+              <sc-if value="{{ sl.on }}"><button onClick="{{ sl.onClick }}" style="border:1.5px solid var(--primary);background:var(--tonal);border-radius:12px;padding:11px;cursor:pointer;text-align:right"><div style="font-size:13px;font-weight:700;color:var(--onTonal);font-family:'Noto Sans Arabic',sans-serif">{{ sl.label }}</div><div style="margin-top:2px;font-size:11px;color:var(--onTonal);opacity:.8;font-family:'Roboto',sans-serif;direction:ltr;text-align:right">{{ sl.range }}</div></button></sc-if>
+              <sc-if value="{{ sl.off }}"><button onClick="{{ sl.onClick }}" style="border:1px solid var(--outline);background:var(--surface);border-radius:12px;padding:11px;cursor:pointer;text-align:right" style-active="background:var(--surface2)"><div style="font-size:13px;font-weight:600;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">{{ sl.label }}</div><div style="margin-top:2px;font-size:11px;color:var(--onVar);font-family:'Roboto',sans-serif;direction:ltr;text-align:right">{{ sl.range }}</div></button></sc-if>
+            </sc-for>
+          </div>
+          <div style="margin-top:16px;font-size:13px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">ملاحظة (اختياري)</div>
+          <textarea rows="2" placeholder="مثال: أفضّل المعاينة بعد صلاة العصر" style="margin-top:9px;width:100%;border:1px solid var(--outline);border-radius:12px;background:var(--surface2);padding:11px 13px;font-size:13px;color:var(--on);outline:none;resize:none;line-height:1.7"></textarea>
+          <button onClick="{{ onConfirmBook }}" style="margin-top:16px;width:100%;height:50px;border:0;border-radius:100px;background:var(--primary);color:var(--onPrimary);font-size:15px;font-weight:700;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif" style-active="transform:scale(.98)">تأكيد الطلب</button>
+        </div>
+        </sc-if>
+
+        <sc-if value="{{ booked }}">
+        <div style="position:absolute;inset-inline:0;bottom:0;background:var(--surface);border-radius:22px 22px 0 0;padding:26px 22px 24px;animation:sheetUp .3s cubic-bezier(.2,.8,.2,1);text-align:center;box-shadow:0 -8px 30px rgba(0,0,0,.2)">
+          <div style="width:80px;height:80px;border-radius:50%;background:var(--greenC);display:flex;align-items:center;justify-content:center;margin:0 auto;animation:pop .45s ease"><span style="font-family:'Material Symbols Outlined';font-size:44px;line-height:1;color:var(--onGreenC);font-variation-settings:'FILL' 1">event_available</span></div>
+          <div style="margin-top:18px;font-size:19px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">تم إرسال الطلب</div>
+          <div style="margin-top:8px;font-size:13px;color:var(--onVar);line-height:1.7;font-family:'Noto Sans Arabic',sans-serif">أرسلنا طلب المعاينة إلى الناشر — سيؤكّد الموعد قريباً.</div>
+          <div style="margin-top:16px;display:inline-flex;align-items:center;gap:7px;background:var(--surface2);border-radius:100px;padding:9px 16px;font-size:13px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif"><span style="font-family:'Material Symbols Outlined';font-size:18px;line-height:1;color:var(--primary)">event</span>{{ bookSummary }}</div>
+          <div style="margin-top:20px;display:flex;gap:9px">
+            <button onClick="{{ onResetBook }}" style="flex:1;height:46px;border:1px solid var(--outline);border-radius:100px;background:transparent;color:var(--on);font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif" style-active="background:var(--surface2)">تعديل الطلب</button>
+            <button onClick="{{ onGoViewings }}" style="flex:1;height:46px;border:0;border-radius:100px;background:var(--primary);color:var(--onPrimary);font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif" style-active="transform:scale(.98)">معايناتي</button>
+          </div>
+        </div>
+        </sc-if>
+      </div>
+      </sc-if>
+
+      <!-- ============ FLOW B · MY VIEWINGS ============ -->
+      <sc-if value="{{ isMyViewings }}">
+      <div data-screen-label="معايناتي" style="position:absolute;inset:0;display:flex;flex-direction:column;animation:scr .2s ease">
+        <div style="flex:1;overflow-y:auto;overflow-x:hidden;background:var(--bg)">
+          <div style="position:sticky;top:0;z-index:20;background:var(--header);padding:34px 8px 16px;display:flex;align-items:center;gap:4px">
+            <button style="width:40px;height:40px;border:0;background:transparent;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0" style-active="background:rgba(255,255,255,.14)"><span style="font-family:'Material Symbols Outlined';font-size:24px;line-height:1;color:#fff">arrow_forward</span></button>
+            <span style="flex:1;font-size:19px;font-weight:700;color:#fff;font-family:'Noto Sans Arabic',sans-serif;padding-inline-start:4px">معايناتي</span>
+          </div>
+          <div style="background:var(--surface);border-radius:20px 20px 0 0;min-height:100%;padding:13px 14px 24px;display:flex;flex-direction:column;gap:11px">
+            <sc-for list="{{ viewings }}" as="v" hint-placeholder-count="4">
+              <div style="background:var(--surface);border:1px solid var(--divider);border-radius:14px;overflow:hidden">
+                <div style="display:flex;gap:11px;padding:11px">
+                  <div style="width:74px;height:74px;border-radius:11px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="font-family:'Material Symbols Outlined';font-size:28px;line-height:1;color:var(--outline)">{{ v.icon }}</span></div>
+                  <div style="flex:1;min-width:0">
+                    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+                      <span style="font-size:13px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif;line-height:1.4;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden">{{ v.title }}</span>
+                      <sc-if value="{{ v.tGreen }}"><span style="display:inline-flex;align-items:center;gap:3px;background:var(--greenC);color:var(--onGreenC);padding:3px 8px;border-radius:7px;font-size:10px;font-weight:700;font-family:'Noto Sans Arabic',sans-serif;white-space:nowrap;flex-shrink:0"><span style="font-family:'Material Symbols Outlined';font-size:12px;line-height:1;font-variation-settings:'FILL' 1">{{ v.chipIcon }}</span>{{ v.chipLabel }}</span></sc-if>
+                      <sc-if value="{{ v.tNeutral }}"><span style="display:inline-flex;align-items:center;gap:3px;background:var(--surface2);color:var(--onVar);padding:3px 8px;border-radius:7px;font-size:10px;font-weight:700;font-family:'Noto Sans Arabic',sans-serif;white-space:nowrap;flex-shrink:0"><span style="font-family:'Material Symbols Outlined';font-size:12px;line-height:1">{{ v.chipIcon }}</span>{{ v.chipLabel }}</span></sc-if>
+                      <sc-if value="{{ v.tBlue }}"><span style="display:inline-flex;align-items:center;gap:3px;background:var(--tonal);color:var(--onTonal);padding:3px 8px;border-radius:7px;font-size:10px;font-weight:700;font-family:'Noto Sans Arabic',sans-serif;white-space:nowrap;flex-shrink:0"><span style="font-family:'Material Symbols Outlined';font-size:12px;line-height:1">{{ v.chipIcon }}</span>{{ v.chipLabel }}</span></sc-if>
+                      <sc-if value="{{ v.tRed }}"><span style="display:inline-flex;align-items:center;gap:3px;background:var(--redC);color:var(--onRedC);padding:3px 8px;border-radius:7px;font-size:10px;font-weight:700;font-family:'Noto Sans Arabic',sans-serif;white-space:nowrap;flex-shrink:0"><span style="font-family:'Material Symbols Outlined';font-size:12px;line-height:1">{{ v.chipIcon }}</span>{{ v.chipLabel }}</span></sc-if>
+                    </div>
+                    <div style="margin-top:5px;font-size:15px;font-weight:700;color:var(--on);font-family:'Roboto',sans-serif">{{ v.price }}</div>
+                    <div style="margin-top:5px;display:flex;align-items:center;gap:10px;color:var(--onVar);font-size:11px;font-family:'Noto Sans Arabic',sans-serif">
+                      <span style="display:inline-flex;align-items:center;gap:3px"><span style="font-family:'Material Symbols Outlined';font-size:13px;line-height:1">event</span>{{ v.date }}</span>
+                      <span style="display:inline-flex;align-items:center;gap:3px;font-family:'Roboto',sans-serif;direction:ltr"><span style="font-family:'Material Symbols Outlined';font-size:13px;line-height:1">schedule</span>{{ v.time }}</span>
+                    </div>
+                  </div>
+                </div>
+                <div style="height:1px;background:var(--divider)"></div>
+                <div style="display:flex;align-items:center;gap:9px;padding:9px 12px">
+                  <span style="flex:1;display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--onVar);font-family:'Noto Sans Arabic',sans-serif"><span style="font-family:'Material Symbols Outlined';font-size:15px;line-height:1">storefront</span>{{ v.pub }}</span>
+                  <button style="width:36px;height:36px;border:1px solid var(--outline);border-radius:50%;background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer" style-active="background:var(--surface2)"><span style="font-family:'Material Symbols Outlined';font-size:18px;line-height:1;color:var(--primary)">call</span></button>
+                  <button style="height:36px;padding:0 13px;border:0;border-radius:100px;background:var(--wa);color:#fff;display:flex;align-items:center;gap:5px;cursor:pointer;font-size:12px;font-weight:700;font-family:'Noto Sans Arabic',sans-serif" style-active="transform:scale(.97)"><span style="font-family:'Material Symbols Outlined';font-size:16px;line-height:1">chat</span>واتساب</button>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+
+      </sc-if>
+      <!-- =========================== NON-OK STATES =========================== -->
+      <sc-if value="{{ notOk }}">
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;animation:fade .2s ease">
+        <div style="flex:1;overflow-y:auto;overflow-x:hidden;background:var(--bg)">
+          <div style="background:var(--header);padding:34px 12px 16px;display:flex;align-items:center;gap:6px">
+            <button onClick="{{ onResetState }}" style="width:40px;height:40px;border:0;background:transparent;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0" style-active="background:rgba(255,255,255,.14)"><span style="font-family:'Material Symbols Outlined';font-size:24px;line-height:1;color:#fff">arrow_forward</span></button>
+            <span style="font-size:18px;font-weight:700;color:#fff;font-family:'Noto Sans Arabic',sans-serif;padding-inline-start:4px">{{ stepTitle }}</span>
+          </div>
+          <div style="background:var(--surface);border-radius:20px 20px 0 0;margin-top:-14px;min-height:100%;position:relative;z-index:2">
+            <sc-if value="{{ isLoading }}">
+              <div style="padding:16px;display:flex;flex-direction:column;gap:13px">
+                <div style="height:52px;border-radius:12px;background:linear-gradient(90deg,var(--surface2) 25%,var(--divider) 37%,var(--surface2) 63%);background-size:400% 100%;animation:shim 1.4s ease infinite"></div>
+                <div style="height:112px;border-radius:12px;background:linear-gradient(90deg,var(--surface2) 25%,var(--divider) 37%,var(--surface2) 63%);background-size:400% 100%;animation:shim 1.4s ease infinite"></div>
+                <div style="display:flex;gap:9px"><div style="flex:1;height:84px;border-radius:12px;background:linear-gradient(90deg,var(--surface2) 25%,var(--divider) 37%,var(--surface2) 63%);background-size:400% 100%;animation:shim 1.4s ease infinite"></div><div style="flex:1;height:84px;border-radius:12px;background:linear-gradient(90deg,var(--surface2) 25%,var(--divider) 37%,var(--surface2) 63%);background-size:400% 100%;animation:shim 1.4s ease infinite"></div><div style="flex:1;height:84px;border-radius:12px;background:linear-gradient(90deg,var(--surface2) 25%,var(--divider) 37%,var(--surface2) 63%);background-size:400% 100%;animation:shim 1.4s ease infinite"></div></div>
+                <div style="height:150px;border-radius:12px;background:linear-gradient(90deg,var(--surface2) 25%,var(--divider) 37%,var(--surface2) 63%);background-size:400% 100%;animation:shim 1.4s ease infinite"></div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ isEmpty }}">
+              <div style="padding:60px 32px;display:flex;flex-direction:column;align-items:center;text-align:center">
+                <div style="width:88px;height:88px;border-radius:50%;background:var(--tonal);display:flex;align-items:center;justify-content:center;margin-bottom:20px"><span style="font-family:'Material Symbols Outlined';font-size:44px;line-height:1;color:var(--onTonal)">event_busy</span></div>
+                <div style="font-size:18px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">لا معاينات بعد</div>
+                <div style="margin-top:8px;font-size:14px;color:var(--onVar);line-height:1.7;font-family:'Noto Sans Arabic',sans-serif">عندما تطلب معاينة لعقارٍ ما ستظهر هنا مع حالتها وموعدها.</div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ isError }}">
+              <div style="padding:60px 32px;display:flex;flex-direction:column;align-items:center;text-align:center">
+                <div style="width:88px;height:88px;border-radius:50%;background:var(--redC);display:flex;align-items:center;justify-content:center;margin-bottom:20px"><span style="font-family:'Material Symbols Outlined';font-size:44px;line-height:1;color:var(--onRedC)">cloud_off</span></div>
+                <div style="font-size:18px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">تعذّر حفظ التغييرات</div>
+                <div style="margin-top:8px;font-size:14px;color:var(--onVar);line-height:1.7;font-family:'Noto Sans Arabic',sans-serif">حدث خطأ في الاتصال بالخادم. تحقّق من الشبكة وحاول مرة أخرى.</div>
+                <button onClick="{{ onResetState }}" style="margin-top:22px;display:flex;align-items:center;gap:7px;height:46px;padding:0 24px;border:0;border-radius:100px;background:var(--primary);color:var(--onPrimary);font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif" style-active="transform:scale(.98)"><span style="font-family:'Material Symbols Outlined';font-size:20px;line-height:1">refresh</span>إعادة المحاولة</button>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      </div>
+    </div>
+    </div>
+  </div>
+
+  <!-- ============ LIGHT / DARK GALLERY ============ -->
+  <div style="width:400px;max-width:100%;margin-top:8px">
+    <div style="display:flex;align-items:center;gap:7px;margin-bottom:12px;color:#3A3E4A"><span style="font-family:'Material Symbols Outlined';font-size:18px;line-height:1;color:#1F4FE6">contrast</span><span style="font-weight:700;font-size:13px;font-family:'Noto Sans Arabic',sans-serif">معاينة الوضعين — الفاتح والداكن</span></div>
+    <div style="display:flex;flex-direction:column;gap:18px">
+
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#8A8F9C;margin-bottom:8px;font-family:'Noto Sans Arabic',sans-serif">مراجعة ونشر</div>
+        <div style="display:flex;gap:12px">
+          <div style="flex:1;--surface:#FFFFFF;--surface2:#F2F4F9;--on:#1A1C22;--onVar:#5B6070;--divider:#E7EAF1;--primary:#1F4FE6;--header:#1A3FC4;--outline:#C6CAD6;border:1px solid #D3D7DF;border-radius:16px;overflow:hidden">
+            <div style="background:var(--header);padding:12px;color:#fff;display:flex;align-items:center;gap:6px"><span style="font-family:'Material Symbols Outlined';font-size:16px;line-height:1">fact_check</span><span style="font-size:12px;font-weight:700;font-family:'Noto Sans Arabic',sans-serif">مراجعة ونشر</span></div>
+            <div style="background:var(--surface);padding:11px"><div style="height:52px;border-radius:9px;background:var(--surface2);display:flex;align-items:center;justify-content:center"><span style="font-family:'Material Symbols Outlined';font-size:20px;line-height:1;color:var(--outline)">image</span></div><div style="margin-top:8px;font-size:15px;font-weight:700;color:var(--on);font-family:'Roboto',sans-serif">$120,000</div><div style="margin-top:3px;font-size:11px;color:var(--onVar);font-family:'Noto Sans Arabic',sans-serif">شقة في المزة فيلات</div><div style="margin-top:8px;height:34px;border-radius:100px;background:var(--primary);display:flex;align-items:center;justify-content:center"><span style="font-size:11px;font-weight:700;color:#fff;font-family:'Noto Sans Arabic',sans-serif">نشر الإعلان</span></div></div>
+          </div>
+          <div style="flex:1;--surface:#131318;--surface2:#1C1D25;--on:#E7E8ED;--onVar:#A7ABB8;--divider:#26272F;--primary:#AEC2FF;--header:#12235E;--outline:#3B3D48;border:1px solid #2A2C36;border-radius:16px;overflow:hidden">
+            <div style="background:var(--header);padding:12px;color:#fff;display:flex;align-items:center;gap:6px"><span style="font-family:'Material Symbols Outlined';font-size:16px;line-height:1">fact_check</span><span style="font-size:12px;font-weight:700;font-family:'Noto Sans Arabic',sans-serif">مراجعة ونشر</span></div>
+            <div style="background:var(--surface);padding:11px"><div style="height:52px;border-radius:9px;background:var(--surface2);display:flex;align-items:center;justify-content:center"><span style="font-family:'Material Symbols Outlined';font-size:20px;line-height:1;color:var(--outline)">image</span></div><div style="margin-top:8px;font-size:15px;font-weight:700;color:var(--on);font-family:'Roboto',sans-serif">$120,000</div><div style="margin-top:3px;font-size:11px;color:var(--onVar);font-family:'Noto Sans Arabic',sans-serif">شقة في المزة فيلات</div><div style="margin-top:8px;height:34px;border-radius:100px;background:var(--primary);display:flex;align-items:center;justify-content:center"><span style="font-size:11px;font-weight:700;color:#0A2063;font-family:'Noto Sans Arabic',sans-serif">نشر الإعلان</span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#8A8F9C;margin-bottom:8px;font-family:'Noto Sans Arabic',sans-serif">طلب معاينة</div>
+        <div style="display:flex;gap:12px">
+          <div style="flex:1;--surface:#FFFFFF;--surface2:#F2F4F9;--tonal:#E2E9FF;--onTonal:#123287;--on:#1A1C22;--onVar:#5B6070;--outline:#C6CAD6;--primary:#1F4FE6;--onPrimary:#fff;border:1px solid #D3D7DF;border-radius:16px;overflow:hidden;background:var(--surface);padding:12px">
+            <div style="font-size:12px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif;margin-bottom:8px">اختر اليوم</div>
+            <div style="display:flex;gap:6px">
+              <sc-for list="{{ galleryDays }}" as="d" hint-placeholder-count="4">
+                <sc-if value="{{ d.on }}"><div style="flex:1;padding:7px 0;border-radius:11px;background:var(--primary);display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font-size:9px;color:var(--onPrimary);opacity:.85;font-family:'Noto Sans Arabic',sans-serif">{{ d.dow }}</span><span style="font-size:14px;font-weight:700;color:var(--onPrimary);font-family:'Roboto',sans-serif">{{ d.num }}</span></div></sc-if>
+                <sc-if value="{{ d.off }}"><div style="flex:1;padding:7px 0;border:1px solid var(--outline);border-radius:11px;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font-size:9px;color:var(--onVar);font-family:'Noto Sans Arabic',sans-serif">{{ d.dow }}</span><span style="font-size:14px;font-weight:700;color:var(--on);font-family:'Roboto',sans-serif">{{ d.num }}</span></div></sc-if>
+              </sc-for>
+            </div>
+            <div style="margin-top:10px;height:32px;border-radius:100px;background:var(--primary);display:flex;align-items:center;justify-content:center"><span style="font-size:11px;font-weight:700;color:var(--onPrimary);font-family:'Noto Sans Arabic',sans-serif">تأكيد الطلب</span></div>
+          </div>
+          <div style="flex:1;--surface:#131318;--surface2:#1C1D25;--tonal:#26356E;--onTonal:#DCE4FF;--on:#E7E8ED;--onVar:#A7ABB8;--outline:#3B3D48;--primary:#AEC2FF;--onPrimary:#0A2063;border:1px solid #2A2C36;border-radius:16px;overflow:hidden;background:var(--surface);padding:12px">
+            <div style="font-size:12px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif;margin-bottom:8px">اختر اليوم</div>
+            <div style="display:flex;gap:6px">
+              <sc-for list="{{ galleryDays }}" as="d" hint-placeholder-count="4">
+                <sc-if value="{{ d.on }}"><div style="flex:1;padding:7px 0;border-radius:11px;background:var(--primary);display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font-size:9px;color:var(--onPrimary);opacity:.85;font-family:'Noto Sans Arabic',sans-serif">{{ d.dow }}</span><span style="font-size:14px;font-weight:700;color:var(--onPrimary);font-family:'Roboto',sans-serif">{{ d.num }}</span></div></sc-if>
+                <sc-if value="{{ d.off }}"><div style="flex:1;padding:7px 0;border:1px solid var(--outline);border-radius:11px;display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font-size:9px;color:var(--onVar);font-family:'Noto Sans Arabic',sans-serif">{{ d.dow }}</span><span style="font-size:14px;font-weight:700;color:var(--on);font-family:'Roboto',sans-serif">{{ d.num }}</span></div></sc-if>
+              </sc-for>
+            </div>
+            <div style="margin-top:10px;height:32px;border-radius:100px;background:var(--primary);display:flex;align-items:center;justify-content:center"><span style="font-size:11px;font-weight:700;color:var(--onPrimary);font-family:'Noto Sans Arabic',sans-serif">تأكيد الطلب</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;accent&quot;: {&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:[&quot;#1F4FE6&quot;,&quot;#1A3FC4&quot;],&quot;tsType&quot;:&quot;string[]&quot;,&quot;section&quot;:&quot;العلامة&quot;,&quot;options&quot;:[[&quot;#1F4FE6&quot;,&quot;#1A3FC4&quot;],[&quot;#0B6BCB&quot;,&quot;#0A4F96&quot;],[&quot;#1E7F52&quot;,&quot;#155E3C&quot;],[&quot;#B23A48&quot;,&quot;#8E2A36&quot;],[&quot;#6D4AC0&quot;,&quot;#4E3593&quot;]]}
+}">
+class Component extends DCLogic {
+  rootRef = React.createRef();
+  mapRef = React.createRef();
+  _vt = null;
+
+  RATE = 13000;
+  STEP_TITLES = {1:'طريقة الإضافة',2:'النوع والغرض',3:'التفاصيل الأساسية',4:'الموقع',5:'الصور والفيديو',6:'المواصفات',7:'مراجعة ونشر'};
+
+  state = {
+    dark:false, screen:'wizard', step:1, dataState:'ok',
+    mode:'detailed', ptype:'شقة', purpose:'للبيع',
+    price:120000, rooms:3, baths:2, parkings:1, floor:4,
+    gov:'دمشق', city:'دمشق', area:'المزة', pinX:52, pinY:44,
+    photos:6, coverIdx:0, videoState:'none', videoPct:0,
+    deed:'طابو أخضر', finish:'سوبر ديلوكس',
+    amenities:{'مصعد':true,'موقف سيارة':true,'تدفئة مركزية':true,'شرفة':true,'مفروش':false,'حديقة':false,'مسبح':false,'حراسة':true},
+    contactVisible:true, nameVisible:true,
+    bookDay:2, bookSlot:'صباحاً', booked:false,
+  };
+
+  PTYPES=[{label:'شقة',icon:'apartment'},{label:'فيلا',icon:'villa'},{label:'أرض',icon:'landscape'},{label:'محل',icon:'storefront'},{label:'مكتب',icon:'business'},{label:'مستودع',icon:'warehouse'},{label:'مزرعة',icon:'agriculture'}];
+  PURPOSES=['للبيع','للإيجار','إيجار يومي'];
+  DEEDS=['طابو أخضر','حكم محكمة','كاتب بالعدل'];
+  FINISHES=['سوبر ديلوكس','ديلوكس','عادي','على العظم'];
+  AMENITIES=[{label:'مصعد',icon:'elevator'},{label:'موقف سيارة',icon:'local_parking'},{label:'تدفئة مركزية',icon:'mode_heat'},{label:'شرفة',icon:'balcony'},{label:'مفروش',icon:'chair'},{label:'حديقة',icon:'yard'},{label:'مسبح',icon:'pool'},{label:'حراسة',icon:'shield'}];
+
+  DIFF=[
+    {label:'السعر', old:'$135,000', new:'$120,000'},
+    {label:'عدد الصور', old:'6 صور', new:'9 صور'},
+    {label:'الوصف', old:'شقة في المزة، ثلاث غرف.', new:'شقة مطلّة في المزة فيلات، ثلاث غرف نوم وصالون واسع، تشطيب حديث ومصعد وموقف خاص.'},
+  ];
+
+  VIEWINGS=[
+    {id:'v1', title:'شقة مطلّة في المزة فيلات', pub:'مكتب الشام العقاري', price:'$120,000', icon:'apartment', date:'الأربعاء 16 تموز', time:'11:00 ص', status:'confirmed'},
+    {id:'v2', title:'فيلا مع حديقة في المالكي', pub:'دار الياسمين للعقارات', price:'$340,000', icon:'villa', date:'الخميس 17 تموز', time:'4:30 م', status:'pending'},
+    {id:'v3', title:'محل تجاري في باب توما', pub:'عقارات دمشق', price:'$95,000', icon:'storefront', date:'السبت 12 تموز', time:'1:00 م', status:'done'},
+    {id:'v4', title:'أرض سكنية في صحنايا', pub:'مكتب المستقبل', price:'$74,000', icon:'landscape', date:'الاثنين 7 تموز', time:'10:00 ص', status:'cancelled'},
+  ];
+  V_STATUS={confirmed:{label:'مؤكّد',cls:'green',icon:'check_circle'}, pending:{label:'بانتظار التأكيد',cls:'neutral',icon:'hourglass_top'}, done:{label:'مكتمل',cls:'blue',icon:'task_alt'}, cancelled:{label:'ملغى',cls:'red',icon:'cancel'}};
+
+  DAYNAMES=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+  SLOTS=[{label:'صباحاً',range:'9:00 – 12:00'},{label:'ظهراً',range:'12:00 – 3:00'},{label:'عصراً',range:'3:00 – 6:00'},{label:'مساءً',range:'6:00 – 9:00'}];
+
+  THEMES={
+    light:{'--bg':'#EAEDF2','--surface':'#FFFFFF','--surface2':'#F2F4F9','--tonal':'#E2E9FF','--onTonal':'#123287','--sec':'#DAE1F6','--onSec':'#182C58','--on':'#1A1C22','--onVar':'#5B6070','--outline':'#C6CAD6','--divider':'#E7EAF1','--primary':'#1F4FE6','--onPrimary':'#FFFFFF','--header':'#1A3FC4','--headerField':'#FFFFFF','--green':'#0E7A3C','--greenC':'#E4F3E9','--onGreenC':'#0A5A2C','--wa':'#1FA855','--gold':'#8A6912','--goldC':'#FBEDC7','--red':'#D93B3B','--redC':'#FBE6E6','--onRedC':'#B42318','--onRed':'#FFFFFF','--scrim':'rgba(15,18,30,0.42)'},
+    dark:{'--bg':'#0C0C10','--surface':'#131318','--surface2':'#1C1D25','--tonal':'#26356E','--onTonal':'#DCE4FF','--sec':'#2A3352','--onSec':'#DEE4FA','--on':'#E7E8ED','--onVar':'#A7ABB8','--outline':'#3B3D48','--divider':'#26272F','--primary':'#AEC2FF','--onPrimary':'#0A2063','--header':'#12235E','--headerField':'#20232C','--green':'#74D99A','--greenC':'#12331F','--onGreenC':'#A9E9C0','--wa':'#2AAE60','--gold':'#E6C56A','--goldC':'#39300B','--red':'#FF6B6B','--redC':'#3A1414','--onRedC':'#FF9B9B','--onRed':'#3A0A0A','--scrim':'rgba(0,0,0,0.5)'},
+  };
+
+  componentDidMount(){ this.applyTheme(); }
+  componentDidUpdate(){ this.applyTheme(); }
+  componentWillUnmount(){ if(this._vt) clearInterval(this._vt); }
+  applyTheme(){
+    const el=this.rootRef.current; if(!el) return;
+    const t=this.state.dark?this.THEMES.dark:this.THEMES.light;
+    for(const k in t) el.style.setProperty(k, t[k]);
+    const acc=this.props.accent;
+    if(Array.isArray(acc)){ if(acc[0]) el.style.setProperty('--primary', acc[0]); if(!this.state.dark && acc[1]){ el.style.setProperty('--header', acc[1]); } }
+  }
+
+  go(screen){ this.setState({screen, dataState:'ok'}); }
+  clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+  fmt(n){ return n.toLocaleString('en-US'); }
+
+  uploadVideo(){
+    if(this._vt) clearInterval(this._vt);
+    this.setState({videoState:'uploading', videoPct:0});
+    this._vt=setInterval(()=>{
+      this.setState(s=>{
+        const np=s.videoPct+14;
+        if(np>=100){ clearInterval(this._vt); this._vt=setTimeout(()=>this.setState({videoState:'ready'}),1500); return {videoPct:100, videoState:'processing'}; }
+        return {videoPct:np};
+      });
+    },240);
+  }
+
+  renderVals(){
+    const s=this.state, scr=s.screen, step=s.step;
+
+    // theme / nav
+    const mk=(label, screen, act)=>({label, active:scr===screen, inactive:scr!==screen, onClick:act||(()=>this.go(screen))});
+    const mkStep=(label,n)=>({label, active:scr==='wizard'&&step===n&&s.dataState==='ok', inactive:!(scr==='wizard'&&step===n&&s.dataState==='ok'), onClick:()=>this.setState({screen:'wizard',step:n,dataState:'ok'})});
+    const st4=(label,val)=>({label, active:s.dataState===val, inactive:s.dataState!==val, onClick:()=>this.setState({dataState:val})});
+    const navGroups=[
+      {label:'إنشاء إعلان — الخطوات', items:[mkStep('١ الطريقة',1),mkStep('٢ النوع',2),mkStep('٣ التفاصيل',3),mkStep('٤ الموقع',4),mkStep('٥ الوسائط',5),mkStep('٦ المواصفات',6),mkStep('٧ المراجعة',7)]},
+      {label:'نتائج ومسارات', items:[mk('تم النشر','success'), mk('تعديل بمراجعة','editRevision')]},
+      {label:'حجز معاينة', items:[mk('طلب معاينة','bookSheet'), mk('معايناتي','myViewings')]},
+      {label:'حالة الشاشة', items:[st4('بيانات','ok'), st4('تحميل','loading'), st4('خطأ','error'), st4('فارغ','empty')]},
+    ];
+
+    // wizard
+    const modes=[{key:'express',icon:'bolt',title:'إدخال سريع',sub:'٤ حقول أساسية — انشر خلال دقيقة'},{key:'detailed',icon:'tune',title:'إدخال مفصّل',sub:'كل التفاصيل — ظهور وثقة أعلى'}]
+      .map(m=>Object.assign({},m,{on:s.mode===m.key,off:s.mode!==m.key,onClick:()=>this.setState({mode:m.key})}));
+    const ptypes=this.PTYPES.map(p=>Object.assign({},p,{on:s.ptype===p.label,off:s.ptype!==p.label,onClick:()=>this.setState({ptype:p.label})}));
+    const purposes=this.PURPOSES.map(l=>({label:l,on:s.purpose===l,off:s.purpose!==l,onClick:()=>this.setState({purpose:l})}));
+    const steppers=[
+      {icon:'bed',label:'غرف',value:s.rooms,onDown:()=>this.setState({rooms:this.clamp(s.rooms-1,0,20)}),onUp:()=>this.setState({rooms:this.clamp(s.rooms+1,0,20)})},
+      {icon:'bathtub',label:'حمّامات',value:s.baths,onDown:()=>this.setState({baths:this.clamp(s.baths-1,0,10)}),onUp:()=>this.setState({baths:this.clamp(s.baths+1,0,10)})},
+      {icon:'local_parking',label:'مواقف',value:s.parkings,onDown:()=>this.setState({parkings:this.clamp(s.parkings-1,0,10)}),onUp:()=>this.setState({parkings:this.clamp(s.parkings+1,0,10)})},
+    ];
+    const cascades=[
+      {icon:'map',label:'المحافظة',value:s.gov},
+      {icon:'location_city',label:'المدينة',value:s.city},
+      {icon:'pin_drop',label:'المنطقة',value:s.area},
+    ];
+    const lat=(33.5138+(0.5-s.pinY/100)*0.09).toFixed(4);
+    const lng=(36.2765+(s.pinX/100-0.5)*0.09).toFixed(4);
+    const onMapMove=(e)=>{ if(e.buttons!==1 && e.type!=='pointerdown') return; const el=this.mapRef.current; if(!el) return; const r=el.getBoundingClientRect(); this.setState({pinX:this.clamp(((e.clientX-r.left)/r.width)*100,4,96), pinY:this.clamp(((e.clientY-r.top)/r.height)*100,6,94)}); };
+
+    // media
+    const photos=Array.from({length:s.photos},(_,i)=>({idx:i, cover:i===s.coverIdx, notCover:i!==s.coverIdx, onCover:()=>this.setState({coverIdx:i})}));
+    const vs=s.videoState;
+
+    // attributes
+    const deeds=this.DEEDS.map(l=>({label:l,on:s.deed===l,off:s.deed!==l,onClick:()=>this.setState({deed:l})}));
+    const finishes=this.FINISHES.map(l=>({label:l,on:s.finish===l,off:s.finish!==l,onClick:()=>this.setState({finish:l})}));
+    const amenities=this.AMENITIES.map(a=>Object.assign({},a,{on:!!s.amenities[a.label],off:!s.amenities[a.label],onClick:()=>this.setState(x=>({amenities:Object.assign({},x.amenities,{[a.label]:!x.amenities[a.label]})}))}));
+
+    // review summary
+    const amenNames=this.AMENITIES.filter(a=>s.amenities[a.label]).map(a=>a.label);
+    const summary=[
+      {icon:'sell', label:'السعر', value:'$'+this.fmt(s.price)},
+      {icon:'home_work', label:'النوع والغرض', value:s.ptype+' · '+s.purpose},
+      {icon:'straighten', label:'الغرف / الحمّامات', value:s.rooms+' غرف · '+s.baths+' حمّام'},
+      {icon:'location_on', label:'الموقع', value:s.gov+'، '+s.area},
+      {icon:'description', label:'سند الملكية', value:s.deed},
+      {icon:'auto_awesome', label:'التشطيب', value:s.finish},
+    ];
+
+    // booking
+    const days=Array.from({length:14},(_,i)=>{ const d=new Date(2026,6,14+i); return {idx:i, dow:this.DAYNAMES[d.getDay()], num:d.getDate(), on:s.bookDay===i, off:s.bookDay!==i, onClick:()=>this.setState({bookDay:i, booked:false})}; });
+    const slots=this.SLOTS.map(sl=>Object.assign({},sl,{on:s.bookSlot===sl.label,off:s.bookSlot!==sl.label,onClick:()=>this.setState({bookSlot:sl.label, booked:false})}));
+    const sel=days[s.bookDay]||days[0];
+    const bookSummary=sel.dow+' '+sel.num+' تموز · '+s.bookSlot;
+
+    // viewings
+    const viewings=this.VIEWINGS.map(v=>{const t=this.V_STATUS[v.status]; return Object.assign({},v,{chipLabel:t.label, chipIcon:t.icon, tGreen:t.cls==='green', tNeutral:t.cls==='neutral', tBlue:t.cls==='blue', tRed:t.cls==='red', actionable:v.status==='confirmed'||v.status==='pending'});});
+
+    // diff
+    const diffRows=this.DIFF.map(d=>Object.assign({},d));
+
+    return {
+      rootRef:this.rootRef, mapRef:this.mapRef,
+      themeLight:!s.dark, themeDark:s.dark, onLight:()=>this.setState({dark:false}), onDark:()=>this.setState({dark:true}),
+      navGroups,
+      isOk:s.dataState==='ok', notOk:s.dataState!=='ok', isLoading:s.dataState==='loading', isError:s.dataState==='error', isEmpty:s.dataState==='empty', onResetState:()=>this.setState({dataState:'ok'}),
+
+      isWizard:scr==='wizard', isSuccess:scr==='success', isEditRevision:scr==='editRevision', isBookSheet:scr==='bookSheet', isMyViewings:scr==='myViewings',
+
+      stepNum:step, stepTitle:this.STEP_TITLES[step]||'إضافة إعلان', stepPct:Math.round(step/7*100)+'%',
+      isStep1:step===1, isStep2:step===2, isStep3:step===3, isStep4:step===4, isStep5:step===5, isStep6:step===6, isStep7:step===7,
+      stepFirst:step===1, canPrev:step>1, notLast:step<7, stepLast:step===7,
+      onPrev:()=>this.setState(x=>({step:this.clamp(x.step-1,1,7)})), onNext:()=>this.setState(x=>({step:this.clamp(x.step+1,1,7)})), onPublish:()=>this.go('success'),
+
+      modes, ptypes, purposes,
+      priceUsd:'$'+this.fmt(s.price), priceSyp:this.fmt(s.price*this.RATE),
+      onPriceDown:()=>this.setState({price:this.clamp(s.price-5000,5000,5000000)}), onPriceUp:()=>this.setState({price:this.clamp(s.price+5000,5000,5000000)}),
+      steppers, cascades, lat, lng, pinTop:s.pinY+'%', pinLeft:s.pinX+'%', onMapMove,
+      photos, photoCount:s.photos+' صور',
+      vNone:vs==='none', vUploading:vs==='uploading', vProcessing:vs==='processing', vReady:vs==='ready', videoPct:s.videoPct+'%', videoPctNum:s.videoPct, onUploadVideo:()=>this.uploadVideo(), onRemoveVideo:()=>{ if(this._vt)clearInterval(this._vt); this.setState({videoState:'none',videoPct:0}); },
+      deeds, finishes, amenities,
+      contactVisible:s.contactVisible, contactHidden:!s.contactVisible, onToggleContact:()=>this.setState({contactVisible:!s.contactVisible}),
+      nameVisible:s.nameVisible, nameHidden:!s.nameVisible, onToggleName:()=>this.setState({nameVisible:!s.nameVisible}),
+      summary, reviewTitle:'شقة مطلّة في المزة فيلات',
+      diffRows,
+      onGoWizard:()=>this.setState({screen:'wizard',step:1,dataState:'ok'}),
+      days, slots, bookSummary, booked:s.booked, notBooked:!s.booked, onConfirmBook:()=>this.setState({booked:true}), onResetBook:()=>this.setState({booked:false}), onGoViewings:()=>this.go('myViewings'),
+      viewings, galleryDays:days.slice(0,4),
+    };
+  }
+}
+</script>
+</body>
+</html>
