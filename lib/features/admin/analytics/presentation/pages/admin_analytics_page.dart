@@ -7,10 +7,9 @@
 // empty series and the corresponding card renders a muted empty hint (never an
 // error). A transport failure shows a retry affordance. Token-clean + RTL.
 //
-// The evolution chart carries a NATIVE ⇄ fl_chart engine toggle: both renderers
-// draw the identical series/styling under one shared shell, so the design can
-// compare hand-built CustomPaint against the fl_chart package and pick. Pushed
-// via Navigator.push — no go_router route.
+// The evolution chart renders with the native CustomPaint DcLineChartPlot (the
+// chosen engine — zero deps, token-exact colours, lightest on low-end devices).
+// Pushed via Navigator.push — no go_router route.
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
@@ -25,7 +24,6 @@ import '../../../../../core/theme/typography.dart';
 import '../../../../../core/widgets/_widget_support.dart';
 import '../../../../../core/widgets/charts/dc_bar_chart.dart';
 import '../../../../../core/widgets/charts/dc_line_chart.dart';
-import '../../../../../core/widgets/charts/fl_line_chart.dart';
 import '../../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../../core/widgets/ds/dc_stat_card.dart';
 import '../../../../../core/widgets/error_state.dart';
@@ -92,7 +90,7 @@ class _Body extends StatelessWidget {
     final sections = <Widget>[
       // KPI row — real values, month-over-month trend where the series supports it.
       _KpiGrid(analytics: analytics, l10n: l10n, numLocale: numLocale),
-      // Evolution over time (listings ⇄ users), native ⇄ fl_chart engine toggle.
+      // Evolution over time (listings ⇄ users) — native line chart.
       _EvolutionCard(
         listings: analytics.listingsByMonth,
         users: analytics.profilesByMonth,
@@ -276,7 +274,6 @@ class _EvolutionCard extends StatefulWidget {
 
 class _EvolutionCardState extends State<_EvolutionCard> {
   int _series = 0; // 0 = listings, 1 = users
-  bool _native = true; // true = DcLineChartPlot, false = FlLineChartPlot
 
   @override
   Widget build(BuildContext context) {
@@ -355,11 +352,9 @@ class _EvolutionCardState extends State<_EvolutionCard> {
             onChanged: (i) => setState(() => _series = i),
           ),
           const SizedBox(height: AppSpacing.lg),
-          // The plot — swapped by engine, identical data + styling either way.
-          if (_native)
-            DcLineChartPlot(values: values)
-          else
-            FlLineChartPlot(values: values),
+          // Native CustomPaint plot (chosen engine: zero deps, token-exact,
+          // lightest on low-end devices).
+          DcLineChartPlot(values: values),
           // Shared month axis (rendered by the shell, not the plot).
           const SizedBox(height: AppSpacing.sm),
           Row(
@@ -374,26 +369,6 @@ class _EvolutionCardState extends State<_EvolutionCard> {
                     style: styles.labelSmall.copyWith(color: colors.textMuted),
                   ),
                 ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          // Engine comparison toggle (the founder's chart-package experiment).
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  l10n.adminAnalyticsEngineLabel,
-                  style: styles.labelSmall.copyWith(color: colors.textMuted),
-                ),
-              ),
-              _SegToggle(
-                labels: [
-                  l10n.adminAnalyticsEngineNative,
-                  l10n.adminAnalyticsEngineFlChart,
-                ],
-                index: _native ? 0 : 1,
-                onChanged: (i) => setState(() => _native = i == 0),
-              ),
             ],
           ),
         ],

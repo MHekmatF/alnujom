@@ -19,7 +19,6 @@ import 'package:alnujom/core/theme/typography.dart';
 import 'package:alnujom/core/widgets/_widget_support.dart';
 import 'package:alnujom/core/widgets/charts/dc_bar_chart.dart';
 import 'package:alnujom/core/widgets/charts/dc_line_chart.dart';
-import 'package:alnujom/core/widgets/charts/fl_line_chart.dart';
 import 'package:alnujom/core/widgets/dc_crown_scaffold.dart';
 import 'package:alnujom/core/widgets/ds/dc_quick_link_tile.dart';
 import 'package:alnujom/core/widgets/ds/dc_stat_card.dart';
@@ -170,26 +169,11 @@ class DcGalleryHome extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.xl),
-          _Label(
-            ar
-                ? 'مخطط خطي — أصلي مقابل fl_chart'
-                : 'Line chart — native vs fl_chart',
-          ),
+          _Label(ar ? 'مخطط خطي' : 'Line chart'),
           const SizedBox(height: AppSpacing.md),
-          // Native CustomPaint (DcLineChart) — the DC default engine.
+          // Native CustomPaint (DcLineChart) — the chosen chart engine.
           DcLineChart(
-            title: ar ? 'التطوّر — أصلي' : 'Growth — native',
-            totalValue: '34',
-            totalLabel: ar ? 'إعلانات' : 'Listings',
-            values: const [3, 5, 2, 8, 15, 7],
-            labels: ar
-                ? const ['شباط', 'آذار', 'نيسان', 'أيار', 'حزيران', 'تموز']
-                : const ['Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          // Same data + styling via the fl_chart package, matching shell.
-          _FlChartCard(
-            title: ar ? 'التطوّر — fl_chart' : 'Growth — fl_chart',
+            title: ar ? 'التطوّر' : 'Growth',
             totalValue: '34',
             totalLabel: ar ? 'إعلانات' : 'Listings',
             values: const [3, 5, 2, 8, 15, 7],
@@ -443,88 +427,3 @@ class _Label extends StatelessWidget {
   }
 }
 
-/// The fl_chart sibling of [DcLineChart] — an identical card shell wrapping the
-/// [FlLineChartPlot] renderer, so the gallery can show native vs package under
-/// matched styling for the engine comparison.
-class _FlChartCard extends StatelessWidget {
-  const _FlChartCard({
-    required this.title,
-    required this.values,
-    required this.labels,
-    this.totalValue,
-    this.totalLabel,
-  });
-
-  final String title;
-  final List<num> values;
-  final List<String> labels;
-  final String? totalValue;
-  final String? totalLabel;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-    final styles = AppTextStyles.of(context);
-    return Container(
-      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: colors.card,
-        borderRadius: appRadius(AppRadii.lg),
-        border: Border.all(color: colors.outline),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Text(
-                  title,
-                  style: styles.labelLarge.copyWith(color: colors.onSurface),
-                ),
-              ),
-              if (totalValue != null)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      totalValue!,
-                      style: styles.titleLarge.copyWith(color: colors.onSurface),
-                    ),
-                    if (totalLabel != null) ...[
-                      const SizedBox(height: AppSpacing.xxs),
-                      Text(
-                        totalLabel!,
-                        style: styles.labelSmall.copyWith(
-                          color: colors.textMuted,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          FlLineChartPlot(values: values),
-          const SizedBox(height: AppSpacing.sm),
-          Row(
-            children: [
-              for (final label in labels)
-                Expanded(
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: styles.labelSmall.copyWith(color: colors.textMuted),
-                  ),
-                ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}

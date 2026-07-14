@@ -121,9 +121,9 @@ class DcLineChart extends StatelessWidget {
 }
 
 /// Just the plot area of a [DcLineChart] — the single-hue area+line+dots, no
-/// card/header/axis. Rendered with a hand-written [CustomPainter] (the NATIVE
-/// engine). Split out so the admin analytics screen can swap it for the
-/// [FlLineChartPlot] adapter under one shared shell and compare engines fairly.
+/// card/header/axis. Rendered with a hand-written [CustomPainter]. Split out so
+/// the admin analytics screen can reuse the bare plot under its own shared shell
+/// (title, running total, month axis).
 class DcLineChartPlot extends StatelessWidget {
   const DcLineChartPlot({
     required this.values,

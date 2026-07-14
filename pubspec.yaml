@@ -25,11 +25,6 @@ dependencies:
   # Pure-Dart, no platform channels; takes Duration/Curve so AppMotion stays the
   # source of truth. Reduce-motion is guarded by the app (it ignores the flag).
   flutter_animate: ^4.5.0
-  # Tier-E admin analytics — one candidate charting package, offered side-by-side
-  # with the native CustomPaint charts (DcLineChart/DcBarChart) behind a runtime
-  # engine toggle so the design can pick. Pure-Dart canvas renderer (no platform
-  # channels, cheap on low-end devices).
-  fl_chart: ^0.69.0
   flutter_lucide: 1.11.0
   flutter_secure_storage: 10.0.0
   get_it: 8.2.0
