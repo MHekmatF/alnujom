@@ -5,9 +5,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_spinner.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/locale_toggle_action.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -64,23 +66,27 @@ class _ExchangeRateHistoryViewState extends State<_ExchangeRateHistoryView> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          l10n.exchangeRateHistoryPageTitleFor(widget.baseCurrencyCode),
-          overflow: TextOverflow.ellipsis,
-        ),
-        actions: [
-          IconButton(
-            onPressed: () => context.push(
-              '${AppRoutes.currenciesAdminSetRate}?base=${widget.baseCurrencyCode}',
-            ),
-            icon: const Icon(LucideIcons.chart_line),
-            tooltip: l10n.setNewRateButton,
-          ),
-          const LocaleToggleAction(),
-        ],
+    return DcCrownScaffold(
+      title: l10n.exchangeRateHistoryPageTitleFor(widget.baseCurrencyCode),
+      dense: true,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () =>
+            context.canPop() ? context.pop() : context.go(AppRoutes.shellHome),
       ),
+      actions: [
+        IconButton(
+          onPressed: () => context.push(
+            '${AppRoutes.currenciesAdminSetRate}?base=${widget.baseCurrencyCode}',
+          ),
+          icon: Icon(
+            LucideIcons.chart_line,
+            color: AppColors.of(context).onBrandHeader,
+          ),
+          tooltip: l10n.setNewRateButton,
+        ),
+        const LocaleToggleAction(),
+      ],
       body: FutureBuilder<List<Currency>>(
         future: _currenciesFuture,
         builder: (context, snapshot) {

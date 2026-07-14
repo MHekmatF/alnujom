@@ -5,8 +5,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/app_toast.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/locale_toggle_action.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -37,18 +39,25 @@ class _CurrenciesListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.currenciesPageTitle),
-        actions: [
-          TextButton.icon(
-            onPressed: () => _openSetRate(context),
-            icon: const Icon(LucideIcons.chart_line),
-            label: Text(l10n.setNewRateButton),
-          ),
-          const LocaleToggleAction(),
-        ],
+    return DcCrownScaffold(
+      title: l10n.currenciesPageTitle,
+      dense: true,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () =>
+            context.canPop() ? context.pop() : context.go(AppRoutes.shellHome),
       ),
+      actions: [
+        TextButton.icon(
+          onPressed: () => _openSetRate(context),
+          icon: const Icon(LucideIcons.chart_line),
+          label: Text(l10n.setNewRateButton),
+          style: TextButton.styleFrom(
+            foregroundColor: AppColors.of(context).onBrandHeader,
+          ),
+        ),
+        const LocaleToggleAction(),
+      ],
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final result = await context.push<bool>(
