@@ -25,10 +25,17 @@ final class LocaleCubit extends Cubit<Locale> {
     final nextLocale = state.languageCode == 'ar'
         ? englishLocale
         : defaultLocale;
+    await setLocale(nextLocale);
+  }
 
-    emit(nextLocale);
+  /// Selects [locale] explicitly (used by the Settings language picker). No-ops
+  /// when it already matches the current locale; otherwise emits then persists.
+  Future<void> setLocale(Locale locale) async {
+    if (locale.languageCode == state.languageCode) return;
 
-    final result = await _preferencesStore.writeLocale(nextLocale);
+    emit(locale);
+
+    final result = await _preferencesStore.writeLocale(locale);
     if (result case FailureResult(:final failure)) {
       _logger.warning(
         'Failed to persist locale preference.',

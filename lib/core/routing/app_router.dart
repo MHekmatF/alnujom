@@ -71,6 +71,7 @@ import '../../features/dashboard/presentation/pages/dashboard_entry_page.dart';
 import '../../features/settings/presentation/bloc/app_settings_cubit.dart';
 import '../../features/settings/presentation/pages/about_support_page.dart';
 import '../../features/settings/presentation/pages/maintenance_screen.dart';
+import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/settings/presentation/widgets/maintenance_gate.dart';
 import '../../features/publisher_dashboard/presentation/pages/listing_moderation_history_page.dart';
 import '../../features/publisher_dashboard/presentation/pages/my_listings_page.dart';
@@ -168,6 +169,8 @@ abstract final class AppRoutes {
   static const maintenance = maintenanceRoute;
   // Phase 23 FC — public about/support surface (FR-013).
   static const about = '/about';
+  // Phase 035: unified user settings screen.
+  static const settings = '/settings';
   static const themeGallery = '/_debug/theme-gallery';
   static const debugMoneyFormatter = '/debug/money-formatter';
   // Phase 25 uplift v2 — saved searches + role-aware dashboard.
@@ -274,6 +277,8 @@ abstract final class AppRouteNames {
   // Phase 23 FC — maintenance gate + about/support route names.
   static const maintenance = 'maintenance';
   static const about = 'about';
+  // Phase 035: settings screen route name.
+  static const settings = 'settings';
   static const themeGallery = 'theme-gallery';
 }
 
@@ -820,6 +825,13 @@ GoRouter buildAppRouter({
         path: AppRoutes.about,
         name: AppRouteNames.about,
         builder: (context, state) => const AboutSupportPage(),
+      ),
+
+      // ─── Phase 035 — unified user settings (anonymous-accessible, pushed) ──
+      GoRoute(
+        path: AppRoutes.settings,
+        name: AppRouteNames.settings,
+        builder: (context, state) => const SettingsPage(),
       ),
 
       if (kDesignToolsEnabled)

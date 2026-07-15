@@ -204,6 +204,15 @@ class AppNavDrawer extends StatelessWidget {
                           () => context.push(AppRoutes.reports),
                         ),
                       ),
+                    // Settings — public (anonymous-accessible route).
+                    DrawerRow(
+                      icon: Icons.settings_outlined,
+                      title: AppLocalizations.of(context)!.settings_title,
+                      onTap: () => _closeThen(
+                        context,
+                        () => context.push(AppRoutes.settings),
+                      ),
+                    ),
                     // About / support — public (anonymous-accessible route).
                     DrawerRow(
                       icon: LucideIcons.info,

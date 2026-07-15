@@ -6794,4 +6794,42 @@ final class _DebugAppLocalizations extends AppLocalizations {
   String get report_sheet_subtitle => _resolve('report_sheet_subtitle', (loc) => loc.report_sheet_subtitle);
   @override
   String get report_banner_status_label => _resolve('report_banner_status_label', (loc) => loc.report_banner_status_label);
+  @override
+  String get settings_title => _resolve('settings_title', (loc) => loc.settings_title);
+  @override
+  String get settings_appearance_heading => _resolve('settings_appearance_heading', (loc) => loc.settings_appearance_heading);
+  @override
+  String get settings_theme_light => _resolve('settings_theme_light', (loc) => loc.settings_theme_light);
+  @override
+  String get settings_theme_dark => _resolve('settings_theme_dark', (loc) => loc.settings_theme_dark);
+  @override
+  String get settings_theme_auto => _resolve('settings_theme_auto', (loc) => loc.settings_theme_auto);
+  @override
+  String get settings_general_heading => _resolve('settings_general_heading', (loc) => loc.settings_general_heading);
+  @override
+  String get settings_language_label => _resolve('settings_language_label', (loc) => loc.settings_language_label);
+  @override
+  String get settings_language_arabic => _resolve('settings_language_arabic', (loc) => loc.settings_language_arabic);
+  @override
+  String get settings_language_english => _resolve('settings_language_english', (loc) => loc.settings_language_english);
+  @override
+  String get settings_language_sheet_title => _resolve('settings_language_sheet_title', (loc) => loc.settings_language_sheet_title);
+  @override
+  String get settings_currency_label => _resolve('settings_currency_label', (loc) => loc.settings_currency_label);
+  @override
+  String get settings_notifications_heading => _resolve('settings_notifications_heading', (loc) => loc.settings_notifications_heading);
+  @override
+  String get settings_notif_new_matches => _resolve('settings_notif_new_matches', (loc) => loc.settings_notif_new_matches);
+  @override
+  String get settings_notif_messages => _resolve('settings_notif_messages', (loc) => loc.settings_notif_messages);
+  @override
+  String get settings_notif_marketing => _resolve('settings_notif_marketing', (loc) => loc.settings_notif_marketing);
+  @override
+  String get settings_about_heading => _resolve('settings_about_heading', (loc) => loc.settings_about_heading);
+  @override
+  String get settings_about_row => _resolve('settings_about_row', (loc) => loc.settings_about_row);
+  @override
+  String get settings_rate_app => _resolve('settings_rate_app', (loc) => loc.settings_rate_app);
+  @override
+  String settings_version(String version) => _resolve('settings_version', (loc) => loc.settings_version(version));
 }
