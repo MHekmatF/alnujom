@@ -6,6 +6,7 @@ import '../../theme/colors.dart';
 import '../../theme/radii.dart';
 import '../../theme/spacing.dart';
 import '../../theme/typography.dart';
+import '../../../shared/util/localized_numbers.dart';
 import '../_widget_support.dart';
 
 /// One slice of a [DcDonutChart].
@@ -36,6 +37,7 @@ class DcDonutChart extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
+    final locale = Localizations.localeOf(context);
     final total = slices.fold<int>(0, (sum, s) => sum + s.value);
 
     return Row(
@@ -55,7 +57,7 @@ class DcDonutChart extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    '$total',
+                    formatLocalizedNumber(total, locale),
                     style: styles.titleLarge.copyWith(color: colors.onSurface),
                   ),
                   Text(
@@ -94,6 +96,7 @@ class _LegendRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
+    final locale = Localizations.localeOf(context);
     return Row(
       children: [
         Container(
@@ -115,7 +118,7 @@ class _LegendRow extends StatelessWidget {
         ),
         const SizedBox(width: AppSpacing.sm),
         Text(
-          '${slice.value}',
+          formatLocalizedNumber(slice.value, locale),
           style: styles.labelLarge.copyWith(color: colors.textMuted),
         ),
       ],

@@ -65,6 +65,26 @@ class ReviewsRepositoryImpl implements ReviewsRepository {
   }
 
   @override
+  Future<Result<Map<int, int>>> fetchRatingDistribution(
+    String targetUserId,
+  ) async {
+    try {
+      final map = await _datasource.fetchRatingDistribution(targetUserId);
+      return Success(map);
+    } on Object catch (error, stackTrace) {
+      _logger.warning(
+        'fetchRatingDistribution failed for target=$targetUserId',
+        error: error,
+        stackTrace: stackTrace,
+        tag: _tag,
+      );
+      return FailureResult(
+        NetworkFailure(error.toString(), cause: error, stackTrace: stackTrace),
+      );
+    }
+  }
+
+  @override
   Future<Result<ResponseStats?>> fetchResponseStats(String targetUserId) async {
     try {
       final dto = await _datasource.fetchResponseStats(targetUserId);

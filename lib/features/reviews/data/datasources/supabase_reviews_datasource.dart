@@ -48,6 +48,24 @@ class SupabaseReviewsDatasource {
     return PublisherRatingDto.fromJson(Map<String, dynamic>.from(row));
   }
 
+  /// Rating distribution (star → count) via the `publisher_rating_distribution`
+  /// RPC. An empty map when the seller has no reviews. Only ratings 1..5 kept.
+  Future<Map<int, int>> fetchRatingDistribution(String targetUserId) async {
+    final result = await _client.rpc(
+      'publisher_rating_distribution',
+      params: {'p_user_id': targetUserId},
+    );
+    final rows = result as List<dynamic>;
+    final out = <int, int>{};
+    for (final row in rows) {
+      final map = Map<String, dynamic>.from(row as Map);
+      final rating = int.tryParse('${map['rating']}') ?? 0;
+      final total = int.tryParse('${map['total']}') ?? 0;
+      if (rating >= 1 && rating <= 5) out[rating] = total;
+    }
+    return out;
+  }
+
   /// Responsiveness stats via the `publisher_response_stats` RPC. Returns the
   /// first row; null when the RPC yields no rows.
   Future<ResponseStatsDto?> fetchResponseStats(String targetUserId) async {

@@ -12,6 +12,7 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/rating_stars.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/util/localized_numbers.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../domain/entities/review.dart';
@@ -109,6 +110,7 @@ class SellerReviewsSection extends StatelessWidget {
                 l10n.reviews_count(state.rating!.reviewCount),
                 style: styles.bodyMedium.copyWith(color: colors.textMuted),
               ),
+              _RatingDistribution(distribution: state.ratingDistribution),
             ],
             const SizedBox(height: AppSpacing.md),
 
@@ -202,6 +204,93 @@ class _WriteAffordance extends StatelessWidget {
         cubit: cubit,
         targetUserId: sellerId,
         listingId: listingId,
+      ),
+    );
+  }
+}
+
+// ─── Rating distribution bars ─────────────────────────────────────────────────
+
+/// A 5-row star-rating breakdown (5★ → 1★): each row is a star-count label, a
+/// proportional bar, and the count. Full-history counts from
+/// `publisher_rating_distribution`. Collapses when there are no reviews.
+class _RatingDistribution extends StatelessWidget {
+  const _RatingDistribution({required this.distribution});
+
+  final Map<int, int> distribution;
+
+  @override
+  Widget build(BuildContext context) {
+    final total = distribution.values.fold<int>(0, (s, v) => s + v);
+    if (total == 0) return const SizedBox.shrink();
+    final maxCount = distribution.values.fold<int>(0, (m, v) => v > m ? v : m);
+
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    final locale = Localizations.localeOf(context);
+
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(
+        top: AppSpacing.sm,
+        bottom: AppSpacing.xs,
+      ),
+      child: Column(
+        children: [
+          for (final star in const [5, 4, 3, 2, 1]) ...[
+            if (star != 5) const SizedBox(height: AppSpacing.xs),
+            Row(
+              children: [
+                SizedBox(
+                  width: 34,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        formatLocalizedNumber(star, locale),
+                        style: styles.labelMedium.copyWith(
+                          color: colors.textMuted,
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.xxs),
+                      Icon(Icons.star, size: AppSpacing.md, color: colors.warning),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: appRadius(AppRadii.pill),
+                    child: SizedBox(
+                      height: 8,
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                            child: ColoredBox(color: colors.surfaceVariant),
+                          ),
+                          FractionallySizedBox(
+                            widthFactor: maxCount == 0
+                                ? 0
+                                : (distribution[star] ?? 0) / maxCount,
+                            child: ColoredBox(color: colors.primary),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                SizedBox(
+                  width: 28,
+                  child: Text(
+                    formatLocalizedNumber(distribution[star] ?? 0, locale),
+                    textAlign: TextAlign.end,
+                    style: styles.labelMedium.copyWith(color: colors.textMuted),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
       ),
     );
   }

@@ -22,6 +22,10 @@ abstract class ReviewsRepository {
   /// Responsiveness stats — null when the RPC yields no row.
   Future<Result<ResponseStats?>> fetchResponseStats(String targetUserId);
 
+  /// Rating distribution (star 1..5 → count) for [targetUserId]; empty when the
+  /// seller has no reviews.
+  Future<Result<Map<int, int>>> fetchRatingDistribution(String targetUserId);
+
   /// Submits a review. A unique-violation (already reviewed) surfaces as an
   /// [AlreadyReviewedFailure].
   Future<Result<void>> submitReview({

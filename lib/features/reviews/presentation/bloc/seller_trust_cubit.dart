@@ -26,6 +26,7 @@ class SellerTrustState extends Equatable {
     this.rating,
     this.stats,
     this.reviews = const [],
+    this.ratingDistribution = const {},
     this.submitting = false,
     this.submitOutcome = SubmitOutcome.none,
   });
@@ -34,6 +35,9 @@ class SellerTrustState extends Equatable {
   final PublisherRating? rating;
   final ResponseStats? stats;
   final List<Review> reviews;
+
+  /// Full-history rating distribution (star 1..5 → count); empty when no reviews.
+  final Map<int, int> ratingDistribution;
   final bool submitting;
   final SubmitOutcome submitOutcome;
 
@@ -48,6 +52,7 @@ class SellerTrustState extends Equatable {
     PublisherRating? rating,
     ResponseStats? stats,
     List<Review>? reviews,
+    Map<int, int>? ratingDistribution,
     bool? submitting,
     SubmitOutcome? submitOutcome,
   }) {
@@ -56,6 +61,7 @@ class SellerTrustState extends Equatable {
       rating: rating ?? this.rating,
       stats: stats ?? this.stats,
       reviews: reviews ?? this.reviews,
+      ratingDistribution: ratingDistribution ?? this.ratingDistribution,
       submitting: submitting ?? this.submitting,
       submitOutcome: submitOutcome ?? this.submitOutcome,
     );
@@ -67,6 +73,7 @@ class SellerTrustState extends Equatable {
     rating,
     stats,
     reviews,
+    ratingDistribution,
     submitting,
     submitOutcome,
   ];
@@ -107,6 +114,10 @@ class SellerTrustCubit extends Cubit<SellerTrustState> {
       Success<ResponseStats?>(:final value) => value,
       FailureResult<ResponseStats?>() => null,
     };
+    final distribution = switch (bundle.distribution) {
+      Success<Map<int, int>>(:final value) => value,
+      FailureResult<Map<int, int>>() => const <int, int>{},
+    };
 
     emit(
       SellerTrustState(
@@ -114,6 +125,7 @@ class SellerTrustCubit extends Cubit<SellerTrustState> {
         rating: rating,
         stats: stats,
         reviews: reviews,
+        ratingDistribution: distribution,
       ),
     );
   }

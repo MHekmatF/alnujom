@@ -20,16 +20,19 @@ class LoadSellerTrust {
     Result<PublisherRating?> rating,
     Result<ResponseStats?> stats,
     Result<List<Review>> reviews,
+    Result<Map<int, int>> distribution,
   })> call(String targetUserId, {int reviewsLimit = 20}) async {
     final results = await Future.wait([
       _repository.fetchRating(targetUserId),
       _repository.fetchResponseStats(targetUserId),
       _repository.fetchReviews(targetUserId, limit: reviewsLimit),
+      _repository.fetchRatingDistribution(targetUserId),
     ]);
     return (
       rating: results[0] as Result<PublisherRating?>,
       stats: results[1] as Result<ResponseStats?>,
       reviews: results[2] as Result<List<Review>>,
+      distribution: results[3] as Result<Map<int, int>>,
     );
   }
 }
