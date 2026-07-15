@@ -115,6 +115,9 @@ class _RevisionStatusPageState extends State<RevisionStatusPage> {
         onTap: () =>
             context.canPop() ? context.pop() : context.go(AppRoutes.shellHome),
       ),
+      // Sticky footer lives INSIDE the body (a Column), never as
+      // `bottomNavigationBar` — that slot silently collapses the DcCrownScaffold
+      // body to blank.
       body: FutureBuilder<_RevisionData?>(
         future: _future,
         builder: (context, snapshot) {
@@ -133,14 +136,12 @@ class _RevisionStatusPageState extends State<RevisionStatusPage> {
               actionLabel: l10n.revisionStatusContinueEditing,
             );
           }
-          return _Body(data: data);
-        },
-      ),
-      bottomNavigationBar: FutureBuilder<_RevisionData?>(
-        future: _future,
-        builder: (context, snapshot) {
-          if (snapshot.data == null) return const SizedBox.shrink();
-          return _BottomBar(onContinue: _continueEditing);
+          return Column(
+            children: [
+              Expanded(child: _Body(data: data)),
+              _BottomBar(onContinue: _continueEditing),
+            ],
+          );
         },
       ),
     );
@@ -357,12 +358,20 @@ class _CenteredMessage extends StatelessWidget {
   }
 }
 
-/// Normalizes a value for equality comparison (matches the admin diff logic).
+/// Normalizes a value for equality comparison. Numeric values compare by value
+/// (so `340000.0` == `340000` and the price doesn't show a spurious change).
 String _normalize(Object? v) {
   if (v == null) return '';
   if (v is List) return v.map((e) => e.toString()).join(',');
-  return v.toString().trim();
+  if (v is num) return _trimNum(v);
+  final s = v.toString().trim();
+  final n = num.tryParse(s);
+  return n != null ? _trimNum(n) : s;
 }
+
+/// Drops a trailing `.0` from whole numbers ("340000.0" → "340000").
+String _trimNum(num n) =>
+    n == n.roundToDouble() ? n.toInt().toString() : n.toString();
 
 /// Human-readable value for a proposed/current field. Enum keys resolve to
 /// localized labels; lists join; everything else falls back to its string.
@@ -386,8 +395,11 @@ String _formatValue(AppLocalizations l10n, String key, Object? v) {
     if (v.isEmpty) return '—';
     return v.map((e) => e.toString()).join('، ');
   }
+  if (v is num) return _trimNum(v);
   final s = v.toString().trim();
-  return s.isEmpty ? '—' : s;
+  if (s.isEmpty) return '—';
+  final n = num.tryParse(s);
+  return n != null ? _trimNum(n) : s;
 }
 
 String _fieldLabel(AppLocalizations l10n, String key) {
