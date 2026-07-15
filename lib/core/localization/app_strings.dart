@@ -6615,6 +6615,34 @@ final class _DebugAppLocalizations extends AppLocalizations {
   String get revisionStatusError =>
       _resolve("revisionStatusError", (loc) => loc.revisionStatusError);
   @override
+  String get revisionStatusWithdraw =>
+      _resolve("revisionStatusWithdraw", (loc) => loc.revisionStatusWithdraw);
+  @override
+  String get revisionStatusWithdrawConfirmTitle => _resolve(
+    "revisionStatusWithdrawConfirmTitle",
+    (loc) => loc.revisionStatusWithdrawConfirmTitle,
+  );
+  @override
+  String get revisionStatusWithdrawConfirmBody => _resolve(
+    "revisionStatusWithdrawConfirmBody",
+    (loc) => loc.revisionStatusWithdrawConfirmBody,
+  );
+  @override
+  String get revisionStatusWithdrawConfirmCta => _resolve(
+    "revisionStatusWithdrawConfirmCta",
+    (loc) => loc.revisionStatusWithdrawConfirmCta,
+  );
+  @override
+  String get revisionStatusWithdrawSuccess => _resolve(
+    "revisionStatusWithdrawSuccess",
+    (loc) => loc.revisionStatusWithdrawSuccess,
+  );
+  @override
+  String get revisionStatusWithdrawError => _resolve(
+    "revisionStatusWithdrawError",
+    (loc) => loc.revisionStatusWithdrawError,
+  );
+  @override
   String get revisionStartFailedMessage => _resolve(
     "revisionStartFailedMessage",
     (loc) => loc.revisionStartFailedMessage,

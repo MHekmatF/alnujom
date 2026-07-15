@@ -22,6 +22,7 @@ import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_spinner.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/listing.dart';
@@ -77,6 +78,7 @@ class RevisionStatusPage extends StatefulWidget {
 
 class _RevisionStatusPageState extends State<RevisionStatusPage> {
   late Future<_RevisionData?> _future;
+  bool _withdrawing = false;
 
   @override
   void initState() {
@@ -100,6 +102,46 @@ class _RevisionStatusPageState extends State<RevisionStatusPage> {
       AppRouteNames.publisherListingsEdit,
       pathParameters: {'id': widget.listingId},
       extra: ListingFormMode.edit,
+    );
+  }
+
+  /// Confirms, then cancels the open revision. On success the listing keeps its
+  /// live version and we return to My Listings (the badge clears).
+  Future<void> _withdraw(String revisionId) async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await _confirmWithdraw(context, l10n);
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _withdrawing = true);
+    try {
+      await getIt<ListingRevisionsRepository>().withdrawRevision(revisionId);
+      if (!mounted) return;
+      AppToast.success(context, l10n.revisionStatusWithdrawSuccess);
+      context.go(AppRoutes.publisherMyListings);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _withdrawing = false);
+      AppToast.error(context, l10n.revisionStatusWithdrawError);
+    }
+  }
+
+  Future<bool?> _confirmWithdraw(BuildContext context, AppLocalizations l10n) {
+    return showDialog<bool>(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        title: Text(l10n.revisionStatusWithdrawConfirmTitle),
+        content: Text(l10n.revisionStatusWithdrawConfirmBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(false),
+            child: Text(l10n.actionCancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(true),
+            child: Text(l10n.revisionStatusWithdrawConfirmCta),
+          ),
+        ],
+      ),
     );
   }
 
@@ -139,7 +181,11 @@ class _RevisionStatusPageState extends State<RevisionStatusPage> {
           return Column(
             children: [
               Expanded(child: _Body(data: data)),
-              _BottomBar(onContinue: _continueEditing),
+              _BottomBar(
+                onContinue: _continueEditing,
+                onWithdraw: () => _withdraw(data.revision.id),
+                busy: _withdrawing,
+              ),
             ],
           );
         },
@@ -298,9 +344,15 @@ class _DiffRow extends StatelessWidget {
 }
 
 class _BottomBar extends StatelessWidget {
-  const _BottomBar({required this.onContinue});
+  const _BottomBar({
+    required this.onContinue,
+    required this.onWithdraw,
+    required this.busy,
+  });
 
   final VoidCallback onContinue;
+  final VoidCallback onWithdraw;
+  final bool busy;
 
   @override
   Widget build(BuildContext context) {
@@ -314,11 +366,26 @@ class _BottomBar extends StatelessWidget {
           border: BorderDirectional(top: BorderSide(color: colors.outline)),
         ),
         padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
-        child: AppButton(
-          label: l10n.revisionStatusContinueEditing,
-          icon: Icons.edit,
-          expanded: true,
-          onPressed: onContinue,
+        child: Row(
+          children: [
+            Expanded(
+              child: AppButton(
+                label: l10n.revisionStatusWithdraw,
+                variant: AppButtonVariant.outlined,
+                onPressed: busy ? null : onWithdraw,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              flex: 2,
+              child: AppButton(
+                label: l10n.revisionStatusContinueEditing,
+                icon: Icons.edit,
+                expanded: true,
+                onPressed: busy ? null : onContinue,
+              ),
+            ),
+          ],
         ),
       ),
     );
