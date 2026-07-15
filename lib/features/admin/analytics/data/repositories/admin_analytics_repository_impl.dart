@@ -123,6 +123,48 @@ class AdminAnalyticsRepositoryImpl implements AdminAnalyticsRepository {
     }
   }
 
+  @override
+  Future<Result<List<AdminCategoryTotal>>> fetchListingsByCategory() async {
+    try {
+      final dtos = await _datasource
+          .fetchListingsByCategory()
+          .timeout(_rpcTimeout);
+      return Success(dtos.map((dto) => dto.toEntity()).toList(growable: false));
+    } on Object catch (error, stackTrace) {
+      _logger.warning(
+        'fetchListingsByCategory failed.',
+        error: error,
+        stackTrace: stackTrace,
+        tag: _tag,
+      );
+      return FailureResult(
+        UnknownFailure(error.toString(), cause: error, stackTrace: stackTrace),
+      );
+    }
+  }
+
+  @override
+  Future<Result<List<AdminActivityCell>>> fetchActivityByDowHour({
+    int days = 30,
+  }) async {
+    try {
+      final dtos = await _datasource
+          .fetchActivityByDowHour(days: days)
+          .timeout(_rpcTimeout);
+      return Success(dtos.map((dto) => dto.toEntity()).toList(growable: false));
+    } on Object catch (error, stackTrace) {
+      _logger.warning(
+        'fetchActivityByDowHour failed.',
+        error: error,
+        stackTrace: stackTrace,
+        tag: _tag,
+      );
+      return FailureResult(
+        UnknownFailure(error.toString(), cause: error, stackTrace: stackTrace),
+      );
+    }
+  }
+
   /// One [AdminMonthlyTotal] per calendar month across the trailing [months]
   /// window (oldest → newest, ending this month). Absent months default to 0.
   /// Returns empty when [sparse] is empty so the page can show an empty hint

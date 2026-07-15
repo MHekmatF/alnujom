@@ -21,4 +21,13 @@ abstract class AdminAnalyticsRepository {
   /// Active listings per governorate, busiest first (top 10), ordered as
   /// returned by the RPC.
   Future<Result<List<AdminGovernorateTotal>>> fetchListingsByGovernorate();
+
+  /// Approved listings grouped by property type, busiest first.
+  Future<Result<List<AdminCategoryTotal>>> fetchListingsByCategory();
+
+  /// Lead-event activity cells (ISO day-of-week × 4-hour bucket) over the
+  /// trailing [days]-day window; empty buckets omitted.
+  Future<Result<List<AdminActivityCell>>> fetchActivityByDowHour({
+    int days = 30,
+  });
 }

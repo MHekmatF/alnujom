@@ -2626,5 +2626,11 @@
   "home_city_picker_error": "Couldn't load areas",
   "@home_city_picker_error": {"description": "Home location picker — load-failure message (035)."},
   "leadAnalyticsBySourceSectionLabel": "Leads by source",
-  "@leadAnalyticsBySourceSectionLabel": {"description": "Publisher lead-analytics — 'by source' summary section label (035)."}
+  "@leadAnalyticsBySourceSectionLabel": {"description": "Publisher lead-analytics — 'by source' summary section label (035)."},
+  "adminAnalyticsByCategoryTitle": "Listings by type",
+  "@adminAnalyticsByCategoryTitle": {"description": "Admin analytics — listings-by-property-type donut title (035)."},
+  "adminAnalyticsByCategoryCenterLabel": "listings",
+  "@adminAnalyticsByCategoryCenterLabel": {"description": "Admin analytics — donut centre label under the total (035)."},
+  "adminAnalyticsActivityTitle": "Activity by time",
+  "@adminAnalyticsActivityTitle": {"description": "Admin analytics — activity heatmap title (035)."}
 }

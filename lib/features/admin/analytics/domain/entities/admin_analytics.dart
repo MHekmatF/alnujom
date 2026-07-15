@@ -44,7 +44,32 @@ class AdminGovernorateTotal {
   final int total;
 }
 
-/// The full admin-analytics payload: four independent series. Any may be empty
+/// Approved listings grouped by property type (apartment/villa/land/…).
+class AdminCategoryTotal {
+  const AdminCategoryTotal({required this.propertyType, required this.total});
+
+  /// The `listings.property_type` value.
+  final String propertyType;
+
+  /// Approved listings of this type.
+  final int total;
+}
+
+/// One activity-grid cell: lead events at ISO [dow] (1=Mon .. 7=Sun) within the
+/// 4-hour [hourBucket] (0..5, i.e. 00–04, 04–08, … 20–24 UTC).
+class AdminActivityCell {
+  const AdminActivityCell({
+    required this.dow,
+    required this.hourBucket,
+    required this.total,
+  });
+
+  final int dow;
+  final int hourBucket;
+  final int total;
+}
+
+/// The full admin-analytics payload: independent series. Any may be empty
 /// (no data, or the caller lacks that section's permission).
 class AdminAnalytics {
   const AdminAnalytics({
@@ -52,6 +77,8 @@ class AdminAnalytics {
     required this.profilesByMonth,
     required this.leadEventsByDay,
     required this.listingsByGovernorate,
+    required this.listingsByCategory,
+    required this.activityByDowHour,
   });
 
   /// Listings created per month (gap-filled, oldest → newest).
@@ -66,11 +93,20 @@ class AdminAnalytics {
   /// Active listings per governorate, busiest first (top 10).
   final List<AdminGovernorateTotal> listingsByGovernorate;
 
+  /// Approved listings grouped by property type, busiest first.
+  final List<AdminCategoryTotal> listingsByCategory;
+
+  /// Lead-event activity cells (day-of-week × 4-hour bucket); empty buckets
+  /// omitted (rendered as blank cells by the heatmap).
+  final List<AdminActivityCell> activityByDowHour;
+
   /// An empty payload — handy as an optimistic placeholder.
   static const empty = AdminAnalytics(
     listingsByMonth: [],
     profilesByMonth: [],
     leadEventsByDay: [],
     listingsByGovernorate: [],
+    listingsByCategory: [],
+    activityByDowHour: [],
   );
 }

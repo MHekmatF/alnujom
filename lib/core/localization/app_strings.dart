@@ -6838,4 +6838,10 @@ final class _DebugAppLocalizations extends AppLocalizations {
   String get home_city_picker_error => _resolve('home_city_picker_error', (loc) => loc.home_city_picker_error);
   @override
   String get leadAnalyticsBySourceSectionLabel => _resolve('leadAnalyticsBySourceSectionLabel', (loc) => loc.leadAnalyticsBySourceSectionLabel);
+  @override
+  String get adminAnalyticsByCategoryTitle => _resolve('adminAnalyticsByCategoryTitle', (loc) => loc.adminAnalyticsByCategoryTitle);
+  @override
+  String get adminAnalyticsByCategoryCenterLabel => _resolve('adminAnalyticsByCategoryCenterLabel', (loc) => loc.adminAnalyticsByCategoryCenterLabel);
+  @override
+  String get adminAnalyticsActivityTitle => _resolve('adminAnalyticsActivityTitle', (loc) => loc.adminAnalyticsActivityTitle);
 }

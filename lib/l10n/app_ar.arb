@@ -2526,5 +2526,8 @@
   "settings_version": "النجوم · الإصدار {version}",
   "home_city_picker_title": "اختر المنطقة",
   "home_city_picker_error": "تعذّر تحميل المناطق",
-  "leadAnalyticsBySourceSectionLabel": "التفاعلات حسب المصدر"
+  "leadAnalyticsBySourceSectionLabel": "التفاعلات حسب المصدر",
+  "adminAnalyticsByCategoryTitle": "الإعلانات حسب النوع",
+  "adminAnalyticsByCategoryCenterLabel": "إعلان",
+  "adminAnalyticsActivityTitle": "النشاط حسب الوقت"
 }

@@ -35,6 +35,8 @@ class AdminAnalyticsCubit extends Cubit<AdminAnalyticsState> {
       _repository.fetchProfilesByMonth(months: monthsWindow),
       _repository.fetchLeadEventsByDay(days: daysWindow),
       _repository.fetchListingsByGovernorate(),
+      _repository.fetchListingsByCategory(),
+      _repository.fetchActivityByDowHour(days: daysWindow),
     ]);
     if (isClosed) return;
 
@@ -42,6 +44,8 @@ class AdminAnalyticsCubit extends Cubit<AdminAnalyticsState> {
     final profilesResult = results[1] as Result<List<AdminMonthlyTotal>>;
     final leadsResult = results[2] as Result<List<AdminDailyTotal>>;
     final govResult = results[3] as Result<List<AdminGovernorateTotal>>;
+    final categoryResult = results[4] as Result<List<AdminCategoryTotal>>;
+    final activityResult = results[5] as Result<List<AdminActivityCell>>;
 
     // Resilient: render whatever loaded. A single stalled/failed series just
     // shows its own empty card — only a TOTAL wipe-out (every series failed,
@@ -70,6 +74,8 @@ class AdminAnalyticsCubit extends Cubit<AdminAnalyticsState> {
           profilesByMonth: valueOr(profilesResult),
           leadEventsByDay: valueOr(leadsResult),
           listingsByGovernorate: valueOr(govResult),
+          listingsByCategory: valueOr(categoryResult),
+          activityByDowHour: valueOr(activityResult),
         ),
       ),
     );

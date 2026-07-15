@@ -23,6 +23,8 @@ import '../../../../../core/theme/spacing.dart';
 import '../../../../../core/theme/typography.dart';
 import '../../../../../core/widgets/_widget_support.dart';
 import '../../../../../core/widgets/charts/dc_bar_chart.dart';
+import '../../../../../core/widgets/charts/dc_donut_chart.dart';
+import '../../../../../core/widgets/charts/dc_heatmap.dart';
 import '../../../../../core/widgets/charts/dc_line_chart.dart';
 import '../../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../../core/widgets/ds/dc_stat_card.dart';
@@ -87,6 +89,9 @@ class _Body extends StatelessWidget {
     final govs = analytics.listingsByGovernorate;
     final topGovs = govs.length > 6 ? govs.sublist(0, 6) : govs;
 
+    final palette = _categoryPalette(AppColors.of(context));
+    final cats = analytics.listingsByCategory;
+
     final sections = <Widget>[
       // KPI row — real values, month-over-month trend where the series supports it.
       _KpiGrid(analytics: analytics, l10n: l10n, numLocale: numLocale),
@@ -136,6 +141,44 @@ class _Body extends StatelessWidget {
           totalValue: formatLocalizedNumber(
             analytics.leadEventsByDay.fold<int>(0, (s, p) => s + p.total),
             numLocale,
+          ),
+        ),
+      // Listings by property type → native donut (a new chart type).
+      if (cats.isEmpty)
+        _EmptyChartCard(
+          title: l10n.adminAnalyticsByCategoryTitle,
+          hint: l10n.adminAnalyticsEmptyHint,
+        )
+      else
+        _TitledChartCard(
+          title: l10n.adminAnalyticsByCategoryTitle,
+          child: DcDonutChart(
+            centerLabel: l10n.adminAnalyticsByCategoryCenterLabel,
+            slices: [
+              for (var i = 0; i < cats.length; i++)
+                DcDonutSlice(
+                  label: _categoryLabel(cats[i].propertyType, l10n),
+                  value: cats[i].total,
+                  color: palette[i % palette.length],
+                ),
+            ],
+          ),
+        ),
+      // Lead-event activity by day-of-week × 4-hour bucket → native heatmap.
+      if (analytics.activityByDowHour.isEmpty)
+        _EmptyChartCard(
+          title: l10n.adminAnalyticsActivityTitle,
+          hint: l10n.adminAnalyticsEmptyHint,
+        )
+      else
+        _TitledChartCard(
+          title: l10n.adminAnalyticsActivityTitle,
+          child: DcHeatmap(
+            rowLabels: _dayLabels(locale),
+            cells: [
+              for (final c in analytics.activityByDowHour)
+                DcHeatmapCell(dow: c.dow, bucket: c.hourBucket, value: c.total),
+            ],
           ),
         ),
     ];
@@ -437,6 +480,72 @@ class _SegToggle extends StatelessWidget {
 
 /// A flat titled card carrying only a muted "no data" hint — shown when a
 /// series is empty (no data, or the caller lacks that section's permission).
+/// A titled card shell for a chart that carries no built-in card (the donut /
+/// heatmap) — mirrors [_EmptyChartCard]'s frame with an arbitrary child.
+class _TitledChartCard extends StatelessWidget {
+  const _TitledChartCard({required this.title, required this.child});
+
+  final String title;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: colors.card,
+        borderRadius: appRadius(AppRadii.lg),
+        border: Border.all(color: colors.outline),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: styles.labelLarge.copyWith(color: colors.onSurface),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+/// Maps a `listings.property_type` value to its localized label.
+String _categoryLabel(String type, AppLocalizations l10n) => switch (type) {
+  'apartment' => l10n.propertyTypeApartment,
+  'villa' => l10n.propertyTypeVilla,
+  'land' => l10n.propertyTypeLand,
+  'shop' => l10n.propertyTypeShop,
+  'office' => l10n.propertyTypeOffice,
+  'farm' => l10n.propertyTypeFarm,
+  'warehouse' => l10n.propertyTypeWarehouse,
+  _ => l10n.propertyTypeOther,
+};
+
+/// The donut slice palette — distinct token colours, cycled for extra slices.
+List<Color> _categoryPalette(AppColors colors) => [
+  colors.primary,
+  colors.success,
+  colors.warning,
+  colors.accent,
+  colors.error,
+  colors.textMuted,
+];
+
+/// Localized short day-of-week labels (Mon → Sun) for the activity heatmap rows.
+List<String> _dayLabels(String locale) {
+  final monday = DateTime(2024, 1, 1); // 2024-01-01 is a Monday.
+  return [
+    for (var i = 0; i < 7; i++)
+      DateFormat.E(locale).format(monday.add(Duration(days: i))),
+  ];
+}
+
 class _EmptyChartCard extends StatelessWidget {
   const _EmptyChartCard({required this.title, required this.hint});
 

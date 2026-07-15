@@ -63,6 +63,48 @@ class AdminGovernorateTotalDto {
       AdminGovernorateTotal(nameAr: nameAr, nameEn: nameEn, total: total);
 }
 
+/// Maps one `admin_listings_by_category()` row.
+class AdminCategoryTotalDto {
+  const AdminCategoryTotalDto({required this.propertyType, required this.total});
+
+  final String propertyType;
+  final int total;
+
+  factory AdminCategoryTotalDto.fromJson(Map<String, dynamic> json) {
+    return AdminCategoryTotalDto(
+      propertyType: (json['property_type'] ?? '').toString(),
+      total: _toInt(json['total']),
+    );
+  }
+
+  AdminCategoryTotal toEntity() =>
+      AdminCategoryTotal(propertyType: propertyType, total: total);
+}
+
+/// Maps one `admin_activity_by_dow_hour()` row.
+class AdminActivityCellDto {
+  const AdminActivityCellDto({
+    required this.dow,
+    required this.hourBucket,
+    required this.total,
+  });
+
+  final int dow;
+  final int hourBucket;
+  final int total;
+
+  factory AdminActivityCellDto.fromJson(Map<String, dynamic> json) {
+    return AdminActivityCellDto(
+      dow: _toInt(json['dow']),
+      hourBucket: _toInt(json['hour_bucket']),
+      total: _toInt(json['total']),
+    );
+  }
+
+  AdminActivityCell toEntity() =>
+      AdminActivityCell(dow: dow, hourBucket: hourBucket, total: total);
+}
+
 /// Coerces a JSON scalar to a non-null int (Supabase BIGINT may arrive as int,
 /// num, or String), defaulting to 0.
 int _toInt(dynamic value) {
