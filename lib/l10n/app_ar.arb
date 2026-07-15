@@ -2525,5 +2525,6 @@
   "settings_rate_app": "قيّم التطبيق",
   "settings_version": "النجوم · الإصدار {version}",
   "home_city_picker_title": "اختر المنطقة",
-  "home_city_picker_error": "تعذّر تحميل المناطق"
+  "home_city_picker_error": "تعذّر تحميل المناطق",
+  "leadAnalyticsBySourceSectionLabel": "التفاعلات حسب المصدر"
 }
