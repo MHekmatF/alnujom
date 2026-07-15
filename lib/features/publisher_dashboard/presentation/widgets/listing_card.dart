@@ -235,11 +235,20 @@ class ListingCard extends StatelessWidget {
     // bloc detects `approved` and drives stay-live revision mode (the live
     // listing stays public until an admin applies the staged edit).
     if (publisherListing.canOpenEditForm) {
-      context.goNamed(
-        AppRouteNames.publisherListingsEdit,
-        pathParameters: {'id': listing.id},
-        extra: ListingFormMode.edit,
-      );
+      // With an open pending-review revision, show the change summary first
+      // (the status screen's «Continue editing» re-opens this same edit form).
+      if (editInReview) {
+        context.goNamed(
+          AppRouteNames.publisherListingsRevisionStatus,
+          pathParameters: {'id': listing.id},
+        );
+      } else {
+        context.goNamed(
+          AppRouteNames.publisherListingsEdit,
+          pathParameters: {'id': listing.id},
+          extra: ListingFormMode.edit,
+        );
+      }
     } else {
       Navigator.of(context).push(
         MaterialPageRoute<void>(

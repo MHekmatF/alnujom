@@ -6586,6 +6586,35 @@ final class _DebugAppLocalizations extends AppLocalizations {
   String get revisionBannerBody =>
       _resolve("revisionBannerBody", (loc) => loc.revisionBannerBody);
   @override
+  String get revisionStatusTitle =>
+      _resolve("revisionStatusTitle", (loc) => loc.revisionStatusTitle);
+  @override
+  String get revisionStatusProposedChanges => _resolve(
+    "revisionStatusProposedChanges",
+    (loc) => loc.revisionStatusProposedChanges,
+  );
+  @override
+  String get revisionStatusAwaitingReview => _resolve(
+    "revisionStatusAwaitingReview",
+    (loc) => loc.revisionStatusAwaitingReview,
+  );
+  @override
+  String get revisionStatusContinueEditing => _resolve(
+    "revisionStatusContinueEditing",
+    (loc) => loc.revisionStatusContinueEditing,
+  );
+  @override
+  String get revisionStatusNoChanges =>
+      _resolve("revisionStatusNoChanges", (loc) => loc.revisionStatusNoChanges);
+  @override
+  String get revisionStatusNoFieldChanges => _resolve(
+    "revisionStatusNoFieldChanges",
+    (loc) => loc.revisionStatusNoFieldChanges,
+  );
+  @override
+  String get revisionStatusError =>
+      _resolve("revisionStatusError", (loc) => loc.revisionStatusError);
+  @override
   String get revisionStartFailedMessage => _resolve(
     "revisionStartFailedMessage",
     (loc) => loc.revisionStartFailedMessage,

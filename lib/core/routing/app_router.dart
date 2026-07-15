@@ -39,6 +39,7 @@ import '../../features/locations/presentation/pages/locations_list_page.dart';
 import '../../features/listing_form/domain/entities/listing.dart';
 import '../../features/listing_form/domain/entities/listing_form_state.dart';
 import '../../features/listing_form/presentation/pages/listing_form_page.dart';
+import '../../features/listing_form/presentation/pages/revision_status_page.dart';
 import '../../features/favorites/presentation/pages/favorites_page.dart';
 import '../../features/reports/presentation/pages/my_reports_page.dart';
 import '../../features/admin/reports/presentation/pages/reports_queue_page.dart';
@@ -113,6 +114,8 @@ abstract final class AppRoutes {
   static const profilePrivate = '/profile/private';
   static const publisherListingsCreate = '/publisher/listings/create';
   static const publisherListingsEdit = '/publisher/listings/:id/edit';
+  static const publisherListingsRevisionStatus =
+      '/publisher/listings/:id/revision';
   static const publisherMyListings = '/publisher/dashboard/my-listings';
   static const publisherApprovalPending = '/publisher/pending-approval';
   static const publisherListingsModerationHistory =
@@ -215,6 +218,8 @@ abstract final class AppRouteNames {
   static const profilePrivate = 'profile-private';
   static const publisherListingsCreate = 'publisher-listings-create';
   static const publisherListingsEdit = 'publisher-listings-edit';
+  static const publisherListingsRevisionStatus =
+      'publisher-listings-revision-status';
   static const publisherMyListings = 'publisher-my-listings';
   static const publisherApprovalPending = 'publisher-pending-approval';
   static const publisherListingsModerationHistory =
@@ -546,6 +551,13 @@ GoRouter buildAppRouter({
           mode: ListingFormMode.edit,
           listingId: state.pathParameters['id'],
         ),
+      ),
+      GoRoute(
+        path: AppRoutes.publisherListingsRevisionStatus,
+        name: AppRouteNames.publisherListingsRevisionStatus,
+        redirect: requirePublisherStatusRedirect,
+        builder: (context, state) =>
+            RevisionStatusPage(listingId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: AppRoutes.publisherMyListings,
