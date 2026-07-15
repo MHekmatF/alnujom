@@ -9,6 +9,7 @@
 // Build:  flutter build apk --debug -t tool/dc_gallery/main.dart --dart-define-from-file=.env.json
 // (Reinstall the real app afterwards.)
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 import 'package:alnujom/core/theme/app_theme.dart';
 import 'package:alnujom/core/theme/color_palette.dart';
@@ -17,6 +18,7 @@ import 'package:alnujom/core/theme/radii.dart';
 import 'package:alnujom/core/theme/spacing.dart';
 import 'package:alnujom/core/theme/typography.dart';
 import 'package:alnujom/core/widgets/_widget_support.dart';
+import 'package:alnujom/core/widgets/app_button.dart';
 import 'package:alnujom/core/widgets/charts/dc_bar_chart.dart';
 import 'package:alnujom/core/widgets/charts/dc_line_chart.dart';
 import 'package:alnujom/core/widgets/dc_crown_scaffold.dart';
@@ -25,6 +27,7 @@ import 'package:alnujom/core/widgets/ds/dc_stat_card.dart';
 import 'package:alnujom/core/widgets/ds/dc_meta_chip.dart';
 import 'package:alnujom/core/widgets/ds/dc_status_chip.dart';
 import 'package:alnujom/core/widgets/ds/dc_timeline.dart';
+import 'package:alnujom/features/auth/presentation/widgets/auth_status_message.dart';
 
 void main() => runApp(const DcGalleryApp());
 
@@ -343,7 +346,161 @@ class DcGalleryHome extends StatelessWidget {
               ],
             ),
           ),
+          const SizedBox(height: AppSpacing.xl),
+          _Label(ar ? 'شاشات حالة الحساب' : 'Account status screens'),
+          const SizedBox(height: AppSpacing.md),
+          _StatusScreenButtons(ar: ar),
         ],
+      ),
+    );
+  }
+}
+
+/// Launcher buttons for the 4 account-gate screens (pending / publisher-pending
+/// / rejected / suspended). Each pushes a full-screen [_StatusScreenDemo] so the
+/// DC crown chrome (blue header + white sheet) wrapping the shared
+/// [AuthStatusMessage] can be eye-verified — those pages only appear for a
+/// specially-statused account, so they can't be reached in the running app.
+class _StatusScreenButtons extends StatelessWidget {
+  const _StatusScreenButtons({required this.ar});
+
+  final bool ar;
+
+  @override
+  Widget build(BuildContext context) {
+    final signOut = ar ? 'تسجيل الخروج' : 'Sign out';
+    final items =
+        <
+          ({
+            String title,
+            IconData icon,
+            AuthStatusTone tone,
+            String message,
+            bool crownSignOut,
+            bool bodySignOut,
+          })
+        >[
+          (
+            title: ar ? 'قيد الموافقة' : 'Pending approval',
+            icon: LucideIcons.clock,
+            tone: AuthStatusTone.neutral,
+            message: ar
+                ? 'حسابك قيد المراجعة من قِبل الفريق. سنُعلمك فور الموافقة عليه.'
+                : 'Your account is under review. We will notify you once it is approved.',
+            crownSignOut: true,
+            bodySignOut: false,
+          ),
+          (
+            title: ar ? 'طلب النشر قيد المراجعة' : 'Publisher request pending',
+            icon: LucideIcons.badge_check,
+            tone: AuthStatusTone.neutral,
+            message: ar
+                ? 'طلبك لتصبح ناشراً قيد المراجعة. يمكنك التصفّح ريثما تتم الموافقة.'
+                : 'Your request to become a publisher is under review. You can browse meanwhile.',
+            crownSignOut: false,
+            bodySignOut: false,
+          ),
+          (
+            title: ar ? 'تم رفض الحساب' : 'Account rejected',
+            icon: LucideIcons.circle_x,
+            tone: AuthStatusTone.error,
+            message: ar
+                ? 'نأسف، لم تتم الموافقة على حسابك. السبب: بيانات غير مكتملة.'
+                : 'Sorry, your account was not approved. Reason: incomplete details.',
+            crownSignOut: false,
+            bodySignOut: true,
+          ),
+          (
+            title: ar ? 'الحساب موقوف' : 'Account suspended',
+            icon: LucideIcons.ban,
+            tone: AuthStatusTone.warning,
+            message: ar
+                ? 'تم إيقاف حسابك مؤقتاً. تواصل مع الدعم لمزيد من المعلومات.'
+                : 'Your account has been suspended. Contact support for more information.',
+            crownSignOut: false,
+            bodySignOut: true,
+          ),
+        ];
+
+    return Column(
+      children: [
+        for (final it in items) ...[
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              icon: Icon(it.icon),
+              label: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: Text(it.title),
+              ),
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => _StatusScreenDemo(
+                    title: it.title,
+                    icon: it.icon,
+                    tone: it.tone,
+                    message: it.message,
+                    crownSignOut: it.crownSignOut,
+                    bodySignOut: it.bodySignOut,
+                    signOutLabel: signOut,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+        ],
+      ],
+    );
+  }
+}
+
+/// Faithful full-screen proxy of an account-gate page: the exact widget tree the
+/// real page builds — [DcCrownScaffold] (title + optional crown sign-out action)
+/// over a padded, centred [AuthStatusMessage] (with an optional in-body sign-out
+/// button) — minus only the [AuthBloc] wiring, which is behaviour, not visuals.
+class _StatusScreenDemo extends StatelessWidget {
+  const _StatusScreenDemo({
+    required this.title,
+    required this.icon,
+    required this.tone,
+    required this.message,
+    required this.crownSignOut,
+    required this.bodySignOut,
+    required this.signOutLabel,
+  });
+
+  final String title;
+  final IconData icon;
+  final AuthStatusTone tone;
+  final String message;
+  final bool crownSignOut;
+  final bool bodySignOut;
+  final String signOutLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    return DcCrownScaffold(
+      title: title,
+      dense: true,
+      actions: crownSignOut
+          ? [DcCrownTextButton(label: signOutLabel, onTap: () {})]
+          : null,
+      body: Padding(
+        padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
+        child: AuthStatusMessage(
+          icon: icon,
+          tone: tone,
+          title: title,
+          message: message,
+          action: bodySignOut
+              ? AppButton(
+                  label: signOutLabel,
+                  variant: AppButtonVariant.outlined,
+                  onPressed: () {},
+                )
+              : null,
+        ),
       ),
     );
   }

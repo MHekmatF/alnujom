@@ -22,7 +22,7 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_spinner.dart';
-import '../../../../core/widgets/deep_link_aware_back_button.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/press_scale.dart';
@@ -59,17 +59,21 @@ class _AdminOversightView extends StatelessWidget {
 
     return BlocBuilder<InquiryInboxBloc, InquiryInboxState>(
       builder: (context, state) {
-        return Scaffold(
-          appBar: AppBar(
-            leading: const DeepLinkAwareBackButton(),
-            title: Text(l10n.admin_inquiries_app_bar_title),
-            actions: [
-              // Status filter — reused from publisher inbox.
-              _AdminStatusFilterButton(state: state),
-              // Publisher filter stub (Phase 16: always "All publishers").
-              const _PublisherFilterDropdown(),
-            ],
+        return DcCrownScaffold(
+          title: l10n.admin_inquiries_app_bar_title,
+          dense: true,
+          leading: DcCrownIconButton(
+            icon: Icons.arrow_forward,
+            onTap: () => context.canPop()
+                ? context.pop()
+                : context.go(AppRoutes.shellHome),
           ),
+          actions: [
+            // Status filter — reused from publisher inbox.
+            _AdminStatusFilterButton(state: state),
+            // Publisher filter stub (Phase 16: always "All publishers").
+            const _PublisherFilterDropdown(),
+          ],
           body: Column(
             children: [
               // Admin-tier banner distinguishes this from the publisher inbox.
@@ -91,12 +95,14 @@ class _AdminStatusFilterButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
     final currentFilter = state is InquiryInboxLoaded
         ? (state as InquiryInboxLoaded).statusFilter
         : null;
 
     return PopupMenuButton<InquiryStatus?>(
       tooltip: l10n.inquiry_inbox_filter_status_label,
+      iconColor: colors.onBrandHeader,
       icon: const Icon(LucideIcons.funnel),
       onSelected: (value) => context.read<InquiryInboxBloc>().add(
         InquiryInboxStatusFilterChanged(value),
@@ -136,9 +142,11 @@ class _PublisherFilterDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
 
     return PopupMenuButton<String?>(
       tooltip: l10n.admin_inquiries_publisher_filter_label,
+      iconColor: colors.onBrandHeader,
       icon: const Icon(LucideIcons.user),
       onSelected: (_) {
         // Phase 16 stub: no real publisher filter implemented.
