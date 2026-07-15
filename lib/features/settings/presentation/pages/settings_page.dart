@@ -23,6 +23,7 @@ import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../core/widgets/segmented_control.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../currencies/presentation/widgets/preferred_currency_toggle.dart';
+import '../../data/datasources/notification_prefs_remote.dart';
 
 /// Phase 035 — the unified user Settings screen (Tier-D "Chrome" design).
 ///
@@ -44,6 +45,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   static const _storeUrl =
       'https://play.google.com/store/apps/details?id=com.alnujom.app';
+  static const _remote = NotificationPrefsRemote();
 
   @override
   void initState() {
@@ -52,7 +54,25 @@ class _SettingsPageState extends State<SettingsPage> {
     // toggles reflect the saved state on open.
     LiteMode.load();
     NotificationPrefs.load();
+    unawaited(_loadRemotePrefs());
     unawaited(_loadVersion());
+  }
+
+  /// Pulls the server-authoritative per-category notification flags (when signed
+  /// in) into the local [NotificationPrefs] so the toggles reflect the account's
+  /// state across devices. Local-only writes — no server round-trip back.
+  Future<void> _loadRemotePrefs() async {
+    final server = await _remote.read();
+    for (final entry in server.entries) {
+      await NotificationPrefs.set(entry.key, entry.value);
+    }
+  }
+
+  /// Flips a notification category locally (instant UI) AND on the server (the
+  /// dispatch_push edge function honors the columns to actually mute pushes).
+  void _setNotif(NotificationCategory category, bool value) {
+    unawaited(NotificationPrefs.set(category, value));
+    unawaited(_remote.write(category, value));
   }
 
   Future<void> _loadVersion() async {
@@ -175,20 +195,17 @@ class _SettingsPageState extends State<SettingsPage> {
         _SettingsToggleRow(
           title: l10n.settings_notif_new_matches,
           listenable: NotificationPrefs.notifier(NotificationCategory.newMatches),
-          onChanged: (v) =>
-              unawaited(NotificationPrefs.set(NotificationCategory.newMatches, v)),
+          onChanged: (v) => _setNotif(NotificationCategory.newMatches, v),
         ),
         _SettingsToggleRow(
           title: l10n.settings_notif_messages,
           listenable: NotificationPrefs.notifier(NotificationCategory.messages),
-          onChanged: (v) =>
-              unawaited(NotificationPrefs.set(NotificationCategory.messages, v)),
+          onChanged: (v) => _setNotif(NotificationCategory.messages, v),
         ),
         _SettingsToggleRow(
           title: l10n.settings_notif_marketing,
           listenable: NotificationPrefs.notifier(NotificationCategory.marketing),
-          onChanged: (v) =>
-              unawaited(NotificationPrefs.set(NotificationCategory.marketing, v)),
+          onChanged: (v) => _setNotif(NotificationCategory.marketing, v),
         ),
       ],
     );
