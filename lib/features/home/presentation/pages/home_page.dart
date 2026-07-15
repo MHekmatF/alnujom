@@ -40,9 +40,11 @@ import '../bloc/home_state.dart';
 import '../../../ads/domain/entities/ad_placement.dart';
 import '../../../ads/presentation/widgets/ad_slot.dart';
 import '../../../recently_viewed/presentation/bloc/recently_viewed_cubit.dart';
+import '../../../search/domain/entities/filter_state.dart';
 import '../../domain/entities/home_listing_card.dart';
 import '../widgets/featured_listings_carousel.dart';
 import '../widgets/home_card_mapper.dart';
+import '../widgets/home_city_picker_sheet.dart';
 
 /// Phase 13 — public HomePage per FR-013 + contracts/
 /// phase13-home-page-composition.md.
@@ -467,7 +469,20 @@ class _HomeCrown extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           InkWell(
-            onTap: () {},
+            onTap: () async {
+              final govId = await showModalBottomSheet<String>(
+                context: context,
+                showDragHandle: true,
+                isScrollControlled: true,
+                builder: (_) => const HomeCityPickerSheet(),
+              );
+              if (govId != null && context.mounted) {
+                context.go(
+                  AppRoutes.search,
+                  extra: FilterState(governorateId: govId),
+                );
+              }
+            },
             borderRadius: appRadius(AppRadii.sm),
             child: Padding(
               padding: const EdgeInsetsDirectional.symmetric(

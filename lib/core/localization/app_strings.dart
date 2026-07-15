@@ -6832,4 +6832,8 @@ final class _DebugAppLocalizations extends AppLocalizations {
   String get settings_rate_app => _resolve('settings_rate_app', (loc) => loc.settings_rate_app);
   @override
   String settings_version(String version) => _resolve('settings_version', (loc) => loc.settings_version(version));
+  @override
+  String get home_city_picker_title => _resolve('home_city_picker_title', (loc) => loc.home_city_picker_title);
+  @override
+  String get home_city_picker_error => _resolve('home_city_picker_error', (loc) => loc.home_city_picker_error);
 }

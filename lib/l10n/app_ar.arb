@@ -2523,5 +2523,7 @@
   "settings_about_heading": "حول والدعم",
   "settings_about_row": "عن التطبيق والدعم",
   "settings_rate_app": "قيّم التطبيق",
-  "settings_version": "النجوم · الإصدار {version}"
+  "settings_version": "النجوم · الإصدار {version}",
+  "home_city_picker_title": "اختر المنطقة",
+  "home_city_picker_error": "تعذّر تحميل المناطق"
 }

@@ -2620,5 +2620,9 @@
   "settings_rate_app": "Rate the app",
   "@settings_rate_app": {"description": "Settings — rate-the-app row (035)."},
   "settings_version": "AlNujom · Version {version}",
-  "@settings_version": {"description": "Settings — version footer; {version} is the app version string (035).", "placeholders": {"version": {"type": "String"}}}
+  "@settings_version": {"description": "Settings — version footer; {version} is the app version string (035).", "placeholders": {"version": {"type": "String"}}},
+  "home_city_picker_title": "Choose an area",
+  "@home_city_picker_title": {"description": "Home location-chip picker sheet title (035)."},
+  "home_city_picker_error": "Couldn't load areas",
+  "@home_city_picker_error": {"description": "Home location picker — load-failure message (035)."}
 }
