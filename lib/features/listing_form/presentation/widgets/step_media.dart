@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart' hide TextDirection;
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/theme/colors.dart';
@@ -14,6 +13,7 @@ import '../../../../core/widgets/app_bottom_sheet.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/util/localized_numbers.dart';
 import '../../domain/entities/listing.dart';
 import '../../domain/entities/listing_form_state.dart';
 import '../../domain/entities/listing_media.dart';
@@ -408,7 +408,7 @@ class _HelpStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
-    final locale = Localizations.localeOf(context).toLanguageTag();
+    final locale = Localizations.localeOf(context);
     return Padding(
       padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.md),
       child: Row(
@@ -423,7 +423,7 @@ class _HelpStep extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: Text(
-              NumberFormat.decimalPattern(locale).format(index),
+              formatLocalizedNumber(index, locale),
               style: styles.labelMedium.copyWith(color: colors.primary),
             ),
           ),

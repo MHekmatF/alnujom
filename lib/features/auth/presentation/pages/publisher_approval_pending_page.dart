@@ -4,8 +4,8 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_router.dart';
-import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/account_status.dart';
 import '../../../../shared/domain/value_objects/publisher_status.dart';
@@ -25,7 +25,6 @@ class PublisherApprovalPendingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final colors = AppColors.of(context);
 
     return BlocListener<AuthBloc, AuthState>(
       listenWhen: (prev, curr) {
@@ -40,21 +39,15 @@ class PublisherApprovalPendingPage extends StatelessWidget {
           context.go(AppRoutes.shellHome);
         }
       },
-      child: Scaffold(
-        backgroundColor: colors.surface,
-        appBar: AppBar(
-          backgroundColor: colors.surface,
-          elevation: 0,
-          title: Text(l10n.publisherApprovalPendingTitle),
-        ),
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-            child: AuthStatusMessage(
-              icon: LucideIcons.badge_check,
-              title: l10n.publisherApprovalPendingTitle,
-              message: l10n.publisherApprovalPendingMessage,
-            ),
+      child: DcCrownScaffold(
+        title: l10n.publisherApprovalPendingTitle,
+        dense: true,
+        body: Padding(
+          padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
+          child: AuthStatusMessage(
+            icon: LucideIcons.badge_check,
+            title: l10n.publisherApprovalPendingTitle,
+            message: l10n.publisherApprovalPendingMessage,
           ),
         ),
       ),

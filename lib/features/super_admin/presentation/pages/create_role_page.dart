@@ -3,10 +3,12 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/app_toast.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/permission_catalog_entry.dart';
 import '../../domain/entities/role_mutation_result.dart';
@@ -50,8 +52,14 @@ class _CreateRolePageState extends State<CreateRolePage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.superAdminCreateRoleTitle)),
+    return DcCrownScaffold(
+      title: l10n.superAdminCreateRoleTitle,
+      dense: true,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () =>
+            context.canPop() ? context.pop() : context.go(AppRoutes.shellHome),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _saving ? null : _save,
         child: _saving ? const AppSpinner() : const Icon(LucideIcons.save),

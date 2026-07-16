@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&family=Roboto:wght@400;500;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..0&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;scrollbar-width:none}
+html,body{margin:0;padding:0}
+body{background:#C7CBD3;font-family:'Roboto','Noto Sans Arabic',sans-serif}
+a{color:#1F4FE6;text-decoration:none}a:hover{opacity:.85}
+::-webkit-scrollbar{width:0;height:0;display:none}
+@keyframes scr{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
+@keyframes pan{0%{background-position:0% 50%}100%{background-position:100% 50%}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:#C7CBD3;display:flex;flex-direction:column;align-items:center;padding:26px 16px 44px;gap:14px;direction:rtl">
+
+  <!-- DEMO CONTROL BAR -->
+  <div style="width:400px;max-width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px">
+    <div style="display:flex;align-items:center;gap:8px;color:#3A3E4A">
+      <span style="font-family:'Material Symbols Outlined';font-size:20px;line-height:1;color:#1F4FE6;font-variation-settings:'FILL' 1">star</span>
+      <span style="font-weight:700;font-size:13px;font-family:'Noto Sans Arabic',sans-serif;white-space:nowrap">النجوم — ميزات</span>
+    </div>
+    <sc-if value="{{ themeLight }}" hint-placeholder-val="{{ true }}">
+      <button onClick="{{ onDark }}" style="display:flex;align-items:center;gap:6px;border:1px solid #C1C5CE;background:#fff;border-radius:9px;padding:7px 12px;font-size:12px;font-weight:600;color:#3A3E4A;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif;white-space:nowrap"><span style="font-family:'Material Symbols Outlined';font-size:17px;line-height:1">dark_mode</span>الوضع الداكن</button>
+    </sc-if>
+    <sc-if value="{{ themeDark }}">
+      <button onClick="{{ onLight }}" style="display:flex;align-items:center;gap:6px;border:1px solid #3A3E4A;background:#20242E;border-radius:9px;padding:7px 12px;font-size:12px;font-weight:600;color:#E7E8ED;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif;white-space:nowrap"><span style="font-family:'Material Symbols Outlined';font-size:17px;line-height:1">light_mode</span>الوضع الفاتح</button>
+    </sc-if>
+  </div>
+  <div style="width:400px;max-width:100%;display:flex;flex-direction:column;gap:9px;background:#fff;border:1px solid #D3D7DF;border-radius:14px;padding:11px 12px">
+    <sc-for list="{{ navGroups }}" as="g" hint-placeholder-count="4">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <span style="font-size:10px;font-weight:700;color:#8A8F9C;letter-spacing:.4px;font-family:'Noto Sans Arabic',sans-serif">{{ g.label }}</span>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="4">
+            <sc-if value="{{ it.active }}"><button onClick="{{ it.onClick }}" style="border:1px solid #1F4FE6;background:#E7ECFF;border-radius:100px;padding:6px 12px;font-size:12px;font-weight:700;color:#123287;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif;white-space:nowrap">{{ it.label }}</button></sc-if>
+            <sc-if value="{{ it.inactive }}"><button onClick="{{ it.onClick }}" style="border:1px solid #D3D7DF;background:#fff;border-radius:100px;padding:6px 12px;font-size:12px;font-weight:600;color:#4A4F5C;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif;white-space:nowrap" style-active="background:#F2F4F9">{{ it.label }}</button></sc-if>
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- PHONE -->
+  <div ref="{{ rootRef }}" style="--bg:#EAEDF2;--surface:#FFFFFF;--surface2:#F2F4F9;--tonal:#E2E9FF;--onTonal:#123287;--sec:#DAE1F6;--onSec:#182C58;--on:#1A1C22;--onVar:#5B6070;--outline:#C6CAD6;--divider:#E7EAF1;--primary:#1F4FE6;--onPrimary:#FFFFFF;--header:#1A3FC4;--statusbg:#1A3FC4;--headerField:#FFFFFF;--green:#0E7A3C;--greenC:#E4F3E9;--onGreenC:#0A5A2C;--greenBorder:#C3E4CF;--wa:#1FA855;--gold:#8A6912;--goldC:#FBEDC7;--red:#D93B3B;--redC:#FBE6E6;--onRedC:#B42318;--onRed:#FFFFFF;--scrim:rgba(15,18,30,0.42);position:relative;width:400px;height:842px;background:#0A0A0C;border-radius:46px;box-shadow:0 26px 64px rgba(15,23,42,.4),0 6px 16px rgba(0,0,0,.22);flex-shrink:0">
+    <div style="position:absolute;inset:11px;border-radius:35px;overflow:hidden;background:var(--bg);direction:rtl">
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column">
+      <div style="flex:1;position:relative;overflow:hidden">
+
+      <sc-if value="{{ isOk }}" hint-placeholder-val="{{ true }}">
+
+      <!-- ============ COMPARE ============ -->
+      <sc-if value="{{ isCompare }}">
+      <div data-screen-label="المقارنة" style="position:absolute;inset:0;display:flex;flex-direction:column;animation:scr .2s ease;background:var(--surface)">
+        <div style="flex-shrink:0;background:var(--header);padding:34px 8px 14px;display:flex;align-items:center;gap:6px">
+          <button onClick="{{ onBack }}" style="width:40px;height:40px;border:0;background:transparent;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0" style-active="background:rgba(255,255,255,.14)"><span style="font-family:'Material Symbols Outlined';font-size:24px;line-height:1;color:#fff">arrow_forward</span></button>
+          <span style="font-size:18px;font-weight:700;color:#fff;font-family:'Noto Sans Arabic',sans-serif">المقارنة</span>
+          <span style="margin-inline-start:auto;background:rgba(255,255,255,.16);color:#fff;padding:3px 10px;border-radius:100px;font-size:12px;font-weight:700;font-family:'Noto Sans Arabic',sans-serif">{{ compareCount }}</span>
+        </div>
+        <div style="flex:1;overflow:auto;background:var(--surface)">
+          <div style="display:flex;flex-direction:column;min-width:max-content">
+            <!-- header row -->
+            <div style="display:flex;border-bottom:1px solid var(--divider)">
+              <div style="position:sticky;right:0;z-index:3;width:96px;flex-shrink:0;background:var(--surface);border-inline-start:1px solid var(--divider)"></div>
+              <sc-for list="{{ compareCols }}" as="col" hint-placeholder-count="3">
+                <div style="width:150px;flex-shrink:0;padding:10px;border-inline-start:1px solid var(--divider)">
+                  <div style="position:relative;width:100%;height:84px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center"><span style="font-family:'Material Symbols Outlined';font-size:30px;line-height:1;color:var(--outline)">apartment</span><button onClick="{{ col.onRemove }}" style="position:absolute;top:5px;left:5px;width:24px;height:24px;border:0;border-radius:50%;background:var(--scrim);display:flex;align-items:center;justify-content:center;cursor:pointer"><span style="font-family:'Material Symbols Outlined';font-size:16px;line-height:1;color:#fff">close</span></button></div>
+                </div>
+              </sc-for>
+            </div>
+            <sc-for list="{{ compareRows }}" as="row" hint-placeholder-count="7">
+              <div style="display:flex;border-bottom:1px solid var(--divider)" style-active="background:var(--surface2)">
+                <div style="position:sticky;right:0;z-index:2;width:96px;flex-shrink:0;background:var(--surface2);border-inline-start:1px solid var(--divider);display:flex;align-items:center;padding:0 11px;font-size:12px;font-weight:700;color:var(--onVar);font-family:'Noto Sans Arabic',sans-serif">{{ row.label }}</div>
+                <sc-for list="{{ row.cells }}" as="cell" hint-placeholder-count="3">
+                  <div style="width:150px;flex-shrink:0;padding:12px 11px;border-inline-start:1px solid var(--divider);font-size:13px;font-weight:600;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">{{ cell.v }}</div>
+                </sc-for>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ============ REELS ============ -->
+      <sc-if value="{{ isReels }}">
+      <div data-screen-label="ريلز" onClick="{{ onReelNext }}" style="position:absolute;inset:0;animation:fade .2s ease;background:{{ reelTint }};overflow:hidden;cursor:pointer">
+        <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.42) 0%,rgba(0,0,0,0) 26%,rgba(0,0,0,0) 52%,rgba(0,0,0,.82) 100%)"></div>
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:.16"><span style="font-family:'Material Symbols Outlined';font-size:120px;line-height:1;color:#fff">play_circle</span></div>
+        <div style="position:absolute;top:36px;left:14px;right:14px;display:flex;align-items:center;justify-content:space-between;z-index:5">
+          <button onClick="{{ onBackStop }}" style="width:40px;height:40px;border:0;background:rgba(0,0,0,.3);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer"><span style="font-family:'Material Symbols Outlined';font-size:23px;line-height:1;color:#fff">arrow_forward</span></button>
+          <span style="font-size:16px;font-weight:700;color:#fff;font-family:'Noto Sans Arabic',sans-serif">ريلز العقارات</span>
+          <button style="width:40px;height:40px;border:0;background:rgba(0,0,0,.3);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer"><span style="font-family:'Material Symbols Outlined';font-size:22px;line-height:1;color:#fff">search</span></button>
+        </div>
+        <!-- progress dots -->
+        <div style="position:absolute;top:50%;inset-inline-start:8px;transform:translateY(-50%);display:flex;flex-direction:column;gap:6px;z-index:5">
+          <sc-for list="{{ reelDots }}" as="d" hint-placeholder-count="3"><span style="width:4px;border-radius:3px;background:#fff;{{ d.style }}"></span></sc-for>
+        </div>
+        <!-- right rail -->
+        <div style="position:absolute;bottom:150px;inset-inline-start:12px;display:flex;flex-direction:column;gap:20px;z-index:5;align-items:center">
+          <button onClick="{{ onReelHeartStop }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;background:transparent;border:0;cursor:pointer">
+            <sc-if value="{{ reelSaved }}"><span style="font-family:'Material Symbols Outlined';font-size:32px;line-height:1;color:#FF5B6E;font-variation-settings:'FILL' 1">favorite</span></sc-if>
+            <sc-if value="{{ reelNotSaved }}"><span style="font-family:'Material Symbols Outlined';font-size:32px;line-height:1;color:#fff">favorite</span></sc-if>
+            <span style="font-size:11px;color:#fff;font-weight:700;font-family:'Roboto',sans-serif">{{ reel.likes }}</span>
+          </button>
+          <button onClick="{{ onBackStop }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;background:transparent;border:0;cursor:pointer"><span style="font-family:'Material Symbols Outlined';font-size:31px;line-height:1;color:#fff">chat_bubble</span><span style="font-size:11px;color:#fff;font-weight:700;font-family:'Roboto',sans-serif">{{ reel.comments }}</span></button>
+          <button onClick="{{ onBackStop }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;background:transparent;border:0;cursor:pointer"><span style="font-family:'Material Symbols Outlined';font-size:30px;line-height:1;color:#fff">share</span><span style="font-size:11px;color:#fff;font-weight:700;font-family:'Noto Sans Arabic',sans-serif">مشاركة</span></button>
+          <button onClick="{{ onBackStop }}" style="width:38px;height:38px;border:0;background:rgba(0,0,0,.3);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer"><span style="font-family:'Material Symbols Outlined';font-size:20px;line-height:1;color:#fff">volume_off</span></button>
+        </div>
+        <!-- content -->
+        <div style="position:absolute;bottom:0;right:0;left:0;padding:16px 16px 24px 66px;z-index:4">
+          <div style="display:flex;align-items:center;gap:9px;margin-bottom:11px">
+            <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center"><span style="font-family:'Material Symbols Outlined';font-size:20px;line-height:1;color:#111">storefront</span></div>
+            <span style="font-size:14px;font-weight:700;color:#fff;font-family:'Noto Sans Arabic',sans-serif">{{ reel.agency }}</span>
+            <button onClick="{{ onBackStop }}" style="border:1px solid rgba(255,255,255,.7);background:transparent;color:#fff;padding:4px 13px;border-radius:100px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif">متابعة</button>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:23px;font-weight:700;color:#fff;font-family:'Roboto',sans-serif">{{ reel.price }}</span></div>
+          <div style="margin-top:5px;font-size:14px;color:#fff;font-family:'Noto Sans Arabic',sans-serif">{{ reel.title }}</div>
+          <div style="margin-top:5px;display:flex;align-items:center;gap:12px;color:rgba(255,255,255,.9);font-size:12px;font-family:'Roboto',sans-serif">
+            <span style="display:flex;align-items:center;gap:4px"><span style="font-family:'Material Symbols Outlined';font-size:15px;line-height:1">king_bed</span>{{ reel.beds }}</span>
+            <span style="display:flex;align-items:center;gap:4px"><span style="font-family:'Material Symbols Outlined';font-size:15px;line-height:1">bathtub</span>{{ reel.baths }}</span>
+            <span style="display:flex;align-items:center;gap:4px"><span style="font-family:'Material Symbols Outlined';font-size:15px;line-height:1">square_foot</span>{{ reel.area }}</span>
+            <span style="display:flex;align-items:center;gap:4px"><span style="font-family:'Material Symbols Outlined';font-size:15px;line-height:1">location_on</span>{{ reel.loc }}</span>
+          </div>
+          <div style="margin-top:13px;display:flex;gap:8px">
+            <button onClick="{{ onBackStop }}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;height:44px;border:0;border-radius:100px;background:#fff;color:#111;font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif"><span style="font-family:'Material Symbols Outlined';font-size:19px;line-height:1">visibility</span>عرض الإعلان</button>
+            <button onClick="{{ onBackStop }}" style="width:52px;height:44px;border:0;border-radius:100px;background:var(--wa);display:flex;align-items:center;justify-content:center;cursor:pointer"><span style="font-family:'Material Symbols Outlined';font-size:21px;line-height:1;color:#fff">chat</span></button>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ============ PANORAMA 360 ============ -->
+      <sc-if value="{{ isPano }}">
+      <div data-screen-label="جولة 360" style="position:absolute;inset:0;animation:fade .2s ease;background:#0b0d12;overflow:hidden">
+        <div style="position:absolute;inset:0;background:linear-gradient(90deg,{{ panoTint }},#0b0d12 40%,{{ panoTint }} 70%,#0b0d12);background-size:220% 100%;animation:pan 22s linear infinite alternate"></div>
+        <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:38px 38px"></div>
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;pointer-events:none">
+          <span style="font-family:'Material Symbols Outlined';font-size:52px;line-height:1;color:rgba(255,255,255,.85);font-variation-settings:'FILL' 1">360</span>
+          <span style="font-size:13px;color:rgba(255,255,255,.8);font-family:'Noto Sans Arabic',sans-serif">اسحب للتدوير والاستكشاف</span>
+        </div>
+        <div style="position:absolute;top:36px;left:14px;right:14px;display:flex;align-items:center;justify-content:space-between;z-index:5">
+          <button onClick="{{ onBack }}" style="width:40px;height:40px;border:0;background:rgba(0,0,0,.4);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer"><span style="font-family:'Material Symbols Outlined';font-size:23px;line-height:1;color:#fff">close</span></button>
+          <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(0,0,0,.4);color:#fff;padding:6px 12px;border-radius:100px;font-size:12px;font-weight:700;font-family:'Noto Sans Arabic',sans-serif">جولة افتراضية · {{ panoLabel }}</span>
+          <button style="width:40px;height:40px;border:0;background:rgba(0,0,0,.4);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer"><span style="font-family:'Material Symbols Outlined';font-size:22px;line-height:1;color:#fff">share</span></button>
+        </div>
+        <div style="position:absolute;bottom:22px;left:0;right:0;padding:0 14px;z-index:5">
+          <div style="display:flex;gap:9px;overflow-x:auto;padding:4px">
+            <sc-for list="{{ scenes }}" as="sc" hint-placeholder-count="4">
+              <button onClick="{{ sc.onClick }}" style="flex-shrink:0;width:82px;cursor:pointer;background:transparent;border:0;padding:0">
+                <div style="position:relative;width:82px;height:58px;border-radius:10px;overflow:hidden;background:{{ sc.tint }};{{ sc.ring }}"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="font-family:'Material Symbols Outlined';font-size:20px;line-height:1;color:rgba(255,255,255,.7)">panorama_photosphere</span></div></div>
+                <div style="margin-top:5px;font-size:11px;color:#fff;font-weight:600;font-family:'Noto Sans Arabic',sans-serif;text-align:center">{{ sc.label }}</div>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ============ AI ASSISTANT ============ -->
+      <sc-if value="{{ isAi }}">
+      <div data-screen-label="المساعد الذكي" style="position:absolute;inset:0;display:flex;flex-direction:column;animation:scr .2s ease;background:var(--bg)">
+        <div style="flex-shrink:0;background:var(--header);padding:34px 8px 14px;display:flex;align-items:center;gap:8px">
+          <button onClick="{{ onBack }}" style="width:40px;height:40px;border:0;background:transparent;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0" style-active="background:rgba(255,255,255,.14)"><span style="font-family:'Material Symbols Outlined';font-size:24px;line-height:1;color:#fff">arrow_forward</span></button>
+          <div style="width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center"><span style="font-family:'Material Symbols Outlined';font-size:20px;line-height:1;color:#fff;font-variation-settings:'FILL' 1">auto_awesome</span></div>
+          <div><div style="font-size:16px;font-weight:700;color:#fff;font-family:'Noto Sans Arabic',sans-serif">المساعد الذكي</div><div style="font-size:11px;color:rgba(255,255,255,.7);font-family:'Noto Sans Arabic',sans-serif">مدعوم بالذكاء الاصطناعي</div></div>
+        </div>
+        <div style="flex:1;overflow-y:auto;overflow-x:hidden;background:var(--bg);padding:16px 14px;display:flex;flex-direction:column;gap:12px">
+          <sc-if value="{{ aiEmpty }}">
+            <div style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:26px 20px 12px">
+              <div style="width:70px;height:70px;border-radius:20px;background:var(--tonal);display:flex;align-items:center;justify-content:center;margin-bottom:14px"><span style="font-family:'Material Symbols Outlined';font-size:36px;line-height:1;color:var(--onTonal);font-variation-settings:'FILL' 1">auto_awesome</span></div>
+              <div style="font-size:17px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">اسأل عمّا تبحث عنه</div>
+              <div style="margin-top:7px;font-size:13px;color:var(--onVar);line-height:1.7;font-family:'Noto Sans Arabic',sans-serif">اكتب طلبك بلغتك الطبيعية وسأجد لك العقارات المناسبة فوراً.</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <sc-for list="{{ suggestions }}" as="sg" hint-placeholder-count="3">
+                <button onClick="{{ sg.onClick }}" style="display:flex;align-items:center;gap:10px;width:100%;text-align:right;background:var(--surface);border:1px solid var(--divider);border-radius:14px;padding:13px 14px;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif" style-active="background:var(--surface2)"><span style="font-family:'Material Symbols Outlined';font-size:20px;line-height:1;color:var(--primary)">search</span><span style="flex:1;font-size:14px;color:var(--on);font-weight:600">{{ sg.label }}</span><span style="font-family:'Material Symbols Outlined';font-size:18px;line-height:1;color:var(--onVar)">north_west</span></button>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ aiHasMsgs }}">
+            <sc-for list="{{ aiMsgs }}" as="m" hint-placeholder-count="2">
+              <sc-if value="{{ m.mine }}"><div style="align-self:flex-end;max-width:82%;background:var(--primary);border-radius:16px 4px 16px 16px;padding:10px 14px"><div style="font-size:14px;color:var(--onPrimary);line-height:1.6;font-family:'Noto Sans Arabic',sans-serif">{{ m.text }}</div></div></sc-if>
+              <sc-if value="{{ m.bot }}">
+                <div style="align-self:flex-start;max-width:88%;display:flex;flex-direction:column;gap:9px">
+                  <div style="display:flex;gap:8px;align-items:flex-start"><div style="width:28px;height:28px;border-radius:9px;background:var(--tonal);display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="font-family:'Material Symbols Outlined';font-size:16px;line-height:1;color:var(--onTonal);font-variation-settings:'FILL' 1">auto_awesome</span></div><div style="background:var(--surface);border:1px solid var(--divider);border-radius:4px 16px 16px 16px;padding:10px 13px;font-size:14px;color:var(--on);line-height:1.6;font-family:'Noto Sans Arabic',sans-serif">{{ m.text }}</div></div>
+                  <sc-if value="{{ m.hasResults }}">
+                    <div style="display:flex;flex-direction:column;gap:9px;padding-inline-start:36px">
+                      <sc-for list="{{ m.results }}" as="c" hint-placeholder-count="2">
+                        <div style="background:var(--surface);border:1px solid var(--divider);border-radius:12px;padding:9px;display:flex;gap:10px;cursor:pointer" style-active="background:var(--surface2)">
+                          <div style="width:66px;height:56px;border-radius:9px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="font-family:'Material Symbols Outlined';font-size:24px;line-height:1;color:var(--outline)">apartment</span></div>
+                          <div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:700;color:var(--on);font-family:'Roboto',sans-serif">{{ c.price }}</div><div style="margin-top:3px;font-size:12px;color:var(--on);font-family:'Noto Sans Arabic',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.title }}</div><div style="margin-top:3px;font-size:11px;color:var(--onVar);font-family:'Noto Sans Arabic',sans-serif">{{ c.loc }} · {{ c.area }}</div></div>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-if>
+            </sc-for>
+          </sc-if>
+        </div>
+        <div style="flex-shrink:0;background:var(--surface);border-top:1px solid var(--divider);padding:10px 12px 18px;display:flex;align-items:center;gap:8px">
+          <input value="{{ aiInput }}" onInput="{{ onAiInput }}" placeholder="مثال: شقة بدمشق تحت 100 ألف…" style="flex:1;height:46px;border:1px solid var(--outline);border-radius:100px;background:var(--surface2);padding:0 16px;font-size:14px;color:var(--on);outline:none;font-family:'Noto Sans Arabic',sans-serif">
+          <button onClick="{{ onAiSend }}" style="width:46px;height:46px;border:0;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0" style-active="transform:scale(.94)"><span style="font-family:'Material Symbols Outlined';font-size:22px;line-height:1;color:var(--onPrimary);font-variation-settings:'FILL' 1">auto_awesome</span></button>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ============ REVIEWS + WRITE ============ -->
+      <sc-if value="{{ isReviews }}">
+      <div data-screen-label="التقييمات" style="position:absolute;inset:0;display:flex;flex-direction:column;animation:scr .2s ease;background:var(--surface)">
+        <div style="flex-shrink:0;background:var(--header);padding:34px 8px 14px;display:flex;align-items:center;gap:6px">
+          <button onClick="{{ onBack }}" style="width:40px;height:40px;border:0;background:transparent;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0" style-active="background:rgba(255,255,255,.14)"><span style="font-family:'Material Symbols Outlined';font-size:24px;line-height:1;color:#fff">arrow_forward</span></button>
+          <span style="font-size:18px;font-weight:700;color:#fff;font-family:'Noto Sans Arabic',sans-serif">التقييمات</span>
+        </div>
+        <div style="flex:1;overflow-y:auto;overflow-x:hidden;background:var(--surface);padding:16px 14px 24px">
+          <div style="display:flex;gap:16px;align-items:center;background:var(--surface2);border-radius:14px;padding:14px">
+            <div style="text-align:center;flex-shrink:0"><div style="font-size:38px;font-weight:700;color:var(--on);font-family:'Roboto',sans-serif;line-height:1">{{ avg }}</div><div style="margin-top:5px;display:flex;gap:2px;justify-content:center"><sc-for list="{{ avgStars }}" as="st" hint-placeholder-count="5"><sc-if value="{{ st.on }}"><span style="font-family:'Material Symbols Outlined';font-size:15px;line-height:1;color:var(--gold);font-variation-settings:'FILL' 1">star</span></sc-if><sc-if value="{{ st.off }}"><span style="font-family:'Material Symbols Outlined';font-size:15px;line-height:1;color:var(--outline)">star</span></sc-if></sc-for></div><div style="margin-top:4px;font-size:11px;color:var(--onVar);font-family:'Noto Sans Arabic',sans-serif">{{ reviewCount }} تقييم</div></div>
+            <div style="flex:1"><div style="font-size:14px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">مكتب الشام العقاري</div><div style="margin-top:4px;font-size:12px;color:var(--onVar);line-height:1.6;font-family:'Noto Sans Arabic',sans-serif">شارك تجربتك مع هذا المكتب لمساعدة الآخرين.</div></div>
+          </div>
+          <button onClick="{{ onOpenSheet }}" style="margin-top:12px;width:100%;display:flex;align-items:center;justify-content:center;gap:6px;height:46px;border:0;border-radius:100px;background:var(--primary);color:var(--onPrimary);font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif" style-active="transform:scale(.98)"><span style="font-family:'Material Symbols Outlined';font-size:19px;line-height:1">rate_review</span>اكتب تقييماً</button>
+          <div style="margin-top:16px;display:flex;flex-direction:column;gap:12px">
+            <sc-for list="{{ reviews }}" as="r" hint-placeholder-count="3">
+              <div style="background:var(--surface);border:1px solid var(--divider);border-radius:14px;padding:13px">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div style="width:38px;height:38px;border-radius:50%;background:var(--tonal);display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="font-size:15px;font-weight:700;color:var(--onTonal);font-family:'Noto Sans Arabic',sans-serif">{{ r.initial }}</span></div>
+                  <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">{{ r.name }}</div><div style="margin-top:2px;display:flex;gap:1px"><sc-for list="{{ r.stars }}" as="st" hint-placeholder-count="5"><sc-if value="{{ st.on }}"><span style="font-family:'Material Symbols Outlined';font-size:13px;line-height:1;color:var(--gold);font-variation-settings:'FILL' 1">star</span></sc-if><sc-if value="{{ st.off }}"><span style="font-family:'Material Symbols Outlined';font-size:13px;line-height:1;color:var(--outline)">star</span></sc-if></sc-for></div></div>
+                  <span style="font-size:11px;color:var(--onVar);font-family:'Noto Sans Arabic',sans-serif">{{ r.time }}</span>
+                </div>
+                <div style="margin-top:9px;font-size:13px;color:var(--on);line-height:1.75;font-family:'Noto Sans Arabic',sans-serif">{{ r.text }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ============ SAVED SEARCHES ============ -->
+      <sc-if value="{{ isSaved }}">
+      <div data-screen-label="عمليات البحث المحفوظة" style="position:absolute;inset:0;display:flex;flex-direction:column;animation:scr .2s ease">
+        <div style="flex:1;overflow-y:auto;overflow-x:hidden;background:var(--bg)">
+          <div style="position:sticky;top:0;z-index:20;background:var(--header);padding:34px 8px 16px;display:flex;align-items:center;gap:6px">
+            <button onClick="{{ onBack }}" style="width:40px;height:40px;border:0;background:transparent;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0" style-active="background:rgba(255,255,255,.14)"><span style="font-family:'Material Symbols Outlined';font-size:24px;line-height:1;color:#fff">arrow_forward</span></button>
+            <span style="font-size:18px;font-weight:700;color:#fff;font-family:'Noto Sans Arabic',sans-serif">عمليات البحث المحفوظة</span>
+          </div>
+          <div style="background:var(--surface);border-radius:20px 20px 0 0;margin-top:-14px;position:relative;z-index:2;min-height:100%;padding:16px 14px 24px;display:flex;flex-direction:column;gap:12px">
+            <sc-for list="{{ searches }}" as="x" hint-placeholder-count="3">
+              <div style="background:var(--surface);border:1px solid var(--divider);border-radius:14px;padding:14px">
+                <div style="display:flex;align-items:flex-start;gap:11px">
+                  <div style="width:40px;height:40px;border-radius:11px;background:var(--tonal);display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="font-family:'Material Symbols Outlined';font-size:22px;line-height:1;color:var(--onTonal)">saved_search</span></div>
+                  <div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">{{ x.title }}</div><div style="margin-top:4px;font-size:12px;color:var(--onVar);line-height:1.6;font-family:'Noto Sans Arabic',sans-serif">{{ x.summary }}</div></div>
+                  <button style="width:30px;height:30px;border:0;background:transparent;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0" style-active="background:var(--surface2)"><span style="font-family:'Material Symbols Outlined';font-size:20px;line-height:1;color:var(--onVar)">delete_outline</span></button>
+                </div>
+                <div style="height:1px;background:var(--divider);margin:12px 0 11px"></div>
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--on);font-weight:600;font-family:'Noto Sans Arabic',sans-serif"><span style="font-family:'Material Symbols Outlined';font-size:16px;line-height:1;color:var(--primary)">home_work</span>{{ x.count }} · {{ x.ago }}</span>
+                  <button onClick="{{ x.onToggle }}" style="display:flex;align-items:center;gap:6px;background:transparent;border:0;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif">
+                    <sc-if value="{{ x.alertOn }}"><span style="display:inline-flex;align-items:center;gap:5px;background:var(--greenC);color:var(--onGreenC);padding:5px 11px;border-radius:100px;font-size:12px;font-weight:700"><span style="font-family:'Material Symbols Outlined';font-size:16px;line-height:1;font-variation-settings:'FILL' 1">notifications_active</span>التنبيهات مفعّلة</span></sc-if>
+                    <sc-if value="{{ x.alertOff }}"><span style="display:inline-flex;align-items:center;gap:5px;background:var(--surface2);color:var(--onVar);padding:5px 11px;border-radius:100px;font-size:12px;font-weight:700"><span style="font-family:'Material Symbols Outlined';font-size:16px;line-height:1">notifications_off</span>مغلقة</span></sc-if>
+                  </button>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ============ PRIVATE PROFILE ============ -->
+      <sc-if value="{{ isPrivate }}">
+      <div data-screen-label="معلوماتي الخاصة" style="position:absolute;inset:0;display:flex;flex-direction:column;animation:scr .2s ease;background:var(--surface)">
+        <div style="flex-shrink:0;background:var(--header);padding:34px 8px 14px;display:flex;align-items:center;gap:6px">
+          <button onClick="{{ onBack }}" style="width:40px;height:40px;border:0;background:transparent;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0" style-active="background:rgba(255,255,255,.14)"><span style="font-family:'Material Symbols Outlined';font-size:24px;line-height:1;color:#fff">arrow_forward</span></button>
+          <span style="font-size:18px;font-weight:700;color:#fff;font-family:'Noto Sans Arabic',sans-serif">معلوماتي الخاصة</span>
+        </div>
+        <div style="flex:1;overflow-y:auto;overflow-x:hidden;background:var(--surface);padding:16px 14px 24px;display:flex;flex-direction:column;gap:16px">
+          <sc-for list="{{ privateGroups }}" as="g" hint-placeholder-count="3">
+            <div>
+              <div style="font-size:12px;font-weight:700;color:var(--onVar);letter-spacing:.3px;margin-bottom:8px;padding:0 2px;font-family:'Noto Sans Arabic',sans-serif">{{ g.title }}</div>
+              <div style="background:var(--surface);border:1px solid var(--divider);border-radius:14px;overflow:hidden">
+                <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="2">
+                  <sc-if value="{{ r.notFirst }}"><div style="height:1px;background:var(--divider)"></div></sc-if>
+                  <div style="display:flex;align-items:center;gap:10px;padding:13px 14px">
+                    <div style="flex:1;min-width:0"><div style="font-size:12px;color:var(--onVar);font-family:'Noto Sans Arabic',sans-serif">{{ r.label }}</div><div style="margin-top:3px;font-size:14px;font-weight:600;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">{{ r.value }}</div></div>
+                    <sc-if value="{{ r.verified }}"><span style="display:inline-flex;align-items:center;gap:3px;background:var(--greenC);color:var(--onGreenC);padding:4px 9px;border-radius:100px;font-size:11px;font-weight:700;font-family:'Noto Sans Arabic',sans-serif"><span style="font-family:'Material Symbols Outlined';font-size:14px;line-height:1;font-variation-settings:'FILL' 1">verified</span>موثّق</span></sc-if>
+                    <sc-if value="{{ r.unverified }}"><button style="display:inline-flex;align-items:center;gap:4px;height:32px;padding:0 13px;border:0;border-radius:100px;background:var(--tonal);color:var(--onTonal);font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif" style-active="transform:scale(.96)">توثيق</button></sc-if>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ============ MY REPORTS ============ -->
+      <sc-if value="{{ isReports }}">
+      <div data-screen-label="بلاغاتي" style="position:absolute;inset:0;display:flex;flex-direction:column;animation:scr .2s ease">
+        <div style="flex:1;overflow-y:auto;overflow-x:hidden;background:var(--bg)">
+          <div style="position:sticky;top:0;z-index:20;background:var(--header);padding:34px 8px 16px;display:flex;align-items:center;gap:6px">
+            <button onClick="{{ onBack }}" style="width:40px;height:40px;border:0;background:transparent;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0" style-active="background:rgba(255,255,255,.14)"><span style="font-family:'Material Symbols Outlined';font-size:24px;line-height:1;color:#fff">arrow_forward</span></button>
+            <span style="font-size:18px;font-weight:700;color:#fff;font-family:'Noto Sans Arabic',sans-serif">بلاغاتي</span>
+          </div>
+          <div style="background:var(--surface);border-radius:20px 20px 0 0;margin-top:-14px;position:relative;z-index:2;min-height:100%;padding:16px 14px 24px;display:flex;flex-direction:column;gap:11px">
+            <sc-for list="{{ reports }}" as="r" hint-placeholder-count="3">
+              <div style="background:var(--surface);border:1px solid var(--divider);border-radius:14px;padding:13px">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div style="width:38px;height:38px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="font-family:'Material Symbols Outlined';font-size:20px;line-height:1;color:var(--onVar)">{{ r.icon }}</span></div>
+                  <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.subject }}</div><div style="margin-top:3px;font-size:11px;color:var(--onVar);font-family:'Noto Sans Arabic',sans-serif">{{ r.date }}</div></div>
+                  <sc-if value="{{ r.pGreen }}"><span style="display:inline-flex;align-items:center;gap:3px;background:var(--greenC);color:var(--onGreenC);padding:3px 9px;border-radius:7px;font-size:10px;font-weight:700;font-family:'Noto Sans Arabic',sans-serif;white-space:nowrap"><span style="font-family:'Material Symbols Outlined';font-size:13px;line-height:1;font-variation-settings:'FILL' 1">check_circle</span>{{ r.statusLabel }}</span></sc-if>
+                  <sc-if value="{{ r.pRed }}"><span style="display:inline-flex;align-items:center;gap:3px;background:var(--redC);color:var(--onRedC);padding:3px 9px;border-radius:7px;font-size:10px;font-weight:700;font-family:'Noto Sans Arabic',sans-serif;white-space:nowrap"><span style="font-family:'Material Symbols Outlined';font-size:13px;line-height:1">cancel</span>{{ r.statusLabel }}</span></sc-if>
+                  <sc-if value="{{ r.pNeutral }}"><span style="display:inline-flex;align-items:center;gap:3px;background:var(--surface2);color:var(--onVar);padding:3px 9px;border-radius:7px;font-size:10px;font-weight:700;font-family:'Noto Sans Arabic',sans-serif;white-space:nowrap"><span style="font-family:'Material Symbols Outlined';font-size:13px;line-height:1">hourglass_top</span>{{ r.statusLabel }}</span></sc-if>
+                </div>
+                <div style="margin-top:10px;background:var(--surface2);border-radius:10px;padding:9px 11px;font-size:12px;color:var(--on);line-height:1.6;font-family:'Noto Sans Arabic',sans-serif">السبب: {{ r.reason }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      </sc-if>
+
+      <!-- NON-OK STATES -->
+      <sc-if value="{{ notOk }}">
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;animation:fade .2s ease">
+        <div style="flex:1;overflow-y:auto;overflow-x:hidden;background:var(--bg)">
+          <div style="background:var(--header);padding:34px 12px 16px;display:flex;align-items:center;gap:6px">
+            <button onClick="{{ onBack }}" style="width:40px;height:40px;border:0;background:transparent;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0" style-active="background:rgba(255,255,255,.14)"><span style="font-family:'Material Symbols Outlined';font-size:24px;line-height:1;color:#fff">arrow_forward</span></button>
+            <span style="font-size:19px;font-weight:700;color:#fff;font-family:'Noto Sans Arabic',sans-serif;padding-inline-start:4px">{{ currentTitle }}</span>
+          </div>
+          <div style="background:var(--surface);border-radius:20px 20px 0 0;margin-top:-14px;min-height:100%;position:relative;z-index:2">
+            <sc-if value="{{ isLoading }}">
+              <div style="padding:14px;display:flex;flex-direction:column;gap:12px">
+                <sc-for list="{{ skRows }}" as="r" hint-placeholder-count="4">
+                  <div style="border:1px solid var(--divider);border-radius:14px;padding:13px;display:flex;gap:11px"><div style="width:44px;height:44px;border-radius:11px;background:linear-gradient(90deg,var(--surface2) 25%,var(--divider) 37%,var(--surface2) 63%);background-size:400% 100%;animation:shim 1.4s ease infinite;flex-shrink:0"></div><div style="flex:1;display:flex;flex-direction:column;gap:8px;padding-top:2px"><div style="width:50%;height:14px;border-radius:6px;background:linear-gradient(90deg,var(--surface2) 25%,var(--divider) 37%,var(--surface2) 63%);background-size:400% 100%;animation:shim 1.4s ease infinite"></div><div style="width:80%;height:11px;border-radius:6px;background:linear-gradient(90deg,var(--surface2) 25%,var(--divider) 37%,var(--surface2) 63%);background-size:400% 100%;animation:shim 1.4s ease infinite"></div></div></div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ isEmpty }}">
+              <div style="padding:60px 32px;display:flex;flex-direction:column;align-items:center;text-align:center">
+                <div style="width:88px;height:88px;border-radius:50%;background:var(--tonal);display:flex;align-items:center;justify-content:center;margin-bottom:20px"><span style="font-family:'Material Symbols Outlined';font-size:44px;line-height:1;color:var(--onTonal)">{{ emptyIcon }}</span></div>
+                <div style="font-size:18px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">{{ emptyTitle }}</div>
+                <div style="margin-top:8px;font-size:14px;color:var(--onVar);line-height:1.7;font-family:'Noto Sans Arabic',sans-serif">{{ emptyBody }}</div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ isError }}">
+              <div style="padding:60px 32px;display:flex;flex-direction:column;align-items:center;text-align:center">
+                <div style="width:88px;height:88px;border-radius:50%;background:var(--redC);display:flex;align-items:center;justify-content:center;margin-bottom:20px"><span style="font-family:'Material Symbols Outlined';font-size:44px;line-height:1;color:var(--onRedC)">cloud_off</span></div>
+                <div style="font-size:18px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif">تعذّر تحميل البيانات</div>
+                <div style="margin-top:8px;font-size:14px;color:var(--onVar);line-height:1.7;font-family:'Noto Sans Arabic',sans-serif">حدث خطأ في الاتصال بالخادم. تحقّق من الإنترنت وحاول مرة أخرى.</div>
+                <button onClick="{{ onRetry }}" style="margin-top:22px;display:flex;align-items:center;gap:7px;height:46px;padding:0 24px;border:0;border-radius:100px;background:var(--primary);color:var(--onPrimary);font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif" style-active="transform:scale(.98)"><span style="font-family:'Material Symbols Outlined';font-size:20px;line-height:1">refresh</span>إعادة المحاولة</button>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- WRITE-REVIEW BOTTOM SHEET -->
+      <sc-if value="{{ sheetOpen }}">
+      <div style="position:absolute;inset:0;z-index:60;display:flex;flex-direction:column;justify-content:flex-end">
+        <div onClick="{{ onCloseSheet }}" style="position:absolute;inset:0;background:var(--scrim);animation:fade .2s ease"></div>
+        <div style="position:relative;background:var(--surface);border-radius:24px 24px 0 0;padding:10px 18px 24px;animation:sheetUp .28s cubic-bezier(.2,.8,.2,1)">
+          <div style="display:flex;justify-content:center;padding-bottom:12px"><div style="width:36px;height:4px;border-radius:3px;background:var(--outline)"></div></div>
+          <div style="font-size:17px;font-weight:700;color:var(--on);font-family:'Noto Sans Arabic',sans-serif;text-align:center">قيّم مكتب الشام العقاري</div>
+          <div style="margin-top:16px;display:flex;justify-content:center;gap:8px">
+            <sc-for list="{{ ratingStars }}" as="st" hint-placeholder-count="5">
+              <button onClick="{{ st.onClick }}" style="background:transparent;border:0;padding:2px;cursor:pointer">
+                <sc-if value="{{ st.on }}"><span style="font-family:'Material Symbols Outlined';font-size:38px;line-height:1;color:var(--gold);font-variation-settings:'FILL' 1">star</span></sc-if>
+                <sc-if value="{{ st.off }}"><span style="font-family:'Material Symbols Outlined';font-size:38px;line-height:1;color:var(--outline)">star</span></sc-if>
+              </button>
+            </sc-for>
+          </div>
+          <div style="margin-top:6px;text-align:center;font-size:12px;color:var(--onVar);font-family:'Noto Sans Arabic',sans-serif">{{ ratingLabel }}</div>
+          <textarea value="{{ reviewText }}" onInput="{{ onReviewInput }}" placeholder="اكتب تجربتك مع هذا المكتب…" style="margin-top:14px;width:100%;height:104px;border:1px solid var(--outline);border-radius:14px;background:var(--surface2);padding:12px 14px;font-size:14px;color:var(--on);outline:none;resize:none;line-height:1.7;font-family:'Noto Sans Arabic',sans-serif"></textarea>
+          <button onClick="{{ onSubmitReview }}" style="margin-top:14px;width:100%;height:48px;border:0;border-radius:100px;background:var(--primary);color:var(--onPrimary);font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans Arabic',sans-serif" style-active="transform:scale(.98)">إرسال التقييم</button>
+        </div>
+      </div>
+      </sc-if>
+
+      </div>
+    </div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;accent&quot;: {&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:[&quot;#1F4FE6&quot;,&quot;#1A3FC4&quot;],&quot;tsType&quot;:&quot;string[]&quot;,&quot;section&quot;:&quot;العلامة&quot;,&quot;options&quot;:[[&quot;#1F4FE6&quot;,&quot;#1A3FC4&quot;],[&quot;#0B6BCB&quot;,&quot;#0A4F96&quot;],[&quot;#1E7F52&quot;,&quot;#155E3C&quot;],[&quot;#B23A48&quot;,&quot;#8E2A36&quot;],[&quot;#6D4AC0&quot;,&quot;#4E3593&quot;]]}
+}">
+class Component extends DCLogic {
+  rootRef = React.createRef();
+  STATEFUL = ['compare','ai','reviews','saved','private','reports'];
+  TITLES = {compare:'المقارنة', ai:'المساعد الذكي', reviews:'التقييمات', saved:'عمليات البحث المحفوظة', private:'معلوماتي الخاصة', reports:'بلاغاتي', reels:'ريلز', pano:'جولة 360'};
+
+  COMPARE = [
+    {id:'c1', price:'$210,000', beds:'4', baths:'3', area:'220 م²', deed:'طابو أخضر', finish:'سوبر ديلوكس', loc:'أبو رمانة'},
+    {id:'c2', price:'$135,000', beds:'3', baths:'2', area:'170 م²', deed:'طابو أخضر', finish:'ديلوكس', loc:'المزة'},
+    {id:'c3', price:'$265,000', beds:'4', baths:'3', area:'240 م²', deed:'حكم محكمة', finish:'سوبر ديلوكس', loc:'كفر سوسة'},
+  ];
+  COMPARE_ROWS = [
+    {key:'price', label:'السعر'}, {key:'beds', label:'غرف النوم'}, {key:'baths', label:'الحمامات'},
+    {key:'area', label:'المساحة'}, {key:'deed', label:'الطابو'}, {key:'finish', label:'الكسوة'}, {key:'loc', label:'الموقع'},
+  ];
+
+  REELS = [
+    {id:'r1', price:'$210,000', title:'دوبلكس مع تراس في أبو رمانة', loc:'أبو رمانة', beds:'4', baths:'3', area:'220 م²', agency:'مكتب الشام العقاري', likes:'1.2k', comments:'34', tint:'#1a2740'},
+    {id:'r2', price:'$310,000', title:'فيلا مستقلة مع حديقة في المالكي', loc:'المالكي', beds:'5', baths:'4', area:'320 م²', agency:'دار الياسمين للعقارات', likes:'860', comments:'21', tint:'#241a40'},
+    {id:'r3', price:'$135,000', title:'شقة مطلّة في المزة فيلات', loc:'المزة', beds:'3', baths:'2', area:'170 م²', agency:'عقارات المزة', likes:'540', comments:'12', tint:'#3a2418'},
+  ];
+
+  SCENES = [
+    {label:'الصالون', tint:'#20304f'}, {label:'المطبخ', tint:'#264a3a'},
+    {label:'غرفة النوم', tint:'#3a2a4a'}, {label:'التراس', tint:'#4a3a24'},
+  ];
+
+  SUGGESTIONS = ['شقة بدمشق تحت 100 ألف دولار','فلل مع حديقة في حلب','أراضٍ طابو أخضر في ريف دمشق'];
+  AI_RESULTS = [
+    {price:'$92,000', title:'شقة مشطّبة في ركن الدين', loc:'ركن الدين، دمشق', area:'110 م²'},
+    {price:'$98,000', title:'شقة في المزة 86', loc:'المزة، دمشق', area:'120 م²'},
+  ];
+
+  REVIEWS = [
+    {name:'محمود الأحمد', rating:5, time:'منذ أسبوع', text:'تعامل راقٍ ومصداقية عالية، الشقة مطابقة تماماً للوصف والصور.'},
+    {name:'رنا العلي', rating:5, time:'منذ 3 أسابيع', text:'ساعدوني في كل خطوة حتى إتمام البيع بسلاسة. فريق محترف.'},
+    {name:'سامر خوري', rating:4, time:'منذ شهر', text:'خدمة جيدة عموماً، لكن تأخّر قليلاً في تحديد موعد المعاينة.'},
+  ];
+
+  SEARCHES = [
+    {id:'ss1', title:'شقق للبيع في المزة', summary:'المزة · للبيع · $50k–$150k · 3 غرف · موثّق', count:'24 عقاراً', ago:'آخر تحديث منذ يوم'},
+    {id:'ss2', title:'فلل للبيع في حلب', summary:'الحمدانية · للبيع · $200k فأكثر · 4 غرف فأكثر', count:'9 عقارات', ago:'منذ 3 أيام'},
+    {id:'ss3', title:'أراضٍ في ريف دمشق', summary:'صحنايا، الكسوة · حتى $100k · طابو أخضر', count:'17 عقاراً', ago:'اليوم'},
+  ];
+
+  PRIVATE = [
+    {title:'الهوية', rows:[
+      {label:'الاسم الكامل', value:'أحمد الخطيب'},
+      {label:'رقم الهوية الوطنية', value:'•••• 4821', state:'verified'},
+    ]},
+    {title:'معلومات التواصل', rows:[
+      {label:'رقم الهاتف', value:'+963 944 210 337', state:'verified'},
+      {label:'البريد الإلكتروني', value:'ahmad@example.com', state:'unverified'},
+    ]},
+    {title:'الحساب', rows:[
+      {label:'نوع الحساب', value:'فردي'},
+      {label:'تاريخ الانضمام', value:'مارس 2023'},
+    ]},
+  ];
+
+  REPORTS = [
+    {id:'rp1', type:'listing', subject:'إعلان: شقة في المزة 86', reason:'معلومات مضلّلة عن المساحة الحقيقية للشقة.', date:'منذ يومين', status:'review'},
+    {id:'rp2', type:'user', subject:'مستخدم: حساب مشبوه', reason:'انتحال هوية مكتب عقاري معروف.', date:'منذ أسبوع', status:'resolved'},
+    {id:'rp3', type:'listing', subject:'إعلان: أرض في صحنايا', reason:'الصور المستخدمة غير حقيقية ولا تخص العقار.', date:'منذ أسبوعين', status:'rejected'},
+  ];
+
+  THEMES = {
+    light:{'--bg':'#EAEDF2','--surface':'#FFFFFF','--surface2':'#F2F4F9','--tonal':'#E2E9FF','--onTonal':'#123287','--sec':'#DAE1F6','--onSec':'#182C58','--on':'#1A1C22','--onVar':'#5B6070','--outline':'#C6CAD6','--divider':'#E7EAF1','--primary':'#1F4FE6','--onPrimary':'#FFFFFF','--header':'#1A3FC4','--statusbg':'#1A3FC4','--headerField':'#FFFFFF','--green':'#0E7A3C','--greenC':'#E4F3E9','--onGreenC':'#0A5A2C','--greenBorder':'#C3E4CF','--wa':'#1FA855','--gold':'#8A6912','--goldC':'#FBEDC7','--red':'#D93B3B','--redC':'#FBE6E6','--onRedC':'#B42318','--onRed':'#FFFFFF','--scrim':'rgba(15,18,30,0.42)'},
+    dark:{'--bg':'#0C0C10','--surface':'#131318','--surface2':'#1C1D25','--tonal':'#26356E','--onTonal':'#DCE4FF','--sec':'#2A3352','--onSec':'#DEE4FA','--on':'#E7E8ED','--onVar':'#A7ABB8','--outline':'#3B3D48','--divider':'#26272F','--primary':'#AEC2FF','--onPrimary':'#0A2063','--header':'#12235E','--statusbg':'#12235E','--headerField':'#20232C','--green':'#74D99A','--greenC':'#12331F','--onGreenC':'#A9E9C0','--greenBorder':'#1E4A30','--wa':'#2AAE60','--gold':'#E6C56A','--goldC':'#39300B','--red':'#FF6B6B','--redC':'#3A1414','--onRedC':'#FF9B9B','--onRed':'#3A0A0A','--scrim':'rgba(0,0,0,0.5)'},
+  };
+
+  state = {
+    dark:false, screen:'compare', dataState:'ok',
+    compareIds:['c1','c2','c3'],
+    reelIndex:0, reelSaved:{},
+    sceneIndex:0,
+    aiMsgs:[], aiInput:'',
+    reviews:null,
+    alerts:{ss1:true, ss2:false, ss3:true},
+    sheetOpen:false, rating:0, reviewText:'',
+  };
+
+  componentDidMount(){ this.applyTheme(); this.setState({reviews:this.REVIEWS.slice()}); }
+  componentDidUpdate(){ this.applyTheme(); }
+  applyTheme(){
+    const el = this.rootRef.current; if(!el) return;
+    const t = this.state.dark ? this.THEMES.dark : this.THEMES.light;
+    for(const k in t) el.style.setProperty(k, t[k]);
+    const acc = this.props.accent;
+    if(Array.isArray(acc)){
+      if(!this.state.dark && acc[0]) el.style.setProperty('--primary', acc[0]);
+      if(!this.state.dark && acc[1]) el.style.setProperty('--header', acc[1]);
+    }
+  }
+
+  initial(n){ return (n||'؟').trim().charAt(0); }
+  stars(n){ return [1,2,3,4,5].map(i=>({on:i<=n, off:i>n})); }
+  go(screen){ this.setState({screen, dataState:'ok'}); }
+
+  renderVals(){
+    const s = this.state;
+    const stop = e => { if(e&&e.stopPropagation) e.stopPropagation(); };
+    const stateful = this.STATEFUL.includes(s.screen);
+
+    // compare
+    const cols = s.compareIds.map(id=>this.COMPARE.find(c=>c.id===id)).filter(Boolean);
+    const compareCols = cols.map(col=>({id:col.id, onRemove:()=>{ if(s.compareIds.length>2) this.setState(x=>({compareIds:x.compareIds.filter(z=>z!==col.id)})); }}));
+    const compareRows = this.COMPARE_ROWS.map(rc=>({label:rc.label, cells:cols.map(col=>({v:col[rc.key]}))}));
+
+    // reels
+    const reel = this.REELS[s.reelIndex];
+    const reelDots = this.REELS.map((r,i)=>({style:'height:'+(i===s.reelIndex?'22px':'8px')+';opacity:'+(i===s.reelIndex?'1':'.4')}));
+    const reelSaved = !!s.reelSaved[reel.id];
+
+    // scenes
+    const scene = this.SCENES[s.sceneIndex];
+    const scenes = this.SCENES.map((sc,i)=>Object.assign({}, sc, {onClick:()=>this.setState({sceneIndex:i}), ring:i===s.sceneIndex?'outline:2px solid #fff;outline-offset:-2px':'outline:2px solid transparent;outline-offset:-2px'}));
+
+    // ai
+    const aiSend = (text)=>{ const t=(text||'').trim(); if(!t) return; this.setState(x=>({aiMsgs:x.aiMsgs.concat([{me:true, text:t},{bot:true, text:'وجدت لك عدة عقارات مطابقة لطلبك:', results:this.AI_RESULTS}]), aiInput:''})); };
+    const aiMsgs = s.aiMsgs.map(m=>Object.assign({}, m, {mine:!!m.me, bot:!!m.bot, hasResults:!!(m.results&&m.results.length)}));
+
+    // reviews
+    const revList = s.reviews || this.REVIEWS;
+    const avgNum = revList.length ? (revList.reduce((a,b)=>a+b.rating,0)/revList.length) : 0;
+    const avg = avgNum.toFixed(1);
+    const reviews = revList.map(r=>Object.assign({}, r, {initial:this.initial(r.name), stars:this.stars(r.rating)}));
+    const ratingLabels = ['اختر تقييمك','سيئ','مقبول','جيد','جيد جداً','ممتاز'];
+
+    // reports
+    const REP = {review:{tone:'neutral', label:'قيد المراجعة'}, resolved:{tone:'green', label:'تمّت المعالجة'}, rejected:{tone:'red', label:'مرفوض'}};
+    const reports = this.REPORTS.map(r=>{ const m=REP[r.status]; return Object.assign({}, r, {icon:r.type==='user'?'person':'apartment', statusLabel:m.label, pGreen:m.tone==='green', pRed:m.tone==='red', pNeutral:m.tone==='neutral'}); });
+
+    // private
+    const privateGroups = this.PRIVATE.map(g=>Object.assign({}, g, {rows:g.rows.map((r,i)=>Object.assign({}, r, {verified:r.state==='verified', unverified:r.state==='unverified', notFirst:i>0}))}));
+
+    // searches
+    const searches = this.SEARCHES.map(x=>Object.assign({}, x, {alertOn:!!s.alerts[x.id], alertOff:!s.alerts[x.id], onToggle:()=>this.setState(st=>({alerts:Object.assign({}, st.alerts, {[x.id]:!st.alerts[x.id]})}))}));
+
+    const emptyMap = {
+      compare:{icon:'compare_arrows', title:'لا عقارات للمقارنة', body:'أضف عقارات من نتائج البحث لمقارنتها جنباً إلى جنب.'},
+      ai:{icon:'auto_awesome', title:'ابدأ محادثة', body:'اسأل المساعد عمّا تبحث عنه بلغتك الطبيعية.'},
+      reviews:{icon:'star', title:'لا تقييمات بعد', body:'كن أول من يشارك تجربته مع هذا المكتب.'},
+      saved:{icon:'bookmark', title:'لا عمليات بحث محفوظة', body:'احفظ بحثك من شاشة النتائج لتصلك تنبيهات بالعقارات الجديدة المطابقة.'},
+      private:{icon:'lock', title:'لا معلومات', body:'أكمل بيانات ملفك الشخصي.'},
+      reports:{icon:'flag', title:'لا بلاغات', body:'عند الإبلاغ عن إعلان أو مستخدم مخالف ستظهر حالة بلاغك هنا.'},
+    };
+    const em = emptyMap[s.screen] || emptyMap.compare;
+
+    const mk=(label, screen)=>({label, active:s.screen===screen, inactive:s.screen!==screen, onClick:()=>this.go(screen)});
+    const navGroups = [
+      {label:'ميزات المشتري (مدفوعة)', items:[ mk('المقارنة','compare'), mk('المساعد الذكي','ai'), mk('البحوث المحفوظة','saved'), mk('التقييمات','reviews') ]},
+      {label:'الوسائط (ملء الشاشة)', items:[ mk('ريلز','reels'), mk('جولة 360°','pano') ]},
+      {label:'الحساب (مدفوعة)', items:[ mk('معلوماتي الخاصة','private'), mk('بلاغاتي','reports') ]},
+      {label:'حالة الشاشة', items:[
+        {label:'بيانات', active:s.dataState==='ok', inactive:s.dataState!=='ok', onClick:()=>this.setState({dataState:'ok'})},
+        {label:'فارغ', active:s.dataState==='empty', inactive:s.dataState!=='empty', onClick:()=>this.setState({dataState:'empty'})},
+        {label:'تحميل', active:s.dataState==='loading', inactive:s.dataState!=='loading', onClick:()=>this.setState({dataState:'loading'})},
+        {label:'خطأ', active:s.dataState==='error', inactive:s.dataState!=='error', onClick:()=>this.setState({dataState:'error'})},
+      ]},
+    ];
+
+    return {
+      rootRef:this.rootRef,
+      themeLight:!s.dark, themeDark:s.dark,
+      onLight:()=>this.setState({dark:false}), onDark:()=>this.setState({dark:true}),
+      navGroups,
+      isOk:!stateful || s.dataState==='ok',
+      notOk:stateful && s.dataState!=='ok',
+      isLoading:s.dataState==='loading', isEmpty:s.dataState==='empty', isError:s.dataState==='error',
+      onRetry:()=>this.setState({dataState:'ok'}), skRows:[0,1,2,3],
+      emptyIcon:em.icon, emptyTitle:em.title, emptyBody:em.body,
+      currentTitle:this.TITLES[s.screen]||'',
+      onBack:()=>this.go('compare'), onBackStop:(e)=>{ stop(e); this.go('compare'); },
+
+      isCompare:s.screen==='compare', isReels:s.screen==='reels', isPano:s.screen==='pano',
+      isAi:s.screen==='ai', isReviews:s.screen==='reviews', isSaved:s.screen==='saved',
+      isPrivate:s.screen==='private', isReports:s.screen==='reports',
+
+      compareCols, compareRows, compareCount:cols.length+' عقارات',
+
+      reel, reelTint:reel.tint, reelDots, reelSaved, reelNotSaved:!reelSaved,
+      onReelNext:()=>this.setState(x=>({reelIndex:(x.reelIndex+1)%this.REELS.length})),
+      onReelHeartStop:(e)=>{ stop(e); this.setState(x=>({reelSaved:Object.assign({}, x.reelSaved, {[reel.id]:!x.reelSaved[reel.id]})})); },
+
+      panoTint:scene.tint, panoLabel:scene.label, scenes,
+
+      suggestions:this.SUGGESTIONS.map(t=>({label:t, onClick:()=>aiSend(t)})),
+      aiEmpty:s.aiMsgs.length===0, aiHasMsgs:s.aiMsgs.length>0, aiMsgs,
+      aiInput:s.aiInput, onAiInput:(e)=>this.setState({aiInput:e.target.value}), onAiSend:()=>aiSend(s.aiInput),
+
+      avg, reviewCount:''+revList.length, avgStars:this.stars(Math.round(avgNum)), reviews,
+      sheetOpen:s.sheetOpen, onOpenSheet:()=>this.setState({sheetOpen:true, rating:0, reviewText:''}), onCloseSheet:()=>this.setState({sheetOpen:false}),
+      ratingStars:[1,2,3,4,5].map(i=>({on:i<=s.rating, off:i>s.rating, onClick:()=>this.setState({rating:i})})),
+      ratingLabel:ratingLabels[s.rating], reviewText:s.reviewText, onReviewInput:(e)=>this.setState({reviewText:e.target.value}),
+      onSubmitReview:()=>{ const r=s.rating||5; const t=(s.reviewText||'').trim()||'تجربة جيدة بشكل عام.'; this.setState(x=>({reviews:[{name:'أنت', rating:r, time:'الآن', text:t}].concat(x.reviews||this.REVIEWS), sheetOpen:false, rating:0, reviewText:''})); },
+
+      searches, privateGroups, reports,
+    };
+  }
+}
+</script>
+</body>
+</html>

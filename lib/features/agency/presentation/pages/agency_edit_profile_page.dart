@@ -18,10 +18,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/errors/result.dart';
+import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
@@ -30,6 +32,7 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/app_toast.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/agency.dart';
 import '../../domain/repositories/agency_repository.dart';
@@ -312,8 +315,14 @@ class _AgencyEditProfilePageState extends State<AgencyEditProfilePage> {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.agency_edit_button)),
+    return DcCrownScaffold(
+      title: l10n.agency_edit_button,
+      dense: true,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () =>
+            context.canPop() ? context.pop() : context.go(AppRoutes.shellHome),
+      ),
       body: body,
     );
   }

@@ -36,6 +36,10 @@ abstract class ListingRevisionsRepository {
     required Map<String, dynamic> reason,
   });
 
+  /// Owner `withdraw_listing_revision` — cancels the caller's own open revision
+  /// (status → 'withdrawn'); the live listing stays as-is.
+  Future<void> withdrawRevision(String revisionId);
+
   /// Admin — lists `pending_review` revisions oldest-first.
   Future<List<PendingRevision>> listPendingRevisions({int limit = 50});
 

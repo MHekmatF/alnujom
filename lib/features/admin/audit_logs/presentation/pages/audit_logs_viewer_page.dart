@@ -8,9 +8,11 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 
 import '../../../../../core/di/injection.dart';
+import '../../../../../core/routing/app_router.dart';
 import '../../../../../core/theme/colors.dart';
 import '../../../../../core/theme/radii.dart';
 import '../../../../../core/theme/spacing.dart';
@@ -18,6 +20,7 @@ import '../../../../../core/theme/typography.dart';
 import '../../../../../core/widgets/_widget_support.dart';
 import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_spinner.dart';
+import '../../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../../core/widgets/loading_state.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../domain/entities/audit_log_entry.dart';
@@ -70,8 +73,14 @@ class _AuditLogsViewState extends State<_AuditLogsView> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.auditLogsTitle)),
+    return DcCrownScaffold(
+      title: l10n.auditLogsTitle,
+      dense: true,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () =>
+            context.canPop() ? context.pop() : context.go(AppRoutes.shellHome),
+      ),
       body: BlocBuilder<AuditLogCubit, AuditLogState>(
         builder: (ctx, state) {
           if (state.isLoadingFirstPage && state.items.isEmpty) {
@@ -217,7 +226,7 @@ class _FieldRow extends StatelessWidget {
               text: labelText,
               style: styles.bodyMedium.copyWith(
                 color: colors.textMuted,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w700,
               ),
             ),
             TextSpan(text: value),
@@ -251,10 +260,7 @@ class _JsonBlock extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: styles.labelMedium.copyWith(fontWeight: FontWeight.bold),
-        ),
+        Text(label, style: styles.labelMedium),
         const SizedBox(height: AppSpacing.xs),
         Container(
           width: double.infinity,

@@ -6,6 +6,7 @@ import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/util/localized_numbers.dart';
 import '../../domain/entities/listing_form_state.dart';
 import '../../domain/entities/listing_media.dart';
 import '../../domain/repositories/listings_repository.dart';
@@ -98,15 +99,15 @@ class MediaThumbnail extends StatelessWidget {
             if (!_isGhost &&
                 media!.isMain &&
                 media!.kind == ListingMediaKind.image)
-              Positioned(
+              PositionedDirectional(
                 top: AppSpacing.sm,
-                right: AppSpacing.sm,
+                end: AppSpacing.sm,
                 child: _MainBadge(),
               ),
             if (!_isGhost)
-              Positioned(
+              PositionedDirectional(
                 top: AppSpacing.sm,
-                left: AppSpacing.sm,
+                start: AppSpacing.sm,
                 child: _OrderingBadge(ordering: media!.ordering),
               ),
             // Spec 026 — 360°/virtual-tour mark on the thumbnail (bottom-start)
@@ -148,11 +149,16 @@ class MediaThumbnail extends StatelessWidget {
         child: Icon(
           Icons.play_circle_outline,
           size: 48,
-          color: poster != null ? scheme.onInverseSurface : scheme.onSurfaceVariant,
+          color: poster != null
+              ? scheme.onInverseSurface
+              : scheme.onSurfaceVariant,
         ),
       );
       if (poster == null) {
-        return Container(color: scheme.surfaceContainerHighest, child: playOverlay);
+        return Container(
+          color: scheme.surfaceContainerHighest,
+          child: playOverlay,
+        );
       }
       final posterUrl = getIt<ListingsRepository>().getMediaPublicUrl(
         bucket: 'listing-images',
@@ -291,10 +297,9 @@ class _MainBadge extends StatelessWidget {
       ),
       child: Text(
         l10n.mediaThumbnailMainBadge,
-        style: AppTextStyles.of(context).labelMedium.copyWith(
-          color: scheme.onPrimary,
-          fontWeight: FontWeight.bold,
-        ),
+        style: AppTextStyles.of(
+          context,
+        ).labelMedium.copyWith(color: scheme.onPrimary),
       ),
     );
   }
@@ -356,10 +361,9 @@ class _PanoramaBadge extends StatelessWidget {
           const SizedBox(width: AppSpacing.xs),
           Text(
             l10n.mediaThumbnailPanoramaBadge,
-            style: AppTextStyles.of(context).labelMedium.copyWith(
-              color: scheme.onTertiaryContainer,
-              fontWeight: FontWeight.bold,
-            ),
+            style: AppTextStyles.of(
+              context,
+            ).labelMedium.copyWith(color: scheme.onTertiaryContainer),
           ),
         ],
       ),
@@ -384,7 +388,7 @@ class _OrderingBadge extends StatelessWidget {
         shape: BoxShape.circle,
       ),
       child: Text(
-        '$ordering',
+        formatLocalizedNumber(ordering, Localizations.localeOf(context)),
         style: AppTextStyles.of(
           context,
         ).labelMedium.copyWith(color: scheme.onInverseSurface),
@@ -428,9 +432,9 @@ class _GhostOverlay extends StatelessWidget {
                     Text(
                       l10n.videoCompressing,
                       textAlign: TextAlign.center,
-                      style: AppTextStyles.of(context).labelMedium.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
+                      style: AppTextStyles.of(
+                        context,
+                      ).labelMedium.copyWith(color: scheme.onSurfaceVariant),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),

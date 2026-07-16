@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../listing_form/domain/entities/listing.dart';
@@ -27,27 +29,39 @@ class StatusFilterChipRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
     return BlocBuilder<MyListingsBloc, MyListingsState>(
       buildWhen: (a, b) => a.statusFilter != b.statusFilter,
       builder: (context, state) {
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.sm,
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            border: BorderDirectional(
+              bottom: BorderSide(color: colors.outline),
+            ),
           ),
-          child: Row(
-            children: [
-              for (final f in _filters) ...[
-                ChoiceChip(
-                  label: Text(_labelFor(f, l10n)),
-                  selected: state.statusFilter == f,
-                  onSelected: (_) =>
-                      context.read<MyListingsBloc>().add(ChangeStatusFilter(f)),
-                ),
-                const SizedBox(width: AppSpacing.sm),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.sm,
+            ),
+            child: Row(
+              children: [
+                for (final f in _filters) ...[
+                  ChoiceChip(
+                    label: Text(_labelFor(f, l10n)),
+                    selected: state.statusFilter == f,
+                    onSelected: (_) {
+                      HapticFeedback.selectionClick();
+                      context.read<MyListingsBloc>().add(
+                        ChangeStatusFilter(f),
+                      );
+                    },
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                ],
               ],
-            ],
+            ),
           ),
         );
       },

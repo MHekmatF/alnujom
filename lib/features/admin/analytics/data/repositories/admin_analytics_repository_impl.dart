@@ -17,6 +17,11 @@ class AdminAnalyticsRepositoryImpl implements AdminAnalyticsRepository {
 
   static const _tag = 'AdminAnalyticsRepositoryImpl';
 
+  /// Per-series network cap. A single stalled RPC must not hang the whole
+  /// analytics surface forever — on timeout the series fails to an empty/retry
+  /// state instead of an indefinite blank skeleton.
+  static const _rpcTimeout = Duration(seconds: 15);
+
   final AdminAnalyticsDatasource _datasource;
   final AppLogger _logger;
 
@@ -25,7 +30,9 @@ class AdminAnalyticsRepositoryImpl implements AdminAnalyticsRepository {
     int months = 6,
   }) async {
     try {
-      final dtos = await _datasource.fetchListingsByMonth(months: months);
+      final dtos = await _datasource
+          .fetchListingsByMonth(months: months)
+          .timeout(_rpcTimeout);
       final sparse = <String, int>{
         for (final dto in dtos) _monthKey(dto.month): dto.total,
       };
@@ -48,7 +55,9 @@ class AdminAnalyticsRepositoryImpl implements AdminAnalyticsRepository {
     int months = 6,
   }) async {
     try {
-      final dtos = await _datasource.fetchProfilesByMonth(months: months);
+      final dtos = await _datasource
+          .fetchProfilesByMonth(months: months)
+          .timeout(_rpcTimeout);
       final sparse = <String, int>{
         for (final dto in dtos) _monthKey(dto.month): dto.total,
       };
@@ -71,7 +80,9 @@ class AdminAnalyticsRepositoryImpl implements AdminAnalyticsRepository {
     int days = 30,
   }) async {
     try {
-      final dtos = await _datasource.fetchLeadEventsByDay(days: days);
+      final dtos = await _datasource
+          .fetchLeadEventsByDay(days: days)
+          .timeout(_rpcTimeout);
       final sparse = <String, int>{
         for (final dto in dtos) _dateKey(dto.day): dto.total,
       };
@@ -93,13 +104,57 @@ class AdminAnalyticsRepositoryImpl implements AdminAnalyticsRepository {
   Future<Result<List<AdminGovernorateTotal>>>
   fetchListingsByGovernorate() async {
     try {
-      final dtos = await _datasource.fetchListingsByGovernorate();
+      final dtos = await _datasource
+          .fetchListingsByGovernorate()
+          .timeout(_rpcTimeout);
       return Success(
         dtos.map((dto) => dto.toEntity()).toList(growable: false),
       );
     } on Object catch (error, stackTrace) {
       _logger.warning(
         'fetchListingsByGovernorate failed.',
+        error: error,
+        stackTrace: stackTrace,
+        tag: _tag,
+      );
+      return FailureResult(
+        UnknownFailure(error.toString(), cause: error, stackTrace: stackTrace),
+      );
+    }
+  }
+
+  @override
+  Future<Result<List<AdminCategoryTotal>>> fetchListingsByCategory() async {
+    try {
+      final dtos = await _datasource
+          .fetchListingsByCategory()
+          .timeout(_rpcTimeout);
+      return Success(dtos.map((dto) => dto.toEntity()).toList(growable: false));
+    } on Object catch (error, stackTrace) {
+      _logger.warning(
+        'fetchListingsByCategory failed.',
+        error: error,
+        stackTrace: stackTrace,
+        tag: _tag,
+      );
+      return FailureResult(
+        UnknownFailure(error.toString(), cause: error, stackTrace: stackTrace),
+      );
+    }
+  }
+
+  @override
+  Future<Result<List<AdminActivityCell>>> fetchActivityByDowHour({
+    int days = 30,
+  }) async {
+    try {
+      final dtos = await _datasource
+          .fetchActivityByDowHour(days: days)
+          .timeout(_rpcTimeout);
+      return Success(dtos.map((dto) => dto.toEntity()).toList(growable: false));
+    } on Object catch (error, stackTrace) {
+      _logger.warning(
+        'fetchActivityByDowHour failed.',
         error: error,
         stackTrace: stackTrace,
         tag: _tag,

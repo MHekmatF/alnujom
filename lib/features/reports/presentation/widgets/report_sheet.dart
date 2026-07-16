@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/app_button.dart';
@@ -57,6 +58,7 @@ class _ReportSheetBodyState extends State<_ReportSheetBody> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final styles = AppTextStyles.of(context);
+    final colors = AppColors.of(context);
 
     return BlocListener<ReportSubmissionCubit, ReportSubmissionState>(
       listenWhen: (prev, curr) => curr.result != null && prev.result == null,
@@ -75,19 +77,25 @@ class _ReportSheetBodyState extends State<_ReportSheetBody> {
       },
       child: SafeArea(
         child: Padding(
-          padding: EdgeInsets.only(
-            left: AppSpacing.lg,
-            right: AppSpacing.lg,
+          padding: EdgeInsetsDirectional.only(
+            start: AppSpacing.lg,
+            end: AppSpacing.lg,
             top: AppSpacing.lg,
             bottom: MediaQuery.viewInsetsOf(context).bottom + AppSpacing.lg,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Title
-              Text(l10n.report_sheet_title, style: styles.titleLarge),
-              const SizedBox(height: AppSpacing.lg),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Title
+                Text(l10n.report_sheet_title, style: styles.titleLarge),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  l10n.report_sheet_subtitle,
+                  style: styles.bodyMedium.copyWith(color: colors.textMuted),
+                ),
+                const SizedBox(height: AppSpacing.lg),
               // Reason dropdown
               BlocBuilder<ReportSubmissionCubit, ReportSubmissionState>(
                 buildWhen: (prev, curr) => prev.reason != curr.reason,
@@ -153,7 +161,8 @@ class _ReportSheetBodyState extends State<_ReportSheetBody> {
                   );
                 },
               ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

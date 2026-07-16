@@ -1,0 +1,171 @@
+{
+  "$comment": "Stage 0 content kit — single source of truth for BOTH the 3-direction mockups and the Supabase demo-data pass (Stage D). Prices are integer USD (rents per month). photo files live in ./photos/. db.id = existing listing row to upgrade; db.insert = new demo row to create.",
+  "exchange_rate_hint": { "usd_to_syp": 13000, "note": "≈ل.س line in UI comes from the app's live exchange rate; this is only for mockup rendering" },
+  "listings": [
+    {
+      "key": "malki-3br",
+      "db": { "id": "d1000000-0000-4000-8000-000000000001", "area_ar": "المالكي", "area_id": "2a2d1739-a311-4b22-8d15-7a51d97711dc" },
+      "title_ar": "شقة ٣ غرف حديثة مع إطلالة — المالكي",
+      "purpose": "sale", "property_type": "apartment",
+      "price_usd": 185000, "rooms": 3, "bathrooms": 2, "area_m2": 180, "floor": 4,
+      "verified": true, "featured": true, "deed_type": "green_tabu", "finish_level": "super_deluxe",
+      "agent_ar": "مكتب الشام العقاري",
+      "photos": ["living-bright-1.jpg", "kitchen-modern-1.jpg", "bedroom-1.jpg", "building-1.jpg"]
+    },
+    {
+      "key": "dummar-villa-pool",
+      "db": { "id": "d1000000-0000-4000-8000-000000000002", "area_ar": "مشروع دمر", "area_id": "428f880d-0f20-4c55-bfca-f891a92d2e27" },
+      "title_ar": "فيلا مودرن مع مسبح وحديقة — مشروع دمر",
+      "purpose": "sale", "property_type": "villa",
+      "price_usd": 340000, "rooms": 5, "bathrooms": 4, "area_m2": 420,
+      "verified": true, "featured": true, "deed_type": "green_tabu", "finish_level": "super_deluxe",
+      "agent_ar": "مكتب الشام العقاري",
+      "photos": ["villa-pool-1.jpg", "villa-interior-1.jpg", "villa-exterior-1.jpg", "kitchen-luxury-1.jpg"]
+    },
+    {
+      "key": "mezzeh-rent-2br",
+      "db": { "id": "d1000000-0000-4000-8000-000000000003", "area_ar": "المزة", "area_id": "a2d402fa-7aab-4ed8-a42a-3533a8ce6b3f" },
+      "title_ar": "شقة مفروشة للإيجار — المزة فيلات غربية",
+      "purpose": "rent", "property_type": "apartment",
+      "price_usd": 400, "rooms": 2, "bathrooms": 1, "area_m2": 110, "floor": 2,
+      "verified": true, "featured": false, "finish_level": "deluxe",
+      "agent_ar": "مكتب المزة الذهبي",
+      "photos": ["living-cozy-1.jpg", "bedroom-2.jpg", "kitchen-apartment-1.jpg"]
+    },
+    {
+      "key": "aleppo-shop",
+      "db": { "id": "d1000000-0000-4000-8000-000000000004", "area_ar": "السليمانية", "area_id": "6f2b870b-9aa2-4d77-9d7f-e6c86b4bf8fe" },
+      "title_ar": "محل تجاري ٦٥ م² على شارع رئيسي — السليمانية",
+      "purpose": "sale", "property_type": "shop",
+      "price_usd": 85000, "bathrooms": 1, "area_m2": 65,
+      "verified": false, "featured": false,
+      "agent_ar": "أملاك حلب",
+      "photos": ["shop-1.jpg", "shop-2.jpg"]
+    },
+    {
+      "key": "homs-land",
+      "db": { "id": "d1000000-0000-4000-8000-000000000005", "area_ar": "حمص القديمة" },
+      "title_ar": "أرض سكنية ٥٠٠ م² قابلة للبناء — حمص",
+      "purpose": "sale", "property_type": "land",
+      "price_usd": 35000, "area_m2": 500,
+      "verified": false, "featured": false, "deed_type": "green_tabu",
+      "agent_ar": "مالك مباشر",
+      "photos": ["land-1.jpg", "land-2.jpg"]
+    },
+    {
+      "key": "aleppo-office",
+      "db": { "id": "d1000000-0000-4000-8000-000000000006", "area_ar": "السليمانية", "area_id": "6f2b870b-9aa2-4d77-9d7f-e6c86b4bf8fe" },
+      "title_ar": "مكتب إداري مفروش للإيجار — السليمانية",
+      "purpose": "rent", "property_type": "office",
+      "price_usd": 300, "rooms": 2, "bathrooms": 1, "area_m2": 95,
+      "verified": false, "featured": false,
+      "agent_ar": "أملاك حلب",
+      "photos": ["office-1.jpg", "office-2.jpg", "office-3.jpg"]
+    },
+    {
+      "key": "latakia-sea-view",
+      "db": { "id": "d1000000-0000-4000-8000-000000000007", "area_ar": "كورنيش اللاذقية", "area_id": "ef048e5b-4496-4e6f-bdc7-74e1029189ff" },
+      "title_ar": "شقة مطلة على البحر — كورنيش اللاذقية",
+      "purpose": "sale", "property_type": "apartment",
+      "price_usd": 95000, "rooms": 3, "bathrooms": 2, "area_m2": 150, "floor": 6,
+      "verified": true, "featured": false, "finish_level": "deluxe",
+      "agent_ar": "عقارات الساحل",
+      "photos": ["living-seaview-1.jpg", "bedroom-3.jpg", "bathroom-1.jpg"]
+    },
+    {
+      "key": "dummar-villa-rent",
+      "db": { "id": "d1000000-0000-4000-8000-000000000008", "area_ar": "دمر", "area_id": "009cda80-d768-473d-be7a-1e36662efd3f" },
+      "title_ar": "فيلا ريفية مفروشة للإيجار — دمر",
+      "purpose": "rent", "property_type": "villa",
+      "price_usd": 550, "rooms": 4, "bathrooms": 3, "area_m2": 300,
+      "verified": false, "featured": false,
+      "agent_ar": "مالك مباشر",
+      "photos": ["villa-country-1.jpg", "living-warm-1.jpg", "garden-1.jpg"]
+    },
+    {
+      "key": "hamdaniyeh-5br",
+      "db": { "id": "370678f5-3e61-4c2d-95d5-71f2cfd6ce5f", "area_ar": "الحمدانية", "area_id": "c843cfa5-0a7b-4e78-8465-15a296b92316", "note": "founder's own listing — currently the prayer-card photo; fix area from حلب القديمة to الحمدانية" },
+      "title_ar": "شقة ٥ غرف واسعة — الحمدانية",
+      "purpose": "sale", "property_type": "apartment",
+      "price_usd": 120000, "rooms": 5, "bathrooms": 2, "area_m2": 160, "floor": 3,
+      "verified": true, "featured": true, "deed_type": "green_tabu", "finish_level": "deluxe",
+      "agent_ar": "مالك مباشر",
+      "photos": ["living-spacious-1.jpg", "kitchen-modern-2.jpg", "bedroom-4.jpg", "building-2.jpg"]
+    },
+    {
+      "key": "old-damascus-house",
+      "db": { "insert": true, "id": "d1000000-0000-4000-8000-000000000009", "area_ar": "دمشق القديمة", "area_id": "287878b3-b750-48d4-bdc0-b0b025cf21c1" },
+      "title_ar": "بيت عربي مرمم مع باحة — دمشق القديمة",
+      "purpose": "sale", "property_type": "apartment",
+      "price_usd": 150000, "rooms": 3, "bathrooms": 2, "area_m2": 140,
+      "verified": true, "featured": false, "deed_type": "green_tabu",
+      "agent_ar": "مكتب الشام العقاري",
+      "photos": ["courtyard-1.jpg", "living-traditional-1.jpg", "bedroom-5.jpg"]
+    },
+    {
+      "key": "abu-rummaneh-duplex",
+      "db": { "insert": true, "id": "d1000000-0000-4000-8000-000000000010", "area_ar": "أبو رمانة", "area_id": "8eb4295b-f248-4bd8-b996-fdc577c4de2d" },
+      "title_ar": "شقة دوبلكس مع تراس — أبو رمانة",
+      "purpose": "sale", "property_type": "apartment",
+      "price_usd": 210000, "rooms": 4, "bathrooms": 3, "area_m2": 220, "floor": 7,
+      "verified": true, "featured": true, "deed_type": "green_tabu", "finish_level": "super_deluxe",
+      "agent_ar": "مكتب الشام العقاري",
+      "photos": ["living-luxury-1.jpg", "terrace-1.jpg", "kitchen-luxury-2.jpg", "bathroom-2.jpg"]
+    },
+    {
+      "key": "kafarsouseh-3br",
+      "db": { "insert": true, "id": "d1000000-0000-4000-8000-000000000011", "area_ar": "كفر سوسة", "area_id": "55a035b6-2ce0-4169-a67d-cdef380ab8df" },
+      "title_ar": "شقة عائلية إكساء ديلوكس — كفر سوسة",
+      "purpose": "sale", "property_type": "apartment",
+      "price_usd": 145000, "rooms": 3, "bathrooms": 2, "area_m2": 150, "floor": 5,
+      "verified": true, "featured": false, "finish_level": "deluxe",
+      "agent_ar": "مكتب دمشق الحديثة",
+      "photos": ["living-family-1.jpg", "kitchen-white-1.jpg", "bedroom-6.jpg"]
+    },
+    {
+      "key": "dummar-garden-flat",
+      "db": { "insert": true, "id": "d1000000-0000-4000-8000-000000000012", "area_ar": "دمر", "area_id": "009cda80-d768-473d-be7a-1e36662efd3f" },
+      "title_ar": "شقة أرضية مع حديقة خاصة — دمر",
+      "purpose": "sale", "property_type": "apartment",
+      "price_usd": 88000, "rooms": 3, "bathrooms": 2, "area_m2": 120, "floor": 0,
+      "verified": false, "featured": false,
+      "agent_ar": "مالك مباشر",
+      "photos": ["garden-flat-1.jpg", "living-simple-1.jpg", "kitchen-simple-1.jpg"]
+    },
+    {
+      "key": "center-studio-rent",
+      "db": { "insert": true, "id": "d1000000-0000-4000-8000-000000000013", "area_ar": "وسط دمشق", "area_id": "87de64f0-f1de-4fec-9396-ddd0aee35dd6" },
+      "title_ar": "استوديو مفروش للإيجار قرب الجامعة — وسط دمشق",
+      "purpose": "rent", "property_type": "apartment",
+      "price_usd": 250, "rooms": 1, "bathrooms": 1, "area_m2": 45, "floor": 3,
+      "verified": false, "featured": false,
+      "agent_ar": "مالك مباشر",
+      "photos": ["studio-1.jpg", "studio-2.jpg"]
+    },
+    {
+      "key": "furqan-4br",
+      "db": { "insert": true, "id": "d1000000-0000-4000-8000-000000000014", "area_ar": "الفرقان", "area_id": "de5175f3-4572-4574-b625-aa5ef890fa01" },
+      "title_ar": "شقة عصرية ٤ غرف — الفرقان",
+      "purpose": "sale", "property_type": "apartment",
+      "price_usd": 95000, "rooms": 4, "bathrooms": 2, "area_m2": 140, "floor": 2,
+      "verified": true, "featured": false, "finish_level": "deluxe",
+      "agent_ar": "أملاك حلب",
+      "photos": ["living-modern-2.jpg", "bedroom-7.jpg", "living-modern-3.jpg"]
+    },
+    {
+      "key": "midan-2br",
+      "db": { "insert": true, "id": "d1000000-0000-4000-8000-000000000015", "area_ar": "الميدان", "area_id": "4860995d-c0e5-42c3-bc2d-795045c987e1" },
+      "title_ar": "شقة ٢ غرفة بسعر مناسب — الميدان",
+      "purpose": "sale", "property_type": "apartment",
+      "price_usd": 52000, "rooms": 2, "bathrooms": 1, "area_m2": 95, "floor": 1,
+      "verified": false, "featured": false,
+      "agent_ar": "مالك مباشر",
+      "photos": ["living-simple-2.jpg", "kitchen-simple-2.jpg"]
+    }
+  ],
+  "data_fixes": [
+    { "fix": "area display_name 'انامرج طسو' (id 1eff37c6-6ca3-4d3f-8be6-0390e555b34b) is reversed text; correct to 'وسط جرمانا'" },
+    { "fix": "junk pending_review listings ('اتع', 'sdas', '٥غرف صالون') → status 'rejected' so admin QA keeps them but they never surface" },
+    { "fix": "generic area 'دمشق' under city دمشق causes 'دمشق • دمشق' rendering; no listing may use it" }
+  ]
+}

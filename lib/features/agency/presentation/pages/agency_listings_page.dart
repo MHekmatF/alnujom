@@ -8,7 +8,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart' hide TextDirection;
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
@@ -18,8 +17,9 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_spinner.dart';
-import '../../../../core/widgets/deep_link_aware_back_button.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/presentation/money_formatter.dart';
 import '../bloc/agency_listings_bloc.dart';
 
 class AgencyListingsPage extends StatelessWidget {
@@ -46,10 +46,13 @@ class _AgencyListingsView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: const DeepLinkAwareBackButton(),
-        title: Text(l10n.agency_listings_title),
+    return DcCrownScaffold(
+      title: l10n.agency_listings_title,
+      dense: true,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () =>
+            context.canPop() ? context.pop() : context.go(AppRoutes.shellHome),
       ),
       body: BlocBuilder<AgencyListingsBloc, AgencyListingsState>(
         builder: (context, state) {
@@ -122,7 +125,6 @@ class _ListingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
     final id = row['id'] as String?;
@@ -180,9 +182,10 @@ class _ListingCard extends StatelessWidget {
                     if (amount != null) ...[
                       const SizedBox(height: AppSpacing.xs),
                       Text(
-                        l10n.priceWithCurrency(
-                          _formatAmount(context, amount as num),
+                        MoneyFormatter.formatAmount(
+                          amount as num,
                           currency,
+                          locale: Localizations.localeOf(context),
                         ),
                         style: styles.bodyMedium.copyWith(
                           color: colors.onSurfaceVariant,
@@ -197,14 +200,5 @@ class _ListingCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  /// Localized amount in the active locale's numerals (Arabic-Indic in ar),
-  /// with no fractional part — mirrors the favorites/search card idiom.
-  String _formatAmount(BuildContext context, num amount) {
-    final fmt = NumberFormat.decimalPattern(
-      Localizations.localeOf(context).toLanguageTag(),
-    )..maximumFractionDigits = 0;
-    return fmt.format(amount);
   }
 }

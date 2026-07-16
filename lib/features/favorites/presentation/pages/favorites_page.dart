@@ -6,12 +6,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/elevation.dart';
 import '../../../../core/theme/motion.dart';
+import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../comparison/presentation/cubit/comparison_cubit.dart';
 import '../../../comparison/presentation/widgets/compare_bottom_bar.dart';
+import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_spinner.dart';
-import '../../../../core/widgets/deep_link_aware_back_button.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/main_bottom_nav.dart';
@@ -56,16 +60,18 @@ class _FavoritesView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(
-        // No back arrow when opened as the Favorites bottom-nav tab root
-        // (nothing to pop — the bottom nav returns to Home); keep it when
-        // pushed (e.g. from the Profile menu or a deep-link).
-        leading: Navigator.canPop(context)
-            ? const DeepLinkAwareBackButton()
-            : null,
-        title: Text(l10n.favorites_page_title),
-      ),
+    return DcCrownScaffold(
+      title: l10n.favorites_page_title,
+      // No back arrow when opened as the Favorites bottom-nav tab root (nothing
+      // to pop — the bottom nav returns to Home); keep it when pushed (e.g. from
+      // the Profile menu or a deep-link).
+      leading: Navigator.canPop(context)
+          ? DcCrownIconButton(
+              icon: Icons.arrow_forward,
+              onTap: () => Navigator.of(context).maybePop(),
+            )
+          : null,
+      bottomNavigationBar: const MainBottomNav(current: MainTab.favorites),
       body: Stack(
         children: [
           BlocBuilder<FavoritesPageBloc, FavoritesPageState>(
@@ -99,7 +105,6 @@ class _FavoritesView extends StatelessWidget {
           ),
         ],
       ),
-      bottomNavigationBar: const MainBottomNav(current: MainTab.favorites),
     );
   }
 }
@@ -151,6 +156,11 @@ class _LoadedBody extends StatelessWidget {
         );
       },
       child: ListView.builder(
+        // Clear the always-mounted PublishFab (endFloat) and the pinned
+        // CompareBottomBar so the last card is never occluded by floating chrome.
+        padding: const EdgeInsetsDirectional.only(
+          bottom: AppSpacing.xxxl + AppSpacing.xl,
+        ),
         itemCount: headerCount + items.length + spinnerCount,
         itemBuilder: (context, index) {
           if (index == 0) {
@@ -186,7 +196,8 @@ class _LoadedBody extends StatelessWidget {
   }
 }
 
-/// Shimmer placeholder cards (16:9 image + lines) shown while favorites load.
+/// Shimmer placeholder cards that mirror [FavoriteCard] (card chrome + 16:10
+/// image + price/title/specs lines) so the load→list crossfade doesn't pop.
 class _FavoritesSkeleton extends StatelessWidget {
   const _FavoritesSkeleton();
 
@@ -194,26 +205,58 @@ class _FavoritesSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView.builder(
       itemCount: 4,
-      itemBuilder: (_, __) => const Padding(
-        padding: EdgeInsetsDirectional.symmetric(
-          horizontal: AppSpacing.lg,
-          vertical: AppSpacing.sm,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            AspectRatio(aspectRatio: 16 / 9, child: LoadingState.card()),
-            SizedBox(height: AppSpacing.md),
-            SizedBox(height: AppSpacing.lg, child: LoadingState.row()),
-            SizedBox(height: AppSpacing.sm),
-            FractionallySizedBox(
-              alignment: AlignmentDirectional.centerStart,
-              widthFactor: 0.6,
-              child: SizedBox(height: AppSpacing.lg, child: LoadingState.row()),
+      itemBuilder: (context, __) {
+        final colors = AppColors.of(context);
+        final elevation = AppElevation.of(context);
+        return Container(
+          margin: const EdgeInsetsDirectional.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.sm,
+          ),
+          decoration: BoxDecoration(
+            color: colors.card,
+            borderRadius: appRadius(AppRadii.lg),
+            border: Border.all(color: colors.outline),
+            boxShadow: elevation.level2,
+          ),
+          child: ClipRRect(
+            borderRadius: appRadius(AppRadii.lg),
+            child: const Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                AspectRatio(
+                  aspectRatio: 16 / 10,
+                  child: LoadingState.card(),
+                ),
+                Padding(
+                  padding: EdgeInsetsDirectional.all(AppSpacing.lg),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Price line.
+                      FractionallySizedBox(
+                        alignment: AlignmentDirectional.centerStart,
+                        widthFactor: 0.35,
+                        child: LoadingState.heading(),
+                      ),
+                      SizedBox(height: AppSpacing.sm),
+                      // Title line.
+                      LoadingState.line(),
+                      SizedBox(height: AppSpacing.sm),
+                      // Specs / location line.
+                      FractionallySizedBox(
+                        alignment: AlignmentDirectional.centerStart,
+                        widthFactor: 0.6,
+                        child: LoadingState.line(),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

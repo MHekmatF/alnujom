@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../shared/util/arabic_digits.dart';
 import '../theme/colors.dart';
 import '../theme/spacing.dart';
 import '../theme/typography.dart';
@@ -86,13 +87,21 @@ class RatingStars extends StatelessWidget {
 
     if (!showValue) return row;
 
+    // Fixed one-decimal rating ("4.0"), post-processed to Arabic-Indic digits
+    // under `ar` so the value matches the locale's digit system.
+    final raw = value.toStringAsFixed(1);
+    final ratingLabel =
+        Localizations.localeOf(context).languageCode == 'ar'
+        ? toArabicIndicNumerals(raw)
+        : raw;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         row,
         const SizedBox(width: AppSpacing.xs),
         Text(
-          value.toStringAsFixed(1),
+          ratingLabel,
           style: styles.labelLarge.copyWith(color: colors.onSurface),
         ),
       ],

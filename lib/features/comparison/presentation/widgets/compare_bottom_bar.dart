@@ -79,18 +79,21 @@ class CompareBottomBar extends StatelessWidget {
                               ),
                             ),
                             // Inline clear (keeps the primary tap = "compare").
+                            // Full 48dp hit area + label so the target clears
+                            // the touch minimum next to the large primary tap.
                             InkResponse(
                               radius: kAppMinTouchTarget / 2,
                               onTap: () =>
                                   context.read<ComparisonCubit>().clear(),
-                              child: Padding(
-                                padding: const EdgeInsetsDirectional.all(
-                                  AppSpacing.xs,
-                                ),
-                                child: Icon(
-                                  LucideIcons.x,
-                                  size: AppSpacing.lg,
-                                  color: colors.onPrimary,
+                              child: Tooltip(
+                                message: l10n.comparisonClearAll,
+                                child: SizedBox.square(
+                                  dimension: kAppMinTouchTarget,
+                                  child: Icon(
+                                    LucideIcons.x,
+                                    size: AppSpacing.lg,
+                                    color: colors.onPrimary,
+                                  ),
                                 ),
                               ),
                             ),

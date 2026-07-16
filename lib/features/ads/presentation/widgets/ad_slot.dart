@@ -31,6 +31,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../listing_form/domain/entities/listing.dart'
@@ -67,9 +68,15 @@ class _AdSlotView extends StatelessWidget {
     return BlocBuilder<AdSlotCubit, AdSlotState>(
       builder: (context, state) {
         return switch (state) {
-          AdSlotSingle(:final ad) => AdBannerCard(
-            ad: ad,
-            onTap: () => _handleTap(context, ad),
+          AdSlotSingle(:final ad) => Padding(
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.sm,
+            ),
+            child: AdBannerCard(
+              ad: ad,
+              onTap: () => _handleTap(context, ad),
+            ),
           ),
           AdSlotCarousel(:final ads) => AdCarousel(
             ads: ads,

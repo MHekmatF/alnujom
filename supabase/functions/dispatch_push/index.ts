@@ -35,7 +35,8 @@ type NotificationType =
   | "listing_approved"
   | "listing_rejected"
   | "inquiry_received"
-  | "agency_invitation";
+  | "agency_invitation"
+  | "saved_search_match";
 
 interface DispatchBody {
   notification_id?: unknown;
@@ -88,6 +89,12 @@ const COPY: Record<NotificationType, { ar: [string, string]; en: [string, string
   agency_invitation: {
     ar: ["دعوة إلى مكتب", "تمت دعوتك للانضمام إلى مكتب"],
     en: ["Agency invitation", "You have been invited to join an agency"],
+  },
+  // Phase 035 — enable OS pushes for saved-search matches (previously not in
+  // COPY, so they were dropped as bad_request). Gated by notif_new_matches.
+  saved_search_match: {
+    ar: ["عقار جديد مطابق", "نزل عقار جديد يطابق بحثك المحفوظ"],
+    en: ["New matching listing", "A new listing matches your saved search"],
   },
 };
 
@@ -244,14 +251,30 @@ Deno.serve(async (req: Request) => {
       return json({ skipped: "no_provider" }, 200);
     }
 
-    // 3 + 4. Recipient preference (notifications_enabled) + locale. Default ar; default enabled.
+    // 3 + 4. Recipient preference (global mute + per-category) + locale.
     const { data: pref } = await adminClient
       .from("user_preferences")
-      .select("notifications_enabled, locale")
+      .select(
+        "notifications_enabled, locale, notif_new_matches, notif_messages, notif_marketing",
+      )
       .eq("user_id", recipientId)
       .maybeSingle();
     if (pref && pref.notifications_enabled === false) {
       return json({ skipped: "muted" }, 200); // history already written (FR-021)
+    }
+    // Phase 035 — per-category mute. Transactional types (account/listing
+    // approval + rejection) are ALWAYS delivered; only the user-muteable
+    // categories gate here. History rows are written by the trigger regardless.
+    const categoryColumn = type === "saved_search_match"
+      ? "notif_new_matches"
+      : (type === "inquiry_received" || type === "agency_invitation")
+      ? "notif_messages"
+      : null;
+    if (
+      categoryColumn && pref &&
+      (pref as Record<string, unknown>)[categoryColumn] === false
+    ) {
+      return json({ skipped: "category_muted" }, 200);
     }
     const locale = (pref?.locale as string) ?? "ar";
 

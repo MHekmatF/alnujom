@@ -184,9 +184,15 @@ class _EmptyState extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           Text(
-            l10n.mediaActionReorderHint,
+            l10n.mediaEmptyStateTitle,
             textAlign: TextAlign.center,
-            style: styles.bodyMedium,
+            style: styles.titleMedium.copyWith(color: colors.onSurface),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            l10n.mediaEmptyStateHint,
+            textAlign: TextAlign.center,
+            style: styles.bodyMedium.copyWith(color: colors.textMuted),
           ),
         ],
       ),

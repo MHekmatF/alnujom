@@ -26,8 +26,18 @@ class FeaturedListingsCubit extends Cubit<FeaturedListingsState> {
 
   /// Loads (or reloads) the featured listings for [locale]. Emits
   /// `loading` → (`loaded` | `empty` | `failure`).
+  ///
+  /// On a *reload* (pull-to-refresh) the currently-loaded listings are carried
+  /// through the `loading` phase so the home featured rail keeps its content
+  /// and fixed height instead of collapsing to zero and snapping back — which
+  /// otherwise jumps the whole feed while the refresh is in flight.
   Future<void> load({required Locale locale}) async {
-    emit(const FeaturedListingsState(status: FeaturedListingsStatus.loading));
+    emit(
+      FeaturedListingsState(
+        status: FeaturedListingsStatus.loading,
+        listings: state.listings,
+      ),
+    );
     final result = await _loadFeaturedListings(locale: locale);
     if (isClosed) return;
     switch (result) {

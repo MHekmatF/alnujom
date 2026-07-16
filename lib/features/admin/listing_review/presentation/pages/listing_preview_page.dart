@@ -6,6 +6,7 @@ import 'package:intl/intl.dart' hide TextDirection;
 
 import '../../../../../core/di/injection.dart';
 import '../../../../../core/errors/failure.dart';
+import '../../../../../core/routing/app_router.dart';
 import '../../../../../core/security/permission_checker.dart';
 import '../../../../../core/security/permission_keys.dart';
 import '../../../../../core/theme/colors.dart';
@@ -16,6 +17,7 @@ import '../../../../../core/widgets/_widget_support.dart';
 import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_spinner.dart';
 import '../../../../../core/widgets/app_toast.dart';
+import '../../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../../shared/presentation/widgets/listing_display/listing_amenities_block.dart';
 import '../../../../../shared/presentation/widgets/listing_display/listing_description_block.dart';
@@ -63,16 +65,20 @@ class _ListingPreviewView extends StatelessWidget {
       PermissionKeys.listingsEditAny,
     );
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.adminPreviewTitle),
-        actions: [
-          if (canFeature)
-            BlocBuilder<ListingPreviewBloc, ListingPreviewState>(
-              builder: (ctx, state) => _FeatureAction(state: state),
-            ),
-        ],
+    return DcCrownScaffold(
+      title: l10n.adminPreviewTitle,
+      dense: true,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () =>
+            context.canPop() ? context.pop() : context.go(AppRoutes.shellHome),
       ),
+      actions: [
+        if (canFeature)
+          BlocBuilder<ListingPreviewBloc, ListingPreviewState>(
+            builder: (ctx, state) => _FeatureAction(state: state),
+          ),
+      ],
       body: BlocConsumer<ListingPreviewBloc, ListingPreviewState>(
         listenWhen: (prev, curr) =>
             (curr.lastSuccess != null && prev.lastSuccess == null) ||
@@ -337,7 +343,7 @@ class _FeatureAction extends StatelessWidget {
       tooltip: l10n.adminPreviewActionFeature,
       icon: Icon(
         isFeatured ? Icons.star_rounded : Icons.star_outline_rounded,
-        color: isFeatured ? colors.primary : null,
+        color: colors.onBrandHeader,
       ),
       onPressed: disabled ? null : () => _onFeaturePressed(context, isFeatured),
     );

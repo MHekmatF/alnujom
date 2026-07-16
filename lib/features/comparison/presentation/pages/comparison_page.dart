@@ -6,25 +6,28 @@
 // label column keeps the rows readable as the property columns scroll.
 //
 // Token-only styling (no inline hex / TextStyle / numeric insets). RTL-safe;
-// numbers render in the active locale's numerals via intl NumberFormat.
+// numbers render in the active locale's numerals via `formatLocalizedNumber`.
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
-// hide intl's TextDirection so it doesn't shadow dart:ui's.
-import 'package:intl/intl.dart' hide TextDirection;
 
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
-import '../../../../core/theme/elevation.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_network_image.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/press_scale.dart';
+import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../core/widgets/status_pill.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/presentation/money_formatter.dart';
+import '../../../../shared/util/localized_numbers.dart';
 import '../../../listing_form/domain/entities/listing.dart';
 import '../../domain/entities/comparison_item.dart';
 import '../cubit/comparison_cubit.dart';
@@ -46,28 +49,31 @@ class ComparisonPage extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final colors = AppColors.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.comparisonPageTitle),
-        actions: [
-          BlocBuilder<ComparisonCubit, ComparisonState>(
-            buildWhen: (a, b) => a.count != b.count,
-            builder: (context, state) {
-              if (state.count == 0) return const SizedBox.shrink();
-              return IconButton(
-                tooltip: l10n.comparisonClearAll,
-                icon: const Icon(LucideIcons.trash_2),
-                onPressed: () => context.read<ComparisonCubit>().clear(),
-              );
-            },
-          ),
-        ],
+    return DcCrownScaffold(
+      title: l10n.comparisonPageTitle,
+      dense: true,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () => Navigator.of(context).maybePop(),
       ),
+      actions: [
+        BlocBuilder<ComparisonCubit, ComparisonState>(
+          buildWhen: (a, b) => a.count != b.count,
+          builder: (context, state) {
+            if (state.count == 0) return const SizedBox.shrink();
+            return IconButton(
+              tooltip: l10n.comparisonClearAll,
+              icon: Icon(LucideIcons.trash_2, color: colors.onBrandHeader),
+              onPressed: () => context.read<ComparisonCubit>().clear(),
+            );
+          },
+        ),
+      ],
       body: BlocBuilder<ComparisonCubit, ComparisonState>(
         builder: (context, state) {
           final items = state.items;
           if (items.length < ComparisonCubit.minToCompare) {
-            return _EmptyHint(l10n: l10n, colors: colors);
+            return _EmptyHint(l10n: l10n);
           }
           return _ComparisonBody(items: items, columnWidth: _columnWidth);
         },
@@ -81,34 +87,18 @@ class ComparisonPage extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _EmptyHint extends StatelessWidget {
-  const _EmptyHint({required this.l10n, required this.colors});
+  const _EmptyHint({required this.l10n});
 
   final AppLocalizations l10n;
-  final AppColors colors;
 
   @override
   Widget build(BuildContext context) {
-    final styles = AppTextStyles.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              LucideIcons.scale,
-              size: AppSpacing.xxxl,
-              color: colors.textMuted,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              l10n.comparisonEmptyHint,
-              textAlign: TextAlign.center,
-              style: styles.bodyMedium.copyWith(color: colors.textMuted),
-            ),
-          ],
-        ),
-      ),
+    // Shared empty-state chrome: soft tinted-circle glyph, headline + body
+    // hierarchy, and a reduced-motion-aware fade/slide entrance.
+    return EmptyState(
+      icon: LucideIcons.scale,
+      headline: l10n.comparisonEmptyTitle,
+      body: l10n.comparisonEmptyHint,
     );
   }
 }
@@ -182,12 +172,15 @@ class _ComparisonBody extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  for (final item in items)
-                    _PropertyColumn(
-                      item: item,
-                      rows: rows,
-                      rowDiffers: rowDiffers,
-                      width: columnWidth,
+                  for (var i = 0; i < items.length; i++)
+                    StaggeredListItem(
+                      index: i,
+                      child: _PropertyColumn(
+                        item: items[i],
+                        rows: rows,
+                        rowDiffers: rowDiffers,
+                        width: columnWidth,
+                      ),
                     ),
                 ],
               ),
@@ -230,7 +223,7 @@ class _LabelColumn extends StatelessWidget {
                 border: i == rows.length - 1
                     ? null
                     : BorderDirectional(
-                        bottom: BorderSide(color: colors.outline),
+                        bottom: BorderSide(color: colors.divider),
                       ),
               ),
               child: Row(
@@ -244,7 +237,9 @@ class _LabelColumn extends StatelessWidget {
                   const SizedBox(width: AppSpacing.xs),
                   Text(
                     rows[i].label,
-                    style: styles.labelMedium.copyWith(color: colors.textMuted),
+                    style: styles.labelMedium.copyWith(
+                      color: colors.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -281,7 +276,6 @@ class _PropertyColumn extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
-    final elevation = AppElevation.of(context);
 
     return Container(
       width: width,
@@ -290,7 +284,6 @@ class _PropertyColumn extends StatelessWidget {
         color: colors.card,
         borderRadius: appRadius(AppRadii.lg),
         border: Border.all(color: colors.outline),
-        boxShadow: elevation.level1,
       ),
       child: ClipRRect(
         borderRadius: appRadius(AppRadii.lg),
@@ -339,12 +332,10 @@ class _PropertyColumn extends StatelessWidget {
                                 if (item.primaryAmount != null &&
                                     item.primaryCurrency != null)
                                   Text(
-                                    l10n.priceWithCurrency(
-                                      _formatAmount(
-                                        context,
-                                        item.primaryAmount!,
-                                      ),
+                                    MoneyFormatter.formatAmount(
+                                      item.primaryAmount!,
                                       item.primaryCurrency!,
+                                      locale: Localizations.localeOf(context),
                                     ),
                                     textDirection: TextDirection.ltr,
                                     textAlign: TextAlign.start,
@@ -381,15 +372,17 @@ class _PropertyColumn extends StatelessWidget {
                   border: i == rows.length - 1
                       ? null
                       : BorderDirectional(
-                          bottom: BorderSide(color: colors.outline),
+                          bottom: BorderSide(color: colors.divider),
                         ),
                 ),
                 child: Text(
                   rows[i].valueOf(item),
-                  // Values are bold; differing values pop in brand-blue.
+                  // Differing values pop in brand-blue AND a heavier weight so
+                  // the cue is perceivable without colour; matching values
+                  // recede to a lighter weight.
                   style: styles.bodyMedium.copyWith(
                     color: rowDiffers[i] ? colors.primary : colors.onSurface,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: rowDiffers[i] ? FontWeight.w700 : null,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -401,12 +394,6 @@ class _PropertyColumn extends StatelessWidget {
     );
   }
 
-  String _formatAmount(BuildContext context, num amount) {
-    final fmt = NumberFormat.decimalPattern(
-      Localizations.localeOf(context).toLanguageTag(),
-    )..maximumFractionDigits = 0;
-    return fmt.format(amount);
-  }
 }
 
 /// A round, over-photo "remove this column" affordance — a dark glass circle
@@ -426,7 +413,10 @@ class _RemoveColumnButton extends StatelessWidget {
       shape: const CircleBorder(),
       child: InkWell(
         customBorder: const CircleBorder(),
-        onTap: () => context.read<ComparisonCubit>().removeById(item.id),
+        onTap: () {
+          HapticFeedback.selectionClick();
+          context.read<ComparisonCubit>().removeById(item.id);
+        },
         child: Tooltip(
           message: l10n.comparisonRemoveColumn,
           child: SizedBox(
@@ -508,24 +498,15 @@ class _FactRow {
 
 String _intOrDash(BuildContext context, int? value) {
   if (value == null) return '—';
-  final fmt = NumberFormat.decimalPattern(
-    Localizations.localeOf(context).toLanguageTag(),
-  );
-  return fmt.format(value);
+  return formatLocalizedNumber(value, Localizations.localeOf(context));
 }
 
-String _areaOrDash(
-  BuildContext context,
-  AppLocalizations l10n,
-  double? value,
-) {
+String _areaOrDash(BuildContext context, AppLocalizations l10n, double? value) {
   if (value == null) return '—';
-  final fmt = NumberFormat.decimalPattern(
-    Localizations.localeOf(context).toLanguageTag(),
-  );
+  final locale = Localizations.localeOf(context);
   final number = value == value.roundToDouble()
-      ? fmt.format(value.round())
-      : fmt.format(double.parse(value.toStringAsFixed(1)));
+      ? formatLocalizedNumber(value.round(), locale)
+      : formatLocalizedNumber(double.parse(value.toStringAsFixed(1)), locale);
   return '$number ${l10n.spec_area_unit}';
 }
 

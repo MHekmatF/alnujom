@@ -105,6 +105,16 @@ class SupabaseListingRevisionDatasource {
     );
   }
 
+  /// Owner `withdraw_listing_revision` — cancels the caller's own open
+  /// (draft|pending_review) revision (status → 'withdrawn'); the live listing is
+  /// untouched. The DB enforces owner + status.
+  Future<void> withdrawRevision(String revisionId) async {
+    await _client.rpc<void>(
+      'withdraw_listing_revision',
+      params: <String, dynamic>{'p_revision_id': revisionId},
+    );
+  }
+
   // ─── Open-revision check ───────────────────────────────────────────────
 
   /// Returns the open (draft|pending_review) revision row for [listingId], or

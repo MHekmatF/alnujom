@@ -15,6 +15,7 @@ final class AppTextStyles {
     required this.bodyMedium,
     required this.labelLarge,
     required this.labelMedium,
+    required this.labelSmall,
     required this.priceLarge,
     required this.priceMedium,
     required this.priceCurrency,
@@ -45,39 +46,43 @@ final class AppTextStyles {
     final primary = primaryColor ?? textColor;
 
     return AppTextStyles._(
+      // 035 craft wave — weight CONTRAST is what reads premium, not uniform
+      // boldness: display/headline 800 · title 700 · body 400 · label 600-700.
+      // (The old scale ran w500–w900 with an inversion — displayMedium w900
+      // above displayLarge w800 — so nothing stood out.)
       displayLarge: _style(
         family: displayFamily,
         size: 34,
         lineHeight: 41,
-        weight: FontWeight.w700,
+        weight: FontWeight.w800,
         color: textColor,
       ),
       displayMedium: _style(
         family: displayFamily,
         size: 28,
         lineHeight: 36,
-        weight: FontWeight.w700,
+        weight: FontWeight.w800,
         color: textColor,
       ),
       headlineLarge: _style(
         family: displayFamily,
         size: 26,
         lineHeight: 33,
-        weight: FontWeight.w700,
+        weight: FontWeight.w800,
         color: textColor,
       ),
       headlineMedium: _style(
         family: displayFamily,
         size: 22,
         lineHeight: 29,
-        weight: FontWeight.w600,
+        weight: FontWeight.w800,
         color: textColor,
       ),
       titleLarge: _style(
         family: displayFamily,
         size: 19,
         lineHeight: 25,
-        weight: FontWeight.w600,
+        weight: FontWeight.w700,
         color: textColor,
         letterSpacing: 0.15,
       ),
@@ -85,7 +90,7 @@ final class AppTextStyles {
         family: displayFamily,
         size: 16,
         lineHeight: 24,
-        weight: FontWeight.w600,
+        weight: FontWeight.w700,
         color: textColor,
         letterSpacing: 0.15,
       ),
@@ -109,7 +114,7 @@ final class AppTextStyles {
         family: bodyFamily,
         size: 14,
         lineHeight: 20,
-        weight: FontWeight.w600,
+        weight: FontWeight.w700,
         color: textColor,
         letterSpacing: 0.1,
       ),
@@ -117,6 +122,16 @@ final class AppTextStyles {
         family: bodyFamily,
         size: 12,
         lineHeight: 16,
+        weight: FontWeight.w700,
+        color: secondary,
+        letterSpacing: 0.3,
+      ),
+      // 035 craft wave — the smallest legible label (bottom-nav tab labels,
+      // dense meta rows). Replaces ad-hoc fractional `fontSize: 10.5` overrides.
+      labelSmall: _style(
+        family: bodyFamily,
+        size: 11,
+        lineHeight: 15,
         weight: FontWeight.w600,
         color: secondary,
         letterSpacing: 0.3,
@@ -127,6 +142,7 @@ final class AppTextStyles {
         lineHeight: 28,
         weight: FontWeight.w700,
         color: primary,
+        tabular: true,
       ),
       priceMedium: _style(
         family: displayFamily,
@@ -134,6 +150,7 @@ final class AppTextStyles {
         lineHeight: 22,
         weight: FontWeight.w700,
         color: primary,
+        tabular: true,
       ),
       // Currency suffix beside a price — smaller + lighter than the number so
       // the amount leads and the unit (ل.س / USD) supports it.
@@ -144,6 +161,7 @@ final class AppTextStyles {
         weight: FontWeight.w600,
         color: primary,
         letterSpacing: 0.2,
+        tabular: true,
       ),
     );
   }
@@ -158,6 +176,7 @@ final class AppTextStyles {
   final TextStyle bodyMedium;
   final TextStyle labelLarge;
   final TextStyle labelMedium;
+  final TextStyle labelSmall;
   final TextStyle priceLarge;
   final TextStyle priceMedium;
   final TextStyle priceCurrency;
@@ -169,6 +188,7 @@ final class AppTextStyles {
     required FontWeight weight,
     required Color color,
     double letterSpacing = 0,
+    bool tabular = false,
   }) {
     return TextStyle(
       fontFamily: family,
@@ -177,6 +197,10 @@ final class AppTextStyles {
       fontWeight: weight,
       letterSpacing: letterSpacing,
       color: color,
+      // ui-ux-pro-max `number-tabular` rule — tabular (monospaced) figures for
+      // prices so digits align in columns and don't cause layout shift when the
+      // amount changes.
+      fontFeatures: tabular ? const [FontFeature.tabularFigures()] : null,
     );
   }
 }

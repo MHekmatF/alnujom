@@ -15,6 +15,7 @@ import '../../../../core/widgets/glass_pill.dart';
 import '../../../../core/widgets/press_scale.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/presentation/money_formatter.dart';
 import '../../domain/entities/reel.dart';
 import '../bloc/reels_rail_cubit.dart';
 import '../pages/reels_feed_page.dart';
@@ -239,9 +240,10 @@ class _ReelPosterCard extends StatelessWidget {
                           padding:
                               const EdgeInsetsDirectional.all(AppSpacing.sm),
                           child: GlassPill(
-                            label: l10n.priceWithCurrency(
-                              reel.priceAmount!,
+                            label: MoneyFormatter.formatAmount(
+                              num.tryParse(reel.priceAmount!) ?? 0,
                               reel.priceCurrency!,
+                              locale: Localizations.localeOf(context),
                             ),
                           ),
                         ),

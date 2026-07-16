@@ -6,12 +6,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
-import '../../../../core/theme/elevation.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/ds/dc_status_chip.dart';
 import '../../../../core/widgets/press_scale.dart';
 import '../../../../core/widgets/property_specs.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -76,7 +76,6 @@ class ListingCard extends StatelessWidget {
     final locale = Localizations.localeOf(context);
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
-    final elevation = AppElevation.of(context);
     final listing = publisherListing.listing;
     final price = publisherListing.primaryPrice;
 
@@ -90,7 +89,6 @@ class ListingCard extends StatelessWidget {
           color: colors.card,
           borderRadius: appRadius(AppRadii.lg),
           border: Border.all(color: colors.outline),
-          boxShadow: elevation.level1,
         ),
         child: ClipRRect(
           borderRadius: appRadius(AppRadii.lg),
@@ -109,7 +107,7 @@ class ListingCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             listing.title.isEmpty
-                                ? l10n.myListingsEmptyTitle
+                                ? l10n.myListingsUntitledListing
                                 : listing.title,
                             style: styles.titleMedium,
                             maxLines: 2,
@@ -117,7 +115,7 @@ class ListingCard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: AppSpacing.sm),
-                        StatusBadge(status: listing.status),
+                        _dcStatusChip(listing.status, l10n),
                       ],
                     ),
                     if (price != null) ...[
@@ -152,11 +150,21 @@ class ListingCard extends StatelessWidget {
                       ),
                     ],
                     const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      _formatDate(listing.createdAt),
-                      style: styles.labelMedium.copyWith(
-                        color: colors.textMuted,
-                      ),
+                    Row(
+                      children: [
+                        Icon(
+                          LucideIcons.calendar,
+                          size: AppSpacing.md,
+                          color: colors.textMuted,
+                        ),
+                        const SizedBox(width: AppSpacing.xs),
+                        Text(
+                          _formatDate(listing.createdAt),
+                          style: styles.labelMedium.copyWith(
+                            color: colors.textMuted,
+                          ),
+                        ),
+                      ],
                     ),
                     _ExpirySection(listing: listing),
                     // Phase 031 (WS-B) — approved listings: surface either the
@@ -227,11 +235,20 @@ class ListingCard extends StatelessWidget {
     // bloc detects `approved` and drives stay-live revision mode (the live
     // listing stays public until an admin applies the staged edit).
     if (publisherListing.canOpenEditForm) {
-      context.goNamed(
-        AppRouteNames.publisherListingsEdit,
-        pathParameters: {'id': listing.id},
-        extra: ListingFormMode.edit,
-      );
+      // With an open pending-review revision, show the change summary first
+      // (the status screen's «Continue editing» re-opens this same edit form).
+      if (editInReview) {
+        context.goNamed(
+          AppRouteNames.publisherListingsRevisionStatus,
+          pathParameters: {'id': listing.id},
+        );
+      } else {
+        context.goNamed(
+          AppRouteNames.publisherListingsEdit,
+          pathParameters: {'id': listing.id},
+          extra: ListingFormMode.edit,
+        );
+      }
     } else {
       Navigator.of(context).push(
         MaterialPageRoute<void>(
@@ -241,6 +258,29 @@ class ListingCard extends StatelessWidget {
       );
     }
   }
+}
+
+/// Maps a listing status to a DC status chip (tone + icon), reusing the existing
+/// [StatusBadge.labelFor] localization.
+DcStatusChip _dcStatusChip(ListingStatus status, AppLocalizations l10n) {
+  final (tone, icon) = switch (status) {
+    ListingStatus.approved => (DcStatusTone.green, Icons.check_circle),
+    ListingStatus.rejected => (DcStatusTone.red, Icons.cancel),
+    ListingStatus.pendingReview => (DcStatusTone.neutral, Icons.hourglass_empty),
+    ListingStatus.draft => (DcStatusTone.outline, Icons.edit_note),
+    ListingStatus.paused => (DcStatusTone.neutral, Icons.pause_circle_outline),
+    ListingStatus.sold || ListingStatus.rented => (
+      DcStatusTone.neutral,
+      Icons.task_alt,
+    ),
+    ListingStatus.expired => (DcStatusTone.neutral, Icons.history),
+    ListingStatus.deleted => (DcStatusTone.neutral, Icons.delete_outline),
+  };
+  return DcStatusChip(
+    label: StatusBadge.labelFor(status, l10n),
+    tone: tone,
+    icon: icon,
+  );
 }
 
 /// Phase 031 (WS-B) — the per-card revision affordance for an APPROVED listing:

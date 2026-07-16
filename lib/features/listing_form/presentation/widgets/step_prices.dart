@@ -13,6 +13,7 @@ import '../../../currencies/domain/usecases/list_currencies.dart';
 import '../../domain/entities/listing_form_state.dart';
 import '../bloc/listing_form_bloc.dart';
 import '../bloc/listing_form_event.dart';
+import 'express_form_fields.dart' show expressDecoration;
 import 'price_preview_subline.dart';
 import 'step_section.dart';
 
@@ -91,9 +92,7 @@ class _StepPricesState extends State<StepPrices> {
                 DropdownButtonFormField<String>(
                   initialValue: price?.currencyCode ?? selected.code,
                   isExpanded: true,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                  ),
+                  decoration: expressDecoration(context),
                   items: currencies
                       .map(
                         (c) => DropdownMenuItem(
@@ -128,10 +127,7 @@ class _StepPricesState extends State<StepPrices> {
                   inputFormatters: <TextInputFormatter>[
                     FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                   ],
-                  decoration: InputDecoration(
-                    border: const OutlineInputBorder(),
-                    errorText: _amountError,
-                  ),
+                  decoration: expressDecoration(context, error: _amountError),
                   onChanged: (v) {
                     final parsed = Decimal.tryParse(v);
                     final activeCurrency = currencies.firstWhere(

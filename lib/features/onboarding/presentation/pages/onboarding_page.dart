@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/motion.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
@@ -131,41 +132,70 @@ class _OnboardingViewState extends State<_OnboardingView> {
                           ],
                         ),
                         const Spacer(),
-                        Text(
-                          current.title,
-                          style: styles.displayMedium.copyWith(
-                            color: colors.onPhoto,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.md),
-                        Text(
-                          current.body,
-                          style: styles.bodyLarge.copyWith(
-                            color: colors.onPhoto,
+                        AnimatedSwitcher(
+                          duration: AppMotion.slow,
+                          switchInCurve: AppMotion.curve,
+                          switchOutCurve: AppMotion.curve,
+                          layoutBuilder: (currentChild, previousChildren) =>
+                              Stack(
+                                alignment: AlignmentDirectional.centerStart,
+                                children: [
+                                  ...previousChildren,
+                                  if (currentChild != null) currentChild,
+                                ],
+                              ),
+                          child: Column(
+                            key: ValueKey<int>(step),
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                current.title,
+                                style: styles.displayMedium.copyWith(
+                                  color: colors.onPhoto,
+                                ),
+                              ),
+                              const SizedBox(height: AppSpacing.md),
+                              Text(
+                                current.body,
+                                style: styles.bodyLarge.copyWith(
+                                  color: colors.onPhoto,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         const SizedBox(height: AppSpacing.xl),
-                        Row(
-                          children: List.generate(total, (i) {
-                            return Container(
-                              margin: const EdgeInsetsDirectional.only(
-                                end: AppSpacing.xs,
-                              ),
-                              width: i == step ? AppSpacing.xl : AppSpacing.sm,
-                              height: AppSpacing.sm,
-                              decoration: BoxDecoration(
-                                color: i == step
-                                    ? colors.primary
-                                    : colors.onPhoto.withValues(alpha: 0.5),
-                                borderRadius: appRadius(AppRadii.pill),
-                              ),
-                            );
-                          }),
+                        Semantics(
+                          container: true,
+                          label: l10n.stepCounter(step + 1, total),
+                          child: ExcludeSemantics(
+                            child: Row(
+                              children: List.generate(total, (i) {
+                                final active = i == step;
+                                return AnimatedContainer(
+                                  duration: AppMotion.base,
+                                  curve: AppMotion.curve,
+                                  margin: const EdgeInsetsDirectional.only(
+                                    end: AppSpacing.xs,
+                                  ),
+                                  width: active ? AppSpacing.xl : AppSpacing.sm,
+                                  height: AppSpacing.sm,
+                                  decoration: BoxDecoration(
+                                    color: active
+                                        ? colors.primary
+                                        : colors.onPhoto.withValues(alpha: 0.5),
+                                    borderRadius: appRadius(AppRadii.pill),
+                                  ),
+                                );
+                              }),
+                            ),
+                          ),
                         ),
                         const SizedBox(height: AppSpacing.lg),
                         AppButton.filledPrimary(
-                          label: l10n.onboarding_get_started,
+                          label: step >= total - 1
+                              ? l10n.onboarding_get_started
+                              : l10n.onboarding_next,
                           expanded: true,
                           onPressed: () =>
                               context.read<OnboardingCubit>().nextStep(),
@@ -199,15 +229,25 @@ class _SlideBackground extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        Image.asset(image, fit: BoxFit.cover),
+        Image.asset(
+          image,
+          fit: BoxFit.cover,
+          excludeFromSemantics: true,
+          frameBuilder: (context, child, frame, wasSync) => AnimatedOpacity(
+            opacity: frame == null ? 0 : 1,
+            duration: AppMotion.base,
+            curve: AppMotion.curve,
+            child: child,
+          ),
+        ),
         DecoratedBox(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                scrim.withValues(alpha: 0.45),
-                scrim.withValues(alpha: 0.15),
+                scrim.withValues(alpha: 0.6),
+                scrim.withValues(alpha: 0.2),
                 scrim.withValues(alpha: 0.88),
               ],
               stops: const [0.0, 0.35, 1.0],

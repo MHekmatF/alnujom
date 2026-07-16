@@ -11,6 +11,7 @@ import '../../domain/entities/listing.dart';
 import '../../domain/entities/listing_form_state.dart';
 import '../bloc/listing_form_bloc.dart';
 import '../bloc/listing_form_event.dart';
+import 'express_form_fields.dart' show expressDecoration;
 import 'step_section.dart';
 
 const List<String> kAmenitiesCatalog = <String>[
@@ -95,9 +96,7 @@ class _StepDetailsState extends State<StepDetails> {
                   onChanged: (v) => context.read<ListingFormBloc>().add(
                     FieldChanged.description(v),
                   ),
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                  ),
+                  decoration: expressDecoration(context, collapseHeight: true),
                 ),
                 const FieldGap(),
                 FieldLabel(label: l10n.fieldLabelAreaSize, required: true),
@@ -113,10 +112,7 @@ class _StepDetailsState extends State<StepDetails> {
                   inputFormatters: <TextInputFormatter>[
                     FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                   ],
-                  decoration: InputDecoration(
-                    border: const OutlineInputBorder(),
-                    errorText: _areaSizeError,
-                  ),
+                  decoration: expressDecoration(context, error: _areaSizeError),
                   onChanged: (v) {
                     final parsed = double.tryParse(v);
                     final error = AreaSizeValidator.validate(parsed, l10n);
@@ -256,7 +252,7 @@ class _StepDetailsState extends State<StepDetails> {
             inputFormatters: <TextInputFormatter>[
               FilteringTextInputFormatter.digitsOnly,
             ],
-            decoration: const InputDecoration(border: OutlineInputBorder()),
+            decoration: expressDecoration(context),
             onChanged: (v) {
               final parsed = int.tryParse(v);
               onParsed(parsed);

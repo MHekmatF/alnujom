@@ -9,8 +9,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../../core/di/injection.dart';
+import '../../../../../core/routing/app_router.dart';
 import '../../../../../core/theme/colors.dart';
 import '../../../../../core/theme/radii.dart';
 import '../../../../../core/theme/spacing.dart';
@@ -19,6 +21,7 @@ import '../../../../../core/widgets/_widget_support.dart';
 import '../../../../../core/widgets/app_dialog.dart';
 import '../../../../../core/widgets/app_spinner.dart';
 import '../../../../../core/widgets/app_toast.dart';
+import '../../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../../core/widgets/loading_state.dart';
 import '../../../../../core/widgets/press_scale.dart';
 import '../../../../../l10n/app_localizations.dart';
@@ -46,31 +49,37 @@ class _AdsListView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.adsAdminListTitle),
-        actions: [
-          // Archived filter toggle
-          BlocBuilder<AdsAdminCubit, AdsAdminState>(
-            builder: (ctx, state) {
-              final includeArchived =
-                  state is AdsAdminList && state.includeArchived;
-              return IconButton(
-                icon: Icon(
-                  LucideIcons.archive,
-                  color: includeArchived ? AppColors.of(ctx).primary : null,
-                ),
-                tooltip: l10n.adsAdminArchivedFilterTooltip,
-                onPressed: () {
-                  ctx.read<AdsAdminCubit>().loadAds(
-                    includeArchived: !includeArchived,
-                  );
-                },
-              );
-            },
-          ),
-        ],
+    return DcCrownScaffold(
+      title: l10n.adsAdminListTitle,
+      dense: true,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () =>
+            context.canPop() ? context.pop() : context.go(AppRoutes.shellHome),
       ),
+      actions: [
+        // Archived filter toggle
+        BlocBuilder<AdsAdminCubit, AdsAdminState>(
+          builder: (ctx, state) {
+            final includeArchived =
+                state is AdsAdminList && state.includeArchived;
+            return IconButton(
+              icon: Icon(
+                LucideIcons.archive,
+                color: includeArchived
+                    ? AppColors.of(ctx).onBrandHeader
+                    : AppColors.of(ctx).onBrandHeader.withValues(alpha: 0.55),
+              ),
+              tooltip: l10n.adsAdminArchivedFilterTooltip,
+              onPressed: () {
+                ctx.read<AdsAdminCubit>().loadAds(
+                  includeArchived: !includeArchived,
+                );
+              },
+            );
+          },
+        ),
+      ],
       body: BlocConsumer<AdsAdminCubit, AdsAdminState>(
         listener: (ctx, state) {
           if (state is AdsAdminError) {

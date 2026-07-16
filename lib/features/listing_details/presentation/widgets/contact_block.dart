@@ -1,30 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/di/injection.dart';
-import '../../../../core/errors/result.dart';
-import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/agent_card.dart';
 import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_toast.dart';
-import '../../../../features/auth/presentation/bloc/auth_bloc.dart';
-import '../../../../features/auth/presentation/bloc/auth_state.dart';
-import '../../../../features/chat/domain/usecases/get_or_create_conversation.dart';
-import '../../../../features/chat/presentation/bloc/chat_thread_cubit.dart';
-import '../../../../features/chat/presentation/pages/chat_thread_page.dart';
-import '../../../../features/inquiries/domain/entities/lead_event_type.dart';
-import '../../../../features/inquiries/domain/usecases/record_lead_event.dart';
 import '../../../../features/inquiries/presentation/bloc/contact_cta_cubit.dart';
-import '../../../../features/inquiries/presentation/sheets/inquiry_form_sheet.dart';
 import '../../../../features/listing_form/domain/entities/listing.dart';
 import '../../../../features/reviews/presentation/widgets/seller_trust_summary.dart';
-import '../../../../features/viewings/presentation/sheets/request_viewing_sheet.dart';
 import '../../../../l10n/app_localizations.dart';
+import 'contact_actions.dart';
 
 /// Phase 16 (spec/016-contact-inquiries) — Contact CTA block.
 ///
@@ -42,6 +30,12 @@ import '../../../../l10n/app_localizations.dart';
 /// canonical link). No sticky/pinned bottom bar — the CTA lives inline in the
 /// contact card.
 ///
+/// Phase 35 (035-redesign-ground-up) craft pass — per the approved mockup,
+/// exactly TWO high-emphasis actions remain: WhatsApp (green fill) + Call
+/// (outlined) side by side; Send-inquiry / Request-viewing / Message are
+/// demoted to quiet small text buttons in a row beneath. All handlers,
+/// visibility rules, and lead-event analytics are unchanged.
+///
 /// FR-001d: self-contact guard — when the signed-in user IS the publisher the
 /// widget collapses to `SizedBox.shrink()`.
 class ContactBlock extends StatelessWidget {
@@ -52,9 +46,15 @@ class ContactBlock extends StatelessWidget {
     this.subtitle,
     this.logoUrl,
     this.verified = false,
+    this.showPrimaryActions = true,
   });
 
   final Listing listing;
+
+  /// When false the inline card drops its high-emphasis اتصال / واتساب pair
+  /// (the DC sticky bottom bar owns them), keeping only the agent header, the
+  /// trust summary, and the quiet secondary actions.
+  final bool showPrimaryActions;
 
   /// Display name for the contact card header (agency or publisher name). When
   /// null/empty the card omits the agent header and shows the actions alone.
@@ -81,50 +81,15 @@ class ContactBlock extends StatelessWidget {
           final colors = AppColors.of(context);
           final styles = AppTextStyles.of(context);
 
-          // Secondary actions (Call + Message + Viewing) share a row; each
-          // can shrink.
-          final secondary = <Widget>[
-            // Call CTA — visible only when phone is set (FR-001a).
-            if (state.showCall)
+          // Approved mockup: exactly TWO high-emphasis contact actions —
+          // WhatsApp (brand-green fill) + Call (outlined), side by side.
+          // WhatsApp keeps the Phase-28 pre-filled message and its
+          // disabled-without-number tooltip (Q1=B-refined preserved
+          // verbatim); Call keeps FR-001a visibility (only when phone set).
+          final primaryButtons = <Widget>[
+            if (showPrimaryActions && state.showWhatsApp)
               Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () => _onCallPressed(context, state.phone!),
-                  icon: const Icon(Icons.phone_outlined),
-                  label: Text(l10n.cta_call, overflow: TextOverflow.ellipsis),
-                ),
-              ),
-            // In-app chat CTA — opens (or creates) a conversation with the
-            // publisher. The block is hidden for self-contact, so no self-msg.
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => _onMessagePressed(context),
-                icon: const Icon(Icons.forum_outlined),
-                label: Text(
-                  l10n.chatContactAction,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ),
-            // Request-a-viewing CTA — opens the date/time request sheet. The
-            // block is hidden for self-contact, so no self-viewing.
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => _onRequestViewingPressed(context),
-                icon: const Icon(Icons.calendar_today_outlined),
-                label: Text(
-                  l10n.viewingRequestAction,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ),
-          ];
-
-          // WhatsApp CTA — Phase 28: promoted to the MOST prominent contact
-          // action — a full-width brand-green button with a localized
-          // pre-filled message. Still always rendered while disabled without
-          // a number (Q1=B-refined preserved verbatim).
-          final whatsappCta = state.showWhatsApp
-              ? Tooltip(
+                child: Tooltip(
                   message: state.whatsappEnabled
                       ? ''
                       : l10n.contact_whatsapp_disabled_tooltip,
@@ -134,26 +99,62 @@ class ContactBlock extends StatelessWidget {
                     icon: LucideIcons.message_circle,
                     expanded: true,
                     onPressed: state.whatsappEnabled
-                        ? () => _onWhatsAppPressed(context, state.whatsapp!)
+                        ? () => ContactActions.whatsApp(
+                            context,
+                            listing,
+                            state.whatsapp!,
+                          )
                         : null,
                   ),
-                )
-              : null;
-
-          // Send-inquiry — full-width (always present for non-self-contact
-          // per FR-001c), now seconded to the WhatsApp CTA.
-          final primary = state.showInquiry
-              ? AppButton(
-                  label: l10n.cta_send_inquiry,
-                  variant: AppButtonVariant.filledPrimary,
-                  icon: Icons.email_outlined,
+                ),
+              ),
+            if (showPrimaryActions && state.showCall)
+              Expanded(
+                child: AppButton(
+                  label: l10n.cta_call,
+                  variant: AppButtonVariant.outlined,
+                  icon: Icons.phone_outlined,
                   expanded: true,
-                  onPressed: () => _onSendInquiryPressed(context),
-                )
-              : null;
+                  onPressed: () =>
+                      ContactActions.call(context, listing, state.phone!),
+                ),
+              ),
+          ];
 
-          // Stack the seller-trust summary (rating + response badge) above the
-          // WhatsApp + inquiry CTAs over the Call/Message/Viewing row. The
+          // In-app options demoted to quiet, small text buttons beneath the
+          // primary pair: Send inquiry (FR-001c), Request a viewing, and
+          // Message. Same handlers/visibility as before — only the visual
+          // emphasis changed. A Wrap keeps longer Arabic labels from
+          // truncating on narrow widths.
+          final quietActions = Wrap(
+            alignment: WrapAlignment.center,
+            spacing: AppSpacing.sm,
+            children: [
+              if (state.showInquiry)
+                TextButton.icon(
+                  onPressed: () => ContactActions.sendInquiry(context, listing),
+                  icon: const Icon(Icons.email_outlined, size: AppSpacing.lg),
+                  label: Text(l10n.cta_send_inquiry),
+                ),
+              TextButton.icon(
+                onPressed: () =>
+                    ContactActions.requestViewing(context, listing),
+                icon: const Icon(
+                  Icons.calendar_today_outlined,
+                  size: AppSpacing.lg,
+                ),
+                label: Text(l10n.viewingRequestAction),
+              ),
+              TextButton.icon(
+                onPressed: () => ContactActions.message(context, listing),
+                icon: const Icon(Icons.forum_outlined, size: AppSpacing.lg),
+                label: Text(l10n.chatContactAction),
+              ),
+            ],
+          );
+
+          // Stack the seller-trust summary (rating + response badge) above
+          // the WhatsApp + Call pair and the quiet text-button row. The
           // summary reads the page-provided SellerTrustCubit and collapses
           // when no data.
           final actionStack = Column(
@@ -161,14 +162,11 @@ class ContactBlock extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               const SellerTrustSummary(),
-              if (whatsappCta != null) whatsappCta,
-              if (whatsappCta != null &&
-                  (primary != null || secondary.isNotEmpty))
-                const SizedBox(height: AppSpacing.sm),
-              if (primary != null) primary,
-              if (primary != null && secondary.isNotEmpty)
-                const SizedBox(height: AppSpacing.sm),
-              if (secondary.isNotEmpty) Row(children: _interspersed(secondary)),
+              if (primaryButtons.isNotEmpty)
+                Row(children: _interspersed(primaryButtons)),
+              if (primaryButtons.isNotEmpty)
+                const SizedBox(height: AppSpacing.xs),
+              quietActions,
             ],
           );
 
@@ -182,9 +180,7 @@ class ContactBlock extends StatelessWidget {
               children: [
                 Text(
                   l10n.contact_section_title,
-                  style: styles.titleMedium.copyWith(
-                    color: colors.onSurfaceVariant,
-                  ),
+                  style: styles.titleMedium.copyWith(color: colors.onSurface),
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 AgentCard(
@@ -203,9 +199,7 @@ class ContactBlock extends StatelessWidget {
             children: [
               Text(
                 l10n.contact_section_title,
-                style: styles.titleMedium.copyWith(
-                  color: colors.onSurfaceVariant,
-                ),
+                style: styles.titleMedium.copyWith(color: colors.onSurface),
               ),
               const SizedBox(height: AppSpacing.sm),
               actionStack,
@@ -225,109 +219,4 @@ class ContactBlock extends StatelessWidget {
     return out;
   }
 
-  Future<void> _onCallPressed(BuildContext context, String phone) async {
-    await getIt<RecordLeadEvent>()(
-      listingId: listing.id,
-      eventType: LeadEventType.phoneRevealed,
-    );
-    final launched = await launchUrl(Uri.parse('tel:$phone'));
-    if (!launched && context.mounted) {
-      AppToast.error(
-        context,
-        AppLocalizations.of(context)!.contact_dialer_unavailable,
-      );
-    }
-  }
-
-  Future<void> _onWhatsAppPressed(BuildContext context, String whatsapp) async {
-    final l10n = AppLocalizations.of(context)!;
-    // Phase 28 — localized pre-filled message (listing title + canonical
-    // link). Composed via `Uri.queryParameters` so the Arabic text
-    // percent-encodes correctly in the wa.me deep link.
-    final link = '$_waLinkBase${AppRoutes.listingDetailsFor(listing.id)}';
-    final e164NoPlus = whatsapp.replaceAll('+', '');
-    final uri = Uri(
-      scheme: 'https',
-      host: 'wa.me',
-      path: e164NoPlus,
-      queryParameters: {
-        'text': l10n.contactWhatsappPrefill(listing.title, link),
-      },
-    );
-
-    await getIt<RecordLeadEvent>()(
-      listingId: listing.id,
-      eventType: LeadEventType.whatsappClicked,
-    );
-    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
-    if (!launched && context.mounted) {
-      AppToast.error(context, l10n.contact_whatsapp_app_unavailable);
-    }
-  }
-
-  /// Canonical https base for the pre-filled WhatsApp listing link — mirrors
-  /// `PerListingActionBlock._shareLinkBase` so both deep links stay identical.
-  static const String _waLinkBase = 'https://alnujom.app';
-
-  void _onSendInquiryPressed(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (_) => InquiryFormSheet(listingId: listing.id),
-    );
-  }
-
-  /// Request-a-viewing entry. Anonymous → sign-in toast (same pattern as the
-  /// Message action). Signed-in → open the date/time request sheet seeded with
-  /// the listing id; on success show the standard confirmation toast.
-  Future<void> _onRequestViewingPressed(BuildContext context) async {
-    final l10n = AppLocalizations.of(context)!;
-
-    if (getIt<AuthBloc>().state is! Authenticated) {
-      AppToast.warning(context, l10n.chatSignInPrompt);
-      return;
-    }
-
-    final submitted = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      builder: (_) => RequestViewingSheet(listingId: listing.id),
-    );
-
-    if (submitted == true && context.mounted) {
-      AppToast.success(context, l10n.viewingRequestSuccess);
-    }
-  }
-
-  /// In-app chat entry. Anonymous → sign-in toast. Signed-in → open (or
-  /// create) the conversation for this listing, then push the thread page.
-  Future<void> _onMessagePressed(BuildContext context) async {
-    final l10n = AppLocalizations.of(context)!;
-    final navigator = Navigator.of(context);
-
-    if (getIt<AuthBloc>().state is! Authenticated) {
-      AppToast.warning(context, l10n.chatSignInPrompt);
-      return;
-    }
-
-    final result = await getIt<GetOrCreateConversation>()(listing.id);
-    if (!context.mounted) return;
-
-    switch (result) {
-      case Success(:final value):
-        await navigator.push(
-          MaterialPageRoute<void>(
-            builder: (_) => BlocProvider<ChatThreadCubit>(
-              create: (_) => getIt<ChatThreadCubit>(),
-              child: ChatThreadPage(
-                conversationId: value,
-                listingTitle: listing.title,
-              ),
-            ),
-          ),
-        );
-      case FailureResult():
-        AppToast.error(context, l10n.chatOpenError);
-    }
-  }
 }

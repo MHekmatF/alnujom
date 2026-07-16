@@ -21,6 +21,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
@@ -149,7 +150,7 @@ class _MarkerPreviewPopoverState extends State<MarkerPreviewPopover> {
                         Row(
                           children: [
                             Icon(
-                              Icons.info_outline,
+                              LucideIcons.info,
                               size: AppSpacing.lg,
                               color: colors.textMuted,
                             ),
@@ -182,7 +183,7 @@ class _MarkerPreviewPopoverState extends State<MarkerPreviewPopover> {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close),
+                  icon: const Icon(LucideIcons.x),
                   tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
                   color: colors.onSurfaceVariant,
                   onPressed: () =>
@@ -269,7 +270,7 @@ class _PopoverImage extends StatelessWidget {
         borderRadius: appRadius(AppRadii.md),
       ),
       child: Icon(
-        Icons.image_not_supported_outlined,
+        LucideIcons.image_off,
         color: colors.onSurfaceVariant,
         semanticLabel: l10n.map_marker_image_unavailable,
       ),

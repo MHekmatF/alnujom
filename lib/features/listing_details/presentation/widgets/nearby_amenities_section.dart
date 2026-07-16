@@ -12,6 +12,7 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/util/arabic_digits.dart';
 import '../../domain/entities/nearby_amenity.dart';
 import '../bloc/nearby_amenities_cubit.dart';
 
@@ -79,7 +80,7 @@ class _NearbyAmenitiesBody extends StatelessWidget {
         final l10n = AppLocalizations.of(context)!;
         final colors = AppColors.of(context);
         final styles = AppTextStyles.of(context);
-        final localeTag = Localizations.localeOf(context).toLanguageTag();
+        final locale = Localizations.localeOf(context);
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -114,7 +115,7 @@ class _NearbyAmenitiesBody extends StatelessWidget {
               runSpacing: AppSpacing.sm,
               children: [
                 for (final amenity in state.amenities)
-                  _AmenityChip(amenity: amenity, localeTag: localeTag),
+                  _AmenityChip(amenity: amenity, locale: locale),
               ],
             ),
             const SizedBox(height: AppSpacing.md),
@@ -127,10 +128,10 @@ class _NearbyAmenitiesBody extends StatelessWidget {
 
 /// One amenity chip: a kind glyph + localized kind label + distance pill text.
 class _AmenityChip extends StatelessWidget {
-  const _AmenityChip({required this.amenity, required this.localeTag});
+  const _AmenityChip({required this.amenity, required this.locale});
 
   final NearbyAmenity amenity;
-  final String localeTag;
+  final Locale locale;
 
   @override
   Widget build(BuildContext context) {
@@ -201,15 +202,19 @@ class _AmenityChip extends StatelessWidget {
     }
   }
 
-  /// "350 m" under a kilometer, "1.2 km" above — both via locale-aware intl
-  /// formatting (Arabic-Indic digits for free under `ar`).
+  /// "350 m" under a kilometer, "1.2 km" above — locale-aware intl formatting,
+  /// post-processed to Arabic-Indic digits under `ar` (intl's bundled `ar`
+  /// data keeps Western digits).
   String _distanceLabel(AppLocalizations l10n, double meters) {
+    final isArabic = locale.languageCode == 'ar';
     if (meters < 1000) {
-      return l10n.amenityDistanceM(meters.round());
+      final label = l10n.amenityDistanceM(meters.round());
+      return isArabic ? toArabicIndicNumerals(label) : label;
     }
-    final kmFmt = NumberFormat.decimalPattern(localeTag)
+    final kmFmt = NumberFormat.decimalPattern(locale.toLanguageTag())
       ..minimumFractionDigits = 1
       ..maximumFractionDigits = 1;
-    return l10n.amenityDistanceKm(kmFmt.format(meters / 1000));
+    final km = kmFmt.format(meters / 1000);
+    return l10n.amenityDistanceKm(isArabic ? toArabicIndicNumerals(km) : km);
   }
 }

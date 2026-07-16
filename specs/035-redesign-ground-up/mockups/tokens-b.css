@@ -1,0 +1,93 @@
+/* =========================================================
+   DIRECTION B — "Disciplined Glass #8"
+   Keeps the indigo/glass identity the founder picked from
+   the 9-variant gallery, but executed with discipline:
+   ONE accent family (indigo), opaque cards, blur confined
+   to the bottom nav, gold demoted to the Featured badge.
+   ========================================================= */
+:root {
+  --page-behind: #191a2e;
+
+  --primary: #4F46E5;
+  --primary-press: #3B33C8;
+  --primary-tint: rgba(79, 70, 229, .09);
+  --on-primary: #ffffff;
+
+  --ink: #14162E;
+  --text: #14162E;
+  --text-2: #565C7A;
+  --muted: #8A90A8;
+
+  --surface: #F2F4FC;
+  --surface-wash: linear-gradient(180deg, #EEF0FE 0%, #F6F7FE 60%, #F2F4FC 100%);
+  --card: #FFFFFF;
+  --border: #E5E8F5;
+  --seg-track: #E7EAF8;
+
+  --green: #1F7A4D;
+  --green-tint: #EAF4EE;
+  --green-border: #CDE6D8;
+  --whatsapp: #1DAB61;
+  --gold: #C2A14D;
+  --heart: #FF5A76;
+  --heart-bg: #FFFFFF;
+
+  --scrim-pill: rgba(20, 22, 46, .55);
+
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-card: 20px;
+  --r-pill: 999px;
+
+  --shadow-soft: 0 2px 10px rgba(20, 22, 46, .05);
+  --shadow-card: 0 4px 16px rgba(20, 22, 46, .08);
+  --shadow-raised: 0 10px 30px rgba(20, 22, 46, .16);
+  --shadow-primary: 0 2px 10px rgba(79, 70, 229, .35);
+
+  --nav-bg: #FFFFFF;
+  --nav-border: transparent;
+  --glass-bg: rgba(255, 255, 255, .72);
+  --glass-border: rgba(255, 255, 255, .65);
+}
+
+.dark {
+  --page-behind: #04040a;
+
+  --primary: #818CF8;
+  --primary-press: #6A74E0;
+  --primary-tint: rgba(129, 140, 248, .16);
+  --on-primary: #14162E;
+
+  --ink: #EAECF7;
+  --text: #EAECF7;
+  --text-2: #B9BEDA;
+  --muted: #8A90A8;
+
+  --surface: #0E1020;
+  --surface-wash: linear-gradient(180deg, #131632 0%, #0E1020 100%);
+  --card: #171A2E;
+  --border: #262A4A;
+  --seg-track: #1C2038;
+
+  --green: #4CC08A;
+  --green-tint: rgba(76, 192, 138, .12);
+  --green-border: rgba(76, 192, 138, .30);
+  --whatsapp: #25D366;
+  --gold: #D9B86A;
+  --heart: #FF7A8F;
+  --heart-bg: #171A2E;
+
+  --scrim-pill: rgba(0, 0, 0, .55);
+
+  --shadow-soft: none;
+  --shadow-card: 0 4px 16px rgba(0, 0, 0, .40);
+  --shadow-raised: 0 10px 30px rgba(0, 0, 0, .50);
+  --shadow-primary: 0 2px 10px rgba(129, 140, 248, .35);
+
+  --nav-bg: #171A2E;
+  --nav-border: transparent;
+  --glass-bg: rgba(23, 26, 46, .74);
+  --glass-border: rgba(255, 255, 255, .08);
+}
+
+.dark .chip.active { color: #0E1020; }

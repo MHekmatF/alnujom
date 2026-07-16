@@ -7,17 +7,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../../core/di/injection.dart';
 import '../../../../../core/errors/result.dart';
+import '../../../../../core/routing/app_router.dart';
 import '../../../../../core/theme/colors.dart';
-import '../../../../../core/theme/radii.dart';
 import '../../../../../core/theme/spacing.dart';
 import '../../../../../core/theme/typography.dart';
-import '../../../../../core/widgets/_widget_support.dart';
 import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_spinner.dart';
 import '../../../../../core/widgets/app_toast.dart';
+import '../../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../../core/widgets/ds/dc_status_chip.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../agency/domain/entities/agency_status.dart';
 import '../../domain/entities/agency_verification_item.dart';
@@ -86,14 +88,26 @@ class _AgencyDetailPageState extends State<AgencyDetailPage> {
           builder: (ctx) {
             final l10n = AppLocalizations.of(ctx)!;
             if (_loading) {
-              return Scaffold(
-                appBar: AppBar(title: Text(l10n.agencies_queue_title)),
+              return DcCrownScaffold(
+                title: l10n.agencies_queue_title,
+                dense: true,
+                leading: DcCrownIconButton(
+                  icon: Icons.arrow_forward,
+                  onTap: () =>
+                      ctx.canPop() ? ctx.pop() : ctx.go(AppRoutes.shellHome),
+                ),
                 body: const AppSpinner.page(),
               );
             }
             if (_error != null || _item == null) {
-              return Scaffold(
-                appBar: AppBar(title: Text(l10n.agencies_queue_title)),
+              return DcCrownScaffold(
+                title: l10n.agencies_queue_title,
+                dense: true,
+                leading: DcCrownIconButton(
+                  icon: Icons.arrow_forward,
+                  onTap: () =>
+                      ctx.canPop() ? ctx.pop() : ctx.go(AppRoutes.shellHome),
+                ),
                 body: Center(
                   child: Padding(
                     padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
@@ -153,8 +167,14 @@ class _AgencyDetailView extends StatelessWidget {
     final agency = item.agency;
     final request = item.request;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(agency.name)),
+    return DcCrownScaffold(
+      title: agency.name,
+      dense: true,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () =>
+            context.canPop() ? context.pop() : context.go(AppRoutes.shellHome),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsetsDirectional.all(AppSpacing.md),
         child: Column(
@@ -163,7 +183,7 @@ class _AgencyDetailView extends StatelessWidget {
             // ── Agency basic info ────────────────────────────────────────────
             Text(agency.name, style: styles.titleLarge),
             const SizedBox(height: AppSpacing.xs),
-            _StatusPill(status: agency.status, l10n: l10n),
+            _AgencyStatusChip(status: agency.status, l10n: l10n),
             const SizedBox(height: AppSpacing.md),
 
             if (item.ownerDisplayName != null) ...[
@@ -379,57 +399,32 @@ class _ActionButtons extends StatelessWidget {
   }
 }
 
-// ─── Status pill ─────────────────────────────────────────────────────────────
+// ─── Status chip ─────────────────────────────────────────────────────────────
 
-class _StatusPill extends StatelessWidget {
-  const _StatusPill({required this.status, required this.l10n});
+class _AgencyStatusChip extends StatelessWidget {
+  const _AgencyStatusChip({required this.status, required this.l10n});
 
   final AgencyStatus status;
   final AppLocalizations l10n;
 
-  String _label() {
-    switch (status) {
-      case AgencyStatus.pending:
-        return l10n.agency_status_pending;
-      case AgencyStatus.approved:
-        return l10n.agency_status_approved;
-      case AgencyStatus.rejected:
-        return l10n.agency_status_rejected;
-      case AgencyStatus.suspended:
-        return l10n.agency_status_suspended;
-    }
-  }
-
-  Color _color(AppColors colors) {
-    switch (status) {
-      case AgencyStatus.pending:
-        return colors.warning;
-      case AgencyStatus.approved:
-        return colors.success;
-      case AgencyStatus.rejected:
-        return colors.error;
-      case AgencyStatus.suspended:
-        return colors.textMuted;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-    final styles = AppTextStyles.of(context);
-    final color = _color(colors);
-    return Container(
-      padding: const EdgeInsetsDirectional.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
+    final (label, tone) = switch (status) {
+      AgencyStatus.pending => (
+        l10n.agency_status_pending,
+        DcStatusTone.neutral,
       ),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: appRadius(AppRadii.pill),
-        border: Border.all(color: color),
+      AgencyStatus.approved => (
+        l10n.agency_status_approved,
+        DcStatusTone.green,
       ),
-      child: Text(_label(), style: styles.labelMedium.copyWith(color: color)),
-    );
+      AgencyStatus.rejected => (l10n.agency_status_rejected, DcStatusTone.red),
+      AgencyStatus.suspended => (
+        l10n.agency_status_suspended,
+        DcStatusTone.neutral,
+      ),
+    };
+    return DcStatusChip(label: label, tone: tone);
   }
 }
 

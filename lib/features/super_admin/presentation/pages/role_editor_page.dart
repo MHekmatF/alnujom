@@ -4,12 +4,14 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/routing/app_router.dart';
 import '../../../../core/security/permission_checker.dart';
 import '../../../../core/security/permission_keys.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/app_toast.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../bloc/role_editor_bloc.dart';
 import '../widgets/permission_checklist.dart';
@@ -74,8 +76,15 @@ class _RoleEditorView extends StatelessWidget {
           final canManagePermissions = getIt<PermissionChecker>().has(
             PermissionKeys.permissionsManage,
           );
-          return Scaffold(
-            appBar: AppBar(title: Text(l10n.superAdminRoleEditorTitle)),
+          return DcCrownScaffold(
+            title: l10n.superAdminRoleEditorTitle,
+            dense: true,
+            leading: DcCrownIconButton(
+              icon: Icons.arrow_forward,
+              onTap: () => context.canPop()
+                  ? context.pop()
+                  : context.go(AppRoutes.shellHome),
+            ),
             floatingActionButton: state is RoleEditorEditing
                 ? FloatingActionButton(
                     onPressed:

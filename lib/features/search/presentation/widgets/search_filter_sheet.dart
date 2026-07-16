@@ -1,14 +1,20 @@
 // lib/features/search/presentation/widgets/search_filter_sheet.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/radii.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../shared/presentation/deed_finish_labels.dart';
 import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/range_slider_field.dart';
 import '../../../../core/widgets/segmented_control.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/util/arabic_digits.dart';
+import '../../../../shared/util/localized_numbers.dart';
 import '../../../currencies/domain/entities/currency.dart';
 import '../../../currencies/domain/repositories/currencies_repository.dart';
 import '../../../listing_form/domain/entities/listing.dart';
@@ -61,6 +67,11 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
   // Owner-vs-agency lister filter: null = all, false = owner, true = agency.
   bool? _isAgency;
 
+  // Phase 035 Stage 3 — Syria-native + verification filters.
+  String? _deedType;
+  String? _finishLevel;
+  bool _verifiedOnly = false;
+
   // Location data
   List<GovernorateWithCityCount> _governorates = [];
   List<CityWithAreaCount> _cities = [];
@@ -95,6 +106,9 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
       _kAreaMax,
     );
     _isAgency = widget.initialFilters.isAgency;
+    _deedType = widget.initialFilters.deedType;
+    _finishLevel = widget.initialFilters.finishLevel;
+    _verifiedOnly = widget.initialFilters.verifiedOnly ?? false;
 
     _loadGovernorates();
     _loadCurrencies();
@@ -176,61 +190,72 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     return DraggableScrollableSheet(
       initialChildSize: 0.6,
       maxChildSize: 0.92,
       minChildSize: 0.4,
       expand: false,
+      // A single drag handle is supplied by the modal bottom-sheet theme
+      // (showDragHandle: true); the sheet no longer renders its own.
       builder: (context, scrollController) => Form(
         key: _formKey,
-        child: SingleChildScrollView(
-          controller: scrollController,
-          child: Padding(
-            padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHandle(),
-                _buildTitle(context),
-                const SizedBox(height: 16),
-                _buildPurposeSection(context),
-                const SizedBox(height: 16),
-                _buildPropertyTypeSection(context),
-                const SizedBox(height: 16),
-                _buildListerTypeSection(context),
-                const SizedBox(height: 16),
-                _buildLocationSection(context),
-                const SizedBox(height: 16),
-                _buildPriceRangeSection(context),
-                const SizedBox(height: 16),
-                _buildRoomsSection(context),
-                const SizedBox(height: 16),
-                _buildBathroomsSection(context),
-                const SizedBox(height: 16),
-                _buildAreaSizeSection(context),
-                const SizedBox(height: 24),
-                _buildActionRow(context),
-              ],
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                controller: scrollController,
+                child: Padding(
+                  padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildTitle(context),
+                      const SizedBox(height: AppSpacing.lg),
+                      _buildPurposeSection(context),
+                      const SizedBox(height: AppSpacing.lg),
+                      _buildPropertyTypeSection(context),
+                      const SizedBox(height: AppSpacing.lg),
+                      _buildListerTypeSection(context),
+                      // Group boundary (basics → documentation & verification).
+                      const SizedBox(height: AppSpacing.xl),
+                      _buildVerifiedSection(context),
+                      const SizedBox(height: AppSpacing.lg),
+                      _buildDeedSection(context),
+                      const SizedBox(height: AppSpacing.lg),
+                      _buildFinishSection(context),
+                      // Group boundary (documentation → property details).
+                      const SizedBox(height: AppSpacing.xl),
+                      _buildLocationSection(context),
+                      const SizedBox(height: AppSpacing.lg),
+                      _buildPriceRangeSection(context),
+                      const SizedBox(height: AppSpacing.lg),
+                      _buildRoomsSection(context),
+                      const SizedBox(height: AppSpacing.lg),
+                      _buildBathroomsSection(context),
+                      const SizedBox(height: AppSpacing.lg),
+                      _buildAreaSizeSection(context),
+                    ],
+                  ),
+                ),
+              ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHandle() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.md),
-        child: Container(
-          width: 40,
-          height: 4,
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.outlineVariant,
-            borderRadius: BorderRadius.circular(
-              AppRadii.pill,
-            ), // drag-handle bar — fully rounded
-          ),
+            // Pinned Reset/Apply footer — the primary CTA stays reachable
+            // without scrolling past every filter section.
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: colors.card,
+                border: Border(top: BorderSide(color: colors.divider)),
+              ),
+              child: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: appPadding(),
+                  child: _buildActionRow(context),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -240,8 +265,28 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
     final l10n = AppLocalizations.of(context)!;
     return Text(
       l10n.search_filter_sheet_title,
-      style: Theme.of(context).textTheme.titleMedium,
+      style: AppTextStyles.of(context).titleLarge,
       textAlign: TextAlign.start,
+    );
+  }
+
+  /// Wraps a bare [DropdownButton] in the app's branded field chrome (card
+  /// fill, hairline outline, md radius) so the location/currency selectors read
+  /// as inputs consistent with the search field / AppTextField. Purely visual —
+  /// the dropdown's value/items/onChanged are unchanged.
+  Widget _sheetDropdownFrame(BuildContext context, {required Widget child}) {
+    final colors = AppColors.of(context);
+    return Container(
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: colors.card,
+        borderRadius: appRadius(AppRadii.md),
+        border: Border.all(color: colors.outline),
+      ),
+      child: DropdownButtonHideUnderline(child: child),
     );
   }
 
@@ -252,12 +297,13 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
       children: [
         Text(
           l10n.search_filter_purpose_label,
-          style: Theme.of(context).textTheme.labelLarge,
+          style: AppTextStyles.of(context).labelLarge,
           textAlign: TextAlign.start,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         Wrap(
-          spacing: 8,
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
           children: ListingPurpose.values.map((p) {
             return ChoiceChip(
               label: Text(_localizedPurpose(p, l10n)),
@@ -277,12 +323,13 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
       children: [
         Text(
           l10n.search_filter_property_type_label,
-          style: Theme.of(context).textTheme.labelLarge,
+          style: AppTextStyles.of(context).labelLarge,
           textAlign: TextAlign.start,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         Wrap(
-          spacing: 8,
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
           children: PropertyType.values.map((t) {
             return ChoiceChip(
               label: Text(_localizedPropertyType(t, l10n)),
@@ -306,10 +353,10 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
       children: [
         Text(
           l10n.search_filter_lister_type_label,
-          style: Theme.of(context).textTheme.labelLarge,
+          style: AppTextStyles.of(context).labelLarge,
           textAlign: TextAlign.start,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         AppSegmentedControl<bool?>(
           value: _isAgency,
           onChanged: (v) => setState(() => _isAgency = v),
@@ -335,89 +382,191 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
     );
   }
 
+  /// Phase 035 — "الموثّقة فقط / Verified only" toggle. Uses the verified-green
+  /// so the semantic tie to the موثّق badge is explicit.
+  Widget _buildVerifiedSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    return Row(
+      children: [
+        Icon(
+          LucideIcons.badge_check,
+          size: AppSpacing.xl,
+          color: colors.verified,
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Text(
+            l10n.filter_verified_only,
+            style: AppTextStyles.of(context).labelLarge,
+          ),
+        ),
+        Switch(
+          value: _verifiedOnly,
+          activeThumbColor: colors.verified,
+          onChanged: (v) => setState(() => _verifiedOnly = v),
+        ),
+      ],
+    );
+  }
+
+  /// Phase 035 — deed-type (الطابو) single-select chip group.
+  Widget _buildDeedSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return _buildChipGroup(
+      label: l10n.filter_deed_type,
+      values: kDeedTypes,
+      selected: _deedType,
+      labelFor: (v) => deedTypeLabel(l10n, v),
+      onSelected: (v) => setState(() => _deedType = v),
+    );
+  }
+
+  /// Phase 035 — finish-level (الكسوة) single-select chip group.
+  Widget _buildFinishSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return _buildChipGroup(
+      label: l10n.filter_finish_level,
+      values: kFinishLevels,
+      selected: _finishLevel,
+      labelFor: (v) => finishLevelLabel(l10n, v),
+      onSelected: (v) => setState(() => _finishLevel = v),
+    );
+  }
+
+  /// A labelled single-select chip group (tapping the active chip clears it).
+  Widget _buildChipGroup({
+    required String label,
+    required List<String> values,
+    required String? selected,
+    required String Function(String) labelFor,
+    required void Function(String?) onSelected,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: AppTextStyles.of(context).labelLarge,
+          textAlign: TextAlign.start,
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          children: [
+            for (final v in values)
+              ChoiceChip(
+                label: Text(labelFor(v)),
+                selected: selected == v,
+                onSelected: (isSel) => onSelected(isSel ? v : null),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+
   Widget _buildLocationSection(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          l10n.search_filter_location_label,
-          style: Theme.of(context).textTheme.labelLarge,
-          textAlign: TextAlign.start,
+        Row(
+          children: [
+            Text(
+              l10n.search_filter_location_label,
+              style: AppTextStyles.of(context).labelLarge,
+              textAlign: TextAlign.start,
+            ),
+            if (_loadingGovernorates) ...[
+              const SizedBox(width: AppSpacing.sm),
+              appInlineSpinner(context),
+            ],
+          ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         // Governorate dropdown
-        DropdownButton<String?>(
-          isExpanded: true,
-          value: _governorateId,
-          hint: Text(l10n.search_filter_governorate_hint),
-          items: [
-            DropdownMenuItem<String?>(
-              value: null,
-              child: Text(l10n.search_filter_governorate_hint),
-            ),
-            ..._governorates.map(
-              (g) => DropdownMenuItem<String?>(
-                value: g.governorate.id,
-                child: Text(
-                  g.governorate.displayName['ar'] ??
-                      g.governorate.displayName['en'] ??
-                      g.governorate.key,
+        _sheetDropdownFrame(
+          context,
+          child: DropdownButton<String?>(
+            isExpanded: true,
+            value: _governorateId,
+            hint: Text(l10n.search_filter_governorate_hint),
+            items: [
+              DropdownMenuItem<String?>(
+                value: null,
+                child: Text(l10n.search_filter_governorate_hint),
+              ),
+              ..._governorates.map(
+                (g) => DropdownMenuItem<String?>(
+                  value: g.governorate.id,
+                  child: Text(
+                    g.governorate.displayName['ar'] ??
+                        g.governorate.displayName['en'] ??
+                        g.governorate.key,
+                  ),
                 ),
               ),
-            ),
-          ],
-          onChanged: _loadingGovernorates ? null : _onGovernorateChanged,
+            ],
+            onChanged: _loadingGovernorates ? null : _onGovernorateChanged,
+          ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         // City dropdown
-        DropdownButton<String?>(
-          isExpanded: true,
-          value: _cityId,
-          hint: Text(l10n.search_filter_city_hint),
-          items: [
-            DropdownMenuItem<String?>(
-              value: null,
-              child: Text(l10n.search_filter_city_hint),
-            ),
-            ..._cities.map(
-              (c) => DropdownMenuItem<String?>(
-                value: c.city.id,
-                child: Text(
-                  c.city.displayName['ar'] ??
-                      c.city.displayName['en'] ??
-                      c.city.key,
+        _sheetDropdownFrame(
+          context,
+          child: DropdownButton<String?>(
+            isExpanded: true,
+            value: _cityId,
+            hint: Text(l10n.search_filter_city_hint),
+            items: [
+              DropdownMenuItem<String?>(
+                value: null,
+                child: Text(l10n.search_filter_city_hint),
+              ),
+              ..._cities.map(
+                (c) => DropdownMenuItem<String?>(
+                  value: c.city.id,
+                  child: Text(
+                    c.city.displayName['ar'] ??
+                        c.city.displayName['en'] ??
+                        c.city.key,
+                  ),
                 ),
               ),
-            ),
-          ],
-          onChanged: _governorateId == null ? null : _onCityChanged,
+            ],
+            onChanged: _governorateId == null ? null : _onCityChanged,
+          ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         // Area dropdown
-        DropdownButton<String?>(
-          isExpanded: true,
-          value: _areaId,
-          hint: Text(l10n.search_filter_area_hint),
-          items: [
-            DropdownMenuItem<String?>(
-              value: null,
-              child: Text(l10n.search_filter_area_hint),
-            ),
-            ..._areas.map(
-              (a) => DropdownMenuItem<String?>(
-                value: a.id,
-                child: Text(
-                  a.displayName['ar'] ?? a.displayName['en'] ?? a.key,
+        _sheetDropdownFrame(
+          context,
+          child: DropdownButton<String?>(
+            isExpanded: true,
+            value: _areaId,
+            hint: Text(l10n.search_filter_area_hint),
+            items: [
+              DropdownMenuItem<String?>(
+                value: null,
+                child: Text(l10n.search_filter_area_hint),
+              ),
+              ..._areas.map(
+                (a) => DropdownMenuItem<String?>(
+                  value: a.id,
+                  child: Text(
+                    a.displayName['ar'] ?? a.displayName['en'] ?? a.key,
+                  ),
                 ),
               ),
-            ),
-          ],
-          onChanged: _cityId == null
-              ? null
-              : (id) => setState(() {
-                  _areaId = id;
-                }),
+            ],
+            onChanged: _cityId == null
+                ? null
+                : (id) => setState(() {
+                    _areaId = id;
+                  }),
+          ),
         ),
       ],
     );
@@ -428,32 +577,30 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          l10n.search_filter_price_range_label,
-          style: Theme.of(context).textTheme.labelLarge,
-          textAlign: TextAlign.start,
-        ),
-        const SizedBox(height: 8),
-        // Currency selector
-        DropdownButton<String?>(
-          isExpanded: true,
-          value: _priceCurrency,
-          hint: Text(l10n.search_filter_price_currency_label),
-          items: [
-            DropdownMenuItem<String?>(
-              value: null,
-              child: Text(l10n.search_filter_price_currency_label),
-            ),
-            ..._currencies.map(
-              (c) => DropdownMenuItem<String?>(
-                value: c.code,
-                child: Text('${c.code} ${c.symbol}'),
+        // Currency selector. (The "Price range" heading is rendered by the
+        // RangeSliderField header below, so it is not repeated here.)
+        _sheetDropdownFrame(
+          context,
+          child: DropdownButton<String?>(
+            isExpanded: true,
+            value: _priceCurrency,
+            hint: Text(l10n.search_filter_price_currency_label),
+            items: [
+              DropdownMenuItem<String?>(
+                value: null,
+                child: Text(l10n.search_filter_price_currency_label),
               ),
-            ),
-          ],
-          onChanged: (code) => setState(() => _priceCurrency = code),
+              ..._currencies.map(
+                (c) => DropdownMenuItem<String?>(
+                  value: c.code,
+                  child: Text('${c.code} ${c.symbol}'),
+                ),
+              ),
+            ],
+            onChanged: (code) => setState(() => _priceCurrency = code),
+          ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         RangeSliderField(
           label: l10n.search_filter_price_range_label,
           min: 0,
@@ -482,11 +629,18 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
 
   /// Compact, locale-aware money label. When [atCap] the upper-bound reads as
   /// "no max" (the slider's max position expresses an open-ended range).
+  /// Post-processed to Arabic-Indic digits under `ar` (intl's bundled `ar`
+  /// data keeps Western digits).
   String _formatPrice(double value, {bool atCap = false}) {
     final l10n = AppLocalizations.of(context)!;
     if (atCap) return l10n.search_filter_range_no_max;
-    final locale = Localizations.localeOf(context).toString();
-    return NumberFormat.compact(locale: locale).format(value.round());
+    final locale = Localizations.localeOf(context);
+    final compact = NumberFormat.compact(
+      locale: locale.toString(),
+    ).format(value.round());
+    return locale.languageCode == 'ar'
+        ? toArabicIndicNumerals(compact)
+        : compact;
   }
 
   Widget _buildRoomsSection(BuildContext context) {
@@ -525,8 +679,7 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
   }) {
     final l10n = AppLocalizations.of(context)!;
     final styles = AppTextStyles.of(context);
-    final locale = Localizations.localeOf(context).toString();
-    final numberFmt = NumberFormat.decimalPattern(locale);
+    final locale = Localizations.localeOf(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -546,8 +699,8 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
               ChoiceChip(
                 label: Text(
                   n == _kBedsBathsMax
-                      ? '${numberFmt.format(n)}+'
-                      : numberFmt.format(n),
+                      ? '${formatLocalizedNumber(n, locale)}+'
+                      : formatLocalizedNumber(n, locale),
                 ),
                 selected: value == n,
                 onSelected: (_) => onValueChanged(n),
@@ -582,12 +735,7 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          l10n.search_filter_area_size_label,
-          style: Theme.of(context).textTheme.labelLarge,
-          textAlign: TextAlign.start,
-        ),
-        const SizedBox(height: 8),
+        // The "Area size" heading is rendered by the RangeSliderField header.
         RangeSliderField(
           label: l10n.search_filter_area_size_label,
           min: 0,
@@ -597,9 +745,10 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
           formatValue: (v) => v >= _kAreaMax
               ? l10n.search_filter_range_no_max
               : l10n.search_filter_area_size_value(
-                  NumberFormat.decimalPattern(
-                    Localizations.localeOf(context).toString(),
-                  ).format(v.round()),
+                  formatLocalizedNumber(
+                    v.round(),
+                    Localizations.localeOf(context),
+                  ),
                 ),
           onChanged: (range) => setState(() => _areaRange = range),
         ),
@@ -629,6 +778,9 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
             _bathroomsMode = CountFilterMode.exactly;
             _areaRange = const RangeValues(0, _kAreaMax);
             _isAgency = null;
+            _deedType = null;
+            _finishLevel = null;
+            _verifiedOnly = false;
           }),
           child: Text(l10n.search_filter_reset),
         ),
@@ -664,6 +816,9 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
               areaSizeMin: areaMin,
               areaSizeMax: areaMax,
               isAgency: _isAgency,
+              deedType: _deedType,
+              finishLevel: _finishLevel,
+              verifiedOnly: _verifiedOnly ? true : null,
             );
             widget.onApply(newFilters);
             Navigator.of(context).pop();

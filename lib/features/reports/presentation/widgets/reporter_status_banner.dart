@@ -14,7 +14,6 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../domain/entities/report_status.dart';
 import '../cubit/listing_report_status_cubit.dart';
 import 'report_status_chip.dart';
 
@@ -67,7 +66,7 @@ class _BannerBody extends StatelessWidget {
             vertical: AppSpacing.md,
           ),
           decoration: BoxDecoration(
-            color: colors.card,
+            color: colors.surfaceVariant,
             borderRadius: appRadius(AppRadii.lg),
             border: Border.all(color: colors.outline),
           ),
@@ -81,7 +80,7 @@ class _BannerBody extends StatelessWidget {
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
-                  l10n.report_banner_status(_statusLabel(l10n, report.status)),
+                  l10n.report_banner_status_label,
                   style: styles.bodyMedium.copyWith(color: colors.textMuted),
                 ),
               ),
@@ -93,13 +92,4 @@ class _BannerBody extends StatelessWidget {
       },
     );
   }
-}
-
-String _statusLabel(AppLocalizations l10n, ReportStatus status) {
-  return switch (status) {
-    ReportStatus.newReport => l10n.report_status_new,
-    ReportStatus.reviewing => l10n.report_status_reviewing,
-    ReportStatus.resolved => l10n.report_status_resolved,
-    ReportStatus.dismissed => l10n.report_status_dismissed,
-  };
 }

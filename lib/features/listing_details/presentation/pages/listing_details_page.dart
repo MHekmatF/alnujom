@@ -6,6 +6,7 @@ import '../../../../core/analytics/analytics_service.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/gradients.dart';
 import '../../../../core/theme/motion.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
@@ -31,6 +32,7 @@ import '../../../../features/listing_form/domain/entities/listing_media.dart';
 import '../../../../features/listing_form/domain/entities/listing_price.dart';
 import '../../../../features/listing_form/presentation/util/listing_enum_labels.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../favorites/presentation/widgets/favorite_heart_button.dart';
 import '../../../../shared/presentation/widgets/listing_display/listing_amenities_block.dart';
 import '../../../../shared/presentation/widgets/listing_display/listing_description_block.dart';
 import '../../../../shared/presentation/widgets/listing_display/listing_gallery.dart';
@@ -41,6 +43,8 @@ import '../bloc/listing_details_bloc.dart';
 import '../widgets/affordability_calculator.dart';
 import '../widgets/buyer_safety_banner.dart';
 import '../widgets/contact_block.dart';
+import '../widgets/detail_sticky_contact_bar.dart';
+import '../widgets/listing_verification_section.dart';
 import '../widgets/listing_details_skeleton.dart';
 import '../widgets/listing_facts_block.dart';
 import '../widgets/market_insights_section.dart';
@@ -253,15 +257,37 @@ class _SuccessBodyState extends State<_SuccessBody> {
       create: (_) =>
           getIt<SellerTrustCubit>()..load(aggregate.listing.publisherUserId),
       child: Scaffold(
-        body: CustomScrollView(
-          slivers: [
+        // DC "Blue Crown" — the persistent bottom اتصال / دردشة / واتساب bar as a
+        // Stack overlay (NOT a bottomNavigationBar, which collapsed the sliver
+        // body's viewport); the scroll content adds bottom clearance for it.
+        body: Stack(
+          children: [
+            CustomScrollView(
+              slivers: [
             // 2. Parallax collapsing gallery + FR-027 video-tap overlay.
             //    Phase 12 Q8=A ListingGallery wrapped (not edited) per SC-016;
             //    it also owns the Hero destination flown from the home card.
             SliverAppBar(
               pinned: true,
               expandedHeight: galleryHeight,
+              backgroundColor: Colors.transparent,
+              surfaceTintColor: Colors.transparent,
+              scrolledUnderElevation: 0,
+              elevation: 0,
+              foregroundColor: AppColors.of(context).onPhoto,
               leading: const DeepLinkAwareBackButton(),
+              // 035 craft wave — favoriting lives HERE (the gallery heart,
+              // same affordance as the feed cards); the old duplicate
+              // Favorite button in the bottom action block was removed.
+              actions: [
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(end: AppSpacing.md),
+                  child: FavoriteHeartButton(
+                    listingId: aggregate.listing.id,
+                    style: FavoriteHeartStyle.onImage,
+                  ),
+                ),
+              ],
               flexibleSpace: FlexibleSpaceBar(
                 collapseMode: CollapseMode.parallax,
                 background: _GalleryWithVideoTap(
@@ -274,16 +300,13 @@ class _SuccessBodyState extends State<_SuccessBody> {
               child: StaggeredListItem(
                 index: 1,
                 child: Padding(
-                  padding: const EdgeInsetsDirectional.all(AppSpacing.md),
+                  padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Phase 18: Reporter status banner (renders nothing for non-
                       // reporters / anon). Self-contained: hosts its own cubit.
                       ReporterStatusBanner(listingId: aggregate.listing.id),
-                      // Phase 21: listing details banner (collapses to zero height
-                      // when no eligible ads — FR-012; no reflow on the details layout).
-                      const AdSlot(placement: AdPlacement.listingDetailsBanner),
                       // DS: a soft-primary sale/rent tag chip leads the body,
                       // sitting just above the title (purely visual signal).
                       _PurposeTagChip(purpose: aggregate.listing.purpose),
@@ -325,6 +348,15 @@ class _SuccessBodyState extends State<_SuccessBody> {
                       //     floor·type) right under the title/price. Collapses to
                       //     nothing when the listing has none of these.
                       ListingFactsBlock(listing: aggregate.listing),
+                      const SizedBox(height: AppSpacing.md),
+                      // Phase 035 Stage 3 — field-verification trust block +
+                      // deed (الطابو) / finish (الكسوة) tiles. Self-hides when
+                      // none of the data is present.
+                      ListingVerificationSection(
+                        isVerified: aggregate.isVerified,
+                        deedType: aggregate.deedType,
+                        finishLevel: aggregate.finishLevel,
+                      ),
                       const SizedBox(height: AppSpacing.md),
                       // 4c. Premium uplift — financing ("حاسبة التمويل")
                       //     calculator, expandable, seeded with the primary price.
@@ -415,6 +447,10 @@ class _SuccessBodyState extends State<_SuccessBody> {
                       //    surface seeded with the publisher's name + username.
                       ContactBlock(
                         listing: aggregate.listing,
+                        // The DC sticky bottom bar owns اتصال / واتساب; the
+                        // inline card keeps the agent header + trust + quiet
+                        // secondary actions.
+                        showPrimaryActions: false,
                         contactName: aggregate.publisher.fullName.isNotEmpty
                             ? aggregate.publisher.fullName
                             : null,
@@ -450,8 +486,14 @@ class _SuccessBodyState extends State<_SuccessBody> {
                         ),
                         const SizedBox(height: AppSpacing.md),
                       ],
-                      // 9. Per-listing action block — Favorite + Report live;
-                      //    Share now live (premium uplift v2) with title + price.
+                      // Phase 21 / DC: the sponsored slot sits low in the page
+                      // (after the description), collapsing to zero height when
+                      // no eligible ad is served (FR-012, no reflow).
+                      const AdSlot(
+                        placement: AdPlacement.listingDetailsBanner,
+                      ),
+                      // 9. Per-listing action block — quiet Share + Report text
+                      //    buttons (035: duplicate Favorite CTA removed).
                       PerListingActionBlock(
                         listingId: aggregate.listing.id,
                         shareTitle: aggregate.listing.title,
@@ -479,7 +521,15 @@ class _SuccessBodyState extends State<_SuccessBody> {
                 staggerIndex: 2,
               ),
             ),
-            const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
+            const SliverToBoxAdapter(child: SizedBox(height: 104)),
+              ],
+            ),
+            PositionedDirectional(
+              start: 0,
+              end: 0,
+              bottom: 0,
+              child: DetailStickyContactBar(listing: aggregate.listing),
+            ),
           ],
         ),
       ),
@@ -523,7 +573,7 @@ class _SuccessBodyState extends State<_SuccessBody> {
       code: primary.currencyCode,
       nameAr: primary.currencyCode,
       nameEn: primary.currencyCode,
-      symbol: primary.currencyCode,
+      symbol: MoneyFormatter.symbolForCode(primary.currencyCode),
       isActive: true,
       sortOrder: 0,
       isSystem: false,
@@ -642,12 +692,30 @@ class _GalleryWithVideoTapState extends State<_GalleryWithVideoTap> {
       child: Stack(
         alignment: AlignmentDirectional.bottomCenter,
         children: [
-          GestureDetector(
-            // FR-027: only intercept taps when the visible item is a video.
-            onTap: videoMedia != null
-                ? () => ListingDetailsVideoLauncher.launch(videoMedia)
+          Semantics(
+            button: videoMedia != null,
+            label: videoMedia != null
+                ? AppLocalizations.of(context)!.mediaGalleryVideoPlay
                 : null,
-            child: gallery,
+            child: GestureDetector(
+              // FR-027: only intercept taps when the visible item is a video.
+              onTap: videoMedia != null
+                  ? () => ListingDetailsVideoLauncher.launch(videoMedia)
+                  : null,
+              child: gallery,
+            ),
+          ),
+          // DS a11y: a token top scrim so the over-photo affordances (back
+          // arrow + 360 pill) stay legible on bright imagery. IgnorePointer so
+          // the gallery/video taps below still register.
+          Positioned.fill(
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: AppGradients.of(context).photoTopScrim,
+                ),
+              ),
+            ),
           ),
           // Spec 026 — 360°/virtual-tour affordance. When the listing has any
           // panorama row, a frosted "360°" pill sits at the top-END (the
@@ -700,7 +768,15 @@ class _PanoramaPillButton extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: appRadius(AppRadii.pill),
-        child: GlassPill(label: l10n.panoramaTourBadge, icon: Icons.threesixty),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: kAppMinTouchTarget),
+          child: Center(
+            child: GlassPill(
+              label: l10n.panoramaTourBadge,
+              icon: Icons.threesixty,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -734,7 +810,9 @@ class _PurposeTagChip extends StatelessWidget {
           ),
           child: Text(
             listingPurposeLabel(purpose, l10n),
-            style: styles.labelMedium.copyWith(color: colors.primary),
+            style: styles.labelMedium.copyWith(
+              color: colors.onPrimaryContainer,
+            ),
           ),
         ),
       ),

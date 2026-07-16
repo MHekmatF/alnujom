@@ -11,10 +11,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/errors/result.dart';
+import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
@@ -24,8 +26,9 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/app_toast.dart';
-import '../../../../core/widgets/deep_link_aware_back_button.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/util/localized_numbers.dart';
 import '../../domain/entities/agency.dart';
 import '../../domain/entities/agency_status.dart';
 import '../../domain/entities/agency_verification_request.dart';
@@ -56,10 +59,13 @@ class _AgencyVerificationView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: const DeepLinkAwareBackButton(),
-        title: Text(l10n.agency_verify_title),
+    return DcCrownScaffold(
+      title: l10n.agency_verify_title,
+      dense: true,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () =>
+            context.canPop() ? context.pop() : context.go(AppRoutes.shellHome),
       ),
       body: BlocConsumer<AgencyVerificationCubit, AgencyVerificationState>(
         listenWhen: (prev, curr) =>
@@ -238,7 +244,8 @@ class _VerificationFormState extends State<_VerificationForm> {
           AppButton(
             label: _evidenceUrls.isEmpty
                 ? l10n.agency_verify_documents_label
-                : '${l10n.agency_verify_documents_label} (${_evidenceUrls.length})',
+                : '${l10n.agency_verify_documents_label} '
+                      '(${formatLocalizedNumber(_evidenceUrls.length, Localizations.localeOf(context))})',
             variant: AppButtonVariant.outlined,
             icon: LucideIcons.paperclip,
             loading: _uploadingDoc,

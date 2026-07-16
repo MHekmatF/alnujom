@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../../core/di/injection.dart';
+import '../../../../../core/routing/app_router.dart';
 import '../../../../../core/theme/colors.dart';
 import '../../../../../core/theme/radii.dart';
 import '../../../../../core/theme/spacing.dart';
@@ -11,6 +13,7 @@ import '../../../../../core/theme/typography.dart';
 import '../../../../../core/widgets/_widget_support.dart';
 import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_dialog.dart';
+import '../../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../../core/widgets/loading_state.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../domain/entities/account_approval_request.dart';
@@ -39,8 +42,14 @@ class _AccountApprovalsView extends StatelessWidget {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.admin_queue_title)),
+    return DcCrownScaffold(
+      title: l10n.admin_queue_title,
+      dense: true,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () =>
+            context.canPop() ? context.pop() : context.go(AppRoutes.shellHome),
+      ),
       body: BlocBuilder<AccountApprovalsCubit, AccountApprovalsState>(
         builder: (context, state) {
           return switch (state) {

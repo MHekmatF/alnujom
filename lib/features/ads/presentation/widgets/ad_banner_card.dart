@@ -1,23 +1,23 @@
 // lib/features/ads/presentation/widgets/ad_banner_card.dart
 //
 // Phase 21 (spec/021-ads-banners) — AdBannerCard (T032).
-//
-// Renders a single [ServingAd] as a tappable banner:
-//   - [CachedNetworkImage] from the public URL of [ServingAd.imagePath]
-//     (resolved via `supabase.storage.from('ads').getPublicUrl(...)`)
-//   - Optional locale-matched caption ([captionAr]/[captionEn]) per R-172
-//   - All sizing/spacing/styling via Phase 2 theme tokens — NO inline hex,
-//     font-size, or hardcoded padding.
-//
-// The URL resolution is confined here; domain + data layers have zero
-// supabase_flutter imports (Constitution IX exception: widget layer only).
+// Phase 035 v2 (DC "Blue Crown") — restyled to the DC sponsored-slot card
+// (`AlNujom.dc.html`): a bordered surface card with a "إعلان" campaign-chip
+// disclosure header, the advertiser's creative, its caption, and a "اعرف
+// المزيد" CTA footer separated by a hairline. Non-intrusive, honestly labelled,
+// and card-consistent with the feed. All sizing/spacing via theme tokens.
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show Supabase;
 
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/press_scale.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/serving_ad.dart';
 
 class AdBannerCard extends StatelessWidget {
@@ -28,6 +28,9 @@ class AdBannerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     final locale = Localizations.localeOf(context);
     final isArabic = locale.languageCode == 'ar';
     final caption = isArabic ? ad.captionAr : ad.captionEn;
@@ -36,37 +39,101 @@ class AdBannerCard extends StatelessWidget {
         .from('ads')
         .getPublicUrl(ad.imagePath);
 
-    return GestureDetector(
-      onTap: onTap,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppRadii.md),
-        child: AspectRatio(
-          aspectRatio: 16 / 5,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              CachedNetworkImage(
-                imageUrl: imageUrl,
-                fit: BoxFit.cover,
-                placeholder: (_, __) => ColoredBox(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                ),
-                errorWidget: (_, __, ___) => ColoredBox(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  child: Icon(
-                    Icons.image_not_supported_outlined,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+    return PressScale(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colors.card,
+          borderRadius: appRadius(AppRadii.card),
+          border: Border.all(color: colors.outline),
+        ),
+        child: ClipRRect(
+          borderRadius: appRadius(AppRadii.card),
+          child: Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              onTap: onTap,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // "إعلان" disclosure chip header — reads honestly as an ad.
+                  Padding(
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                      AppSpacing.md,
+                      AppSpacing.sm,
+                      AppSpacing.md,
+                      AppSpacing.xs,
+                    ),
+                    child: Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: _SponsoredChip(label: l10n.ad_sponsored_label),
+                    ),
                   ),
-                ),
+                  // The advertiser's creative.
+                  AspectRatio(
+                    aspectRatio: 16 / 7,
+                    child: CachedNetworkImage(
+                      imageUrl: imageUrl,
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) =>
+                          ColoredBox(color: colors.surfaceVariant),
+                      errorWidget: (_, __, ___) => ColoredBox(
+                        color: colors.surfaceVariant,
+                        child: Icon(
+                          Icons.image_not_supported_outlined,
+                          color: colors.textMuted,
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (caption != null && caption.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                        AppSpacing.md,
+                        AppSpacing.sm,
+                        AppSpacing.md,
+                        AppSpacing.sm,
+                      ),
+                      child: Text(
+                        caption,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: styles.bodyMedium.copyWith(
+                          color: colors.onSurfaceVariant,
+                          height: 1.5,
+                        ),
+                      ),
+                    ),
+                  // CTA footer, separated by a hairline like the DC card.
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      border: Border(top: BorderSide(color: colors.outline)),
+                    ),
+                    child: SizedBox(
+                      height: 44,
+                      child: Center(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              l10n.ad_learn_more,
+                              style: styles.labelLarge.copyWith(
+                                color: colors.primary,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            Icon(
+                              Icons.chevron_left,
+                              size: 17,
+                              color: colors.primary,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              if (caption != null && caption.isNotEmpty)
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: _CaptionOverlay(caption: caption),
-                ),
-            ],
+            ),
           ),
         ),
       ),
@@ -74,25 +141,38 @@ class AdBannerCard extends StatelessWidget {
   }
 }
 
-class _CaptionOverlay extends StatelessWidget {
-  const _CaptionOverlay({required this.caption});
+/// The DC "إعلان" disclosure chip — a tonal surface pill with a campaign icon.
+class _SponsoredChip extends StatelessWidget {
+  const _SponsoredChip({required this.label});
 
-  final String caption;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     return Container(
       padding: const EdgeInsetsDirectional.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.xs,
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xxs,
       ),
-      color: theme.colorScheme.surface.withValues(alpha: 0.75),
-      child: Text(
-        caption,
-        style: theme.textTheme.bodySmall,
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
+      decoration: BoxDecoration(
+        color: colors.surfaceVariant,
+        borderRadius: appRadius(AppRadii.sm),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.campaign, size: 13, color: colors.onSurfaceVariant),
+          const SizedBox(width: AppSpacing.xxs),
+          Text(
+            label,
+            style: styles.labelSmall.copyWith(
+              color: colors.onSurfaceVariant,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
       ),
     );
   }

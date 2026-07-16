@@ -7,6 +7,7 @@
 //
 // Token-only; RTL-safe.
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 
@@ -31,12 +32,17 @@ class FavoritesSortBar extends StatelessWidget {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
 
-    return Padding(
+    return Container(
       padding: const EdgeInsetsDirectional.only(
         start: AppSpacing.lg,
         end: AppSpacing.lg,
         top: AppSpacing.sm,
         bottom: AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        border: BorderDirectional(
+          bottom: BorderSide(color: colors.divider),
+        ),
       ),
       child: Row(
         children: [
@@ -54,7 +60,8 @@ class FavoritesSortBar extends StatelessWidget {
           DropdownButtonHideUnderline(
             child: DropdownButton<FavoritesSort>(
               value: sort,
-              isDense: true,
+              // isDense removed: keep the 48dp interactive minimum (touch
+              // target).
               borderRadius: appRadius(AppRadii.sm),
               icon: Icon(
                 LucideIcons.chevron_down,
@@ -78,6 +85,7 @@ class FavoritesSortBar extends StatelessWidget {
               ],
               onChanged: (value) {
                 if (value != null) {
+                  HapticFeedback.selectionClick();
                   context.read<FavoritesPageBloc>().add(
                     FavoritesPageSortChanged(value),
                   );

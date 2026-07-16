@@ -12,8 +12,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../../core/routing/app_router.dart';
 import '../../../../../core/theme/colors.dart';
 import '../../../../../core/theme/radii.dart';
 import '../../../../../core/theme/spacing.dart';
@@ -22,6 +24,7 @@ import '../../../../../core/widgets/_widget_support.dart';
 import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_spinner.dart';
 import '../../../../../core/widgets/app_toast.dart';
+import '../../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../../core/widgets/press_scale.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../domain/entities/ad.dart';
@@ -224,23 +227,33 @@ class _AdEditorPageState extends State<AdEditorPage> {
       builder: (ctx, state) {
         final styles = AppTextStyles.of(ctx);
         final colors = AppColors.of(ctx);
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(
-              _isEditing ? l10n.adsAdminEditTitle : l10n.adsAdminCreateTitle,
-            ),
-            actions: [
-              if (_isSaving)
-                const Padding(
-                  padding: EdgeInsetsDirectional.symmetric(
-                    horizontal: AppSpacing.lg,
-                  ),
-                  child: AppSpinner(size: AppSpacing.lg),
-                )
-              else
-                TextButton(onPressed: _save, child: Text(l10n.saveLabel)),
-            ],
+        return DcCrownScaffold(
+          title: _isEditing ? l10n.adsAdminEditTitle : l10n.adsAdminCreateTitle,
+          dense: true,
+          leading: DcCrownIconButton(
+            icon: Icons.arrow_forward,
+            onTap: () => ctx.canPop() ? ctx.pop() : ctx.go(AppRoutes.shellHome),
           ),
+          actions: [
+            if (_isSaving)
+              Padding(
+                padding: const EdgeInsetsDirectional.symmetric(
+                  horizontal: AppSpacing.lg,
+                ),
+                child: AppSpinner(
+                  size: AppSpacing.lg,
+                  color: colors.onBrandHeader,
+                ),
+              )
+            else
+              TextButton(
+                onPressed: _save,
+                style: TextButton.styleFrom(
+                  foregroundColor: colors.onBrandHeader,
+                ),
+                child: Text(l10n.saveLabel),
+              ),
+          ],
           body: Form(
             key: _formKey,
             child: ListView(

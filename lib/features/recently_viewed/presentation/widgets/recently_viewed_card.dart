@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
-// hide intl's TextDirection so it doesn't shadow dart:ui's (TextDirection.ltr).
-import 'package:intl/intl.dart' hide TextDirection;
-
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/elevation.dart';
@@ -15,6 +12,7 @@ import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/press_scale.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/presentation/money_formatter.dart';
 import '../../domain/entities/recently_viewed_listing.dart';
 
 /// A fixed-width compact card for the Home "recently viewed" carousel. Reuses
@@ -76,9 +74,10 @@ class RecentlyViewedCard extends StatelessWidget {
                           if (item.priceAmount != null &&
                               item.currencyCode != null) ...[
                             Text(
-                              l10n.priceWithCurrency(
-                                _formatAmount(context, item.priceAmount!),
+                              MoneyFormatter.formatAmount(
+                                num.tryParse(item.priceAmount!) ?? 0,
                                 item.currencyCode!,
+                                locale: Localizations.localeOf(context),
                               ),
                               textDirection: TextDirection.ltr,
                               textAlign: TextAlign.start,
@@ -130,17 +129,6 @@ class RecentlyViewedCard extends StatelessWidget {
     );
   }
 
-  /// Localized amount with the active locale's numerals (no fractional part —
-  /// the snapshot only carries the primary amount string, not the full currency
-  /// catalog). Falls back to the raw string if it doesn't parse as a number.
-  String _formatAmount(BuildContext context, String amount) {
-    final parsed = num.tryParse(amount);
-    if (parsed == null) return amount;
-    final fmt = NumberFormat.decimalPattern(
-      Localizations.localeOf(context).toLanguageTag(),
-    )..maximumFractionDigits = 0;
-    return fmt.format(parsed);
-  }
 }
 
 class _Hero extends StatelessWidget {

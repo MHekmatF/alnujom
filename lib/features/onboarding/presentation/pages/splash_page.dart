@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../domain/repositories/onboarding_repository.dart';
@@ -72,10 +73,15 @@ class _SplashPageState extends State<SplashPage> {
         body: Center(
           child: StaggeredListItem(
             index: 0,
-            child: Image.asset(
-              'assets/branding/splash_full.png',
-              width: MediaQuery.sizeOf(context).width * 0.78,
-              fit: BoxFit.contain,
+            child: Semantics(
+              label: AppLocalizations.of(context)!.appTitle,
+              image: true,
+              child: Image.asset(
+                'assets/branding/splash_full.png',
+                width: MediaQuery.sizeOf(context).width * 0.78,
+                fit: BoxFit.contain,
+                excludeFromSemantics: true,
+              ),
             ),
           ),
         ),

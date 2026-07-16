@@ -5,6 +5,7 @@
 // Restyled to the royal-blue DS: a soft primary-container strip with a
 // hairline bottom outline. Token-only.
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
@@ -35,7 +36,7 @@ class AdminTierBanner extends StatelessWidget {
         child: Row(
           children: [
             Icon(
-              Icons.admin_panel_settings_outlined,
+              LucideIcons.shield_check,
               size: AppSpacing.lg,
               color: colors.onPrimaryContainer,
             ),

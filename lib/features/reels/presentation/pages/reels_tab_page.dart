@@ -31,7 +31,7 @@ class ReelsTabPage extends StatelessWidget {
         create: (_) => getIt<ReelsFeedCubit>()..loadInitial(locale: locale),
         child: ReelsFeedBody(emptyBody: l10n.reels_tab_empty_subtitle),
       ),
-      bottomNavigationBar: const MainBottomNav(current: MainTab.reels),
+      bottomNavigationBar: const MainBottomNav(current: MainTab.none),
     );
   }
 }

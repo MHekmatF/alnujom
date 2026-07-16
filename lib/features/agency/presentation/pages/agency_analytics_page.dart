@@ -5,15 +5,17 @@
 // Phase 2 tokens only; all strings via AppLocalizations.
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart' hide TextDirection;
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/app_spinner.dart';
-import '../../../../core/widgets/deep_link_aware_back_button.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/util/localized_numbers.dart';
 import '../bloc/agency_analytics_cubit.dart';
 
 class AgencyAnalyticsPage extends StatelessWidget {
@@ -38,14 +40,15 @@ class _AgencyAnalyticsView extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final styles = AppTextStyles.of(context);
     // Render counters in the active locale's numerals (Arabic-Indic in ar).
-    final numFmt = NumberFormat.decimalPattern(
-      Localizations.localeOf(context).toLanguageTag(),
-    )..maximumFractionDigits = 0;
+    final locale = Localizations.localeOf(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: const DeepLinkAwareBackButton(),
-        title: Text(l10n.agency_analytics_title),
+    return DcCrownScaffold(
+      title: l10n.agency_analytics_title,
+      dense: true,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () =>
+            context.canPop() ? context.pop() : context.go(AppRoutes.shellHome),
       ),
       body: BlocBuilder<AgencyAnalyticsCubit, AgencyAnalyticsState>(
         builder: (context, state) {
@@ -82,7 +85,7 @@ class _AgencyAnalyticsView extends StatelessWidget {
                       children: [
                         Text(entry.key, style: styles.bodyLarge),
                         Text(
-                          numFmt.format(entry.value),
+                          formatLocalizedNumber(entry.value, locale),
                           style: styles.titleMedium,
                         ),
                       ],

@@ -12,6 +12,7 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/rating_stars.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/util/localized_numbers.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../domain/entities/review.dart';
@@ -96,7 +97,7 @@ class SellerReviewsSection extends StatelessWidget {
                 Expanded(
                   child: Text(
                     l10n.reviews_section_title,
-                    style: styles.titleLarge.copyWith(color: colors.onSurface),
+                    style: styles.titleMedium.copyWith(color: colors.onSurface),
                   ),
                 ),
                 if (state.hasRating)
@@ -109,6 +110,7 @@ class SellerReviewsSection extends StatelessWidget {
                 l10n.reviews_count(state.rating!.reviewCount),
                 style: styles.bodyMedium.copyWith(color: colors.textMuted),
               ),
+              _RatingDistribution(distribution: state.ratingDistribution),
             ],
             const SizedBox(height: AppSpacing.md),
 
@@ -207,6 +209,93 @@ class _WriteAffordance extends StatelessWidget {
   }
 }
 
+// ─── Rating distribution bars ─────────────────────────────────────────────────
+
+/// A 5-row star-rating breakdown (5★ → 1★): each row is a star-count label, a
+/// proportional bar, and the count. Full-history counts from
+/// `publisher_rating_distribution`. Collapses when there are no reviews.
+class _RatingDistribution extends StatelessWidget {
+  const _RatingDistribution({required this.distribution});
+
+  final Map<int, int> distribution;
+
+  @override
+  Widget build(BuildContext context) {
+    final total = distribution.values.fold<int>(0, (s, v) => s + v);
+    if (total == 0) return const SizedBox.shrink();
+    final maxCount = distribution.values.fold<int>(0, (m, v) => v > m ? v : m);
+
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    final locale = Localizations.localeOf(context);
+
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(
+        top: AppSpacing.sm,
+        bottom: AppSpacing.xs,
+      ),
+      child: Column(
+        children: [
+          for (final star in const [5, 4, 3, 2, 1]) ...[
+            if (star != 5) const SizedBox(height: AppSpacing.xs),
+            Row(
+              children: [
+                SizedBox(
+                  width: 34,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        formatLocalizedNumber(star, locale),
+                        style: styles.labelMedium.copyWith(
+                          color: colors.textMuted,
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.xxs),
+                      Icon(Icons.star, size: AppSpacing.md, color: colors.warning),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: appRadius(AppRadii.pill),
+                    child: SizedBox(
+                      height: 8,
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                            child: ColoredBox(color: colors.surfaceVariant),
+                          ),
+                          FractionallySizedBox(
+                            widthFactor: maxCount == 0
+                                ? 0
+                                : (distribution[star] ?? 0) / maxCount,
+                            child: ColoredBox(color: colors.primary),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                SizedBox(
+                  width: 28,
+                  child: Text(
+                    formatLocalizedNumber(distribution[star] ?? 0, locale),
+                    textAlign: TextAlign.end,
+                    style: styles.labelMedium.copyWith(color: colors.textMuted),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
 // ─── Single review tile ───────────────────────────────────────────────────────
 
 class _ReviewTile extends StatelessWidget {
@@ -224,39 +313,75 @@ class _ReviewTile extends StatelessWidget {
         (review.reviewerName != null && review.reviewerName!.isNotEmpty)
         ? review.reviewerName!
         : l10n.reviews_anonymous_reviewer;
+    final initial = reviewerLabel.trim().isEmpty
+        ? '؟'
+        : reviewerLabel.trim().substring(0, 1);
 
-    return AppSurface(
+    // DC review card: flat surface + hairline (no shadow), a tonal avatar-initial,
+    // name + stars, a trailing time, and the comment beneath.
+    return Container(
       padding: const EdgeInsetsDirectional.all(AppSpacing.md),
-      radius: AppRadii.md,
+      decoration: BoxDecoration(
+        color: colors.card,
+        borderRadius: appRadius(AppRadii.lg),
+        border: Border.all(color: colors.outline),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
+              Container(
+                width: 38,
+                height: 38,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: colors.primaryContainer,
+                  shape: BoxShape.circle,
+                ),
                 child: Text(
-                  reviewerLabel,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: styles.labelLarge.copyWith(color: colors.onSurface),
+                  initial,
+                  style: styles.labelLarge.copyWith(
+                    color: colors.onPrimaryContainer,
+                  ),
                 ),
               ),
-              RatingStars(value: review.rating.toDouble(), size: AppSpacing.md),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      reviewerLabel,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: styles.labelLarge.copyWith(color: colors.onSurface),
+                    ),
+                    const SizedBox(height: AppSpacing.xxs),
+                    RatingStars(
+                      value: review.rating.toDouble(),
+                      size: AppSpacing.md,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                _relativeDate(context, l10n, review.createdAt),
+                style: styles.labelMedium.copyWith(color: colors.textMuted),
+              ),
             ],
           ),
           if (review.comment != null && review.comment!.trim().isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.xs),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               review.comment!.trim(),
-              style: styles.bodyMedium.copyWith(color: colors.onSurfaceVariant),
+              style: styles.bodyMedium.copyWith(color: colors.onSurface),
             ),
           ],
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            _relativeDate(context, l10n, review.createdAt),
-            style: styles.labelMedium.copyWith(color: colors.textMuted),
-          ),
         ],
       ),
     );

@@ -32,8 +32,6 @@ import '../theme/typography.dart';
 import 'app_network_image.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/bloc/auth_state.dart';
-import '../../features/chat/presentation/bloc/conversations_cubit.dart';
-import '../../features/chat/presentation/pages/conversations_list_page.dart';
 import '../../features/crm/presentation/pages/crm_page.dart';
 import '../../features/viewings/presentation/cubit/viewings_cubit.dart';
 import '../../features/viewings/presentation/pages/viewings_list_page.dart';
@@ -168,17 +166,10 @@ class AppNavDrawer extends StatelessWidget {
                       DrawerRow(
                         icon: Icons.forum_outlined,
                         title: AppLocalizations.of(context)!.chatMessagesTile,
-                        onTap: () => _closeThen(
-                          context,
-                          () => Navigator.of(context).push(
-                            MaterialPageRoute<void>(
-                              builder: (_) => BlocProvider<ConversationsCubit>(
-                                create: (_) => getIt<ConversationsCubit>(),
-                                child: const ConversationsListPage(),
-                              ),
-                            ),
-                          ),
-                        ),
+                        // Phase 035 — Messages is now a primary tab; the drawer
+                        // shortcut routes to it instead of pushing a copy.
+                        onTap: () =>
+                            _closeThen(context, () => context.go(AppRoutes.chat)),
                       ),
                       DrawerRow(
                         icon: Icons.calendar_today_outlined,
@@ -213,6 +204,15 @@ class AppNavDrawer extends StatelessWidget {
                           () => context.push(AppRoutes.reports),
                         ),
                       ),
+                    // Settings — public (anonymous-accessible route).
+                    DrawerRow(
+                      icon: Icons.settings_outlined,
+                      title: AppLocalizations.of(context)!.settings_title,
+                      onTap: () => _closeThen(
+                        context,
+                        () => context.push(AppRoutes.settings),
+                      ),
+                    ),
                     // About / support — public (anonymous-accessible route).
                     DrawerRow(
                       icon: LucideIcons.info,

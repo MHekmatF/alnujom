@@ -219,12 +219,7 @@ class _SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-    child: Text(
-      text,
-      style: Theme.of(
-        context,
-      ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-    ),
+    child: Text(text, style: Theme.of(context).textTheme.titleMedium),
   );
 }
 
@@ -287,12 +282,7 @@ class _CaseCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              c.label,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
+            Text(c.label, style: Theme.of(context).textTheme.labelLarge),
             const SizedBox(height: AppSpacing.xs),
             _LocaleRow(
               localeName: 'ar',
@@ -440,12 +430,7 @@ class _RowSelectionTile extends StatelessWidget {
 
     return ListTile(
       dense: true,
-      title: Text(
-        label,
-        style: Theme.of(
-          context,
-        ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
-      ),
+      title: Text(label, style: Theme.of(context).textTheme.labelLarge),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -503,12 +488,7 @@ class _CurrencyNameRow extends StatelessWidget {
     final name = currency.localizedName(locale);
     return ListTile(
       dense: true,
-      leading: Text(
-        label,
-        style: Theme.of(
-          context,
-        ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
-      ),
+      leading: Text(label, style: Theme.of(context).textTheme.labelLarge),
       title: Text(name),
       subtitle: Text(
         'ar: ${currency.nameAr}  |  en: ${currency.nameEn}  |  symbol: ${currency.symbol}',

@@ -60,6 +60,40 @@ class AdminAnalyticsDatasource {
   }
 
   /// `admin_listings_by_governorate()` — gated by `listings.view_all`.
+  /// Invokes `admin_listings_by_category()` (SECURITY DEFINER, re-gated on
+  /// `listings.view_all`). Returns (property_type, total) rows, busiest first.
+  Future<List<AdminCategoryTotalDto>> fetchListingsByCategory() async {
+    final result = await _client.rpc('admin_listings_by_category');
+    final rows = result as List<dynamic>;
+    return rows
+        .map(
+          (row) => AdminCategoryTotalDto.fromJson(
+            Map<String, dynamic>.from(row as Map),
+          ),
+        )
+        .toList(growable: false);
+  }
+
+  /// Invokes `admin_activity_by_dow_hour(p_days)` (SECURITY DEFINER, re-gated on
+  /// `inquiries.view_all`). Returns one (dow, hour_bucket, total) row per
+  /// non-empty cell.
+  Future<List<AdminActivityCellDto>> fetchActivityByDowHour({
+    int days = 30,
+  }) async {
+    final result = await _client.rpc(
+      'admin_activity_by_dow_hour',
+      params: {'p_days': days},
+    );
+    final rows = result as List<dynamic>;
+    return rows
+        .map(
+          (row) => AdminActivityCellDto.fromJson(
+            Map<String, dynamic>.from(row as Map),
+          ),
+        )
+        .toList(growable: false);
+  }
+
   Future<List<AdminGovernorateTotalDto>> fetchListingsByGovernorate() async {
     final result = await _client.rpc('admin_listings_by_governorate');
     return (result as List<dynamic>)

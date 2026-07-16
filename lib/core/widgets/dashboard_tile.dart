@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 
+import '../../shared/util/localized_numbers.dart';
 import '../theme/colors.dart';
 import '../theme/elevation.dart';
 import '../theme/radii.dart';
@@ -163,7 +164,10 @@ class _CountBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
-    final label = count > 99 ? '99+' : '$count';
+    final locale = Localizations.localeOf(context);
+    final label = count > 99
+        ? '${formatLocalizedNumber(99, locale)}+'
+        : formatLocalizedNumber(count, locale);
 
     return Container(
       constraints: const BoxConstraints(minWidth: AppSpacing.xl),

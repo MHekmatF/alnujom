@@ -4,6 +4,7 @@
 // Full implementation per plan §Sub-Phase F step 6.
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -16,14 +17,14 @@ import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_spinner.dart';
-import '../../../../core/widgets/deep_link_aware_back_button.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../core/widgets/ds/dc_status_chip.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../crm/presentation/widgets/add_to_crm_action.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/inquiry.dart';
 import '../../domain/entities/inquiry_status.dart';
 import '../bloc/inquiry_detail_bloc.dart';
-import '../widgets/inbox_status_badge.dart';
 
 class InquiryDetailPage extends StatelessWidget {
   const InquiryDetailPage({super.key, required this.id});
@@ -48,10 +49,14 @@ class _InquiryDetailView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: const DeepLinkAwareBackButton(),
-        title: Text(l10n.inquiry_detail_app_bar_title),
+    return DcCrownScaffold(
+      title: l10n.inquiry_detail_app_bar_title,
+      dense: true,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () => context.canPop()
+            ? context.pop()
+            : context.go(AppRoutes.shellHome),
       ),
       body: BlocBuilder<InquiryDetailBloc, InquiryDetailState>(
         builder: (context, state) {
@@ -98,20 +103,20 @@ class _InquiryDetailBody extends StatelessWidget {
           // a call affordance — grouped in a DS surface.
           AppSurface(
             radius: AppRadii.lg,
-            elevated: true,
             padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                InboxStatusBadge(status: inquiry.status),
+                Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: _statusChip(inquiry.status, l10n),
+                ),
                 const SizedBox(height: AppSpacing.md),
                 Text(
                   inquiry.senderName.isNotEmpty
                       ? inquiry.senderName
                       : l10n.inquiry_inbox_anonymous_sender_label,
-                  style: styles.titleMedium.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: styles.titleLarge,
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Row(
@@ -131,16 +136,13 @@ class _InquiryDetailBody extends StatelessWidget {
                       ),
                     ),
                     if (inquiry.decryptedPhone != null)
-                      Tooltip(
-                        message: l10n.inquiry_detail_tap_to_call_action,
-                        child: IconButton(
-                          icon: Icon(
-                            Icons.phone_outlined,
-                            color: colors.primary,
-                          ),
-                          onPressed: () => launchUrl(
-                            Uri.parse('tel:${inquiry.decryptedPhone}'),
-                          ),
+                      AppButton(
+                        label: l10n.inquiry_detail_tap_to_call_action,
+                        variant: AppButtonVariant.tonal,
+                        size: AppButtonSize.dense,
+                        icon: LucideIcons.phone,
+                        onPressed: () => launchUrl(
+                          Uri.parse('tel:${inquiry.decryptedPhone}'),
                         ),
                       ),
                   ],
@@ -154,7 +156,17 @@ class _InquiryDetailBody extends StatelessWidget {
           AppSurface(
             radius: AppRadii.lg,
             padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
-            child: Text(inquiry.message, style: styles.bodyLarge),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.inquiry_form_message_label,
+                  style: styles.labelMedium.copyWith(color: colors.textMuted),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(inquiry.message, style: styles.bodyLarge),
+              ],
+            ),
           ),
           const SizedBox(height: AppSpacing.md),
 
@@ -164,28 +176,31 @@ class _InquiryDetailBody extends StatelessWidget {
             padding: const EdgeInsetsDirectional.all(AppSpacing.md),
             onTap: () =>
                 context.push(AppRoutes.listingDetailsFor(inquiry.listingId)),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.home_outlined,
-                  size: AppSpacing.lg,
-                  color: colors.primary,
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Text(
-                    inquiry.listingTitle,
-                    style: styles.bodyMedium.copyWith(color: colors.primary),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: kAppMinTouchTarget),
+              child: Row(
+                children: [
+                  Icon(
+                    LucideIcons.house,
+                    size: AppSpacing.lg,
+                    color: colors.primary,
                   ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Text(
-                  l10n.inquiry_detail_listing_link_label,
-                  style: styles.labelMedium.copyWith(color: colors.primary),
-                ),
-              ],
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Text(
+                      inquiry.listingTitle,
+                      style: styles.bodyMedium.copyWith(color: colors.primary),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Text(
+                    l10n.inquiry_detail_listing_link_label,
+                    style: styles.labelMedium.copyWith(color: colors.primary),
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
@@ -197,7 +212,7 @@ class _InquiryDetailBody extends StatelessWidget {
             AppButton(
               label: l10n.crmAddToCrmAction,
               variant: AppButtonVariant.tonal,
-              icon: Icons.handshake_outlined,
+              icon: LucideIcons.handshake,
               onPressed: () => addToCrm(
                 context,
                 source: CrmLeadSource.inquiry,
@@ -276,4 +291,19 @@ class _StatusMutationButtons extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Maps an inquiry status to a DC status chip.
+DcStatusChip _statusChip(InquiryStatus status, AppLocalizations l10n) {
+  final (label, tone) = switch (status) {
+    InquiryStatus.new_ => (l10n.inquiry_status_new, DcStatusTone.neutral),
+    InquiryStatus.seen => (l10n.inquiry_status_seen, DcStatusTone.neutral),
+    InquiryStatus.responded => (
+      l10n.inquiry_status_responded,
+      DcStatusTone.green,
+    ),
+    InquiryStatus.closed => (l10n.inquiry_status_closed, DcStatusTone.neutral),
+    InquiryStatus.spam => (l10n.inquiry_status_spam, DcStatusTone.red),
+  };
+  return DcStatusChip(label: label, tone: tone);
 }

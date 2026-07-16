@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_lucide/flutter_lucide.dart';
 
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
@@ -34,7 +33,7 @@ class RevisionBanner extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(
-            LucideIcons.shield_alert,
+            Icons.published_with_changes,
             size: AppSpacing.lg,
             color: colors.onPrimaryContainer,
           ),

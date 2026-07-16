@@ -65,6 +65,11 @@ class ListingRevisionsRepositoryImpl implements ListingRevisionsRepository {
   }
 
   @override
+  Future<void> withdrawRevision(String revisionId) {
+    return _ds.withdrawRevision(revisionId);
+  }
+
+  @override
   Future<String> uploadStagedImage({
     required String listingId,
     required Uint8List watermarkedBytes,

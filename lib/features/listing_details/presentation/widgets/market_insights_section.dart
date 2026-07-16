@@ -12,6 +12,7 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/util/localized_numbers.dart';
 import '../../domain/entities/market_trend_point.dart';
 import '../bloc/market_insights_cubit.dart';
 
@@ -98,9 +99,8 @@ class _MarketInsightsBody extends StatelessWidget {
         final colors = AppColors.of(context);
         final styles = AppTextStyles.of(context);
         final elevation = AppElevation.of(context);
-        final localeTag = Localizations.localeOf(context).toLanguageTag();
-        final intFmt = NumberFormat.decimalPattern(localeTag)
-          ..maximumFractionDigits = 0;
+        final locale = Localizations.localeOf(context);
+        final localeTag = locale.toLanguageTag();
 
         final points = state.points;
         final maxAvg = points.fold<double>(
@@ -119,7 +119,7 @@ class _MarketInsightsBody extends StatelessWidget {
         );
         final overallAvg = totalCount == 0 ? 0.0 : weightedSum / totalCount;
         final avgPriceText = l10n.priceWithCurrency(
-          intFmt.format(overallAvg.round()),
+          formatLocalizedNumber(overallAvg.round(), locale),
           currencyCode,
         );
 

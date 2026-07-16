@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../debug/theme_gallery_page.dart';
@@ -16,6 +17,8 @@ import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/auth/presentation/pages/rejected_page.dart';
 import '../../features/auth/presentation/pages/reset_password_page.dart';
 import '../../features/auth/presentation/pages/suspended_page.dart';
+import '../../features/chat/presentation/bloc/conversations_cubit.dart';
+import '../../features/chat/presentation/pages/conversations_list_page.dart';
 import '../../features/currencies/presentation/pages/currencies_list_page.dart';
 import '../../features/currencies/presentation/pages/currency_form_page.dart';
 import '../../features/currencies/presentation/pages/exchange_rate_history_page.dart';
@@ -36,6 +39,7 @@ import '../../features/locations/presentation/pages/locations_list_page.dart';
 import '../../features/listing_form/domain/entities/listing.dart';
 import '../../features/listing_form/domain/entities/listing_form_state.dart';
 import '../../features/listing_form/presentation/pages/listing_form_page.dart';
+import '../../features/listing_form/presentation/pages/revision_status_page.dart';
 import '../../features/favorites/presentation/pages/favorites_page.dart';
 import '../../features/reports/presentation/pages/my_reports_page.dart';
 import '../../features/admin/reports/presentation/pages/reports_queue_page.dart';
@@ -67,6 +71,7 @@ import '../../features/dashboard/presentation/pages/dashboard_entry_page.dart';
 import '../../features/settings/presentation/bloc/app_settings_cubit.dart';
 import '../../features/settings/presentation/pages/about_support_page.dart';
 import '../../features/settings/presentation/pages/maintenance_screen.dart';
+import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/settings/presentation/widgets/maintenance_gate.dart';
 import '../../features/publisher_dashboard/presentation/pages/listing_moderation_history_page.dart';
 import '../../features/publisher_dashboard/presentation/pages/my_listings_page.dart';
@@ -110,6 +115,8 @@ abstract final class AppRoutes {
   static const profilePrivate = '/profile/private';
   static const publisherListingsCreate = '/publisher/listings/create';
   static const publisherListingsEdit = '/publisher/listings/:id/edit';
+  static const publisherListingsRevisionStatus =
+      '/publisher/listings/:id/revision';
   static const publisherMyListings = '/publisher/dashboard/my-listings';
   static const publisherApprovalPending = '/publisher/pending-approval';
   static const publisherListingsModerationHistory =
@@ -133,6 +140,8 @@ abstract final class AppRoutes {
   static const adminInquiries = '/admin/inquiries';
   // Phase 17 FR-020: authenticated favorites page route.
   static const favorites = '/favorites';
+  // Phase 035: authenticated Messages (chat) tab route.
+  static const chat = '/chat';
   // Phase 18 FR-022: authenticated My-Reports page route.
   static const reports = '/reports';
   // Phase 18 FR-019: admin moderation queue route.
@@ -160,6 +169,8 @@ abstract final class AppRoutes {
   static const maintenance = maintenanceRoute;
   // Phase 23 FC — public about/support surface (FR-013).
   static const about = '/about';
+  // Phase 035: unified user settings screen.
+  static const settings = '/settings';
   static const themeGallery = '/_debug/theme-gallery';
   static const debugMoneyFormatter = '/debug/money-formatter';
   // Phase 25 uplift v2 — saved searches + role-aware dashboard.
@@ -210,6 +221,8 @@ abstract final class AppRouteNames {
   static const profilePrivate = 'profile-private';
   static const publisherListingsCreate = 'publisher-listings-create';
   static const publisherListingsEdit = 'publisher-listings-edit';
+  static const publisherListingsRevisionStatus =
+      'publisher-listings-revision-status';
   static const publisherMyListings = 'publisher-my-listings';
   static const publisherApprovalPending = 'publisher-pending-approval';
   static const publisherListingsModerationHistory =
@@ -236,6 +249,8 @@ abstract final class AppRouteNames {
   static const adminInquiries = 'admin-inquiries';
   // Phase 17 FR-020: authenticated favorites page route name.
   static const favorites = 'favorites';
+  // Phase 035: authenticated Messages (chat) tab route name.
+  static const chat = 'chat';
   // Phase 18 FR-022: authenticated My-Reports page route name.
   static const reports = 'reports';
   // Phase 18 FR-019: admin moderation queue route name.
@@ -262,6 +277,8 @@ abstract final class AppRouteNames {
   // Phase 23 FC — maintenance gate + about/support route names.
   static const maintenance = 'maintenance';
   static const about = 'about';
+  // Phase 035: settings screen route name.
+  static const settings = 'settings';
   static const themeGallery = 'theme-gallery';
 }
 
@@ -541,6 +558,13 @@ GoRouter buildAppRouter({
         ),
       ),
       GoRoute(
+        path: AppRoutes.publisherListingsRevisionStatus,
+        name: AppRouteNames.publisherListingsRevisionStatus,
+        redirect: requirePublisherStatusRedirect,
+        builder: (context, state) =>
+            RevisionStatusPage(listingId: state.pathParameters['id']!),
+      ),
+      GoRoute(
         path: AppRoutes.publisherMyListings,
         name: AppRouteNames.publisherMyListings,
         redirect: requirePublisherStatusRedirect,
@@ -677,6 +701,20 @@ GoRouter buildAppRouter({
         builder: (context, state) => const FavoritesPage(),
       ),
 
+      // ─── Phase 035 — authenticated Messages (chat) tab ───
+      // Requires sign-in; anonymous deep-links redirect to /login (mirrors
+      // favorites). Provides the ConversationsCubit above the list page.
+      GoRoute(
+        path: AppRoutes.chat,
+        name: AppRouteNames.chat,
+        redirect: (context, state) =>
+            authBloc.state is Unauthenticated ? AppRoutes.login : null,
+        builder: (context, state) => BlocProvider<ConversationsCubit>(
+          create: (_) => getIt<ConversationsCubit>(),
+          child: const ConversationsListPage(),
+        ),
+      ),
+
       // ─── Phase 18 — authenticated My-Reports page ───
       // Requires sign-in (FR-022); anonymous deep-links redirect to /login.
       GoRoute(
@@ -787,6 +825,13 @@ GoRouter buildAppRouter({
         path: AppRoutes.about,
         name: AppRouteNames.about,
         builder: (context, state) => const AboutSupportPage(),
+      ),
+
+      // ─── Phase 035 — unified user settings (anonymous-accessible, pushed) ──
+      GoRoute(
+        path: AppRoutes.settings,
+        name: AppRouteNames.settings,
+        builder: (context, state) => const SettingsPage(),
       ),
 
       if (kDesignToolsEnabled)

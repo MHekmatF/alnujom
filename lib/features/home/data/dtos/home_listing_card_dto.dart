@@ -25,6 +25,9 @@ class HomeListingCardDto {
     required this.mainImageUrl,
     required this.governorate,
     required this.city,
+    this.area,
+    this.phone,
+    this.whatsapp,
     this.agencyId,
     this.agencyName,
     this.agencyLogoPath,
@@ -34,6 +37,10 @@ class HomeListingCardDto {
     this.areaSize,
     this.floor,
     this.isFeatured = false,
+    this.deedType,
+    this.finishLevel,
+    this.verificationStatus,
+    this.verifiedAt,
   });
 
   final String id;
@@ -56,6 +63,16 @@ class HomeListingCardDto {
   /// — Phase 8 governorate/city FKs are nullable on the listings row.
   final HomeListingLocationNameDto? governorate;
   final HomeListingLocationNameDto? city;
+
+  /// 035 craft wave — neighbourhood-level location for the card's
+  /// `city · area` line (supersedes Phase-13 FR-017's city-only minimalism,
+  /// per the approved artifact's card anatomy).
+  final HomeListingLocationNameDto? area;
+
+  /// 035 craft wave — listing contact numbers so the card's WhatsApp CTA can
+  /// launch WhatsApp directly instead of merely opening the detail page.
+  final String? phone;
+  final String? whatsapp;
 
   /// Phase 19 (FR-022) — owning agency badge fields. Only populated when the
   /// listing is under an `approved` agency (others stay null → no badge).
@@ -81,6 +98,14 @@ class HomeListingCardDto {
   /// `featured_until` column on the feed, or forced `true` by the dedicated
   /// featured datasource query (`SupabaseHomeFeedDatasource.fetchFeatured`).
   final bool isFeatured;
+
+  /// Phase 035 Stage 3 — Syria-native attributes + field-verification (columns
+  /// on `listings`, projected by the feed select). All nullable; the card lights
+  /// up the موثّق badge / deed chip only when present.
+  final String? deedType;
+  final String? finishLevel;
+  final String? verificationStatus;
+  final DateTime? verifiedAt;
 
   /// Parses the embedded-selects projection shape from
   /// `SupabaseHomeFeedDatasource.fetchPage`. Defensive against missing
@@ -132,6 +157,7 @@ class HomeListingCardDto {
 
     final govMap = row['governorate'] as Map<String, dynamic>?;
     final cityMap = row['city'] as Map<String, dynamic>?;
+    final areaMap = row['area'] as Map<String, dynamic>?;
 
     // Phase 19 (FR-022) — embedded agency row. Surface the badge ONLY when the
     // agency is approved (others get null → no badge per FR-023).
@@ -163,6 +189,11 @@ class HomeListingCardDto {
       city: cityMap == null
           ? null
           : HomeListingLocationNameDto.fromDisplayName(cityMap['display_name']),
+      area: areaMap == null
+          ? null
+          : HomeListingLocationNameDto.fromDisplayName(areaMap['display_name']),
+      phone: row['phone'] as String?,
+      whatsapp: row['whatsapp'] as String?,
       agencyId: agencyId,
       agencyName: agencyName,
       agencyLogoPath: agencyLogoPath,
@@ -171,6 +202,10 @@ class HomeListingCardDto {
       areaSize: _toDouble(row['area_size']),
       floor: _toInt(row['floor']),
       isFeatured: _parseFeatured(row['featured_until']),
+      deedType: row['deed_type'] as String?,
+      finishLevel: row['finish_level'] as String?,
+      verificationStatus: row['verification_status'] as String?,
+      verifiedAt: _toDateTime(row['verified_at']),
     );
   }
 
@@ -188,6 +223,9 @@ class HomeListingCardDto {
       mainImageUrl: url,
       governorate: governorate,
       city: city,
+      area: area,
+      phone: phone,
+      whatsapp: whatsapp,
       agencyId: agencyId,
       agencyName: agencyName,
       agencyLogoPath: agencyLogoPath,
@@ -197,6 +235,10 @@ class HomeListingCardDto {
       areaSize: areaSize,
       floor: floor,
       isFeatured: isFeatured,
+      deedType: deedType,
+      finishLevel: finishLevel,
+      verificationStatus: verificationStatus,
+      verifiedAt: verifiedAt,
     );
   }
 
@@ -213,6 +255,9 @@ class HomeListingCardDto {
       mainImageUrl: mainImageUrl,
       governorate: governorate,
       city: city,
+      area: area,
+      phone: phone,
+      whatsapp: whatsapp,
       agencyId: agencyId,
       agencyName: agencyName,
       agencyLogoPath: agencyLogoPath,
@@ -222,6 +267,10 @@ class HomeListingCardDto {
       areaSize: areaSize,
       floor: floor,
       isFeatured: isFeatured,
+      deedType: deedType,
+      finishLevel: finishLevel,
+      verificationStatus: verificationStatus,
+      verifiedAt: verifiedAt,
     );
   }
 
@@ -246,6 +295,9 @@ class HomeListingCardDto {
           ? '—'
           : governorate!.localizedName(locale),
       cityNameLocalized: city == null ? '—' : city!.localizedName(locale),
+      areaNameLocalized: area == null ? '' : area!.localizedName(locale),
+      phone: phone,
+      whatsapp: whatsapp,
       primaryPrice: ListingPrice(
         id: '$id:primary',
         listingId: id,
@@ -265,6 +317,10 @@ class HomeListingCardDto {
       areaSize: areaSize,
       floor: floor,
       isFeatured: isFeatured,
+      deedType: deedType,
+      finishLevel: finishLevel,
+      verificationStatus: verificationStatus,
+      verifiedAt: verifiedAt,
     );
   }
 
@@ -283,6 +339,9 @@ class HomeListingCardDto {
       mainImageUrl: mainImageUrl,
       governorate: governorate,
       city: city,
+      area: area,
+      phone: phone,
+      whatsapp: whatsapp,
       agencyId: agencyId,
       agencyName: agencyName,
       agencyLogoPath: agencyLogoPath,
@@ -292,6 +351,10 @@ class HomeListingCardDto {
       areaSize: areaSize,
       floor: floor,
       isFeatured: value,
+      deedType: deedType,
+      finishLevel: finishLevel,
+      verificationStatus: verificationStatus,
+      verifiedAt: verifiedAt,
     );
   }
 }
@@ -366,5 +429,10 @@ bool _parseFeatured(Object? raw) {
 double? _toDouble(Object? raw) {
   if (raw is num) return raw.toDouble();
   if (raw is String) return double.tryParse(raw);
+  return null;
+}
+
+DateTime? _toDateTime(Object? raw) {
+  if (raw is String && raw.isNotEmpty) return DateTime.tryParse(raw);
   return null;
 }

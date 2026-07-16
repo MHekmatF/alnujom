@@ -527,35 +527,38 @@ class _ChecklistRow extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       borderRadius: appRadius(AppRadii.sm),
-      child: Padding(
-        padding: const EdgeInsetsDirectional.symmetric(
-          vertical: AppSpacing.sm,
-        ),
-        child: Row(
-          children: [
-            Icon(
-              LucideIcons.circle_alert,
-              size: AppSpacing.xl,
-              color: colors.warning,
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: Text(
-                label,
-                style: styles.bodyLarge.copyWith(color: colors.onSurface),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: kAppMinTouchTarget),
+        child: Padding(
+          padding: const EdgeInsetsDirectional.symmetric(
+            vertical: AppSpacing.sm,
+          ),
+          child: Row(
+            children: [
+              Icon(
+                LucideIcons.circle_alert,
+                size: AppSpacing.xl,
+                color: colors.warning,
               ),
-            ),
-            Text(
-              l10n.listingFormChecklistFix,
-              style: styles.labelMedium.copyWith(color: colors.primary),
-            ),
-            const SizedBox(width: AppSpacing.xxs),
-            Icon(
-              Icons.chevron_right,
-              size: AppSpacing.lg,
-              color: colors.primary,
-            ),
-          ],
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  label,
+                  style: styles.bodyLarge.copyWith(color: colors.onSurface),
+                ),
+              ),
+              Text(
+                l10n.listingFormChecklistFix,
+                style: styles.labelMedium.copyWith(color: colors.primary),
+              ),
+              const SizedBox(width: AppSpacing.xxs),
+              Icon(
+                Icons.chevron_right,
+                size: AppSpacing.lg,
+                color: colors.primary,
+              ),
+            ],
+          ),
         ),
       ),
     );

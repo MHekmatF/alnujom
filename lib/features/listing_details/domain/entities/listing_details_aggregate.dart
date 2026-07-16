@@ -22,6 +22,10 @@ class ListingDetailsAggregate extends Equatable {
     required this.city,
     required this.area,
     required this.publisher,
+    this.deedType,
+    this.finishLevel,
+    this.verificationStatus,
+    this.verifiedAt,
   });
 
   /// Phase 10 Listing entity (title, type, purpose, visibility flags, etc.)
@@ -46,6 +50,17 @@ class ListingDetailsAggregate extends Equatable {
   /// are NOT projected; Phase 5 RLS would block them anyway.
   final PublisherSummary publisher;
 
+  /// Phase 035 Stage 3 — Syria-native attributes + field-verification. All
+  /// nullable; the detail page renders the deed/finish facts + موثّق trust block
+  /// only when present.
+  final String? deedType;
+  final String? finishLevel;
+  final String? verificationStatus;
+  final DateTime? verifiedAt;
+
+  /// Whether the listing is field-verified (drives the موثّق trust block).
+  bool get isVerified => verificationStatus == 'verified';
+
   @override
   List<Object?> get props => [
     listing,
@@ -56,6 +71,10 @@ class ListingDetailsAggregate extends Equatable {
     city,
     area,
     publisher,
+    deedType,
+    finishLevel,
+    verificationStatus,
+    verifiedAt,
   ];
 }
 

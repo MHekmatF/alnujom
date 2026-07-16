@@ -38,6 +38,7 @@ import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/glass_pill.dart';
 import '../../../../core/widgets/press_scale.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/util/localized_numbers.dart';
 import '../../../agency/presentation/widgets/agency_badge.dart';
 import '../../../favorites/presentation/widgets/favorite_heart_button.dart';
 import '../../../listing_form/domain/entities/listing.dart';
@@ -254,7 +255,10 @@ class _Body extends StatelessWidget {
             // numerals + currency read left-to-right even in RTL.
             Text(
               l10n.priceWithCurrency(
-                item.primaryAmount.toStringAsFixed(0),
+                formatLocalizedNumber(
+                  item.primaryAmount.round(),
+                  Localizations.localeOf(context),
+                ),
                 item.primaryCurrency,
               ),
               textDirection: TextDirection.ltr,

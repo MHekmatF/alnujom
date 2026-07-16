@@ -14,8 +14,12 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/app_toast.dart';
+import '../../../../core/widgets/crown_underline_tabs.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
+import '../../../../core/widgets/loading_state.dart';
+import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../currencies/domain/entities/currency.dart';
 import '../../../currencies/domain/usecases/list_currencies.dart';
@@ -33,7 +37,24 @@ import '../bloc/my_listings_event.dart';
 import '../bloc/my_listings_state.dart';
 import '../widgets/listing_card.dart';
 import '../widgets/rejection_reason_banner.dart';
-import '../widgets/status_filter_chip_row.dart';
+import '../widgets/status_badge.dart';
+
+/// The status-filter tabs shown on the crown (null = "الكل"). Mirrors the order
+/// the old `StatusFilterChipRow` used so the [MyListingsBloc] filter is unchanged.
+const List<ListingStatus?> _statusFilters = [
+  null,
+  ListingStatus.draft,
+  ListingStatus.pendingReview,
+  ListingStatus.approved,
+  ListingStatus.rejected,
+  ListingStatus.paused,
+  ListingStatus.sold,
+  ListingStatus.rented,
+  ListingStatus.expired,
+];
+
+String _filterLabel(ListingStatus? f, AppLocalizations l10n) =>
+    f == null ? l10n.filterChipAll : StatusBadge.labelFor(f, l10n);
 
 class MyListingsPage extends StatelessWidget {
   const MyListingsPage({super.key});
@@ -71,96 +92,109 @@ class _MyListingsViewState extends State<_MyListingsView> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.myListingsPageTitle)),
+    return DcCrownScaffold(
+      title: l10n.myListingsPageTitle,
+      dense: true,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () => Navigator.of(context).maybePop(),
+      ),
+      crownBottom: BlocBuilder<MyListingsBloc, MyListingsState>(
+        buildWhen: (a, b) => a.statusFilter != b.statusFilter,
+        builder: (context, state) => CrownUnderlineTabs(
+          scrollable: true,
+          fontSize: 14,
+          labels: [
+            for (final f in _statusFilters) _filterLabel(f, l10n),
+          ],
+          selectedIndex: _statusFilters.indexOf(state.statusFilter),
+          onChanged: (i) => context.read<MyListingsBloc>().add(
+            ChangeStatusFilter(_statusFilters[i]),
+          ),
+        ),
+      ),
       body: FutureBuilder<List<Currency>>(
         future: _currenciesFuture,
         builder: (context, currencySnap) {
           final currenciesByCode = <String, Currency>{
             for (final c in currencySnap.data ?? const <Currency>[]) c.code: c,
           };
-          return Column(
-            children: [
-              const StatusFilterChipRow(),
-              Expanded(
-                child: BlocListener<MyListingsBloc, MyListingsState>(
-                  listenWhen: (prev, curr) =>
-                      prev.renewSuccessToken != curr.renewSuccessToken ||
-                      prev.renewErrorToken != curr.renewErrorToken,
-                  listener: (context, state) {
-                    final succeeded =
-                        state.renewSuccessToken != _lastRenewSuccessToken;
-                    final failed =
-                        state.renewErrorToken != _lastRenewErrorToken;
-                    _lastRenewSuccessToken = state.renewSuccessToken;
-                    _lastRenewErrorToken = state.renewErrorToken;
-                    if (!succeeded && !failed) return;
-                    AppToast.show(
-                      context,
-                      succeeded
-                          ? l10n.myListingsRenewSuccess
-                          : l10n.myListingsRenewError,
-                      variant: succeeded
-                          ? AppToastVariant.success
-                          : AppToastVariant.error,
-                    );
-                  },
-                  child: BlocBuilder<MyListingsBloc, MyListingsState>(
-                    builder: (context, state) {
-                      if (state.loading && state.listings.isEmpty) {
-                        return const AppSpinner.page();
-                      }
-                      if (state.errorMessage != null &&
-                          state.listings.isEmpty) {
-                        return _ErrorBody(message: state.errorMessage!);
-                      }
-                      if (state.listings.isEmpty) {
-                        return const _EmptyBody();
-                      }
-                      return _LocationLabelsHost(
-                        listings: state.listings,
-                        builder: (context, governorates, areas) {
-                          return RefreshIndicator(
-                            onRefresh: () async {
-                              context.read<MyListingsBloc>().add(
-                                const Refresh(),
-                              );
-                              await _waitForRefresh(context);
-                            },
-                            child: ListView.builder(
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              itemCount:
-                                  state.listings.length +
-                                  (state.endReached ? 0 : 1),
-                              itemBuilder: (context, index) {
-                                if (index >= state.listings.length) {
-                                  context.read<MyListingsBloc>().add(
-                                    const LoadMore(),
-                                  );
-                                  return const Padding(
-                                    padding: EdgeInsetsDirectional.all(
-                                      AppSpacing.lg,
-                                    ),
-                                    child: AppSpinner(),
-                                  );
-                                }
-                                final pl = state.listings[index];
-                                return _ListingRow(
-                                  publisherListing: pl,
-                                  currenciesByCode: currenciesByCode,
-                                  governoratesById: governorates,
-                                  areasById: areas,
-                                );
-                              },
+          return BlocListener<MyListingsBloc, MyListingsState>(
+            listenWhen: (prev, curr) =>
+                prev.renewSuccessToken != curr.renewSuccessToken ||
+                prev.renewErrorToken != curr.renewErrorToken,
+            listener: (context, state) {
+              final succeeded =
+                  state.renewSuccessToken != _lastRenewSuccessToken;
+              final failed = state.renewErrorToken != _lastRenewErrorToken;
+              _lastRenewSuccessToken = state.renewSuccessToken;
+              _lastRenewErrorToken = state.renewErrorToken;
+              if (!succeeded && !failed) return;
+              AppToast.show(
+                context,
+                succeeded
+                    ? l10n.myListingsRenewSuccess
+                    : l10n.myListingsRenewError,
+                variant: succeeded
+                    ? AppToastVariant.success
+                    : AppToastVariant.error,
+              );
+            },
+            child: BlocBuilder<MyListingsBloc, MyListingsState>(
+              builder: (context, state) {
+                if (state.loading && state.listings.isEmpty) {
+                  return const _MyListingsSkeleton();
+                }
+                if (state.errorMessage != null && state.listings.isEmpty) {
+                  return _ErrorBody(message: state.errorMessage!);
+                }
+                if (state.listings.isEmpty) {
+                  return _EmptyBody(statusFilter: state.statusFilter);
+                }
+                return _LocationLabelsHost(
+                  listings: state.listings,
+                  builder: (context, governorates, areas) {
+                    return RefreshIndicator(
+                      onRefresh: () async {
+                        context.read<MyListingsBloc>().add(const Refresh());
+                        await _waitForRefresh(context);
+                      },
+                      child: ListView.builder(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsetsDirectional.only(
+                          top: AppSpacing.sm,
+                          bottom: AppSpacing.xl,
+                        ),
+                        itemCount:
+                            state.listings.length +
+                            (state.endReached ? 0 : 1),
+                        itemBuilder: (context, index) {
+                          if (index >= state.listings.length) {
+                            context.read<MyListingsBloc>().add(
+                              const LoadMore(),
+                            );
+                            return const Padding(
+                              padding: EdgeInsetsDirectional.all(AppSpacing.lg),
+                              child: AppSpinner(),
+                            );
+                          }
+                          final pl = state.listings[index];
+                          return StaggeredListItem(
+                            index: index,
+                            child: _ListingRow(
+                              publisherListing: pl,
+                              currenciesByCode: currenciesByCode,
+                              governoratesById: governorates,
+                              areasById: areas,
                             ),
                           );
                         },
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ],
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
           );
         },
       ),
@@ -290,17 +324,54 @@ class _LocationLabelsHostState extends State<_LocationLabelsHost> {
 }
 
 class _EmptyBody extends StatelessWidget {
-  const _EmptyBody();
+  const _EmptyBody({this.statusFilter});
+
+  final ListingStatus? statusFilter;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    if (statusFilter != null) {
+      // Filtered-empty: the publisher HAS listings, just none in this status.
+      // Offer an exit affordance that reuses the existing filter event.
+      return EmptyState(
+        icon: LucideIcons.funnel_x,
+        headline: l10n.myListingsFilteredEmptyTitle,
+        ctaLabel: l10n.myListingsFilteredEmptyShowAll,
+        onCtaPressed: () => context.read<MyListingsBloc>().add(
+          const ChangeStatusFilter(null),
+        ),
+      );
+    }
     return EmptyState(
       icon: LucideIcons.list_plus,
       headline: l10n.myListingsEmptyTitle,
+      body: l10n.myListingsEmptyBody,
       ctaLabel: l10n.myListingsEmptyCtaCreateFirst,
       onCtaPressed: () =>
           context.goNamed(AppRouteNames.publisherListingsCreate),
+    );
+  }
+}
+
+/// Card-shaped skeletons shown during the initial load (state.loading &&
+/// listings.isEmpty) — preserves the list layout instead of flashing a bare
+/// centred spinner, matching the sibling publisher dashboard's skeletons.
+class _MyListingsSkeleton extends StatelessWidget {
+  const _MyListingsSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: 5,
+      itemBuilder: (context, _) => const Padding(
+        padding: EdgeInsetsDirectional.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.sm,
+        ),
+        child: LoadingState.card(),
+      ),
     );
   }
 }

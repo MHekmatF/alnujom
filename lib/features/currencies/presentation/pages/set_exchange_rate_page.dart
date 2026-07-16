@@ -2,8 +2,10 @@ import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
@@ -12,6 +14,7 @@ import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/app_toast.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../core/widgets/locale_toggle_action.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/presentation/rate_formatter.dart';
@@ -100,11 +103,16 @@ class _SetExchangeRateViewState extends State<_SetExchangeRateView> {
             final locale = Localizations.localeOf(context);
             final isSaving = state.status == SetRateStatus.saving;
 
-            return Scaffold(
-              appBar: AppBar(
-                title: Text(l10n.setExchangeRatePageTitle),
-                actions: const [LocaleToggleAction()],
+            return DcCrownScaffold(
+              title: l10n.setExchangeRatePageTitle,
+              dense: true,
+              leading: DcCrownIconButton(
+                icon: Icons.arrow_forward,
+                onTap: () => context.canPop()
+                    ? context.pop()
+                    : context.go(AppRoutes.shellHome),
               ),
+              actions: const [LocaleToggleAction()],
               body: snapshot.connectionState != ConnectionState.done
                   ? const AppSpinner.page()
                   : ListView(

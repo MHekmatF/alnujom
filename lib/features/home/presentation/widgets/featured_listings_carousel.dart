@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_router.dart';
@@ -9,23 +8,23 @@ import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
-import '../../../../core/widgets/staggered_list_item.dart';
+import '../../../../core/widgets/ds/ds_listing_card.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../currencies/domain/entities/currency.dart';
 import '../bloc/featured_listings_cubit.dart';
-import 'featured_hero_card.dart';
-import 'featured_mini_card.dart';
+import 'home_card_mapper.dart';
 
-/// Phase 32 redesign — the "✨ عقارات مميّزة" section at the TOP of the home feed.
+/// The "عقارات مميّزة" section at the top of the home feed, rebuilt to the DC
+/// "Blue Crown" design (`AlNujom.dc.html` §HOME): a gold-star section header
+/// followed by a **horizontal rail** of compact 250px cards
+/// ([DsListingCard] in its `featured` variant — gold "مميّز" chip, no heart,
+/// no publisher row).
 ///
-/// Matches the Al Nujom Design System home mockup: a single large
-/// [FeaturedHeroCard] (the top featured listing, photo-led with everything
-/// composited over the image) followed by a 2-up grid of compact
-/// [FeaturedMiniCard]s for the remaining featured listings.
-///
-/// Hides itself entirely (zero height) unless the [FeaturedListingsCubit] is in
-/// the `loaded` state with at least one listing — `empty` / `failure` /
-/// `loading` collapse the section so it never disrupts the regular feed.
+/// The rail has a fixed height, so unlike the old hero + 2-up grid it never
+/// reflows the feed as its contents change. It stays visible whenever the cubit
+/// holds featured listings — including through a pull-to-refresh reload, which
+/// [FeaturedListingsCubit.load] carries the current listings through — so the
+/// section no longer collapses to zero and snaps back mid-refresh.
 class FeaturedListingsCarousel extends StatelessWidget {
   const FeaturedListingsCarousel({super.key, required this.currenciesByCode});
 
@@ -33,70 +32,66 @@ class FeaturedListingsCarousel extends StatelessWidget {
   /// card so it can resolve the price (mirrors the regular feed card).
   final Map<String, Currency> currenciesByCode;
 
+  /// Rail height: 250px card = 16/10 image (≈156) + the featured body. Cards
+  /// with fewer specs are shorter and simply top-align in the rail.
+  static const double _railHeight = 276;
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<FeaturedListingsCubit, FeaturedListingsState>(
       builder: (context, state) {
-        if (state.status != FeaturedListingsStatus.loaded ||
-            state.listings.isEmpty) {
+        if (state.listings.isEmpty) {
           return const SizedBox.shrink();
         }
 
         final l10n = AppLocalizations.of(context)!;
+        final locale = Localizations.localeOf(context);
         final listings = state.listings;
-        final hero = listings.first;
-        final rest = listings.skip(1).toList();
 
-        return StaggeredListItem(
-          index: 1,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _FeaturedSectionHeader(
-                title: l10n.home_featured_section_title,
-                seeAllLabel: l10n.reels_see_all,
-                // "See all" → browse the full property catalogue (Search).
-                onSeeAll: () => context.go(AppRoutes.search),
-              ),
-              FeaturedHeroCard(card: hero, currenciesByCode: currenciesByCode),
-              if (rest.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsetsDirectional.only(
-                    start: AppSpacing.lg,
-                    end: AppSpacing.lg,
-                    bottom: AppSpacing.sm,
-                  ),
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      const gap = AppSpacing.md;
-                      final width = (constraints.maxWidth - gap) / 2;
-                      return Wrap(
-                        spacing: gap,
-                        runSpacing: gap,
-                        children: [
-                          for (final card in rest)
-                            SizedBox(
-                              width: width,
-                              child: FeaturedMiniCard(
-                                card: card,
-                                currenciesByCode: currenciesByCode,
-                              ),
-                            ),
-                        ],
-                      );
-                    },
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _FeaturedSectionHeader(
+              title: l10n.home_featured_section_title,
+              seeAllLabel: l10n.home_see_all,
+              onSeeAll: () => context.go(AppRoutes.search),
+            ),
+            SizedBox(
+              height: _railHeight,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsetsDirectional.symmetric(
+                  horizontal: AppSpacing.lg,
+                ),
+                itemCount: listings.length,
+                separatorBuilder: (_, __) =>
+                    const SizedBox(width: AppSpacing.md),
+                itemBuilder: (context, i) => SizedBox(
+                  width: 250,
+                  child: DsListingCard(
+                    data: homeCardToData(
+                      listings[i],
+                      currenciesByCode,
+                      locale,
+                      l10n,
+                    ),
+                    featured: true,
+                    onTap: () =>
+                        context.go(AppRoutes.listingDetailsFor(listings[i].id)),
                   ),
                 ),
-            ],
-          ),
+              ),
+            ),
+          ],
         );
       },
     );
   }
 }
 
-/// Section header for the featured block — a gold sparkle tile + bold title +
-/// a "see all" link, tying the section to the gold مميّز badge on the cards.
+/// DC section header for the featured block — a gold filled-star, the bold
+/// section title, and a "عرض الكل" text link. The gold star ties the section to
+/// the gold "مميّز" chip on the cards.
 class _FeaturedSectionHeader extends StatelessWidget {
   const _FeaturedSectionHeader({
     required this.title,
@@ -121,27 +116,26 @@ class _FeaturedSectionHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsetsDirectional.all(AppSpacing.xs),
-            decoration: BoxDecoration(
-              // Gold sparkle tile — ties the "featured" section to the gold
-              // premium signal used on the cards' مميّز badge.
-              color: colors.tertiary,
-              borderRadius: appRadius(AppRadii.md),
-            ),
-            child: Icon(
-              LucideIcons.sparkles,
-              size: AppSpacing.lg,
-              color: Theme.of(context).colorScheme.onTertiary,
+          Icon(Icons.star, size: 20, color: colors.tertiary),
+          const SizedBox(width: AppSpacing.xs),
+          Expanded(
+            child: Text(
+              title,
+              style: styles.titleMedium.copyWith(fontWeight: FontWeight.w700),
             ),
           ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(child: Text(title, style: styles.titleLarge)),
-          TextButton(
-            onPressed: onSeeAll,
-            child: Text(
-              seeAllLabel,
-              style: styles.labelLarge.copyWith(color: colors.primary),
+          InkWell(
+            onTap: onSeeAll,
+            borderRadius: appRadius(AppRadii.sm),
+            child: Padding(
+              padding: const EdgeInsetsDirectional.symmetric(
+                horizontal: AppSpacing.xs,
+                vertical: AppSpacing.xxs,
+              ),
+              child: Text(
+                seeAllLabel,
+                style: styles.labelLarge.copyWith(color: colors.primary),
+              ),
             ),
           ),
         ],

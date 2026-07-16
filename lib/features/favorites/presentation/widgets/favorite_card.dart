@@ -8,13 +8,10 @@
 // (a "No longer available" pill, dimmed photo) and remain tappable.
 //
 // Token-only (no inline hex / TextStyle / numeric insets). RTL-safe; numbers
-// render in the active locale's numerals via intl NumberFormat.
+// render in the active locale's numerals via `formatLocalizedNumber`.
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
-// hide intl's TextDirection so it doesn't shadow dart:ui's (TextDirection.ltr).
-import 'package:intl/intl.dart' hide TextDirection;
-
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/elevation.dart';
@@ -29,6 +26,7 @@ import '../../../../core/widgets/press_scale.dart';
 import '../../../../core/widgets/property_specs.dart';
 import '../../../../core/widgets/status_pill.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/presentation/money_formatter.dart';
 import '../../../comparison/domain/entities/comparison_item.dart';
 import '../../../comparison/presentation/widgets/compare_toggle_button.dart';
 import '../../../listing_form/domain/entities/listing.dart';
@@ -83,9 +81,10 @@ class FavoriteCard extends StatelessWidget {
                         if (item.primaryAmount != null &&
                             item.primaryCurrency != null) ...[
                           Text(
-                            l10n.priceWithCurrency(
-                              _formatAmount(context, item.primaryAmount!),
+                            MoneyFormatter.formatAmount(
+                              item.primaryAmount!,
                               item.primaryCurrency!,
+                              locale: Localizations.localeOf(context),
                             ),
                             textDirection: TextDirection.ltr,
                             textAlign: TextAlign.start,
@@ -119,14 +118,14 @@ class FavoriteCard extends StatelessWidget {
                               Icon(
                                 LucideIcons.map_pin,
                                 size: AppSpacing.lg,
-                                color: colors.textMuted,
+                                color: colors.onSurfaceVariant,
                               ),
                               const SizedBox(width: AppSpacing.xs),
                               Expanded(
                                 child: Text(
                                   location,
                                   style: styles.bodyMedium.copyWith(
-                                    color: colors.textMuted,
+                                    color: colors.onSurfaceVariant,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -145,15 +144,6 @@ class FavoriteCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  /// Localized amount with the active locale's numerals (no fractional part —
-  /// favorites only carry the primary amount, not the full currency catalog).
-  String _formatAmount(BuildContext context, num amount) {
-    final fmt = NumberFormat.decimalPattern(
-      Localizations.localeOf(context).toLanguageTag(),
-    )..maximumFractionDigits = 0;
-    return fmt.format(amount);
   }
 
   String _locationLabel(FavoriteListing item) {

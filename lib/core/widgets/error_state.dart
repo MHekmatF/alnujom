@@ -26,7 +26,6 @@ class ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
     final loc = AppStrings.of(context).loc;
     return Center(
@@ -41,13 +40,15 @@ class ErrorState extends StatelessWidget {
                 icon: variant == ErrorStateVariant.network
                     ? LucideIcons.wifi_off
                     : LucideIcons.circle_alert,
-                color: colors.error,
               ),
               const SizedBox(height: AppSpacing.md),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: styles.titleLarge,
+              Semantics(
+                header: true,
+                child: Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: styles.titleLarge,
+                ),
               ),
               if (message != null) ...[
                 const SizedBox(height: AppSpacing.sm),
@@ -60,7 +61,8 @@ class ErrorState extends StatelessWidget {
               const SizedBox(height: AppSpacing.lg),
               AppButton(
                 label: loc.errorRetryAction,
-                variant: AppButtonVariant.outlined,
+                variant: AppButtonVariant.tonal,
+                icon: LucideIcons.refresh_cw,
                 onPressed: onRetry,
               ),
             ],
@@ -74,21 +76,23 @@ class ErrorState extends StatelessWidget {
 /// The error glyph in a soft tinted circle. The whole [ErrorState] already
 /// fades + slides in via [StaggeredListItem], so the glyph itself stays static.
 class _PoppingIcon extends StatelessWidget {
-  const _PoppingIcon({required this.icon, required this.color});
+  const _PoppingIcon({required this.icon});
 
   final IconData icon;
-  final Color color;
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    // DC error badge: an 88px red-container circle with a 44px glyph.
     return Container(
-      width: AppSpacing.xxxl + AppSpacing.lg,
-      height: AppSpacing.xxxl + AppSpacing.lg,
+      width: 88,
+      height: 88,
+      alignment: Alignment.center,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: color.withValues(alpha: 0.12),
+        color: colors.errorContainer,
       ),
-      child: Icon(icon, color: color, size: AppSpacing.xxl),
+      child: Icon(icon, color: colors.onErrorContainer, size: 44),
     );
   }
 }

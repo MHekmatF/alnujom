@@ -17,17 +17,20 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 
 import '../../../../core/theme/colors.dart';
-import '../../../../core/theme/elevation.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/charts/token_bar_chart.dart';
+import '../../../../core/widgets/charts/token_hbar_list.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../core/widgets/ds/dc_stat_card.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/util/localized_numbers.dart';
 import '../../domain/entities/publisher_lead_analytics.dart';
 import '../bloc/publisher_analytics_cubit.dart';
 import '../bloc/publisher_analytics_state.dart';
@@ -38,8 +41,13 @@ class LeadAnalyticsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.leadAnalyticsTitle)),
+    return DcCrownScaffold(
+      title: l10n.leadAnalyticsTitle,
+      dense: true,
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () => Navigator.of(context).maybePop(),
+      ),
       body: BlocBuilder<PublisherAnalyticsCubit, PublisherAnalyticsState>(
         builder: (context, state) {
           return RefreshIndicator(
@@ -98,13 +106,23 @@ class _AnalyticsBody extends StatelessWidget {
         const SizedBox(height: AppSpacing.xl),
         StaggeredListItem(
           index: 3,
+          child: _SectionLabel(label: l10n.leadAnalyticsBySourceSectionLabel),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        StaggeredListItem(
+          index: 4,
+          child: _LeadsBySourceCard(byListing: analytics.byListing, l10n: l10n),
+        ),
+        const SizedBox(height: AppSpacing.xl),
+        StaggeredListItem(
+          index: 5,
           child: _SectionLabel(label: l10n.leadAnalyticsByListingSectionLabel),
         ),
         const SizedBox(height: AppSpacing.md),
         for (var i = 0; i < analytics.byListing.length; i++) ...[
           if (i > 0) const SizedBox(height: AppSpacing.md),
           StaggeredListItem(
-            index: i + 4,
+            index: i + 6,
             child: _ListingBreakdownCard(
               listing: analytics.byListing[i],
               l10n: l10n,
@@ -125,60 +143,12 @@ class _TotalHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-    final styles = AppTextStyles.of(context);
-    final locale = Localizations.localeOf(context).toLanguageTag();
-    final fmt = NumberFormat.decimalPattern(locale);
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        borderRadius: appRadius(AppRadii.lg),
-        gradient: LinearGradient(
-          begin: AlignmentDirectional.topStart,
-          end: AlignmentDirectional.bottomEnd,
-          colors: [
-            colors.primary.withValues(alpha: 0.14),
-            colors.accent.withValues(alpha: 0.06),
-          ],
-        ),
-        border: Border.all(color: colors.outline),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsetsDirectional.all(AppSpacing.md),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: colors.primary.withValues(alpha: 0.14),
-            ),
-            child: Icon(
-              LucideIcons.trending_up,
-              color: colors.primary,
-              size: AppSpacing.xl,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  fmt.format(total),
-                  style: styles.headlineLarge.copyWith(color: colors.onSurface),
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  l10n.leadAnalyticsTotalCaption,
-                  style: styles.bodyMedium.copyWith(color: colors.textMuted),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+    final locale = Localizations.localeOf(context);
+    // Flat DC KPI card — replaces the BANNED gradient hero band.
+    return DcStatCard(
+      icon: Icons.trending_up,
+      value: formatLocalizedNumber(total, locale),
+      label: l10n.leadAnalyticsTotalCaption,
     );
   }
 }
@@ -208,6 +178,71 @@ class _DailyBarChart extends StatelessWidget {
   }
 }
 
+/// A "leads by source" summary card: the four channels (phone / WhatsApp /
+/// inquiry / favourite) summed across ALL the publisher's listings, drawn as
+/// horizontal token bars. Derived from the same per-listing data — no new RPC.
+class _LeadsBySourceCard extends StatelessWidget {
+  const _LeadsBySourceCard({required this.byListing, required this.l10n});
+
+  final List<PublisherListingLeadAnalytics> byListing;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final locale = Localizations.localeOf(context);
+
+    var phone = 0;
+    var whatsapp = 0;
+    var inquiry = 0;
+    var favorite = 0;
+    for (final listing in byListing) {
+      phone += listing.phoneCount;
+      whatsapp += listing.whatsappCount;
+      inquiry += listing.inquiryCount;
+      favorite += listing.favoriteCount;
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: colors.card,
+        borderRadius: appRadius(AppRadii.lg),
+        border: Border.all(color: colors.outline),
+      ),
+      child: TokenHbarList(
+        items: [
+          TokenHbarItem(
+            label: l10n.leadAnalyticsSourcePhone,
+            value: phone,
+            valueLabel: formatLocalizedNumber(phone, locale),
+            barColor: colors.primary,
+          ),
+          TokenHbarItem(
+            label: l10n.leadAnalyticsSourceWhatsapp,
+            value: whatsapp,
+            valueLabel: formatLocalizedNumber(whatsapp, locale),
+            barColor: colors.success,
+          ),
+          TokenHbarItem(
+            label: l10n.leadAnalyticsSourceInquiry,
+            value: inquiry,
+            valueLabel: formatLocalizedNumber(inquiry, locale),
+            barColor: colors.accent,
+          ),
+          TokenHbarItem(
+            label: l10n.leadAnalyticsSourceFavorite,
+            value: favorite,
+            valueLabel: formatLocalizedNumber(favorite, locale),
+            barColor: colors.error,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// A per-listing card: title + status chip, then a row of small lead counters
 /// (phone / WhatsApp / inquiry / favourite) reusing the StatCard tinted-icon
 /// idiom in a compact inline form.
@@ -221,9 +256,7 @@ class _ListingBreakdownCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
-    final elevation = AppElevation.of(context);
-    final locale = Localizations.localeOf(context).toLanguageTag();
-    final fmt = NumberFormat.decimalPattern(locale);
+    final locale = Localizations.localeOf(context);
 
     return Container(
       padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
@@ -231,7 +264,6 @@ class _ListingBreakdownCard extends StatelessWidget {
         color: colors.card,
         borderRadius: appRadius(AppRadii.lg),
         border: Border.all(color: colors.outline),
-        boxShadow: elevation.level1,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -259,7 +291,9 @@ class _ListingBreakdownCard extends StatelessWidget {
                 const SizedBox(width: AppSpacing.xs),
               ],
               Text(
-                l10n.leadAnalyticsListingTotal(fmt.format(listing.total)),
+                l10n.leadAnalyticsListingTotal(
+                  formatLocalizedNumber(listing.total, locale),
+                ),
                 style: styles.labelLarge.copyWith(color: colors.primary),
               ),
             ],
@@ -270,7 +304,7 @@ class _ListingBreakdownCard extends StatelessWidget {
               Expanded(
                 child: _LeadCounter(
                   icon: LucideIcons.phone,
-                  value: fmt.format(listing.phoneCount),
+                  value: formatLocalizedNumber(listing.phoneCount, locale),
                   label: l10n.leadAnalyticsSourcePhone,
                   accent: colors.primary,
                 ),
@@ -278,7 +312,7 @@ class _ListingBreakdownCard extends StatelessWidget {
               Expanded(
                 child: _LeadCounter(
                   icon: LucideIcons.message_circle,
-                  value: fmt.format(listing.whatsappCount),
+                  value: formatLocalizedNumber(listing.whatsappCount, locale),
                   label: l10n.leadAnalyticsSourceWhatsapp,
                   accent: colors.success,
                 ),
@@ -286,7 +320,7 @@ class _ListingBreakdownCard extends StatelessWidget {
               Expanded(
                 child: _LeadCounter(
                   icon: LucideIcons.inbox,
-                  value: fmt.format(listing.inquiryCount),
+                  value: formatLocalizedNumber(listing.inquiryCount, locale),
                   label: l10n.leadAnalyticsSourceInquiry,
                   accent: colors.accent,
                 ),
@@ -294,7 +328,7 @@ class _ListingBreakdownCard extends StatelessWidget {
               Expanded(
                 child: _LeadCounter(
                   icon: LucideIcons.heart,
-                  value: fmt.format(listing.favoriteCount),
+                  value: formatLocalizedNumber(listing.favoriteCount, locale),
                   label: l10n.leadAnalyticsSourceFavorite,
                   accent: colors.error,
                 ),

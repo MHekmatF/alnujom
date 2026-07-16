@@ -40,6 +40,7 @@
 // `_controller.fitCamera(...)`. flutter_map's `initialCameraFit` is only
 // honored on first build, so a controller-driven update is required.
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
@@ -143,8 +144,8 @@ class _MapView extends StatelessWidget {
         },
         builder: (context, state) {
           return switch (state) {
-            MapInitial() => const AppSpinner.page(),
-            MapLoading() => const AppSpinner.page(),
+            MapInitial() => const _MapLoadingBody(),
+            MapLoading() => const _MapLoadingBody(),
             MapError(failure: final f) => _ErrorBody(message: f.message),
             MapLoaded() => _LoadedBody(state: state),
           };
@@ -244,6 +245,24 @@ class _LoadedBodyState extends State<_LoadedBody> {
       clusterLayer = clusterLayer.animate().fadeIn(duration: AppMotion.slow);
     }
 
+    // Build the selection preview up front so it can carry a subtle
+    // reduced-motion-guarded fade+slide entrance (pattern: 150-300ms reveal).
+    Widget? popover;
+    if (state.selectedMarker != null) {
+      popover = MarkerPreviewPopover(marker: state.selectedMarker!);
+      if (!reduceMotion(context)) {
+        popover = popover
+            .animate()
+            .fadeIn(duration: AppMotion.base, curve: AppMotion.emphasized)
+            .slideY(
+              begin: 0.08,
+              end: 0,
+              duration: AppMotion.base,
+              curve: AppMotion.emphasized,
+            );
+      }
+    }
+
     return Stack(
       children: [
         FlutterMap(
@@ -282,17 +301,23 @@ class _LoadedBodyState extends State<_LoadedBody> {
           start: AppSpacing.sm,
           child: OsmAttributionWidget(),
         ),
-        const PositionedDirectional(
-          bottom: 80,
-          end: AppSpacing.lg,
-          child: CenterOnMyLocationFab(),
-        ),
-        if (state.selectedMarker != null)
+        // Hide the transient recenter FAB while the preview is up so it can't
+        // float over the popover's close/top-right area (dynamic card height
+        // rules out a static clearance offset). Token sum replaces the magic 80.
+        if (state.selectedMarker == null)
+          const PositionedDirectional(
+            bottom: AppSpacing.xxxl + AppSpacing.xxl, // 48 + 32 = 80
+            end: AppSpacing.lg,
+            child: CenterOnMyLocationFab(),
+          ),
+        if (popover != null)
           PositionedDirectional(
-            bottom: AppSpacing.lg,
+            // Lifted clear of the bottom-start OSM attribution pill so the
+            // OSMF-required tile attribution stays visible beneath the preview.
+            bottom: AppSpacing.xxxl,
             start: AppSpacing.lg,
             end: AppSpacing.lg,
-            child: MarkerPreviewPopover(marker: state.selectedMarker!),
+            child: popover,
           ),
         if (state.markers.isEmpty)
           PositionedDirectional(
@@ -309,17 +334,45 @@ class _LoadedBodyState extends State<_LoadedBody> {
 
   /// T053 — marker builder helper per contract §Marker builder.
   Marker _buildMarker(BuildContext context, MapMarker marker) {
+    final l10n = AppLocalizations.of(context)!;
     final isApprox = marker.isApproximate;
     return Marker(
       point: LatLng(marker.position.latitude, marker.position.longitude),
       width: isApprox ? 48 : 40,
       height: isApprox ? 48 : 40,
       alignment: Alignment.topCenter,
-      child: GestureDetector(
-        onTap: () =>
-            context.read<MapBloc>().add(MarkerTapped(listingId: marker.id)),
-        child: isApprox ? const ApproximateMarkerPin() : const ExactMarkerPin(),
+      child: Semantics(
+        button: true,
+        label: marker.title.isEmpty
+            ? l10n.map_marker_semantics_label
+            : marker.title,
+        child: GestureDetector(
+          onTap: () {
+            HapticFeedback.selectionClick();
+            context.read<MapBloc>().add(MarkerTapped(listingId: marker.id));
+          },
+          child: isApprox
+              ? const ApproximateMarkerPin()
+              : const ExactMarkerPin(),
+        ),
       ),
+    );
+  }
+}
+
+/// Full-body loading state with an announced label so assistive tech conveys
+/// that the map data is being fetched (the bare spinner alone announces
+/// nothing). Purely a Semantics wrapper — the spinner visual is unchanged.
+class _MapLoadingBody extends StatelessWidget {
+  const _MapLoadingBody();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Semantics(
+      label: l10n.map_loading_label,
+      liveRegion: true,
+      child: const AppSpinner.page(),
     );
   }
 }

@@ -35,16 +35,19 @@ import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
-import '../../../../core/widgets/segmented_control.dart' as seg;
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/app_toast.dart';
-import '../../../../core/widgets/deep_link_aware_back_button.dart';
+import '../../../../core/widgets/crown_underline_tabs.dart';
+import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/main_bottom_nav.dart';
+import '../../../../core/widgets/publish_fab.dart';
 import '../../../../core/widgets/reduce_motion.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
-import '../../../../features/map/domain/entities/map_entry_context.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/presentation/money_formatter.dart';
+import '../../../../shared/util/localized_numbers.dart';
+import '../../../../shared/util/location_line.dart';
 import '../../../ads/domain/entities/ad_placement.dart';
 import '../../../ads/presentation/widgets/ad_slot.dart';
 import '../../../listing_form/domain/entities/listing.dart';
@@ -61,7 +64,10 @@ import '../widgets/recent_searches_panel.dart';
 import '../widgets/save_search_dialog.dart';
 import '../widgets/search_filter_sheet.dart';
 import '../widgets/search_map_view.dart';
-import '../widgets/search_result_card.dart';
+import '../../../../core/settings/listing_view_mode.dart';
+import '../../../../core/widgets/ds/ds_listing_card.dart';
+import '../../../../core/widgets/ds/ds_listing_card_data.dart';
+import '../../domain/entities/search_result_item.dart';
 
 class SearchPage extends StatelessWidget {
   const SearchPage({
@@ -140,123 +146,221 @@ class _SearchPageViewState extends State<_SearchPageView> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    // DC "Blue Crown" — the search crown (back + field + bookmark, purpose
+    // tabs, filter chips) sits on the brand header; the results live in a white
+    // sheet whose rounded top corners reveal the blue crown behind them.
     return Scaffold(
-      appBar: AppBar(
-        // No back arrow when opened as the Search bottom-nav tab root (nothing
-        // to pop — the bottom nav returns to Home); keep it when pushed (hero
-        // search / property-type chip / deep-link).
-        leading: Navigator.canPop(context)
-            ? const DeepLinkAwareBackButton()
-            : null,
-        // The bold screen title lives in the body header (_ResultsCountHeader);
-        // the app bar stays chrome-only (back + saved searches).
-        titleSpacing: 0,
-        actions: [
-          IconButton(
-            tooltip: l10n.search_saved_searches_title,
-            icon: const Icon(Icons.bookmark_border),
-            onPressed: () => context.push(AppRoutes.savedSearches),
-          ),
-        ],
-      ),
+      backgroundColor: colors.brandHeader,
       body: Column(
         children: [
-          const _ResultsCountHeader(),
-          // Search input (50dp) + a solid-primary square filter button.
-          _SearchInputRow(
-            autofocus: widget.autofocusSearchBar,
+          _SearchCrown(
+            autofocusSearchBar: widget.autofocusSearchBar,
             initialQuery: widget.initialQuery,
             onFocusEmptyChanged: _onFocusEmptyChanged,
           ),
-          const _SortAndFiltersRow(),
-          const _ActiveFilterChips(),
-          const _DisplayModeBar(),
           Expanded(
-            child: Stack(
-              children: [
-                const _ResultsArea(),
-                if (_showRecent)
-                  Positioned.fill(
-                    child: RecentSearchesPanel(
-                      onSelected: (query) {
-                        // Dismiss focus + run the search.
-                        FocusScope.of(context).unfocus();
-                        _onFocusEmptyChanged(false);
-                        final bloc = context.read<SearchBloc>();
-                        bloc.add(
-                          SearchFiltersApplied(
-                            filters: bloc.state.filters.copyWith(query: query),
+            child: Container(
+              decoration: BoxDecoration(
+                color: colors.surface,
+                borderRadius: const BorderRadiusDirectional.vertical(
+                  top: Radius.circular(AppRadii.sheet),
+                ),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                children: [
+                  const _ResultsSheetHeader(),
+                  Expanded(
+                    child: Stack(
+                      children: [
+                        const _ResultsArea(),
+                        if (_showRecent)
+                          Positioned.fill(
+                            child: RecentSearchesPanel(
+                              onSelected: (query) {
+                                // Dismiss focus + run the search.
+                                FocusScope.of(context).unfocus();
+                                _onFocusEmptyChanged(false);
+                                final bloc = context.read<SearchBloc>();
+                                bloc.add(
+                                  SearchFiltersApplied(
+                                    filters: bloc.state.filters.copyWith(
+                                      query: query,
+                                    ),
+                                  ),
+                                );
+                                context.read<RecentSearchesCubit>().record(
+                                  query,
+                                );
+                              },
+                            ),
                           ),
-                        );
-                        context.read<RecentSearchesCubit>().record(query);
-                      },
+                      ],
                     ),
                   ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
       ),
-      bottomNavigationBar: const MainBottomNav(current: MainTab.none),
+      bottomNavigationBar: const MainBottomNav(current: MainTab.search),
+      floatingActionButton: const PublishFab(),
     );
   }
 }
 
-/// The screen header: a bold title with a results-count line in the brand
-/// primary beneath it. The title is always shown (it is the screen's heading);
-/// the count line appears once a search has run and tracks the loaded results.
-class _ResultsCountHeader extends StatelessWidget {
-  const _ResultsCountHeader();
+/// DC search crown — the blue brand header carrying the back button, the white
+/// search field, a "save this search" bookmark, the purpose underline tabs, and
+/// the horizontal filter-chips row.
+class _SearchCrown extends StatelessWidget {
+  const _SearchCrown({
+    required this.autofocusSearchBar,
+    required this.initialQuery,
+    required this.onFocusEmptyChanged,
+  });
+
+  final bool autofocusSearchBar;
+  final String? initialQuery;
+  final ValueChanged<bool> onFocusEmptyChanged;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final colors = AppColors.of(context);
-    final styles = AppTextStyles.of(context);
-    return BlocBuilder<SearchBloc, SearchState>(
-      buildWhen: (p, c) =>
-          p.results.length != c.results.length ||
-          (p.status == SearchStatus.initial) !=
-              (c.status == SearchStatus.initial),
-      builder: (context, state) {
-        final showCount = state.status != SearchStatus.initial;
-        return Padding(
-          padding: const EdgeInsetsDirectional.only(
-            start: AppSpacing.lg,
-            end: AppSpacing.lg,
-            top: AppSpacing.md,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(l10n.nav_search, style: styles.headlineMedium),
-              if (showCount) ...[
-                const SizedBox(height: AppSpacing.xxs),
-                Text(
-                  l10n.search_results_count(state.results.length),
-                  style: styles.labelLarge.copyWith(color: colors.primary),
+    final topInset = MediaQuery.paddingOf(context).top;
+    return Container(
+      color: colors.brandHeader,
+      padding: EdgeInsetsDirectional.only(
+        top: topInset + AppSpacing.sm,
+        bottom: AppSpacing.sm,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Back (when pushed) + search field + save-this-search bookmark.
+          Padding(
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: AppSpacing.sm,
+            ),
+            child: Row(
+              children: [
+                if (Navigator.canPop(context)) ...[
+                  _CrownIconButton(
+                    icon: Icons.arrow_forward,
+                    onTap: () => context.pop(),
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                ],
+                Expanded(
+                  child: _CrownSearchField(
+                    autofocus: autofocusSearchBar,
+                    initialQuery: initialQuery,
+                    onFocusEmptyChanged: onFocusEmptyChanged,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                BlocBuilder<SearchBloc, SearchState>(
+                  buildWhen: (p, c) => p.filters != c.filters,
+                  builder: (context, state) => _CrownIconButton(
+                    icon: Icons.bookmark_border,
+                    onTap: () => saveCurrentSearch(context, state.filters),
+                  ),
                 ),
               ],
-            ],
+            ),
           ),
-        );
-      },
+          const SizedBox(height: AppSpacing.md),
+          // Purpose tabs (للبيع/للإيجار/إيجار يومي) drive filters.purpose.
+          Padding(
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: AppSpacing.md,
+            ),
+            child: BlocBuilder<SearchBloc, SearchState>(
+              buildWhen: (p, c) => p.filters.purpose != c.filters.purpose,
+              builder: (context, state) => CrownUnderlineTabs(
+                labels: [
+                  l10n.listingPurposeSale,
+                  l10n.listingPurposeRent,
+                  l10n.listingPurposeDailyRent,
+                ],
+                selectedIndex: _purposeIndex(state.filters.purpose),
+                fontSize: 14,
+                onChanged: (i) {
+                  const purposes = [
+                    ListingPurpose.sale,
+                    ListingPurpose.rent,
+                    ListingPurpose.dailyRent,
+                  ];
+                  context.read<SearchBloc>().add(
+                    SearchFiltersApplied(
+                      filters: state.filters.copyWith(purpose: purposes[i]),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          const _SearchFilterChipsRow(),
+        ],
+      ),
     );
   }
 }
 
-/// The search input row: a 50dp rounded input (card fill, hairline outline,
-/// leading search glyph) hosting the existing [_SearchBar] TextField, beside a
-/// 50dp solid-primary square filter button that opens the filter sheet.
-class _SearchInputRow extends StatelessWidget {
-  const _SearchInputRow({
+int _purposeIndex(ListingPurpose? purpose) => switch (purpose) {
+  ListingPurpose.sale => 0,
+  ListingPurpose.rent => 1,
+  ListingPurpose.dailyRent => 2,
+  _ => -1,
+};
+
+/// Opens the filter bottom sheet, applying the returned filters to the bloc.
+void openSearchFilterSheet(BuildContext context, FilterState filters) {
+  final bloc = context.read<SearchBloc>();
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    useSafeArea: true,
+    builder: (_) => SearchFilterSheet(
+      initialFilters: filters,
+      onApply: (f) => bloc.add(SearchFiltersApplied(filters: f)),
+    ),
+  );
+}
+
+/// A 42px circular white-icon action button on the blue crown.
+class _CrownIconButton extends StatelessWidget {
+  const _CrownIconButton({required this.icon, required this.onTap});
+
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    return InkWell(
+      onTap: onTap,
+      customBorder: const CircleBorder(),
+      child: SizedBox(
+        width: 42,
+        height: 42,
+        child: Icon(icon, size: 24, color: colors.onBrandHeader),
+      ),
+    );
+  }
+}
+
+/// The DC crown search field: a white (headerField) rounded field with a
+/// leading search glyph hosting the existing [_SearchBar] text field.
+class _CrownSearchField extends StatelessWidget {
+  const _CrownSearchField({
     required this.autofocus,
     required this.initialQuery,
     required this.onFocusEmptyChanged,
   });
-
-  static const double _fieldHeight = 50;
 
   final bool autofocus;
   final String? initialQuery;
@@ -265,132 +369,73 @@ class _SearchInputRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    return Padding(
-      padding: const EdgeInsetsDirectional.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.sm,
+    return Container(
+      height: 46,
+      decoration: BoxDecoration(
+        color: colors.brandHeaderField,
+        borderRadius: appRadius(AppRadii.md),
       ),
       child: Row(
         children: [
+          const SizedBox(width: AppSpacing.md),
+          Icon(Icons.search, size: 20, color: colors.onSurfaceVariant),
           Expanded(
-            child: Container(
-              height: _fieldHeight,
-              decoration: BoxDecoration(
-                color: colors.card,
-                borderRadius: appRadius(AppRadii.md),
-                border: Border.all(color: colors.outline),
-              ),
-              child: Row(
-                children: [
-                  const SizedBox(width: AppSpacing.md),
-                  Icon(Icons.search, color: colors.textMuted),
-                  Expanded(
-                    child: _SearchBar(
-                      autofocus: autofocus,
-                      initialQuery: initialQuery,
-                      onFocusEmptyChanged: onFocusEmptyChanged,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          BlocBuilder<SearchBloc, SearchState>(
-            buildWhen: (p, c) => p.filters.isEmpty != c.filters.isEmpty,
-            builder: (context, state) => _FilterButton(
-              size: _fieldHeight,
-              active: !state.filters.isEmpty,
-              onTap: () => _openFilterSheet(context, state.filters),
+            child: _SearchBar(
+              autofocus: autofocus,
+              initialQuery: initialQuery,
+              onFocusEmptyChanged: onFocusEmptyChanged,
             ),
           ),
         ],
       ),
     );
   }
-
-  void _openFilterSheet(BuildContext context, FilterState filters) {
-    final bloc = context.read<SearchBloc>();
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (_) => SearchFilterSheet(
-        initialFilters: filters,
-        onApply: (f) => bloc.add(SearchFiltersApplied(filters: f)),
-      ),
-    );
-  }
 }
 
-/// The solid-primary square filter button beside the search input. A small
-/// accent dot signals when any filter is active (the chip strip lists which).
-class _FilterButton extends StatelessWidget {
-  const _FilterButton({
-    required this.size,
-    required this.active,
-    required this.onTap,
-  });
+/// Saves the current filters as a named saved search (the crown bookmark),
+/// surfacing the outcome as a toast.
+Future<void> saveCurrentSearch(
+  BuildContext context,
+  FilterState filters,
+) async {
+  final l10n = AppLocalizations.of(context)!;
+  final cubit = context.read<SavedSearchesCubit>();
+  final label = await showSaveSearchDialog(
+    context: context,
+    suggestedLabel: filters.query ?? '',
+  );
+  if (label == null) return; // cancelled
+  final outcome = await cubit.save(label: label, filters: filters);
+  if (!context.mounted) return;
+  final message = switch (outcome) {
+    SaveSearchOutcome.saved => l10n.search_save_search_success,
+    SaveSearchOutcome.authRequired => l10n.search_save_search_auth_required,
+    SaveSearchOutcome.error => l10n.search_save_search_error,
+  };
+  AppToast.show(
+    context,
+    message,
+    variant: switch (outcome) {
+      SaveSearchOutcome.saved => AppToastVariant.success,
+      SaveSearchOutcome.authRequired => AppToastVariant.warning,
+      SaveSearchOutcome.error => AppToastVariant.error,
+    },
+  );
+}
 
-  final double size;
-  final bool active;
-  final VoidCallback onTap;
+/// DC white-sheet header — the result count on the start, the sort control and a
+/// list⇄map toggle pill on the end. Hidden in the initial (pre-first-search)
+/// state to keep the empty surface calm.
+class _ResultsSheetHeader extends StatelessWidget {
+  const _ResultsSheetHeader();
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final colors = AppColors.of(context);
-    return Tooltip(
-      message: l10n.search_filters_button,
-      child: Material(
-        color: colors.primary,
-        borderRadius: appRadius(AppRadii.md),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: SizedBox(
-            width: size,
-            height: size,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Icon(
-                  Icons.tune,
-                  size: AppSpacing.xl,
-                  color: colors.onPrimary,
-                ),
-                if (active)
-                  PositionedDirectional(
-                    top: AppSpacing.sm,
-                    end: AppSpacing.sm,
-                    child: Container(
-                      width: AppSpacing.sm,
-                      height: AppSpacing.sm,
-                      decoration: BoxDecoration(
-                        color: colors.accent,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: colors.onPrimary),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// The list ⇄ map presentation toggle + the "save this search" action. Hidden
-/// in the initial (pre-first-search) state to keep the empty surface calm.
-class _DisplayModeBar extends StatelessWidget {
-  const _DisplayModeBar();
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final styles = AppTextStyles.of(context);
     return BlocBuilder<SearchBloc, SearchState>(
       buildWhen: (p, c) =>
+          p.results.length != c.results.length ||
           p.filters.displayMode != c.filters.displayMode ||
           (p.status == SearchStatus.initial) !=
               (c.status == SearchStatus.initial),
@@ -398,38 +443,40 @@ class _DisplayModeBar extends StatelessWidget {
         if (state.status == SearchStatus.initial) {
           return const SizedBox.shrink();
         }
+        final isMap = state.filters.displayMode == DisplayMode.map;
         return Padding(
-          padding: const EdgeInsetsDirectional.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.xs,
+          padding: const EdgeInsetsDirectional.only(
+            start: AppSpacing.lg,
+            end: AppSpacing.sm,
+            top: AppSpacing.md,
+            bottom: AppSpacing.sm,
           ),
           child: Row(
             children: [
               Expanded(
-                child: seg.AppSegmentedControl<DisplayMode>(
-                  value: state.filters.displayMode,
-                  onChanged: (mode) => context.read<SearchBloc>().add(
-                    SearchDisplayModeChanged(mode: mode),
+                child: Text(
+                  state.results.isNotEmpty
+                      ? l10n.search_results_count(state.results.length)
+                      : l10n.nav_search,
+                  style: styles.titleMedium.copyWith(
+                    fontWeight: FontWeight.w700,
                   ),
-                  segments: [
-                    seg.AppSegmentedSegment(
-                      icon: Icons.view_list_outlined,
-                      label: l10n.search_display_mode_list,
-                      value: DisplayMode.list,
-                    ),
-                    seg.AppSegmentedSegment(
-                      icon: Icons.map_outlined,
-                      label: l10n.search_display_mode_map,
-                      value: DisplayMode.map,
-                    ),
-                  ],
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
+              const Flexible(child: InlineSortControl()),
               const SizedBox(width: AppSpacing.sm),
-              IconButton.filledTonal(
-                tooltip: l10n.search_save_this_search_action,
-                icon: const Icon(Icons.bookmark_add_outlined),
-                onPressed: () => _onSaveSearch(context, state.filters),
+              _OutlinePill(
+                icon: isMap ? Icons.view_list : Icons.map,
+                label: isMap
+                    ? l10n.search_display_mode_list
+                    : l10n.search_display_mode_map,
+                onTap: () => context.read<SearchBloc>().add(
+                  SearchDisplayModeChanged(
+                    mode: isMap ? DisplayMode.list : DisplayMode.map,
+                  ),
+                ),
               ),
             ],
           ),
@@ -437,30 +484,51 @@ class _DisplayModeBar extends StatelessWidget {
       },
     );
   }
+}
 
-  Future<void> _onSaveSearch(BuildContext context, FilterState filters) async {
-    final l10n = AppLocalizations.of(context)!;
-    final cubit = context.read<SavedSearchesCubit>();
-    final label = await showSaveSearchDialog(
-      context: context,
-      suggestedLabel: filters.query ?? '',
-    );
-    if (label == null) return; // cancelled
-    final outcome = await cubit.save(label: label, filters: filters);
-    if (!context.mounted) return;
-    final message = switch (outcome) {
-      SaveSearchOutcome.saved => l10n.search_save_search_success,
-      SaveSearchOutcome.authRequired => l10n.search_save_search_auth_required,
-      SaveSearchOutcome.error => l10n.search_save_search_error,
-    };
-    AppToast.show(
-      context,
-      message,
-      variant: switch (outcome) {
-        SaveSearchOutcome.saved => AppToastVariant.success,
-        SaveSearchOutcome.authRequired => AppToastVariant.warning,
-        SaveSearchOutcome.error => AppToastVariant.error,
-      },
+/// A small outline pill button (icon + label) — the DC sort/map affordance.
+class _OutlinePill extends StatelessWidget {
+  const _OutlinePill({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    return Material(
+      color: colors.surface,
+      shape: StadiumBorder(side: BorderSide(color: colors.outlineStrong)),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 18, color: colors.onSurface),
+              const SizedBox(width: AppSpacing.xs),
+              Text(
+                label,
+                style: styles.labelMedium.copyWith(
+                  color: colors.onSurface,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -580,76 +648,12 @@ class _SearchBarState extends State<_SearchBar> {
   }
 }
 
-class _SortAndFiltersRow extends StatelessWidget {
-  const _SortAndFiltersRow();
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return Padding(
-      padding: const EdgeInsetsDirectional.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.xs,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Flexible(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Flexible(
-                  child: Text(
-                    l10n.search_sort_label,
-                    style: Theme.of(context).textTheme.bodySmall,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                const Flexible(child: InlineSortControl()),
-              ],
-            ),
-          ),
-          // Phase 15 G3: "Show on map" entry point per
-          // contracts/phase15-search-show-on-map.md. Always visible; no state
-          // mutation on SearchBloc. (Filter access moved to the solid-primary
-          // square button beside the search input.)
-          IconButton(
-            onPressed: () => _openMap(context),
-            icon: const Icon(Icons.map_outlined),
-            tooltip: l10n.search_results_show_on_map_action,
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Phase 15 G3: Navigate to MapPage with the current [FilterState] snapshot.
-  /// Reads the filter from [SearchBloc] without mutating it (R-77 BLoC
-  /// lifetime preserved — pressing back returns to identical search results).
-  void _openMap(BuildContext context) {
-    final filters = context.read<SearchBloc>().state.filters;
-    context.go(
-      AppRoutes.map,
-      extra: MapEntryFromSearch(
-        filterState: filters,
-        showFilterAlert: filters.hasAnyActiveFilter,
-      ),
-    );
-  }
-}
-
-/// A scrollable row of removable chips, one per active filter dimension, shown
-/// below the sort/filters row. Tapping a chip's ✕ clears that dimension and
-/// re-runs the search; a trailing "clear filters" chip clears them all (the
-/// free-text query is left alone — it has its own clear control in the bar).
-///
-/// Location, price and area collapse to a single category chip (the search
-/// state carries IDs/ranges, not display names) — tapping ✕ clears the whole
-/// dimension. Purpose, type, rooms and bathrooms show their value.
-class _ActiveFilterChips extends StatelessWidget {
-  const _ActiveFilterChips();
+/// DC filter-chips row on the blue crown — a tonal "الفلاتر" entry button (with
+/// an active-filter count), a removable white chip per active non-purpose
+/// dimension (purpose lives in the crown tabs; the query has its own clear in
+/// the field), and a "الموثّقة فقط" verified toggle.
+class _SearchFilterChipsRow extends StatelessWidget {
+  const _SearchFilterChipsRow();
 
   @override
   Widget build(BuildContext context) {
@@ -659,27 +663,21 @@ class _ActiveFilterChips extends StatelessWidget {
       builder: (context, state) {
         final f = state.filters;
         final bloc = context.read<SearchBloc>();
-        final chips = <Widget>[];
 
+        final removable = <Widget>[];
         void addChip(String label, FilterState cleared) {
-          chips.add(
+          removable.add(
             Padding(
               padding: const EdgeInsetsDirectional.only(end: AppSpacing.sm),
-              child: _FilterPill(
+              child: _RemovableFilterChip(
                 label: label,
-                selected: true,
-                onTap: () => bloc.add(SearchFiltersApplied(filters: cleared)),
+                onRemove: () =>
+                    bloc.add(SearchFiltersApplied(filters: cleared)),
               ),
             ),
           );
         }
 
-        if (f.purpose != null) {
-          addChip(
-            _purposeLabel(f.purpose!, l10n),
-            f.copyWith(clearPurpose: true),
-          );
-        }
         if (f.propertyType != null) {
           addChip(
             _propertyTypeLabel(f.propertyType!, l10n),
@@ -726,32 +724,32 @@ class _ActiveFilterChips extends StatelessWidget {
           );
         }
 
-        if (chips.isEmpty) return const SizedBox.shrink();
+        final activeCount = removable.length + (f.verifiedOnly == true ? 1 : 0);
 
-        // Trailing "clear all" — an unselected pill (keeps the query; the bar
-        // owns its own clear).
-        chips.add(
-          _FilterPill(
-            label: l10n.search_empty_clear_filters,
-            selected: false,
-            onTap: () => bloc.add(
-              SearchFiltersApplied(filters: FilterState(query: f.query)),
-            ),
-          ),
-        );
-
-        // Intrinsic height (not a fixed SizedBox) so the row grows with the
-        // text scale instead of clipping the chips at large font sizes.
-        return Padding(
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
           padding: const EdgeInsetsDirectional.symmetric(
-            vertical: AppSpacing.xs,
+            horizontal: AppSpacing.md,
           ),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsetsDirectional.symmetric(
-              horizontal: AppSpacing.lg,
-            ),
-            child: Row(children: chips),
+          child: Row(
+            children: [
+              _FiltersEntryChip(
+                count: activeCount,
+                onTap: () => openSearchFilterSheet(context, f),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              ...removable,
+              _VerifiedToggleChip(
+                on: f.verifiedOnly == true,
+                onToggle: () => bloc.add(
+                  SearchFiltersApplied(
+                    filters: f.verifiedOnly == true
+                        ? f.copyWith(clearVerifiedOnly: true)
+                        : f.copyWith(verifiedOnly: true),
+                  ),
+                ),
+              ),
+            ],
           ),
         );
       },
@@ -759,50 +757,66 @@ class _ActiveFilterChips extends StatelessWidget {
   }
 }
 
-/// A filter-strip pill. Selected (an active filter dimension) = solid primary
-/// fill + onPrimary bold text + a trailing ✕ to clear that dimension.
-/// Unselected (the "clear all" action) = card fill + 1px outline + onSurface
-/// text. Height 38, pill radius — matches the design-system chip strip.
-class _FilterPill extends StatelessWidget {
-  const _FilterPill({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
+/// The tonal "الفلاتر" entry chip that opens the filter sheet, with a badge
+/// showing how many filter dimensions are active.
+class _FiltersEntryChip extends StatelessWidget {
+  const _FiltersEntryChip({required this.count, required this.onTap});
 
-  static const double _height = 38;
-
-  final String label;
-  final bool selected;
+  final int count;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
-    final fg = selected ? colors.onPrimary : colors.onSurface;
     return Material(
-      color: selected ? colors.primary : colors.card,
-      borderRadius: appRadius(AppRadii.pill),
+      color: colors.primaryContainer,
+      borderRadius: appRadius(AppRadii.sm),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        child: Container(
-          height: _height,
+        child: Padding(
           padding: const EdgeInsetsDirectional.symmetric(
             horizontal: AppSpacing.md,
-          ),
-          decoration: BoxDecoration(
-            borderRadius: appRadius(AppRadii.pill),
-            border: selected ? null : Border.all(color: colors.outline),
+            vertical: AppSpacing.sm,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(label, style: styles.labelLarge.copyWith(color: fg)),
-              if (selected) ...[
+              Icon(Icons.tune, size: 17, color: colors.onPrimaryContainer),
+              const SizedBox(width: AppSpacing.xs),
+              Text(
+                l10n.search_filters_button,
+                style: styles.labelMedium.copyWith(
+                  color: colors.onPrimaryContainer,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              if (count > 0) ...[
                 const SizedBox(width: AppSpacing.xs),
-                Icon(Icons.close, size: AppSpacing.lg, color: fg),
+                Container(
+                  constraints: const BoxConstraints(minWidth: 18),
+                  height: 18,
+                  alignment: Alignment.center,
+                  padding: const EdgeInsetsDirectional.symmetric(
+                    horizontal: AppSpacing.xs,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colors.onPrimaryContainer,
+                    borderRadius: appRadius(AppRadii.pill),
+                  ),
+                  child: Text(
+                    formatLocalizedNumber(
+                      count,
+                      Localizations.localeOf(context),
+                    ),
+                    style: styles.labelSmall.copyWith(
+                      color: colors.primaryContainer,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
               ],
             ],
           ),
@@ -812,16 +826,93 @@ class _FilterPill extends StatelessWidget {
   }
 }
 
-String _purposeLabel(ListingPurpose p, AppLocalizations l10n) {
-  switch (p) {
-    case ListingPurpose.sale:
-      return l10n.listingPurposeSale;
-    case ListingPurpose.rent:
-      return l10n.listingPurposeRent;
-    case ListingPurpose.dailyRent:
-      return l10n.listingPurposeDailyRent;
-    case ListingPurpose.investment:
-      return l10n.listingPurposeInvestment;
+/// A white (headerField) removable filter chip — label + a trailing ✕ that
+/// clears that dimension.
+class _RemovableFilterChip extends StatelessWidget {
+  const _RemovableFilterChip({required this.label, required this.onRemove});
+
+  final String label;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    return Material(
+      color: colors.brandHeaderField,
+      borderRadius: appRadius(AppRadii.sm),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onRemove,
+        child: Padding(
+          padding: const EdgeInsetsDirectional.only(
+            start: AppSpacing.md,
+            end: AppSpacing.sm,
+            top: AppSpacing.sm,
+            bottom: AppSpacing.sm,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: styles.labelMedium.copyWith(
+                  color: colors.onSurface,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              Icon(Icons.close, size: 16, color: colors.onSurfaceVariant),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The "الموثّقة فقط" verified-only toggle chip — green when on, white when off.
+class _VerifiedToggleChip extends StatelessWidget {
+  const _VerifiedToggleChip({required this.on, required this.onToggle});
+
+  final bool on;
+  final VoidCallback onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    return Material(
+      color: on ? colors.verifiedContainer : colors.brandHeaderField,
+      borderRadius: appRadius(AppRadii.sm),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onToggle,
+        child: Padding(
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (on) ...[
+                Icon(Icons.check, size: 16, color: colors.onSuccess),
+                const SizedBox(width: AppSpacing.xs),
+              ],
+              Text(
+                l10n.filter_verified_only,
+                style: styles.labelMedium.copyWith(
+                  color: on ? colors.onSuccess : colors.onSurface,
+                  fontWeight: on ? FontWeight.w700 : FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -864,16 +955,17 @@ class _ResultsArea extends StatelessWidget {
         // skeleton into results (or empty/error), but list→list during
         // pagination is the same type, so it updates in place without a fade.
         final child = switch (state.status) {
-          SearchStatus.initial => Center(child: Text(l10n.search_placeholder)),
+          SearchStatus.initial => const _SearchSkeleton(),
           SearchStatus.loading =>
             state.results.isEmpty
                 ? const _SearchSkeleton()
                 : _ResultsListView(state: state),
           SearchStatus.failure =>
             state.results.isEmpty
-                ? _ErrorView(
+                ? ErrorState(
+                    title: l10n.search_error_title,
                     message: l10n.search_error_message,
-                    retryLabel: l10n.search_error_retry,
+                    variant: ErrorStateVariant.network,
                     onRetry: () => context.read<SearchBloc>().add(
                       const SearchRefreshRequested(),
                     ),
@@ -894,35 +986,6 @@ class _ResultsArea extends StatelessWidget {
   }
 }
 
-class _ErrorView extends StatelessWidget {
-  const _ErrorView({
-    required this.message,
-    required this.retryLabel,
-    required this.onRetry,
-  });
-
-  final String message;
-  final String retryLabel;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(message, textAlign: TextAlign.center),
-            const SizedBox(height: 8),
-            TextButton(onPressed: onRetry, child: Text(retryLabel)),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _EmptyView extends StatelessWidget {
   const _EmptyView({required this.state});
 
@@ -931,6 +994,8 @@ class _EmptyView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
@@ -942,31 +1007,38 @@ class _EmptyView extends StatelessWidget {
               height: AppSpacing.xxxl + AppSpacing.lg,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Theme.of(
-                  context,
-                ).colorScheme.primary.withValues(alpha: 0.10),
+                color: colors.primary.withValues(alpha: 0.10),
               ),
               child: Icon(
                 Icons.search_off,
                 size: AppSpacing.xxl,
-                color: Theme.of(context).colorScheme.primary,
+                color: colors.primary,
               ),
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
               l10n.search_empty_title,
-              style: Theme.of(context).textTheme.titleLarge,
+              style: styles.titleLarge,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.xs),
-            Text(l10n.search_empty_subtitle, textAlign: TextAlign.center),
-            const SizedBox(height: AppSpacing.sm),
-            TextButton(
-              onPressed: () => context.read<SearchBloc>().add(
-                const SearchFiltersApplied(filters: FilterState.empty),
-              ),
-              child: Text(l10n.search_empty_clear_filters),
+            Text(
+              l10n.search_empty_subtitle,
+              style: styles.bodyMedium.copyWith(color: colors.textMuted),
+              textAlign: TextAlign.center,
             ),
+            // The clear-filters CTA only makes sense when something IS
+            // filtered (incl. a query) — on a virgin empty catalog it would
+            // be a dead button.
+            if (state.filters.hasAnyActiveFilter) ...[
+              const SizedBox(height: AppSpacing.sm),
+              TextButton(
+                onPressed: () => context.read<SearchBloc>().add(
+                  const SearchFiltersApplied(filters: FilterState.empty),
+                ),
+                child: Text(l10n.search_empty_clear_filters),
+              ),
+            ],
             if (state.isArabicQuery)
               Padding(
                 padding: const EdgeInsetsDirectional.symmetric(
@@ -1004,9 +1076,14 @@ class _ResultsListView extends StatelessWidget {
     const adTrail = 1;
 
     return ListView.builder(
-      padding: const EdgeInsetsDirectional.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
+      // lg horizontal padding — same single screen margin as the header rows.
+      // Extra bottom clearance so the floating publish FAB never covers the
+      // last card's content (035 craft wave).
+      padding: const EdgeInsetsDirectional.only(
+        start: AppSpacing.lg,
+        end: AppSpacing.lg,
+        top: AppSpacing.sm,
+        bottom: AppSpacing.xxxl + AppSpacing.xl,
       ),
       itemCount: state.results.length + pagingTrail + hintTrail + adTrail,
       itemBuilder: (context, index) {
@@ -1019,17 +1096,23 @@ class _ResultsListView extends StatelessWidget {
         }
         final offsetIndex = index - adTrail;
         if (showArabicHint && offsetIndex == 0) {
+          final colors = AppColors.of(context);
+          final styles = AppTextStyles.of(context);
           return Container(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             padding: const EdgeInsetsDirectional.symmetric(
               horizontal: AppSpacing.lg,
               vertical: AppSpacing.sm,
             ),
             margin: const EdgeInsetsDirectional.only(bottom: AppSpacing.sm),
+            decoration: BoxDecoration(
+              color: colors.surfaceVariant,
+              borderRadius: appRadius(AppRadii.md),
+            ),
             child: Text(
               l10n.search_arabic_hint(
                 _suggestionFromQuery(state.filters.query!),
               ),
+              style: styles.bodyMedium.copyWith(color: colors.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
           );
@@ -1040,30 +1123,90 @@ class _ResultsListView extends StatelessWidget {
         }
         return StaggeredListItem(
           index: itemIndex,
-          child: SearchResultCard(item: state.results[itemIndex]),
+          child: _SearchFeedCard(item: state.results[itemIndex]),
         );
       },
     );
   }
 }
 
-/// Shimmer placeholder rows (132dp, matching [SearchResultCard]) shown while the
-/// first search page loads.
+/// Phase 035 — maps a [SearchResultItem] into the unified [DsListingCard] at the
+/// user's chosen [ListingViewMode]. Uses `context.push` so the search stack (and
+/// [SearchBloc]) survives the back-navigation from the detail page.
+class _SearchFeedCard extends StatelessWidget {
+  const _SearchFeedCard({required this.item});
+
+  final SearchResultItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context);
+    final isAr = locale.languageCode == 'ar';
+    final gov = isAr ? item.governorateNameAr : item.governorateNameEn;
+    final city = isAr ? item.cityNameAr : item.cityNameEn;
+    // Same dedupe rules as every other feed (kills 'دمشق، دمشق').
+    final location = listingLocationLine(governorate: gov, city: city);
+    final data = DsListingCardData(
+      id: item.id,
+      title: item.title,
+      priceText: MoneyFormatter.formatAmount(
+        item.primaryAmount,
+        item.primaryCurrency,
+        locale: locale,
+      ),
+      purpose: item.purpose,
+      locationText: location.isEmpty ? '—' : location,
+      imageUrl: item.mainImagePath,
+      agencyId: item.agencyId,
+      agencyName: item.agencyName,
+      agencyLogoUrl: item.agencyLogoUrl,
+      publishedAt: item.publishedAt,
+    );
+    return ValueListenableBuilder<ListingViewMode>(
+      valueListenable: ListingViewModePref.notifier,
+      builder: (context, mode, _) => Padding(
+        padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.sm),
+        child: DsListingCard(
+          data: data,
+          mode: mode,
+          onTap: () => context.push(AppRoutes.listingDetailsFor(item.id)),
+        ),
+      ),
+    );
+  }
+}
+
+/// Shimmer placeholder rows shown while the first search page loads. Mode-aware
+/// so the skeleton height approximates the [DsListingCard] the feed will render
+/// (tall photo card in comfortable/balanced, dense row in compact) instead of a
+/// fixed block that jumps size on the skeleton→results swap.
 class _SearchSkeleton extends StatelessWidget {
   const _SearchSkeleton();
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: const EdgeInsetsDirectional.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
-      ),
-      itemCount: 6,
-      itemBuilder: (_, __) => const Padding(
-        padding: EdgeInsetsDirectional.only(bottom: AppSpacing.sm),
-        child: SizedBox(height: 132, child: LoadingState.card()),
-      ),
+    return ValueListenableBuilder<ListingViewMode>(
+      valueListenable: ListingViewModePref.notifier,
+      builder: (context, mode, _) {
+        final height = switch (mode) {
+          ListingViewMode.comfortable => 300.0,
+          ListingViewMode.balanced => 272.0,
+          ListingViewMode.compact => 128.0,
+        };
+        return ListView.builder(
+          // Mirrors _ResultsListView's lg margin so the skeleton→results
+          // crossfade doesn't shift horizontally.
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.sm,
+          ),
+          itemCount: 6,
+          itemBuilder: (_, __) => Padding(
+            padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.sm),
+            child: SizedBox(height: height, child: const LoadingState.card()),
+          ),
+        );
+      },
     );
   }
 }

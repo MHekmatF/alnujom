@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/motion.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_logo.dart';
+import '../../../../core/widgets/dc_auth_scaffold.dart';
+import '../../../../core/widgets/reduce_motion.dart';
 import '../widgets/auth_text_field.dart';
 import '../widgets/auth_trust_note.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -30,6 +34,7 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
 
   String? _errorText;
+  bool _obscure = true;
 
   @override
   void dispose() {
@@ -79,6 +84,34 @@ class _LoginPageState extends State<LoginPage> {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
 
+    // Subtle first-impression entrance on the brand/header cluster only
+    // (input fields untouched); skipped entirely under "reduce motion".
+    Widget header = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.auth_login_headline,
+          style: styles.headlineMedium.copyWith(color: colors.onSurface),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          l10n.auth_login_subtitle,
+          style: styles.bodyMedium.copyWith(color: colors.textMuted),
+        ),
+      ],
+    );
+    if (!reduceMotion(context)) {
+      header = header
+          .animate()
+          .fadeIn(duration: AppMotion.slow)
+          .slideY(
+            begin: 0.06,
+            end: 0,
+            duration: AppMotion.slow,
+            curve: AppMotion.curve,
+          );
+    }
+
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthError) {
@@ -90,44 +123,15 @@ class _LoginPageState extends State<LoginPage> {
       child: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
           final isLoading = state is Authenticating;
-          return Scaffold(
-            backgroundColor: colors.surface,
-            appBar: AppBar(
-              backgroundColor: colors.surface,
-              elevation: 0,
-              title: Text(l10n.login_title),
-            ),
-            body: SafeArea(
-              child: SingleChildScrollView(
-                padding: const EdgeInsetsDirectional.symmetric(
-                  horizontal: AppSpacing.xl,
-                  vertical: AppSpacing.lg,
-                ),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const SizedBox(height: AppSpacing.lg),
-                      const Center(child: AppLogo()),
-                      const SizedBox(height: AppSpacing.xxl),
-                      Text(
-                        l10n.auth_login_headline,
-                        style: styles.headlineLarge.copyWith(
-                          color: colors.onSurface,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(
-                        l10n.auth_login_subtitle,
-                        style: styles.bodyMedium.copyWith(
-                          color: colors.textMuted,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: AppSpacing.xxl),
-                      AuthField(
+          return DcAuthScaffold(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  header,
+                  const SizedBox(height: AppSpacing.xl),
+                  AuthField(
                         label: l10n.login_phone_label,
                         child: TextFormField(
                           controller: _phoneController,
@@ -151,8 +155,22 @@ class _LoginPageState extends State<LoginPage> {
                         label: l10n.login_password_label,
                         child: TextFormField(
                           controller: _passwordController,
-                          obscureText: true,
-                          decoration: authFieldDecoration(context),
+                          obscureText: _obscure,
+                          decoration: authFieldDecoration(
+                            context,
+                            suffixIcon: IconButton(
+                              onPressed: () =>
+                                  setState(() => _obscure = !_obscure),
+                              icon: Icon(
+                                _obscure
+                                    ? LucideIcons.eye
+                                    : LucideIcons.eye_off,
+                              ),
+                              tooltip: _obscure
+                                  ? l10n.password_show
+                                  : l10n.password_hide,
+                            ),
+                          ),
                           validator: (v) {
                             if (v == null || v.isEmpty) {
                               return l10n.password_too_short;
@@ -176,12 +194,30 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       const SizedBox(height: AppSpacing.md),
                       if (_errorText != null) ...[
-                        Text(
-                          _errorText!,
-                          style: styles.bodyMedium.copyWith(
-                            color: colors.error,
+                        Semantics(
+                          liveRegion: true,
+                          container: true,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(
+                                LucideIcons.circle_alert,
+                                size: AppSpacing.lg,
+                                color: colors.error,
+                              ),
+                              const SizedBox(width: AppSpacing.xs),
+                              Flexible(
+                                child: Text(
+                                  _errorText!,
+                                  style: styles.bodyMedium.copyWith(
+                                    color: colors.error,
+                                  ),
+                                  textAlign: TextAlign.start,
+                                ),
+                              ),
+                            ],
                           ),
-                          textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: AppSpacing.sm),
                       ],
@@ -191,7 +227,19 @@ class _LoginPageState extends State<LoginPage> {
                         expanded: true,
                         onPressed: isLoading ? null : () => _submit(l10n),
                       ),
-                      const SizedBox(height: AppSpacing.sm),
+                      const SizedBox(height: AppSpacing.md),
+                      // Phase 035 — browse the app without an account (Home +
+                      // listings are anonymous-readable). Design "الدخول كزائر".
+                      // Promoted to a clear secondary (outlined) action so the
+                      // marketplace's key anonymous path reads as a real CTA.
+                      AppButton(
+                        label: l10n.auth_continue_as_guest,
+                        variant: AppButtonVariant.outlined,
+                        expanded: true,
+                        icon: LucideIcons.store,
+                        onPressed: () => context.go(AppRoutes.home),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
                       TextButton(
                         style: TextButton.styleFrom(
                           foregroundColor: colors.primary,
@@ -204,9 +252,7 @@ class _LoginPageState extends State<LoginPage> {
                     ],
                   ),
                 ),
-              ),
-            ),
-          );
+              );
         },
       ),
     );

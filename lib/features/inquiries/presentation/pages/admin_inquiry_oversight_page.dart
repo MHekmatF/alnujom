@@ -12,6 +12,7 @@
 //      inquiries_select_admin policy.
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
@@ -21,14 +22,17 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_spinner.dart';
-import '../../../../core/widgets/deep_link_aware_back_button.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/press_scale.dart';
+import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/inquiry.dart';
 import '../../domain/entities/inquiry_status.dart';
 import '../bloc/inquiry_inbox_bloc.dart';
 import '../widgets/admin_tier_banner.dart';
+import '../widgets/inbox_skeleton.dart';
 import '../widgets/inbox_status_badge.dart';
 import '../widgets/inquiry_message_snippet.dart';
 
@@ -55,17 +59,21 @@ class _AdminOversightView extends StatelessWidget {
 
     return BlocBuilder<InquiryInboxBloc, InquiryInboxState>(
       builder: (context, state) {
-        return Scaffold(
-          appBar: AppBar(
-            leading: const DeepLinkAwareBackButton(),
-            title: Text(l10n.admin_inquiries_app_bar_title),
-            actions: [
-              // Status filter — reused from publisher inbox.
-              _AdminStatusFilterButton(state: state),
-              // Publisher filter stub (Phase 16: always "All publishers").
-              const _PublisherFilterDropdown(),
-            ],
+        return DcCrownScaffold(
+          title: l10n.admin_inquiries_app_bar_title,
+          dense: true,
+          leading: DcCrownIconButton(
+            icon: Icons.arrow_forward,
+            onTap: () => context.canPop()
+                ? context.pop()
+                : context.go(AppRoutes.shellHome),
           ),
+          actions: [
+            // Status filter — reused from publisher inbox.
+            _AdminStatusFilterButton(state: state),
+            // Publisher filter stub (Phase 16: always "All publishers").
+            const _PublisherFilterDropdown(),
+          ],
           body: Column(
             children: [
               // Admin-tier banner distinguishes this from the publisher inbox.
@@ -87,13 +95,15 @@ class _AdminStatusFilterButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
     final currentFilter = state is InquiryInboxLoaded
         ? (state as InquiryInboxLoaded).statusFilter
         : null;
 
     return PopupMenuButton<InquiryStatus?>(
       tooltip: l10n.inquiry_inbox_filter_status_label,
-      icon: const Icon(Icons.filter_list),
+      iconColor: colors.onBrandHeader,
+      icon: const Icon(LucideIcons.funnel),
       onSelected: (value) => context.read<InquiryInboxBloc>().add(
         InquiryInboxStatusFilterChanged(value),
       ),
@@ -132,10 +142,12 @@ class _PublisherFilterDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
 
     return PopupMenuButton<String?>(
       tooltip: l10n.admin_inquiries_publisher_filter_label,
-      icon: const Icon(Icons.person_outlined),
+      iconColor: colors.onBrandHeader,
+      icon: const Icon(LucideIcons.user),
       onSelected: (_) {
         // Phase 16 stub: no real publisher filter implemented.
         // The admin RLS policy returns cross-publisher rows automatically.
@@ -160,7 +172,7 @@ class _AdminInboxBody extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return switch (state) {
-      InquiryInboxLoading() => const AppSpinner.page(),
+      InquiryInboxLoading() => const InboxSkeleton(),
       InquiryInboxError(:final failure) => ErrorState(
         title: failure.message,
         variant: ErrorStateVariant.network,
@@ -170,7 +182,10 @@ class _AdminInboxBody extends StatelessWidget {
       ),
       InquiryInboxLoaded(inquiries: final inquiries, hasMore: final hasMore) =>
         inquiries.isEmpty
-            ? Center(child: Text(l10n.inquiry_inbox_empty_state))
+            ? EmptyState(
+                icon: LucideIcons.inbox,
+                headline: l10n.inquiry_inbox_empty_state,
+              )
             : RefreshIndicator(
                 onRefresh: () async {
                   context.read<InquiryInboxBloc>().add(
@@ -193,7 +208,10 @@ class _AdminInboxBody extends StatelessWidget {
                         child: AppSpinner(),
                       );
                     }
-                    return _AdminInquiryRowTile(inquiry: inquiries[index]);
+                    return StaggeredListItem(
+                      index: index,
+                      child: _AdminInquiryRowTile(inquiry: inquiries[index]),
+                    );
                   },
                 ),
               ),
@@ -238,12 +256,24 @@ class _AdminInquiryRowTile extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (inquiry.status == InquiryStatus.new_) ...[
+                    Container(
+                      width: AppSpacing.sm,
+                      height: AppSpacing.sm,
+                      margin: const EdgeInsetsDirectional.only(
+                        end: AppSpacing.sm,
+                        top: AppSpacing.xs,
+                      ),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: colors.primary,
+                      ),
+                    ),
+                  ],
                   Expanded(
                     child: Text(
                       displayName,
-                      style: styles.titleMedium.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                      style: styles.titleMedium,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -258,11 +288,25 @@ class _AdminInquiryRowTile extends StatelessWidget {
                 style: styles.bodyMedium.copyWith(color: colors.textMuted),
               ),
               const SizedBox(height: AppSpacing.xxs),
-              Text(
-                inquiry.listingTitle,
-                style: styles.bodyMedium.copyWith(color: colors.textMuted),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              Row(
+                children: [
+                  Icon(
+                    LucideIcons.house,
+                    size: AppSpacing.md,
+                    color: colors.textMuted,
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  Expanded(
+                    child: Text(
+                      inquiry.listingTitle,
+                      style: styles.bodyMedium.copyWith(
+                        color: colors.textMuted,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: AppSpacing.xs),
               InquiryMessageSnippet(message: inquiry.message),

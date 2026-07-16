@@ -8,6 +8,9 @@ import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
+import '../../../../core/validators/area_size_validator.dart';
+import '../../../../core/validators/phone_validator.dart';
+import '../../../../core/validators/price_validator.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../currencies/domain/entities/currency.dart';
@@ -283,34 +286,42 @@ class _PurposePill extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
-    return Material(
-      color: selected ? colors.primary : colors.surfaceVariant,
-      borderRadius: appRadius(AppRadii.md),
-      child: InkWell(
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      child: Material(
+        color: selected ? colors.primary : colors.surfaceVariant,
         borderRadius: appRadius(AppRadii.md),
-        onTap: onTap,
-        child: Container(
-          constraints: const BoxConstraints(
-            minWidth: AppSpacing.xxxl,
-            minHeight: _kPurposePillHeight,
-          ),
-          padding: const EdgeInsetsDirectional.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.sm,
-          ),
-          decoration: BoxDecoration(
-            borderRadius: appRadius(AppRadii.md),
-            // Selected pills lose the border (filled primary); idle pills carry
-            // the 1.5px outline of the DS segmented control.
-            border: selected
-                ? null
-                : Border.all(color: colors.outline, width: 1.5),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            label,
-            style: styles.labelLarge.copyWith(
-              color: selected ? colors.onPrimary : colors.textMuted,
+        child: InkWell(
+          borderRadius: appRadius(AppRadii.md),
+          onTap: () {
+            HapticFeedback.selectionClick();
+            onTap();
+          },
+          child: Container(
+            constraints: const BoxConstraints(
+              minWidth: AppSpacing.xxxl,
+              minHeight: _kPurposePillHeight,
+            ),
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.sm,
+            ),
+            decoration: BoxDecoration(
+              borderRadius: appRadius(AppRadii.md),
+              // Selected pills lose the border (filled primary); idle pills carry
+              // the 1.5px outline of the DS segmented control.
+              border: selected
+                  ? null
+                  : Border.all(color: colors.outline, width: 1.5),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              label,
+              style: styles.labelLarge.copyWith(
+                color: selected ? colors.onPrimary : colors.onSurfaceVariant,
+              ),
             ),
           ),
         ),
@@ -332,6 +343,8 @@ class _ExpressPriceAreaState extends State<ExpressPriceArea> {
   Future<List<Currency>>? _currencies;
   bool _seeded = false;
   bool _currencyAuto = false;
+  String? _amountError;
+  String? _areaError;
 
   @override
   void initState() {
@@ -396,9 +409,26 @@ class _ExpressPriceAreaState extends State<ExpressPriceArea> {
                         suffix: currencyCode == null
                             ? null
                             : _expressUnitSuffix(context, currencyCode),
+                        error: _amountError,
                       ),
                       onChanged: (v) {
                         final parsed = Decimal.tryParse(v);
+                        // Inline pre-submit feedback (display-only): reuse the
+                        // same PriceValidator the Detail/Classic flows use. The
+                        // dispatched FieldChanged event is unchanged.
+                        if (currencies.isNotEmpty) {
+                          final activeCurrency = currencies.firstWhere(
+                            (c) => c.code == currencyCode,
+                            orElse: () => currencies.first,
+                          );
+                          setState(() {
+                            _amountError = PriceValidator.validate(
+                              parsed,
+                              activeCurrency,
+                              l10n,
+                            );
+                          });
+                        }
                         if (parsed != null) {
                           context.read<ListingFormBloc>().add(
                             FieldChanged.priceAmount(parsed),
@@ -424,10 +454,19 @@ class _ExpressPriceAreaState extends State<ExpressPriceArea> {
                       decoration: expressDecoration(
                         context,
                         suffix: _expressUnitSuffix(context, l10n.spec_area_unit),
+                        error: _areaError,
                       ),
-                      onChanged: (v) => context.read<ListingFormBloc>().add(
-                        FieldChanged.areaSize(double.tryParse(v)),
-                      ),
+                      onChanged: (v) {
+                        final parsed = double.tryParse(v);
+                        // Inline pre-submit feedback (display-only): reuse the
+                        // same AreaSizeValidator as the Detail/Classic flows.
+                        setState(() {
+                          _areaError = AreaSizeValidator.validate(parsed, l10n);
+                        });
+                        context.read<ListingFormBloc>().add(
+                          FieldChanged.areaSize(parsed),
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -520,6 +559,7 @@ class _ExpressFactsContactState extends State<ExpressFactsContact> {
   final _baths = TextEditingController();
   final _phone = TextEditingController();
   bool _seeded = false;
+  String? _phoneError;
 
   @override
   void dispose() {
@@ -600,10 +640,20 @@ class _ExpressFactsContactState extends State<ExpressFactsContact> {
                 decoration: expressDecoration(
                   context,
                   hint: l10n.fieldLabelPhoneOrWhatsappHint,
+                  error: _phoneError,
                 ),
-                onChanged: (v) => context.read<ListingFormBloc>().add(
-                  FieldChanged.phone(v),
-                ),
+                onChanged: (v) {
+                  // Inline pre-submit feedback (display-only): reuse the same
+                  // PhoneValidator the Detail/Classic flows use. The dispatched
+                  // FieldChanged.phone(v) event is unchanged (raw value).
+                  final result = PhoneValidator.validateAndNormalize(v, l10n);
+                  setState(() {
+                    _phoneError = v.trim().isEmpty ? null : result.error;
+                  });
+                  context.read<ListingFormBloc>().add(
+                    FieldChanged.phone(v),
+                  );
+                },
               ),
             ),
           ],

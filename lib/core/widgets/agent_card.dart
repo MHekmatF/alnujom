@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 import '../theme/colors.dart';
 import '../theme/elevation.dart';
@@ -70,13 +71,15 @@ class AgentCard extends StatelessWidget {
                       name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: styles.titleMedium.copyWith(color: colors.onSurface),
+                      style: styles.titleMedium.copyWith(
+                        color: colors.onSurface,
+                      ),
                     ),
                   ),
                   if (verified) ...[
                     const SizedBox(width: AppSpacing.xs),
                     Icon(
-                      Icons.verified,
+                      LucideIcons.badge_check,
                       size: AppSpacing.lg,
                       color: colors.verified,
                     ),

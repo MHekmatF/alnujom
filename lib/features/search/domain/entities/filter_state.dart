@@ -38,6 +38,14 @@ class FilterState extends Equatable {
   /// the `saved_searches.filters` JSONB under key `is_agency`.
   final bool? isAgency;
 
+  /// Phase 035 Stage 3 — Syria-native + verification filters. `deedType`
+  /// (green/red/temporary/agricultural/court_ruling) and `finishLevel`
+  /// (on_bone/normal/deluxe/super_deluxe) are `null` ⇒ no constraint;
+  /// `verifiedOnly == true` restricts to field-verified listings.
+  final String? deedType;
+  final String? finishLevel;
+  final bool? verifiedOnly;
+
   /// Phase 25 — list vs. embedded-map presentation of the results. Purely a
   /// view concern: it is NOT sent to the search RPC, NOT counted as an active
   /// filter, and NOT persisted in [toJson] (saved searches restore filters,
@@ -64,6 +72,9 @@ class FilterState extends Equatable {
     this.parking,
     this.amenities = const <String>{},
     this.isAgency,
+    this.deedType,
+    this.finishLevel,
+    this.verifiedOnly,
     this.displayMode = DisplayMode.list,
   });
 
@@ -85,7 +96,10 @@ class FilterState extends Equatable {
       furnished == null &&
       parking == null &&
       amenities.isEmpty &&
-      isAgency == null;
+      isAgency == null &&
+      deedType == null &&
+      finishLevel == null &&
+      verifiedOnly == null;
 
   /// Phase 15 G3: true when at least one filter dimension is active.
   /// Consumed by [MapEntryFromSearch.showFilterAlert] to show the
@@ -106,6 +120,9 @@ class FilterState extends Equatable {
       parking != null ||
       amenities.isNotEmpty ||
       isAgency != null ||
+      deedType != null ||
+      finishLevel != null ||
+      verifiedOnly != null ||
       (query != null && query!.isNotEmpty);
 
   FilterState copyWith({
@@ -128,6 +145,9 @@ class FilterState extends Equatable {
     bool? parking,
     Set<String>? amenities,
     bool? isAgency,
+    String? deedType,
+    String? finishLevel,
+    bool? verifiedOnly,
     DisplayMode? displayMode,
     // Sentinel for clearing nullable fields
     bool clearQuery = false,
@@ -145,6 +165,9 @@ class FilterState extends Equatable {
     bool clearFurnished = false,
     bool clearParking = false,
     bool clearIsAgency = false,
+    bool clearDeedType = false,
+    bool clearFinishLevel = false,
+    bool clearVerifiedOnly = false,
   }) {
     return FilterState(
       query: clearQuery ? null : (query ?? this.query),
@@ -172,6 +195,11 @@ class FilterState extends Equatable {
       parking: clearParking ? null : (parking ?? this.parking),
       amenities: amenities ?? this.amenities,
       isAgency: clearIsAgency ? null : (isAgency ?? this.isAgency),
+      deedType: clearDeedType ? null : (deedType ?? this.deedType),
+      finishLevel: clearFinishLevel ? null : (finishLevel ?? this.finishLevel),
+      verifiedOnly: clearVerifiedOnly
+          ? null
+          : (verifiedOnly ?? this.verifiedOnly),
       displayMode: displayMode ?? this.displayMode,
     );
   }
@@ -207,6 +235,9 @@ class FilterState extends Equatable {
     if (parking != null) json['parking'] = parking;
     if (amenities.isNotEmpty) json['amenities'] = amenities.toList();
     if (isAgency != null) json['is_agency'] = isAgency;
+    if (deedType != null) json['deed_type'] = deedType;
+    if (finishLevel != null) json['finish_level'] = finishLevel;
+    if (verifiedOnly != null) json['verified_only'] = verifiedOnly;
     return json;
   }
 
@@ -263,6 +294,11 @@ class FilterState extends Equatable {
                 .toSet()
           : const <String>{},
       isAgency: json['is_agency'] is bool ? json['is_agency'] as bool : null,
+      deedType: json['deed_type'] as String?,
+      finishLevel: json['finish_level'] as String?,
+      verifiedOnly: json['verified_only'] is bool
+          ? json['verified_only'] as bool
+          : null,
     );
   }
 
@@ -287,6 +323,9 @@ class FilterState extends Equatable {
     parking,
     amenities,
     isAgency,
+    deedType,
+    finishLevel,
+    verifiedOnly,
     displayMode,
   ];
 }

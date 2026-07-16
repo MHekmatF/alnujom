@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/elevation.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
@@ -83,14 +84,36 @@ class ListingDetailFormPage extends StatelessWidget {
           );
         }
         if (state.submitSucceeded) {
-          showPublishSuccess(context).then((_) {
-            if (context.mounted) context.go(AppRoutes.shellHome);
+          showPublishSuccess(context).then((action) {
+            if (!context.mounted) return;
+            switch (action) {
+              case PublishSuccessAction.addAnother:
+                context.pushReplacement(AppRoutes.publisherListingsCreate);
+              case PublishSuccessAction.viewListings:
+                context.go(AppRoutes.publisherMyListings);
+              case null:
+                context.go(AppRoutes.shellHome);
+            }
           });
         }
       },
       builder: (context, state) {
-        if (state.loadInProgress || !state.isReady) {
+        if (state.loadInProgress) {
           return Center(child: appInlineSpinner(context));
+        }
+        if (!state.isReady) {
+          // Draft creation failed (not loading, not ready) — surface the error
+          // instead of an infinite spinner, mirroring the classic stepper body.
+          return Padding(
+            padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
+            child: Center(
+              child: Text(
+                state.lastSaveError ?? l10n.listingFormLoadingMessage,
+                textAlign: TextAlign.center,
+                style: styles.bodyLarge.copyWith(color: colors.textMuted),
+              ),
+            ),
+          );
         }
         final busy = state.submitInProgress || state.saveInProgress;
         return Column(
@@ -195,10 +218,12 @@ class _SubmitBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final colors = AppColors.of(context);
+    final elevation = AppElevation.of(context);
     return DecoratedBox(
       decoration: BoxDecoration(
         color: colors.surface,
         border: BorderDirectional(top: BorderSide(color: colors.outline)),
+        boxShadow: elevation.level1,
       ),
       child: SafeArea(
         top: false,

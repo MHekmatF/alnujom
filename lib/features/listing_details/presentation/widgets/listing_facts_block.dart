@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_lucide/flutter_lucide.dart';
-import 'package:intl/intl.dart';
 
-import '../../../../core/widgets/facts_grid.dart';
+import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/radii.dart';
+import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/util/localized_numbers.dart';
 import '../../../listing_form/domain/entities/listing.dart';
 
-/// Premium uplift v2 — the listing-detail key-facts block.
-///
-/// Maps the source listing's beds / baths / area / floor / type onto a
-/// [FactsGrid] of soft tiles placed right under the title + price. Renders only
-/// the facts that are present (land has no rooms/baths, etc.), and collapses to
-/// nothing when none apply. Numbers render in the active locale's numerals.
+/// The listing-detail key-facts strip, rebuilt to the DC "Blue Crown" design
+/// (`AlNujom.dc.html` §DETAIL): a single `surface2` rounded strip of equal-width
+/// columns, each a primary icon over a combined value string ("4 غرف",
+/// "3 حمّامات", "220 م²", "الطابق 7"). Renders only the facts that are present
+/// (land has no rooms/baths/floor) and collapses to nothing when none apply.
 class ListingFactsBlock extends StatelessWidget {
   const ListingFactsBlock({super.key, required this.listing});
 
@@ -20,68 +22,80 @@ class ListingFactsBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final numFmt = NumberFormat.decimalPattern(
-      Localizations.localeOf(context).toLanguageTag(),
-    );
+    final locale = Localizations.localeOf(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
 
-    final items = <FactItem>[
+    final facts = <(IconData, String)>[
       if (listing.rooms != null)
-        FactItem(
-          icon: LucideIcons.bed,
-          value: numFmt.format(listing.rooms),
-          label: l10n.spec_rooms_label,
+        (
+          Icons.king_bed,
+          '${formatLocalizedNumber(listing.rooms!, locale)} '
+              '${l10n.spec_rooms_label}',
         ),
       if (listing.bathrooms != null)
-        FactItem(
-          icon: LucideIcons.bath,
-          value: numFmt.format(listing.bathrooms),
-          label: l10n.spec_baths_label,
+        (
+          Icons.bathtub,
+          '${formatLocalizedNumber(listing.bathrooms!, locale)} '
+              '${l10n.spec_baths_label}',
         ),
       if (listing.areaSize != null)
-        FactItem(
-          icon: LucideIcons.ruler,
-          value: '${_formatArea(numFmt, listing.areaSize!)} ${l10n.spec_area_unit}',
-          label: l10n.spec_area_label,
+        (
+          Icons.square_foot,
+          '${_formatArea(locale, listing.areaSize!)} ${l10n.spec_area_unit}',
         ),
       if (listing.floor != null)
-        FactItem(
-          icon: LucideIcons.layers,
-          value: numFmt.format(listing.floor),
-          label: l10n.spec_floor_label,
+        (
+          Icons.stairs,
+          '${l10n.spec_floor_label} '
+              '${formatLocalizedNumber(listing.floor!, locale)}',
         ),
-      FactItem(
-        icon: LucideIcons.house,
-        value: _propertyTypeLabel(l10n, listing.propertyType),
-        label: l10n.listing_details_facts_type_label,
-      ),
     ];
+    if (facts.isEmpty) return const SizedBox.shrink();
 
-    return FactsGrid(items: items);
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.surfaceVariant,
+        borderRadius: appRadius(AppRadii.card),
+      ),
+      padding: const EdgeInsetsDirectional.symmetric(
+        vertical: AppSpacing.md,
+        horizontal: AppSpacing.sm,
+      ),
+      child: Row(
+        children: [
+          for (final (icon, value) in facts)
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(icon, size: 23, color: colors.primary),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    value,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: styles.labelMedium.copyWith(
+                      color: colors.onSurface,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
   }
 
-  static String _formatArea(NumberFormat fmt, double value) {
-    if (value == value.roundToDouble()) return fmt.format(value.round());
-    return fmt.format(double.parse(value.toStringAsFixed(1)));
-  }
-
-  String _propertyTypeLabel(AppLocalizations l10n, PropertyType type) {
-    switch (type) {
-      case PropertyType.apartment:
-        return l10n.propertyTypeApartment;
-      case PropertyType.villa:
-        return l10n.propertyTypeVilla;
-      case PropertyType.land:
-        return l10n.propertyTypeLand;
-      case PropertyType.shop:
-        return l10n.propertyTypeShop;
-      case PropertyType.office:
-        return l10n.propertyTypeOffice;
-      case PropertyType.farm:
-        return l10n.propertyTypeFarm;
-      case PropertyType.warehouse:
-        return l10n.propertyTypeWarehouse;
-      case PropertyType.other:
-        return l10n.propertyTypeOther;
+  static String _formatArea(Locale locale, double value) {
+    if (value == value.roundToDouble()) {
+      return formatLocalizedNumber(value.round(), locale);
     }
+    return formatLocalizedNumber(
+      double.parse(value.toStringAsFixed(1)),
+      locale,
+    );
   }
 }

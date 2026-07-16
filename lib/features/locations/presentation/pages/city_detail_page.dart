@@ -9,6 +9,7 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/app_toast.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../core/widgets/locale_toggle_action.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/area.dart';
@@ -55,11 +56,16 @@ class _CityDetailView extends StatelessWidget {
             ? state.city.localizedName(locale)
             : l10n.cityDetailPageTitle;
 
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(title),
-            actions: const [LocaleToggleAction()],
+        return DcCrownScaffold(
+          title: title,
+          dense: true,
+          leading: DcCrownIconButton(
+            icon: Icons.arrow_forward,
+            onTap: () => context.canPop()
+                ? context.pop()
+                : context.go(AppRoutes.shellHome),
           ),
+          actions: const [LocaleToggleAction()],
           floatingActionButton: FloatingActionButton(
             onPressed: () async {
               final result = await context.push<bool>(

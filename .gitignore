@@ -256,3 +256,15 @@ specs/012-listing-approval/.phase4-log-audit-body.sql
 docs/brand/uikit_extracted/
 docs/brand/logo/
 docs/brand/*.zip
+
+# Phase 035 — Claude Design source artifacts (kept locally, not in git)
+New design/
+
+# ui-ux-pro-max skill (installed locally via npx skills; not committed)
+/.agents/
+/skills-lock.json
+/.claude/skills/ui-ux-pro-max
+docs/release/compare-apks/*.apk
+
+# Claude Design raw handoff downloads (the unzipped project is committed under specs/)
+/AlNujom real estate marketplace-handoff*.zip

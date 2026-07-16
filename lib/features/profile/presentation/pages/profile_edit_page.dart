@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_lucide/flutter_lucide.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/colors.dart';
@@ -9,6 +8,7 @@ import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/app_text_field.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/repositories/profile_repository.dart';
 import '../cubit/profile_cubit.dart';
@@ -142,8 +142,9 @@ class _ProfileEditViewState extends State<_ProfileEditView> {
       builder: (context, state) {
         if (state.status == ProfileStatus.loading ||
             state.status == ProfileStatus.initial) {
-          return Scaffold(
-            appBar: AppBar(title: Text(l10n.profile_title)),
+          return DcCrownScaffold(
+            title: l10n.profile_title,
+            dense: true,
             body: const AppSpinner.page(),
           );
         }
@@ -158,15 +159,14 @@ class _ProfileEditViewState extends State<_ProfileEditView> {
             ? null
             : _localizeFailure(failure, l10n);
 
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(l10n.profile_title),
-            leading: IconButton(
-              icon: const Icon(LucideIcons.x),
-              onPressed: () {
-                if (Navigator.canPop(context)) Navigator.pop(context);
-              },
-            ),
+        return DcCrownScaffold(
+          title: l10n.profile_title,
+          dense: true,
+          leading: DcCrownIconButton(
+            icon: Icons.arrow_forward,
+            onTap: () {
+              if (Navigator.canPop(context)) Navigator.pop(context);
+            },
           ),
           body: SingleChildScrollView(
             padding: const EdgeInsetsDirectional.all(AppSpacing.xl),

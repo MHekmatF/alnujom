@@ -122,7 +122,7 @@ class _SimilarListingsBody extends StatelessWidget {
           ),
           child: Text(
             l10n.listing_details_similar_title,
-            style: styles.titleLarge.copyWith(color: colors.onSurface),
+            style: styles.titleMedium.copyWith(color: colors.onSurface),
           ),
         );
 
@@ -132,7 +132,7 @@ class _SimilarListingsBody extends StatelessWidget {
             children: [
               header,
               SizedBox(
-                height: cardWidth * 0.95,
+                height: cardWidth * 1.12,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsetsDirectional.symmetric(
@@ -158,7 +158,7 @@ class _SimilarListingsBody extends StatelessWidget {
             children: [
               header,
               SizedBox(
-                height: cardWidth * 0.95,
+                height: cardWidth * 1.12,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsetsDirectional.symmetric(

@@ -14,6 +14,7 @@
 // RTL-correct via directional geometry throughout.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
@@ -29,6 +30,7 @@ import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/chat_bubble.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/util/arabic_digits.dart';
 import '../../domain/entities/assistant_message.dart';
@@ -66,6 +68,7 @@ class _AssistantViewState extends State<_AssistantView> {
   void _onSend() {
     final text = _composer.text;
     if (text.trim().isEmpty) return;
+    HapticFeedback.selectionClick();
     context.read<AssistantCubit>().send(text);
     _composer.clear();
   }
@@ -75,62 +78,99 @@ class _AssistantViewState extends State<_AssistantView> {
     final l10n = AppLocalizations.of(context)!;
     final colors = AppColors.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
+    return DcCrownScaffold(
+      title: l10n.assistantTitle,
+      dense: true,
+      titleWidget: _AssistantCrownTitle(title: l10n.assistantTitle),
+      leading: DcCrownIconButton(
+        icon: Icons.arrow_forward,
+        onTap: () =>
+            context.canPop() ? context.pop() : context.go(AppRoutes.shellHome),
+      ),
+      sheet: false,
+      body: ColoredBox(
+        color: colors.surface,
+        child: Column(
           children: [
-            Icon(LucideIcons.sparkles, color: colors.primary),
-            const SizedBox(width: AppSpacing.sm),
-            Flexible(
-              child: Text(
-                l10n.assistantTitle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+            Expanded(
+              child: BlocBuilder<AssistantCubit, AssistantState>(
+                builder: (context, state) {
+                  // Reversed list: newest at the visual bottom (index 0); the
+                  // typing bubble occupies index 0 while the brain replies.
+                  final reversed = state.messages.reversed.toList();
+                  final extra = state.thinking ? 1 : 0;
+                  return ListView.builder(
+                    reverse: true,
+                    padding: const EdgeInsetsDirectional.symmetric(
+                      horizontal: AppSpacing.lg,
+                      vertical: AppSpacing.md,
+                    ),
+                    itemCount: reversed.length + extra,
+                    itemBuilder: (context, i) {
+                      if (state.thinking && i == 0) {
+                        return const _TypingBubble();
+                      }
+                      final message = reversed[i - extra];
+                      return _MessageTile(message: message);
+                    },
+                  );
+                },
               ),
             ),
+            BlocBuilder<AssistantCubit, AssistantState>(
+              builder: (context, state) => state.isFresh
+                  ? _QuickReplies(
+                      onTap: (text) =>
+                          context.read<AssistantCubit>().send(text),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+            const _PoweredByCaption(),
+            _Composer(controller: _composer, onSend: _onSend),
           ],
         ),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: BlocBuilder<AssistantCubit, AssistantState>(
-              builder: (context, state) {
-                // Reversed list: newest at the visual bottom (index 0); the
-                // typing bubble occupies index 0 while the brain replies.
-                final reversed = state.messages.reversed.toList();
-                final extra = state.thinking ? 1 : 0;
-                return ListView.builder(
-                  reverse: true,
-                  padding: const EdgeInsetsDirectional.symmetric(
-                    horizontal: AppSpacing.lg,
-                    vertical: AppSpacing.md,
-                  ),
-                  itemCount: reversed.length + extra,
-                  itemBuilder: (context, i) {
-                    if (state.thinking && i == 0) {
-                      return const _TypingBubble();
-                    }
-                    final message = reversed[i - extra];
-                    return _MessageTile(message: message);
-                  },
-                );
-              },
+    );
+  }
+}
+
+/// The assistant's bespoke crown title: a sparkles logo tile + the title, in
+/// white on the brand crown.
+class _AssistantCrownTitle extends StatelessWidget {
+  const _AssistantCrownTitle({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    final onHeader = colors.onBrandHeader;
+    return Row(
+      children: [
+        Container(
+          width: 34,
+          height: 34,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: onHeader.withValues(alpha: 0.16),
+            borderRadius: appRadius(AppRadii.sm),
+          ),
+          child: Icon(LucideIcons.sparkles, size: 20, color: onHeader),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Flexible(
+          child: Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: styles.titleMedium.copyWith(
+              color: onHeader,
+              fontWeight: FontWeight.w700,
             ),
           ),
-          BlocBuilder<AssistantCubit, AssistantState>(
-            builder: (context, state) => state.isFresh
-                ? _QuickReplies(
-                    onTap: (text) =>
-                        context.read<AssistantCubit>().send(text),
-                  )
-                : const SizedBox.shrink(),
-          ),
-          const _PoweredByCaption(),
-          _Composer(controller: _composer, onSend: _onSend),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -209,11 +249,16 @@ class _TypingBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const _AssistantBubble(
-      child: SizedBox(
-        width: AppSpacing.xxl,
-        height: AppSpacing.lg,
-        child: AppSpinner(size: AppSpacing.lg),
+    final l10n = AppLocalizations.of(context)!;
+    return Semantics(
+      label: l10n.assistantTyping,
+      container: true,
+      child: const _AssistantBubble(
+        child: SizedBox(
+          width: AppSpacing.xxl,
+          height: AppSpacing.lg,
+          child: AppSpinner(size: AppSpacing.lg),
+        ),
       ),
     );
   }
@@ -281,8 +326,7 @@ class _ReplyContent extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context);
     final stats = reply.stats!;
-    final area =
-        reply.parsed?.governorate?.localizedName(locale) ?? '';
+    final area = reply.parsed?.governorate?.localizedName(locale) ?? '';
     var amount = NumberFormat.compact(
       locale: locale.toString(),
     ).format(stats.avgPrice.round());
@@ -414,29 +458,56 @@ class _QuickReplies extends StatelessWidget {
         horizontal: AppSpacing.lg,
         vertical: AppSpacing.xs,
       ),
-      child: Align(
-        alignment: AlignmentDirectional.centerStart,
-        child: Wrap(
-          spacing: AppSpacing.xs,
-          runSpacing: AppSpacing.xs,
-          children: [
-            for (final suggestion in suggestions)
-              AppSurface(
-                onTap: () => onTap(suggestion),
-                color: colors.card,
-                borderColor: colors.outlineStrong,
-                radius: AppRadii.pill,
-                padding: const EdgeInsetsDirectional.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: AppSpacing.xs,
-                ),
-                child: Text(
-                  suggestion,
-                  style: styles.labelLarge.copyWith(color: colors.primary),
-                ),
-              ),
-          ],
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Lead-in: signals the chips below are tappable example prompts and
+          // separates them from the display-only fragment chips.
+          Padding(
+            padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.xs),
+            child: Text(
+              l10n.assistantTrySuggestions,
+              style: styles.labelMedium.copyWith(color: colors.textMuted),
+            ),
+          ),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: Wrap(
+              spacing: AppSpacing.xs,
+              runSpacing: AppSpacing.xs,
+              children: [
+                for (final suggestion in suggestions)
+                  AppSurface(
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      onTap(suggestion);
+                    },
+                    color: colors.card,
+                    borderColor: colors.outlineStrong,
+                    radius: AppRadii.pill,
+                    padding: const EdgeInsetsDirectional.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.sm,
+                    ),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        minHeight: AppSpacing.xxl,
+                      ),
+                      child: Center(
+                        widthFactor: 1,
+                        child: Text(
+                          suggestion,
+                          style: styles.labelLarge.copyWith(
+                            color: colors.primary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -541,10 +612,18 @@ class _Composer extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
-            IconButton.filled(
-              onPressed: onSend,
-              icon: const Icon(LucideIcons.send),
-              tooltip: l10n.chatComposerSend,
+            // Disabled when the field is empty — reflects the cubit's existing
+            // no-op on empty input so an empty tap is no longer a dead press.
+            ValueListenableBuilder<TextEditingValue>(
+              valueListenable: controller,
+              builder: (context, value, _) {
+                final canSend = value.text.trim().isNotEmpty;
+                return IconButton.filled(
+                  onPressed: canSend ? onSend : null,
+                  icon: const Icon(LucideIcons.send),
+                  tooltip: l10n.chatComposerSend,
+                );
+              },
             ),
           ],
         ),

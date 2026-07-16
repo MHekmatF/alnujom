@@ -40,7 +40,15 @@ class EmptyState extends StatelessWidget {
     Widget? art = illustration;
     art ??= icon == null
         ? null
-        : _EmptyStateIcon(icon: icon!, color: iconColor ?? colors.primary);
+        : _EmptyStateIcon(
+            icon: icon!,
+            // DC: a tonal (blue) badge by default; a caller-supplied accent
+            // keeps its own low-alpha tint for semantic empties.
+            bg: iconColor == null
+                ? colors.primaryContainer
+                : iconColor!.withValues(alpha: 0.12),
+            fg: iconColor ?? colors.onPrimaryContainer,
+          );
 
     return Center(
       child: Padding(
@@ -51,10 +59,13 @@ class EmptyState extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (art != null) ...[art, const SizedBox(height: AppSpacing.lg)],
-              Text(
-                headline,
-                textAlign: TextAlign.center,
-                style: styles.titleLarge,
+              Semantics(
+                header: true,
+                child: Text(
+                  headline,
+                  textAlign: TextAlign.center,
+                  style: styles.titleLarge,
+                ),
               ),
               if (body != null) ...[
                 const SizedBox(height: AppSpacing.sm),
@@ -80,21 +91,25 @@ class EmptyState extends StatelessWidget {
 /// empty/list surfaces. The whole [EmptyState] fades + slides in via
 /// [StaggeredListItem], so the glyph itself stays static.
 class _EmptyStateIcon extends StatelessWidget {
-  const _EmptyStateIcon({required this.icon, required this.color});
+  const _EmptyStateIcon({
+    required this.icon,
+    required this.bg,
+    required this.fg,
+  });
 
   final IconData icon;
-  final Color color;
+  final Color bg;
+  final Color fg;
 
   @override
   Widget build(BuildContext context) {
+    // DC empty-state badge: an 88px circle with a 44px glyph.
     return Container(
-      width: AppSpacing.xxxl + AppSpacing.lg,
-      height: AppSpacing.xxxl + AppSpacing.lg,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color.withValues(alpha: 0.10),
-      ),
-      child: Icon(icon, color: color, size: AppSpacing.xxl),
+      width: 88,
+      height: 88,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(shape: BoxShape.circle, color: bg),
+      child: Icon(icon, color: fg, size: 44),
     );
   }
 }

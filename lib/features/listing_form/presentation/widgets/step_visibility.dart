@@ -8,6 +8,7 @@ import '../../domain/entities/listing.dart';
 import '../../domain/entities/listing_form_state.dart';
 import '../bloc/listing_form_bloc.dart';
 import '../bloc/listing_form_event.dart';
+import 'express_form_fields.dart' show expressDecoration;
 import 'step_section.dart';
 
 class StepVisibility extends StatefulWidget {
@@ -55,9 +56,7 @@ class _StepVisibilityState extends State<StepVisibility> {
                 DropdownButtonFormField<LocationVisibility>(
                   initialValue: listing.locationVisibility,
                   isExpanded: true,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                  ),
+                  decoration: expressDecoration(context),
                   items: LocationVisibility.values
                       .map(
                         (v) => DropdownMenuItem(
@@ -79,9 +78,7 @@ class _StepVisibilityState extends State<StepVisibility> {
                 DropdownButtonFormField<ContactNameVisibility>(
                   initialValue: listing.contactNameVisibility,
                   isExpanded: true,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                  ),
+                  decoration: expressDecoration(context),
                   items: ContactNameVisibility.values
                       .map(
                         (v) => DropdownMenuItem(
@@ -142,10 +139,7 @@ class _StepVisibilityState extends State<StepVisibility> {
                 TextField(
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
-                  decoration: InputDecoration(
-                    border: const OutlineInputBorder(),
-                    errorText: _phoneError,
-                  ),
+                  decoration: expressDecoration(context, error: _phoneError),
                   onChanged: (v) {
                     final result = PhoneValidator.validateAndNormalize(v, l10n);
                     setState(() {
@@ -161,10 +155,7 @@ class _StepVisibilityState extends State<StepVisibility> {
                 TextField(
                   controller: _whatsappController,
                   keyboardType: TextInputType.phone,
-                  decoration: InputDecoration(
-                    border: const OutlineInputBorder(),
-                    errorText: _whatsappError,
-                  ),
+                  decoration: expressDecoration(context, error: _whatsappError),
                   onChanged: (v) {
                     final result = PhoneValidator.validateAndNormalize(v, l10n);
                     setState(() {

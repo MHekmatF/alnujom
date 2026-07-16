@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/analytics/analytics_service.dart';
@@ -13,15 +13,16 @@ import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_nav_drawer.dart';
 import '../../../../core/widgets/app_spinner.dart';
-import '../../../../core/widgets/brand_mark.dart';
+import '../../../../core/widgets/crown_underline_tabs.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
-import '../../../../core/widgets/locale_toggle_action.dart';
+import '../../../../core/settings/listing_view_mode.dart';
+import '../../../../core/widgets/ds/ds_listing_card.dart';
 import '../../../../core/widgets/main_bottom_nav.dart';
+import '../../../../core/widgets/publish_fab.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../core/widgets/star_refresh_indicator.dart';
-import '../../../../core/widgets/theme_toggle_action.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/account_status.dart';
 import '../../../../shared/domain/value_objects/publisher_status.dart';
@@ -32,7 +33,6 @@ import '../../../currencies/domain/usecases/list_currencies.dart';
 import '../../../favorites/presentation/bloc/favorites_cubit.dart';
 import '../../../inquiries/presentation/bloc/inquiries_unread_cubit.dart';
 import '../../../notifications/presentation/bloc/notification_badge_cubit.dart';
-import '../../../../core/widgets/app_network_image.dart';
 import '../bloc/featured_listings_cubit.dart';
 import '../bloc/home_bloc.dart';
 import '../bloc/home_event.dart';
@@ -40,13 +40,11 @@ import '../bloc/home_state.dart';
 import '../../../ads/domain/entities/ad_placement.dart';
 import '../../../ads/presentation/widgets/ad_slot.dart';
 import '../../../recently_viewed/presentation/bloc/recently_viewed_cubit.dart';
-import '../../../recently_viewed/presentation/widgets/recently_viewed_carousel.dart';
-import '../../../reels/presentation/widgets/reels_rail.dart';
+import '../../../search/domain/entities/filter_state.dart';
+import '../../domain/entities/home_listing_card.dart';
 import '../widgets/featured_listings_carousel.dart';
-import '../widgets/hero_search_bar.dart';
-import '../widgets/home_listing_card.dart';
-import '../widgets/map_entry_tile.dart';
-import '../widgets/property_type_shortcut_row.dart';
+import '../widgets/home_card_mapper.dart';
+import '../widgets/home_city_picker_sheet.dart';
 
 /// Phase 13 — public HomePage per FR-013 + contracts/
 /// phase13-home-page-composition.md.
@@ -56,7 +54,7 @@ import '../widgets/property_type_shortcut_row.dart';
 /// 2. [HeroSearchBar] (Q1=A stub).
 /// 3. [PropertyTypeShortcutRow] (Q1=A stub).
 /// 4. Section header `home_latest_listings_header`.
-/// 5. `RefreshIndicator`-wrapped `ListView.builder` of [HomeListingCardTile]
+/// 5. `RefreshIndicator`-wrapped `ListView.builder` of [DsListingCard]
 ///    widgets, driven by [HomeBloc]. Cursor pagination + infinite scroll.
 ///
 /// Empty-state CTA branches on auth state per FR-019:
@@ -106,6 +104,9 @@ class _HomeViewState extends State<_HomeView> {
   late final ScrollController _scrollController;
   late final Future<List<Currency>> _currenciesFuture;
   AppLifecycleListener? _lifecycleListener;
+
+  /// DC for-sale / rent / daily-rent segmented control selection.
+  int _segment = 0;
 
   /// Threshold (in pixels) from the bottom that triggers
   /// `HomeFeedNextPageRequested` per FR-016. Approximately 5 cards' worth.
@@ -163,60 +164,53 @@ class _HomeViewState extends State<_HomeView> {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context);
 
-    return Scaffold(
-      // Phase 030 (W5) — app navigation drawer (opens from the start side =
-      // RIGHT under RTL). Hosts the tool sections relocated off the Profile tab.
-      drawer: const AppNavDrawer(),
-      appBar: AppBar(
-        // Phase 030 (W5) — hamburger affordance opening the nav drawer. Wrapped
-        // in a Builder so Scaffold.of(context) resolves the enclosing Scaffold.
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(LucideIcons.menu),
-            tooltip: l10n.navDrawerMenuTooltip,
-            onPressed: () => Scaffold.of(context).openDrawer(),
-          ),
+    final colors = AppColors.of(context);
+    // DC "Blue Crown" — light status-bar icons over the deep-blue crown that
+    // sits at the top of the Home scroll.
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
+        systemNavigationBarColor: colors.card,
+        systemNavigationBarIconBrightness: Theme.of(context).brightness == Brightness.dark
+            ? Brightness.light
+            : Brightness.dark,
+      ),
+      child: Scaffold(
+        backgroundColor: colors.surface,
+        drawer: const AppNavDrawer(),
+        body: FutureBuilder<List<Currency>>(
+          future: _currenciesFuture,
+          builder: (context, currencySnap) {
+            final currenciesByCode = <String, Currency>{
+              for (final c in currencySnap.data ?? const <Currency>[])
+                c.code: c,
+            };
+            return BlocBuilder<HomeBloc, HomeState>(
+              builder: (context, state) {
+                return StarRefreshIndicator(
+                  onRefresh: () async {
+                    // Capture cubits before the awaits (no BuildContext across
+                    // async gaps).
+                    final featured = context.read<FeaturedListingsCubit>();
+                    final recent = context.read<RecentlyViewedCubit>();
+                    context.read<HomeBloc>().add(
+                      HomeFeedRefreshRequested(locale: locale),
+                    );
+                    // Featured-listings + recently-viewed also reload on refresh.
+                    await featured.load(locale: locale);
+                    await recent.load();
+                  },
+                  child: _buildBody(context, state, currenciesByCode, l10n),
+                );
+              },
+            );
+          },
         ),
-        title: const BrandMark(withWordmark: true, size: 30),
-        actions: const [
-          // Phase 33 restyle — the notification bell moves down into the photo-
-          // forward header row (a 42px circular button); the bar keeps only the
-          // locale/theme toggles. Profile/sign-in is the Profile tab.
-          LocaleToggleAction(),
-          ThemeToggleAction(),
-        ],
+        // Phase 035 — the publish entry is a floating Extended FAB above the
+        // 5-tab bottom nav (publishers only; self-gates to nothing otherwise).
+        bottomNavigationBar: const MainBottomNav(current: MainTab.home),
+        floatingActionButton: const PublishFab(),
       ),
-      body: FutureBuilder<List<Currency>>(
-        future: _currenciesFuture,
-        builder: (context, currencySnap) {
-          final currenciesByCode = <String, Currency>{
-            for (final c in currencySnap.data ?? const <Currency>[]) c.code: c,
-          };
-          return BlocBuilder<HomeBloc, HomeState>(
-            builder: (context, state) {
-              return StarRefreshIndicator(
-                onRefresh: () async {
-                  // Capture cubits before the awaits (no BuildContext across
-                  // async gaps).
-                  final featured = context.read<FeaturedListingsCubit>();
-                  final recent = context.read<RecentlyViewedCubit>();
-                  context.read<HomeBloc>().add(
-                    HomeFeedRefreshRequested(locale: locale),
-                  );
-                  // Featured-listings + recently-viewed also reload on refresh.
-                  await featured.load(locale: locale);
-                  await recent.load();
-                },
-                child: _buildBody(context, state, currenciesByCode, l10n),
-              );
-            },
-          );
-        },
-      ),
-      // Phase 25 — the publish entry now lives in the persistent bottom nav
-      // (a prominent accent action for approved publishers) instead of a
-      // floating action button.
-      bottomNavigationBar: const MainBottomNav(current: MainTab.home),
     );
   }
 
@@ -226,43 +220,63 @@ class _HomeViewState extends State<_HomeView> {
     Map<String, Currency> currenciesByCode,
     AppLocalizations l10n,
   ) {
-    // Always render the static chrome (search + chips + header) so the user
-    // sees something during the initial load + during refresh.
-    return CustomScrollView(
+    final colors = AppColors.of(context);
+    // DC "Blue Crown" — the deep-blue crown header scrolls at the very top, and
+    // a white sheet with rounded top corners overlaps it, carrying the category
+    // grid, the for-sale/rent segmented control, the featured rail and the feed.
+    return SingleChildScrollView(
       controller: _scrollController,
-      slivers: [
-        // Phase 25 (Claude Design) — personalized welcome above the search bar.
-        const SliverToBoxAdapter(child: _HomeGreeting()),
-        const SliverToBoxAdapter(child: HeroSearchBar()),
-        const SliverToBoxAdapter(child: PropertyTypeShortcutRow()),
-        // Phase 15 G1: Map entry tile — R-91 slot (between shortcut row and header).
-        const SliverToBoxAdapter(child: MapEntryTile()),
-        // Phase 21: home top banner (collapses to zero height when no ads — FR-012).
-        const SliverToBoxAdapter(
-          child: AdSlot(placement: AdPlacement.homeTopBanner),
-        ),
-        // Featured-listings treatment — the "✨ عقارات مميّزة" carousel sits at the
-        // TOP of the feed (above the regular list). Hides itself entirely when
-        // there are no active featured listings or the load failed.
-        SliverToBoxAdapter(
-          child: FeaturedListingsCarousel(currenciesByCode: currenciesByCode),
-        ),
-        // Recently-viewed: the "شوهد مؤخراً / Recently viewed" row, just under the
-        // featured carousel. Backed by local storage; hides itself when empty.
-        const SliverToBoxAdapter(child: RecentlyViewedCarousel()),
-        // Phase 029 (Reels W4) — the "Reels" rail of vertical video posters.
-        // Self-wired (hosts its own ReelsRailCubit) and hides itself entirely
-        // on empty / failure / loading, mirroring the FeaturedListingsCarousel.
-        const SliverToBoxAdapter(child: ReelsRail()),
-        SliverToBoxAdapter(
-          child: _SectionHeader(title: l10n.home_latest_listings_header),
-        ),
-        ..._buildFeedSlivers(context, state, currenciesByCode, l10n),
-      ],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _HomeCrown(
+            selectedPurpose: _segment,
+            onPurposeChanged: (i) => setState(() => _segment = i),
+          ),
+          Transform.translate(
+            offset: const Offset(0, -18),
+            child: Container(
+              decoration: BoxDecoration(
+                color: colors.card,
+                borderRadius: const BorderRadiusDirectional.vertical(
+                  top: Radius.circular(AppRadii.sheet),
+                ),
+              ),
+              padding: const EdgeInsetsDirectional.only(top: AppSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _HomeCategoryGrid(
+                    onSelected: (_) => context.go(AppRoutes.search),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  FeaturedListingsCarousel(
+                    currenciesByCode: currenciesByCode,
+                  ),
+                  // DC: the sponsored slot sits between the featured rail and
+                  // the "latest" feed (renders nothing when no ad is served).
+                  const Padding(
+                    padding: EdgeInsetsDirectional.only(top: AppSpacing.sm),
+                    child: AdSlot(placement: AdPlacement.homeMiddleBanner),
+                  ),
+                  _DcSectionHeader(
+                    title: l10n.home_latest_listings_header,
+                    onSeeAll: () => context.go(AppRoutes.search),
+                  ),
+                  ..._feedChildren(context, state, currenciesByCode, l10n),
+                  // Clearance so the floating publish FAB never covers the last
+                  // card's content.
+                  const SizedBox(height: AppSpacing.xxxl + AppSpacing.xl),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  List<Widget> _buildFeedSlivers(
+  List<Widget> _feedChildren(
     BuildContext context,
     HomeState state,
     Map<String, Currency> currenciesByCode,
@@ -271,18 +285,11 @@ class _HomeViewState extends State<_HomeView> {
     switch (state.status) {
       case HomeFeedStatus.initial:
       case HomeFeedStatus.loading:
-        // Phase polish — card-shaped shimmer skeletons instead of a bare
-        // spinner, so the feed's shape is visible while it loads.
-        return [
-          SliverList.builder(
-            itemCount: 4,
-            itemBuilder: (_, __) => const _HomeCardSkeleton(),
-          ),
-        ];
+        return List.generate(3, (_) => const _HomeCardSkeleton());
       case HomeFeedStatus.error:
         return [
-          SliverFillRemaining(
-            hasScrollBody: false,
+          Padding(
+            padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
             child: ErrorState(
               title: l10n.error_could_not_load_listings,
               variant: ErrorStateVariant.network,
@@ -297,46 +304,30 @@ class _HomeViewState extends State<_HomeView> {
       case HomeFeedStatus.refreshing:
         if (state.listings.isEmpty && state.status == HomeFeedStatus.success) {
           return [
-            SliverFillRemaining(
-              hasScrollBody: false,
+            Padding(
+              padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
               child: _EmptyView(l10n: l10n),
             ),
           ];
         }
         return [
-          SliverList.separated(
-            itemCount: state.listings.length,
-            separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.xs),
-            itemBuilder: (context, index) {
-              final card = state.listings[index];
-              return StaggeredListItem(
-                index: index,
-                // Don't replay the entrance cascade on a pull-to-refresh
-                // rebuild; first load + appended pages still animate.
-                enabled: state.status != HomeFeedStatus.refreshing,
-                child: HomeListingCardTile(
-                  card: card,
-                  currenciesByCode: currenciesByCode,
-                  displayCurrencyCode: null,
-                ),
-              );
-            },
-          ),
-          // Phase 21: home middle banner — once after the first feed page
-          // (R-176; not repeated on scroll).
-          const SliverToBoxAdapter(
-            child: AdSlot(placement: AdPlacement.homeMiddleBanner),
-          ),
-          SliverToBoxAdapter(
-            child: _FeedFooter(state: state, l10n: l10n),
-          ),
+          for (var index = 0; index < state.listings.length; index++)
+            StaggeredListItem(
+              index: index,
+              enabled: state.status != HomeFeedStatus.refreshing,
+              child: _FeedCard(
+                card: state.listings[index],
+                currenciesByCode: currenciesByCode,
+              ),
+            ),
+          _FeedFooter(state: state, l10n: l10n),
         ];
     }
   }
 }
 
 /// Card-shaped shimmer placeholder shown while the first feed page loads —
-/// an image block plus a price and title line, mirroring [HomeListingCardTile].
+/// an image block plus a price and title line, mirroring the feed card.
 class _HomeCardSkeleton extends StatelessWidget {
   const _HomeCardSkeleton();
 
@@ -365,16 +356,405 @@ class _HomeCardSkeleton extends StatelessWidget {
   }
 }
 
-/// Premium feed section header — a bold title preceded by a short accent rule
-/// so the "Latest listings" block reads as a deliberate section start rather
-/// than a stray line of text. Purely presentational.
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title});
+/// Phase 035 — a feed row that maps a [HomeListingCard] into the unified
+/// [DsListingCard] and re-renders at the user's chosen [ListingViewMode].
+class _FeedCard extends StatelessWidget {
+  const _FeedCard({required this.card, required this.currenciesByCode});
 
-  final String title;
+  final HomeListingCard card;
+  final Map<String, Currency> currenciesByCode;
 
   @override
   Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context);
+    final data = homeCardToData(
+      card,
+      currenciesByCode,
+      locale,
+      AppLocalizations.of(context)!,
+    );
+    return ValueListenableBuilder<ListingViewMode>(
+      valueListenable: ListingViewModePref.notifier,
+      builder: (context, mode, _) => Padding(
+        padding: const EdgeInsetsDirectional.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.xs,
+        ),
+        child: DsListingCard(data: data, mode: mode),
+      ),
+    );
+  }
+}
+
+/// Phase 33 restyle — the photo-forward home **header row**. A small italic
+/// accent greeting (brand-primary) sits over a bold name/title line on the
+/// start side, with a circular avatar + a circular notification bell on the
+/// end side. Reuses the existing greeting strings, the avatar from the auth
+/// profile, and the [NotificationBadgeCubit] count + routing — purely visual.
+/// DC "Blue Crown" — the deep-blue brand header at the top of Home: the star
+/// logo + brand, chat + notification actions, a city selector, and a white
+/// search field. It scrolls with the content; the white sheet below overlaps
+/// it by 18px so the blue peeks through the sheet's rounded top corners.
+class _HomeCrown extends StatelessWidget {
+  const _HomeCrown({
+    required this.selectedPurpose,
+    required this.onPurposeChanged,
+  });
+
+  /// للبيع / للإيجار / إيجار يومي — the DC purpose tabs now live in the crown.
+  final int selectedPurpose;
+  final ValueChanged<int> onPurposeChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    final topInset = MediaQuery.paddingOf(context).top;
+
+    return Container(
+      width: double.infinity,
+      color: colors.brandHeader,
+      // Bottom padding is tighter than before: the purpose tabs now sit at the
+      // crown's bottom edge and the white sheet overlaps it, so a smaller pad
+      // keeps the selected tab's underline clear of the sheet.
+      padding: EdgeInsetsDirectional.only(
+        top: topInset + AppSpacing.sm,
+        start: AppSpacing.lg,
+        end: AppSpacing.lg,
+        bottom: AppSpacing.xl,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              // Opens the app navigation drawer (Dashboard / Admin / Messages /
+              // …). Without it the drawer is edge-swipe-only and undiscoverable.
+              Builder(
+                builder: (context) => _CrownAction(
+                  icon: Icons.menu,
+                  onTap: () => Scaffold.of(context).openDrawer(),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              Container(
+                width: 33,
+                height: 33,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: colors.onBrandHeader,
+                  borderRadius: appRadius(AppRadii.sm),
+                ),
+                child: Icon(Icons.star, size: 22, color: colors.brandHeader),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                l10n.home_app_bar_title,
+                style: styles.titleLarge.copyWith(
+                  color: colors.onBrandHeader,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const Spacer(),
+              _CrownAction(
+                icon: Icons.chat_bubble_outline,
+                onTap: () => context.go(AppRoutes.chat),
+              ),
+              _CrownNotificationAction(
+                onTap: () => context.push(AppRoutes.notifications),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          InkWell(
+            onTap: () async {
+              final govId = await showModalBottomSheet<String>(
+                context: context,
+                showDragHandle: true,
+                isScrollControlled: true,
+                builder: (_) => const HomeCityPickerSheet(),
+              );
+              if (govId != null && context.mounted) {
+                context.go(
+                  AppRoutes.search,
+                  extra: FilterState(governorateId: govId),
+                );
+              }
+            },
+            borderRadius: appRadius(AppRadii.sm),
+            child: Padding(
+              padding: const EdgeInsetsDirectional.symmetric(
+                vertical: AppSpacing.xs,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.location_on,
+                    size: 18,
+                    color: colors.onBrandHeader,
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  Text(
+                    l10n.home_crown_location,
+                    style: styles.bodyMedium.copyWith(
+                      color: colors.onBrandHeader,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Icon(
+                    Icons.expand_more,
+                    size: 20,
+                    color: colors.onBrandHeader,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Material(
+            color: colors.brandHeaderField,
+            borderRadius: appRadius(AppRadii.md),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: () => context.go(AppRoutes.search),
+              child: SizedBox(
+                height: 48,
+                child: Padding(
+                  padding: const EdgeInsetsDirectional.symmetric(
+                    horizontal: AppSpacing.md,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.search,
+                        size: 22,
+                        color: colors.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: Text(
+                          l10n.home_search_bar_placeholder,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: styles.bodyMedium.copyWith(
+                            color: colors.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Container(width: 1, height: 22, color: colors.outline),
+                      const SizedBox(width: AppSpacing.sm),
+                      Icon(Icons.tune, size: 23, color: colors.primary),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          CrownUnderlineTabs(
+            labels: [
+              l10n.listingPurposeSale,
+              l10n.listingPurposeRent,
+              l10n.listingPurposeDailyRent,
+            ],
+            selectedIndex: selectedPurpose,
+            onChanged: onPurposeChanged,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A 42px circular action button on the blue crown (white icon).
+class _CrownAction extends StatelessWidget {
+  const _CrownAction({required this.icon, required this.onTap, this.badge});
+
+  final IconData icon;
+  final VoidCallback onTap;
+  final Widget? badge;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    return InkWell(
+      onTap: onTap,
+      customBorder: const CircleBorder(),
+      child: SizedBox(
+        width: 42,
+        height: 42,
+        child: Stack(
+          alignment: Alignment.center,
+          clipBehavior: Clip.none,
+          children: [
+            Icon(icon, size: 24, color: colors.onBrandHeader),
+            if (badge != null)
+              PositionedDirectional(top: 5, end: 5, child: badge!),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The crown's notification bell with the live unread count badge.
+class _CrownNotificationAction extends StatelessWidget {
+  const _CrownNotificationAction({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider.value(
+      value: getIt<NotificationBadgeCubit>(),
+      child: BlocBuilder<NotificationBadgeCubit, NotificationBadgeState>(
+        builder: (context, state) {
+          return _CrownAction(
+            icon: Icons.notifications_none,
+            onTap: onTap,
+            badge: state.count > 0 ? _CountBadge(count: state.count) : null,
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// A small red count badge (crown actions + chat).
+class _CountBadge extends StatelessWidget {
+  const _CountBadge({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    return Container(
+      constraints: const BoxConstraints(minWidth: 16),
+      height: 16,
+      padding: const EdgeInsetsDirectional.symmetric(horizontal: AppSpacing.xs),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: colors.error,
+        borderRadius: appRadius(AppRadii.pill),
+        border: Border.all(color: colors.brandHeader, width: 1.5),
+      ),
+      child: Text(
+        count > 9 ? '9+' : '$count',
+        style: styles.labelSmall.copyWith(
+          color: colors.onError,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+/// DC category grid — 8 property-type tiles in a 4-column layout, each a tonal
+/// rounded square with its icon and label. Tapping routes to search.
+class _HomeCategoryGrid extends StatelessWidget {
+  const _HomeCategoryGrid({required this.onSelected});
+
+  final void Function(int index) onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final cats = <(IconData, String)>[
+      (Icons.apartment, l10n.propertyTypeApartment),
+      (Icons.villa, l10n.propertyTypeVilla),
+      (Icons.landscape, l10n.propertyTypeLand),
+      (Icons.storefront, l10n.propertyTypeShop),
+      (Icons.business_center, l10n.propertyTypeOffice),
+      (Icons.agriculture, l10n.propertyTypeFarm),
+      (Icons.warehouse, l10n.propertyTypeWarehouse),
+      (Icons.grid_view, l10n.propertyTypeOther),
+    ];
+    Widget row(int start) => Row(
+      children: [
+        for (var i = start; i < start + 4; i++)
+          Expanded(
+            child: _CategoryTile(
+              icon: cats[i].$1,
+              label: cats[i].$2,
+              onTap: () => onSelected(i),
+            ),
+          ),
+      ],
+    );
+    return Padding(
+      padding: const EdgeInsetsDirectional.symmetric(horizontal: AppSpacing.sm),
+      child: Column(
+        children: [row(0), const SizedBox(height: AppSpacing.xs), row(4)],
+      ),
+    );
+  }
+}
+
+class _CategoryTile extends StatelessWidget {
+  const _CategoryTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    return InkWell(
+      onTap: onTap,
+      borderRadius: appRadius(AppRadii.md),
+      child: Padding(
+        padding: const EdgeInsetsDirectional.symmetric(vertical: AppSpacing.sm),
+        child: Column(
+          children: [
+            Container(
+              width: 54,
+              height: 54,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: colors.primaryContainer,
+                borderRadius: appRadius(AppRadii.lg),
+              ),
+              child: Icon(icon, size: 27, color: colors.onPrimaryContainer),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: styles.labelMedium.copyWith(
+                color: colors.onSurface,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// DC section header — a bold title with a trailing "see all" text button.
+class _DcSectionHeader extends StatelessWidget {
+  const _DcSectionHeader({required this.title, this.onSeeAll});
+
+  final String title;
+  final VoidCallback? onSeeAll;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
     return Padding(
@@ -386,201 +766,21 @@ class _SectionHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Short brand-accent rule anchoring the section start.
-          Container(
-            width: AppSpacing.xs,
-            height: AppSpacing.xl,
-            decoration: BoxDecoration(
-              color: colors.primary,
-              borderRadius: appRadius(AppRadii.pill),
+          Expanded(
+            child: Text(
+              title,
+              style: styles.titleMedium.copyWith(fontWeight: FontWeight.w700),
             ),
           ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(child: Text(title, style: styles.titleLarge)),
-        ],
-      ),
-    );
-  }
-}
-
-/// Phase 33 restyle — the photo-forward home **header row**. A small italic
-/// accent greeting (brand-primary) sits over a bold name/title line on the
-/// start side, with a circular avatar + a circular notification bell on the
-/// end side. Reuses the existing greeting strings, the avatar from the auth
-/// profile, and the [NotificationBadgeCubit] count + routing — purely visual.
-class _HomeGreeting extends StatelessWidget {
-  const _HomeGreeting();
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final colors = AppColors.of(context);
-    final styles = AppTextStyles.of(context);
-
-    return BlocBuilder<AuthBloc, AuthState>(
-      builder: (context, state) {
-        final profile = switch (state) {
-          Authenticated(:final profile) => profile,
-          _ => null,
-        };
-        final name = _firstName(
-          profile?.fullName ?? profile?.username ?? '',
-        );
-        // Accent line = the localized greeting (e.g. "Hi Ahmad," / "Welcome,").
-        final greeting = (name != null && name.isNotEmpty)
-            ? l10n.home_greeting_named(name)
-            : l10n.home_greeting_welcome;
-
-        return StaggeredListItem(
-          index: 0,
-          child: Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(
-              AppSpacing.lg,
-              AppSpacing.xl,
-              AppSpacing.lg,
-              AppSpacing.xs,
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Small italic brand-accent greeting line.
-                      Text(
-                        greeting,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: styles.labelLarge.copyWith(
-                          color: colors.primary,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.xxs),
-                      // Bold ~22px subtitle line — the loudest line on first
-                      // paint.
-                      Text(
-                        l10n.home_greeting_subtitle,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: styles.headlineMedium,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                _HomeAvatar(avatarUrl: profile?.avatarUrl),
-                const SizedBox(width: AppSpacing.sm),
-                const _HomeHeaderBell(),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  /// First whitespace-delimited token of a display name (the design shows just
-  /// the given name); null/empty when there's nothing to show.
-  static String? _firstName(String full) {
-    final trimmed = full.trim();
-    if (trimmed.isEmpty) return null;
-    return trimmed.split(RegExp(r'\s+')).first;
-  }
-}
-
-/// A 46px circular avatar for the home header. Renders the user's avatar photo
-/// when present, otherwise a neutral person glyph on a recessed surface.
-class _HomeAvatar extends StatelessWidget {
-  const _HomeAvatar({required this.avatarUrl});
-
-  final String? avatarUrl;
-
-  static const double _size = 46;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-    return Container(
-      width: _size,
-      height: _size,
-      decoration: BoxDecoration(
-        color: colors.surfaceVariant,
-        shape: BoxShape.circle,
-        border: Border.all(color: colors.outline),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: (avatarUrl != null && avatarUrl!.isNotEmpty)
-          ? AppNetworkImage(url: avatarUrl)
-          : Icon(
-              Icons.person_outline,
-              size: AppSpacing.xl,
-              color: colors.textMuted,
-            ),
-    );
-  }
-}
-
-/// A 42px circular notification bell for the home header — a bordered surface
-/// chip with a small coral dot when there are unread notifications. Reuses the
-/// shared [NotificationBadgeCubit] count and routes to /notifications on tap.
-class _HomeHeaderBell extends StatelessWidget {
-  const _HomeHeaderBell();
-
-  static const double _size = 42;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final colors = AppColors.of(context);
-
-    return BlocProvider.value(
-      value: getIt<NotificationBadgeCubit>(),
-      child: BlocBuilder<NotificationBadgeCubit, NotificationBadgeState>(
-        builder: (context, state) {
-          return Tooltip(
-            message: l10n.notification_bell_tooltip,
-            child: Material(
-              color: colors.surface,
-              shape: CircleBorder(side: BorderSide(color: colors.outline)),
-              clipBehavior: Clip.antiAlias,
-              child: InkWell(
-                onTap: () => context.push(AppRoutes.notifications),
-                child: SizedBox(
-                  width: _size,
-                  height: _size,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    clipBehavior: Clip.none,
-                    children: [
-                      Icon(
-                        Icons.notifications_none_outlined,
-                        size: AppSpacing.xl,
-                        color: colors.onSurface,
-                      ),
-                      if (state.count > 0)
-                        PositionedDirectional(
-                          top: AppSpacing.sm,
-                          end: AppSpacing.md,
-                          child: Container(
-                            width: AppSpacing.sm,
-                            height: AppSpacing.sm,
-                            decoration: BoxDecoration(
-                              color: colors.accent,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: colors.surface),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
+          if (onSeeAll != null)
+            InkWell(
+              onTap: onSeeAll,
+              child: Text(
+                l10n.home_see_all,
+                style: styles.labelLarge.copyWith(color: colors.primary),
               ),
             ),
-          );
-        },
+        ],
       ),
     );
   }

@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>النجوم — pro mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* =====================================================================
+   AlNujom "real app" mockup — earned familiarity (Bayut/dubizzle/Airbnb
+   grammar). Flat surfaces, hairlines, dense info, restrained type.
+   ONE accent (royal blue) for actions/selection. Green = verified/WhatsApp
+   only. Gold = featured chip only.
+   ===================================================================== */
+* { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; }
+:root {
+  --blue:#1F4FE6; --blue-press:#1636A8; --blue-tint:#EEF3FE;
+  --ink:#101828; --ink-2:#475467; --muted:#667085; --faint:#98A2B3;
+  --bg:#FFFFFF; --bg-2:#F7F8FA; --line:#EAECF0; --line-2:#D0D5DD;
+  --green:#12805C; --green-tint:#E8F5F0;
+  --wa:#1DAB61;
+  --gold:#B7791F; --gold-tint:#FdF3e2;
+  --heart:#E5484D;
+  --chip-scrim:rgba(16,24,40,.62);
+}
+.dark {
+  --blue:#6C8CFF; --blue-press:#8FA8FF; --blue-tint:#182036;
+  --ink:#F2F4F7; --ink-2:#C7CEDA; --muted:#98A2B3; --faint:#667085;
+  --bg:#0D1420; --bg-2:#111A29; --line:#1F2A3C; --line-2:#2C3A50;
+  --green:#3CCB95; --green-tint:#12291F;
+  --wa:#25D366;
+  --gold:#E0A94E; --gold-tint:#2A2113;
+  --heart:#FF6B6E;
+}
+html { background:#31394a; }
+body {
+  font-family:'Tajawal', 'Segoe UI', Tahoma, sans-serif;
+  display:flex; justify-content:center; padding:0;
+}
+.frame {
+  width:392px; min-height:852px; background:var(--bg); color:var(--ink);
+  position:relative; overflow:hidden;
+}
+.i { width:18px; height:18px; stroke:currentColor; stroke-width:1.8; fill:none;
+     stroke-linecap:round; stroke-linejoin:round; flex:none; }
+
+/* ---------- status bar ---------- */
+.status {
+  height:34px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 22px; font-size:13px; font-weight:700; letter-spacing:.2px;
+}
+.status .right { display:flex; gap:5px; align-items:center; }
+.status svg { width:15px; height:15px; fill:currentColor; stroke:none; }
+
+/* ---------- header ---------- */
+.hdr {
+  display:flex; align-items:center; gap:10px; padding:6px 16px 10px;
+}
+.brand { display:flex; align-items:center; gap:7px; }
+.brand .mark {
+  width:28px; height:28px; border-radius:7px; background:var(--blue);
+  display:grid; place-items:center; color:#fff;
+}
+.brand .mark svg { width:16px; height:16px; fill:currentColor; stroke:none; }
+.brand b { font-size:16px; font-weight:700; }
+.hdr .loc {
+  display:flex; align-items:center; gap:4px; margin-inline-start:2px;
+  font-size:12.5px; font-weight:500; color:var(--ink-2);
+  padding:6px 10px; border:1px solid var(--line); border-radius:8px; background:var(--bg);
+}
+.hdr .loc .i { width:14px; height:14px; color:var(--blue); }
+.hdr .sp { flex:1; }
+.icon-btn {
+  width:38px; height:38px; border-radius:9px; border:1px solid var(--line);
+  background:var(--bg); color:var(--ink); display:grid; place-items:center; position:relative;
+}
+.icon-btn .dot {
+  position:absolute; top:8px; inset-inline-start:9px; width:7px; height:7px;
+  border-radius:99px; background:var(--heart); border:1.5px solid var(--bg);
+}
+
+/* ---------- search ---------- */
+.search-wrap { padding:0 16px 10px; }
+.search {
+  height:44px; border:1px solid var(--line-2); border-radius:10px; background:var(--bg);
+  display:flex; align-items:center; padding:0 12px; gap:8px;
+}
+.search .i { color:var(--muted); width:17px; height:17px; }
+.search .ph { flex:1; font-size:13px; color:var(--faint); font-weight:400; }
+.search .divider { width:1px; height:22px; background:var(--line); }
+.search .filter { display:flex; align-items:center; gap:5px; color:var(--blue);
+  font-size:12.5px; font-weight:700; }
+.search .filter .i { color:var(--blue); width:16px; height:16px; }
+
+/* ---------- purpose tabs ---------- */
+.tabs { display:flex; padding:0 16px; gap:22px; border-bottom:1px solid var(--line); }
+.tabs button {
+  background:none; border:0; font-family:inherit; font-size:13.5px; font-weight:500;
+  color:var(--muted); padding:8px 2px 9px; position:relative;
+}
+.tabs button.on { color:var(--ink); font-weight:700; }
+.tabs button.on::after {
+  content:''; position:absolute; bottom:-1px; inset-inline:0; height:2.5px;
+  border-radius:2px 2px 0 0; background:var(--blue);
+}
+
+/* ---------- type chips ---------- */
+.chips { display:flex; gap:8px; padding:12px 16px 4px; overflow-x:auto; scrollbar-width:none; }
+.chips::-webkit-scrollbar { display:none; }
+.chip {
+  height:32px; padding:0 13px; border-radius:8px; border:1px solid var(--line-2);
+  background:var(--bg); color:var(--ink-2); font-family:inherit; font-size:12.5px;
+  font-weight:500; white-space:nowrap; display:flex; align-items:center; gap:5px;
+}
+.chip.on { background:var(--blue-tint); border-color:var(--blue); color:var(--blue); font-weight:700; }
+
+/* ---------- section head ---------- */
+.sec { display:flex; align-items:baseline; padding:16px 16px 10px; gap:8px; }
+.sec h2 { font-size:15px; font-weight:700; }
+.sec .n { font-size:12px; color:var(--faint); font-weight:400; }
+.sec .sp { flex:1; }
+.sec a { font-size:12.5px; font-weight:500; color:var(--blue); text-decoration:none; }
+
+/* ---------- featured rail ---------- */
+.rail { display:flex; gap:10px; padding:0 16px; overflow-x:auto; scrollbar-width:none; }
+.rail::-webkit-scrollbar { display:none; }
+.fcard {
+  flex:none; width:225px; border:1px solid var(--line); border-radius:12px;
+  background:var(--bg); overflow:hidden;
+}
+.fcard .ph { position:relative; height:120px; }
+.fcard .ph img { width:100%; height:100%; object-fit:cover; display:block; }
+.fcard .bd { padding:9px 11px 11px; }
+.fcard .price { font-size:15px; font-weight:700; }
+.fcard .specs { margin-top:3px; }
+.fcard .t { font-size:12px; color:var(--ink-2); margin-top:3px; font-weight:400;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.fcard .l { font-size:11.5px; color:var(--faint); margin-top:2px; font-weight:400; }
+
+/* ---------- overlay chips on photos ---------- */
+.ochip {
+  position:absolute; display:flex; align-items:center; gap:4px;
+  font-size:11px; font-weight:700; padding:3px 8px; border-radius:6px;
+}
+.ochip .i { width:12px; height:12px; }
+.ochip.gold { top:8px; inset-inline-start:8px; background:var(--gold); color:#fff; }
+.ochip.verify { top:8px; inset-inline-start:8px; background:var(--green); color:#fff; }
+.ochip.count { bottom:8px; inset-inline-start:8px; background:var(--chip-scrim); color:#fff; font-weight:500; }
+.heart {
+  position:absolute; top:8px; inset-inline-end:8px; width:32px; height:32px;
+  border-radius:99px; background:rgba(255,255,255,.94); border:0;
+  display:grid; place-items:center; color:var(--ink-2);
+}
+.dark .heart { background:rgba(13,20,32,.82); color:#C7CEDA; }
+.heart .i { width:16px; height:16px; }
+
+/* ---------- specs inline row ---------- */
+.specs { display:flex; align-items:center; gap:10px; font-size:12px; color:var(--muted); font-weight:400; }
+.specs b { font-weight:500; color:var(--ink-2); }
+.specs .s { display:flex; align-items:center; gap:4px; }
+.specs .i { width:14px; height:14px; color:var(--faint); }
+.specs .sep { width:3px; height:3px; border-radius:99px; background:var(--line-2); }
+
+/* ---------- listing card (feed) ---------- */
+.feed { padding:2px 16px 0; display:flex; flex-direction:column; gap:12px; }
+.card {
+  border:1px solid var(--line); border-radius:12px; background:var(--bg); overflow:hidden;
+}
+.card .ph { position:relative; height:186px; }
+.card .ph img { width:100%; height:100%; object-fit:cover; display:block; }
+.card .bd { padding:11px 13px 12px; }
+.price-row { display:flex; align-items:baseline; gap:7px; }
+.price { font-size:17px; font-weight:700; letter-spacing:.1px; font-feature-settings:'tnum'; }
+.price-sub { font-size:11.5px; color:var(--faint); font-weight:400; }
+.card .specs { margin-top:6px; }
+.card .t {
+  margin-top:6px; font-size:13px; font-weight:400; color:var(--ink-2); line-height:1.55;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.meta { display:flex; align-items:center; margin-top:4px; font-size:11.5px; color:var(--faint); gap:4px; font-weight:400; }
+.meta .i { width:12.5px; height:12.5px; }
+.meta .sp { flex:1; }
+.cardctas {
+  display:flex; gap:8px; margin-top:11px; padding-top:11px;
+  border-top:1px solid var(--line);
+}
+.avatar {
+  width:30px; height:30px; border-radius:99px; background:var(--bg-2);
+  border:1px solid var(--line); display:grid; place-items:center;
+  font-size:12px; font-weight:700; color:var(--ink-2); flex:none;
+}
+.abtn {
+  flex:1; height:36px; border-radius:8px; font-family:inherit;
+  font-size:12.5px; font-weight:700; display:flex; align-items:center;
+  justify-content:center; gap:6px; border:0;
+}
+.abtn .i { width:15px; height:15px; }
+.abtn.call { border:1px solid var(--line-2); background:var(--bg); color:var(--ink-2); }
+.abtn.wa { background:var(--green-tint); color:var(--green); }
+
+/* ---------- bottom nav (standard, full width) ---------- */
+.navpad { height:76px; }
+.nav {
+  position:absolute; bottom:0; inset-inline:0; height:62px; background:var(--bg);
+  border-top:1px solid var(--line); display:flex; padding-bottom:6px;
+}
+.nav button {
+  flex:1; border:0; background:none; font-family:inherit;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+  font-size:10px; font-weight:500; color:var(--muted); position:relative;
+}
+.nav button .i { width:22px; height:22px; }
+.nav button.on { color:var(--blue); font-weight:700; }
+.nav .dot { position:absolute; top:9px; inset-inline-start:calc(50% + 7px);
+  width:7px; height:7px; border-radius:99px; background:var(--heart); border:1.5px solid var(--bg); }
+.fab {
+  position:absolute; bottom:78px; inset-inline-end:16px; height:44px; padding:0 16px;
+  border-radius:22px; background:var(--blue); color:#fff; border:0;
+  font-family:inherit; font-size:13px; font-weight:700;
+  display:flex; align-items:center; gap:6px;
+  box-shadow:0 4px 12px rgba(31,79,230,.32);
+}
+.dark .fab { box-shadow:0 4px 12px rgba(0,0,0,.5); }
+.fab .i { width:16px; height:16px; }
+
+/* ---------- detail ---------- */
+.gal { position:relative; height:280px; }
+.gal img { width:100%; height:100%; object-fit:cover; display:block; }
+.gal .top { position:absolute; top:12px; inset-inline:12px; display:flex; }
+.gbtn {
+  width:36px; height:36px; border-radius:99px; background:rgba(255,255,255,.94);
+  border:0; display:grid; place-items:center; color:var(--ink);
+}
+.dark .gbtn { background:rgba(13,20,32,.85); color:#F2F4F7; }
+.gal .top .sp { flex:1; }
+.gal .top .gbtn + .gbtn { margin-inline-start:8px; }
+.gal .cnt {
+  position:absolute; bottom:12px; inset-inline-end:12px;
+  background:var(--chip-scrim); color:#fff; font-size:11px; font-weight:500;
+  padding:3px 9px; border-radius:6px; display:flex; gap:4px; align-items:center;
+}
+.gal .cnt .i { width:12px; height:12px; }
+.gal .thumbs { position:absolute; bottom:12px; inset-inline-start:12px; display:flex; gap:5px; }
+.gal .thumbs img {
+  width:44px; height:34px; border-radius:6px; object-fit:cover; border:1.5px solid rgba(255,255,255,.85);
+}
+.gal .thumbs img.on { border-color:#fff; box-shadow:0 0 0 1.5px var(--blue); }
+
+.dbody { padding:14px 16px 0; }
+.dprice-row { display:flex; align-items:baseline; gap:8px; }
+.dprice { font-size:21px; font-weight:700; font-feature-settings:'tnum'; }
+.dprice-sub { font-size:12px; color:var(--faint); font-weight:400; }
+.badges { display:flex; gap:6px; margin-top:8px; }
+.badge {
+  display:flex; align-items:center; gap:4px; font-size:11px; font-weight:700;
+  padding:3.5px 9px; border-radius:6px;
+}
+.badge .i { width:12px; height:12px; }
+.badge.green { background:var(--green-tint); color:var(--green); }
+.badge.blue { background:var(--blue-tint); color:var(--blue); }
+.badge.plain { background:var(--bg-2); color:var(--ink-2); font-weight:500; }
+.dtitle { margin-top:9px; font-size:15.5px; font-weight:500; line-height:1.6; color:var(--ink); }
+.dmeta { display:flex; align-items:center; gap:5px; margin-top:5px; font-size:12.5px; color:var(--muted); }
+.dmeta .i { width:14px; height:14px; color:var(--faint); }
+.dmeta .sep { width:3px; height:3px; border-radius:99px; background:var(--line-2); margin:0 3px; }
+
+.facts {
+  display:flex; margin-top:14px; border:1px solid var(--line); border-radius:10px;
+  padding:11px 0; background:var(--bg);
+}
+.fact { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; }
+.fact + .fact { border-inline-start:1px solid var(--line); }
+.fact .i { width:17px; height:17px; color:var(--ink-2); }
+.fact b { font-size:13.5px; font-weight:700; font-feature-settings:'tnum'; }
+.fact span { font-size:10.5px; color:var(--faint); font-weight:400; }
+
+.vrow {
+  display:flex; gap:10px; align-items:flex-start; margin-top:12px;
+  background:var(--green-tint); border-radius:10px; padding:11px 12px;
+}
+.vrow .i { width:19px; height:19px; color:var(--green); margin-top:1px; }
+.vrow b { font-size:12.5px; font-weight:700; color:var(--green); display:block; }
+.vrow span { font-size:11.5px; color:var(--ink-2); font-weight:400; line-height:1.6; }
+
+.kv { margin-top:14px; border-top:1px solid var(--line); }
+.kv .row {
+  display:flex; padding:10px 2px; border-bottom:1px solid var(--line);
+  font-size:12.5px;
+}
+.kv .k { color:var(--muted); width:110px; font-weight:400; }
+.kv .v { color:var(--ink); font-weight:500; }
+
+.dsec { font-size:14px; font-weight:700; margin:16px 0 7px; }
+.ddesc { font-size:13px; line-height:1.9; color:var(--ink-2); font-weight:400; }
+
+.dagent {
+  margin-top:16px; border:1px solid var(--line); border-radius:12px; padding:12px 13px;
+}
+.dagent .row1 { display:flex; align-items:center; gap:10px; }
+.dagent .avatar { width:38px; height:38px; font-size:14px; }
+.dagent .who { flex:1; min-width:0; }
+.dagent .who b { font-size:13px; font-weight:700; display:flex; align-items:center; gap:4px; }
+.dagent .who b .i { width:14px; height:14px; color:var(--green); }
+.dagent .who span { font-size:11.5px; color:var(--faint); font-weight:400; }
+.dagent .lnk { font-size:12px; color:var(--blue); font-weight:500; text-decoration:none; }
+.dagent .ctas { display:flex; gap:8px; margin-top:11px; }
+.dagent .cta {
+  flex:1; height:40px; border-radius:9px; font-family:inherit; font-size:13px;
+  font-weight:700; display:flex; align-items:center; justify-content:center; gap:6px; border:0;
+}
+.dagent .cta .i { width:16px; height:16px; }
+.dagent .cta.call { border:1px solid var(--line-2); background:var(--bg); color:var(--ink); }
+.dagent .cta.wa { background:var(--wa); color:#fff; }
+
+/* ---------- search screen ---------- */
+.s-hd { display:flex; align-items:center; gap:10px; padding:6px 16px 10px; }
+.s-hd .back { width:38px; height:38px; border-radius:9px; border:1px solid var(--line);
+  background:var(--bg); display:grid; place-items:center; color:var(--ink); }
+.s-hd .search { flex:1; height:40px; }
+.filterbar { display:flex; gap:8px; padding:0 16px 10px; overflow-x:auto; scrollbar-width:none; }
+.filterbar::-webkit-scrollbar { display:none; }
+.fchip {
+  height:32px; padding:0 12px; border-radius:8px; border:1px solid var(--line-2);
+  background:var(--bg); color:var(--ink-2); font-family:inherit; font-size:12px; font-weight:500;
+  display:flex; align-items:center; gap:5px; white-space:nowrap;
+}
+.fchip .i { width:13px; height:13px; }
+.fchip.active { background:var(--blue-tint); border-color:var(--blue); color:var(--blue); font-weight:700; }
+.resultbar {
+  display:flex; align-items:center; padding:2px 16px 10px; gap:8px;
+}
+.resultbar .n { font-size:12.5px; color:var(--muted); font-weight:400; }
+.resultbar .n b { color:var(--ink); font-weight:700; }
+.resultbar .sp { flex:1; }
+.sortbtn, .mapbtn {
+  height:32px; padding:0 11px; border-radius:8px; border:1px solid var(--line-2);
+  background:var(--bg); color:var(--ink-2); font-family:inherit; font-size:12px; font-weight:500;
+  display:flex; align-items:center; gap:5px;
+}
+.sortbtn .i, .mapbtn .i { width:14px; height:14px; }
+</style>
+</head>
+<body>
+<div class="frame" id="frame">
+
+  <!-- ============ HOME ============ -->
+  <section data-screen="home">
+    <div class="status"><span>9:41</span>
+      <span class="right">
+        <svg viewBox="0 0 24 24"><path d="M2 17h3v4H2zM7.5 13h3v8h-3zM13 9h3v12h-3zM18.5 5h3v16h-3z"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M12 4C7 4 2.7 6.5 0 10.4L12 21 24 10.4C21.3 6.5 17 4 12 4z"/></svg>
+        <svg viewBox="0 0 24 24"><rect x="2" y="7" width="18" height="10" rx="2"/><rect x="21" y="10" width="2" height="4"/></svg>
+      </span>
+    </div>
+
+    <header class="hdr">
+      <div class="brand">
+        <span class="mark"><svg viewBox="0 0 24 24"><path d="M12 2l2.4 6.2 6.6.5-5 4.2 1.6 6.4L12 15.9l-5.6 3.4L8 12.9 3 8.7l6.6-.5z"/></svg></span>
+        <b>النجوم</b>
+      </div>
+      <span class="sp"></span>
+      <button class="loc">
+        <svg class="i" viewBox="0 0 24 24"><path d="M20 10c0 4.99-5.54 10.19-7.4 11.8a1 1 0 0 1-1.2 0C9.54 20.19 4 14.99 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
+        دمشق
+        <svg class="i" viewBox="0 0 24 24" style="width:12px;height:12px;color:var(--faint)"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <button class="icon-btn">
+        <svg class="i" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        <span class="dot"></span>
+      </button>
+    </header>
+
+    <div class="search-wrap">
+      <div class="search">
+        <svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <span class="ph">ابحث عن منطقة، مدينة، أو مشروع…</span>
+        <span class="divider"></span>
+        <span class="filter">
+          <svg class="i" viewBox="0 0 24 24"><line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/></svg>
+          تصفية
+        </span>
+      </div>
+    </div>
+
+    <nav class="tabs">
+      <button class="on">للبيع</button>
+      <button>للإيجار</button>
+      <button>إيجار يومي</button>
+    </nav>
+
+    <div class="chips">
+      <button class="chip on">الكل</button>
+      <button class="chip">شقق</button>
+      <button class="chip">فلل</button>
+      <button class="chip">أراضٍ</button>
+      <button class="chip">محلات</button>
+      <button class="chip">مكاتب</button>
+      <button class="chip">مزارع</button>
+    </div>
+
+    <div class="sec">
+      <h2>عقارات مميّزة</h2>
+      <span class="sp"></span>
+      <a href="#">عرض الكل</a>
+    </div>
+    <div class="rail" id="rail"></div>
+
+    <div class="sec">
+      <h2>أحدث الإعلانات</h2>
+      <span class="n">١٦ إعلاناً</span>
+      <span class="sp"></span>
+      <a href="#">عرض الكل</a>
+    </div>
+    <div class="feed" id="feed"></div>
+
+    <div class="navpad"></div>
+    <button class="fab">
+      <svg class="i" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+      أضف إعلانك
+    </button>
+    <nav class="nav">
+      <button class="on">
+        <svg class="i" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+        الرئيسية
+      </button>
+      <button>
+        <svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        البحث
+      </button>
+      <button>
+        <svg class="i" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+        المحفوظة
+      </button>
+      <button style="position:relative">
+        <svg class="i" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+        الرسائل
+        <span class="dot"></span>
+      </button>
+      <button>
+        <svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+        حسابي
+      </button>
+    </nav>
+  </section>
+
+  <!-- ============ DETAIL ============ -->
+  <section data-screen="detail" hidden>
+    <div class="gal">
+      <img src="../photos/living-luxury-1.jpg" alt="">
+      <div class="top">
+        <button class="gbtn"><svg class="i" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
+        <span class="sp"></span>
+        <button class="gbtn"><svg class="i" viewBox="0 0 24 24"><path d="M12 2v13"/><path d="m16 6-4-4-4 4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></button>
+        <button class="gbtn"><svg class="i" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></button>
+      </div>
+      <div class="thumbs">
+        <img src="../photos/living-luxury-1.jpg" class="on" alt="">
+        <img src="../photos/terrace-1.jpg" alt="">
+        <img src="../photos/kitchen-luxury-2.jpg" alt="">
+        <img src="../photos/bathroom-2.jpg" alt="">
+      </div>
+      <span class="cnt">
+        <svg class="i" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg>
+        ١ / ٩
+      </span>
+    </div>
+
+    <div class="dbody">
+      <div class="dprice-row">
+        <span class="dprice">٢١٠٬٠٠٠ $</span>
+        <span class="dprice-sub">≈ ٢٫٧ مليار ل.س</span>
+      </div>
+      <div class="badges">
+        <span class="badge green">
+          <svg class="i" viewBox="0 0 24 24"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></svg>
+          موثّق ميدانياً
+        </span>
+        <span class="badge blue">للبيع</span>
+        <span class="badge plain">طابو أخضر</span>
+      </div>
+      <h1 class="dtitle">شقة دوبلكس مع تراس ٤٠ م² — أبو رمانة</h1>
+      <div class="dmeta">
+        <svg class="i" viewBox="0 0 24 24"><path d="M20 10c0 4.99-5.54 10.19-7.4 11.8a1 1 0 0 1-1.2 0C9.54 20.19 4 14.99 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
+        دمشق، أبو رمانة
+        <span class="sep"></span>
+        نُشر منذ ١٢ ساعة
+      </div>
+
+      <div class="facts">
+        <div class="fact">
+          <svg class="i" viewBox="0 0 24 24"><path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"/><path d="M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4"/><path d="M2 17h20"/><path d="M6 8v2"/></svg>
+          <b>٤</b><span>غرف</span>
+        </div>
+        <div class="fact">
+          <svg class="i" viewBox="0 0 24 24"><path d="M10 4 8 6"/><path d="M17 19v2"/><path d="M2 12h20"/><path d="M7 19v2"/><path d="M9 5 7.62 3.62A2.12 2.12 0 0 0 4 5v7"/><path d="M20 12v5a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3v-5"/></svg>
+          <b>٣</b><span>حمّامات</span>
+        </div>
+        <div class="fact">
+          <svg class="i" viewBox="0 0 24 24"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z"/><path d="m14.5 12.5 2-2"/><path d="m11.5 9.5 2-2"/><path d="m8.5 6.5 2-2"/><path d="m17.5 15.5 2-2"/></svg>
+          <b>٢٢٠ م²</b><span>المساحة</span>
+        </div>
+        <div class="fact">
+          <svg class="i" viewBox="0 0 24 24"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>
+          <b>٧</b><span>الطابق</span>
+        </div>
+      </div>
+
+      <div class="vrow">
+        <svg class="i" viewBox="0 0 24 24"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></svg>
+        <div>
+          <b>موثّق ميدانياً</b>
+          <span>زار فريقنا هذا العقار وتأكّد من توفّره وصحة بياناته قبل ٣ أيام.</span>
+        </div>
+      </div>
+
+      <div class="kv">
+        <div class="row"><span class="k">نوع العقار</span><span class="v">شقة — دوبلكس</span></div>
+        <div class="row"><span class="k">الطابو</span><span class="v">طابو أخضر</span></div>
+        <div class="row"><span class="k">الكسوة</span><span class="v">سوبر ديلوكس</span></div>
+        <div class="row"><span class="k">سعر المتر</span><span class="v">٩٥٥ $ / م²</span></div>
+      </div>
+
+      <h3 class="dsec">الوصف</h3>
+      <p class="ddesc">شقة دوبلكس مجدَّدة بالكامل مع تراس ٤٠ م² مطل على الحديقة. إكساء سوبر ديلوكس، موقف سيارة خاص ومصعد. الطابع عدلي والنقل فوري.</p>
+
+      <div class="dagent">
+        <div class="row1">
+          <span class="avatar">ش</span>
+          <div class="who">
+            <b>مكتب الشام العقاري
+              <svg class="i" viewBox="0 0 24 24"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></svg>
+            </b>
+            <span>وسيط موثّق · يرد عادةً خلال ساعة</span>
+          </div>
+          <a class="lnk" href="#">كل إعلاناته</a>
+        </div>
+        <div class="ctas">
+          <button class="cta call">
+            <svg class="i" viewBox="0 0 24 24"><path d="M9.03 3.34a2 2 0 0 1 1.98 1.7l.44 2.62a2 2 0 0 1-.55 1.74l-1.05 1.05a14 14 0 0 0 3.7 3.7l1.05-1.05a2 2 0 0 1 1.74-.55l2.62.44a2 2 0 0 1 1.7 1.98v2.11a2 2 0 0 1-2.18 2A18 18 0 0 1 3.02 5.52a2 2 0 0 1 2-2.18Z"/></svg>
+            اتصال
+          </button>
+          <button class="cta wa">
+            <svg class="i" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+            واتساب
+          </button>
+        </div>
+      </div>
+      <div style="height:24px"></div>
+    </div>
+  </section>
+
+  <!-- ============ SEARCH ============ -->
+  <section data-screen="search" hidden>
+    <div class="status"><span>9:41</span>
+      <span class="right">
+        <svg viewBox="0 0 24 24"><path d="M2 17h3v4H2zM7.5 13h3v8h-3zM13 9h3v12h-3zM18.5 5h3v16h-3z"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M12 4C7 4 2.7 6.5 0 10.4L12 21 24 10.4C21.3 6.5 17 4 12 4z"/></svg>
+        <svg viewBox="0 0 24 24"><rect x="2" y="7" width="18" height="10" rx="2"/><rect x="21" y="10" width="2" height="4"/></svg>
+      </span>
+    </div>
+
+    <div class="s-hd">
+      <button class="back"><svg class="i" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
+      <div class="search">
+        <svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <span class="ph" style="color:var(--ink);font-weight:500">شقق للبيع في المزة</span>
+      </div>
+      <button class="icon-btn">
+        <svg class="i" viewBox="0 0 24 24"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+      </button>
+    </div>
+
+    <div class="filterbar">
+      <button class="fchip active">
+        <svg class="i" viewBox="0 0 24 24"><line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/></svg>
+        الفلاتر · ٣
+      </button>
+      <button class="fchip active">شقق ×</button>
+      <button class="fchip active">المزة ×</button>
+      <button class="fchip">السعر</button>
+      <button class="fchip">الغرف</button>
+      <button class="fchip">الموثّقة فقط</button>
+    </div>
+
+    <div class="resultbar">
+      <span class="n"><b>٢٤</b> نتيجة</span>
+      <span class="sp"></span>
+      <button class="sortbtn">
+        <svg class="i" viewBox="0 0 24 24"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></svg>
+        الأحدث
+      </button>
+      <button class="mapbtn">
+        <svg class="i" viewBox="0 0 24 24"><path d="M14.1 6 8 3 2 6v15l6-3 6.1 3L20 18V3z"/><path d="M8 3v15"/><path d="M14 6v15"/></svg>
+        خريطة
+      </button>
+    </div>
+
+    <div class="feed" id="sfeed"></div>
+    <div class="navpad"></div>
+    <nav class="nav">
+      <button>
+        <svg class="i" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+        الرئيسية
+      </button>
+      <button class="on">
+        <svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        البحث
+      </button>
+      <button>
+        <svg class="i" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+        المحفوظة
+      </button>
+      <button>
+        <svg class="i" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+        الرسائل
+      </button>
+      <button>
+        <svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+        حسابي
+      </button>
+    </nav>
+  </section>
+
+</div>
+<script>
+const I = {
+  pin:'<svg class="i" viewBox="0 0 24 24"><path d="M20 10c0 4.99-5.54 10.19-7.4 11.8a1 1 0 0 1-1.2 0C9.54 20.19 4 14.99 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>',
+  bed:'<svg class="i" viewBox="0 0 24 24"><path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"/><path d="M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4"/><path d="M2 17h20"/><path d="M6 8v2"/></svg>',
+  bath:'<svg class="i" viewBox="0 0 24 24"><path d="M10 4 8 6"/><path d="M17 19v2"/><path d="M2 12h20"/><path d="M7 19v2"/><path d="M9 5 7.62 3.62A2.12 2.12 0 0 0 4 5v7"/><path d="M20 12v5a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3v-5"/></svg>',
+  area:'<svg class="i" viewBox="0 0 24 24"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z"/><path d="m14.5 12.5 2-2"/><path d="m11.5 9.5 2-2"/><path d="m8.5 6.5 2-2"/><path d="m17.5 15.5 2-2"/></svg>',
+  cam:'<svg class="i" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/></svg>',
+  check:'<svg class="i" viewBox="0 0 24 24"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></svg>',
+  star:'<svg class="i" viewBox="0 0 24 24"><path d="M11.5 3.3a.55.55 0 0 1 1 0l2.3 4.7a.55.55 0 0 0 .4.3l5.2.75a.55.55 0 0 1 .3.94l-3.75 3.65a.55.55 0 0 0-.16.49l.89 5.14a.55.55 0 0 1-.8.59l-4.63-2.44a.55.55 0 0 0-.51 0l-4.63 2.44a.55.55 0 0 1-.8-.59l.89-5.14a.55.55 0 0 0-.16-.49L2.3 9.99a.55.55 0 0 1 .3-.94l5.2-.74a.55.55 0 0 0 .4-.31Z"/></svg>',
+  heart:'<svg class="i" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>',
+  phone:'<svg class="i" viewBox="0 0 24 24"><path d="M9.03 3.34a2 2 0 0 1 1.98 1.7l.44 2.62a2 2 0 0 1-.55 1.74l-1.05 1.05a14 14 0 0 0 3.7 3.7l1.05-1.05a2 2 0 0 1 1.74-.55l2.62.44a2 2 0 0 1 1.7 1.98v2.11a2 2 0 0 1-2.18 2A18 18 0 0 1 3.02 5.52a2 2 0 0 1 2-2.18Z"/></svg>',
+  wa:'<svg class="i" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>'
+};
+
+const F = [
+  { img:'../photos/living-luxury-1.jpg', price:'٢١٠٬٠٠٠ $', beds:'٤', area:'٢٢٠',
+    t:'شقة دوبلكس مع تراس — أبو رمانة', l:'دمشق، أبو رمانة', verified:true },
+  { img:'../photos/villa-pool-1.jpg', price:'٣٤٠٬٠٠٠ $', beds:'٥', area:'٤٢٠',
+    t:'فيلا مودرن مع مسبح وحديقة', l:'دمشق، مشروع دمر', verified:true },
+  { img:'../photos/living-bright-1.jpg', price:'١٨٥٬٠٠٠ $', beds:'٣', area:'١٨٠',
+    t:'شقة ٣ غرف حديثة مع إطلالة', l:'دمشق، المالكي', verified:true },
+];
+document.getElementById('rail').innerHTML = F.map(x=>`
+  <article class="fcard">
+    <div class="ph">
+      <img src="${x.img}" alt="">
+      <span class="ochip gold">${I.star} مميّز</span>
+      <button class="heart">${I.heart}</button>
+    </div>
+    <div class="bd">
+      <div class="price">${x.price}</div>
+      <div class="specs">
+        <span class="s">${I.bed}<b>${x.beds}</b></span><span class="sep"></span>
+        <span class="s">${I.area}<b>${x.area} م²</b></span>
+      </div>
+      <div class="t">${x.t}</div>
+      <div class="l">${x.l}</div>
+    </div>
+  </article>`).join('');
+
+const L = [
+  { img:'../photos/living-spacious-1.jpg', price:'١٢٠٬٠٠٠ $', sub:'≈ ١٫٦ مليار ل.س',
+    beds:'٥', baths:'٢', area:'١٦٠', photos:'٤',
+    t:'شقة ٥ غرف واسعة — الحمدانية', l:'حلب، الحمدانية', ago:'منذ يوم',
+    agent:'مالك مباشر', verified:true },
+  { img:'../photos/living-family-1.jpg', price:'١٤٥٬٠٠٠ $', sub:'≈ ١٫٩ مليار ل.س',
+    beds:'٣', baths:'٢', area:'١٥٠', photos:'٣',
+    t:'شقة عائلية إكساء ديلوكس — كفر سوسة', l:'دمشق، كفر سوسة', ago:'منذ يومين',
+    agent:'مكتب دمشق الحديثة', verified:true },
+  { img:'../photos/courtyard-1.jpg', price:'١٥٠٬٠٠٠ $', sub:'≈ ٢ مليار ل.س',
+    beds:'٣', baths:'٢', area:'١٤٠', photos:'٣',
+    t:'بيت عربي مرمم مع باحة — دمشق القديمة', l:'دمشق، دمشق القديمة', ago:'منذ ٣ أيام',
+    agent:'مكتب الشام العقاري', verified:true },
+];
+const card = x => `
+  <article class="card">
+    <div class="ph">
+      <img src="${x.img}" alt="">
+      ${x.verified ? `<span class="ochip verify">${I.check} موثّق</span>` : ''}
+      <button class="heart">${I.heart}</button>
+      <span class="ochip count">${I.cam} ${x.photos}</span>
+    </div>
+    <div class="bd">
+      <div class="price-row">
+        <span class="price">${x.price}</span>
+        <span class="price-sub">${x.sub}</span>
+      </div>
+      <div class="specs">
+        <span class="s">${I.bed}<b>${x.beds} غرف</b></span><span class="sep"></span>
+        <span class="s">${I.bath}<b>${x.baths}</b></span><span class="sep"></span>
+        <span class="s">${I.area}<b>${x.area} م²</b></span>
+      </div>
+      <div class="t">${x.t}</div>
+      <div class="meta">
+        ${I.pin} ${x.l}
+        <span class="sp"></span>
+        ${x.ago}
+      </div>
+      <div class="cardctas">
+        <button class="abtn call">${I.phone} اتصال</button>
+        <button class="abtn wa">${I.wa} واتساب</button>
+      </div>
+    </div>
+  </article>`;
+document.getElementById('feed').innerHTML = L.map(card).join('');
+const sfeed = document.getElementById('sfeed');
+if (sfeed) sfeed.innerHTML = L.slice(0,2).map(card).join('');
+
+const q = new URLSearchParams(location.search);
+if ((q.get('theme')||'light') === 'dark') document.documentElement.classList.add('dark');
+const screen = q.get('screen') || 'home';
+document.querySelectorAll('[data-screen]').forEach(s => { s.hidden = s.dataset.screen !== screen; });
+</script>
+</body>
+</html>

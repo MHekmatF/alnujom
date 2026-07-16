@@ -4,6 +4,7 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
@@ -12,6 +13,7 @@ import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/app_toast.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../core/widgets/locale_toggle_action.dart';
 import '../../../../core/widgets/press_scale.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -71,11 +73,16 @@ class _LocationFormView extends StatelessWidget {
       child: BlocBuilder<LocationFormBloc, LocationFormState>(
         builder: (context, state) {
           final title = _appBarTitle(l10n, state);
-          return Scaffold(
-            appBar: AppBar(
-              title: Text(title),
-              actions: const [LocaleToggleAction()],
+          return DcCrownScaffold(
+            title: title,
+            dense: true,
+            leading: DcCrownIconButton(
+              icon: Icons.arrow_forward,
+              onTap: () => context.canPop()
+                  ? context.pop()
+                  : context.go(AppRoutes.shellHome),
             ),
+            actions: const [LocaleToggleAction()],
             body: switch (state) {
               LocationFormIdle() ||
               LocationFormLoading() => const AppSpinner.page(),
