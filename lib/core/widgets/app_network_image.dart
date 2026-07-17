@@ -53,29 +53,50 @@ class AppNetworkImage extends StatelessWidget {
     if (url == null || url!.isEmpty) {
       result = _fallback(colors, Icons.apartment_rounded);
     } else {
-      // Data saver (lite mode): when ON, decode/fetch at a reduced resolution so
-      // less data is pulled over the wire and less memory is spent decoding.
-      // When OFF, render at full fidelity exactly as before. ValueListenable so
-      // flipping the toggle re-paints live without a route rebuild.
-      result = ValueListenableBuilder<bool>(
-        valueListenable: LiteMode.notifier,
-        builder: (context, lite, _) => CachedNetworkImage(
-          imageUrl: url!,
-          fit: fit,
-          // ~600px is enough for feed cards / most heroes on phones while
-          // roughly halving the bytes fetched on a slow connection.
-          memCacheWidth: lite ? _liteCacheWidth : null,
-          maxWidthDiskCache: lite ? _liteCacheWidth : null,
-          fadeInDuration: fade,
-          fadeInCurve: AppMotion.curve,
-          placeholderFadeInDuration: fade,
-          placeholder: (context, _) =>
-              placeholderStyle == AppImagePlaceholder.skeleton
-              ? const LoadingState.card()
-              : ColoredBox(color: colors.surfaceVariant),
-          errorWidget: (context, _, __) =>
-              _fallback(colors, Icons.apartment_rounded),
-        ),
+      // PERF-H2 — cap the decode resolution to the display size for feed/list
+      // images (the `flat` placeholder) so a full-size (~1920px) JPEG is never
+      // decoded into a small card slot (~8 MB bitmap per card → decode jank +
+      // memory pressure on low-end devices like the Infinix Note 8). Full-screen
+      // heroes / galleries (`skeleton` placeholder) keep full fidelity so pinch-
+      // zoom stays crisp. Data saver (lite mode) tightens the cap and shrinks the
+      // disk cache. LayoutBuilder yields the box width; memCacheWidth is in device
+      // pixels. ValueListenable so flipping the toggle re-paints live.
+      result = LayoutBuilder(
+        builder: (context, constraints) {
+          final capToDisplay =
+              placeholderStyle == AppImagePlaceholder.flat &&
+              constraints.maxWidth.isFinite &&
+              constraints.maxWidth > 0;
+          final int? displayWidth = capToDisplay
+              ? (constraints.maxWidth * MediaQuery.devicePixelRatioOf(context))
+                    .round()
+              : null;
+          return ValueListenableBuilder<bool>(
+            valueListenable: LiteMode.notifier,
+            builder: (context, lite, _) {
+              final int? memCap = displayWidth != null
+                  ? (lite && displayWidth > _liteCacheWidth
+                        ? _liteCacheWidth
+                        : displayWidth)
+                  : (lite ? _liteCacheWidth : null);
+              return CachedNetworkImage(
+                imageUrl: url!,
+                fit: fit,
+                memCacheWidth: memCap,
+                maxWidthDiskCache: lite ? _liteCacheWidth : null,
+                fadeInDuration: fade,
+                fadeInCurve: AppMotion.curve,
+                placeholderFadeInDuration: fade,
+                placeholder: (context, _) =>
+                    placeholderStyle == AppImagePlaceholder.skeleton
+                    ? const LoadingState.card()
+                    : ColoredBox(color: colors.surfaceVariant),
+                errorWidget: (context, _, __) =>
+                    _fallback(colors, Icons.apartment_rounded),
+              );
+            },
+          );
+        },
       );
     }
 

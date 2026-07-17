@@ -201,7 +201,9 @@ class _MessageBubble extends StatelessWidget {
         children: [
           ConstrainedBox(
             constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width * 0.78,
+              // PERF-L5: sizeOf depends only on the size aspect, so bubbles don't
+              // all rebuild on every keyboard-animation MediaQuery change.
+              maxWidth: MediaQuery.sizeOf(context).width * 0.78,
             ),
             child: Container(
               padding: const EdgeInsetsDirectional.symmetric(

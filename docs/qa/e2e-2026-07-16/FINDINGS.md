@@ -125,7 +125,9 @@ Read-only audit (no data/schema mutated). Overall the backend is in good shape: 
 ### 🔵 SEC-L3 — Three trigger functions have mutable `search_path` (`set_updated_at`, `listing_status_transition_trigger_fn`, `listing_media_cap_check`); non-DEFINER so low risk, pin anyway.
 ### 🔵 SEC-L4 — `pg_net` extension installed in `public` schema; move to a dedicated schema.
 ### 🔵 SEC-L5 — Android `allowBackup` defaults to `true` — Supabase session tokens in SharedPreferences could be extracted via `adb backup` on some devices. Set `android:allowBackup="false"` or exclude the auth store.
-### ⚪ SEC-I1 — `map_jitter_coordinates` is anon-executable and takes original coords as client params; public view `v_listings_public` does NOT expose lat/lng (checked), so exact coords don't appear to reach anon. UNVERIFIED: confirm no other anon path hands exact lat/lng to clients before jitter.
+### 🟠 SEC-I1 — Exact listing coordinates ARE readable by anonymous clients (CONFIRMED 2026-07-17, upgraded from INFO)
+- `v_listings_public` correctly omits lat/lng and `v_listings_map_public` correctly gates them (exact→exact, approximate→jittered, hidden→null). **BUT** `anon` has table-wide SELECT on `public.listings` **including `latitude`/`longitude`**, and the `listings_select_public` RLS policy exposes every approved listing. So `GET /rest/v1/listings?select=latitude,longitude&status=eq.approved` returns **exact coords for all approved listings** — and **all 16 current approved listings are `location_visibility='approximate'`**, so the jitter is bypassed for 100% of them. The detail page also reads the raw columns and shows the exact pin.
+- **Whether this is a leak is a product decision:** does `approximate` mean "jitter the browse map only" (current behavior — detail reveals exact) or "never reveal exact to any client"? Fix path + recommendation in [IMPLEMENTATION.md](IMPLEMENTATION.md) §SEC-I1. Treat as **P1 security** under the "never reveal" interpretation.
 
 ---
 
