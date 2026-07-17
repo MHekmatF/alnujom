@@ -30,7 +30,7 @@ class SupabaseListingDetailsDatasource {
       id, title, property_type, purpose, governorate_id, city_id, area_id,
       phone, whatsapp, contact_name_visibility, location_visibility,
       area_size, rooms, bathrooms, floor, published_at,
-      publisher_user_id, agency_id, address_text, latitude, longitude,
+      publisher_user_id, agency_id, address_text,
       status, created_at, updated_at, expires_at,
       deed_type, finish_level, verification_status, verified_at,
       listing_details(listing_id, description, amenities, year_built, furnished, parking, created_at, updated_at),
@@ -50,6 +50,22 @@ class SupabaseListingDetailsDatasource {
     // RLS-only filter — NO application-layer status='approved' per FR-018.
     // .maybeSingle() returns null when RLS hides the row OR row doesn't exist.
     if (row == null) return null;
-    return ListingDetailsAggregateDto.fromJson(row);
+
+    // SEC-I1: never read raw latitude/longitude from the base table here — that
+    // would hand the EXACT spot to any viewer (anon included) even for a listing
+    // the publisher set to `approximate`. Source the map marker from the
+    // visibility-gated `v_listings_map_public` instead: exact only when the
+    // publisher chose 'exact', jittered for 'approximate', absent when hidden /
+    // not-yet-approved. Anon's SELECT on listings.latitude/longitude is revoked
+    // in migration 20260717120007 so this is the only client coordinate path.
+    final map = Map<String, dynamic>.from(row);
+    final marker = await _client
+        .from('v_listings_map_public')
+        .select('marker_lat, marker_lng')
+        .eq('id', listingId)
+        .maybeSingle();
+    map['latitude'] = marker?['marker_lat'];
+    map['longitude'] = marker?['marker_lng'];
+    return ListingDetailsAggregateDto.fromJson(map);
   }
 }
