@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
 import 'app_logger.dart';
+import 'log_redaction.dart';
 
 typedef DeveloperLogSink =
     void Function(
@@ -81,11 +82,18 @@ final class ConsoleLogger implements AppLogger {
       return;
     }
 
+    // Scrub tokens/PII even from debug output, so a leaked debug APK or an
+    // attached debug session never surfaces a credential (security L1/logging).
+    final safeMessage = LogRedaction.redactText(message);
+    final safeError = error == null
+        ? null
+        : LogRedaction.redactText(error.toString());
+
     _logSink(
-      message,
+      safeMessage,
       level: level,
       name: tag ?? 'AlNujom',
-      error: error,
+      error: safeError,
       stackTrace: stackTrace,
     );
 
@@ -97,9 +105,9 @@ final class ConsoleLogger implements AppLogger {
       >= 800 => 'INFO',
       _ => 'DEBUG',
     };
-    debugPrint('[${tag ?? 'AlNujom'}] $severity: $message');
-    if (error != null) {
-      debugPrint('  error: $error');
+    debugPrint('[${tag ?? 'AlNujom'}] $severity: $safeMessage');
+    if (safeError != null) {
+      debugPrint('  error: $safeError');
     }
     if (stackTrace != null) {
       debugPrint('  stack: $stackTrace');

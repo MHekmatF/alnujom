@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import '../errors/failure.dart';
 import '../errors/result.dart';
 import '../logging/app_logger.dart';
+import 'secure_session_storage.dart';
 import 'supabase_client_wrapper.dart';
 import 'types/auth_state.dart';
 import 'types/realtime_channel.dart';
@@ -36,7 +37,23 @@ final class SupabaseClientWrapperImpl implements SupabaseClientWrapper {
     }
 
     try {
-      await supabase.Supabase.initialize(url: url, anonKey: anonKey);
+      // Security (auth H1): persist the session (incl. refresh token) in the
+      // platform secure keystore rather than plaintext SharedPreferences.
+      // The legacy key mirrors supabase_flutter's own default so the one-time
+      // migration inside SecureLocalStorage can find + wipe the old plaintext
+      // session (see secure_session_storage.dart).
+      final legacyPersistSessionKey =
+          'sb-${Uri.parse(url).host.split('.').first}-auth-token';
+      await supabase.Supabase.initialize(
+        url: url,
+        anonKey: anonKey,
+        authOptions: supabase.FlutterAuthClientOptions(
+          localStorage: SecureLocalStorage(
+            legacyPersistSessionKey: legacyPersistSessionKey,
+          ),
+          pkceAsyncStorage: SecureGotrueAsyncStorage(),
+        ),
+      );
       _isInitialized = true;
       return const Success(null);
     } on Object catch (error, stackTrace) {

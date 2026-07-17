@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  QA E2E security hardening (build L1) — pin the no-cleartext / no-user-CA
+  network posture explicitly instead of relying implicitly on targetSdk >= 28.
+  All app traffic (Supabase, GlitchTip, FCM, storage CDN) is HTTPS, so:
+    * cleartextTrafficPermitted="false" blocks any accidental/downgraded HTTP.
+    * only the SYSTEM trust store is trusted (user-added CAs are NOT), which
+      resists MITM via a user-installed proxy/root certificate.
+  Referenced from AndroidManifest.xml <application android:networkSecurityConfig>.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

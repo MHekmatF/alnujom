@@ -24,6 +24,7 @@ import 'package:injectable/injectable.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'crash_reporter.dart';
+import 'log_redaction.dart';
 
 /// Sentry-backed [CrashReporter].
 ///
@@ -291,34 +292,8 @@ class SentryCrashReporter implements CrashReporter {
     return false;
   }
 
-  // Synthetic auth email: `<phone>@alnujom.local`.
-  static final _syntheticEmail = RegExp(
-    r'[A-Za-z0-9._%+\-]+@alnujom\.local',
-    caseSensitive: false,
-  );
-  // Any email-shaped token.
-  static final _anyEmail = RegExp(
-    r'[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}',
-  );
-  // JWT (three base64url segments) — covers Supabase access/refresh tokens.
-  static final _jwt = RegExp(
-    r'eyJ[A-Za-z0-9_\-]+\.[A-Za-z0-9_\-]+\.[A-Za-z0-9_\-]+',
-  );
-  // `Bearer <token>` headers/strings.
-  static final _bearer = RegExp(r'[Bb]earer\s+[A-Za-z0-9._\-]+');
-  // Phone-like runs (the synthetic email encodes the raw phone). 7+ digits,
-  // optional leading + and separators — broad on purpose (fail-closed on PII).
-  static final _phone = RegExp(r'\+?\d[\d\s\-()]{6,}\d');
-
-  /// Redacts sensitive substrings embedded in free text.
-  static String _redactString(String input) {
-    if (input.isEmpty) return input;
-    var out = input;
-    out = out.replaceAll(_jwt, _redacted);
-    out = out.replaceAll(_bearer, _redacted);
-    out = out.replaceAll(_syntheticEmail, _redacted);
-    out = out.replaceAll(_anyEmail, _redacted);
-    out = out.replaceAll(_phone, _redacted);
-    return out;
-  }
+  /// Redacts sensitive substrings embedded in free text. Delegates to the
+  /// shared [LogRedaction] scrubber so the console logger and crash reporter
+  /// stay in lock-step (single source of truth for the token/PII regexes).
+  static String _redactString(String input) => LogRedaction.redactText(input);
 }

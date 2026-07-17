@@ -20,6 +20,23 @@ After reviewing the deferred list, the founder chose: **SEC-I1 → "never reveal
 
 ---
 
+## Round 3 (2026-07-17) — full security audit + hardening
+
+Founder asked to "make sure the app is secure — no one can steal a token to log in as someone else, no debug leaks, API endpoints locked down, everything secure." Ran three parallel code audits (auth/session, logging, secrets/build) + a full Supabase backend audit (RLS, storage, edge functions, RPCs, security advisors). Full report: **[SECURITY_AUDIT.md](SECURITY_AUDIT.md)**. Outcome:
+
+| Item | Status | Notes |
+|---|---|---|
+| **AUTH-H1 — session stored in plaintext** | ✅ **Fixed + AVD-verified** | `Supabase.initialize` had no `authOptions`, so the whole session (incl. the long-lived **refresh token**) was written to plaintext SharedPreferences — lift-able on a rooted/forensic device to mint fresh access tokens. Added `SecureLocalStorage` + `SecureGotrueAsyncStorage` over `flutter_secure_storage` (Android EncryptedSharedPreferences / iOS Keychain); one-time migration copies any legacy session in and **wipes the plaintext copy** (no forced logout). Directly answers the founder's #1 concern. **Verified on the Pixel 8 Pro AVD (debug build):** logged in → force-stopped → relaunched → session persisted (returned to the logged-in screen, not login). `run-as` inspection: the session lives in `FlutterSecureStorage.xml` under `com.alnujom.auth.session.v1` as **Tink AES-SIV ciphertext** (AndroidX Security-Crypto keyset present); `FlutterSharedPreferences.xml` is empty (`<map/>`) — **no readable JWT anywhere in prefs**. Also confirmed the `handle_new_auth_user` provisioning trigger + normal GoTrue login still work after the `…120010` grant change. `flutter analyze` clean. |
+| **Build-L1 — implicit cleartext posture** | ✅ **Fixed** | Added `res/xml/network_security_config.xml` (`cleartextTrafficPermitted=false`, system trust anchors only) + `usesCleartextTraffic=false` on `<application>` → HTTPS-only + no user-CA trust, pinned independent of `targetSdk`. |
+| **Logging — debug-build residue** | ✅ **Hardened** | Release already emits nothing (single logger, `kDebugMode`-gated; crash reporter `sendDefaultPii=false`, `tracesSampleRate=0`, fail-closed `beforeSend`). Extracted the scrub regexes into shared `log_redaction.dart`; `ConsoleLogger` now redacts JWT/bearer/email/phone from `message`+`error` in debug too. Sentry reporter delegates to the same util (single source of truth). 0 call-site changes. |
+| **API surface — needless anon grants** | ✅ **Fixed** | `…120010`: revoked direct-call EXECUTE on 4 trigger fns (`handle_new_auth_user`, `notify_saved_search_matches`, `bump_conversation_last_message`, `enforce_inquiry_transition`) + anon on `get_inbox_unread_count`. Verified ACLs. Left `map_jitter_coordinates` (needed by anon via the `security_invoker` map view), the bool RLS-helpers (leak-free, revoking risks 42501), and the genuine guest features. |
+| **SEC-I1 — authenticated coordinate residual** | 🟠 **Confirmed, documented** | Verified: `authenticated` retains `SELECT` on `listings.latitude/longitude` (anon already revoked). So a signed-up user can raw-API-read exact coords, defeating the approximate-location jitter. **Medium** (property coords, not personal PII; app UI never exposes it). Fix = `get_listing_coordinates` owner/admin RPC + convert ~2 read sites + revoke the column + edit/moderation testing — a change to core flows that needs login-gated on-device QA; not safe to rush pre-launch. Precise plan in SECURITY_AUDIT.md. |
+| **AUTH-M2 — phone→email lookup** | 🟠 **Documented** | `lookup_email_by_phone` returns the real auth email for the **3** (of 12) accounts that have a non-synthetic email → a small phone→email disclosure + existence oracle for those 3. The 9 synthetic-email accounts leak nothing. Fix = normalize all auth emails to synthetic (keep real email only in `profiles`). Tiny blast radius (non-end-user accounts). |
+| **Verified secure** | ✅ | RLS on every table; 6 definer views correctly filtered; storage locked; edge fns hardened; contact form encrypts inquirer phone; no secrets in client/repo; fail-closed signing; hardened manifest; publish-gate enforced in-DB. |
+| **Founder actions** | ❓ | Leaked-password dashboard toggle; restrict FCM `AIza…` key; ship with `--split-per-abi --obfuscate`. |
+
+---
+
 ## Status by plan item
 
 | # | Item | Status | Notes |
