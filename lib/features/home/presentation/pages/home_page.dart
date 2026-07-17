@@ -171,12 +171,17 @@ class _HomeViewState extends State<_HomeView> {
       value: SystemUiOverlayStyle.light.copyWith(
         statusBarColor: Colors.transparent,
         systemNavigationBarColor: colors.card,
-        systemNavigationBarIconBrightness: Theme.of(context).brightness == Brightness.dark
+        systemNavigationBarIconBrightness:
+            Theme.of(context).brightness == Brightness.dark
             ? Brightness.light
             : Brightness.dark,
       ),
       child: Scaffold(
-        backgroundColor: colors.surface,
+        // PERF-H1: the feed is now a virtualized sliver list outside the white
+        // sheet Container, so the scaffold itself carries the sheet's `card`
+        // colour — this makes the 18px crown/sheet overlap read seamlessly and
+        // gives the feed rows their card background.
+        backgroundColor: colors.card,
         drawer: const AppNavDrawer(),
         body: FutureBuilder<List<Currency>>(
           future: _currenciesFuture,
@@ -221,19 +226,22 @@ class _HomeViewState extends State<_HomeView> {
     AppLocalizations l10n,
   ) {
     final colors = AppColors.of(context);
-    // DC "Blue Crown" — the deep-blue crown header scrolls at the very top, and
-    // a white sheet with rounded top corners overlaps it, carrying the category
-    // grid, the for-sale/rent segmented control, the featured rail and the feed.
-    return SingleChildScrollView(
+    // DC "Blue Crown" — the deep-blue crown scrolls at the top; a white sheet
+    // with rounded top corners overlaps it by 18px (the scaffold bg is `card` so
+    // the overlap reads seamlessly), carrying the category grid, featured rail,
+    // ad and section header. PERF-H1: the feed below is now a virtualized
+    // SliverList.builder — the old Column kept every paged card + image alive.
+    return CustomScrollView(
       controller: _scrollController,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _HomeCrown(
+      slivers: [
+        SliverToBoxAdapter(
+          child: _HomeCrown(
             selectedPurpose: _segment,
             onPurposeChanged: (i) => setState(() => _segment = i),
           ),
-          Transform.translate(
+        ),
+        SliverToBoxAdapter(
+          child: Transform.translate(
             offset: const Offset(0, -18),
             child: Container(
               decoration: BoxDecoration(
@@ -250,9 +258,7 @@ class _HomeViewState extends State<_HomeView> {
                     onSelected: (_) => context.go(AppRoutes.search),
                   ),
                   const SizedBox(height: AppSpacing.xs),
-                  FeaturedListingsCarousel(
-                    currenciesByCode: currenciesByCode,
-                  ),
+                  FeaturedListingsCarousel(currenciesByCode: currenciesByCode),
                   // DC: the sponsored slot sits between the featured rail and
                   // the "latest" feed (renders nothing when no ad is served).
                   const Padding(
@@ -263,20 +269,17 @@ class _HomeViewState extends State<_HomeView> {
                     title: l10n.home_latest_listings_header,
                     onSeeAll: () => context.go(AppRoutes.search),
                   ),
-                  ..._feedChildren(context, state, currenciesByCode, l10n),
-                  // Clearance so the floating publish FAB never covers the last
-                  // card's content.
-                  const SizedBox(height: AppSpacing.xxxl + AppSpacing.xl),
                 ],
               ),
             ),
           ),
-        ],
-      ),
+        ),
+        ..._feedSlivers(context, state, currenciesByCode, l10n),
+      ],
     );
   }
 
-  List<Widget> _feedChildren(
+  List<Widget> _feedSlivers(
     BuildContext context,
     HomeState state,
     Map<String, Currency> currenciesByCode,
@@ -285,16 +288,26 @@ class _HomeViewState extends State<_HomeView> {
     switch (state.status) {
       case HomeFeedStatus.initial:
       case HomeFeedStatus.loading:
-        return List.generate(3, (_) => const _HomeCardSkeleton());
+        return [
+          SliverToBoxAdapter(
+            child: Column(
+              children: List.generate(3, (_) => const _HomeCardSkeleton()),
+            ),
+          ),
+        ];
       case HomeFeedStatus.error:
         return [
-          Padding(
-            padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-            child: ErrorState(
-              title: l10n.error_could_not_load_listings,
-              variant: ErrorStateVariant.network,
-              onRetry: () => context.read<HomeBloc>().add(
-                HomeFeedLoadRequested(locale: Localizations.localeOf(context)),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
+              child: ErrorState(
+                title: l10n.error_could_not_load_listings,
+                variant: ErrorStateVariant.network,
+                onRetry: () => context.read<HomeBloc>().add(
+                  HomeFeedLoadRequested(
+                    locale: Localizations.localeOf(context),
+                  ),
+                ),
               ),
             ),
           ),
@@ -304,15 +317,18 @@ class _HomeViewState extends State<_HomeView> {
       case HomeFeedStatus.refreshing:
         if (state.listings.isEmpty && state.status == HomeFeedStatus.success) {
           return [
-            Padding(
-              padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-              child: _EmptyView(l10n: l10n),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
+                child: _EmptyView(l10n: l10n),
+              ),
             ),
           ];
         }
         return [
-          for (var index = 0; index < state.listings.length; index++)
-            StaggeredListItem(
+          SliverList.builder(
+            itemCount: state.listings.length,
+            itemBuilder: (context, index) => StaggeredListItem(
               index: index,
               enabled: state.status != HomeFeedStatus.refreshing,
               child: _FeedCard(
@@ -320,7 +336,14 @@ class _HomeViewState extends State<_HomeView> {
                 currenciesByCode: currenciesByCode,
               ),
             ),
-          _FeedFooter(state: state, l10n: l10n),
+          ),
+          SliverToBoxAdapter(
+            child: _FeedFooter(state: state, l10n: l10n),
+          ),
+          // Clearance so the floating publish FAB never covers the last card.
+          const SliverToBoxAdapter(
+            child: SizedBox(height: AppSpacing.xxxl + AppSpacing.xl),
+          ),
         ];
     }
   }
@@ -690,7 +713,11 @@ class _HomeCategoryGrid extends StatelessWidget {
     return Padding(
       padding: const EdgeInsetsDirectional.symmetric(horizontal: AppSpacing.sm),
       child: Column(
-        children: [row(0), const SizedBox(height: AppSpacing.xs), row(4)],
+        children: [
+          row(0),
+          const SizedBox(height: AppSpacing.xs),
+          row(4),
+        ],
       ),
     );
   }
