@@ -11,6 +11,7 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_dialog.dart';
 import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../core/widgets/segmented_control.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -58,7 +59,7 @@ class ListingFormPage extends StatelessWidget {
       // toggle (detail-style single scroll vs the classic stepper); EDIT mode
       // is always the stepper.
       child: mode == ListingFormMode.create
-          ? const _CreateFlowSwitcher()
+          ? const _CreateExitGuard(child: _CreateFlowSwitcher())
           : const _ListingFormBody(),
     );
   }
@@ -150,6 +151,42 @@ class _CreateFlowSwitcher extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// UX-6 — intercepts the system back gesture on the create flow so a half-filled
+/// form is never silently abandoned. The publisher's progress is autosaved as a
+/// draft (resumable from the "draft" tab in My Listings), so the dialog reassures
+/// rather than warns. Deliberate in-app exits (the back arrow, Save & exit,
+/// publish) navigate via go/pushReplacement and are unaffected.
+class _CreateExitGuard extends StatelessWidget {
+  const _CreateExitGuard({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        final l10n = AppLocalizations.of(context)!;
+        final leave = await showDialog<bool>(
+          context: context,
+          builder: (dialogCtx) => AppDialog(
+            title: l10n.createExitTitle,
+            message: l10n.createExitBody,
+            icon: LucideIcons.triangle_alert,
+            actionLabel: l10n.createExitLeave,
+            onAction: () => Navigator.of(dialogCtx).pop(true),
+          ),
+        );
+        if (leave == true && context.mounted) {
+          context.go(AppRoutes.shellHome);
+        }
+      },
+      child: child,
     );
   }
 }
@@ -330,9 +367,7 @@ class _BottomNav extends StatelessWidget {
     final bar = Container(
       decoration: BoxDecoration(
         color: colors.surface,
-        border: BorderDirectional(
-          top: BorderSide(color: colors.outline),
-        ),
+        border: BorderDirectional(top: BorderSide(color: colors.outline)),
         boxShadow: elevation.level1,
       ),
       child: SafeArea(

@@ -552,6 +552,12 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get admin_queue_user_id_label => _resolve(
+    'admin_queue_user_id_label',
+    (loc) => loc.admin_queue_user_id_label,
+  );
+
+  @override
   String get admin_action_approve =>
       _resolve('admin_action_approve', (loc) => loc.admin_action_approve);
 
@@ -6620,6 +6626,15 @@ final class _DebugAppLocalizations extends AppLocalizations {
   @override
   String get createToggleExpress =>
       _resolve("createToggleExpress", (loc) => loc.createToggleExpress);
+  @override
+  String get createExitTitle =>
+      _resolve("createExitTitle", (loc) => loc.createExitTitle);
+  @override
+  String get createExitBody =>
+      _resolve("createExitBody", (loc) => loc.createExitBody);
+  @override
+  String get createExitLeave =>
+      _resolve("createExitLeave", (loc) => loc.createExitLeave);
   @override
   String get createExpressHint =>
       _resolve("createExpressHint", (loc) => loc.createExpressHint);

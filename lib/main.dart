@@ -96,12 +96,9 @@ Future<void> main() async {
   // Run the bootstrap inside a guarded zone so uncaught async errors (outside
   // the framework/platform handlers above) are also forwarded.
   unawaited(
-    runZonedGuarded(
-      () => _bootstrap(coldStartWatch),
-      (error, stack) {
-        unawaited(reporter.recordError(error, stack));
-      },
-    ),
+    runZonedGuarded(() => _bootstrap(coldStartWatch), (error, stack) {
+      unawaited(reporter.recordError(error, stack));
+    }),
   );
 }
 
@@ -129,12 +126,10 @@ Future<void> _bootstrap(Stopwatch coldStartWatch) async {
   PushMessagingService pushService;
   try {
     await Firebase.initializeApp();
-    // Request notification permission (Android 13+ requires explicit prompt).
-    await FirebaseMessaging.instance.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
+    // UX-1 / PERF-M3 — notification permission (Android 13+) is requested LATER,
+    // after the first frame renders (see the post-frame callback after runApp),
+    // so the OS dialog appears over the branded splash instead of a black screen
+    // during cold start, and its await no longer sits on the startup path.
     // Background-message handler must be a top-level function; the handler
     // here is intentionally minimal — the trigger + dispatch_push Edge
     // Function already wrote the history row, so the in-app center will show
@@ -211,6 +206,22 @@ Future<void> _bootstrap(Stopwatch coldStartWatch) async {
       _scheduleCrmRemindersOnAuth();
     } catch (_) {
       // Never disrupt the app for a reminder reschedule.
+    }
+
+    // UX-1 / PERF-M3 — deferred notification-permission prompt. Requested here
+    // (post-first-frame) rather than during bootstrap so the Android 13+ system
+    // dialog appears over the rendered splash/branding, not a black cold-start
+    // screen. Only when Firebase initialised (FCM push active); best-effort.
+    if (pushService is FcmPushMessagingService) {
+      try {
+        FirebaseMessaging.instance.requestPermission(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+      } catch (_) {
+        // Permission request is best-effort — a throw must not disrupt startup.
+      }
     }
   });
 }
