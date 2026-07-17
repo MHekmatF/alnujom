@@ -6,6 +6,20 @@ Tracks what was **implemented** against [PLAN.md](PLAN.md). Done in 4 waves on b
 
 ---
 
+## Round 2 (2026-07-17) — founder-directed follow-up
+
+After reviewing the deferred list, the founder chose: **SEC-I1 → "never reveal exact location"**, keep the area field required, skip the leaked-password toggle, and take on all four deferred performance items. Outcome:
+
+| Item | Status | Notes |
+|---|---|---|
+| **SEC-I1 coordinate leak** | ✅ Anon vector closed | Detail page now sources the map marker from the gated `v_listings_map_public`; anon SELECT on `listings.latitude/longitude` revoked (migration `…120007`). Verified anon can't read the coords. **Residual:** an authenticated (signed-up) user can still read others' coords via the base table — fully closing that needs an owner-only coordinate RPC + reworking the edit-form/revision datasources (which `.select()` all columns), so it's deferred for edit-flow testing. The severe no-login bulk-scrape is closed. |
+| **Item 18 — RLS `auth.uid()` wrap** | ✅ Hot tables done | Wrapped `auth.uid()` → `(select auth.uid())` on the 9 feed/search/chat tables (migration `…120008`), generated + reviewed + verified (0 unwrapped remain; semantically identical). The ~17 non-hot tables + `current_user_has_permission()` wrap + the 27 duplicate-policy merges remain a follow-up (near-zero benefit at current scale; security-critical). |
+| **Item 17 — search index** | ⏸ Deferred (assessed) | `search_vector` is a GENERATED column (title+address only). Folding in `listing_details.description` cascades through `v_listings_public` + `search_listings` + `search_map` + needs a backfill + a `listing_details` trigger, and touches search correctness — so it needs search-result testing and is not a safe rush alongside everything else. Zero benefit at 26 listings. Do it as a focused, tested change when data grows. |
+| **Item 15 — home virtualization** | ⏸ Deferred (assessed) | Preserving the Blue Crown `-18px` sheet-overlap + rounded corners + card-bg-behind-feed in a `CustomScrollView` needs custom sliver work (`DecoratedSliver` + `SliverMainAxisGroup`, and a non-standard upward overlap) plus several AVD build-screenshot iterations across light/dark × ar/en. Too much risk to the just-shipped flagship for a deep-scroll-only benefit to land un-iterated. Best as a dedicated visual-QA pass — happy to take it on next. |
+| **Item 19 — APK shrink** | ✅ Done (finding: use ABI split, not minify) | R8 minify was validated (release build passes with `proguard-rules.pro`) but **left disabled**: on a Flutter APK it shrank ~0.5 MB (90 → 89.5) — the bulk is native `.so`, which R8 doesn't touch — for release-only runtime risk. The real win, no code change: `flutter build apk --release --split-per-abi --dart-define-from-file=.env.json` → a ~arm64-only APK (roughly half the ~90 MB). Font prune (~1.5 MB) already landed. Config left ready-to-enable in `build.gradle.kts` if obfuscation is ever wanted. |
+
+---
+
 ## Status by plan item
 
 | # | Item | Status | Notes |
