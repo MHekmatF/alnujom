@@ -78,12 +78,19 @@ class SupabaseFavoritesDatasource {
     final rows = await query
         .order('favorited_at', ascending: false)
         .limit(limit);
-    return (rows as List<dynamic>)
-        .map(
-          (row) => FavoriteListingDto.fromJson(
-            Map<String, dynamic>.from(row as Map),
-          ),
-        )
-        .toList();
+    return (rows as List<dynamic>).map((row) {
+      final map = Map<String, dynamic>.from(row as Map);
+      // FUNC-M1: `v_favorites.main_image_path` is a raw storage path; resolve it
+      // to a full public URL here — mirroring the home / search / chat
+      // datasources — so the favorites card shows the real cover photo instead of
+      // a placeholder. Already-absolute URLs pass through unchanged.
+      final path = map['main_image_path'];
+      if (path is String && path.isNotEmpty && !path.startsWith('http')) {
+        map['main_image_path'] = _client.storage
+            .from('listing-images')
+            .getPublicUrl(path);
+      }
+      return FavoriteListingDto.fromJson(map);
+    }).toList();
   }
 }

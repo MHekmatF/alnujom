@@ -454,6 +454,7 @@
   "locationPickerSelectGovernorate": "Select a governorate",
   "locationPickerSelectCity": "Select a city",
   "locationPickerSelectArea": "Select an area (optional)",
+  "locationPickerSelectAreaRequired": "Select an area",
   "locationPickerNoAreasYet": "No areas yet — leave blank",
   "locationsLoadFailed": "Failed to load locations",
   "locationSaveFailed": "Save failed",

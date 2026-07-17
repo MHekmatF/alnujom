@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Default (non-Arabic) launcher / app label. UX-5: properly-cased brand name
+         (was the lowercase "alnujom"). Arabic locales use values-ar/strings.xml. -->
+    <string name="app_name">Al Nujom</string>
+</resources>

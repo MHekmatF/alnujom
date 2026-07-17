@@ -148,6 +148,11 @@ class SubmitFailureDialog extends StatelessWidget {
         return l10n.missingFieldListingsPhoneOrWhatsapp;
       case 'listing_prices.primary':
         return l10n.missingFieldListingPricesPrimary;
+      // FUNC-H2: server emits this code when a draft has fewer than the minimum
+      // watermarked images; map it to the existing localized string instead of
+      // showing the raw key.
+      case 'listing_media.images_below_minimum':
+        return l10n.submitErrorImagesBelowMinimum;
       default:
         return path;
     }
@@ -177,6 +182,9 @@ class SubmitFailureDialog extends StatelessWidget {
     }
     if (path.startsWith('listings.phone_or_whatsapp')) {
       return ListingFormStep.visibility;
+    }
+    if (path.startsWith('listing_media')) {
+      return ListingFormStep.media;
     }
     return ListingFormStep.basics;
   }

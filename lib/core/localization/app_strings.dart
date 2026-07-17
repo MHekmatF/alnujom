@@ -1377,6 +1377,12 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get locationPickerSelectAreaRequired => _resolve(
+    'locationPickerSelectAreaRequired',
+    (loc) => loc.locationPickerSelectAreaRequired,
+  );
+
+  @override
   String get locationPickerNoAreasYet => _resolve(
     'locationPickerNoAreasYet',
     (loc) => loc.locationPickerNoAreasYet,
@@ -1550,10 +1556,8 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
-  String get listingFormAddAnother => _resolve(
-    'listingFormAddAnother',
-    (loc) => loc.listingFormAddAnother,
-  );
+  String get listingFormAddAnother =>
+      _resolve('listingFormAddAnother', (loc) => loc.listingFormAddAnother);
 
   @override
   String get listingFormLoadingMessage => _resolve(
@@ -4545,10 +4549,8 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('view_mode_compact_desc', (loc) => loc.view_mode_compact_desc);
 
   @override
-  String get auth_continue_as_guest => _resolve(
-    'auth_continue_as_guest',
-    (loc) => loc.auth_continue_as_guest,
-  );
+  String get auth_continue_as_guest =>
+      _resolve('auth_continue_as_guest', (loc) => loc.auth_continue_as_guest);
 
   @override
   String get home_trust_headline =>
@@ -4926,10 +4928,8 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
-  String get publisherManageSection => _resolve(
-    'publisherManageSection',
-    (loc) => loc.publisherManageSection,
-  );
+  String get publisherManageSection =>
+      _resolve('publisherManageSection', (loc) => loc.publisherManageSection);
 
   @override
   String get publisherDashboardInteractionsTitle => _resolve(
@@ -5846,10 +5846,8 @@ final class _DebugAppLocalizations extends AppLocalizations {
   String get viewingCancelAction =>
       _resolve('viewingCancelAction', (loc) => loc.viewingCancelAction);
   @override
-  String get viewingContactPublisher => _resolve(
-    'viewingContactPublisher',
-    (loc) => loc.viewingContactPublisher,
-  );
+  String get viewingContactPublisher =>
+      _resolve('viewingContactPublisher', (loc) => loc.viewingContactPublisher);
   @override
   String get viewingConfirmedSuccess =>
       _resolve('viewingConfirmedSuccess', (loc) => loc.viewingConfirmedSuccess);
@@ -6114,8 +6112,7 @@ final class _DebugAppLocalizations extends AppLocalizations {
   String get crmFilterAll =>
       _resolve("crmFilterAll", (loc) => loc.crmFilterAll);
   @override
-  String get crmStageNew =>
-      _resolve("crmStageNew", (loc) => loc.crmStageNew);
+  String get crmStageNew => _resolve("crmStageNew", (loc) => loc.crmStageNew);
   @override
   String get crmStageContacted =>
       _resolve("crmStageContacted", (loc) => loc.crmStageContacted);
@@ -6126,8 +6123,7 @@ final class _DebugAppLocalizations extends AppLocalizations {
   String get crmStageNegotiation =>
       _resolve("crmStageNegotiation", (loc) => loc.crmStageNegotiation);
   @override
-  String get crmStageWon =>
-      _resolve("crmStageWon", (loc) => loc.crmStageWon);
+  String get crmStageWon => _resolve("crmStageWon", (loc) => loc.crmStageWon);
   @override
   String get crmStageLost =>
       _resolve("crmStageLost", (loc) => loc.crmStageLost);
@@ -6135,10 +6131,8 @@ final class _DebugAppLocalizations extends AppLocalizations {
   String get crmStageSectionTitle =>
       _resolve("crmStageSectionTitle", (loc) => loc.crmStageSectionTitle);
   @override
-  String crmLeadLastActivity(String when) => _resolve(
-    "crmLeadLastActivity",
-    (loc) => loc.crmLeadLastActivity(when),
-  );
+  String crmLeadLastActivity(String when) =>
+      _resolve("crmLeadLastActivity", (loc) => loc.crmLeadLastActivity(when));
   @override
   String get crmRelativeToday =>
       _resolve("crmRelativeToday", (loc) => loc.crmRelativeToday);
@@ -6146,24 +6140,24 @@ final class _DebugAppLocalizations extends AppLocalizations {
   String get crmRelativeYesterday =>
       _resolve("crmRelativeYesterday", (loc) => loc.crmRelativeYesterday);
   @override
-  String crmRelativeDaysAgo(int count) => _resolve(
-    "crmRelativeDaysAgo",
-    (loc) => loc.crmRelativeDaysAgo(count),
-  );
+  String crmRelativeDaysAgo(int count) =>
+      _resolve("crmRelativeDaysAgo", (loc) => loc.crmRelativeDaysAgo(count));
   @override
-  String crmDueTodayTitle(int count) => _resolve(
-    "crmDueTodayTitle",
-    (loc) => loc.crmDueTodayTitle(count),
-  );
+  String crmDueTodayTitle(int count) =>
+      _resolve("crmDueTodayTitle", (loc) => loc.crmDueTodayTitle(count));
   @override
-  String get crmRemindersSectionTitle =>
-      _resolve("crmRemindersSectionTitle", (loc) => loc.crmRemindersSectionTitle);
+  String get crmRemindersSectionTitle => _resolve(
+    "crmRemindersSectionTitle",
+    (loc) => loc.crmRemindersSectionTitle,
+  );
   @override
   String get crmRemindersEmpty =>
       _resolve("crmRemindersEmpty", (loc) => loc.crmRemindersEmpty);
   @override
-  String get crmRemindersPermissionDenied =>
-      _resolve("crmRemindersPermissionDenied", (loc) => loc.crmRemindersPermissionDenied);
+  String get crmRemindersPermissionDenied => _resolve(
+    "crmRemindersPermissionDenied",
+    (loc) => loc.crmRemindersPermissionDenied,
+  );
   @override
   String get crmReminderAddAction =>
       _resolve("crmReminderAddAction", (loc) => loc.crmReminderAddAction);
@@ -6180,14 +6174,18 @@ final class _DebugAppLocalizations extends AppLocalizations {
   String get crmReminderAddedSuccess =>
       _resolve("crmReminderAddedSuccess", (loc) => loc.crmReminderAddedSuccess);
   @override
-  String get crmReminderToggleTooltip =>
-      _resolve("crmReminderToggleTooltip", (loc) => loc.crmReminderToggleTooltip);
+  String get crmReminderToggleTooltip => _resolve(
+    "crmReminderToggleTooltip",
+    (loc) => loc.crmReminderToggleTooltip,
+  );
   @override
   String get crmReminderDeleteTitle =>
       _resolve("crmReminderDeleteTitle", (loc) => loc.crmReminderDeleteTitle);
   @override
-  String get crmReminderDeleteMessage =>
-      _resolve("crmReminderDeleteMessage", (loc) => loc.crmReminderDeleteMessage);
+  String get crmReminderDeleteMessage => _resolve(
+    "crmReminderDeleteMessage",
+    (loc) => loc.crmReminderDeleteMessage,
+  );
   @override
   String get crmNotesSectionTitle =>
       _resolve("crmNotesSectionTitle", (loc) => loc.crmNotesSectionTitle);
@@ -6222,17 +6220,25 @@ final class _DebugAppLocalizations extends AppLocalizations {
   String get crmTimelineMessage =>
       _resolve("crmTimelineMessage", (loc) => loc.crmTimelineMessage);
   @override
-  String get crmTimelineViewingRequested =>
-      _resolve("crmTimelineViewingRequested", (loc) => loc.crmTimelineViewingRequested);
+  String get crmTimelineViewingRequested => _resolve(
+    "crmTimelineViewingRequested",
+    (loc) => loc.crmTimelineViewingRequested,
+  );
   @override
-  String get crmTimelineViewingConfirmed =>
-      _resolve("crmTimelineViewingConfirmed", (loc) => loc.crmTimelineViewingConfirmed);
+  String get crmTimelineViewingConfirmed => _resolve(
+    "crmTimelineViewingConfirmed",
+    (loc) => loc.crmTimelineViewingConfirmed,
+  );
   @override
-  String get crmTimelineViewingDeclined =>
-      _resolve("crmTimelineViewingDeclined", (loc) => loc.crmTimelineViewingDeclined);
+  String get crmTimelineViewingDeclined => _resolve(
+    "crmTimelineViewingDeclined",
+    (loc) => loc.crmTimelineViewingDeclined,
+  );
   @override
-  String get crmTimelineViewingCancelled =>
-      _resolve("crmTimelineViewingCancelled", (loc) => loc.crmTimelineViewingCancelled);
+  String get crmTimelineViewingCancelled => _resolve(
+    "crmTimelineViewingCancelled",
+    (loc) => loc.crmTimelineViewingCancelled,
+  );
   @override
   String get crmTimelineNote =>
       _resolve("crmTimelineNote", (loc) => loc.crmTimelineNote);
@@ -6273,20 +6279,30 @@ final class _DebugAppLocalizations extends AppLocalizations {
   String get adminAnalyticsTileTitle =>
       _resolve("adminAnalyticsTileTitle", (loc) => loc.adminAnalyticsTileTitle);
   @override
-  String get adminAnalyticsTileSubtitle =>
-      _resolve("adminAnalyticsTileSubtitle", (loc) => loc.adminAnalyticsTileSubtitle);
+  String get adminAnalyticsTileSubtitle => _resolve(
+    "adminAnalyticsTileSubtitle",
+    (loc) => loc.adminAnalyticsTileSubtitle,
+  );
   @override
-  String get adminAnalyticsListingsByMonthTitle =>
-      _resolve("adminAnalyticsListingsByMonthTitle", (loc) => loc.adminAnalyticsListingsByMonthTitle);
+  String get adminAnalyticsListingsByMonthTitle => _resolve(
+    "adminAnalyticsListingsByMonthTitle",
+    (loc) => loc.adminAnalyticsListingsByMonthTitle,
+  );
   @override
-  String get adminAnalyticsUsersByMonthTitle =>
-      _resolve("adminAnalyticsUsersByMonthTitle", (loc) => loc.adminAnalyticsUsersByMonthTitle);
+  String get adminAnalyticsUsersByMonthTitle => _resolve(
+    "adminAnalyticsUsersByMonthTitle",
+    (loc) => loc.adminAnalyticsUsersByMonthTitle,
+  );
   @override
-  String get adminAnalyticsLeadEventsByDayTitle =>
-      _resolve("adminAnalyticsLeadEventsByDayTitle", (loc) => loc.adminAnalyticsLeadEventsByDayTitle);
+  String get adminAnalyticsLeadEventsByDayTitle => _resolve(
+    "adminAnalyticsLeadEventsByDayTitle",
+    (loc) => loc.adminAnalyticsLeadEventsByDayTitle,
+  );
   @override
-  String get adminAnalyticsListingsByGovernorateTitle =>
-      _resolve("adminAnalyticsListingsByGovernorateTitle", (loc) => loc.adminAnalyticsListingsByGovernorateTitle);
+  String get adminAnalyticsListingsByGovernorateTitle => _resolve(
+    "adminAnalyticsListingsByGovernorateTitle",
+    (loc) => loc.adminAnalyticsListingsByGovernorateTitle,
+  );
   @override
   String get adminAnalyticsEmptyHint =>
       _resolve("adminAnalyticsEmptyHint", (loc) => loc.adminAnalyticsEmptyHint);
@@ -6294,74 +6310,120 @@ final class _DebugAppLocalizations extends AppLocalizations {
   String get adminAnalyticsError =>
       _resolve("adminAnalyticsError", (loc) => loc.adminAnalyticsError);
   @override
-  String get adminAnalyticsEvolutionTitle =>
-      _resolve("adminAnalyticsEvolutionTitle", (loc) => loc.adminAnalyticsEvolutionTitle);
+  String get adminAnalyticsEvolutionTitle => _resolve(
+    "adminAnalyticsEvolutionTitle",
+    (loc) => loc.adminAnalyticsEvolutionTitle,
+  );
   @override
-  String get adminAnalyticsSeriesListings =>
-      _resolve("adminAnalyticsSeriesListings", (loc) => loc.adminAnalyticsSeriesListings);
+  String get adminAnalyticsSeriesListings => _resolve(
+    "adminAnalyticsSeriesListings",
+    (loc) => loc.adminAnalyticsSeriesListings,
+  );
   @override
-  String get adminAnalyticsSeriesUsers =>
-      _resolve("adminAnalyticsSeriesUsers", (loc) => loc.adminAnalyticsSeriesUsers);
+  String get adminAnalyticsSeriesUsers => _resolve(
+    "adminAnalyticsSeriesUsers",
+    (loc) => loc.adminAnalyticsSeriesUsers,
+  );
   @override
-  String get adminAnalyticsKpiListingsMonth =>
-      _resolve("adminAnalyticsKpiListingsMonth", (loc) => loc.adminAnalyticsKpiListingsMonth);
+  String get adminAnalyticsKpiListingsMonth => _resolve(
+    "adminAnalyticsKpiListingsMonth",
+    (loc) => loc.adminAnalyticsKpiListingsMonth,
+  );
   @override
-  String get adminAnalyticsKpiNewUsers =>
-      _resolve("adminAnalyticsKpiNewUsers", (loc) => loc.adminAnalyticsKpiNewUsers);
+  String get adminAnalyticsKpiNewUsers => _resolve(
+    "adminAnalyticsKpiNewUsers",
+    (loc) => loc.adminAnalyticsKpiNewUsers,
+  );
   @override
-  String get adminAnalyticsKpiLeads30d =>
-      _resolve("adminAnalyticsKpiLeads30d", (loc) => loc.adminAnalyticsKpiLeads30d);
+  String get adminAnalyticsKpiLeads30d => _resolve(
+    "adminAnalyticsKpiLeads30d",
+    (loc) => loc.adminAnalyticsKpiLeads30d,
+  );
   @override
-  String get adminAnalyticsKpiActiveListings =>
-      _resolve("adminAnalyticsKpiActiveListings", (loc) => loc.adminAnalyticsKpiActiveListings);
+  String get adminAnalyticsKpiActiveListings => _resolve(
+    "adminAnalyticsKpiActiveListings",
+    (loc) => loc.adminAnalyticsKpiActiveListings,
+  );
   @override
-  String get adminAnalyticsEngineLabel =>
-      _resolve("adminAnalyticsEngineLabel", (loc) => loc.adminAnalyticsEngineLabel);
+  String get adminAnalyticsEngineLabel => _resolve(
+    "adminAnalyticsEngineLabel",
+    (loc) => loc.adminAnalyticsEngineLabel,
+  );
   @override
-  String get adminAnalyticsEngineNative =>
-      _resolve("adminAnalyticsEngineNative", (loc) => loc.adminAnalyticsEngineNative);
+  String get adminAnalyticsEngineNative => _resolve(
+    "adminAnalyticsEngineNative",
+    (loc) => loc.adminAnalyticsEngineNative,
+  );
   @override
-  String get adminAnalyticsEngineFlChart =>
-      _resolve("adminAnalyticsEngineFlChart", (loc) => loc.adminAnalyticsEngineFlChart);
+  String get adminAnalyticsEngineFlChart => _resolve(
+    "adminAnalyticsEngineFlChart",
+    (loc) => loc.adminAnalyticsEngineFlChart,
+  );
   @override
-  String get publisherChartsSectionLabel =>
-      _resolve("publisherChartsSectionLabel", (loc) => loc.publisherChartsSectionLabel);
+  String get publisherChartsSectionLabel => _resolve(
+    "publisherChartsSectionLabel",
+    (loc) => loc.publisherChartsSectionLabel,
+  );
   @override
-  String get publisherChartsLeadsByDayTitle =>
-      _resolve("publisherChartsLeadsByDayTitle", (loc) => loc.publisherChartsLeadsByDayTitle);
+  String get publisherChartsLeadsByDayTitle => _resolve(
+    "publisherChartsLeadsByDayTitle",
+    (loc) => loc.publisherChartsLeadsByDayTitle,
+  );
   @override
-  String get publisherChartsInquiriesByDayTitle =>
-      _resolve("publisherChartsInquiriesByDayTitle", (loc) => loc.publisherChartsInquiriesByDayTitle);
+  String get publisherChartsInquiriesByDayTitle => _resolve(
+    "publisherChartsInquiriesByDayTitle",
+    (loc) => loc.publisherChartsInquiriesByDayTitle,
+  );
   @override
-  String get publisherChartsViewingsByStatusTitle =>
-      _resolve("publisherChartsViewingsByStatusTitle", (loc) => loc.publisherChartsViewingsByStatusTitle);
+  String get publisherChartsViewingsByStatusTitle => _resolve(
+    "publisherChartsViewingsByStatusTitle",
+    (loc) => loc.publisherChartsViewingsByStatusTitle,
+  );
   @override
-  String get publisherChartsListingsByStatusTitle =>
-      _resolve("publisherChartsListingsByStatusTitle", (loc) => loc.publisherChartsListingsByStatusTitle);
+  String get publisherChartsListingsByStatusTitle => _resolve(
+    "publisherChartsListingsByStatusTitle",
+    (loc) => loc.publisherChartsListingsByStatusTitle,
+  );
   @override
-  String get publisherChartsEmptyHint =>
-      _resolve("publisherChartsEmptyHint", (loc) => loc.publisherChartsEmptyHint);
+  String get publisherChartsEmptyHint => _resolve(
+    "publisherChartsEmptyHint",
+    (loc) => loc.publisherChartsEmptyHint,
+  );
   @override
-  String get publisherChartsStatusActive =>
-      _resolve("publisherChartsStatusActive", (loc) => loc.publisherChartsStatusActive);
+  String get publisherChartsStatusActive => _resolve(
+    "publisherChartsStatusActive",
+    (loc) => loc.publisherChartsStatusActive,
+  );
   @override
-  String get publisherChartsStatusPending =>
-      _resolve("publisherChartsStatusPending", (loc) => loc.publisherChartsStatusPending);
+  String get publisherChartsStatusPending => _resolve(
+    "publisherChartsStatusPending",
+    (loc) => loc.publisherChartsStatusPending,
+  );
   @override
-  String get publisherChartsStatusRejected =>
-      _resolve("publisherChartsStatusRejected", (loc) => loc.publisherChartsStatusRejected);
+  String get publisherChartsStatusRejected => _resolve(
+    "publisherChartsStatusRejected",
+    (loc) => loc.publisherChartsStatusRejected,
+  );
   @override
-  String get publisherChartsViewingRequested =>
-      _resolve("publisherChartsViewingRequested", (loc) => loc.publisherChartsViewingRequested);
+  String get publisherChartsViewingRequested => _resolve(
+    "publisherChartsViewingRequested",
+    (loc) => loc.publisherChartsViewingRequested,
+  );
   @override
-  String get publisherChartsViewingConfirmed =>
-      _resolve("publisherChartsViewingConfirmed", (loc) => loc.publisherChartsViewingConfirmed);
+  String get publisherChartsViewingConfirmed => _resolve(
+    "publisherChartsViewingConfirmed",
+    (loc) => loc.publisherChartsViewingConfirmed,
+  );
   @override
-  String get publisherChartsViewingDeclined =>
-      _resolve("publisherChartsViewingDeclined", (loc) => loc.publisherChartsViewingDeclined);
+  String get publisherChartsViewingDeclined => _resolve(
+    "publisherChartsViewingDeclined",
+    (loc) => loc.publisherChartsViewingDeclined,
+  );
   @override
-  String get publisherChartsViewingCancelled =>
-      _resolve("publisherChartsViewingCancelled", (loc) => loc.publisherChartsViewingCancelled);
+  String get publisherChartsViewingCancelled => _resolve(
+    "publisherChartsViewingCancelled",
+    (loc) => loc.publisherChartsViewingCancelled,
+  );
   @override
   String get dashCrmTileTitle =>
       _resolve("dashCrmTileTitle", (loc) => loc.dashCrmTileTitle);
@@ -6372,25 +6434,29 @@ final class _DebugAppLocalizations extends AppLocalizations {
   String get mediaAddPanorama =>
       _resolve("mediaAddPanorama", (loc) => loc.mediaAddPanorama);
   @override
-  String mediaTipsPhotoCount(int count) => _resolve(
-    "mediaTipsPhotoCount",
-    (loc) => loc.mediaTipsPhotoCount(count),
-  );
+  String mediaTipsPhotoCount(int count) =>
+      _resolve("mediaTipsPhotoCount", (loc) => loc.mediaTipsPhotoCount(count));
   @override
   String get mediaTipsLightingHint =>
       _resolve("mediaTipsLightingHint", (loc) => loc.mediaTipsLightingHint);
   @override
-  String get mediaActionMarkExistingPanorama =>
-      _resolve("mediaActionMarkExistingPanorama", (loc) => loc.mediaActionMarkExistingPanorama);
+  String get mediaActionMarkExistingPanorama => _resolve(
+    "mediaActionMarkExistingPanorama",
+    (loc) => loc.mediaActionMarkExistingPanorama,
+  );
   @override
-  String get mediaActionUnmarkExistingPanorama =>
-      _resolve("mediaActionUnmarkExistingPanorama", (loc) => loc.mediaActionUnmarkExistingPanorama);
+  String get mediaActionUnmarkExistingPanorama => _resolve(
+    "mediaActionUnmarkExistingPanorama",
+    (loc) => loc.mediaActionUnmarkExistingPanorama,
+  );
   @override
   String get mediaCapPanoramas2 =>
       _resolve("mediaCapPanoramas2", (loc) => loc.mediaCapPanoramas2);
   @override
-  String get mediaErrorNotEquirectangular =>
-      _resolve("mediaErrorNotEquirectangular", (loc) => loc.mediaErrorNotEquirectangular);
+  String get mediaErrorNotEquirectangular => _resolve(
+    "mediaErrorNotEquirectangular",
+    (loc) => loc.mediaErrorNotEquirectangular,
+  );
   @override
   String get mediaPanoramaHelpTitle =>
       _resolve("mediaPanoramaHelpTitle", (loc) => loc.mediaPanoramaHelpTitle);
@@ -6410,37 +6476,55 @@ final class _DebugAppLocalizations extends AppLocalizations {
   String get mediaPanoramaHelpGetApp =>
       _resolve("mediaPanoramaHelpGetApp", (loc) => loc.mediaPanoramaHelpGetApp);
   @override
-  String get listingFormPreviewHeading =>
-      _resolve("listingFormPreviewHeading", (loc) => loc.listingFormPreviewHeading);
+  String get listingFormPreviewHeading => _resolve(
+    "listingFormPreviewHeading",
+    (loc) => loc.listingFormPreviewHeading,
+  );
   @override
-  String get listingFormPreviewTitlePlaceholder =>
-      _resolve("listingFormPreviewTitlePlaceholder", (loc) => loc.listingFormPreviewTitlePlaceholder);
+  String get listingFormPreviewTitlePlaceholder => _resolve(
+    "listingFormPreviewTitlePlaceholder",
+    (loc) => loc.listingFormPreviewTitlePlaceholder,
+  );
   @override
-  String get listingFormPreviewPricePlaceholder =>
-      _resolve("listingFormPreviewPricePlaceholder", (loc) => loc.listingFormPreviewPricePlaceholder);
+  String get listingFormPreviewPricePlaceholder => _resolve(
+    "listingFormPreviewPricePlaceholder",
+    (loc) => loc.listingFormPreviewPricePlaceholder,
+  );
   @override
-  String get listingFormPreviewLocationPlaceholder =>
-      _resolve("listingFormPreviewLocationPlaceholder", (loc) => loc.listingFormPreviewLocationPlaceholder);
+  String get listingFormPreviewLocationPlaceholder => _resolve(
+    "listingFormPreviewLocationPlaceholder",
+    (loc) => loc.listingFormPreviewLocationPlaceholder,
+  );
   @override
-  String get listingFormPreviewFeaturedLabel =>
-      _resolve("listingFormPreviewFeaturedLabel", (loc) => loc.listingFormPreviewFeaturedLabel);
+  String get listingFormPreviewFeaturedLabel => _resolve(
+    "listingFormPreviewFeaturedLabel",
+    (loc) => loc.listingFormPreviewFeaturedLabel,
+  );
   @override
-  String get listingFormChecklistTitle =>
-      _resolve("listingFormChecklistTitle", (loc) => loc.listingFormChecklistTitle);
+  String get listingFormChecklistTitle => _resolve(
+    "listingFormChecklistTitle",
+    (loc) => loc.listingFormChecklistTitle,
+  );
   @override
-  String get listingFormChecklistAllComplete =>
-      _resolve("listingFormChecklistAllComplete", (loc) => loc.listingFormChecklistAllComplete);
+  String get listingFormChecklistAllComplete => _resolve(
+    "listingFormChecklistAllComplete",
+    (loc) => loc.listingFormChecklistAllComplete,
+  );
   @override
   String listingFormChecklistMissingSubtitle(int count) => _resolve(
     "listingFormChecklistMissingSubtitle",
     (loc) => loc.listingFormChecklistMissingSubtitle(count),
   );
   @override
-  String get listingFormChecklistPhoneOrWhatsapp =>
-      _resolve("listingFormChecklistPhoneOrWhatsapp", (loc) => loc.listingFormChecklistPhoneOrWhatsapp);
+  String get listingFormChecklistPhoneOrWhatsapp => _resolve(
+    "listingFormChecklistPhoneOrWhatsapp",
+    (loc) => loc.listingFormChecklistPhoneOrWhatsapp,
+  );
   @override
-  String get listingFormChecklistGenericMissing =>
-      _resolve("listingFormChecklistGenericMissing", (loc) => loc.listingFormChecklistGenericMissing);
+  String get listingFormChecklistGenericMissing => _resolve(
+    "listingFormChecklistGenericMissing",
+    (loc) => loc.listingFormChecklistGenericMissing,
+  );
   @override
   String get listingFormChecklistFix =>
       _resolve("listingFormChecklistFix", (loc) => loc.listingFormChecklistFix);
@@ -6460,14 +6544,20 @@ final class _DebugAppLocalizations extends AppLocalizations {
   String get reels_load_error =>
       _resolve("reels_load_error", (loc) => loc.reels_load_error);
   @override
-  String get reels_lite_confirm_title =>
-      _resolve("reels_lite_confirm_title", (loc) => loc.reels_lite_confirm_title);
+  String get reels_lite_confirm_title => _resolve(
+    "reels_lite_confirm_title",
+    (loc) => loc.reels_lite_confirm_title,
+  );
   @override
-  String get reels_lite_confirm_message =>
-      _resolve("reels_lite_confirm_message", (loc) => loc.reels_lite_confirm_message);
+  String get reels_lite_confirm_message => _resolve(
+    "reels_lite_confirm_message",
+    (loc) => loc.reels_lite_confirm_message,
+  );
   @override
-  String get reels_lite_confirm_action =>
-      _resolve("reels_lite_confirm_action", (loc) => loc.reels_lite_confirm_action);
+  String get reels_lite_confirm_action => _resolve(
+    "reels_lite_confirm_action",
+    (loc) => loc.reels_lite_confirm_action,
+  );
   @override
   String get locationCentroidLabel =>
       _resolve("locationCentroidLabel", (loc) => loc.locationCentroidLabel);
@@ -6475,17 +6565,25 @@ final class _DebugAppLocalizations extends AppLocalizations {
   String get locationCentroidHelper =>
       _resolve("locationCentroidHelper", (loc) => loc.locationCentroidHelper);
   @override
-  String get locationCentroidLatLabel =>
-      _resolve("locationCentroidLatLabel", (loc) => loc.locationCentroidLatLabel);
+  String get locationCentroidLatLabel => _resolve(
+    "locationCentroidLatLabel",
+    (loc) => loc.locationCentroidLatLabel,
+  );
   @override
-  String get locationCentroidLngLabel =>
-      _resolve("locationCentroidLngLabel", (loc) => loc.locationCentroidLngLabel);
+  String get locationCentroidLngLabel => _resolve(
+    "locationCentroidLngLabel",
+    (loc) => loc.locationCentroidLngLabel,
+  );
   @override
-  String get locationCentroidRequired =>
-      _resolve("locationCentroidRequired", (loc) => loc.locationCentroidRequired);
+  String get locationCentroidRequired => _resolve(
+    "locationCentroidRequired",
+    (loc) => loc.locationCentroidRequired,
+  );
   @override
-  String get locationCentroidOutOfBounds =>
-      _resolve("locationCentroidOutOfBounds", (loc) => loc.locationCentroidOutOfBounds);
+  String get locationCentroidOutOfBounds => _resolve(
+    "locationCentroidOutOfBounds",
+    (loc) => loc.locationCentroidOutOfBounds,
+  );
   @override
   String get videoCompressing =>
       _resolve("videoCompressing", (loc) => loc.videoCompressing);
@@ -6493,11 +6591,12 @@ final class _DebugAppLocalizations extends AppLocalizations {
   String get crmViewInCrm =>
       _resolve("crmViewInCrm", (loc) => loc.crmViewInCrm);
   @override
-  String get nav_reels =>
-      _resolve("nav_reels", (loc) => loc.nav_reels);
+  String get nav_reels => _resolve("nav_reels", (loc) => loc.nav_reels);
   @override
-  String get reels_tab_empty_subtitle =>
-      _resolve("reels_tab_empty_subtitle", (loc) => loc.reels_tab_empty_subtitle);
+  String get reels_tab_empty_subtitle => _resolve(
+    "reels_tab_empty_subtitle",
+    (loc) => loc.reels_tab_empty_subtitle,
+  );
   @override
   String get navDrawerMenuTooltip =>
       _resolve("navDrawerMenuTooltip", (loc) => loc.navDrawerMenuTooltip);
@@ -6514,8 +6613,10 @@ final class _DebugAppLocalizations extends AppLocalizations {
   String get createToggleDetailView =>
       _resolve("createToggleDetailView", (loc) => loc.createToggleDetailView);
   @override
-  String get createToggleClassicSteps =>
-      _resolve("createToggleClassicSteps", (loc) => loc.createToggleClassicSteps);
+  String get createToggleClassicSteps => _resolve(
+    "createToggleClassicSteps",
+    (loc) => loc.createToggleClassicSteps,
+  );
   @override
   String get createToggleExpress =>
       _resolve("createToggleExpress", (loc) => loc.createToggleExpress);
@@ -6532,53 +6633,85 @@ final class _DebugAppLocalizations extends AppLocalizations {
   String get formDetailSubmitButton =>
       _resolve("formDetailSubmitButton", (loc) => loc.formDetailSubmitButton);
   @override
-  String get formDetailTitleSectionTitle =>
-      _resolve("formDetailTitleSectionTitle", (loc) => loc.formDetailTitleSectionTitle);
+  String get formDetailTitleSectionTitle => _resolve(
+    "formDetailTitleSectionTitle",
+    (loc) => loc.formDetailTitleSectionTitle,
+  );
   @override
-  String get formDetailTitleSectionSubtitle =>
-      _resolve("formDetailTitleSectionSubtitle", (loc) => loc.formDetailTitleSectionSubtitle);
+  String get formDetailTitleSectionSubtitle => _resolve(
+    "formDetailTitleSectionSubtitle",
+    (loc) => loc.formDetailTitleSectionSubtitle,
+  );
   @override
-  String get formDetailClassificationSectionTitle =>
-      _resolve("formDetailClassificationSectionTitle", (loc) => loc.formDetailClassificationSectionTitle);
+  String get formDetailClassificationSectionTitle => _resolve(
+    "formDetailClassificationSectionTitle",
+    (loc) => loc.formDetailClassificationSectionTitle,
+  );
   @override
-  String get formDetailClassificationSectionSubtitle =>
-      _resolve("formDetailClassificationSectionSubtitle", (loc) => loc.formDetailClassificationSectionSubtitle);
+  String get formDetailClassificationSectionSubtitle => _resolve(
+    "formDetailClassificationSectionSubtitle",
+    (loc) => loc.formDetailClassificationSectionSubtitle,
+  );
   @override
-  String get formDetailPriceSectionTitle =>
-      _resolve("formDetailPriceSectionTitle", (loc) => loc.formDetailPriceSectionTitle);
+  String get formDetailPriceSectionTitle => _resolve(
+    "formDetailPriceSectionTitle",
+    (loc) => loc.formDetailPriceSectionTitle,
+  );
   @override
-  String get formDetailPriceSectionSubtitle =>
-      _resolve("formDetailPriceSectionSubtitle", (loc) => loc.formDetailPriceSectionSubtitle);
+  String get formDetailPriceSectionSubtitle => _resolve(
+    "formDetailPriceSectionSubtitle",
+    (loc) => loc.formDetailPriceSectionSubtitle,
+  );
   @override
-  String get formDetailLocationSectionTitle =>
-      _resolve("formDetailLocationSectionTitle", (loc) => loc.formDetailLocationSectionTitle);
+  String get formDetailLocationSectionTitle => _resolve(
+    "formDetailLocationSectionTitle",
+    (loc) => loc.formDetailLocationSectionTitle,
+  );
   @override
-  String get formDetailLocationSectionSubtitle =>
-      _resolve("formDetailLocationSectionSubtitle", (loc) => loc.formDetailLocationSectionSubtitle);
+  String get formDetailLocationSectionSubtitle => _resolve(
+    "formDetailLocationSectionSubtitle",
+    (loc) => loc.formDetailLocationSectionSubtitle,
+  );
   @override
-  String get formDetailFactsSectionTitle =>
-      _resolve("formDetailFactsSectionTitle", (loc) => loc.formDetailFactsSectionTitle);
+  String get formDetailFactsSectionTitle => _resolve(
+    "formDetailFactsSectionTitle",
+    (loc) => loc.formDetailFactsSectionTitle,
+  );
   @override
-  String get formDetailFactsSectionSubtitle =>
-      _resolve("formDetailFactsSectionSubtitle", (loc) => loc.formDetailFactsSectionSubtitle);
+  String get formDetailFactsSectionSubtitle => _resolve(
+    "formDetailFactsSectionSubtitle",
+    (loc) => loc.formDetailFactsSectionSubtitle,
+  );
   @override
-  String get formDetailAmenitiesSectionTitle =>
-      _resolve("formDetailAmenitiesSectionTitle", (loc) => loc.formDetailAmenitiesSectionTitle);
+  String get formDetailAmenitiesSectionTitle => _resolve(
+    "formDetailAmenitiesSectionTitle",
+    (loc) => loc.formDetailAmenitiesSectionTitle,
+  );
   @override
-  String get formDetailAmenitiesSectionSubtitle =>
-      _resolve("formDetailAmenitiesSectionSubtitle", (loc) => loc.formDetailAmenitiesSectionSubtitle);
+  String get formDetailAmenitiesSectionSubtitle => _resolve(
+    "formDetailAmenitiesSectionSubtitle",
+    (loc) => loc.formDetailAmenitiesSectionSubtitle,
+  );
   @override
-  String get formDetailDescriptionSectionTitle =>
-      _resolve("formDetailDescriptionSectionTitle", (loc) => loc.formDetailDescriptionSectionTitle);
+  String get formDetailDescriptionSectionTitle => _resolve(
+    "formDetailDescriptionSectionTitle",
+    (loc) => loc.formDetailDescriptionSectionTitle,
+  );
   @override
-  String get formDetailDescriptionSectionSubtitle =>
-      _resolve("formDetailDescriptionSectionSubtitle", (loc) => loc.formDetailDescriptionSectionSubtitle);
+  String get formDetailDescriptionSectionSubtitle => _resolve(
+    "formDetailDescriptionSectionSubtitle",
+    (loc) => loc.formDetailDescriptionSectionSubtitle,
+  );
   @override
-  String get formDetailContactSectionTitle =>
-      _resolve("formDetailContactSectionTitle", (loc) => loc.formDetailContactSectionTitle);
+  String get formDetailContactSectionTitle => _resolve(
+    "formDetailContactSectionTitle",
+    (loc) => loc.formDetailContactSectionTitle,
+  );
   @override
-  String get formDetailContactSectionSubtitle =>
-      _resolve("formDetailContactSectionSubtitle", (loc) => loc.formDetailContactSectionSubtitle);
+  String get formDetailContactSectionSubtitle => _resolve(
+    "formDetailContactSectionSubtitle",
+    (loc) => loc.formDetailContactSectionSubtitle,
+  );
   @override
   String get revisionBannerTitle =>
       _resolve("revisionBannerTitle", (loc) => loc.revisionBannerTitle);
@@ -6648,35 +6781,55 @@ final class _DebugAppLocalizations extends AppLocalizations {
     (loc) => loc.revisionStartFailedMessage,
   );
   @override
-  String get myListingsEditNeedsApproval =>
-      _resolve("myListingsEditNeedsApproval", (loc) => loc.myListingsEditNeedsApproval);
+  String get myListingsEditNeedsApproval => _resolve(
+    "myListingsEditNeedsApproval",
+    (loc) => loc.myListingsEditNeedsApproval,
+  );
   @override
-  String get myListingsEditInReviewBadge =>
-      _resolve("myListingsEditInReviewBadge", (loc) => loc.myListingsEditInReviewBadge);
+  String get myListingsEditInReviewBadge => _resolve(
+    "myListingsEditInReviewBadge",
+    (loc) => loc.myListingsEditInReviewBadge,
+  );
   @override
-  String get adminRevisionsSectionTitle =>
-      _resolve("adminRevisionsSectionTitle", (loc) => loc.adminRevisionsSectionTitle);
+  String get adminRevisionsSectionTitle => _resolve(
+    "adminRevisionsSectionTitle",
+    (loc) => loc.adminRevisionsSectionTitle,
+  );
   @override
-  String get adminRevisionPendingSubtitle =>
-      _resolve("adminRevisionPendingSubtitle", (loc) => loc.adminRevisionPendingSubtitle);
+  String get adminRevisionPendingSubtitle => _resolve(
+    "adminRevisionPendingSubtitle",
+    (loc) => loc.adminRevisionPendingSubtitle,
+  );
   @override
-  String get adminRevisionReviewTitle =>
-      _resolve("adminRevisionReviewTitle", (loc) => loc.adminRevisionReviewTitle);
+  String get adminRevisionReviewTitle => _resolve(
+    "adminRevisionReviewTitle",
+    (loc) => loc.adminRevisionReviewTitle,
+  );
   @override
-  String get adminRevisionApprovedToast =>
-      _resolve("adminRevisionApprovedToast", (loc) => loc.adminRevisionApprovedToast);
+  String get adminRevisionApprovedToast => _resolve(
+    "adminRevisionApprovedToast",
+    (loc) => loc.adminRevisionApprovedToast,
+  );
   @override
-  String get adminRevisionRejectedToast =>
-      _resolve("adminRevisionRejectedToast", (loc) => loc.adminRevisionRejectedToast);
+  String get adminRevisionRejectedToast => _resolve(
+    "adminRevisionRejectedToast",
+    (loc) => loc.adminRevisionRejectedToast,
+  );
   @override
-  String get adminRevisionProposedMediaLabel =>
-      _resolve("adminRevisionProposedMediaLabel", (loc) => loc.adminRevisionProposedMediaLabel);
+  String get adminRevisionProposedMediaLabel => _resolve(
+    "adminRevisionProposedMediaLabel",
+    (loc) => loc.adminRevisionProposedMediaLabel,
+  );
   @override
-  String get adminRevisionChangesLabel =>
-      _resolve("adminRevisionChangesLabel", (loc) => loc.adminRevisionChangesLabel);
+  String get adminRevisionChangesLabel => _resolve(
+    "adminRevisionChangesLabel",
+    (loc) => loc.adminRevisionChangesLabel,
+  );
   @override
-  String get adminRevisionNoFieldChanges =>
-      _resolve("adminRevisionNoFieldChanges", (loc) => loc.adminRevisionNoFieldChanges);
+  String get adminRevisionNoFieldChanges => _resolve(
+    "adminRevisionNoFieldChanges",
+    (loc) => loc.adminRevisionNoFieldChanges,
+  );
   @override
   String get adminRevisionApproveCta =>
       _resolve("adminRevisionApproveCta", (loc) => loc.adminRevisionApproveCta);
@@ -6684,164 +6837,286 @@ final class _DebugAppLocalizations extends AppLocalizations {
   String get adminRevisionFieldPrice =>
       _resolve("adminRevisionFieldPrice", (loc) => loc.adminRevisionFieldPrice);
   @override
-  String get adminRevisionFieldCurrency =>
-      _resolve("adminRevisionFieldCurrency", (loc) => loc.adminRevisionFieldCurrency);
+  String get adminRevisionFieldCurrency => _resolve(
+    "adminRevisionFieldCurrency",
+    (loc) => loc.adminRevisionFieldCurrency,
+  );
   @override
-  String get adminRevisionFieldAddress =>
-      _resolve("adminRevisionFieldAddress", (loc) => loc.adminRevisionFieldAddress);
+  String get adminRevisionFieldAddress => _resolve(
+    "adminRevisionFieldAddress",
+    (loc) => loc.adminRevisionFieldAddress,
+  );
   @override
-  String get adminRevisionFieldAreaSize =>
-      _resolve("adminRevisionFieldAreaSize", (loc) => loc.adminRevisionFieldAreaSize);
+  String get adminRevisionFieldAreaSize => _resolve(
+    "adminRevisionFieldAreaSize",
+    (loc) => loc.adminRevisionFieldAreaSize,
+  );
   @override
   String get adminRevisionFieldRooms =>
       _resolve("adminRevisionFieldRooms", (loc) => loc.adminRevisionFieldRooms);
   @override
-  String get adminRevisionFieldBathrooms =>
-      _resolve("adminRevisionFieldBathrooms", (loc) => loc.adminRevisionFieldBathrooms);
+  String get adminRevisionFieldBathrooms => _resolve(
+    "adminRevisionFieldBathrooms",
+    (loc) => loc.adminRevisionFieldBathrooms,
+  );
   @override
   String get adminRevisionFieldFloor =>
       _resolve("adminRevisionFieldFloor", (loc) => loc.adminRevisionFieldFloor);
   @override
-  String get adminRevisionFieldDescription =>
-      _resolve("adminRevisionFieldDescription", (loc) => loc.adminRevisionFieldDescription);
+  String get adminRevisionFieldDescription => _resolve(
+    "adminRevisionFieldDescription",
+    (loc) => loc.adminRevisionFieldDescription,
+  );
   @override
-  String get adminRevisionFieldAmenities =>
-      _resolve("adminRevisionFieldAmenities", (loc) => loc.adminRevisionFieldAmenities);
+  String get adminRevisionFieldAmenities => _resolve(
+    "adminRevisionFieldAmenities",
+    (loc) => loc.adminRevisionFieldAmenities,
+  );
   @override
-  String get adminRevisionFieldYearBuilt =>
-      _resolve("adminRevisionFieldYearBuilt", (loc) => loc.adminRevisionFieldYearBuilt);
+  String get adminRevisionFieldYearBuilt => _resolve(
+    "adminRevisionFieldYearBuilt",
+    (loc) => loc.adminRevisionFieldYearBuilt,
+  );
   @override
-  String get adminRevisionFieldFurnished =>
-      _resolve("adminRevisionFieldFurnished", (loc) => loc.adminRevisionFieldFurnished);
+  String get adminRevisionFieldFurnished => _resolve(
+    "adminRevisionFieldFurnished",
+    (loc) => loc.adminRevisionFieldFurnished,
+  );
   @override
-  String get adminRevisionFieldParking =>
-      _resolve("adminRevisionFieldParking", (loc) => loc.adminRevisionFieldParking);
+  String get adminRevisionFieldParking => _resolve(
+    "adminRevisionFieldParking",
+    (loc) => loc.adminRevisionFieldParking,
+  );
   @override
   String get adminRevisionFieldPhone =>
       _resolve("adminRevisionFieldPhone", (loc) => loc.adminRevisionFieldPhone);
   @override
-  String get adminRevisionFieldWhatsapp =>
-      _resolve("adminRevisionFieldWhatsapp", (loc) => loc.adminRevisionFieldWhatsapp);
+  String get adminRevisionFieldWhatsapp => _resolve(
+    "adminRevisionFieldWhatsapp",
+    (loc) => loc.adminRevisionFieldWhatsapp,
+  );
   @override
-  String get adminRevisionFieldLocation =>
-      _resolve("adminRevisionFieldLocation", (loc) => loc.adminRevisionFieldLocation);
+  String get adminRevisionFieldLocation => _resolve(
+    "adminRevisionFieldLocation",
+    (loc) => loc.adminRevisionFieldLocation,
+  );
   @override
-  String get adminRevisionFieldLocationVisibility =>
-      _resolve("adminRevisionFieldLocationVisibility", (loc) => loc.adminRevisionFieldLocationVisibility);
+  String get adminRevisionFieldLocationVisibility => _resolve(
+    "adminRevisionFieldLocationVisibility",
+    (loc) => loc.adminRevisionFieldLocationVisibility,
+  );
   @override
-  String get adminRevisionFieldContactVisibility =>
-      _resolve("adminRevisionFieldContactVisibility", (loc) => loc.adminRevisionFieldContactVisibility);
+  String get adminRevisionFieldContactVisibility => _resolve(
+    "adminRevisionFieldContactVisibility",
+    (loc) => loc.adminRevisionFieldContactVisibility,
+  );
 
-
   @override
-  String get search_error_title => _resolve('search_error_title', (loc) => loc.search_error_title);
+  String get search_error_title =>
+      _resolve('search_error_title', (loc) => loc.search_error_title);
   @override
-  String get map_marker_semantics_label => _resolve('map_marker_semantics_label', (loc) => loc.map_marker_semantics_label);
+  String get map_marker_semantics_label => _resolve(
+    'map_marker_semantics_label',
+    (loc) => loc.map_marker_semantics_label,
+  );
   @override
-  String get map_loading_label => _resolve('map_loading_label', (loc) => loc.map_loading_label);
+  String get map_loading_label =>
+      _resolve('map_loading_label', (loc) => loc.map_loading_label);
   @override
-  String get chatMessageSent => _resolve('chatMessageSent', (loc) => loc.chatMessageSent);
+  String get chatMessageSent =>
+      _resolve('chatMessageSent', (loc) => loc.chatMessageSent);
   @override
-  String get chatMessageRead => _resolve('chatMessageRead', (loc) => loc.chatMessageRead);
+  String get chatMessageRead =>
+      _resolve('chatMessageRead', (loc) => loc.chatMessageRead);
   @override
-  String get profileLoadErrorTitle => _resolve('profileLoadErrorTitle', (loc) => loc.profileLoadErrorTitle);
+  String get profileLoadErrorTitle =>
+      _resolve('profileLoadErrorTitle', (loc) => loc.profileLoadErrorTitle);
   @override
-  String get profilePrivateSecurityNote => _resolve('profilePrivateSecurityNote', (loc) => loc.profilePrivateSecurityNote);
+  String get profilePrivateSecurityNote => _resolve(
+    'profilePrivateSecurityNote',
+    (loc) => loc.profilePrivateSecurityNote,
+  );
   @override
-  String get reels_mute_toggle => _resolve('reels_mute_toggle', (loc) => loc.reels_mute_toggle);
+  String get reels_mute_toggle =>
+      _resolve('reels_mute_toggle', (loc) => loc.reels_mute_toggle);
   @override
   String get reels_close => _resolve('reels_close', (loc) => loc.reels_close);
   @override
-  String get onboarding_next => _resolve('onboarding_next', (loc) => loc.onboarding_next);
+  String get onboarding_next =>
+      _resolve('onboarding_next', (loc) => loc.onboarding_next);
   @override
-  String get password_show => _resolve('password_show', (loc) => loc.password_show);
+  String get password_show =>
+      _resolve('password_show', (loc) => loc.password_show);
   @override
-  String get password_hide => _resolve('password_hide', (loc) => loc.password_hide);
+  String get password_hide =>
+      _resolve('password_hide', (loc) => loc.password_hide);
   @override
-  String get mediaEmptyStateTitle => _resolve('mediaEmptyStateTitle', (loc) => loc.mediaEmptyStateTitle);
+  String get mediaEmptyStateTitle =>
+      _resolve('mediaEmptyStateTitle', (loc) => loc.mediaEmptyStateTitle);
   @override
-  String get mediaEmptyStateHint => _resolve('mediaEmptyStateHint', (loc) => loc.mediaEmptyStateHint);
+  String get mediaEmptyStateHint =>
+      _resolve('mediaEmptyStateHint', (loc) => loc.mediaEmptyStateHint);
   @override
-  String get myListingsEmptyBody => _resolve('myListingsEmptyBody', (loc) => loc.myListingsEmptyBody);
+  String get myListingsEmptyBody =>
+      _resolve('myListingsEmptyBody', (loc) => loc.myListingsEmptyBody);
   @override
-  String get myListingsFilteredEmptyTitle => _resolve('myListingsFilteredEmptyTitle', (loc) => loc.myListingsFilteredEmptyTitle);
+  String get myListingsFilteredEmptyTitle => _resolve(
+    'myListingsFilteredEmptyTitle',
+    (loc) => loc.myListingsFilteredEmptyTitle,
+  );
   @override
-  String get myListingsFilteredEmptyShowAll => _resolve('myListingsFilteredEmptyShowAll', (loc) => loc.myListingsFilteredEmptyShowAll);
+  String get myListingsFilteredEmptyShowAll => _resolve(
+    'myListingsFilteredEmptyShowAll',
+    (loc) => loc.myListingsFilteredEmptyShowAll,
+  );
   @override
-  String get myListingsUntitledListing => _resolve('myListingsUntitledListing', (loc) => loc.myListingsUntitledListing);
+  String get myListingsUntitledListing => _resolve(
+    'myListingsUntitledListing',
+    (loc) => loc.myListingsUntitledListing,
+  );
   @override
-  String get comparisonEmptyTitle => _resolve('comparisonEmptyTitle', (loc) => loc.comparisonEmptyTitle);
+  String get comparisonEmptyTitle =>
+      _resolve('comparisonEmptyTitle', (loc) => loc.comparisonEmptyTitle);
   @override
-  String get comparisonMaxReached => _resolve('comparisonMaxReached', (loc) => loc.comparisonMaxReached);
+  String get comparisonMaxReached =>
+      _resolve('comparisonMaxReached', (loc) => loc.comparisonMaxReached);
   @override
-  String get notification_unread_a11y => _resolve('notification_unread_a11y', (loc) => loc.notification_unread_a11y);
+  String get notification_unread_a11y => _resolve(
+    'notification_unread_a11y',
+    (loc) => loc.notification_unread_a11y,
+  );
   @override
-  String notification_unread_count_a11y(int count) =>
-      _resolve('notification_unread_count_a11y', (loc) => loc.notification_unread_count_a11y(count));
+  String notification_unread_count_a11y(int count) => _resolve(
+    'notification_unread_count_a11y',
+    (loc) => loc.notification_unread_count_a11y(count),
+  );
   @override
-  String get notification_date_today => _resolve('notification_date_today', (loc) => loc.notification_date_today);
+  String get notification_date_today =>
+      _resolve('notification_date_today', (loc) => loc.notification_date_today);
   @override
-  String get notification_date_yesterday => _resolve('notification_date_yesterday', (loc) => loc.notification_date_yesterday);
+  String get notification_date_yesterday => _resolve(
+    'notification_date_yesterday',
+    (loc) => loc.notification_date_yesterday,
+  );
   @override
-  String get notification_empty_state_body => _resolve('notification_empty_state_body', (loc) => loc.notification_empty_state_body);
+  String get notification_empty_state_body => _resolve(
+    'notification_empty_state_body',
+    (loc) => loc.notification_empty_state_body,
+  );
   @override
-  String get assistantTyping => _resolve('assistantTyping', (loc) => loc.assistantTyping);
+  String get assistantTyping =>
+      _resolve('assistantTyping', (loc) => loc.assistantTyping);
   @override
-  String get assistantTrySuggestions => _resolve('assistantTrySuggestions', (loc) => loc.assistantTrySuggestions);
+  String get assistantTrySuggestions =>
+      _resolve('assistantTrySuggestions', (loc) => loc.assistantTrySuggestions);
   @override
-  String get about_empty_title => _resolve('about_empty_title', (loc) => loc.about_empty_title);
+  String get about_empty_title =>
+      _resolve('about_empty_title', (loc) => loc.about_empty_title);
   @override
-  String get report_sheet_subtitle => _resolve('report_sheet_subtitle', (loc) => loc.report_sheet_subtitle);
+  String get report_sheet_subtitle =>
+      _resolve('report_sheet_subtitle', (loc) => loc.report_sheet_subtitle);
   @override
-  String get report_banner_status_label => _resolve('report_banner_status_label', (loc) => loc.report_banner_status_label);
+  String get report_banner_status_label => _resolve(
+    'report_banner_status_label',
+    (loc) => loc.report_banner_status_label,
+  );
   @override
-  String get settings_title => _resolve('settings_title', (loc) => loc.settings_title);
+  String get settings_title =>
+      _resolve('settings_title', (loc) => loc.settings_title);
   @override
-  String get settings_appearance_heading => _resolve('settings_appearance_heading', (loc) => loc.settings_appearance_heading);
+  String get settings_appearance_heading => _resolve(
+    'settings_appearance_heading',
+    (loc) => loc.settings_appearance_heading,
+  );
   @override
-  String get settings_theme_light => _resolve('settings_theme_light', (loc) => loc.settings_theme_light);
+  String get settings_theme_light =>
+      _resolve('settings_theme_light', (loc) => loc.settings_theme_light);
   @override
-  String get settings_theme_dark => _resolve('settings_theme_dark', (loc) => loc.settings_theme_dark);
+  String get settings_theme_dark =>
+      _resolve('settings_theme_dark', (loc) => loc.settings_theme_dark);
   @override
-  String get settings_theme_auto => _resolve('settings_theme_auto', (loc) => loc.settings_theme_auto);
+  String get settings_theme_auto =>
+      _resolve('settings_theme_auto', (loc) => loc.settings_theme_auto);
   @override
-  String get settings_general_heading => _resolve('settings_general_heading', (loc) => loc.settings_general_heading);
+  String get settings_general_heading => _resolve(
+    'settings_general_heading',
+    (loc) => loc.settings_general_heading,
+  );
   @override
-  String get settings_language_label => _resolve('settings_language_label', (loc) => loc.settings_language_label);
+  String get settings_language_label =>
+      _resolve('settings_language_label', (loc) => loc.settings_language_label);
   @override
-  String get settings_language_arabic => _resolve('settings_language_arabic', (loc) => loc.settings_language_arabic);
+  String get settings_language_arabic => _resolve(
+    'settings_language_arabic',
+    (loc) => loc.settings_language_arabic,
+  );
   @override
-  String get settings_language_english => _resolve('settings_language_english', (loc) => loc.settings_language_english);
+  String get settings_language_english => _resolve(
+    'settings_language_english',
+    (loc) => loc.settings_language_english,
+  );
   @override
-  String get settings_language_sheet_title => _resolve('settings_language_sheet_title', (loc) => loc.settings_language_sheet_title);
+  String get settings_language_sheet_title => _resolve(
+    'settings_language_sheet_title',
+    (loc) => loc.settings_language_sheet_title,
+  );
   @override
-  String get settings_currency_label => _resolve('settings_currency_label', (loc) => loc.settings_currency_label);
+  String get settings_currency_label =>
+      _resolve('settings_currency_label', (loc) => loc.settings_currency_label);
   @override
-  String get settings_notifications_heading => _resolve('settings_notifications_heading', (loc) => loc.settings_notifications_heading);
+  String get settings_notifications_heading => _resolve(
+    'settings_notifications_heading',
+    (loc) => loc.settings_notifications_heading,
+  );
   @override
-  String get settings_notif_new_matches => _resolve('settings_notif_new_matches', (loc) => loc.settings_notif_new_matches);
+  String get settings_notif_new_matches => _resolve(
+    'settings_notif_new_matches',
+    (loc) => loc.settings_notif_new_matches,
+  );
   @override
-  String get settings_notif_messages => _resolve('settings_notif_messages', (loc) => loc.settings_notif_messages);
+  String get settings_notif_messages =>
+      _resolve('settings_notif_messages', (loc) => loc.settings_notif_messages);
   @override
-  String get settings_notif_marketing => _resolve('settings_notif_marketing', (loc) => loc.settings_notif_marketing);
+  String get settings_notif_marketing => _resolve(
+    'settings_notif_marketing',
+    (loc) => loc.settings_notif_marketing,
+  );
   @override
-  String get settings_about_heading => _resolve('settings_about_heading', (loc) => loc.settings_about_heading);
+  String get settings_about_heading =>
+      _resolve('settings_about_heading', (loc) => loc.settings_about_heading);
   @override
-  String get settings_about_row => _resolve('settings_about_row', (loc) => loc.settings_about_row);
+  String get settings_about_row =>
+      _resolve('settings_about_row', (loc) => loc.settings_about_row);
   @override
-  String get settings_rate_app => _resolve('settings_rate_app', (loc) => loc.settings_rate_app);
+  String get settings_rate_app =>
+      _resolve('settings_rate_app', (loc) => loc.settings_rate_app);
   @override
-  String settings_version(String version) => _resolve('settings_version', (loc) => loc.settings_version(version));
+  String settings_version(String version) =>
+      _resolve('settings_version', (loc) => loc.settings_version(version));
   @override
-  String get home_city_picker_title => _resolve('home_city_picker_title', (loc) => loc.home_city_picker_title);
+  String get home_city_picker_title =>
+      _resolve('home_city_picker_title', (loc) => loc.home_city_picker_title);
   @override
-  String get home_city_picker_error => _resolve('home_city_picker_error', (loc) => loc.home_city_picker_error);
+  String get home_city_picker_error =>
+      _resolve('home_city_picker_error', (loc) => loc.home_city_picker_error);
   @override
-  String get leadAnalyticsBySourceSectionLabel => _resolve('leadAnalyticsBySourceSectionLabel', (loc) => loc.leadAnalyticsBySourceSectionLabel);
+  String get leadAnalyticsBySourceSectionLabel => _resolve(
+    'leadAnalyticsBySourceSectionLabel',
+    (loc) => loc.leadAnalyticsBySourceSectionLabel,
+  );
   @override
-  String get adminAnalyticsByCategoryTitle => _resolve('adminAnalyticsByCategoryTitle', (loc) => loc.adminAnalyticsByCategoryTitle);
+  String get adminAnalyticsByCategoryTitle => _resolve(
+    'adminAnalyticsByCategoryTitle',
+    (loc) => loc.adminAnalyticsByCategoryTitle,
+  );
   @override
-  String get adminAnalyticsByCategoryCenterLabel => _resolve('adminAnalyticsByCategoryCenterLabel', (loc) => loc.adminAnalyticsByCategoryCenterLabel);
+  String get adminAnalyticsByCategoryCenterLabel => _resolve(
+    'adminAnalyticsByCategoryCenterLabel',
+    (loc) => loc.adminAnalyticsByCategoryCenterLabel,
+  );
   @override
-  String get adminAnalyticsActivityTitle => _resolve('adminAnalyticsActivityTitle', (loc) => loc.adminAnalyticsActivityTitle);
+  String get adminAnalyticsActivityTitle => _resolve(
+    'adminAnalyticsActivityTitle',
+    (loc) => loc.adminAnalyticsActivityTitle,
+  );
 }
