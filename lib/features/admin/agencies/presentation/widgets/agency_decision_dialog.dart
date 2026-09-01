@@ -170,11 +170,14 @@ class _AgencyDecisionDialogState extends State<AgencyDecisionDialog> {
             Text(l10n.agency_reject_reason_label, style: styles.labelLarge),
             const SizedBox(height: AppSpacing.sm),
             // Preset field (required)
+            // Batch-2: the hardcoded `OutlineInputBorder()` on these three
+            // fields overrode the DS inputDecorationTheme (token fill + focus
+            // ring); dropping it restores them.
             TextField(
               controller: _rejectPresetController,
               maxLength: 200,
+              style: styles.bodyLarge,
               decoration: InputDecoration(
-                border: const OutlineInputBorder(),
                 isDense: true,
                 hintText: l10n.agency_reject_reason_label,
               ),
@@ -193,10 +196,8 @@ class _AgencyDecisionDialogState extends State<AgencyDecisionDialog> {
               controller: _rejectDetailController,
               maxLines: 3,
               maxLength: _maxDetailLength,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                isDense: true,
-              ),
+              style: styles.bodyLarge,
+              decoration: const InputDecoration(isDense: true),
               buildCounter:
                   (
                     _, {
@@ -220,10 +221,8 @@ class _AgencyDecisionDialogState extends State<AgencyDecisionDialog> {
               controller: _suspendReasonController,
               maxLines: 3,
               maxLength: _maxDetailLength,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                isDense: true,
-              ),
+              style: styles.bodyLarge,
+              decoration: const InputDecoration(isDense: true),
               buildCounter:
                   (
                     _, {

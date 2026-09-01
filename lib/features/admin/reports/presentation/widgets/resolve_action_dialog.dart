@@ -140,7 +140,13 @@ class _ResolveActionDialogState extends State<ResolveActionDialog> {
                   for (final action in ModerationActionType.values)
                     RadioListTile<ModerationActionType>(
                       value: action,
-                      title: Text(_actionLabel(l10n, action)),
+                      title: Text(
+                        _actionLabel(l10n, action),
+                        style: styles.bodyLarge,
+                      ),
+                      // Batch-2: DS type + token radio fill (was Material's
+                      // ambient style / default primary).
+                      activeColor: AppColors.of(context).primary,
                       contentPadding: EdgeInsets.zero,
                       dense: true,
                     ),
@@ -154,10 +160,10 @@ class _ResolveActionDialogState extends State<ResolveActionDialog> {
               controller: _noteController,
               maxLines: 3,
               maxLength: _maxNoteLength,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                isDense: true,
-              ),
+              style: styles.bodyLarge,
+              // Batch-2: the hardcoded `OutlineInputBorder()` overrode the DS
+              // inputDecorationTheme (token fill + focus ring).
+              decoration: const InputDecoration(isDense: true),
               buildCounter:
                   (
                     _, {
