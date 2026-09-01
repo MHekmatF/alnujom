@@ -75,11 +75,37 @@ more.
 The test account was then purged completely (auth user, queue row, audit row).
 Final state: 12 profiles, 26 listings, 12 auth users — identical to before.
 
+## Third walk — the batch-2 admin screens
+
+A second throwaway account was created with the `admin` role, walked, then
+purged the same way. This is the only way those screens can be seen at all —
+they are login- and permission-gated.
+
+| # | Check | Result |
+|---|---|---|
+| 19 | Navigation drawer (admin) | PASS — Publishing / Administration / Chats & viewings / Other groups, all on DS cards |
+| 20 | Admin console home | PASS — three KPI counters and the moderation + settings tile grids in the restyled idiom, with a live "2" badge on account approvals |
+| 21 | Account-approvals queue | PASS — real rows with name, phone, request date and accept/reject actions |
+
+Everything rendered in Arabic RTL with no overflow, no unstyled Material and no
+error state. Both test accounts were purged afterwards; the database is back to
+12 profiles, 12 auth users, 26 listings, 12 approval requests and 0 deletion
+requests.
+
+**One cosmetic gap noticed, not fixed:** an approval row for an account whose
+profile has no name or phone falls back to displaying the raw user UUID. That is
+the Phase-24 fallback working as designed (it replaced a blank card), but a UUID
+is not useful to a moderator. Only demo data hits it today.
+
+**A note on the design-tools build:** the `DESIGN_TOOLS=true` palette pill sits
+over the app bar's trailing corner and covers the drawer button. Open the drawer
+with an edge swipe when running that build.
+
 ## What this walk could NOT cover
 
 - **The last hop of the password reset**: tapping the real emailed link on a
   device running this build, and setting a new password.
-- **The Vault-secret purge inside deletion** — the test account had no Vault PII.
+- **The Vault-secret purge inside deletion** — neither test account had Vault PII.
 - **Agency invitation accept** — needs two accounts (inviter + invitee).
 - **The heads-up push banner** — needs a real FCM send to a device that
   previously ran the old build, which is the case the new channel id exists for.
