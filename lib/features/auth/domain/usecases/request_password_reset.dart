@@ -1,3 +1,5 @@
+import 'package:injectable/injectable.dart';
+
 import '../../../../core/errors/result.dart';
 import '../../../../shared/domain/value_objects/phone_number.dart';
 import '../entities/password_reset_outcome.dart';
@@ -7,6 +9,7 @@ import '../repositories/auth_repository.dart';
 /// do — mail sent, phone-only account, or no such account.
 ///
 /// [FailureResult] only on transport failure.
+@injectable
 class RequestPasswordReset {
   const RequestPasswordReset(this._repository);
 

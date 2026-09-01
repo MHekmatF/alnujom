@@ -774,9 +774,6 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i24.SupabaseUserSearchDataSource>(
     () => _i24.SupabaseUserSearchDataSource(),
   );
-  gh.factory<_i122.PasswordResetCubit>(
-    () => _i122.PasswordResetCubit(gh<_i956.RequestPasswordReset>()),
-  );
   gh.lazySingleton<_i726.AnalyticsService>(
     () => _i172.SentryAnalyticsService(),
   );
@@ -1706,6 +1703,9 @@ _i174.GetIt $initGetIt(
       gh<_i211.MarkConversationRead>(),
     ),
   );
+  gh.factory<_i956.RequestPasswordReset>(
+    () => _i956.RequestPasswordReset(gh<_i787.AuthRepository>()),
+  );
   gh.factory<_i455.UpdatePassword>(
     () => _i455.UpdatePassword(gh<_i787.AuthRepository>()),
   );
@@ -2029,6 +2029,9 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i490.UploadVideo>(
     () => _i490.UploadVideo(gh<_i340.ListingsRepository>()),
+  );
+  gh.factory<_i122.PasswordResetCubit>(
+    () => _i122.PasswordResetCubit(gh<_i956.RequestPasswordReset>()),
   );
   gh.factory<_i315.ListingFormBloc>(
     () => _i315.ListingFormBloc(
