@@ -21,6 +21,11 @@ class AppTextField extends StatelessWidget {
     this.prefix,
     this.suffix,
     this.onChanged,
+    this.validator,
+    this.textInputAction,
+    this.onFieldSubmitted,
+    this.focusNode,
+    this.textDirection,
     super.key,
   });
 
@@ -37,6 +42,20 @@ class AppTextField extends StatelessWidget {
   final Widget? suffix;
   final ValueChanged<String>? onChanged;
 
+  /// Form validation, so a field inside a [Form] can use this widget instead of
+  /// dropping to a bare, unthemed [TextFormField]. Several admin forms (the ad
+  /// editor, the currency form, dialog inputs) did exactly that only because
+  /// this hook was missing.
+  final FormFieldValidator<String>? validator;
+  final TextInputAction? textInputAction;
+  final ValueChanged<String>? onFieldSubmitted;
+  final FocusNode? focusNode;
+
+  /// Forces the text direction of the field's own content. Leave null to follow
+  /// the ambient locale; set it for values that are always LTR regardless of the
+  /// UI language, such as phone numbers, prices and currency codes.
+  final TextDirection? textDirection;
+
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
@@ -52,6 +71,11 @@ class AppTextField extends StatelessWidget {
         maxLines: obscureText ? 1 : maxLines,
         keyboardType: keyboardType,
         onChanged: onChanged,
+        validator: validator,
+        textInputAction: textInputAction,
+        onFieldSubmitted: onFieldSubmitted,
+        focusNode: focusNode,
+        textDirection: textDirection,
         style: styles.bodyLarge,
         decoration: InputDecoration(
           labelText: label,
