@@ -175,7 +175,7 @@ LANGUAGE plpgsql
 SET search_path = public, auth
 AS $$
 BEGIN
-  -- Self-serve account deletion (20260901120001) — the single narrow allowance.
+  -- Self-serve account deletion (20260901120004) — the single narrow allowance.
   IF NEW.account_status = 'deleted'
      AND NEW.publisher_status = 'deleted'
      AND nullif(current_setting('app.account_self_deletion', true), '') = NEW.user_id::text
