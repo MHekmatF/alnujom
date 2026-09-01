@@ -5,16 +5,16 @@
 -- that accumulated during development, so the app launches with real content
 -- only. Admin/staff accounts and all reference data are preserved.
 --
--- STATUS: NOT YET RUN. The Supabase project was paused at the time this was
--- written, so nothing here has been executed or verified against live data.
+-- STATUS: NOT YET RUN. PART 1's inventory queries were run live on 2026-09-01
+-- (they only read), and their findings are recorded below. Nothing in PART 3
+-- has been executed.
 --
 -- HOW TO USE
---   1. Restore the Supabase project first (see docs/ops/HANDOVER.md).
---   2. Take a backup / point-in-time-restore checkpoint. This script deletes
+--   1. Take a backup / point-in-time-restore checkpoint. This script deletes
 --      rows permanently.
---   3. Run PART 1 alone and read the output. It changes nothing.
---   4. Choose the listing set in PART 2 and confirm the counts look right.
---   5. Run PART 3. It ends with ROLLBACK on purpose — you will see exactly what
+--   2. Run PART 1 alone and read the output. It changes nothing.
+--   3. Choose the listing set in PART 2 and confirm the counts look right.
+--   4. Run PART 3. It ends with ROLLBACK on purpose — you will see exactly what
 --      would be deleted without deleting it. Only after the numbers look
 --      correct, change the final ROLLBACK to COMMIT and run it again.
 --
@@ -27,6 +27,16 @@
 --   PART 3 deletes in an order that satisfies all of that.
 -- =============================================================================
 
+
+-- WHAT WAS ACTUALLY THERE ON 2026-09-01 (verified live, read-only)
+--   26 listings: 16 approved, 5 sold, 3 rejected, 2 draft. Created between
+--   2026-04-10 and 2026-07-08.
+--   Every one of them belongs to a STAFF account — an unnamed super-admin (15),
+--   Hekmat (8) and a manager, باسل العلي (3). No listing has a real end user
+--   behind it, which is why Option A below (delete them all) is the default.
+--   12 accounts: 3 super-admins, 2 admins, 2 moderators, 1 manager, 4 plain
+--   users (one still pending). Accounts are NOT touched by this script.
+--   Re-run PART 1 before deleting — these numbers will have moved on.
 
 -- =============================================================================
 -- PART 1 — INVENTORY (read-only, safe to run any time)
@@ -67,7 +77,7 @@ select
   p.account_status,
   p.publisher_status,
   coalesce(
-    (select string_agg(r.name, ', ')
+    (select string_agg(r.key, ', ')
        from public.user_roles ur
        join public.roles r on r.id = ur.role_id
       where ur.user_id = p.user_id),
