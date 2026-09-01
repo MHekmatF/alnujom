@@ -132,6 +132,39 @@ toggle, or the app's theme setting, which is behind a login.
 **Also noted:** a guest session does not survive an app restart, which is normal
 for guest mode but worth knowing when re-testing.
 
+## Push notifications — verified on the Infinix
+
+The heads-up banner fix had never been observed working; it was the one change
+with no evidence behind it. Tested on the Infinix, which is the exact case the
+fix exists for: it had been running the **old** build, so it carried the old
+low-importance channel.
+
+A throwaway account was signed in on the phone, the app was backgrounded, and a
+real `notifications` row was inserted — which fires the `pg_net` trigger, the
+`dispatch_push` Edge Function, and FCM.
+
+`dumpsys notification` afterwards:
+
+```
+pkg=com.alnujom.app  tag=FCM-Notification:998435452  importance=4
+Notification(channel=alnujom_notifications_v2 ...)
+```
+
+| Check | Result |
+|---|---|
+| Push delivered by FCM to the device | PASS |
+| Posted on the new channel | PASS — `alnujom_notifications_v2` |
+| Channel importance | **PASS — 4 (`IMPORTANCE_HIGH`)**, which is what produces a heads-up banner |
+| Channel has sound | PASS — system notification sound |
+| Old channel removed on upgrade | PASS — no `alnujom_notifications` remains, so existing installs really do get the new one |
+| App icon on the notification | PASS |
+
+The screenshot taken ~25 s later shows the home screen, by which time the banner
+had auto-dismissed; the `dumpsys` record above is the evidence.
+
+The test account was purged and the app's data cleared from the phone. Database
+back to 12 profiles, 12 auth users, 26 listings.
+
 ## What this walk could NOT cover
 
 - **The last hop of the password reset**: tapping the real emailed link on a
