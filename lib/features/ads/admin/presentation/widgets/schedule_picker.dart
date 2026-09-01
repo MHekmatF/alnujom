@@ -4,8 +4,13 @@
 // Phase 2 tokens only; RTL-safe.
 // Constitution IX: zero supabase_flutter imports.
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
+import '../../../../../core/theme/colors.dart';
+import '../../../../../core/theme/radii.dart';
 import '../../../../../core/theme/spacing.dart';
+import '../../../../../core/theme/typography.dart';
+import '../../../../../core/widgets/_widget_support.dart';
 import '../../../../../l10n/app_localizations.dart';
 
 /// Optional schedule window (start/end) picker.
@@ -29,7 +34,8 @@ class SchedulePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
 
     // Validate: start must be before end.
     final hasError =
@@ -38,7 +44,7 @@ class SchedulePicker extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l10n.adsAdminScheduleLabel, style: theme.textTheme.titleSmall),
+        Text(l10n.adsAdminScheduleLabel, style: styles.labelLarge),
         const SizedBox(height: AppSpacing.sm),
         Row(
           children: [
@@ -63,9 +69,7 @@ class SchedulePicker extends StatelessWidget {
           const SizedBox(height: AppSpacing.xs),
           Text(
             l10n.scheduleStartMustBeforeEnd,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.error,
-            ),
+            style: styles.labelMedium.copyWith(color: colors.error),
           ),
         ],
       ],
@@ -87,7 +91,8 @@ class _DateTimeField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
 
     return InkWell(
       onTap: () async {
@@ -118,17 +123,34 @@ class _DateTimeField extends StatelessWidget {
           );
         }
       },
-      borderRadius: BorderRadius.circular(AppSpacing.xs),
+      borderRadius: appRadius(AppRadii.md),
       child: InputDecorator(
         decoration: InputDecoration(
           labelText: label,
+          labelStyle: styles.labelMedium,
           suffixIcon: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.calendar_today_outlined, size: 16),
-              if (value != null)
+              if (value == null)
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(end: AppSpacing.md),
+                  child: Icon(
+                    LucideIcons.calendar,
+                    size: AppSpacing.lg,
+                    color: colors.onSurfaceVariant,
+                  ),
+                )
+              else
+                // Batch-2 a11y: the 16px clear glyph sat in a sub-48dp slot and
+                // the calendar icon crowded it; when a value is set the clear
+                // action is the only affordance, at a full 48dp target.
                 IconButton(
-                  icon: const Icon(Icons.clear, size: 16),
+                  icon: const Icon(LucideIcons.x, size: AppSpacing.lg),
+                  color: colors.onSurfaceVariant,
+                  constraints: const BoxConstraints(
+                    minWidth: kAppMinTouchTarget,
+                    minHeight: kAppMinTouchTarget,
+                  ),
                   tooltip: l10n.scheduleClearTooltip,
                   onPressed: () => onChanged(null),
                 ),
@@ -138,10 +160,8 @@ class _DateTimeField extends StatelessWidget {
         child: Text(
           value != null ? _formatDateTime(value!) : l10n.scheduleNotSet,
           style: value != null
-              ? theme.textTheme.bodyMedium
-              : theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.outline,
-                ),
+              ? styles.bodyLarge
+              : styles.bodyLarge.copyWith(color: colors.textMuted),
         ),
       ),
     );

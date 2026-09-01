@@ -8,6 +8,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/app_dropdown.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/agency.dart';
 
@@ -32,31 +33,28 @@ class PublishUnderAgencyField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
 
-    final eligible =
-        agencies.where((a) => a.status.canPublishUnder).toList();
+    final eligible = agencies.where((a) => a.status.canPublishUnder).toList();
 
     // No eligible agency → no selector at all (publishing stays personal).
     if (eligible.isEmpty) return const SizedBox.shrink();
 
     // Guard against a stale selection that is no longer eligible.
-    final validSelection =
-        eligible.any((a) => a.id == selectedAgencyId) ? selectedAgencyId : null;
+    final validSelection = eligible.any((a) => a.id == selectedAgencyId)
+        ? selectedAgencyId
+        : null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: AppSpacing.lg),
-        Text(
-          l10n.listing_publish_under_agency_label,
-          style: theme.textTheme.titleSmall,
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        DropdownButtonFormField<String?>(
-          initialValue: validSelection,
-          isExpanded: true,
-          decoration: const InputDecoration(border: OutlineInputBorder()),
+        // Batch-2 restyle: the bare OutlineInputBorder dropdown + a raw
+        // `textTheme.titleSmall` caption became the shared AppDropdown, which
+        // carries the DS filled fill, focus ring, caret and rounded popup and
+        // renders its own floating label.
+        AppDropdown<String?>(
+          label: l10n.listing_publish_under_agency_label,
+          value: validSelection,
           items: [
             DropdownMenuItem<String?>(
               value: null,
