@@ -7138,4 +7138,110 @@ final class _DebugAppLocalizations extends AppLocalizations {
     'adminAnalyticsActivityTitle',
     (loc) => loc.adminAnalyticsActivityTitle,
   );
+  @override
+  String get settings_account_heading => _resolve(
+    'settings_account_heading',
+    (loc) => loc.settings_account_heading,
+  );
+  @override
+  String get accountDeleteEntryTitle =>
+      _resolve('accountDeleteEntryTitle', (loc) => loc.accountDeleteEntryTitle);
+  @override
+  String get accountDeleteEntrySubtitle => _resolve(
+    'accountDeleteEntrySubtitle',
+    (loc) => loc.accountDeleteEntrySubtitle,
+  );
+  @override
+  String get accountDeletePageTitle =>
+      _resolve('accountDeletePageTitle', (loc) => loc.accountDeletePageTitle);
+  @override
+  String get accountDeleteWarningTitle => _resolve(
+    'accountDeleteWarningTitle',
+    (loc) => loc.accountDeleteWarningTitle,
+  );
+  @override
+  String get accountDeleteHeadline =>
+      _resolve('accountDeleteHeadline', (loc) => loc.accountDeleteHeadline);
+  @override
+  String get accountDeleteIntro =>
+      _resolve('accountDeleteIntro', (loc) => loc.accountDeleteIntro);
+  @override
+  String get accountDeleteWarningBody => _resolve(
+    'accountDeleteWarningBody',
+    (loc) => loc.accountDeleteWarningBody,
+  );
+  @override
+  String get accountDeleteWhatGoesTitle => _resolve(
+    'accountDeleteWhatGoesTitle',
+    (loc) => loc.accountDeleteWhatGoesTitle,
+  );
+  @override
+  String get accountDeleteItemProfile => _resolve(
+    'accountDeleteItemProfile',
+    (loc) => loc.accountDeleteItemProfile,
+  );
+  @override
+  String get accountDeleteItemListings => _resolve(
+    'accountDeleteItemListings',
+    (loc) => loc.accountDeleteItemListings,
+  );
+  @override
+  String get accountDeleteItemMessages => _resolve(
+    'accountDeleteItemMessages',
+    (loc) => loc.accountDeleteItemMessages,
+  );
+  @override
+  String get accountDeleteItemCrm =>
+      _resolve('accountDeleteItemCrm', (loc) => loc.accountDeleteItemCrm);
+  @override
+  String get accountDeleteKeepsTitle =>
+      _resolve('accountDeleteKeepsTitle', (loc) => loc.accountDeleteKeepsTitle);
+  @override
+  String get accountDeleteKeepsBody =>
+      _resolve('accountDeleteKeepsBody', (loc) => loc.accountDeleteKeepsBody);
+  @override
+  String get accountDeleteAcknowledge => _resolve(
+    'accountDeleteAcknowledge',
+    (loc) => loc.accountDeleteAcknowledge,
+  );
+  @override
+  String get accountDeleteConfirmButton => _resolve(
+    'accountDeleteConfirmButton',
+    (loc) => loc.accountDeleteConfirmButton,
+  );
+  @override
+  String get accountDeleteCancelButton => _resolve(
+    'accountDeleteCancelButton',
+    (loc) => loc.accountDeleteCancelButton,
+  );
+  @override
+  String get accountDeleteDialogTitle => _resolve(
+    'accountDeleteDialogTitle',
+    (loc) => loc.accountDeleteDialogTitle,
+  );
+  @override
+  String get accountDeleteDialogMessage => _resolve(
+    'accountDeleteDialogMessage',
+    (loc) => loc.accountDeleteDialogMessage,
+  );
+  @override
+  String get accountDeleteDialogConfirm => _resolve(
+    'accountDeleteDialogConfirm',
+    (loc) => loc.accountDeleteDialogConfirm,
+  );
+  @override
+  String get accountDeleteSuccessToast => _resolve(
+    'accountDeleteSuccessToast',
+    (loc) => loc.accountDeleteSuccessToast,
+  );
+  @override
+  String get accountDeleteErrorGeneric => _resolve(
+    'accountDeleteErrorGeneric',
+    (loc) => loc.accountDeleteErrorGeneric,
+  );
+  @override
+  String get accountDeleteErrorNotSignedIn => _resolve(
+    'accountDeleteErrorNotSignedIn',
+    (loc) => loc.accountDeleteErrorNotSignedIn,
+  );
 }

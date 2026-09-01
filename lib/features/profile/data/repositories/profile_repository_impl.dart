@@ -189,6 +189,29 @@ class ProfileRepositoryImpl implements ProfileRepository {
     }
   }
 
+  @override
+  Future<Result<void>> requestAccountDeletion() async {
+    try {
+      await _ds.requestAccountDeletion();
+      return const Success(null);
+    } on Object catch (error, stackTrace) {
+      _logger.warning(
+        'Account deletion RPC failed.',
+        error: error,
+        stackTrace: stackTrace,
+        tag: _tag,
+      );
+      if (error.toString().contains('not_authenticated')) {
+        return FailureResult(
+          NotAuthenticated(cause: error, stackTrace: stackTrace),
+        );
+      }
+      return FailureResult(
+        AccountDeletionFailed(cause: error, stackTrace: stackTrace),
+      );
+    }
+  }
+
   ProfileFailure _mapError(Object error, StackTrace stackTrace) {
     _logger.warning(
       'Profile data error.',
