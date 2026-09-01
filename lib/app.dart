@@ -49,8 +49,12 @@ class _AppState extends State<App> with WidgetsBindingObserver {
     // Initial load (fail-open on failure — never blocks app start).
     _appSettingsCubit.load();
     // Cold-start update check — fail-silent (FR-010); dialog shown from the
-    // BlocListener in [build] when [UpdateAvailable] is emitted.
-    _appUpdateCubit.check();
+    // BlocListener in [build] when [UpdateAvailable] is emitted. Skipped
+    // entirely on a Play build, where prompting a sideloaded install is against
+    // policy (see [kInAppUpdatePromptEnabled]).
+    if (kInAppUpdatePromptEnabled) {
+      _appUpdateCubit.check();
+    }
     // Phase 24 (CR / T007) — QA-only forced-crash affordance, gated by the
     // `SENTRY_TEST_CRASH` dart-define. INERT in the shipped release (the flag
     // defaults false and is never set in a release build). Throws an uncaught
