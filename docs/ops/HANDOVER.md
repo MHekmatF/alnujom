@@ -21,10 +21,11 @@ developer, it says so. Most of it happens in web dashboards.
 
 ## Start here
 
-The database was paused when this playbook was last updated. **Before anything
-else**, restore it (section 9), then work through
-[`PENDING_MIGRATIONS.md`](PENDING_MIGRATIONS.md) — four migrations are waiting,
-their order matters, and one of them repairs a defect that is live right now.
+The database is **live** — an earlier scare during the 2026-09-01 session turned
+out to be a DNS failure on the build machine, not a paused project. Read
+[`PENDING_MIGRATIONS.md`](PENDING_MIGRATIONS.md) first: two migrations were
+applied that day (one of them repaired a broken guest map), two are deliberately
+held back, and one of those needs a decision from you.
 
 ## Contents
 

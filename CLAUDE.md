@@ -7,16 +7,18 @@ and [`docs/ops/HANDOVER.md`](docs/ops/HANDOVER.md).
 
 ## The state of things
 
-- **The Supabase project is paused** (free tier, auto-pauses after ~7 days idle).
-  It must be restored from the dashboard by the owner — it is not under the
-  MCP-connected account, so no MCP admin call can list or restore it. Until it is
-  back, nothing can be verified against live data and the app degrades to error
-  states everywhere. A keep-alive workflow
-  (`.github/workflows/supabase-keepalive.yml`) prevents a repeat, once its two
-  repository secrets exist.
-- **Four migrations are written but never applied.** Their order matters and one
-  of them must not be applied until users have a new build. See
-  `PENDING_MIGRATIONS.md` — do not apply them ad hoc.
+- **The Supabase project is live.** It briefly looked paused during the
+  2026-09-01 session, but that was a DNS failure on the build machine — `nslookup`
+  there still fails while `curl` and the MCP tools work. Verify from a second
+  network before ever concluding the project is down. Note the project is **not**
+  under the MCP-connected account, so account-level actions (pause/restore/list)
+  are owner-only dashboard operations. A keep-alive workflow
+  (`.github/workflows/supabase-keepalive.yml`) guards against a real free-tier
+  pause, once its two repository secrets exist.
+- **Two migrations are applied, two are held back on purpose.** See
+  `PENDING_MIGRATIONS.md` before touching the database — one of the held-back
+  ones must not land until users have a new build, and the other has a trade-off
+  the owner has to weigh.
 - **Distribution is Telegram**, with Google Play intended later. Play is gated on
   whether a Play Console account can be opened from Syria at all; see
   `docs/release/google-play-readiness.md`. A Play build must be an AAB and must
