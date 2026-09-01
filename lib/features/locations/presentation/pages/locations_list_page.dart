@@ -8,8 +8,11 @@ import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../core/widgets/empty_state.dart';
+import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/locale_toggle_action.dart';
+import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/governorate_with_city_count.dart';
 import '../../domain/usecases/count_governorate_dependents.dart';
@@ -48,6 +51,8 @@ class _LocationsListView extends StatelessWidget {
       ),
       actions: const [LocaleToggleAction()],
       floatingActionButton: FloatingActionButton(
+        // Batch-2 a11y: the icon-only FAB had no accessible name.
+        tooltip: l10n.addGovernorateButton,
         onPressed: () async {
           final result = await context.push<bool>(
             '${AppRoutes.locationsAdminForm}?mode=add&level=governorate',
@@ -61,38 +66,54 @@ class _LocationsListView extends StatelessWidget {
       body: BlocBuilder<LocationsListBloc, LocationsListState>(
         builder: (context, state) => switch (state) {
           LocationsListLoading() => const _LocationsListSkeleton(),
-          LocationsListError(:final message) => Center(
-            child: Text(message, textAlign: TextAlign.center),
+          // Batch-2: the bare centred Text error gains the shared ErrorState
+          // treatment AND — new — a Retry affordance.
+          LocationsListError(:final message) => ErrorState(
+            title: l10n.locationsLoadFailed,
+            message: message,
+            onRetry: () =>
+                context.read<LocationsListBloc>().add(const RefreshRequested()),
           ),
           LocationsListLoaded(:final governorates) =>
             governorates.isEmpty
-                ? Center(child: Text(l10n.locationsListPageTitle))
+                // Batch-2: the empty state echoed the page title ("Governorates")
+                // as its only copy; now a real EmptyState pointing at the FAB.
+                ? EmptyState(
+                    icon: LucideIcons.map_pin,
+                    headline: l10n.locationsListPageTitle,
+                    body: l10n.addGovernorateButton,
+                  )
                 : RefreshIndicator(
                     onRefresh: () async => context
                         .read<LocationsListBloc>()
                         .add(const RefreshRequested()),
                     child: ListView.separated(
+                      physics: const AlwaysScrollableScrollPhysics(),
                       padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
                       itemCount: governorates.length,
                       separatorBuilder: (_, __) =>
                           const SizedBox(height: AppSpacing.sm),
                       itemBuilder: (context, index) {
                         final summary = governorates[index];
-                        return GovernorateCard(
-                          summary: summary,
-                          onTap: () => context.go(
-                            '${AppRoutes.locationsAdmin}/${summary.governorate.id}',
+                        return StaggeredListItem(
+                          index: index,
+                          child: GovernorateCard(
+                            summary: summary,
+                            onTap: () => context.go(
+                              '${AppRoutes.locationsAdmin}/${summary.governorate.id}',
+                            ),
+                            onEdit: () => _openForm(
+                              context,
+                              mode: 'edit',
+                              level: 'governorate',
+                              id: summary.governorate.id,
+                            ),
+                            onToggleActive: () =>
+                                _toggleActive(context, summary),
+                            onDelete: summary.governorate.isSystem
+                                ? null
+                                : () => _confirmDelete(context, summary),
                           ),
-                          onEdit: () => _openForm(
-                            context,
-                            mode: 'edit',
-                            level: 'governorate',
-                            id: summary.governorate.id,
-                          ),
-                          onToggleActive: () => _toggleActive(context, summary),
-                          onDelete: summary.governorate.isSystem
-                              ? null
-                              : () => _confirmDelete(context, summary),
                         );
                       },
                     ),

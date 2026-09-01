@@ -7,6 +7,7 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/press_scale.dart';
+import '../../../../core/widgets/ds/dc_status_chip.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/currency_with_latest_rates.dart';
 import 'latest_rate_subline.dart';
@@ -88,7 +89,14 @@ class CurrencyCard extends StatelessWidget {
                         ),
                       ),
                       if (currency.isSystem) const SystemCurrencyBadge(),
-                      if (!currency.isActive) _HiddenPill(l10n.hiddenBadge),
+                      // Batch-2: the bespoke _HiddenPill was a third rendering
+                      // of the same "hidden" state — now the shared DS chip.
+                      if (!currency.isActive)
+                        DcStatusChip(
+                          label: l10n.hiddenBadge,
+                          tone: DcStatusTone.neutral,
+                          icon: LucideIcons.eye_off,
+                        ),
                     ],
                   ),
                   const SizedBox(height: AppSpacing.xs),
@@ -120,6 +128,14 @@ class CurrencyCard extends StatelessWidget {
                 LucideIcons.ellipsis_vertical,
                 color: colors.textMuted,
               ),
+              // Batch-2: token popup surface + radius, matching the DS
+              // ListingViewModeSwitcher menu (was the bare Material default).
+              position: PopupMenuPosition.under,
+              color: colors.card,
+              shape: RoundedRectangleBorder(
+                borderRadius: appRadius(AppRadii.lg),
+                side: BorderSide(color: colors.outline),
+              ),
               onSelected: (action) => switch (action) {
                 _CurrencyCardAction.edit => onEdit(),
                 _CurrencyCardAction.history => onViewHistory(),
@@ -143,34 +159,6 @@ class CurrencyCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-/// A soft "hidden" pill (replaces the stock Material [Chip]).
-class _HiddenPill extends StatelessWidget {
-  const _HiddenPill(this.label);
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-    final styles = AppTextStyles.of(context);
-    return Container(
-      padding: const EdgeInsetsDirectional.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: colors.surfaceVariant,
-        borderRadius: appRadius(AppRadii.pill),
-        border: Border.all(color: colors.outline),
-      ),
-      child: Text(
-        label,
-        style: styles.labelMedium.copyWith(color: colors.textMuted),
       ),
     );
   }

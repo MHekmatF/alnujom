@@ -5,12 +5,14 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
-import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../core/widgets/empty_state.dart';
+import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/locale_toggle_action.dart';
+import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../data/repositories/currencies_repository_impl.dart'
     show CurrenciesFailure;
@@ -48,17 +50,19 @@ class _CurrenciesListView extends StatelessWidget {
             context.canPop() ? context.pop() : context.go(AppRoutes.shellHome),
       ),
       actions: [
-        TextButton.icon(
-          onPressed: () => _openSetRate(context),
-          icon: const Icon(LucideIcons.chart_line),
-          label: Text(l10n.setNewRateButton),
-          style: TextButton.styleFrom(
-            foregroundColor: AppColors.of(context).onBrandHeader,
-          ),
+        // Batch-2: a stock TextButton.icon repainted onto the crown became the
+        // DS DcCrownIconButton, matching the identical "set new rate" action on
+        // the sibling exchange-rate-history crown (icon + tooltip).
+        DcCrownIconButton(
+          icon: LucideIcons.chart_line,
+          tooltip: l10n.setNewRateButton,
+          onTap: () => _openSetRate(context),
         ),
         const LocaleToggleAction(),
       ],
       floatingActionButton: FloatingActionButton(
+        // Batch-2 a11y: the icon-only FAB had no accessible name.
+        tooltip: l10n.addCurrencyButton,
         onPressed: () async {
           final result = await context.push<bool>(
             '${AppRoutes.currenciesAdminForm}?mode=create',
@@ -73,40 +77,53 @@ class _CurrenciesListView extends StatelessWidget {
         builder: (context, state) => switch (state) {
           CurrenciesListInitial() ||
           CurrenciesListLoading() => const _CurrenciesSkeleton(),
-          CurrenciesListError(:final reason) => Center(
-            child: Padding(
-              padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
-              child: Text(
-                _errorText(l10n, reason),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
-          CurrenciesListLoaded(:final currencies) => RefreshIndicator(
-            onRefresh: () async => context.read<CurrenciesListBloc>().add(
+          // Batch-2: the bare centred Text error became the shared ErrorState,
+          // which adds the glyph badge and — new here — a Retry affordance.
+          CurrenciesListError(:final reason) => ErrorState(
+            title: _errorText(l10n, reason),
+            onRetry: () => context.read<CurrenciesListBloc>().add(
               const RefreshCurrencies(),
             ),
-            child: ListView.separated(
-              padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
-              itemCount: currencies.length,
-              separatorBuilder: (_, __) =>
-                  const SizedBox(height: AppSpacing.sm),
-              itemBuilder: (context, index) {
-                final summary = currencies[index];
-                return CurrencyCard(
-                  summary: summary,
-                  locale: Localizations.localeOf(context),
-                  onEdit: () => _openForm(context, summary.currency.code),
-                  onViewHistory: () => context.go(
-                    '${AppRoutes.currenciesAdmin}/${summary.currency.code}/history',
-                  ),
-                  onDelete: summary.currency.isSystem
-                      ? null
-                      : () => _confirmDelete(context, summary.currency),
-                );
-              },
-            ),
           ),
+          CurrenciesListLoaded(:final currencies) =>
+            currencies.isEmpty
+                // Batch-2: the loaded-but-empty case rendered a blank sheet.
+                ? EmptyState(
+                    icon: LucideIcons.coins,
+                    headline: l10n.currenciesPageTitle,
+                    body: l10n.noRatesYet,
+                  )
+                : RefreshIndicator(
+                    onRefresh: () async => context
+                        .read<CurrenciesListBloc>()
+                        .add(const RefreshCurrencies()),
+                    child: ListView.separated(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+                      itemCount: currencies.length,
+                      separatorBuilder: (_, __) =>
+                          const SizedBox(height: AppSpacing.sm),
+                      itemBuilder: (context, index) {
+                        final summary = currencies[index];
+                        return StaggeredListItem(
+                          index: index,
+                          child: CurrencyCard(
+                            summary: summary,
+                            locale: Localizations.localeOf(context),
+                            onEdit: () =>
+                                _openForm(context, summary.currency.code),
+                            onViewHistory: () => context.go(
+                              '${AppRoutes.currenciesAdmin}/${summary.currency.code}/history',
+                            ),
+                            onDelete: summary.currency.isSystem
+                                ? null
+                                : () =>
+                                      _confirmDelete(context, summary.currency),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
         },
       ),
     );

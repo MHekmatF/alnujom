@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/app_dropdown.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../data/repositories/currencies_repository_impl.dart'
     show CurrenciesFailure;
@@ -67,30 +71,31 @@ class _PreferredCurrencyToggleState extends State<PreferredCurrencyToggle> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     final currencies = _currencies;
 
+    // Batch-2: this widget is hosted inside the consumer Profile "Account" card
+    // but read as raw Material next to it — `theme.textTheme` / `colorScheme`
+    // and two bare LinearProgressIndicators. Everything below now flows through
+    // the DS tokens + shared components. Control types are unchanged.
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l10n.preferredCurrencyLabel, style: theme.textTheme.titleSmall),
+        Text(l10n.preferredCurrencyLabel, style: styles.labelLarge),
         const SizedBox(height: AppSpacing.xs),
         Text(
           l10n.preferredCurrencyHelp,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.outline,
-          ),
+          style: styles.bodyMedium.copyWith(color: colors.textMuted),
         ),
         const SizedBox(height: AppSpacing.sm),
         if (_errorCode != null)
           Text(
             _errorText(l10n, _errorCode!),
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.error,
-            ),
+            style: styles.bodyMedium.copyWith(color: colors.error),
           )
         else if (currencies == null)
-          const LinearProgressIndicator()
+          appInlineSpinner(context)
         else if (currencies.isEmpty)
           const SizedBox.shrink()
         else if (currencies.length <= 3)
@@ -108,8 +113,10 @@ class _PreferredCurrencyToggleState extends State<PreferredCurrencyToggle> {
                 : (selection) => _select(selection.first),
           )
         else
-          DropdownButtonFormField<String>(
-            initialValue: _selectedCode,
+          AppDropdown<String>(
+            label: l10n.preferredCurrencyLabel,
+            value: _selectedCode,
+            enabled: !_saving && currencies.isNotEmpty,
             items: [
               for (final currency in currencies)
                 DropdownMenuItem(
@@ -117,15 +124,13 @@ class _PreferredCurrencyToggleState extends State<PreferredCurrencyToggle> {
                   child: Text(_labelFor(context, currency)),
                 ),
             ],
-            onChanged: _saving || currencies.isEmpty
-                ? null
-                : (value) {
-                    if (value != null) _select(value);
-                  },
+            onChanged: (value) {
+              if (value != null) _select(value);
+            },
           ),
         if (_saving) ...[
           const SizedBox(height: AppSpacing.sm),
-          const LinearProgressIndicator(),
+          appInlineSpinner(context),
         ],
       ],
     );

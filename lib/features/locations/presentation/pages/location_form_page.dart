@@ -14,6 +14,7 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/locale_toggle_action.dart';
 import '../../../../core/widgets/press_scale.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -53,6 +54,19 @@ class _LocationFormView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    // Re-read the same route params the provider used, so the new load-failure
+    // Retry can re-dispatch the identical FormOpened event (no new behavior).
+    final params = GoRouterState.of(context).uri.queryParameters;
+    final mode = params['mode'] == 'edit'
+        ? LocationFormMode.edit
+        : LocationFormMode.add;
+    final level = switch (params['level']) {
+      'city' => LocationLevel.city,
+      'area' => LocationLevel.area,
+      _ => LocationLevel.governorate,
+    };
+    final id = params['id'];
+    final parentId = params['parentId'];
 
     return BlocListener<LocationFormBloc, LocationFormState>(
       listener: (context, state) {
@@ -86,8 +100,19 @@ class _LocationFormView extends StatelessWidget {
             body: switch (state) {
               LocationFormIdle() ||
               LocationFormLoading() => const AppSpinner.page(),
-              LocationFormLoadFailed(:final message) => Center(
-                child: Text(message, textAlign: TextAlign.center),
+              // Batch-2: bare centred Text -> shared ErrorState + a Retry that
+              // re-dispatches the same load event the page mounts with.
+              LocationFormLoadFailed(:final message) => ErrorState(
+                title: l10n.locationsLoadFailed,
+                message: message,
+                onRetry: () => context.read<LocationFormBloc>().add(
+                  FormOpened(
+                    mode: mode,
+                    level: level,
+                    id: id,
+                    parentId: parentId,
+                  ),
+                ),
               ),
               LocationFormSaveSuccess() => const AppSpinner.page(),
               LocationFormSaveFailure() => const SizedBox.shrink(),

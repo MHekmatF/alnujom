@@ -211,6 +211,9 @@ class _CurrencyFormViewState extends State<_CurrencyFormView> {
                         const SizedBox(height: AppSpacing.lg),
                         AppButton(
                           label: l10n.submitButton,
+                          // Batch-2: form primary CTAs are full-width in the DS
+                          // (auth/create-listing); this one was content-width.
+                          expanded: true,
                           loading: isSaving,
                           onPressed: isSaving ? null : () => _submit(context),
                         ),

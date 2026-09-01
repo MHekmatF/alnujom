@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/location_picker_selection.dart';
 import '../bloc/location_picker_bloc.dart';
@@ -78,22 +81,34 @@ class _LocationPickerBody extends StatelessWidget {
         }
       },
       builder: (context, state) {
+        final colors = AppColors.of(context);
+        final styles = AppTextStyles.of(context);
+
+        // Batch-2: raw `EdgeInsets.symmetric` -> directional; the bare
+        // LinearProgressIndicator bar -> the DS inline spinner; and the two
+        // status lines now use the DS type/colour tokens instead of
+        // `theme.textTheme` + `colorScheme.error`/`.outline`.
         if (state is LocationPickerGovernoratesLoading ||
             state is LocationPickerInitial) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
-            child: LinearProgressIndicator(),
+          return Padding(
+            padding: const EdgeInsetsDirectional.symmetric(
+              vertical: AppSpacing.md,
+            ),
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: appInlineSpinner(context),
+            ),
           );
         }
 
         if (state is LocationPickerLoadFailed) {
           return Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+            padding: const EdgeInsetsDirectional.symmetric(
+              vertical: AppSpacing.md,
+            ),
             child: Text(
               l10n.locationsLoadFailed,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.error,
-              ),
+              style: styles.bodyMedium.copyWith(color: colors.error),
             ),
           );
         }
@@ -152,12 +167,12 @@ class _LocationPickerBody extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             if (areasEmpty)
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                padding: const EdgeInsetsDirectional.symmetric(
+                  vertical: AppSpacing.sm,
+                ),
                 child: Text(
                   l10n.locationPickerNoAreasYet,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
+                  style: styles.bodyMedium.copyWith(color: colors.textMuted),
                 ),
               )
             else
