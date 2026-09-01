@@ -2268,6 +2268,42 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('descriptionReadLess', (loc) => loc.descriptionReadLess);
 
   @override
+  String get listingStatusDraft =>
+      _resolve('listingStatusDraft', (loc) => loc.listingStatusDraft);
+
+  @override
+  String get listingStatusPendingReview =>
+      _resolve('listingStatusPendingReview', (loc) => loc.listingStatusPendingReview);
+
+  @override
+  String get listingStatusApproved =>
+      _resolve('listingStatusApproved', (loc) => loc.listingStatusApproved);
+
+  @override
+  String get listingStatusRejected =>
+      _resolve('listingStatusRejected', (loc) => loc.listingStatusRejected);
+
+  @override
+  String get listingStatusPaused =>
+      _resolve('listingStatusPaused', (loc) => loc.listingStatusPaused);
+
+  @override
+  String get listingStatusSold =>
+      _resolve('listingStatusSold', (loc) => loc.listingStatusSold);
+
+  @override
+  String get listingStatusRented =>
+      _resolve('listingStatusRented', (loc) => loc.listingStatusRented);
+
+  @override
+  String get listingStatusExpired =>
+      _resolve('listingStatusExpired', (loc) => loc.listingStatusExpired);
+
+  @override
+  String get listingStatusDeleted =>
+      _resolve('listingStatusDeleted', (loc) => loc.listingStatusDeleted);
+
+  @override
   String priceOriginallyWas(String price) => _active.priceOriginallyWas(price);
 
   // ── Phase 12 / US2 — Reject flow + publisher rejection banner ────────────

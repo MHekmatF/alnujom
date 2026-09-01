@@ -20,6 +20,7 @@ import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/presentation/listing_status_labels.dart';
 import '../../../../shared/util/localized_numbers.dart';
 import '../bloc/agency_analytics_cubit.dart';
 
@@ -117,7 +118,10 @@ class _AgencyAnalyticsView extends StatelessWidget {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(entry.key, style: styles.bodyLarge),
+                                  Text(
+                                    listingStatusLabel(l10n, entry.key),
+                                    style: styles.bodyLarge,
+                                  ),
                                   Text(
                                     formatLocalizedNumber(entry.value, locale),
                                     style: styles.priceMedium,
