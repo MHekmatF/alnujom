@@ -143,6 +143,27 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> with WidgetsBindingObserver {
     LogoutRequested event,
     Emitter<AuthState> emit,
   ) async {
+    // Deregister this device's push token BEFORE dropping the session. The
+    // delete is RLS-scoped to the signed-in user, so doing it after logout (as
+    // the teardown path used to) could only ever fail — and it failed slowly,
+    // on the network, while the UI waited.
+    final token = _registeredToken;
+    if (token != null && token.isNotEmpty) {
+      _registeredToken = null;
+      // Fired, not awaited: the request already carries this session's JWT, so
+      // it completes server-side on its own. Nothing about signing out should
+      // wait on the network — a stale token row is harmless next to a sign-out
+      // that appears to hang.
+      unawaited(
+        Future<void>(() async {
+          try {
+            await _deregisterPushToken(token);
+          } on Object {
+            // Best-effort.
+          }
+        }),
+      );
+    }
     await _authRepository.logout();
     // sessionStream fires SessionRefreshed(null) → Unauthenticated.
   }
@@ -178,9 +199,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> with WidgetsBindingObserver {
   ) async {
     final session = event.session;
     if (session == null || !session.isActive) {
-      await _teardownSessionSignals();
+      // Free the UI FIRST. Teardown closes a Realtime channel and may hit the
+      // network; awaiting it here left the app frozen on the signed-in screen
+      // for seconds, and the late state change then made the router jump
+      // through several routes at once. Unblock, then clean up behind it.
       _permissionChecker.clear();
       emit(const Unauthenticated());
+      unawaited(_teardownSessionSignals());
       return;
     }
     await _permissionChecker.load();
