@@ -11,14 +11,16 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
-import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_dialog.dart';
-import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../core/widgets/empty_state.dart';
+import '../../../../core/widgets/error_state.dart';
+import '../../../../core/widgets/loading_state.dart';
+import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/agency.dart';
 import '../../domain/entities/agency_member.dart';
@@ -78,9 +80,15 @@ class _AgencyMembersView extends StatelessWidget {
       body: BlocBuilder<AgencyMembersBloc, AgencyMembersState>(
         builder: (context, state) {
           return switch (state) {
-            AgencyMembersLoading() => const AppSpinner.page(),
-            AgencyMembersError() => Center(
-              child: Text(l10n.agency_generic_error),
+            // Batch-2: full-screen spinner -> roster-shaped skeleton; bare
+            // centred Text error -> the shared ErrorState with a Retry that
+            // re-dispatches the very same open event.
+            AgencyMembersLoading() => const _RosterSkeleton(),
+            AgencyMembersError() => ErrorState(
+              title: l10n.agency_generic_error,
+              onRetry: () => context.read<AgencyMembersBloc>().add(
+                AgencyMembersOpened(agency.id),
+              ),
             ),
             AgencyMembersLoaded(:final members) => _Roster(
               agency: agency,
@@ -102,7 +110,6 @@ class _Roster extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final colors = AppColors.of(context);
     final styles = AppTextStyles.of(context);
 
     return ListView(
@@ -122,27 +129,31 @@ class _Roster extends StatelessWidget {
           child: Text(l10n.agency_members_title, style: styles.titleMedium),
         ),
         if (members.isEmpty)
-          Padding(
-            padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
-            child: Text(
-              l10n.agency_members_empty,
-              style: styles.bodyMedium.copyWith(color: colors.onSurfaceVariant),
-            ),
+          // Batch-2: a lone muted paragraph became the shared EmptyState (glyph
+          // badge + headline), pointing at the invite FAB.
+          EmptyState(
+            icon: LucideIcons.users,
+            headline: l10n.agency_members_empty,
+            body: l10n.agency_invite_button,
           )
         else
-          for (final member in members)
-            AgencyMemberTile(
-              member: member,
-              isOwner: member.userId == agency.ownerUserId,
-              canManage: true,
-              onRoleToggle: (role) => context.read<AgencyMembersBloc>().add(
-                AgencyMembersRoleChangeRequested(
-                  agencyId: agency.id,
-                  userId: member.userId,
-                  role: role,
+          for (final (index, member) in members.indexed)
+            StaggeredListItem(
+              index: index,
+              child: AgencyMemberTile(
+                member: member,
+                isOwner: member.userId == agency.ownerUserId,
+                canManage: true,
+                onRoleToggle: (role) => context.read<AgencyMembersBloc>().add(
+                  AgencyMembersRoleChangeRequested(
+                    agencyId: agency.id,
+                    userId: member.userId,
+                    role: role,
+                  ),
                 ),
+                onRemove: () =>
+                    _confirmRemove(context, agency.id, member.userId),
               ),
-              onRemove: () => _confirmRemove(context, agency.id, member.userId),
             ),
       ],
     );
@@ -253,6 +264,24 @@ class _PendingInvitations extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+/// Shimmer placeholder rows shown while the member roster loads.
+class _RosterSkeleton extends StatelessWidget {
+  const _RosterSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+      itemCount: 5,
+      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+      itemBuilder: (_, __) => const SizedBox(
+        height: AppSpacing.xxxl + AppSpacing.md,
+        child: LoadingState.card(),
+      ),
     );
   }
 }

@@ -27,6 +27,7 @@ import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../core/widgets/error_state.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/util/localized_numbers.dart';
 import '../../domain/entities/agency.dart';
@@ -78,8 +79,13 @@ class _AgencyVerificationView extends StatelessWidget {
         builder: (context, state) {
           return switch (state) {
             AgencyVerificationLoading() => const AppSpinner.page(),
-            AgencyVerificationError() => Center(
-              child: Text(l10n.agency_generic_error),
+            // Batch-2: a bare centred Text was the only thing shown on a load
+            // failure — no way out. Now the shared ErrorState with a Retry that
+            // re-calls the very same load(agencyId).
+            AgencyVerificationError() => ErrorState(
+              title: l10n.agency_generic_error,
+              onRetry: () =>
+                  context.read<AgencyVerificationCubit>().load(agencyId),
             ),
             AgencyVerificationReady() => _VerificationForm(
               agencyId: agencyId,

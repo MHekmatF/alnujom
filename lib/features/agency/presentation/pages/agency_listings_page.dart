@@ -7,6 +7,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
@@ -18,6 +19,11 @@ import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../core/widgets/empty_state.dart';
+import '../../../../core/widgets/error_state.dart';
+import '../../../../core/widgets/loading_state.dart';
+import '../../../../core/widgets/press_scale.dart';
+import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/presentation/money_formatter.dart';
 import '../bloc/agency_listings_bloc.dart';
@@ -57,13 +63,21 @@ class _AgencyListingsView extends StatelessWidget {
       body: BlocBuilder<AgencyListingsBloc, AgencyListingsState>(
         builder: (context, state) {
           return switch (state) {
-            AgencyListingsLoading() => const AppSpinner.page(),
-            AgencyListingsError() => Center(
-              child: Text(l10n.agency_generic_error),
+            // Batch-2: full-screen spinner -> list-shaped skeleton; bare centred
+            // Texts -> the shared ErrorState (now with a Retry) and EmptyState.
+            AgencyListingsLoading() => const _AgencyListingsSkeleton(),
+            AgencyListingsError() => ErrorState(
+              title: l10n.agency_generic_error,
+              onRetry: () => context.read<AgencyListingsBloc>().add(
+                AgencyListingsRefreshRequested(agencyId),
+              ),
             ),
             AgencyListingsLoaded(:final items, :final hasMore) =>
               items.isEmpty
-                  ? Center(child: Text(l10n.agency_listings_empty))
+                  ? EmptyState(
+                      icon: LucideIcons.house,
+                      headline: l10n.agency_listings_empty,
+                    )
                   : _ListBody(
                       agencyId: agencyId,
                       items: items,
@@ -96,6 +110,7 @@ class _ListBody extends StatelessWidget {
         );
       },
       child: ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
         itemCount: items.length + (hasMore ? 1 : 0),
         itemBuilder: (context, index) {
           if (index >= (items.length * 0.8).floor() && hasMore) {
@@ -111,8 +126,29 @@ class _ListBody extends StatelessWidget {
               child: AppSpinner(),
             );
           }
-          return _ListingCard(row: items[index]);
+          return StaggeredListItem(
+            index: index,
+            child: _ListingCard(row: items[index]),
+          );
         },
+      ),
+    );
+  }
+}
+
+/// Shimmer placeholder rows shown while the agency listings load.
+class _AgencyListingsSkeleton extends StatelessWidget {
+  const _AgencyListingsSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+      itemCount: 6,
+      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+      itemBuilder: (_, __) => const SizedBox(
+        height: AppSpacing.xxxl + AppSpacing.xxl,
+        child: LoadingState.card(),
       ),
     );
   }
@@ -133,69 +169,81 @@ class _ListingCard extends StatelessWidget {
     final currency = (row['primary_currency'] as String?) ?? '';
     final imagePath = row['main_image_path'] as String?;
 
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      margin: const EdgeInsetsDirectional.symmetric(
+    // Batch-2: the stock Material [Card]+[InkWell] became the DS [AppSurface]
+    // (card fill + hairline + radius-lg) under a [PressScale], matching the
+    // My-Reports / publisher listing rows. The price now uses the `priceMedium`
+    // token instead of a muted body line.
+    return Padding(
+      padding: const EdgeInsetsDirectional.symmetric(
         horizontal: AppSpacing.lg,
         vertical: AppSpacing.sm,
       ),
-      child: InkWell(
-        onTap: id == null
-            ? null
-            : () => context.push(AppRoutes.listingDetailsFor(id)),
-        child: Padding(
+      child: PressScale(
+        enabled: id != null,
+        child: AppSurface(
+          radius: AppRadii.lg,
+          onTap: id == null
+              ? null
+              : () => context.push(AppRoutes.listingDetailsFor(id)),
           padding: const EdgeInsetsDirectional.all(AppSpacing.md),
-          child: Row(
-            children: [
-              ClipRRect(
-                borderRadius: appRadius(AppRadii.sm),
-                child: SizedBox(
-                  width: AppSpacing.xxxl + AppSpacing.xl,
-                  height: AppSpacing.xxxl + AppSpacing.xl,
-                  child: imagePath != null && imagePath.isNotEmpty
-                      ? CachedNetworkImage(
-                          imageUrl: imagePath,
-                          fit: BoxFit.cover,
-                          errorWidget: (_, __, ___) =>
-                              ColoredBox(color: colors.surfaceVariant),
-                        )
-                      : ColoredBox(
-                          color: colors.surfaceVariant,
-                          child: Icon(
-                            Icons.image_not_supported_outlined,
-                            color: colors.onSurfaceVariant,
+          child: MergeSemantics(
+            child: Row(
+              children: [
+                ClipRRect(
+                  borderRadius: appRadius(AppRadii.md),
+                  child: SizedBox(
+                    width: AppSpacing.xxxl + AppSpacing.xl,
+                    height: AppSpacing.xxxl + AppSpacing.xl,
+                    child: imagePath != null && imagePath.isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: imagePath,
+                            fit: BoxFit.cover,
+                            placeholder: (_, __) =>
+                                ColoredBox(color: colors.surfaceVariant),
+                            errorWidget: (_, __, ___) => ColoredBox(
+                              color: colors.surfaceVariant,
+                              child: Icon(
+                                LucideIcons.image_off,
+                                color: colors.textMuted,
+                              ),
+                            ),
+                          )
+                        : ColoredBox(
+                            color: colors.surfaceVariant,
+                            child: Icon(
+                              LucideIcons.image,
+                              color: colors.textMuted,
+                            ),
                           ),
-                        ),
+                  ),
                 ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title.isEmpty ? '—' : title,
-                      style: styles.titleMedium,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (amount != null) ...[
-                      const SizedBox(height: AppSpacing.xs),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        MoneyFormatter.formatAmount(
-                          amount as num,
-                          currency,
-                          locale: Localizations.localeOf(context),
-                        ),
-                        style: styles.bodyMedium.copyWith(
-                          color: colors.onSurfaceVariant,
-                        ),
+                        title.isEmpty ? '—' : title,
+                        style: styles.titleMedium,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
+                      if (amount != null) ...[
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          MoneyFormatter.formatAmount(
+                            amount as num,
+                            currency,
+                            locale: Localizations.localeOf(context),
+                          ),
+                          style: styles.priceMedium,
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

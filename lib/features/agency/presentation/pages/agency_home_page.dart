@@ -26,6 +26,7 @@ import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/press_scale.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/agency.dart';
@@ -80,7 +81,13 @@ class _AgencyHomeView extends StatelessWidget {
           },
           body: switch (state) {
             AgencyHomeLoading() => const AppSpinner.page(),
-            AgencyHomeError() => Center(child: Text(l10n.agency_generic_error)),
+            // Batch-2: a bare centred Text was the only thing shown on a load
+            // failure — no way back. Now the shared ErrorState with a Retry
+            // that re-calls the very same load().
+            AgencyHomeError() => ErrorState(
+              title: l10n.agency_generic_error,
+              onRetry: () => context.read<AgencyHomeCubit>().load(),
+            ),
             AgencyHomeNone() ||
             AgencyHomeCreating() ||
             AgencyHomeCreateFailure() => _CreateAgencyForm(
@@ -399,8 +406,12 @@ class _ManageTile extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
+              // Batch-2 RTL: a bare chevron_right does not mirror in Arabic;
+              // this matches the DS app bar and the super-admin/currency cards.
               Icon(
-                LucideIcons.chevron_right,
+                Directionality.of(context) == TextDirection.rtl
+                    ? LucideIcons.chevron_left
+                    : LucideIcons.chevron_right,
                 size: AppSpacing.xl,
                 color: colors.textMuted,
               ),
