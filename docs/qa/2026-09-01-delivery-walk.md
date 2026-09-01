@@ -49,12 +49,37 @@ confirmed: still 26 listings and 12 profiles, none deleted.
 That also proves the amended `enforce_profile_status_admin_only()` trigger works
 — without it, the tombstone UPDATE would have raised `42501`.
 
+## Second walk — signed-in surfaces (debug build, DESIGN_TOOLS on)
+
+The first walk could only reach guest screens. A throwaway account was
+registered through the app's own form, approved, used, deleted through the app,
+and then fully purged — so the database ends exactly where it started.
+
+| # | Check | Result |
+|---|---|---|
+| 13 | Registration from the app | PASS — account created, correctly gated on the "الحساب قيد المراجعة" screen, which carries its own sign-out |
+| 14 | Approved account reaches the app | PASS — home feed, bottom nav, profile |
+| 15 | Profile screen | PASS — identity card with the "مقبول" badge, role chip, account section, sign-out |
+| 16 | **SegmentedButton theme** | PASS — the preferred-currency toggle now renders as a pill with the selected segment on `primaryContainer` and a check, matching the chips. It was stock Material before this branch |
+| 17 | Verified-agency badge on a photo card | PASS — the green "موثّق" pill reads clearly over listing photography |
+| 18 | **Account deletion, end to end** | PASS — see below |
+
+**Account deletion, verified in the database afterwards:** phone released (no
+profile holds it), `account_status = deleted`, name nulled, one operator-queue
+row, one `account.self_deleted` audit row, and `auth.users.email` renamed to
+`deleted-<uuid>@deleted.alnujom.local` so the number can register again. The app
+returned to the guest home. The three friction gates all behaved: the
+acknowledgement checkbox arms the button, and the destructive dialog asks once
+more.
+
+The test account was then purged completely (auth user, queue row, audit row).
+Final state: 12 profiles, 26 listings, 12 auth users — identical to before.
+
 ## What this walk could NOT cover
 
 - **The last hop of the password reset**: tapping the real emailed link on a
   device running this build, and setting a new password.
-- **Account deletion from the UI**, and its Vault-secret purge (no test account
-  had Vault PII).
+- **The Vault-secret purge inside deletion** — the test account had no Vault PII.
 - **Agency invitation accept** — needs two accounts (inviter + invitee).
 - **The heads-up push banner** — needs a real FCM send to a device that
   previously ran the old build, which is the case the new channel id exists for.
