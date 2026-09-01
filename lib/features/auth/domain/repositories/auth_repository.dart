@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart' show Locale;
 
 import '../../../../core/errors/result.dart';
+import '../entities/password_reset_outcome.dart';
 import '../../../../shared/domain/value_objects/phone_number.dart';
 import '../entities/session.dart';
 
@@ -32,9 +33,12 @@ abstract class AuthRepository {
   /// Sign out. Clears the local session token.
   Future<void> logout();
 
-  /// Reset-password (account-enumeration-resistant per FR-017).
-  /// Always returns Success on parseable input; only transport failures surface.
-  Future<Result<void>> requestPasswordReset({required PhoneNumber phone});
+  /// Requests a password reset and reports what the server could do about it:
+  /// mail sent, phone-only account, or no such account. Only transport failures
+  /// surface as [FailureResult].
+  Future<Result<PasswordResetOutcome>> requestPasswordReset({
+    required PhoneNumber phone,
+  });
 
   /// Spec 005 D-01 — fires once each time an incoming password-recovery deep
   /// link (`alnujom://auth/reset-password`) has been exchanged for a recovery

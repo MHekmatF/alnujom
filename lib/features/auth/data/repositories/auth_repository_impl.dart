@@ -1,3 +1,4 @@
+import '../../domain/entities/password_reset_outcome.dart';
 import 'dart:async';
 
 import 'package:flutter/widgets.dart' show Locale;
@@ -207,12 +208,12 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Result<void>> requestPasswordReset({
+  Future<Result<PasswordResetOutcome>> requestPasswordReset({
     required PhoneNumber phone,
   }) async {
     try {
-      await _authDs.invokeRequestPasswordReset(phone: phone);
-      return const Success(null);
+      final status = await _authDs.invokeRequestPasswordReset(phone: phone);
+      return Success(PasswordResetOutcome.fromStatus(status));
     } on Object catch (error, stackTrace) {
       _logger.warning(
         'request_password_reset transport error.',

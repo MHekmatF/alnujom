@@ -45,7 +45,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> with WidgetsBindingObserver {
     on<RegisterRequested>(_onRegisterRequested);
     on<LoginRequested>(_onLoginRequested);
     on<LogoutRequested>(_onLogoutRequested);
-    on<ResetPasswordRequested>(_onResetPasswordRequested);
     on<SessionRefreshed>(_onSessionRefreshed);
     on<ProfileRefreshed>(_onProfileRefreshed);
     on<AppResumedRefresh>(_onAppResumedRefresh);
@@ -168,30 +167,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> with WidgetsBindingObserver {
     // sessionStream fires SessionRefreshed(null) → Unauthenticated.
   }
 
-  Future<void> _onResetPasswordRequested(
-    ResetPasswordRequested event,
-    Emitter<AuthState> emit,
-  ) async {
-    final previousState = state;
-    emit(const Authenticating());
-    final result = await _authRepository.requestPasswordReset(
-      phone: event.phone,
-    );
-    if (result is FailureResult<void>) {
-      emit(
-        AuthError(
-          UnknownAuthError(
-            result.failure.message,
-            cause: result.failure.cause,
-            stackTrace: result.failure.stackTrace,
-          ),
-        ),
-      );
-    } else {
-      // Always restore previous state (FR-017: uniform response regardless of outcome).
-      emit(previousState);
-    }
-  }
 
   Future<void> _onSessionRefreshed(
     SessionRefreshed event,

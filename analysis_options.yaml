@@ -1,6 +1,9 @@
 include: package:flutter_lints/flutter.yaml
 
 l10n_lint_exempt:
+  # Last-resort ErrorWidget: localisations may be exactly what failed, so it
+  # carries its own Arabic copy. See the doc comment on AppErrorView.
+  - lib/core/widgets/app_error_view.dart
   - lib/l10n/**.arb
   - lib/l10n/app_localizations*.dart
   - lib/debug/**

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'app.dart';
+import 'core/widgets/app_error_view.dart';
 import 'core/analytics/analytics_service.dart';
 import 'core/config/env_config.dart';
 import 'core/di/injection.dart';
@@ -93,6 +94,19 @@ Future<void> main() async {
     unawaited(reporter.recordError(error, stack));
     return true;
   };
+
+  // A widget that throws while building shows Flutter's release ErrorWidget: a
+  // bare grey rectangle. With no crash-reporter DSN configured the exception
+  // reaches neither the screen nor the log, so a broken screen looks exactly
+  // like a blank one — which is how an unregistered dependency shipped
+  // unnoticed until someone walked the app on a device.
+  //
+  // Give it a face instead. Still no technical detail on screen (that is the
+  // reporter's job), but the user sees that something failed rather than a void,
+  // and anyone testing a build knows to look rather than assume a slow load.
+  if (kReleaseMode || kProfileMode) {
+    ErrorWidget.builder = (FlutterErrorDetails details) => const AppErrorView();
+  }
 
   // Run the bootstrap inside a guarded zone so uncaught async errors (outside
   // the framework/platform handlers above) are also forwarded.

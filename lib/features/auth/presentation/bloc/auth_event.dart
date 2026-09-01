@@ -38,11 +38,6 @@ final class LogoutRequested extends AuthEvent {
   const LogoutRequested();
 }
 
-final class ResetPasswordRequested extends AuthEvent {
-  const ResetPasswordRequested({required this.phone});
-
-  final PhoneNumber phone;
-}
 
 final class SessionRefreshed extends AuthEvent {
   const SessionRefreshed(this.session);
