@@ -71,70 +71,75 @@ class FavoriteCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   _Hero(item: item, l10n: l10n),
-                  Padding(
-                    padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Price (null for unavailable rows) — brand-blue,
-                        // priceLarge so the number reads as money.
-                        if (item.primaryAmount != null &&
-                            item.primaryCurrency != null) ...[
-                          Text(
-                            MoneyFormatter.formatAmount(
-                              item.primaryAmount!,
-                              item.primaryCurrency!,
-                              locale: Localizations.localeOf(context),
+                  // One node for the screen reader: price, title, specs and
+                  // location read as a single card instead of four fragments.
+                  // The hero keeps its own nodes so its buttons stay reachable.
+                  MergeSemantics(
+                    child: Padding(
+                      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Price (null for unavailable rows) — brand-blue,
+                          // priceLarge so the number reads as money.
+                          if (item.primaryAmount != null &&
+                              item.primaryCurrency != null) ...[
+                            Text(
+                              MoneyFormatter.formatAmount(
+                                item.primaryAmount!,
+                                item.primaryCurrency!,
+                                locale: Localizations.localeOf(context),
+                              ),
+                              textDirection: TextDirection.ltr,
+                              textAlign: TextAlign.start,
+                              style: styles.priceLarge,
                             ),
-                            textDirection: TextDirection.ltr,
-                            textAlign: TextAlign.start,
-                            style: styles.priceLarge,
+                            const SizedBox(height: AppSpacing.sm),
+                          ],
+                          // Title (empty string for unavailable rows per FR-025).
+                          Text(
+                            item.title.isEmpty ? '—' : item.title,
+                            style: styles.titleLarge,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: AppSpacing.sm),
-                        ],
-                        // Title (empty string for unavailable rows per FR-025).
-                        Text(
-                          item.title.isEmpty ? '—' : item.title,
-                          style: styles.titleLarge,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        if (PropertySpecsRow.hasAnyOf(
-                          rooms: item.rooms,
-                          bathrooms: item.bathrooms,
-                          areaSize: item.areaSize,
-                        )) ...[
-                          const SizedBox(height: AppSpacing.sm),
-                          PropertySpecsRow(
+                          if (PropertySpecsRow.hasAnyOf(
                             rooms: item.rooms,
                             bathrooms: item.bathrooms,
                             areaSize: item.areaSize,
-                          ),
-                        ],
-                        if (location.isNotEmpty) ...[
-                          const SizedBox(height: AppSpacing.sm),
-                          Row(
-                            children: [
-                              Icon(
-                                LucideIcons.map_pin,
-                                size: AppSpacing.lg,
-                                color: colors.onSurfaceVariant,
-                              ),
-                              const SizedBox(width: AppSpacing.xs),
-                              Expanded(
-                                child: Text(
-                                  location,
-                                  style: styles.bodyMedium.copyWith(
-                                    color: colors.onSurfaceVariant,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                          )) ...[
+                            const SizedBox(height: AppSpacing.sm),
+                            PropertySpecsRow(
+                              rooms: item.rooms,
+                              bathrooms: item.bathrooms,
+                              areaSize: item.areaSize,
+                            ),
+                          ],
+                          if (location.isNotEmpty) ...[
+                            const SizedBox(height: AppSpacing.sm),
+                            Row(
+                              children: [
+                                Icon(
+                                  LucideIcons.map_pin,
+                                  size: AppSpacing.lg,
+                                  color: colors.onSurfaceVariant,
                                 ),
-                              ),
-                            ],
-                          ),
+                                const SizedBox(width: AppSpacing.xs),
+                                Expanded(
+                                  child: Text(
+                                    location,
+                                    style: styles.bodyMedium.copyWith(
+                                      color: colors.onSurfaceVariant,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
                   ),
                 ],
@@ -188,9 +193,7 @@ class _Hero extends StatelessWidget {
         // Unavailable rows are dimmed with a soft scrim so the "no longer
         // available" treatment reads at a glance (FR-025).
         if (!item.isAvailable)
-          Positioned.fill(
-            child: ColoredBox(color: colors.scrim),
-          ),
+          Positioned.fill(child: ColoredBox(color: colors.scrim)),
         PositionedDirectional(
           top: AppSpacing.sm,
           end: AppSpacing.sm,
