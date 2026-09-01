@@ -60,10 +60,15 @@ Verified after: RPC owned by `postgres` (so it bypasses RLS as intended), `anon`
 holds no EXECUTE, `authenticated` does, and no row in `profiles` or `listings`
 changed.
 
+**Verified end to end** on 2026-09-01: a throwaway account was registered through
+the app, deleted through the app's own button, and checked afterwards — phone
+released, status tombstoned, name nulled, operator-queue and audit rows written,
+and `auth.users.email` renamed to `deleted-<uuid>@deleted.alnujom.local` so the
+number can register again. The test account was then purged completely.
+
 **Still owed:** the RPC does not remove the `auth.users` row or the account's
 uploaded files. `account_deletion_requests.purge_status` is your work queue for
-that. And **nobody has actually deleted an account yet** — run one end-to-end on
-a throwaway account before relying on it.
+that.
 
 ---
 
@@ -94,11 +99,11 @@ for the handful of accounts that have one, leaking a phone-to-email mapping and
 confirming whether a number is registered.
 
 **The trade-off, and why it is not obviously worth taking.**
-`request_password_reset` finds users by their `auth.users` email. Once those are
-synthetic, **emailed password reset stops working for the 3 accounts that have a
-real email** — and those 3 are the only accounts the newly-completed
-password-reset deep link can serve at all. Applying this would switch off the
-feature that was just built, for everyone who can use it.
+`request_password_reset` finds users by their `auth.users` email. Checked live on
+2026-09-01: **exactly one** account has a real email — the founder's — not the
+three the audit estimated. So the disclosure is one account wide, and applying
+this would switch off emailed password reset for the only account the
+newly-completed reset flow can serve at all.
 
 It fails quietly (the caller still gets the uniform `{ok:true}`; nothing breaks
 or leaks) and you would reset those passwords by hand from the dashboard, exactly
