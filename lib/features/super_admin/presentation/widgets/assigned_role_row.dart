@@ -6,6 +6,7 @@ import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/role_assignment_summary.dart';
 
 class AssignedRoleRow extends StatelessWidget {
@@ -76,8 +77,10 @@ class AssignedRoleRow extends StatelessWidget {
           ),
           if (showRemoveAffordance) ...[
             const SizedBox(width: AppSpacing.sm),
+            // Batch-2 a11y: the icon-only revoke button had no accessible name.
             IconButton(
               onPressed: onRemove,
+              tooltip: AppLocalizations.of(context)!.actionRevoke,
               icon: Icon(LucideIcons.circle_minus, color: colors.error),
             ),
           ],

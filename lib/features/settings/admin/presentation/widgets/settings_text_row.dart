@@ -7,7 +7,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../../../core/localization/app_strings.dart';
 import '../../../../../../core/theme/spacing.dart';
-import '../../../../../../core/widgets/app_spinner.dart';
+import '../../../../../../core/theme/typography.dart';
+import '../../../../../../core/widgets/app_button.dart';
 
 /// A single-row validated text field with an inline Save button.
 ///
@@ -82,6 +83,11 @@ class _SettingsTextRowState extends State<SettingsTextRow> {
 
   @override
   Widget build(BuildContext context) {
+    final styles = AppTextStyles.of(context);
+    // Batch-2: the hardcoded `OutlineInputBorder()` overrode the DS input theme
+    // (token fill + focus ring); the stock TextButton became the DS AppButton
+    // text variant, which carries the 48dp target and press feedback and can
+    // render its own inline spinner while saving.
     return Padding(
       padding: const EdgeInsetsDirectional.symmetric(vertical: AppSpacing.sm),
       child: Form(
@@ -95,27 +101,23 @@ class _SettingsTextRowState extends State<SettingsTextRow> {
                 enabled: !widget.isSaving,
                 keyboardType: widget.keyboardType,
                 maxLines: widget.maxLines,
+                style: styles.bodyLarge,
                 decoration: InputDecoration(
                   labelText: widget.label,
-                  border: const OutlineInputBorder(),
+                  labelStyle: styles.bodyMedium,
                   isDense: true,
                   errorText: _errorText,
                 ),
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
-            widget.isSaving
-                ? const Padding(
-                    padding: EdgeInsetsDirectional.only(top: AppSpacing.xs),
-                    child: AppSpinner(),
-                  )
-                : TextButton(
-                    onPressed: _handleSave,
-                    child: Text(
-                      widget.saveLabel ??
-                          AppStrings.of(context).loc.action_save,
-                    ),
-                  ),
+            AppButton(
+              label: widget.saveLabel ?? AppStrings.of(context).loc.action_save,
+              variant: AppButtonVariant.text,
+              size: AppButtonSize.dense,
+              loading: widget.isSaving,
+              onPressed: _handleSave,
+            ),
           ],
         ),
       ),

@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../../core/theme/spacing.dart';
+import '../../../../../../core/widgets/app_dropdown.dart';
 
 /// A single-row labeled dropdown for an enum or string setting value.
 ///
@@ -31,15 +32,15 @@ class SettingsDropdownRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Batch-2: the raw `EdgeInsets.symmetric` became directional, and the bare
+    // `DropdownButtonFormField` with a hardcoded `OutlineInputBorder()` (which
+    // overrode the DS input theme) became the shared [AppDropdown].
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-      child: DropdownButtonFormField<String>(
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-          isDense: true,
-        ),
-        initialValue: value,
+      padding: const EdgeInsetsDirectional.symmetric(vertical: AppSpacing.xs),
+      child: AppDropdown<String>(
+        label: label,
+        value: value,
+        enabled: !isSaving,
         items: items
             .map(
               (e) => DropdownMenuItem<String>(
@@ -48,7 +49,7 @@ class SettingsDropdownRow extends StatelessWidget {
               ),
             )
             .toList(),
-        onChanged: isSaving ? null : onSave,
+        onChanged: onSave,
       ),
     );
   }

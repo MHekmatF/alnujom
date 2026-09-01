@@ -5,6 +5,7 @@ import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/app_checkbox.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/permission_catalog_entry.dart';
 import 'permission_category_header.dart';
@@ -98,33 +99,39 @@ class _PermissionRow extends StatelessWidget {
             horizontal: AppSpacing.sm,
             vertical: AppSpacing.xs,
           ),
-          child: Row(
-            children: [
-              Checkbox(
-                value: selected,
-                onChanged: onToggle == null ? null : (_) => onToggle!(),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      permission.description ?? permission.key,
-                      style: styles.bodyLarge,
-                    ),
-                    const SizedBox(height: AppSpacing.xxs),
-                    Text(
-                      permission.key,
-                      style: styles.bodyMedium.copyWith(
-                        color: colors.textMuted,
-                      ),
-                    ),
-                  ],
+          child: MergeSemantics(
+            child: Row(
+              children: [
+                // Batch-2 a11y: the bare Checkbox sat in a ~40dp slot; the DS
+                // AppCheckbox reserves the 48dp minimum tap target and takes
+                // its enabled state from the read-only gate.
+                AppCheckbox(
+                  value: selected,
+                  enabled: onToggle != null,
+                  onChanged: (_) => onToggle?.call(),
                 ),
-              ),
-            ],
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        permission.description ?? permission.key,
+                        style: styles.bodyLarge,
+                      ),
+                      const SizedBox(height: AppSpacing.xxs),
+                      Text(
+                        permission.key,
+                        style: styles.labelMedium.copyWith(
+                          color: colors.textMuted,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

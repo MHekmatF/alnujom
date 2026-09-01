@@ -12,6 +12,7 @@ import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_spinner.dart';
+import '../../../../core/widgets/app_toggle.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../core/widgets/error_state.dart';
@@ -311,7 +312,9 @@ class _ActiveSwitchRow extends StatelessWidget {
             const SizedBox(width: AppSpacing.md),
             Expanded(child: Text(label, style: styles.bodyLarge)),
             const SizedBox(width: AppSpacing.sm),
-            Switch(value: value, onChanged: onChanged),
+            // Batch-2: the bare Material Switch -> the DS AppToggle, so all
+            // four internal toggle rows share one active-state treatment.
+            AppToggle(value: value, onChanged: onChanged),
           ],
         ),
       ),

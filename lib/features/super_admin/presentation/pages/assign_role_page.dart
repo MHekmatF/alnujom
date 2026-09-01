@@ -16,7 +16,9 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/press_scale.dart';
+import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
@@ -73,24 +75,31 @@ class _AssignRoleView extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 if (state is AssignRoleSearching)
-                  const AppSpinner()
+                  const Center(child: AppSpinner())
                 else if (ready != null && ready.results.isEmpty)
-                  Text(l10n.userSearchEmptyResults)
+                  // Batch-2: a lone unstyled Text became the shared EmptyState.
+                  EmptyState(
+                    icon: LucideIcons.search_x,
+                    headline: l10n.userSearchEmptyResults,
+                  )
                 else if (ready != null)
-                  for (final user in ready.results)
+                  for (final (index, user) in ready.results.indexed)
                     Padding(
                       padding: const EdgeInsetsDirectional.only(
                         bottom: AppSpacing.sm,
                       ),
-                      child: _UserResultRow(
-                        title:
-                            user.fullName ??
-                            user.username ??
-                            user.phone ??
-                            user.userId,
-                        subtitle: user.phone ?? user.username ?? user.userId,
-                        onTap: () => context.read<AssignRoleBloc>().add(
-                          SelectUser(user),
+                      child: StaggeredListItem(
+                        index: index,
+                        child: _UserResultRow(
+                          title:
+                              user.fullName ??
+                              user.username ??
+                              user.phone ??
+                              user.userId,
+                          subtitle: user.phone ?? user.username ?? user.userId,
+                          onTap: () => context.read<AssignRoleBloc>().add(
+                            SelectUser(user),
+                          ),
                         ),
                       ),
                     ),
