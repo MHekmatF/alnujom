@@ -1,29 +1,49 @@
 # AlNujom — Operator Handover Playbook
 
-A plain-language guide for the new owner of AlNujom. It walks you through the
-handful of one-time setup steps needed to run the app, then gives you a
-First-30-Days checklist for day-to-day operations.
+A plain-language guide for the owner of AlNujom. It covers the one-time setup,
+the routine jobs, and the emergencies — what to do when push stops working, when
+Supabase pauses, when you need to take the app down, and when you want to ship a
+new version.
 
 You do **not** need to be a programmer to follow this. Where a step needs a
-developer's help, it says so. Everything is done from web dashboards (Supabase)
-and a couple of small text files on the build machine.
+developer, it says so. Most of it happens in web dashboards.
 
-> **The two dashboards you will live in:**
-> - **Supabase** — the database, user accounts, and login settings.
->   Project name **AlNujom**, project reference `hczsgceagommznjaohyk`.
->   Log in at <https://supabase.com/dashboard>.
+> **The dashboards you will live in:**
+> - **Supabase** — database, user accounts, login settings, file storage, server
+>   functions. Project **AlNujom**, reference `hczsgceagommznjaohyk`.
+>   <https://supabase.com/dashboard>
 > - **GlitchTip** — the crash-report inbox (tells you when the app breaks for a user).
+> - **Firebase Console** — push notifications (project `alnujom-real-estate-test`).
+> - **GitHub** — the code, and the keep-alive robot that stops Supabase pausing.
+>   Repository `MHekmatF/alnujom`.
+
+---
+
+## Contents
+
+1. [Create the first super-admin](#1-create-the-first-super-admin)
+2. [Supabase login settings (password reset)](#2-supabase-login-settings-password-reset)
+3. [The secret files on the build machine](#3-the-secret-files-on-the-build-machine)
+4. [Vault secrets — the ones that must never be lost](#4-vault-secrets--the-ones-that-must-never-be-lost)
+5. [Server functions (Edge Functions)](#5-server-functions-edge-functions)
+6. [Push notifications — how they work and how to fix them](#6-push-notifications--how-they-work-and-how-to-fix-them)
+7. [Shipping a new version](#7-shipping-a-new-version)
+8. [Maintenance mode — taking the app down safely](#8-maintenance-mode--taking-the-app-down-safely)
+9. [The project is paused — how to restore it](#9-the-project-is-paused--how-to-restore-it)
+10. [The keep-alive robot](#10-the-keep-alive-robot)
+11. [First-30-days checklist](#11-first-30-days-checklist)
+12. [Known gaps and where the truth lives](#12-known-gaps-and-where-the-truth-lives)
 
 ---
 
 ## A quick mental model
 
 - **Buyers and sellers** use the Android app. Sellers ("publishers") post
-  property listings; buyers browse and send inquiries.
+  listings; buyers browse, chat, and send inquiries.
 - **Moderators and admins** approve new seller accounts, approve listings before
   they go public, and handle reports.
 - **You (the super-admin)** sit at the top: you create the moderators and admins,
-  and you hold the master keys (the "service-role key", below).
+  and you hold the master keys.
 
 Nothing happens automatically. A new seller's account must be approved by a
 person before they can post, and each listing must be approved before the public
@@ -34,22 +54,17 @@ sees it. That is by design.
 ## 1. Create the first super-admin
 
 When the app first goes live there are **no administrators** — every new sign-up
-gets the plain "user" role automatically, and a plain user cannot approve
-anyone. So the very first admin has to be granted by hand, one time, directly in
-the database. After that, you can create every other moderator/admin from inside
-the app's admin screens.
-
-**Step by step:**
+gets the plain "user" role, and a plain user cannot approve anyone. So the very
+first admin has to be granted by hand, one time, directly in the database. After
+that you create every other moderator/admin from inside the app.
 
 1. **Install the app and register a normal account** with the phone number you
-   want to be the owner account. Choose a strong password. Complete the sign-up
-   so the account exists.
+   want as the owner account. Choose a strong password. Finish the sign-up.
 
-2. Open the **Supabase dashboard** → project **AlNujom** → **SQL Editor**
-   (left sidebar).
+2. Supabase dashboard → project **AlNujom** → **SQL Editor**.
 
-3. Find your new account's internal ID by running this query (replace the phone
-   number with yours, in full international form, e.g. `+9639XXXXXXXX`):
+3. Find your account's internal ID (use your phone in full international form,
+   e.g. `+9639XXXXXXXX`):
 
    ```sql
    select user_id, phone, full_name
@@ -57,10 +72,9 @@ the app's admin screens.
    where phone = '+9639XXXXXXXX';
    ```
 
-   Copy the `user_id` value (a long string of letters/numbers).
+   Copy the `user_id`.
 
-4. Grant that account the **super-admin** role by running this (paste your
-   `user_id` where shown):
+4. Grant super-admin:
 
    ```sql
    insert into public.user_roles (user_id, role_id)
@@ -71,8 +85,8 @@ the app's admin screens.
    on conflict (user_id, role_id) do nothing;
    ```
 
-5. If your account is still **pending approval** (a brand-new sign-up usually
-   is), also approve it so you can log all the way in:
+5. If your account is still pending approval (a brand-new sign-up usually is),
+   approve it:
 
    ```sql
    update public.profiles
@@ -81,83 +95,90 @@ the app's admin screens.
    ```
 
 6. **Fully close and reopen the app, then log in again.** You should now see the
-   admin section. From here on, use the in-app **Roles** screen to create
-   moderators and other admins — you should never need step 4 again.
+   admin section. From here on use the in-app **Roles** screen — you should never
+   need step 4 again.
 
-> **Do this only once.** Granting super-admin by hand is a master-key action.
-> Keep the list of super-admins tiny (ideally just you, plus one trusted backup).
-
----
-
-## 2. Turn on password reset (Supabase login settings)
-
-The app lets a user request a "reset my password" link. For that link to
-actually work, Supabase has to be told which addresses it is allowed to send
-people back to. Today this is set to a **placeholder** and must be pointed at the
-app's real reset address: **`alnujom://auth/reset-password`**.
-
-(That funny-looking address is a "deep link" — tapping it opens the AlNujom app
-directly instead of a web page.)
-
-**Step by step:**
-
-1. Supabase dashboard → project **AlNujom** → **Authentication** (left sidebar)
-   → **URL Configuration**.
-
-2. **Site URL** — set it to exactly:
-
-   ```
-   alnujom://auth/reset-password
-   ```
-
-3. **Redirect URLs** — click **Add URL** and add the same value (and keep it on
-   the allow-list):
-
-   ```
-   alnujom://auth/reset-password
-   ```
-
-4. Click **Save**.
-
-5. While you are in Authentication, confirm these two settings are correct (they
-   were set during build and should already be right — just verify):
-   - **Settings → Password → Minimum length** = **8**
-   - **Providers → Email → Confirm email** = **OFF / unchecked**
-     (the app uses phone numbers, not real mailboxes, so email confirmation must
-     stay off or sign-ups will break).
-
-> **Known limitation to be aware of.** Finishing a password reset from the
-> emailed link is a feature that is **not fully built yet** (it is on the parked
-> list — see Section 5). In the meantime, if a user is truly locked out, a
-> super-admin can set a temporary password for them from
-> **Authentication → Users** → pick the user → **Change password**, and tell them
-> to change it in the app afterwards. The app uses phone numbers, so there is no
-> self-serve email recovery to rely on.
+> **Do this only once.** Keep the list of super-admins tiny: you, plus one
+> trusted backup so you are not locked out if you lose your phone.
 
 ---
 
-## 3. Crash reporting and the master key (two small text files)
+## 2. Supabase login settings (password reset)
 
-The app's settings and secrets live in two small text files on the **build
-machine** (the computer that produces the app's installable file). These files
-are deliberately kept out of the shared code so secrets never leak.
+A user who forgets their password taps "forgot password" and enters their phone.
+The app asks the server for a reset link. For that link to bring them back into
+the app, Supabase has to know the app's address.
 
-You will rarely touch these yourself — they are usually managed by whoever builds
-the app — but you must understand what they are and the one rule that protects
-you.
+That address is a **deep link** — `alnujom://auth/reset-password`. It is not a
+web page; tapping it opens the AlNujom app straight onto the "set a new password"
+screen. The app registers this address with Android, so Android knows to hand it
+over.
 
-### The two files
+**Why the Site URL matters here:** the server function that sends the reset
+(`request_password_reset`) does not specify a return address of its own, so
+Supabase falls back to whatever **Site URL** is configured. If Site URL still
+points at a web address, the reset link opens a browser page instead of the app,
+and the user is stuck.
 
-| File | What it holds | Goes into the app? |
+### Set it
+
+Supabase dashboard → project **AlNujom** → **Authentication** → **URL
+Configuration**.
+
+| Field | Exact value to enter |
+|---|---|
+| **Site URL** | `alnujom://auth/reset-password` |
+| **Redirect URLs** → *Add URL* | `alnujom://auth/reset-password` |
+
+Add the value in **both** places — Site URL is what gets used, Redirect URLs is
+the allow-list that permits it. Click **Save**.
+
+Then note the change in `docs/RUNBOOK.md` (entry T004), which still records the
+old placeholder.
+
+### While you are on that screen, verify two more settings
+
+- **Authentication → Settings → Password → Minimum length** = **8**
+- **Authentication → Providers → Email → Confirm email** = **OFF / unchecked**
+
+Email confirmation must stay off. The app signs people up with a made-up email
+built from their phone number (`+9639XXXXXXXX@alnujom.local`) — that mailbox does
+not exist and can never receive a confirmation, so turning this on breaks every
+sign-up.
+
+### Test it, once
+
+Register a throwaway account, tap "forgot password", and confirm the link opens
+the app rather than a browser. If it opens a browser or an error page, the Site
+URL is wrong.
+
+### If a user is genuinely locked out
+
+Because most accounts use a made-up email, the reset email only reaches the few
+accounts that have a **real** email on file. For everyone else:
+
+1. Supabase → **Authentication → Users** → find them by phone.
+2. Use the **Change password** field to set a temporary password.
+   ("Send password recovery" does nothing useful for a made-up email.)
+3. Tell them the temporary password and to change it in the app.
+
+---
+
+## 3. The secret files on the build machine
+
+Three files live on the **build machine** (the computer that produces the app's
+installable file) and are deliberately kept out of the code repository. All three
+are "gitignored", meaning the repository is configured to refuse them. Keep it
+that way.
+
+| File | What it holds | Ships inside the app? |
 |---|---|---|
-| `.env.json` | Public-safe settings: the database web address, the public "anon" key, and the **crash-report address (`SENTRY_DSN`)** | **Yes** — these are safe to ship |
-| `.env.admin.json` | The **master key** (`SUPABASE_SERVICE_ROLE_KEY`) used only by back-office tools | **No, never** — it must never go into a build |
+| `.env.json` | Public-safe build settings: the Supabase web address, the public **anon** key, and the crash-report address (`SENTRY_DSN`) | **Yes** — safe to ship |
+| `.env.admin.json` | The **master key** (`SUPABASE_SERVICE_ROLE_KEY`) used only by back-office tools | **Never** |
+| `android/app/google-services.json` | The Firebase configuration that makes **push notifications** work | Yes (it is meant to) |
+| `android/key.properties` + the keystore file | The **signing key** that proves an update really comes from you | The signature does |
 
-### Set the crash-report address (`SENTRY_DSN`)
-
-Crash reports go to **GlitchTip**, a private crash inbox. To switch it on, the
-builder puts the GlitchTip "DSN" (a long web address GlitchTip gives you) into
-`.env.json`:
+### `.env.json`
 
 ```json
 {
@@ -168,111 +189,560 @@ builder puts the GlitchTip "DSN" (a long web address GlitchTip gives you) into
 }
 ```
 
-- If `SENTRY_DSN` is **left empty**, crash reporting is simply off (the app still
-  works fine — it just does not phone home about errors). This is safe.
-- When it is filled in, crashes from real users land in your GlitchTip inbox with
-  the technical detail a developer needs to fix them. Reports are scrubbed of
-  personal data by design.
-- The app must be rebuilt for a change to this file to take effect.
+- Every `flutter run` and `flutter build` **must** include
+  `--dart-define-from-file=.env.json`. Without it the app cannot reach Supabase
+  and shows a red error screen on launch. This is the single most common build
+  mistake.
+- If `SENTRY_DSN` is left empty, crash reporting is simply off — the app works
+  fine, it just does not report errors. That is safe.
+- The app must be rebuilt for any change to this file to take effect.
 
-### The one rule about the master key
+### `.env.admin.json` — the one rule
 
-`.env.admin.json` holds the **service-role key** — think of it as the master key
-to the entire database. It bypasses every safety rule.
+This holds the **service-role key**: the master key to the entire database. It
+bypasses every safety rule.
 
-- It lives **only** on the build/admin machine, in `.env.admin.json`.
-- It is **never** put into `.env.json`, and **never** shipped inside the app.
-  (The app only carries the harmless public "anon" key.)
-- Never paste it into chat, email, screenshots, or the code repository.
-- If you ever suspect it leaked, rotate it immediately (see the 30-day
-  checklist).
+- It lives **only** on the build/admin machine.
+- It is **never** put into `.env.json` and **never** shipped inside the app.
+  (The app carries only the harmless public anon key — confirmed by scanning the
+  built app; see `docs/release/v1.0.0.md`.)
+- Never paste it into chat, email, screenshots, or the repository.
+- If you suspect it leaked, rotate it immediately: Supabase → **Project Settings
+  → API** → roll the key, then put the new value into `.env.admin.json`.
 
-> Both files are "gitignored" — meaning the code repository is configured to
-> ignore them so they can't be committed by accident. Keep it that way.
+### `android/app/google-services.json`
+
+The Firebase config for push notifications. **It is not in the repository** — the
+build is written to work with or without it:
+
+- **Present** → push notifications work.
+- **Absent** → the app still builds and runs perfectly; users just get in-app
+  notifications only, no phone-tray banners.
+
+Download it from **Firebase Console → Project settings → Your apps → Android app
+`com.alnujom.app` → `google-services.json`** and place it at
+`android/app/google-services.json` on the build machine. Back it up alongside
+your other build secrets — it is not secret in the dangerous sense, but losing it
+means push silently stops working on the next build.
+
+### The signing key
+
+`android/key.properties` points at your keystore file:
+
+```
+storePassword=<password>
+keyPassword=<password>
+keyAlias=<alias>
+storeFile=<absolute-path-to-keystore>
+```
+
+⚠️ **Back up the keystore file and its passwords in two separate places.** If you
+lose them you can never ship an update to this app again — not on Telegram
+(Android refuses an update signed by a different key) and not on Google Play.
+There is no recovery. This is the single most irreplaceable thing you own.
+
+A release build with no `key.properties` **fails on purpose** rather than
+producing an unsigned or debug-signed file.
 
 ---
 
-## 4. First-30-Days checklist
+## 4. Vault secrets — the ones that must never be lost
 
-Work through these in roughly this order during your first month of running the
-app. Tick them off as you go.
+Supabase **Vault** is an encrypted safe inside your database. Some of the app's
+most important values live there. You can see them at **Supabase dashboard →
+Project Settings → Vault** (or via SQL, below).
 
-### Week 1 — get the team and the safety nets in place
+**Five secrets are managed by you.** Losing one is not always fatal, but each has
+a real consequence:
 
-- [ ] **Confirm you can log in as super-admin** and see the admin section
-      (Section 1 done correctly).
-- [ ] **Set the password-reset URLs** in Supabase (Section 2).
-- [ ] **Confirm the crash inbox works** — ask your builder to send a test crash;
-      confirm it appears in GlitchTip. If GlitchTip stays empty, `SENTRY_DSN` is
-      probably blank or wrong.
-- [ ] **Enroll your moderators.** In the app's admin **Roles** screen, create
-      each trusted helper an account and assign **moderator** (day-to-day
-      approvals) or **admin** (broader control). Keep **super-admin** to just you
-      plus one backup.
-- [ ] **Write down a backup super-admin.** Make sure one other trusted person can
-      get in if you lose your phone.
+| Secret name | What it is for | What breaks if it is lost or changed |
+|---|---|---|
+| `map_jitter_salt` | The secret ingredient that scrambles a property's map pin when the seller chose "approximate location" | **Silent damage.** The privacy feature keeps working, but *every* approximate listing's pin jumps to a new spot. Nothing errors; the map just quietly becomes wrong for everyone. If the secret is deleted outright, the map function raises an error and map markers stop loading. |
+| `app-inquirer-phone-key` | The key that encrypts the phone number of someone who sends an inquiry through the contact form | Existing encrypted phone numbers become **permanently unreadable**. There is no recovery. |
+| `fcm_service_account` | The Firebase credentials the server uses to send push notifications | Push stops. In-app notifications still work. |
+| `push_dispatch_url` | The address of the server function that sends pushes | Push stops silently. |
+| `push_dispatch_token` | The password the database uses to prove it is allowed to trigger a push | Push stops (the function answers "401 unauthorized"). |
+
+> **Save the raw values in your password manager the day they are created.**
+> Vault will show them back to you, but only while the project is alive and you
+> have access. If the database is ever rebuilt from scratch, these are gone.
+
+There is also a **large, automatic** set of Vault secrets you never touch: one
+per user per sensitive field, named `pii.<user-id>.<field>`. These hold each
+user's **legal name**, **national ID number**, and **private contact methods**
+(WhatsApp / Telegram / Signal / private email / secondary phone), plus agency ID
+and commercial-registration numbers. They are created and read automatically, and
+only the user themselves or an admin can decrypt them. Never edit these by hand.
+
+### Checking what is in the Vault
+
+Supabase → **SQL Editor**:
+
+```sql
+-- List the operator-managed secrets (names + descriptions only, no values).
+select name, description, created_at
+from vault.secrets
+where name not like 'pii.%'
+order by name;
+```
+
+To confirm the map salt is the right shape without revealing it:
+
+```sql
+select length(decrypted_secret) as hex_length
+from vault.decrypted_secrets
+where name = 'map_jitter_salt';
+-- Expected: 64
+```
+
+### Creating a missing secret
+
+If `map_jitter_salt` is ever missing, generate a fresh 64-character value **out
+of band** (PowerShell: `openssl rand -hex 32`, or ask your developer) and:
+
+```sql
+select vault.create_secret(
+  '<the-64-character-value>',
+  'map_jitter_salt',
+  'Map jitter salt — changing it re-scrambles every approximate marker'
+);
+```
+
+Full detail, including rotation: `supabase/docs/map_jitter_coordinates.md`.
+
+---
+
+## 5. Server functions (Edge Functions)
+
+Seven small programs run on Supabase's servers rather than in the app. They exist
+for jobs that must not be trusted to a phone. You can see them at **Supabase
+dashboard → Edge Functions**.
+
+| Function | What it does | Who may call it |
+|---|---|---|
+| `approve_listing` | Publishes a listing after a moderator approves it | Admin/moderator with the right permission, checked server-side |
+| `reject_listing` | Rejects a listing with a reason | Same |
+| `moderate_agency` | Approves or rejects an agency | Same |
+| `resolve_report` | Closes a report from the reports queue | Same |
+| `dispatch_push` | Sends the actual push notification through Firebase | Only the database, using the shared `push_dispatch_token` |
+| `request_password_reset` | Starts a password reset from a phone number | Anyone (deliberately — it answers identically whether or not the number is registered, so nobody can probe which numbers have accounts) |
+| `lookup_email_by_phone` | Translates a phone number into the made-up login email at sign-in | Anyone (same enumeration-resistant design) |
+
+**You will rarely touch these.** They are already deployed and running. A
+developer redeploys one only after changing its code:
+
+```bash
+supabase functions deploy <function-name> --project-ref hczsgceagommznjaohyk
+```
+
+The source lives in `supabase/functions/<name>/index.ts`.
+
+> One known piece of housekeeping: the live `dispatch_push` predates a small fix
+> to the data it sends. Two redeploy attempts in June failed with a Supabase
+> platform error. It should be redeployed from source when convenient — see
+> `specs/022-notifications-realtime/DEFERRED.md`.
+
+---
+
+## 6. Push notifications — how they work and how to fix them
+
+### The chain
+
+Something happens in the database (a listing is approved, an inquiry arrives) →
+the database writes a notification row → a trigger posts to the `dispatch_push`
+function → that function reads the Firebase credentials from the Vault → Firebase
+delivers the banner to the phone → tapping it opens the right screen in the app.
+
+**Every link can fail silently by design.** If any piece is missing, push simply
+does not happen and the app keeps working with **in-app** notifications (the bell
+icon and the notification centre) intact. Nothing crashes. That is deliberate —
+Firebase may be unreachable from the region, and the app must survive that.
+
+### What has to be in place
+
+1. **The three Vault secrets** — `fcm_service_account`, `push_dispatch_url`,
+   `push_dispatch_token` (section 4).
+2. **`android/app/google-services.json`** on the build machine when the app is
+   built (section 3).
+3. **`dispatch_push` deployed** (section 5).
+
+Push was verified working end-to-end in June 2026 against the Firebase project
+`alnujom-real-estate-test`: the app registered a device token on login, the
+server dispatched in 1–2 seconds, and tapping the notification opened the correct
+listing.
+
+### "Push stopped working" — what to check, in order
+
+1. **Did the last build include `google-services.json`?** This is by far the most
+   common cause. The file is not in the repository, so a build on a fresh machine
+   silently produces an app with no push. Symptom: nobody gets phone banners, but
+   the in-app bell still works.
+2. **Are the three Vault secrets still there?** Run the `vault.secrets` query in
+   section 4. If `push_dispatch_url` or `push_dispatch_token` is missing, the
+   database trigger skips quietly — no error anywhere.
+3. **Is the Firebase project still active?** Firebase Console → check the project
+   and that the service account has not been disabled or its key revoked.
+4. **Look at the function's logs.** Supabase → **Edge Functions → dispatch_push →
+   Logs**. It answers with a reason:
+   - `skipped: no_provider` → the `fcm_service_account` secret is missing.
+   - `skipped: no_tokens` → that user's phone never registered (they may not have
+     granted the notification permission, or have not logged in since install).
+   - `skipped: muted` → the user turned notifications off in their own settings.
+   - `401` → the `push_dispatch_token` in the Vault no longer matches.
+5. **Did the user allow notifications?** Android 13 and newer ask permission. A
+   user who declined gets nothing until they re-enable it in Android settings.
+
+### A known cosmetic issue
+
+Notifications arrive in the pull-down shade but do **not** pop up as a banner over
+the screen. The Android notification channel `alnujom_notifications` is never
+created with "high importance", so Android uses a quiet default. Notifications
+still deliver and still open the right screen. Fixing it is a small developer
+task.
+
+---
+
+## 7. Shipping a new version
+
+Two things must happen, in this order. Getting them backwards tells everyone an
+update exists before it is downloadable.
+
+### Step 1 — Build the app
+
+On the build machine, from the project folder:
+
+```bash
+flutter build apk --release \
+  --split-per-abi \
+  --obfuscate --split-debug-info=build/symbols \
+  --dart-define-from-file=.env.json
+```
+
+- `--dart-define-from-file=.env.json` is **mandatory**. Without it the app cannot
+  reach Supabase.
+- `--split-per-abi` produces one file per phone type instead of one giant file.
+  Take **`app-arm64-v8a-release.apk`** — about **38 MB** instead of ~90 MB. That
+  difference matters a great deal on mobile data. It covers essentially every
+  phone in use today.
+- `--obfuscate` makes the app harder to copy. Keep the `build/symbols` folder
+  somewhere safe (out of the repository) — without it, crash reports from this
+  build are unreadable.
+
+Before you hand the file out, **install it on a real phone and open it.** Check
+the icon and splash look right, log in, and browse.
+
+### Step 2 — Post it to Telegram
+
+Upload the APK to the Telegram channel as a **file attachment**, and copy the
+**post URL**.
+
+### Step 3 — Update the version manifest
+
+The app checks a small file on Supabase Storage once per launch and shows an
+"Update available" prompt if the file says a newer version exists.
+
+Supabase dashboard → **Storage** → bucket **`app-release`** → folder **`android`**
+→ replace **`latest.json`**.
+
+Its shape (the template lives at `docs/release/version-manifest.example.json`):
+
+```json
+{
+  "latest_version": "1.1.0",
+  "latest_build": 2,
+  "min_supported_version": null,
+  "download": {
+    "telegram_url": "https://t.me/YOUR_CHANNEL/123",
+    "website_url": null
+  },
+  "release_notes": {
+    "ar": "تحسينات على البحث وسرعة أعلى.",
+    "en": "Search improvements and better speed."
+  }
+}
+```
+
+- `latest_version` / `latest_build` must match the `version:` line in
+  `pubspec.yaml` for the build you just posted (currently `1.1.0+2` → `"1.1.0"`
+  and `2`).
+- `telegram_url` is the post URL from step 2. This is what the **Update** button
+  opens.
+- `release_notes` shows inside the prompt. Write the Arabic one; it is what most
+  users read.
+
+### Step 4 — Check it
+
+Open the app on a phone still running the old version. You should see the update
+prompt on a cold start (fully close the app first — it checks once per launch).
+Tap **Update** and confirm Telegram opens on the right post.
+
+> **If the manifest is wrong or unreachable, nothing bad happens** — the app
+> silently skips the check. A broken manifest cannot break the app; it just means
+> nobody is told about the update.
+
+### The order that matters
+
+Manifest **last**. If you update `latest.json` before the APK is on Telegram,
+every user is prompted to update and the Update button takes them to nothing.
+
+---
+
+## 8. Maintenance mode — taking the app down safely
+
+This is your emergency brake. Turn it on and every user sees a polite
+"we'll be back" screen in their own language instead of a broken app. Use it
+when you are fixing data, when something is badly wrong, or during a risky
+change.
+
+### Turning it on
+
+**From inside the app** (the normal way): log in as an admin with the settings
+permission → **Admin → Settings** → the **Maintenance mode** switch. Write a
+short message in Arabic and English explaining what is happening and roughly when
+you will be back. Save.
+
+**From the Supabase dashboard** (if the app itself is the problem) → SQL Editor:
+
+```sql
+select public.set_app_setting(
+  'maintenance_mode',
+  '{"on": true, "message": {"ar": "نقوم بأعمال صيانة، نعود قريباً.", "en": "We are doing maintenance, back shortly."}}'::jsonb
+);
+```
+
+### Turning it off
+
+```sql
+select public.set_app_setting(
+  'maintenance_mode',
+  '{"on": false, "message": {"ar": null, "en": null}}'::jsonb
+);
+```
+
+### What you need to know
+
+- **The app notices on launch and when it comes back to the foreground** — not
+  instantly. A user already deep inside a screen may keep going for a minute or
+  two. Do not treat it as an instant kill switch.
+- **It is not a security control.** It hides the app's screens; it does not stop
+  the database. If you need to actually block access, that is a different
+  conversation with your developer.
+- **Every change is recorded.** Who flipped it and when is written to the audit
+  log automatically.
+- **The `set_app_setting` call refuses anyone without the settings permission** —
+  running it as yourself in the SQL Editor works because the SQL Editor runs with
+  elevated rights.
+
+### The other settings on that screen
+
+The same `app_settings` table holds seven more values you can change without a
+new app build:
+
+| Setting | What it does |
+|---|---|
+| `default_language` | Language a brand-new account starts in (`"ar"`) |
+| `default_currency` | Currency a brand-new account starts in (`"SYP"`) |
+| `default_publisher_name_visibility` | Whether a new listing shows the seller's name by default |
+| `default_location_visibility` | Whether a new listing's map pin is exact or approximate by default (`"approximate"`) |
+| `support_contact` | The phone / WhatsApp / email shown on the About and maintenance screens |
+| `terms_url` | Link to your terms of service |
+| `privacy_url` | **Link to your privacy policy** — set this once you host it (see `docs/legal/README.md`) |
+
+Changing a default only affects **new** accounts and **new** listings. Existing
+ones keep what they had.
+
+---
+
+## 9. The project is paused — how to restore it
+
+Supabase's **free plan pauses a project after about 7 days with no activity.**
+When that happens the app stops working completely — every screen fails to load,
+logins fail, nothing recovers on its own.
+
+You have chosen to stay on the free plan and prevent this with the keep-alive
+robot (section 10) rather than upgrading. But if it ever does pause:
+
+### Symptoms
+
+- The app loads but every list is empty or shows a connection error.
+- Login fails for everyone, including you.
+- The keep-alive robot on GitHub turns red and emails you.
+- The Supabase dashboard shows the project as **Paused** / **Inactive**.
+
+### Restoring it
+
+1. Go to <https://supabase.com/dashboard> and open the **AlNujom** project.
+2. You will see a banner saying the project is paused, with a **Restore project**
+   button. Click it.
+3. Wait. Restoring typically takes a few minutes; a large project can take
+   longer. The dashboard shows progress.
+4. When it says active, open the app and check that listings load and you can log
+   in.
+5. **Check the keep-alive robot.** GitHub → repository `MHekmatF/alnujom` →
+   **Actions** tab → **supabase keep-alive**. If its recent runs are red, that is
+   why the project paused. Fix the cause (usually a missing or wrong repository
+   secret — see section 10) and click **Run workflow** to confirm it goes green.
+
+### Things to know
+
+- **Your data is not deleted when a project pauses.** It is preserved and comes
+  back with the restore.
+- A project left paused for a very long time may need Supabase support to bring
+  back. Do not leave it paused for months.
+- While paused, **nothing works** — not the app, not push, not the admin screens.
+  There is no partial degradation.
+
+### If it keeps happening
+
+The keep-alive robot is not running. Either its schedule was disabled (GitHub
+switches off scheduled jobs in a repository with no activity for 60 days and
+emails the owner), or its repository secrets are missing. Both are covered next.
+
+---
+
+## 10. The keep-alive robot
+
+`.github/workflows/supabase-keepalive.yml` is a small GitHub robot that makes one
+tiny read from the database **every Monday, Wednesday and Friday**. That counts
+as activity, so Supabase never decides the project is idle. Longest gap between
+pings: about 3 days — comfortably inside the ~7-day window.
+
+It is also an early-warning alarm: if Supabase cannot be reached, the run turns
+**red** and GitHub emails you. A red run is worth looking at the same day.
+
+### One-time setup — two repository secrets
+
+GitHub → repository **`MHekmatF/alnujom`** → **Settings** → **Secrets and
+variables** → **Actions** → **New repository secret**. Add both:
+
+| Secret name | Where to get the value |
+|---|---|
+| `SUPABASE_URL` | Supabase → Project Settings → Data API → **Project URL**. Looks like `https://hczsgceagommznjaohyk.supabase.co` — no trailing slash. |
+| `SUPABASE_ANON_KEY` | Same page → Project API keys → the **anon / public** key. This is the same key already inside the app. |
+
+Use the **anon** key. **Never** put the `service_role` master key into GitHub.
+
+### Running it by hand
+
+GitHub → **Actions** tab → **supabase keep-alive** → **Run workflow**. Useful
+right after you set the secrets, and any time you want to check the project is
+alive.
+
+### If it turns red
+
+1. Open the failed run and read the last lines. It prints the HTTP status.
+2. **Project paused** → restore it (section 9).
+3. **HTTP 401** → the anon key secret is wrong or was rotated. Copy it again
+   from Supabase and update the GitHub secret.
+4. **Nothing reachable at all** → check <https://status.supabase.com>. If
+   Supabase is having an outage, wait; the next scheduled run will go green.
+5. **"Missing repository secrets"** → you have not added them yet.
+
+### One thing to watch
+
+GitHub **switches off scheduled robots in a repository with no pushes for 60
+days** and emails the owner. If development goes quiet for two months, go to the
+Actions tab and re-enable the workflow — otherwise the pings stop and Supabase
+pauses.
+
+---
+
+## 11. First-30-days checklist
+
+### Week 1 — the team and the safety nets
+
+- [ ] **Log in as super-admin** and confirm you see the admin section (section 1).
+- [ ] **Set the password-reset URLs** in Supabase and test one real reset
+      (section 2).
+- [ ] **Add the two GitHub secrets and run the keep-alive robot by hand** — watch
+      it go green (section 10). Do this early; it is what stops the app dying
+      after a quiet week.
+- [ ] **Save all the secrets in a password manager**: the keystore file and its
+      passwords, `.env.admin.json`'s master key, the GlitchTip DSN, and the five
+      operator Vault secrets (section 4). Losing the keystore is unrecoverable.
+- [ ] **Confirm the crash inbox works** — ask your builder to send a test crash
+      and confirm it appears in GlitchTip. If GlitchTip stays empty, `SENTRY_DSN`
+      is blank or wrong.
+- [ ] **Confirm push works on a real phone** — log in, have someone approve a
+      listing, and check the banner arrives (section 6).
+- [ ] **Enroll your moderators** via the in-app **Roles** screen. Keep
+      super-admin to you plus one backup.
+- [ ] **Write down a backup super-admin** so someone else can get in if you lose
+      your phone.
 
 ### Weeks 1–4 — run the queues
 
-- [ ] **Approve (or reject) new seller accounts** as they come in. A seller
-      cannot post until both their **account** and their **publisher** status are
-      approved — both are done from the admin screens.
-- [ ] **Approve (or reject) listings** before they go public. Nothing a seller
-      submits is visible to buyers until an admin approves it.
-- [ ] **Work the reports queue.** When buyers report a bad listing, resolve it
-      from the admin **Reports** screen.
-- [ ] **Watch the crash inbox (GlitchTip) a few times a week.** A sudden spike
-      after a new release means something broke — loop in your developer with the
-      report.
-- [ ] **Glance at the Supabase logs** if something seems off. Supabase dashboard
-      → **Logs** lets you see database and login activity; **Authentication →
+- [ ] **Approve or reject new seller accounts.** A seller cannot post until both
+      their **account** and their **publisher** status are approved.
+- [ ] **Approve or reject listings** before they go public.
+- [ ] **Work the reports queue** from the admin **Reports** screen.
+- [ ] **Watch GlitchTip a few times a week.** A spike after a release means
+      something broke — send the report to your developer.
+- [ ] **Watch the keep-alive robot's emails.** Red means look now.
+- [ ] **Glance at Supabase → Logs** if something seems off; **Authentication →
       Users** shows recent sign-ups.
 
-### Before the month is out — protect your data and your keys
+### Before the month is out
 
-- [ ] **Confirm database backups are on, and do one restore drill.**
-      Supabase dashboard → **Database → Backups**. Paid plans take **daily
-      automatic backups**; confirm yours are running and note how many days are
-      retained. Once, practice the restore path (Supabase's
-      **Point-in-Time Recovery** / restore screen) so a real emergency isn't your
-      first time. If you are on a plan without automatic backups, ask your
-      developer to schedule a manual export.
-- [ ] **Rotate your secrets once you're confident the team is stable.**
-      In **Supabase → Project Settings → API**, you can roll keys; the
-      **service-role (master) key** is the important one. After rotating it, the
-      new key must be put back into `.env.admin.json` on the build machine (it is
-      never shipped in the app). Rotate immediately, not on schedule, if you ever
-      suspect a leak or when a person with access leaves the team.
+- [ ] **Confirm backups and do one restore drill.** Supabase → **Database →
+      Backups**. **The free plan does not include automatic daily backups.** If
+      you are staying on free, arrange a manual export on a schedule with your
+      developer — otherwise a mistake is permanent. Practise the restore once, so
+      an emergency is not your first attempt.
+- [ ] **Host the privacy policy and set `privacy_url`** in the admin settings
+      (see `docs/legal/README.md`). Required before Google Play, and good
+      practice regardless.
+- [ ] **Turn on leaked-password protection** — Supabase → Authentication →
+      Passwords → "Check against HaveIBeenPwned". Thirty seconds; blocks
+      passwords known from public breaches.
+- [ ] **Restrict the Firebase Android key** — Google Cloud Console → the `AIza…`
+      key → restrict to package `com.alnujom.app` plus your release signing
+      fingerprint, and to the Firebase/FCM APIs only.
 - [ ] **Review who has admin/super-admin** and remove anyone who no longer needs
-      it (in the app's **Roles** screen).
+      it.
+- [ ] **Rotate the master key** once the team is stable — Supabase → Project
+      Settings → API. Put the new value into `.env.admin.json`. Rotate
+      *immediately*, not on schedule, if you suspect a leak or someone with
+      access leaves.
 
 ---
 
-## 5. Parked / unfinished items — read before you launch wide
+## 12. Known gaps and where the truth lives
 
-A small number of items were intentionally left for later. They will **not**
-stop the app from running, but you should know they exist. The authoritative,
-always-up-to-date list lives in the release dossier:
+The authoritative, always-current list of what is finished and what is not lives
+in the release dossier:
 
-➡️ **`docs/release/v1.0.0.md`**
+➡️ **[`docs/release/v1.0.0.md`](../release/v1.0.0.md)**
 
-That file tracks, among other things:
-- **Telegram distribution** — the channel where the app's installable file is
-  posted, and the "an update is available" prompt that points users to it.
-- **Finishing the password-reset link** — today a user can request a reset, but
-  completing it from the emailed link isn't wired up yet; until it is, use the
-  admin "Change password" workaround in Section 2.
-- **Cold-start performance check** on a real low-end phone.
-- **Two-device checks** carried over from earlier testing.
-- **Branding** — the current launcher icon/splash may still be a placeholder
-  star; confirm the real logo is in place before any wide release.
+At the time of writing, the headline items are:
 
-When in doubt about whether something is finished, that document is the source of
-truth. Keep it updated as you close items out.
+- **The Telegram channel** — the one thing still blocking distribution
+  (section 7).
+- **A signed `1.1.0+2` build has not been recorded as verified.** The app has
+  changed enormously since the `1.0.0` checks. Re-walk the basics before handing
+  the file out.
+- **Two open security items**, neither of which blocks launch: a signed-up user
+  could hand-craft a raw request to read a property's exact map pin; and a
+  phone-number lookup reveals the real email for three non-end-user accounts.
+  Both are described precisely in
+  [`docs/qa/e2e-2026-07-16/SECURITY_AUDIT.md`](../qa/e2e-2026-07-16/SECURITY_AUDIT.md).
+- **Phone numbers are not verified by SMS** — there is no reliable SMS gateway
+  for the region, so someone can register a number they do not own. Verify
+  numbers manually in admin where it matters.
+- **Push notifications do not pop up as banners**, only into the pull-down shade
+  (section 6).
+- **Two-device checks** carried over from earlier phases are still unverified.
+
+**Branding is done** — the placeholder blue star described in older versions of
+this document was replaced in Phase 033 by the "orbit" emblem (icon and splash).
+Ignore any note still warning about the star.
+
+**For Google Play**, see [`docs/release/google-play-readiness.md`](../release/google-play-readiness.md).
+**For the privacy policy**, see [`docs/legal/README.md`](../legal/README.md).
 
 ---
 
-*Operator handover playbook. Pair this with `docs/release/v1.0.0.md` (release
-status + parked items) and `docs/RUNBOOK.md` (record of one-time dashboard
-settings already applied). When you change a Supabase dashboard setting, note it
-in the RUNBOOK so the next person knows.*
+*Operator handover playbook. Pair with `docs/release/v1.0.0.md` (what is verified
+and what is open) and `docs/RUNBOOK.md` (record of one-time dashboard settings
+already applied). Whenever you change a Supabase dashboard setting, write it into
+the RUNBOOK so the next person knows.*
