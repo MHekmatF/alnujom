@@ -87,7 +87,21 @@ const _authOnlyPaths = {'/login', '/register', '/reset-password'};
 // prefix check covers the deep-link entry case per Q4=D.
 // Phase 23 FC: `/maintenance` (the gate target) and `/about` (the public
 // about/support surface) are anonymous-readable — never bounce them to /login.
-const _publicPaths = {'/', '/onboarding', '/splash', '/maintenance', '/about'};
+// Phase 14 FR-015 + SC-008 and Phase 15 ("anonymous-accessible, no auth gate on
+// map viewing"): `/search` and `/map` are anonymous-readable too. They were
+// missed when the bottom-nav shell was introduced — Phase 15 shipped before any
+// shell existed — which left a guest tapping the Search/Map tab silently
+// ejected to /login. The map's whole server-side jitter mechanism exists to
+// serve anonymous clients, so gating the screen contradicted the backend.
+const _publicPaths = {
+  '/',
+  '/onboarding',
+  '/splash',
+  '/maintenance',
+  '/about',
+  '/search',
+  '/map',
+};
 
 String? _redirectIfProtected(String path) {
   if (_authOnlyPaths.contains(path) || _publicPaths.contains(path)) return null;
