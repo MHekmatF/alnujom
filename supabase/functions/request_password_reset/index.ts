@@ -18,6 +18,13 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "@supabase/supabase-js";
 
+// Spec 005 D-01 — where GoTrue sends the browser after it verifies the recovery
+// token. Must match the Android intent-filter on MainActivity
+// (scheme `alnujom`, host `auth`, path `/reset-password`) AND be present in
+// Supabase Dashboard → Authentication → URL Configuration → Redirect URLs,
+// otherwise /auth/v1/verify answers `{"error":"requested path is invalid"}`.
+const RESET_REDIRECT_URL = "alnujom://auth/reset-password";
+
 // ─── Phone normalization (TS port of lib/shared/domain/value_objects/phone_number.dart) ───
 // The Dart and TS implementations MUST agree on the canonical form.
 function normalizeToE164(raw: string): string | null {
@@ -110,6 +117,7 @@ Deno.serve(async (req: Request) => {
       const { error: linkErr } = await admin.auth.admin.generateLink({
         type: "recovery",
         email: data.email,
+        options: { redirectTo: RESET_REDIRECT_URL },
       });
       if (linkErr) {
         log("generate_link_failed", { code: linkErr.status });

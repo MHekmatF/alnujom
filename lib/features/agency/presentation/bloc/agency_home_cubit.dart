@@ -133,10 +133,17 @@ class AgencyHomeCubit extends Cubit<AgencyHomeState> {
 
     // No owned agency, no active membership — surface any PENDING invitations so
     // the invitee can Accept/Decline from the hub (the create form alone left
-    // them with no path to Accept). Invitation read failure is non-fatal: fall
-    // back to the plain create form.
+    // them with no path to Accept).
     final invResult = await _loadInvitations();
     if (isClosed) return;
+    // B-4 follow-up: a FAILED invitation read must NOT fall through to the
+    // create-agency form — that is exactly the "invitee lands on create an
+    // agency" dead-end, and it silently mis-states the user's situation. Treat
+    // it like the two reads above and surface the error (the user can retry).
+    if (invResult is FailureResult<List<AgencyMember>>) {
+      emit(const AgencyHomeError());
+      return;
+    }
     if (invResult is Success<List<AgencyMember>> && invResult.value.isNotEmpty) {
       final enriched = <AgencyInvitation>[];
       for (final m in invResult.value) {
@@ -145,10 +152,7 @@ class AgencyHomeCubit extends Cubit<AgencyHomeState> {
         final agency =
             agencyResult is Success<Agency?> ? agencyResult.value : null;
         enriched.add(
-          AgencyInvitation(
-            membership: m,
-            agencyName: agency?.name ?? m.agencyId,
-          ),
+          AgencyInvitation(membership: m, agencyName: agency?.name),
         );
       }
       emit(AgencyHomeInvited(enriched));

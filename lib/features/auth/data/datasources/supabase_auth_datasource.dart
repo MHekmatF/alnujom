@@ -79,6 +79,25 @@ class SupabaseAuthDataSource {
     );
   }
 
+  /// Spec 005 D-01 — sets a new password on the CURRENTLY signed-in user.
+  ///
+  /// Used to complete a password reset after the `alnujom://auth/reset-password`
+  /// recovery deep link established a session (GoTrue then emits
+  /// [supabase.AuthChangeEvent.passwordRecovery]). Throws when no session is
+  /// active or the password is rejected server-side; the repository maps the
+  /// throw through [mapAuthException].
+  Future<void> updatePassword({required String newPassword}) async {
+    await _auth.updateUser(supabase.UserAttributes(password: newPassword));
+  }
+
+  /// Whether the incoming auth-state event signals that a password-recovery
+  /// deep link was processed and a recovery session is now active.
+  ///
+  /// Keeps the `AuthChangeEvent` enum inside the data layer (Constitution IX):
+  /// the repository asks this instead of importing the Supabase type itself.
+  bool isPasswordRecoveryEvent(supabase.AuthState state) =>
+      state.event == supabase.AuthChangeEvent.passwordRecovery;
+
   /// Fetches the most recent rejection reason for the current user, or null.
   /// Used by the rejected screen to show the admin's reason.
   Future<String?> fetchMyRejectionReason({required String userId}) async {

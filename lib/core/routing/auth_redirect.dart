@@ -61,6 +61,15 @@ FutureOr<String?> authRedirect(
   final authState = authBloc.state;
   final path = state.uri.path;
 
+  // Spec 005 D-01 — the password-reset COMPLETION screen is reachable in every
+  // auth state. Supabase's recovery link mints a real session, so AuthBloc
+  // resolves to Authenticated / PendingApproval / Rejected / Suspended the
+  // moment the link is processed; without this bypass the account-status
+  // redirects (or the `_authOnlyPaths` → home rule) would throw the user off
+  // the "choose a new password" screen before they could finish. The page
+  // itself handles the no-session case with an "expired link" state.
+  if (path == AppRoutes.resetPasswordComplete) return null;
+
   return switch (authState) {
     Unauthenticated() => _redirectIfProtected(path),
     Authenticating() => null,

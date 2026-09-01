@@ -30,6 +30,16 @@ class AuthRepositoryImpl implements AuthRepository {
     _sub = _authDs.authStateChanges.listen(
       (state) {
         _sessionController.add(state.session?.toDomain());
+        // Spec 005 D-01 — a recovery deep link was exchanged for a session.
+        // Held when nobody is listening yet (cold launch straight from the
+        // email link) and replayed to the first subscriber.
+        if (_authDs.isPasswordRecoveryEvent(state)) {
+          if (_passwordRecoveryController.hasListener) {
+            _passwordRecoveryController.add(null);
+          } else {
+            _pendingPasswordRecovery = true;
+          }
+        }
       },
       onError: (Object error, StackTrace st) {
         _logger.warning(
@@ -58,8 +68,31 @@ class AuthRepositoryImpl implements AuthRepository {
   final _sessionController = StreamController<Session?>.broadcast();
   StreamSubscription<supabase.AuthState>? _sub;
 
+  /// Spec 005 D-01 — set when a `passwordRecovery` event arrives before any
+  /// widget has subscribed (cold launch from the email link). Replayed by
+  /// [_passwordRecoveryController]'s `onListen` and then cleared.
+  bool _pendingPasswordRecovery = false;
+
+  late final StreamController<void> _passwordRecoveryController =
+      StreamController<void>.broadcast(
+        onListen: () {
+          if (!_pendingPasswordRecovery) return;
+          _pendingPasswordRecovery = false;
+          // Deliver on a microtask: a broadcast controller does not guarantee
+          // delivery of an event added from inside its own `onListen`.
+          scheduleMicrotask(() {
+            if (!_passwordRecoveryController.isClosed) {
+              _passwordRecoveryController.add(null);
+            }
+          });
+        },
+      );
+
   @override
   Stream<Session?> get sessionStream => _sessionController.stream;
+
+  @override
+  Stream<void> get passwordRecoveryStream => _passwordRecoveryController.stream;
 
   @override
   Session? get currentSession => _authDs.currentSession?.toDomain();
@@ -198,6 +231,29 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Result<void>> updatePassword({required String newPassword}) async {
+    // No session ⇒ the recovery link expired, was already consumed, or the app
+    // was opened straight at the completion route. Surface a distinct message
+    // key so the UI can offer "request a new link" (the codebase's established
+    // idiom — see `UnknownAuthError('phone_required')` handling in login_page).
+    if (_authDs.currentSession == null) {
+      return const FailureResult(UnknownAuthError('recovery_session_missing'));
+    }
+    try {
+      await _authDs.updatePassword(newPassword: newPassword);
+      return const Success(null);
+    } on Object catch (error, stackTrace) {
+      _logger.warning(
+        'updatePassword failed.',
+        error: error,
+        stackTrace: stackTrace,
+        tag: _tag,
+      );
+      return FailureResult(_authDs.mapAuthException(error, stackTrace));
+    }
+  }
+
+  @override
   Future<String?> fetchRejectionReason({required String userId}) async {
     try {
       return await _authDs.fetchMyRejectionReason(userId: userId);
@@ -217,5 +273,6 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> dispose() async {
     await _sub?.cancel();
     await _sessionController.close();
+    await _passwordRecoveryController.close();
   }
 }

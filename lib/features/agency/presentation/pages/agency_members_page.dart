@@ -215,7 +215,11 @@ class _PendingInvitations extends StatelessWidget {
                       Expanded(
                         child: Text(
                           l10n.agency_invitation_pending_from(
-                            invite.agencyName,
+                            // Never render the raw agency UUID — `v_agencies`
+                            // hides a not-yet-approved agency from a PENDING
+                            // invitee, so the name is often unresolvable.
+                            invite.agencyName ??
+                                l10n.agency_invitation_unnamed_agency,
                           ),
                           style: styles.bodyMedium,
                         ),

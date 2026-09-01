@@ -339,6 +339,72 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get reset_password_new_title => _resolve(
+    'reset_password_new_title',
+    (loc) => loc.reset_password_new_title,
+  );
+
+  @override
+  String get reset_password_new_subtitle => _resolve(
+    'reset_password_new_subtitle',
+    (loc) => loc.reset_password_new_subtitle,
+  );
+
+  @override
+  String get reset_password_new_label => _resolve(
+    'reset_password_new_label',
+    (loc) => loc.reset_password_new_label,
+  );
+
+  @override
+  String get reset_password_confirm_label => _resolve(
+    'reset_password_confirm_label',
+    (loc) => loc.reset_password_confirm_label,
+  );
+
+  @override
+  String get reset_password_mismatch =>
+      _resolve('reset_password_mismatch', (loc) => loc.reset_password_mismatch);
+
+  @override
+  String get reset_password_save =>
+      _resolve('reset_password_save', (loc) => loc.reset_password_save);
+
+  @override
+  String get reset_password_success_title => _resolve(
+    'reset_password_success_title',
+    (loc) => loc.reset_password_success_title,
+  );
+
+  @override
+  String get reset_password_success_body => _resolve(
+    'reset_password_success_body',
+    (loc) => loc.reset_password_success_body,
+  );
+
+  @override
+  String get reset_password_continue =>
+      _resolve('reset_password_continue', (loc) => loc.reset_password_continue);
+
+  @override
+  String get reset_password_link_expired_title => _resolve(
+    'reset_password_link_expired_title',
+    (loc) => loc.reset_password_link_expired_title,
+  );
+
+  @override
+  String get reset_password_link_expired_body => _resolve(
+    'reset_password_link_expired_body',
+    (loc) => loc.reset_password_link_expired_body,
+  );
+
+  @override
+  String get reset_password_request_new_link => _resolve(
+    'reset_password_request_new_link',
+    (loc) => loc.reset_password_request_new_link,
+  );
+
+  @override
   String get phone_required =>
       _resolve('phone_required', (loc) => loc.phone_required);
 
@@ -3496,6 +3562,18 @@ final class _DebugAppLocalizations extends AppLocalizations {
   String agency_invitation_pending_from(String agencyName) => _resolve(
     'agency_invitation_pending_from',
     (loc) => loc.agency_invitation_pending_from(agencyName),
+  );
+
+  @override
+  String get agency_invitation_unnamed_agency => _resolve(
+    'agency_invitation_unnamed_agency',
+    (loc) => loc.agency_invitation_unnamed_agency,
+  );
+
+  @override
+  String get agency_invitations_page_intro => _resolve(
+    'agency_invitations_page_intro',
+    (loc) => loc.agency_invitations_page_intro,
   );
 
   @override
