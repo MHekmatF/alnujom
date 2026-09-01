@@ -959,12 +959,12 @@ Each component in § 5 maps to a single Dart file under `lib/core/widgets/<compo
 
 ### 10.4 State management
 
-- **BLoC / Cubit** per screen, per [Constitution Principle IV](`.specify/memory/constitution.md`).
+- **BLoC / Cubit** per screen, per [Constitution Principle IV](../../.specify/memory/constitution.md).
 - Each screen has a `<Screen>State` sealed class: `Initial`, `Loading`, `Success(data)`, `Empty`, `Failure(message)`. Map UI states 1:1 from this — no ad-hoc booleans.
 
 ### 10.5 Routing
 
-- `go_router` declarative routes — see [Implementation Plan §2](IMPLEMENTATION_PLAN.md). Every screen has a stable path; deep links into Listing Details and Office Profile must work.
+- `go_router` declarative routes — see [Implementation Plan §2](../IMPLEMENTATION_PLAN.md). Every screen has a stable path; deep links into Listing Details and Office Profile must work.
 
 ### 10.6 Localization
 
