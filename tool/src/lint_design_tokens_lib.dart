@@ -38,6 +38,10 @@ const Set<String> _defaultAllowedFiles = {
   'lib/core/theme/color_palette.dart',
   'lib/core/theme/app_theme.dart',
   'lib/core/theme/gradients.dart',
+  // The last-resort ErrorWidget. Must not reach for AppColors/AppTextStyles:
+  // the theme may be exactly what threw, and a throw inside the error
+  // handler loops. See the doc comment on AppErrorView.
+  'lib/core/widgets/app_error_view.dart',
 };
 
 final RegExp _rawColor = RegExp(r'\bColor\(\s*0x[0-9A-Fa-f]+');
