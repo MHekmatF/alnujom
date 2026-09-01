@@ -1,32 +1,54 @@
-// Phase 5 (spec/005-auth-profile R-07/R-16) — request_password_reset Edge Function.
-// Implements account-enumeration-resistant reset-password flow per FR-017.
+// request_password_reset — tell the caller what actually happened.
 //
-// Contract (per contracts/request-password-reset-edge-fn.md):
+// This function used to answer `{ok: true}` for every phone number, so an
+// observer could not learn who has an account. That protection was traded away
+// deliberately (owner's decision, 2026-09-01): most accounts here are
+// phone-only and can never receive a reset mail, so "check your email" was a
+// lie for the majority of users, and the screen had no way to tell anyone what
+// to do instead. It now reports one of three outcomes and the UI acts on each.
+//
+// It also used to call `auth.admin.generateLink()`, which GENERATES a recovery
+// link and returns it — it does not send anything. Nothing was ever mailed. The
+// send now goes through GoTrue's own `/auth/v1/recover` endpoint, which is the
+// call that actually dispatches.
+//
 //   POST /functions/v1/request_password_reset
-//   Body in: { phone: string }
-//   Body out (ALWAYS, for parseable bodies): { ok: true }, status 200
-//   Body out (malformed):                    { error: "invalid_request" }, status 400
+//   in : { phone: string }
+//   out: { status: "sent" | "no_email" | "not_found" }   200
+//        { error: "invalid_request" }                    400 (unparseable body)
+//        { error: "invalid_request" }                    405 (not POST)
 //
-// The function looks up profiles.email by phone via the service-role client (bypassing RLS),
-// conditionally calls auth.admin.generateLink({type:'recovery'}) if a real email is on file,
-// and returns identical {ok: true} for ALL three scenarios:
-//   - phone unknown
-//   - phone known with email
-//   - phone known without email
-// — so a network observer cannot distinguish them from the response body.
+// A malformed or unparseable phone answers `not_found` rather than an error —
+// there is no account to find, and the screen already says so usefully.
+//
+// KEEP THIS FILE IN SYNC WITH WHAT IS DEPLOYED. This source drifted from
+// production once already: the deployed function was updated and the repo was
+// not, so a redeploy from the repo would silently have restored the version
+// that mails nothing. The response contract below was re-derived by probing the
+// live function on 2026-09-02 — method guard, body guard, unparseable phone,
+// empty phone, and unknown phone in +963/local/bare forms all confirmed. The
+// three branches that require a real account (`sent`, `no_email`, and a
+// send failure) could not be exercised without mailing a real person.
+//
+// MAIL DELIVERY IS A SEPARATE PROBLEM: on the free plan Supabase's built-in
+// SMTP is for development only — heavily rate-limited and not a real sender.
+// `sent` means GoTrue accepted the request, NOT that mail reached an inbox.
+// Configure a custom SMTP provider under Authentication → Emails before relying
+// on this in production. See docs/ops/HANDOVER.md.
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "@supabase/supabase-js";
 
-// Spec 005 D-01 — where GoTrue sends the browser after it verifies the recovery
-// token. Must match the Android intent-filter on MainActivity
-// (scheme `alnujom`, host `auth`, path `/reset-password`) AND be present in
-// Supabase Dashboard → Authentication → URL Configuration → Redirect URLs,
-// otherwise /auth/v1/verify answers `{"error":"requested path is invalid"}`.
+// Where GoTrue sends the browser after it verifies the recovery token. Must
+// match the Android intent-filter on MainActivity (scheme `alnujom`, host
+// `auth`, path `/reset-password`) AND appear in Supabase Dashboard →
+// Authentication → URL Configuration → Redirect URLs. GoTrue rejects an
+// unlisted address outright, so an unlisted value means NO mail at all — which
+// is why the send below retries without it rather than giving up.
 const RESET_REDIRECT_URL = "alnujom://auth/reset-password";
 
-// ─── Phone normalization (TS port of lib/shared/domain/value_objects/phone_number.dart) ───
-// The Dart and TS implementations MUST agree on the canonical form.
+// TS port of lib/shared/domain/value_objects/phone_number.dart. The two
+// implementations MUST agree on the canonical form.
 function normalizeToE164(raw: string): string | null {
   const stripped = raw.replace(/[\s\-()\.]/g, "");
   if (stripped.length === 0) return null;
@@ -46,30 +68,67 @@ function normalizeToE164(raw: string): string | null {
   return null;
 }
 
-// ─── Logging helpers (no PII; phone numbers and emails NEVER logged) ───
+// Phone numbers and email addresses are never logged.
 function log(event: string, extra: Record<string, unknown> = {}) {
-  // Edge Function logs are visible via Supabase MCP get_logs (service: edge-function).
   console.log(JSON.stringify({ event, ...extra }));
 }
 
-Deno.serve(async (req: Request) => {
-  // 1. Method guard
-  if (req.method !== "POST") {
-    return new Response(JSON.stringify({ error: "invalid_request" }), {
-      status: 405,
-      headers: { "Content-Type": "application/json" },
+function json(body: unknown, status: number): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
+/// Asks GoTrue to send the recovery mail. Returns true if it accepted.
+async function sendRecoveryMail(
+  supabaseUrl: string,
+  serviceRoleKey: string,
+  email: string,
+): Promise<boolean> {
+  async function post(withRedirect: boolean): Promise<Response> {
+    const url = withRedirect
+      ? `${supabaseUrl}/auth/v1/recover?redirect_to=${
+        encodeURIComponent(RESET_REDIRECT_URL)
+      }`
+      : `${supabaseUrl}/auth/v1/recover`;
+    return await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: serviceRoleKey,
+        Authorization: `Bearer ${serviceRoleKey}`,
+      },
+      body: JSON.stringify({ email }),
     });
   }
 
-  // 2. Parse body
+  const withLink = await post(true);
+  if (withLink.ok) return true;
+
+  // The deep link is not on the allow-list. Send without it rather than sending
+  // nothing — the mail still resets the password, it just lands on the Site URL
+  // instead of opening the app. This log line is how the operator finds out.
+  log("recover_redirect_rejected", { status: withLink.status });
+  const plain = await post(false);
+  if (plain.ok) {
+    log("reset_email_sent_without_deeplink");
+    return true;
+  }
+  log("recover_failed", { status: plain.status });
+  return false;
+}
+
+Deno.serve(async (req: Request) => {
+  if (req.method !== "POST") {
+    return json({ error: "invalid_request" }, 405);
+  }
+
   let body: unknown;
   try {
     body = await req.json();
   } catch {
-    return new Response(JSON.stringify({ error: "invalid_request" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return json({ error: "invalid_request" }, 400);
   }
   if (
     body === null ||
@@ -77,85 +136,57 @@ Deno.serve(async (req: Request) => {
     !("phone" in body) ||
     typeof (body as { phone: unknown }).phone !== "string"
   ) {
-    return new Response(JSON.stringify({ error: "invalid_request" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return json({ error: "invalid_request" }, 400);
   }
-  const rawPhone = (body as { phone: string }).phone;
 
-  // 3. Normalize phone. Failure is treated as "unknown" — uniform 200 response per FR-017.
-  const e164 = normalizeToE164(rawPhone);
-
-  // 4. Privileged Supabase client (service-role; bypasses RLS).
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if (!supabaseUrl || !serviceRoleKey) {
     log("env_missing");
-    return new Response(JSON.stringify({ error: "internal" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return json({ error: "internal" }, 500);
   }
+
+  const e164 = normalizeToE164((body as { phone: string }).phone);
+  if (e164 === null) {
+    log("phone_unparseable");
+    return json({ status: "not_found" }, 200);
+  }
+
+  // Service-role client; bypasses RLS to read the profile behind the phone.
   const admin = createClient(supabaseUrl, serviceRoleKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  // 5. Lookup. If phone is malformed (e164 === null), skip the DB hit but still return uniform 200.
-  if (e164 !== null) {
-    const { data, error } = await admin
-      .from("profiles")
-      .select("user_id, email")
-      .eq("phone", e164)
-      .maybeSingle();
+  const { data, error } = await admin
+    .from("profiles")
+    .select("user_id, email")
+    .eq("phone", e164)
+    .maybeSingle();
 
-    if (error) {
-      log("profile_lookup_error", { code: error.code });
-      // Still return generic success per FR-017.
-    } else if (data && typeof data.email === "string" && data.email.trim().length > 0) {
-      // 6. Real email on file → trigger reset.
-      //
-      // `redirectTo` only works once RESET_REDIRECT_URL is on the project's
-      // Redirect URLs allow-list (Authentication → URL Configuration). GoTrue
-      // rejects an unlisted address outright, which would mean NO mail at all —
-      // strictly worse than the old behaviour of falling back to Site URL.
-      //
-      // So: ask for the deep link, and if that specific call is refused, send
-      // the mail without it rather than sending nothing. The two log lines below
-      // tell the operator which path ran, i.e. whether the allow-list entry is
-      // actually in place.
-      const { error: linkErr } = await admin.auth.admin.generateLink({
-        type: "recovery",
-        email: data.email,
-        options: { redirectTo: RESET_REDIRECT_URL },
-      });
-      if (linkErr) {
-        log("generate_link_redirect_rejected", { code: linkErr.status });
-        const { error: fallbackErr } = await admin.auth.admin.generateLink({
-          type: "recovery",
-          email: data.email,
-        });
-        if (fallbackErr) {
-          log("generate_link_failed", { code: fallbackErr.status });
-          // Still return generic success.
-        } else {
-          // Mail sent, but the link lands on Site URL, not the app. Add
-          // RESET_REDIRECT_URL to the allow-list to complete the flow.
-          log("reset_email_sent_without_deeplink", { user_id: data.user_id });
-        }
-      } else {
-        log("reset_email_sent", { user_id: data.user_id });
-      }
-    } else {
-      log("no_email_on_file");
-    }
-  } else {
-    log("phone_unparseable");
+  if (error) {
+    log("profile_lookup_error", { code: error.code });
+    return json({ status: "not_found" }, 200);
+  }
+  if (!data) {
+    return json({ status: "not_found" }, 200);
   }
 
-  // 7. ALWAYS return uniform 200 + {ok: true} for parseable bodies.
-  return new Response(JSON.stringify({ ok: true }), {
-    status: 200,
-    headers: { "Content-Type": "application/json" },
-  });
+  const email = typeof data.email === "string" ? data.email.trim() : "";
+  if (email.length === 0) {
+    // A real account, but phone-only — there is no mailbox to send to. The
+    // screen routes these users to support instead of promising a mail.
+    log("no_email_on_file", { user_id: data.user_id });
+    return json({ status: "no_email" }, 200);
+  }
+
+  const sent = await sendRecoveryMail(supabaseUrl, serviceRoleKey, email);
+  if (!sent) {
+    // The account exists but we could not get a mail out. From the user's side
+    // the next step is identical to having no email on file — contact support —
+    // so answer the same way rather than claiming a mail is on its way.
+    return json({ status: "no_email" }, 200);
+  }
+
+  log("reset_email_sent", { user_id: data.user_id });
+  return json({ status: "sent" }, 200);
 });

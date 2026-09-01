@@ -140,16 +140,42 @@ Click **Save**. **Site URL does not need changing** — the function supplies th
 return address itself. (If the allow-list rejects the value, or the link still
 fails, add `alnujom://auth/reset-password**` as a second entry.)
 
-### Then redeploy the reset function — required
+### The function itself is already live — do not redeploy blindly
 
-The app side of this does nothing until the updated function is live:
+Verified against production on 2026-09-02: the deployed `request_password_reset`
+is the corrected one. Leave it alone unless you are deliberately shipping a
+change.
 
-```
-supabase functions deploy request_password_reset
-```
+**Why it was broken before:** the old version called `generateLink()`, which
+*generates* a recovery link and hands it back to the caller. It never sends
+anything. That is the whole reason no reset mail ever arrived. It now calls
+GoTrue's `/auth/v1/recover`, which is the call that actually dispatches.
 
-Then note the change in `docs/RUNBOOK.md` (entry T004), which still records the
-old placeholder.
+**One trap to know about:** the deployed function and the copy in the repo drifted
+apart once — production was fixed and the repo was not, so a redeploy from the
+repo would have silently restored the version that mails nothing. They are back
+in sync now. If you ever change this function, deploy from the repo and commit in
+the same breath.
+
+### The reset mail still needs a real mail sender — THIS IS THE REMAINING BLOCKER
+
+Supabase's built-in email service is a development convenience, not a mail
+provider: it is heavily rate-limited (a couple of messages an hour) and Supabase
+states plainly it is not for production use. On that service, most reset mails to
+real users will simply never arrive, and nothing in the app or the logs will look
+wrong — the function will honestly report `sent`, because Supabase accepted the
+request.
+
+`sent` means *Supabase accepted it*, not *it reached an inbox*.
+
+**Fix before launch:** Supabase dashboard → **Authentication → Emails → SMTP
+Settings** → enable custom SMTP. Any free tier will do (Resend, Brevo, and
+SendGrid all have one). You enter the provider's host, port, username and
+password there yourself — those are credentials, so keep them out of the repo and
+out of any chat.
+
+Until that is done, treat password reset as working only for you and anyone else
+on the project team, and fall back to the manual reset below for real users.
 
 ### While you are on that screen, verify two more settings
 
@@ -341,7 +367,7 @@ dashboard → Edge Functions**.
 | `moderate_agency` | Approves or rejects an agency | Same |
 | `resolve_report` | Closes a report from the reports queue | Same |
 | `dispatch_push` | Sends the actual push notification through Firebase | Only the database, using the shared `push_dispatch_token` |
-| `request_password_reset` | Starts a password reset from a phone number | Anyone (deliberately — it answers identically whether or not the number is registered, so nobody can probe which numbers have accounts) |
+| `request_password_reset` | Starts a password reset from a phone number | Anyone. It now answers `sent` / `no_email` / `not_found` so the screen can tell the user what actually happened. That deliberately gives up the old "identical answer for every number" property — see section 2. |
 | `lookup_email_by_phone` | Translates a phone number into the made-up login email at sign-in | Anyone (same enumeration-resistant design) |
 
 **You will rarely touch these.** They are already deployed and running. A
@@ -670,6 +696,8 @@ pauses.
 - [ ] **Log in as super-admin** and confirm you see the admin section (section 1).
 - [ ] **Set the password-reset URLs** in Supabase and test one real reset
       (section 2).
+- [ ] **Turn on custom SMTP** (section 2). Without it, reset mail does not
+      reliably reach real users — and it fails silently, which is the worst kind.
 - [ ] **Add the two GitHub secrets and run the keep-alive robot by hand** — watch
       it go green (section 10). Do this early; it is what stops the app dying
       after a quiet week.
