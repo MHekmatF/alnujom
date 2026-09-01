@@ -188,7 +188,7 @@ Crash reporting **only works if it was enabled when the app build was made**. If
 - **The administrative audit log**, if you were an administrator, because it is an accountability record.
 - Backups may retain your data for a short period until they are rotated out.
 
-**Alternative — if you cannot reach the app** (forgotten password, app removed from your device): write to the address in section 12 from the phone number registered on the account and explicitly ask for deletion. We verify that you own the account and then carry out the same deletion manually.
+**Alternative — if you cannot reach the app** (forgotten password, app removed from your device): write to the address in section 14 from the phone number registered on the account and explicitly ask for deletion. We verify that you own the account and then carry out the same deletion manually.
 
 **Deletion is permanent and cannot be undone.**
 
@@ -203,7 +203,7 @@ Crash reporting **only works if it was enabled when the app build was made**. If
 - **Turn off notifications** from the app's settings or from Android's settings.
 - **Withdraw the location permission** in Android settings at any time.
 
-To exercise any of these, write to the address in section 12. We respond within a reasonable time.
+To exercise any of these, write to the address in section 14. We respond within a reasonable time.
 
 ---
 
