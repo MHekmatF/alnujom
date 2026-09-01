@@ -1,5 +1,5 @@
-// dart format width=80
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// dart format width=80
 
 // **************************************************************************
 // InjectableConfigGenerator
@@ -523,8 +523,12 @@ import '../../features/profile/domain/usecases/load_assigned_roles.dart'
     as _i941;
 import '../../features/profile/domain/usecases/load_pii.dart' as _i363;
 import '../../features/profile/domain/usecases/load_profile.dart' as _i1052;
+import '../../features/profile/domain/usecases/request_account_deletion.dart'
+    as _i231;
 import '../../features/profile/domain/usecases/update_pii.dart' as _i281;
 import '../../features/profile/domain/usecases/update_profile.dart' as _i78;
+import '../../features/profile/presentation/cubit/account_deletion_cubit.dart'
+    as _i617;
 import '../../features/profile/presentation/cubit/profile_cubit.dart' as _i36;
 import '../../features/publisher_dashboard/data/datasources/publisher_analytics_datasource.dart'
     as _i855;
@@ -736,11 +740,14 @@ _i174.GetIt $initGetIt(
   gh.factory<_i676.OverpassNearbyAmenitiesDatasource>(
     () => const _i676.OverpassNearbyAmenitiesDatasource(),
   );
-  gh.factory<_i207.SupabaseListingsDatasource>(
-    () => _i207.SupabaseListingsDatasource(),
-  );
   gh.factory<_i214.SupabaseListingMediaDatasource>(
     () => _i214.SupabaseListingMediaDatasource(),
+  );
+  gh.factory<_i1020.SupabaseListingRevisionDatasource>(
+    () => _i1020.SupabaseListingRevisionDatasource(),
+  );
+  gh.factory<_i207.SupabaseListingsDatasource>(
+    () => _i207.SupabaseListingsDatasource(),
   );
   gh.factory<_i396.ValidateSubmitPayload>(
     () => const _i396.ValidateSubmitPayload(),
@@ -748,9 +755,6 @@ _i174.GetIt $initGetIt(
   gh.factory<_i957.VideoProcessor>(() => _i957.VideoProcessor());
   gh.factory<_i665.SupabaseLocationsDatasource>(
     () => _i665.SupabaseLocationsDatasource(),
-  );
-  gh.factory<_i1020.SupabaseListingRevisionDatasource>(
-    () => _i1020.SupabaseListingRevisionDatasource(),
   );
   gh.singleton<_i373.EnvConfig>(() => const _i373.EnvConfig());
   gh.lazySingleton<_i454.SupabaseClient>(() => supabaseModule.supabaseClient());
@@ -1245,6 +1249,9 @@ _i174.GetIt $initGetIt(
   gh.factory<_i1052.LoadProfile>(
     () => _i1052.LoadProfile(gh<_i894.ProfileRepository>()),
   );
+  gh.factory<_i231.RequestAccountDeletion>(
+    () => _i231.RequestAccountDeletion(gh<_i894.ProfileRepository>()),
+  );
   gh.factory<_i281.UpdatePii>(
     () => _i281.UpdatePii(gh<_i894.ProfileRepository>()),
   );
@@ -1460,6 +1467,12 @@ _i174.GetIt $initGetIt(
   gh.factory<_i937.DeleteGovernorate>(
     () => _i937.DeleteGovernorate(gh<_i704.LocationsRepository>()),
   );
+  gh.factory<_i548.ListAllAreas>(
+    () => _i548.ListAllAreas(gh<_i704.LocationsRepository>()),
+  );
+  gh.factory<_i450.ListAllCities>(
+    () => _i450.ListAllCities(gh<_i704.LocationsRepository>()),
+  );
   gh.factory<_i358.ListAreasForCity>(
     () => _i358.ListAreasForCity(gh<_i704.LocationsRepository>()),
   );
@@ -1486,12 +1499,6 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i1054.UpdateGovernorate>(
     () => _i1054.UpdateGovernorate(gh<_i704.LocationsRepository>()),
-  );
-  gh.factory<_i548.ListAllAreas>(
-    () => _i548.ListAllAreas(gh<_i704.LocationsRepository>()),
-  );
-  gh.factory<_i450.ListAllCities>(
-    () => _i450.ListAllCities(gh<_i704.LocationsRepository>()),
   );
   gh.factory<_i711.ModerationHistoryCubit>(
     () =>
@@ -1533,6 +1540,9 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i957.LoadLatestRatesForBase>(
     () => _i957.LoadLatestRatesForBase(gh<_i505.CurrenciesRepository>()),
   );
+  gh.factory<_i617.AccountDeletionCubit>(
+    () => _i617.AccountDeletionCubit(gh<_i231.RequestAccountDeletion>()),
+  );
   gh.factory<_i181.DeregisterPushToken>(
     () => _i181.DeregisterPushToken(gh<_i6.PushTokenRepository>()),
   );
@@ -1551,11 +1561,11 @@ _i174.GetIt $initGetIt(
   gh.factory<_i705.AddFavorite>(
     () => _i705.AddFavorite(gh<_i212.FavoritesRepository>()),
   );
-  gh.factory<_i1041.LoadFavorites>(
-    () => _i1041.LoadFavorites(gh<_i212.FavoritesRepository>()),
-  );
   gh.factory<_i896.LoadFavoriteIds>(
     () => _i896.LoadFavoriteIds(gh<_i212.FavoritesRepository>()),
+  );
+  gh.factory<_i1041.LoadFavorites>(
+    () => _i1041.LoadFavorites(gh<_i212.FavoritesRepository>()),
   );
   gh.factory<_i828.RemoveFavorite>(
     () => _i828.RemoveFavorite(gh<_i212.FavoritesRepository>()),
@@ -1836,11 +1846,11 @@ _i174.GetIt $initGetIt(
       gh<_i74.InquiriesUnreadCubit>(),
     ),
   );
-  gh.factory<_i991.LoadMyReports>(
-    () => _i991.LoadMyReports(gh<_i808.ReportsRepository>()),
-  );
   gh.factory<_i682.LoadMyReportForListing>(
     () => _i682.LoadMyReportForListing(gh<_i808.ReportsRepository>()),
+  );
+  gh.factory<_i991.LoadMyReports>(
+    () => _i991.LoadMyReports(gh<_i808.ReportsRepository>()),
   );
   gh.factory<_i684.SubmitReport>(
     () => _i684.SubmitReport(gh<_i808.ReportsRepository>()),

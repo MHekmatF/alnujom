@@ -27,6 +27,7 @@ import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/listing_details/presentation/pages/listing_details_page.dart';
 import '../../features/onboarding/presentation/pages/onboarding_page.dart';
 import '../../features/onboarding/presentation/pages/splash_page.dart';
+import '../../features/profile/presentation/pages/account_deletion_page.dart';
 import '../../features/profile/presentation/pages/profile_edit_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/profile/presentation/pages/profile_private_page.dart';
@@ -113,6 +114,8 @@ abstract final class AppRoutes {
   static const profile = '/profile';
   static const profileEdit = '/profile/edit';
   static const profilePrivate = '/profile/private';
+  // Self-serve account deletion (Google Play in-app deletion requirement).
+  static const accountDelete = '/profile/delete-account';
   static const publisherListingsCreate = '/publisher/listings/create';
   static const publisherListingsEdit = '/publisher/listings/:id/edit';
   static const publisherListingsRevisionStatus =
@@ -219,6 +222,8 @@ abstract final class AppRouteNames {
   static const profile = 'profile';
   static const profileEdit = 'profile-edit';
   static const profilePrivate = 'profile-private';
+  // Self-serve account deletion route name.
+  static const accountDelete = 'account-delete';
   static const publisherListingsCreate = 'publisher-listings-create';
   static const publisherListingsEdit = 'publisher-listings-edit';
   static const publisherListingsRevisionStatus =
@@ -540,6 +545,13 @@ GoRouter buildAppRouter({
         path: AppRoutes.profilePrivate,
         name: AppRouteNames.profilePrivate,
         builder: (context, state) => const ProfilePrivatePage(),
+      ),
+      GoRoute(
+        // Self-serve account deletion. Not in `_publicPaths`, so the auth
+        // redirect already bounces signed-out visitors to /login.
+        path: AppRoutes.accountDelete,
+        name: AppRouteNames.accountDelete,
+        builder: (context, state) => const AccountDeletionPage(),
       ),
       GoRoute(
         path: AppRoutes.publisherListingsCreate,

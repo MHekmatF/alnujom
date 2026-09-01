@@ -105,6 +105,17 @@ class SupabaseProfileDataSource {
     );
   }
 
+  // ─── Account deletion ───
+  /// Calls the parameterless `request_account_deletion` RPC. The server derives
+  /// the target from `auth.uid()`, so no user id is ever sent from the client.
+  Future<void> requestAccountDeletion() async {
+    final user = _client.auth.currentUser;
+    if (user == null) {
+      throw StateError('not_authenticated');
+    }
+    await _client.rpc('request_account_deletion');
+  }
+
   Profile _profileFromRow(Map<String, dynamic> row) {
     return Profile(
       userId: row['user_id'] as String,
