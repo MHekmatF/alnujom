@@ -110,13 +110,21 @@ limited to non-end-user accounts; working password recovery is worth more.
 
 ---
 
-## Also outstanding
+## ✅ Also done
 
-- **`supabase functions deploy request_password_reset`** — the password-reset
-  deep link does nothing until this is redeployed. See `HANDOVER.md` section 2.
+- **`request_password_reset` redeployed** (version 2) and verified live: the
+  GoTrue log shows `generate_link` returning 200 with
+  `redirect_to=alnujom://auth/reset-password`, so the deep link is accepted and
+  **no dashboard change is needed**. The function now also falls back to sending
+  the mail without the deep link if that address is ever refused, rather than
+  sending nothing.
+
+## Still outstanding
+
 - **Leaked-password protection** is still off — a dashboard toggle
   (Authentication → Settings), and the only remaining WARN worth acting on in
-  `get_advisors(security)`.
+  `get_advisors(security)`. It cannot be set through the API.
 - **`supabase/scripts/pre_launch_data_cleanup.sql`** — removes the 26 development
-  listings. Read it before running; its delete block ends in `ROLLBACK` so you
-  see the counts before committing to them.
+  listings. **Deliberately not run**: with distribution deferred, that content is
+  what the app has to demo. Run it when launch is actually close. Its delete
+  block ends in `ROLLBACK` so you see the counts before committing to them.
