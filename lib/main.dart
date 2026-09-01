@@ -14,6 +14,7 @@ import 'core/messaging/push_messaging_service.dart';
 import 'core/network/supabase_client_wrapper.dart';
 import 'core/network/types/auth_state.dart' as app_auth;
 import 'core/notifications/local_reminder_scheduler.dart';
+import 'core/notifications/push_notification_channel.dart';
 import 'core/storage/preferences_store.dart';
 import 'features/crm/domain/repositories/crm_repository.dart';
 import 'features/notifications/data/datasources/fcm_push_messaging_service.dart';
@@ -213,6 +214,16 @@ Future<void> _bootstrap(Stopwatch coldStartWatch) async {
     // dialog appears over the rendered splash/branding, not a black cold-start
     // screen. Only when Firebase initialised (FCM push active); best-effort.
     if (pushService is FcmPushMessagingService) {
+      // Phase 22 §6 — create the IMPORTANCE_HIGH FCM default channel BEFORE the
+      // permission prompt, so the very first push a user grants permission for
+      // already arrives as a heads-up banner rather than a silent tray row.
+      // Guarded + idempotent; see push_notification_channel.dart.
+      try {
+        unawaited(getIt<PushNotificationChannel>().ensureCreated());
+      } catch (_) {
+        // Channel creation is best-effort — a throw must not disrupt startup.
+      }
+
       try {
         FirebaseMessaging.instance.requestPermission(
           alert: true,

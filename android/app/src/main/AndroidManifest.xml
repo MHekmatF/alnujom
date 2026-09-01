@@ -47,10 +47,17 @@
             android:value="2" />
         <!-- Phase 22: FCM default notification channel for Android 8.0+.
              Required by firebase_messaging for background messages.
-             The app builds and runs without google-services.json (SC-003). -->
+             The app builds and runs without google-services.json (SC-003).
+
+             The channel itself is created at startup with IMPORTANCE_HIGH by
+             lib/core/notifications/push_notification_channel.dart — this value
+             MUST stay byte-identical to PushNotificationChannel.channelId.
+             The `_v2` suffix is load-bearing: a channel's importance is
+             immutable once created, so the silent original id
+             (`alnujom_notifications`) can only be superseded, never upgraded. -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
-            android:value="alnujom_notifications" />
+            android:value="alnujom_notifications_v2" />
         <!-- Phase 29 (F1): flutter_local_notifications receivers for scheduled
              (zonedSchedule) CRM follow-up reminders + reboot re-registration. -->
         <receiver

@@ -1,6 +1,8 @@
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
+import '../../../../../core/listing/listing_columns.dart';
+import '../../../../../core/listing/listing_coordinates_reader.dart';
 import '../../../../../core/listing/rejection_reason.dart';
 import '../dtos/pending_listing_summary_dto.dart';
 
@@ -19,9 +21,14 @@ import '../dtos/pending_listing_summary_dto.dart';
 /// so Phase 4 can extend without refactor.
 @injectable
 class SupabaseListingReviewDatasource {
-  SupabaseListingReviewDatasource(this._client);
+  SupabaseListingReviewDatasource(this._client, this._coordinates);
 
   final supabase.SupabaseClient _client;
+
+  /// SEC-I1: the moderator preview shows the listing's pin, which is no longer
+  /// readable off the base table. Sourced from the owner/admin-gated
+  /// `get_listing_coordinates` RPC (a moderator holds `listings.view_all`).
+  final ListingCoordinatesReader _coordinates;
 
   // ─── loadPendingQueue ──────────────────────────────────────────────────
 
@@ -117,8 +124,12 @@ class SupabaseListingReviewDatasource {
   Future<Map<String, dynamic>?> loadListingPreview(String listingId) async {
     final rows = await _client
         .from('listings')
+        // SEC-I1: the leading `*` expanded to latitude/longitude too, which
+        // `authenticated` may no longer SELECT — the whole preview would 42501.
+        // Named columns + the admin-gated coordinate RPC below instead. The
+        // embedded resources keep their `*` (those tables are unrestricted).
         .select(
-          '*, '
+          '$listingColumnsWithoutCoordinates, '
           'governorate:governorates(*), '
           'city:cities(*), '
           'area:areas(*), '
@@ -130,6 +141,7 @@ class SupabaseListingReviewDatasource {
         .limit(1);
     if (rows.isEmpty) return null;
     final row = Map<String, dynamic>.from(rows.first);
+    await _coordinates.mergeInto(row, listingId: listingId);
 
     // Same two-step join as loadPendingQueue — see _loadProfiles dartdoc.
     final uid = row['publisher_user_id'] as String?;
@@ -203,10 +215,7 @@ class SupabaseListingReviewDatasource {
   }) async {
     final result = await _client.rpc(
       'set_listing_featured',
-      params: <String, dynamic>{
-        'p_listing_id': listingId,
-        'p_days': days,
-      },
+      params: <String, dynamic>{'p_listing_id': listingId, 'p_days': days},
     );
     // Scalar RETURNS timestamptz → the client yields the ISO-8601 string
     // (or null when p_days <= 0 cleared the featuring).

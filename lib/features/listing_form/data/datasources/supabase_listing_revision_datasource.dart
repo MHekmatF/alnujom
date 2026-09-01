@@ -5,6 +5,8 @@ import 'dart:typed_data';
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
+import '../../../../core/listing/listing_coordinates_reader.dart';
+
 /// Phase 031 (WS-B) — Supabase datasource for the stay-live edit-revision flow.
 ///
 /// Constitution IX boundary: this is the ONLY revision file importing
@@ -16,7 +18,12 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 /// `listing_media` row (the manifest is the source of truth until apply).
 @injectable
 class SupabaseListingRevisionDatasource {
-  SupabaseListingRevisionDatasource();
+  SupabaseListingRevisionDatasource(this._coordinates);
+
+  /// SEC-I1: the admin's current-vs-proposed diff needs the live listing's
+  /// exact pin, which is no longer readable off the base table. Sourced from
+  /// the owner/admin-gated `get_listing_coordinates` RPC instead.
+  final ListingCoordinatesReader _coordinates;
 
   supabase.SupabaseClient get _client => supabase.Supabase.instance.client;
 
@@ -137,7 +144,9 @@ class SupabaseListingRevisionDatasource {
   Future<Map<String, dynamic>?> loadRevision(String revisionId) async {
     final rows = await _client
         .from('listing_revisions')
-        .select('id, listing_id, status, proposed, media_manifest, reject_reason')
+        .select(
+          'id, listing_id, status, proposed, media_manifest, reject_reason',
+        )
         .eq('id', revisionId)
         .limit(1);
     if (rows.isEmpty) return null;
@@ -148,12 +157,12 @@ class SupabaseListingRevisionDatasource {
   /// `listing_revisions_pending_created_idx`). RLS exposes these rows only to a
   /// `listings.review` holder. Each row carries the proposed snapshot + manifest
   /// and the listing's id/created_at so the queue can show a compact summary.
-  Future<List<Map<String, dynamic>>> listPendingRevisions({int limit = 50}) async {
+  Future<List<Map<String, dynamic>>> listPendingRevisions({
+    int limit = 50,
+  }) async {
     final rows = await _client
         .from('listing_revisions')
-        .select(
-          'id, listing_id, status, proposed, media_manifest, created_at',
-        )
+        .select('id, listing_id, status, proposed, media_manifest, created_at')
         .eq('status', 'pending_review')
         .order('created_at', ascending: true)
         .limit(limit);
@@ -168,9 +177,13 @@ class SupabaseListingRevisionDatasource {
   Future<Map<String, dynamic>?> loadCurrentSnapshot(String listingId) async {
     final listingRows = await _client
         .from('listings')
+        // SEC-I1: latitude/longitude are no longer SELECT-able by
+        // `authenticated`; naming them here would 42501 the whole diff. They
+        // are merged back below through the admin-gated RPC so the
+        // current-vs-proposed diff still lines up 1:1 with the `proposed` keys.
         .select(
           'title, purpose, property_type, governorate_id, city_id, area_id, '
-          'address_text, latitude, longitude, location_visibility, '
+          'address_text, location_visibility, '
           'contact_name_visibility, phone, whatsapp, area_size, rooms, '
           'bathrooms, floor',
         )
@@ -178,6 +191,7 @@ class SupabaseListingRevisionDatasource {
         .limit(1);
     if (listingRows.isEmpty) return null;
     final snapshot = Map<String, dynamic>.from(listingRows.first);
+    await _coordinates.mergeInto(snapshot, listingId: listingId);
 
     final detailRows = await _client
         .from('listing_details')
