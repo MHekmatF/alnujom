@@ -36,11 +36,15 @@ was never finished.
 
 ## One thing to verify before publishing
 
-Section 9 of both files says a user can delete their account from
-**Profile → Settings → Delete account**. **Open the app and confirm that button
-exists and works** before you host the policy. A privacy policy that promises a
-deletion path the app does not have is a false statement to your users and a
-failed review with Google.
+Section 9 of both files says a user can delete their account from **Settings →
+Delete my account** or from the bottom of **Profile**. Those screens now exist,
+but the RPC behind them ships as an **unapplied migration**
+(`supabase/migrations/20260901120004_self_serve_account_deletion.sql`) because
+the database was paused when it was written.
+
+**Apply that migration and delete a throwaway account end-to-end before you host
+this policy.** A privacy policy that promises a deletion path that errors out is
+a false statement to your users and a failed review with Google.
 
 If the button is not there yet, either wait for the build that adds it, or edit
 section 9 down to the email-request route only until it ships.

@@ -114,11 +114,10 @@ web page; tapping it opens the AlNujom app straight onto the "set a new password
 screen. The app registers this address with Android, so Android knows to hand it
 over.
 
-**Why the Site URL matters here:** the server function that sends the reset
-(`request_password_reset`) does not specify a return address of its own, so
-Supabase falls back to whatever **Site URL** is configured. If Site URL still
-points at a web address, the reset link opens a browser page instead of the app,
-and the user is stuck.
+**Why the allow-list matters here:** the server function that sends the reset
+(`request_password_reset`) now names the app's address explicitly. Supabase will
+only honour an address that is on the **Redirect URLs** allow-list — anything
+else is rejected and the user is stuck.
 
 ### Set it
 
@@ -127,11 +126,19 @@ Configuration**.
 
 | Field | Exact value to enter |
 |---|---|
-| **Site URL** | `alnujom://auth/reset-password` |
 | **Redirect URLs** → *Add URL* | `alnujom://auth/reset-password` |
 
-Add the value in **both** places — Site URL is what gets used, Redirect URLs is
-the allow-list that permits it. Click **Save**.
+Click **Save**. **Site URL does not need changing** — the function supplies the
+return address itself. (If the allow-list rejects the value, or the link still
+fails, add `alnujom://auth/reset-password**` as a second entry.)
+
+### Then redeploy the reset function — required
+
+The app side of this does nothing until the updated function is live:
+
+```
+supabase functions deploy request_password_reset
+```
 
 Then note the change in `docs/RUNBOOK.md` (entry T004), which still records the
 old placeholder.
@@ -148,9 +155,10 @@ sign-up.
 
 ### Test it, once
 
-Register a throwaway account, tap "forgot password", and confirm the link opens
-the app rather than a browser. If it opens a browser or an error page, the Site
-URL is wrong.
+Register a throwaway account **with a real email address**, tap "forgot
+password", and confirm the link opens the app on the "set a new password" screen
+rather than a browser. If it opens a browser or an error page, the address is
+missing from the Redirect URLs allow-list, or the function was not redeployed.
 
 ### If a user is genuinely locked out
 

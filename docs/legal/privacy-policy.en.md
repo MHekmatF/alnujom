@@ -177,7 +177,7 @@ Crash reporting **only works if it was enabled when the app build was made**. If
 
 ## 9. Deleting your account
 
-**From inside the app:** open **Profile → Settings → Delete account** and confirm. This is the primary route and does not require contacting us.
+**From inside the app:** open **Settings → Delete my account**, or use **Delete my account** at the bottom of your **Profile**. You are shown a page explaining what will be deleted and what may remain, then you confirm twice. This is the primary route and does not require contacting us.
 
 **What is deleted:** your account and profile, your Vault-encrypted data (legal name, national ID, private contact methods), your listings, your photos and videos, your chats, favourites, saved searches, preferences, notification tokens, viewing requests, reviews, and the CRM records tied to you.
 

@@ -92,7 +92,7 @@ installing the app. Most developers only do the first and get rejected.
 
 | # | Item | Status | Notes |
 |---|---|---|---|
-| 4.1 | **In-app account deletion** | 🔧 DEV WORK — **verify before submitting** | At commit `c751f38` there is **no** account-deletion flow anywhere in `lib/` or in the Supabase migrations — an exhaustive search found no `deleteAccount`, no delete-user RPC, and no delete Edge Function. The only account exit is sign-out (`lib/features/profile/presentation/pages/profile_page.dart`). A parallel work stream is adding it; **confirm the button exists and works in the build you upload.** The privacy policy already describes it as available. |
+| 4.1 | **In-app account deletion** | ✅ DONE (code) / 🔧 needs the migration applied | Shipped since this checklist was first written. Route `/profile/delete-account`, reachable from **Settings → Delete my account** and from the bottom of **Profile**; three deliberate acts (read the inventory, tick the acknowledgement, confirm the destructive dialog). Backed by the `request_account_deletion()` RPC in `supabase/migrations/20260901120004_self_serve_account_deletion.sql`, which soft-deletes and anonymises rather than hard-deleting (a hard delete would cascade away the counterparty's chats, viewings and reviews). **The migration has not been applied — the database was paused — so the button will fail until it is.** Verify end-to-end on a throwaway account before you upload. |
 | 4.2 | **Web-accessible deletion request page** | 🟡 OWNER ACTION | A public URL where someone can request account and data deletion without the app. It must state what is deleted, what is retained, and for how long. Can be a section of the same page that hosts the privacy policy. The URL is entered in Play Console → App content → **Data safety** → "Data deletion". |
 | 4.3 | Deletion actually removes the data it claims to | 🔧 DEV WORK | Schema-wise the app is mostly ready: nearly every user-owned table uses `ON DELETE CASCADE` on `auth.users`. But three tables use `ON DELETE SET NULL` and keep their rows — `lead_events` (whose `metadata` holds the **IP address** captured at the time), `ad_impressions`, and `inquiries` (which keeps `sender_name` and the encrypted phone). The privacy policy discloses this honestly; make sure the implementation matches what it says. |
 
@@ -267,7 +267,7 @@ Worth thinking about before submission rather than after a rejection.
 | Blocking item | Type |
 |---|---|
 | Play Console account availability from Syria | ⛔ Settle first |
-| In-app account deletion must exist in the uploaded build | 🔧 DEV WORK |
+| In-app account deletion — apply the migration, then verify end-to-end | 🔧 DEV WORK |
 | Web-accessible deletion request URL | 🟡 OWNER ACTION |
 | Privacy policy hosted, placeholders filled | 🟡 OWNER ACTION |
 | Build as `.aab`, not `.apk` | 🔧 DEV WORK |
