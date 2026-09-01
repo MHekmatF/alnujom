@@ -25,16 +25,36 @@ Marker counts were cross-checked against SQL: `anon` sees exactly 16 rows in
 `v_listings_map_public`, and all 16 approximate listings return a **jittered**
 coordinate — none returns its exact position.
 
+## Server-side verification (same day, after the walk)
+
+**Password reset — the deep link is accepted.** The Edge Function was redeployed
+as version 2 and invoked for real against the founder's own account (the only
+one with a real email on file — the audit's "3 accounts" figure is now 1). The
+GoTrue log shows
+`POST | 200 | /auth/v1/admin/generate_link?redirect_to=alnujom%3A%2F%2Fauth%2Freset-password`
+and the function logged `reset_email_sent`, i.e. the **primary** path, not the
+no-deep-link fallback. So the redirect address is already allow-listed and **no
+dashboard change is needed**. What remains unproven is only the last hop: tapping
+the emailed link on a device running this build.
+
+**Account deletion — the RPC runs correctly.** Executed twice against real
+accounts inside transactions that were rolled back, so nothing changed. On a
+plain account it returned
+`{"status":"deleted", …, "auth_identifier_released":true}` — including the
+best-effort `auth.users` rename, the branch most likely to fail. On the heaviest
+account (15 listings) it left 11 listings live, tombstoned one profile, and wrote
+one operator-queue row and one `account.self_deleted` audit row. Both rollbacks
+confirmed: still 26 listings and 12 profiles, none deleted.
+
+That also proves the amended `enforce_profile_status_admin_only()` trigger works
+— without it, the tombstone UPDATE would have raised `42501`.
+
 ## What this walk could NOT cover
 
-- **The password-reset round trip.** The `request_password_reset` Edge Function
-  is still at version 1; it needs `alnujom://auth/reset-password` added to the
-  Supabase Redirect URLs allow-list and then redeploying. Only the intent
-  plumbing is proven, not the mail → link → new password path.
-- **Account deletion end to end.** The RPC is applied but nobody has deleted an
-  account. Do it on a throwaway account: check the profile is tombstoned, its
-  listings leave search/map/home, its three Vault secrets are gone, and a row
-  lands in `account_deletion_requests`.
+- **The last hop of the password reset**: tapping the real emailed link on a
+  device running this build, and setting a new password.
+- **Account deletion from the UI**, and its Vault-secret purge (no test account
+  had Vault PII).
 - **Agency invitation accept** — needs two accounts (inviter + invitee).
 - **The heads-up push banner** — needs a real FCM send to a device that
   previously ran the old build, which is the case the new channel id exists for.
