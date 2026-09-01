@@ -14,6 +14,7 @@ import 'debug/palette_tester.dart';
 import 'features/app_update/presentation/bloc/app_update_cubit.dart';
 import 'features/app_update/presentation/widgets/update_prompt_dialog.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/auth/presentation/widgets/password_recovery_listener.dart';
 import 'features/notifications/presentation/widgets/notification_push_listener.dart';
 import 'features/settings/presentation/bloc/app_settings_cubit.dart';
 import 'l10n/app_localizations.dart';
@@ -164,11 +165,18 @@ class _AppState extends State<App> with WidgetsBindingObserver {
                           }
                         },
                         child: NotificationPushListener(
-                          child: Stack(
-                            children: [
-                              child ?? const SizedBox.shrink(),
-                              if (showPaletteTester) const PaletteTester(),
-                            ],
+                          // Spec 005 D-01 — routes to the "set a new password"
+                          // screen when a recovery deep link is exchanged for
+                          // a session (warm resume AND cold launch; the
+                          // repository replays a recovery that landed before
+                          // this widget mounted).
+                          child: PasswordRecoveryListener(
+                            child: Stack(
+                              children: [
+                                child ?? const SizedBox.shrink(),
+                                if (showPaletteTester) const PaletteTester(),
+                              ],
+                            ),
                           ),
                         ),
                       );

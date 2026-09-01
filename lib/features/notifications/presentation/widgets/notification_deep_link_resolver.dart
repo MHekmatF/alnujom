@@ -141,7 +141,14 @@ abstract final class NotificationDeepLinkResolver {
       case NotificationType.inquiryReceived:
         return const _NavRoute(AppRoutes.inquiries);
       case NotificationType.agencyInvitation:
-        return const _NavRoute(AppRoutes.agency);
+        // Spec 019 B-4 / 022 §6 — route to the dedicated invitations screen,
+        // NOT the `/agency` hub. The hub's default branch is the "create an
+        // agency" form, so any empty/failed read there (classically the
+        // cold-start race between this post-frame navigation and the Supabase
+        // session restore) left the invitee staring at a create form with no
+        // path to Accept. The invitations screen only ever shows invitations
+        // and re-loads once auth settles.
+        return const _NavRoute(AppRoutes.agencyInvitations);
       case NotificationType.savedSearchMatch:
         // Phase 25 — tap a saved-search match → open the matched listing.
         final id = params['listing_id'] as String?;

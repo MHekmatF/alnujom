@@ -35,9 +35,46 @@
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
               />
+            <!-- Spec 005 D-01 — supabase_flutter (via its bundled app_links
+                 plugin) owns the auth-callback deep link: it reads the ACTION_VIEW
+                 intent itself and calls getSessionFromUrl().  Flutter's built-in
+                 deep-linking (ON by default since Flutter 3.24) would ALSO feed the
+                 incoming URI to the router as the initial route — which for
+                 `alnujom://auth/reset-password#access_token=…` resolves to the
+                 EXISTING `/reset-password` request-a-reset page, dropping the user
+                 on the wrong screen.  Disable it: the intent still reaches the
+                 activity (and therefore app_links); only the router hand-off is
+                 suppressed, and there are no other deep links in the app. -->
+            <meta-data
+              android:name="flutter_deeplinking_enabled"
+              android:value="false"
+              />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <!-- Spec 005 D-01 — password-reset completion deep link.
+                 Supabase's recovery mail redirects the browser to
+                 `alnujom://auth/reset-password#access_token=…&type=recovery`
+                 (or `…#error_description=…` for an expired link).  Both `path`
+                 and `pathPrefix` are declared so the URI still matches when a
+                 trailing slash / extra segment is appended; Android ignores the
+                 query + fragment when matching, so they survive intact in
+                 `Intent.getDataString()`.
+                 The activity's `launchMode="singleTop"` (above) makes a RUNNING
+                 app receive this through onNewIntent instead of a second task. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data
+                    android:scheme="alnujom"
+                    android:host="auth"
+                    android:path="/reset-password"/>
+                <data
+                    android:scheme="alnujom"
+                    android:host="auth"
+                    android:pathPrefix="/reset-password"/>
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.

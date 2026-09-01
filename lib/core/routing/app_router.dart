@@ -15,6 +15,7 @@ import '../../features/auth/presentation/pages/pending_approval_page.dart';
 import '../../features/auth/presentation/pages/publisher_approval_pending_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/auth/presentation/pages/rejected_page.dart';
+import '../../features/auth/presentation/pages/reset_password_complete_page.dart';
 import '../../features/auth/presentation/pages/reset_password_page.dart';
 import '../../features/auth/presentation/pages/suspended_page.dart';
 import '../../features/chat/presentation/bloc/conversations_cubit.dart';
@@ -45,6 +46,7 @@ import '../../features/favorites/presentation/pages/favorites_page.dart';
 import '../../features/reports/presentation/pages/my_reports_page.dart';
 import '../../features/admin/reports/presentation/pages/reports_queue_page.dart';
 import '../../features/agency/presentation/pages/agency_home_page.dart';
+import '../../features/agency/presentation/pages/agency_invitations_page.dart';
 import '../../features/agency/presentation/pages/agency_profile_page.dart';
 import '../../features/agency/presentation/pages/agency_members_page.dart';
 import '../../features/agency/presentation/pages/agency_listings_page.dart';
@@ -111,6 +113,10 @@ abstract final class AppRoutes {
   static const currenciesAdminSetRate = '/admin/currencies/set-rate';
   static const currenciesAdminForm = '/admin/currencies/form';
   static const resetPassword = '/reset-password';
+  // Spec 005 D-01 — password-reset COMPLETION screen. Deliberately mirrors the
+  // `alnujom://auth/reset-password` recovery deep link (scheme `alnujom`, host
+  // `auth`, path `/reset-password`) so the two never drift apart.
+  static const resetPasswordComplete = '/auth/reset-password';
   static const profile = '/profile';
   static const profileEdit = '/profile/edit';
   static const profilePrivate = '/profile/private';
@@ -156,6 +162,10 @@ abstract final class AppRoutes {
   static const agencyAnalytics = '/agency/analytics';
   static const agencyVerify = '/agency/verify';
   static const agencyEdit = '/agency/edit';
+  // Spec 019 B-4 / 022 §6 — the `agency_invitation` deep-link target. A
+  // dedicated screen so an invitee can never be dropped on the hub's default
+  // "create an agency" form (see agency_invitations_page.dart).
+  static const agencyInvitations = '/agency/invitations';
   // Phase 19: public agency profile deep-link (no auth redirect).
   static const agencyProfile = '/agency/:id';
   // Phase 19: admin agency verification queue route.
@@ -219,6 +229,8 @@ abstract final class AppRouteNames {
   static const currenciesAdminHistory = 'currencies-admin-history';
   static const currenciesAdminForm = 'currencies-admin-form';
   static const resetPassword = 'reset-password';
+  // Spec 005 D-01 — password-reset completion route name.
+  static const resetPasswordComplete = 'reset-password-complete';
   static const profile = 'profile';
   static const profileEdit = 'profile-edit';
   static const profilePrivate = 'profile-private';
@@ -267,6 +279,8 @@ abstract final class AppRouteNames {
   static const agencyAnalytics = 'agency-analytics';
   static const agencyVerify = 'agency-verify';
   static const agencyEdit = 'agency-edit';
+  // Spec 019 B-4 / 022 §6 — agency invitations route name.
+  static const agencyInvitations = 'agency-invitations';
   // Phase 19: public agency profile route name.
   static const agencyProfile = 'agency-profile';
   // Phase 19: admin agency verification queue route name.
@@ -530,6 +544,17 @@ GoRouter buildAppRouter({
         path: AppRoutes.resetPassword,
         name: AppRouteNames.resetPassword,
         builder: (context, state) => const ResetPasswordPage(),
+      ),
+      // ─── Spec 005 D-01 — password-reset completion ───
+      // Entered programmatically by [PasswordRecoveryListener] once the
+      // recovery deep link produced a session. `authRedirect` lets this path
+      // through in EVERY auth state (see the bypass there): the recovery
+      // session is a real session, so the account-status gates would otherwise
+      // bounce a pending/suspended user off the screen mid-reset.
+      GoRoute(
+        path: AppRoutes.resetPasswordComplete,
+        name: AppRouteNames.resetPasswordComplete,
+        builder: (context, state) => const ResetPasswordCompletePage(),
       ),
       GoRoute(
         path: AppRoutes.profile,
@@ -802,6 +827,21 @@ GoRouter buildAppRouter({
         redirect: (context, state) =>
             authBloc.state is Unauthenticated ? AppRoutes.login : null,
         builder: (context, state) => const AgencyEditProfilePage(),
+      ),
+      // Spec 019 B-4 / 022 §6 — pending agency invitations (accept / decline).
+      // The `agency_invitation` notification routes HERE instead of the
+      // `/agency` hub, whose default branch is the "create an agency" form:
+      // an invitee whose reads came back empty (typically the cold-start race
+      // between the push tap and the Supabase session restore) was left on the
+      // create form with no path to Accept. Carries no `extra`, so it survives
+      // process recreation. Declared BEFORE `/agency/:id` so the literal
+      // segment wins over the wildcard.
+      GoRoute(
+        path: AppRoutes.agencyInvitations,
+        name: AppRouteNames.agencyInvitations,
+        redirect: (context, state) =>
+            authBloc.state is Unauthenticated ? AppRoutes.login : null,
+        builder: (context, state) => const AgencyInvitationsPage(),
       ),
       // Public agency profile (no auth redirect; approved-only enforced by the
       // page + v_agencies). Declared LAST so the literal routes above win.

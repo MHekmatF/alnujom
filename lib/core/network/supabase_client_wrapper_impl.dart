@@ -52,6 +52,24 @@ final class SupabaseClientWrapperImpl implements SupabaseClientWrapper {
             legacyPersistSessionKey: legacyPersistSessionKey,
           ),
           pkceAsyncStorage: SecureGotrueAsyncStorage(),
+          // Spec 005 D-01 (password-reset completion) — the recovery mail is
+          // generated SERVER-SIDE by the `request_password_reset` Edge Function
+          // via `auth.admin.generateLink({type:'recovery'})`. That path never
+          // hands the device a PKCE code verifier, so GoTrue's /verify redirect
+          // carries implicit tokens in the URL fragment
+          // (`alnujom://auth/reset-password#access_token=…&type=recovery`)
+          // rather than a `?code=` query. supabase_flutter's deep-link observer
+          // only forwards fragment links to `getSessionFromUrl` when the flow
+          // type is `implicit` (SupabaseAuth._isAuthCallbackDeeplink), and
+          // `exchangeCodeForSession` would throw "Code verifier could not be
+          // found in local storage" regardless — so PKCE cannot complete this
+          // app's reset flow at all. Implicit is the only workable setting here.
+          //
+          // Safe for the rest of the app: the client only ever calls
+          // signUp / signInWithPassword (phone + password, email confirmation
+          // OFF — `register` requires a session back immediately). There is no
+          // OAuth, magic-link or SSO sign-in, which are the flows PKCE protects.
+          authFlowType: supabase.AuthFlowType.implicit,
         ),
       );
       _isInitialized = true;
