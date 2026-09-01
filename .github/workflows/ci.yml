@@ -59,6 +59,13 @@ jobs:
       - name: Lint l10n literals
         run: dart run tool/lint_l10n_literals.dart
 
+      # injectable does not verify that everything it RESOLVES is also
+      # REGISTERED — a class asking for an unannotated collaborator builds
+      # green and throws at runtime, which in release is a blank screen and
+      # nothing in the log.
+      - name: Lint DI graph
+        run: dart run tool/lint_di_graph.dart
+
       - name: Guard Supabase SDK boundary (Constitution IX — no package:supabase_flutter in any domain/)
         run: |
           # Constitution IX / SC-014: Supabase types may appear in core/network wrappers

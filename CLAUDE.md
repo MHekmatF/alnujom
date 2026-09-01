@@ -53,7 +53,14 @@ flutter analyze
 dart run tool/lint_design_tokens.dart
 dart run tool/lint_l10n_parity.dart
 dart run tool/lint_l10n_literals.dart
+dart run tool/lint_di_graph.dart
 ```
+
+The last one exists because `injectable` does **not** check that everything the
+generated injector resolves is also registered: a class asking for a
+collaborator that was never annotated `@injectable` builds green and throws at
+runtime. In a release build that is a blank screen and nothing in the log, since
+the crash reporter is inert without a DSN.
 
 CI is paused, so this local run is the only gate.
 
