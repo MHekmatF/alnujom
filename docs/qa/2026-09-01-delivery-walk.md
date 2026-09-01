@@ -101,6 +101,37 @@ is not useful to a moderator. Only demo data hits it today.
 over the app bar's trailing corner and covers the drawer button. Open the drawer
 with an edge swipe when running that build.
 
+## Fourth walk — the Infinix Note 8 (real hardware)
+
+The release APK (`arm64-v8a`, signed with the release keystore) installed and
+walked on the founder's own Infinix Note 8 — Helio G80, 6 GB RAM, Android 10,
+720x1640 — against the live backend.
+
+The phone was carrying a **debug** build from 21 June, which a release APK
+cannot upgrade in place (different signing key), so that build was uninstalled
+first. Its local data went with it; signing back in is all that is needed.
+
+| # | Check | Result |
+|---|---|---|
+| 22 | Cold start | **5.4 s** (`am start -W`, `TotalTime: 5392 ms`) — over the 3 s target, recorded in the release doc |
+| 23 | Onboarding at 720x1640 | PASS — the headline wraps to two lines on this narrower screen and still does not overflow |
+| 24 | Register and login screens | PASS |
+| 25 | Guest home | PASS — categories, ad artwork, real listings |
+| 26 | **Guest Search** | PASS — 16 results, on real hardware |
+| 27 | **Guest Map** | PASS — 4 (Aleppo) + 10 (Damascus) clusters plus Latakia and Homs pins, OSM tiles and attribution |
+| 28 | Listing detail | PASS — hero, specs row, the "موثّق ميدانياً" banner, deed and finish cards, and the sticky WhatsApp / message / call bar |
+| 29 | Similar-listings carousel | PASS — cards fit their row, no overflow |
+| 30 | Android log across the whole walk | Clean — no error, exception or overflow |
+| 31 | Memory after browsing | ~296 MB PSS |
+
+**Could not be tested here:** dark mode. Infinix's XOS ignores both
+`cmd uimode night yes` and `settings put secure ui_night_mode`, so the theme
+cannot be flipped over adb on this device — it needs the phone's own settings
+toggle, or the app's theme setting, which is behind a login.
+
+**Also noted:** a guest session does not survive an app restart, which is normal
+for guest mode but worth knowing when re-testing.
+
 ## What this walk could NOT cover
 
 - **The last hop of the password reset**: tapping the real emailed link on a
