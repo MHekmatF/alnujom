@@ -6,10 +6,14 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/spacing.dart';
-import '../../../../core/widgets/app_spinner.dart';
+import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../core/widgets/empty_state.dart';
+import '../../../../core/widgets/error_state.dart';
+import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/locale_toggle_action.dart';
+import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/city_with_area_count.dart';
 import '../../domain/usecases/count_city_dependents.dart';
@@ -63,6 +67,8 @@ class _GovernorateDetailView extends StatelessWidget {
           ),
           actions: const [LocaleToggleAction()],
           floatingActionButton: FloatingActionButton(
+            // Batch-2 a11y: the icon-only FAB had no accessible name.
+            tooltip: l10n.addCityButton,
             onPressed: () async {
               final result = await context.push<bool>(
                 '${AppRoutes.locationsAdminForm}'
@@ -77,9 +83,16 @@ class _GovernorateDetailView extends StatelessWidget {
             child: const Icon(LucideIcons.plus),
           ),
           body: switch (state) {
-            GovernorateDetailLoading() => const AppSpinner.page(),
-            GovernorateDetailError(:final message) => Center(
-              child: Text(message, textAlign: TextAlign.center),
+            // Batch-2: a full-screen spinner became a list-shaped skeleton, the
+            // consumer convention for list surfaces.
+            GovernorateDetailLoading() => const _CitiesSkeleton(),
+            // Batch-2: bare centred Text -> shared ErrorState + a Retry.
+            GovernorateDetailError(:final message) => ErrorState(
+              title: l10n.locationsLoadFailed,
+              message: message,
+              onRetry: () => context.read<GovernorateDetailBloc>().add(
+                const GovernorateDetailRefreshRequested(),
+              ),
             ),
             GovernorateDetailLoaded(:final governorate, :final cities) =>
               RefreshIndicator(
@@ -87,6 +100,7 @@ class _GovernorateDetailView extends StatelessWidget {
                     .read<GovernorateDetailBloc>()
                     .add(const GovernorateDetailRefreshRequested()),
                 child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
                   padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
                   children: [
                     // Governorate header
@@ -98,7 +112,12 @@ class _GovernorateDetailView extends StatelessWidget {
                           const HiddenBadge(),
                         ],
                         const Spacer(),
-                        TextButton.icon(
+                        // Batch-2: stock TextButton.icon -> the DS AppButton
+                        // text variant (48dp target, PressScale, token type).
+                        AppButton(
+                          label: l10n.editAffordance,
+                          variant: AppButtonVariant.text,
+                          icon: LucideIcons.pencil,
                           onPressed: () async {
                             final result = await context.push<bool>(
                               '${AppRoutes.locationsAdminForm}'
@@ -110,37 +129,44 @@ class _GovernorateDetailView extends StatelessWidget {
                               );
                             }
                           },
-                          icon: const Icon(LucideIcons.pencil),
-                          label: Text(l10n.editAffordance),
                         ),
                       ],
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     // Cities list
                     if (cities.isEmpty)
-                      Center(child: Text(l10n.addCityButton))
+                      // Batch-2: a bare centred "Add city" string became a real
+                      // EmptyState (glyph badge + headline + hint).
+                      EmptyState(
+                        icon: LucideIcons.building_2,
+                        headline: l10n.cityDetailPageTitle,
+                        body: l10n.addCityButton,
+                      )
                     else
-                      ...cities.map(
-                        (summary) => Padding(
+                      ...cities.indexed.map(
+                        (entry) => Padding(
                           padding: const EdgeInsetsDirectional.only(
                             bottom: AppSpacing.sm,
                           ),
-                          child: CityCard(
-                            summary: summary,
-                            onTap: () => context.go(
-                              '${AppRoutes.locationsAdmin}/$governorateId'
-                              '/cities/${summary.city.id}',
+                          child: StaggeredListItem(
+                            index: entry.$1,
+                            child: CityCard(
+                              summary: entry.$2,
+                              onTap: () => context.go(
+                                '${AppRoutes.locationsAdmin}/$governorateId'
+                                '/cities/${entry.$2.city.id}',
+                              ),
+                              onEdit: () => _openCityForm(
+                                context,
+                                mode: 'edit',
+                                id: entry.$2.city.id,
+                              ),
+                              onToggleActive: () =>
+                                  _toggleCityActive(context, entry.$2),
+                              onDelete: entry.$2.city.isSystem
+                                  ? null
+                                  : () => _confirmDeleteCity(context, entry.$2),
                             ),
-                            onEdit: () => _openCityForm(
-                              context,
-                              mode: 'edit',
-                              id: summary.city.id,
-                            ),
-                            onToggleActive: () =>
-                                _toggleCityActive(context, summary),
-                            onDelete: summary.city.isSystem
-                                ? null
-                                : () => _confirmDeleteCity(context, summary),
                           ),
                         ),
                       ),
@@ -215,5 +241,23 @@ class _GovernorateDetailView extends StatelessWidget {
         AppToast.error(context, error.toString());
       }
     }
+  }
+}
+
+/// Shimmer placeholder rows shown while the cities list loads.
+class _CitiesSkeleton extends StatelessWidget {
+  const _CitiesSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+      itemCount: 6,
+      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+      itemBuilder: (_, __) => const SizedBox(
+        height: AppSpacing.xxxl + AppSpacing.xxl,
+        child: LoadingState.card(),
+      ),
+    );
   }
 }

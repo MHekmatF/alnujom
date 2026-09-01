@@ -9,7 +9,11 @@
 // Constitution IX: zero supabase_flutter imports.
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/colors.dart';
+import '../../../../../core/theme/radii.dart';
 import '../../../../../core/theme/spacing.dart';
+import '../../../../../core/theme/typography.dart';
+import '../../../../../core/widgets/_widget_support.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../domain/entities/ad_link.dart';
 
@@ -108,16 +112,28 @@ class _LinkTargetPickerState extends State<LinkTargetPicker> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l10n.adsAdminLinkLabel, style: theme.textTheme.titleSmall),
+        Text(l10n.adsAdminLinkLabel, style: styles.labelLarge),
         const SizedBox(height: AppSpacing.sm),
+        // Batch-2: the two dropdowns keep their FormField validators (so they
+        // cannot become AppDropdown) but adopt its chrome — themed caret,
+        // rounded token popup, card popup surface, isExpanded overflow guard.
         DropdownButtonFormField<AdLinkKind>(
           initialValue: _kind,
-          decoration: InputDecoration(labelText: l10n.adLinkKindLabel),
+          isExpanded: true,
+          icon: Icon(Icons.keyboard_arrow_down, color: colors.onSurfaceVariant),
+          borderRadius: appRadius(AppRadii.md),
+          dropdownColor: colors.card,
+          style: styles.bodyLarge,
+          decoration: InputDecoration(
+            labelText: l10n.adLinkKindLabel,
+            labelStyle: styles.bodyMedium,
+          ),
           items: AdLinkKind.values.map((k) {
             return DropdownMenuItem(value: k, child: Text(_kindLabel(l10n, k)));
           }).toList(),
@@ -137,7 +153,18 @@ class _LinkTargetPickerState extends State<LinkTargetPicker> {
             initialValue: _kPropertyTypeKeys.contains(_valueController.text)
                 ? _valueController.text
                 : null,
-            decoration: InputDecoration(labelText: _valueHint(l10n, _kind)),
+            isExpanded: true,
+            icon: Icon(
+              Icons.keyboard_arrow_down,
+              color: colors.onSurfaceVariant,
+            ),
+            borderRadius: appRadius(AppRadii.md),
+            dropdownColor: colors.card,
+            style: styles.bodyLarge,
+            decoration: InputDecoration(
+              labelText: _valueHint(l10n, _kind),
+              labelStyle: styles.bodyMedium,
+            ),
             items: _kPropertyTypeKeys
                 .map((k) => DropdownMenuItem(value: k, child: Text(k)))
                 .toList(),
@@ -154,7 +181,11 @@ class _LinkTargetPickerState extends State<LinkTargetPicker> {
         else
           TextFormField(
             controller: _valueController,
-            decoration: InputDecoration(labelText: _valueHint(l10n, _kind)),
+            style: styles.bodyLarge,
+            decoration: InputDecoration(
+              labelText: _valueHint(l10n, _kind),
+              labelStyle: styles.bodyMedium,
+            ),
             keyboardType: _kind == AdLinkKind.external
                 ? TextInputType.url
                 : TextInputType.text,

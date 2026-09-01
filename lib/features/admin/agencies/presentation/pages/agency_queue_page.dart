@@ -6,18 +6,21 @@
 // Mirrors ReportsQueuePage (Phase 18).
 // Constitution IX: zero Supabase imports.
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/di/injection.dart';
 import '../../../../../core/routing/app_router.dart';
 import '../../../../../core/theme/colors.dart';
 import '../../../../../core/theme/spacing.dart';
-import '../../../../../core/theme/typography.dart';
-import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_spinner.dart';
 import '../../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../../core/widgets/empty_state.dart';
+import '../../../../../core/widgets/error_state.dart';
 import '../../../../../core/widgets/loading_state.dart';
+import '../../../../../core/widgets/staggered_list_item.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../agency/domain/entities/agency_status.dart';
 import '../bloc/agency_queue_bloc.dart';
@@ -104,7 +107,9 @@ class _AgencyQueueViewState extends State<_AgencyQueueView> {
                   return const _QueueSkeleton();
                 }
                 if (state.failure != null && state.items.isEmpty) {
-                  return _ErrorState(
+                  // Batch-2: the local _ErrorState clone -> shared ErrorState.
+                  return ErrorState(
+                    title: l10n.agencies_queue_title,
                     message: state.failure!.message,
                     onRetry: () => ctx.read<AgencyQueueBloc>().add(
                       const AgencyQueueRefresh(),
@@ -112,17 +117,28 @@ class _AgencyQueueViewState extends State<_AgencyQueueView> {
                   );
                 }
                 if (state.isEmpty) {
+                  // Batch-2: a bare centred Text under a hand-tuned spacer ->
+                  // the shared EmptyState, still scrollable so the existing
+                  // pull-to-refresh keeps working while empty.
                   return RefreshIndicator(
                     onRefresh: () async {
                       ctx.read<AgencyQueueBloc>().add(
                         const AgencyQueueRefresh(),
                       );
                     },
-                    child: ListView(
-                      children: [
-                        const SizedBox(height: AppSpacing.xl),
-                        Center(child: Text(l10n.agencies_queue_empty)),
-                      ],
+                    child: LayoutBuilder(
+                      builder: (context, constraints) => ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          SizedBox(
+                            height: constraints.maxHeight,
+                            child: EmptyState(
+                              icon: LucideIcons.building_2,
+                              headline: l10n.agencies_queue_empty,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 }
@@ -132,6 +148,7 @@ class _AgencyQueueViewState extends State<_AgencyQueueView> {
                   },
                   child: ListView.separated(
                     controller: _scrollController,
+                    physics: const AlwaysScrollableScrollPhysics(),
                     padding: const EdgeInsetsDirectional.all(AppSpacing.md),
                     itemCount:
                         state.items.length + (state.isLoadingNextPage ? 1 : 0),
@@ -145,16 +162,19 @@ class _AgencyQueueViewState extends State<_AgencyQueueView> {
                         );
                       }
                       final item = state.items[index];
-                      return AgencyQueueCard(
-                        item: item,
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute<void>(
-                              builder: (_) =>
-                                  AgencyDetailPage(agencyId: item.agency.id),
-                            ),
-                          );
-                        },
+                      return StaggeredListItem(
+                        index: index,
+                        child: AgencyQueueCard(
+                          item: item,
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) =>
+                                    AgencyDetailPage(agencyId: item.agency.id),
+                              ),
+                            );
+                          },
+                        ),
                       );
                     },
                   ),
@@ -182,7 +202,7 @@ class _AgencyStatusFilterBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
 
     String statusLabel(AgencyStatus s) {
       switch (s) {
@@ -197,71 +217,48 @@ class _AgencyStatusFilterBar extends StatelessWidget {
       }
     }
 
-    return Padding(
-      padding: const EdgeInsetsDirectional.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
+    // Batch-2: the bar sat on the bare sheet with no separation, and its chips
+    // pinned `colorScheme.primaryContainer` directly instead of inheriting the
+    // DS chipTheme. Now a hairline-bottom card bar of ChoiceChips with the
+    // consumer selection haptic (StatusFilterChipRow idiom).
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colors.card,
+        border: BorderDirectional(bottom: BorderSide(color: colors.outline)),
       ),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
+        padding: const EdgeInsetsDirectional.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
         child: Row(
           children: [
             // "All" chip
             Padding(
               padding: const EdgeInsetsDirectional.only(end: AppSpacing.sm),
-              child: FilterChip(
+              child: ChoiceChip(
                 label: Text(l10n.agency_filter_status_label),
                 selected: selected == null,
-                onSelected: (_) => onChanged(null),
-                selectedColor: theme.colorScheme.primaryContainer,
+                onSelected: (_) {
+                  HapticFeedback.selectionClick();
+                  onChanged(null);
+                },
               ),
             ),
             // One chip per status
             for (final status in AgencyStatus.values)
               Padding(
                 padding: const EdgeInsetsDirectional.only(end: AppSpacing.sm),
-                child: FilterChip(
+                child: ChoiceChip(
                   label: Text(statusLabel(status)),
                   selected: selected == status,
-                  onSelected: (picked) => onChanged(picked ? status : null),
-                  selectedColor: theme.colorScheme.primaryContainer,
+                  onSelected: (picked) {
+                    HapticFeedback.selectionClick();
+                    onChanged(picked ? status : null);
+                  },
                 ),
               ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Error state ──────────────────────────────────────────────────────────────
-
-class _ErrorState extends StatelessWidget {
-  const _ErrorState({required this.message, required this.onRetry});
-
-  final String message;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-    final styles = AppTextStyles.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: styles.bodyLarge.copyWith(color: colors.error),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            AppButton(
-              label: AppLocalizations.of(context)!.actionReload,
-              onPressed: onRetry,
-            ),
           ],
         ),
       ),

@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
+import '../../../../core/widgets/ds/dc_status_chip.dart';
 import '../../../../l10n/app_localizations.dart';
 
+/// "System row" marker — an outlined DS status chip (batch-2 restyle: was a
+/// bare Material [Chip] on `secondaryContainer`). Matches SystemCurrencyBadge.
 class SystemRowBadge extends StatelessWidget {
   const SystemRowBadge({super.key});
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Chip(
-      label: Text(
-        l10n.systemBadge,
-        style: Theme.of(context).textTheme.labelSmall,
-      ),
-      backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-      padding: EdgeInsets.zero,
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    return DcStatusChip(
+      label: l10n.systemBadge,
+      tone: DcStatusTone.outline,
+      icon: LucideIcons.lock,
     );
   }
 }

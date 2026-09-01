@@ -5,6 +5,7 @@
 // and remove actions. The owner row is protected (no role/remove actions).
 // Phase 2 tokens only; no inline hex/font-size/padding.
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
@@ -71,7 +72,10 @@ class AgencyMemberTile extends StatelessWidget {
               shape: BoxShape.circle,
               color: colors.primaryContainer,
             ),
-            child: Icon(Icons.person_outline, color: colors.onPrimaryContainer),
+            child: Icon(
+              LucideIcons.user_round,
+              color: colors.onPrimaryContainer,
+            ),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -124,7 +128,18 @@ class AgencyMemberTile extends StatelessWidget {
           ),
           if (showActions)
             PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert),
+              // Batch-2: Lucide glyph + token popup surface/shape, matching the
+              // DS ListingViewModeSwitcher menu.
+              icon: Icon(
+                LucideIcons.ellipsis_vertical,
+                color: colors.textMuted,
+              ),
+              position: PopupMenuPosition.under,
+              color: colors.card,
+              shape: RoundedRectangleBorder(
+                borderRadius: appRadius(AppRadii.lg),
+                side: BorderSide(color: colors.outline),
+              ),
               onSelected: (value) {
                 switch (value) {
                   case 'toggle_role':

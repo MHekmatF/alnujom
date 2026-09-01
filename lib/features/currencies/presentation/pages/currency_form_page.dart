@@ -12,6 +12,7 @@ import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_spinner.dart';
+import '../../../../core/widgets/app_toggle.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../core/widgets/locale_toggle_action.dart';
@@ -211,6 +212,9 @@ class _CurrencyFormViewState extends State<_CurrencyFormView> {
                         const SizedBox(height: AppSpacing.lg),
                         AppButton(
                           label: l10n.submitButton,
+                          // Batch-2: form primary CTAs are full-width in the DS
+                          // (auth/create-listing); this one was content-width.
+                          expanded: true,
                           loading: isSaving,
                           onPressed: isSaving ? null : () => _submit(context),
                         ),
@@ -313,7 +317,9 @@ class _ActiveSwitchRow extends StatelessWidget {
             const SizedBox(width: AppSpacing.md),
             Expanded(child: Text(label, style: styles.bodyLarge)),
             const SizedBox(width: AppSpacing.sm),
-            Switch(value: value, onChanged: onChanged),
+            // Batch-2: the bare Material Switch -> the DS AppToggle, so all
+            // four internal toggle rows share one active-state treatment.
+            AppToggle(value: value, onChanged: onChanged),
           ],
         ),
       ),

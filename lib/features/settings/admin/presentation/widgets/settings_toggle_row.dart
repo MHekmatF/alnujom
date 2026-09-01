@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../../../core/theme/spacing.dart';
 import '../../../../../../core/theme/typography.dart';
-import '../../../../../../core/widgets/app_spinner.dart';
+import '../../../../../../core/widgets/_widget_support.dart';
+import '../../../../../../core/widgets/app_toggle.dart';
 
 /// A single-row labeled toggle for a boolean setting value.
 ///
@@ -30,18 +31,26 @@ class SettingsToggleRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Batch-2: the label used `bodyMedium` (the DS *secondary* body token) even
+    // though it is the row's primary copy — bumped to `bodyLarge`; the whole row
+    // is now a 48dp-minimum, merged-Semantics toggle target.
     return Padding(
       padding: const EdgeInsetsDirectional.symmetric(vertical: AppSpacing.xs),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Text(label, style: AppTextStyles.of(context).bodyMedium),
+      child: MergeSemantics(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: kAppMinTouchTarget),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(label, style: AppTextStyles.of(context).bodyLarge),
+              ),
+              isSaving
+                  ? appInlineSpinner(context)
+                  : AppToggle(value: value, onChanged: onChanged),
+            ],
           ),
-          isSaving
-              ? const AppSpinner()
-              : Switch(value: value, onChanged: onChanged),
-        ],
+        ),
       ),
     );
   }

@@ -18,6 +18,7 @@ import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_spinner.dart';
 import '../../../../../core/widgets/app_toast.dart';
 import '../../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../../core/widgets/error_state.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../../shared/presentation/widgets/listing_display/listing_amenities_block.dart';
 import '../../../../../shared/presentation/widgets/listing_display/listing_description_block.dart';
@@ -46,13 +47,17 @@ class ListingPreviewPage extends StatelessWidget {
     return BlocProvider<ListingPreviewBloc>(
       create: (_) =>
           getIt<ListingPreviewBloc>()..add(ListingPreviewLoad(listingId)),
-      child: const _ListingPreviewView(),
+      // Batch-2: the id is threaded through so the load-failure body can offer
+      // a Retry that re-dispatches the very same ListingPreviewLoad event.
+      child: _ListingPreviewView(listingId: listingId),
     );
   }
 }
 
 class _ListingPreviewView extends StatelessWidget {
-  const _ListingPreviewView();
+  const _ListingPreviewView({required this.listingId});
+
+  final String listingId;
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +94,15 @@ class _ListingPreviewView extends StatelessWidget {
             return const AppSpinner.page();
           }
           if (state.failure != null && state.preview == null) {
-            return _ErrorState(message: state.failure!.message);
+            // Batch-2: the local _ErrorState clone (a lone red paragraph with
+            // no way out) -> the shared ErrorState, which adds a Retry.
+            return ErrorState(
+              title: l10n.errorGeneric,
+              message: state.failure!.message,
+              onRetry: () => ctx.read<ListingPreviewBloc>().add(
+                ListingPreviewLoad(listingId),
+              ),
+            );
           }
           if (state.preview == null) {
             return const SizedBox.shrink();
@@ -403,27 +416,6 @@ class _FeaturedBanner extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _ErrorState extends StatelessWidget {
-  const _ErrorState({required this.message});
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-    final styles = AppTextStyles.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-        child: Text(
-          message,
-          textAlign: TextAlign.center,
-          style: styles.bodyLarge.copyWith(color: colors.error),
-        ),
       ),
     );
   }

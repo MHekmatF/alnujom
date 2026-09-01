@@ -147,7 +147,14 @@ class _RejectReasonDialogState extends State<RejectReasonDialog> {
                   for (final preset in RejectionReason.values)
                     RadioListTile<RejectionReason>(
                       value: preset,
-                      title: Text(_presetLabel(l10n, preset)),
+                      title: Text(
+                        _presetLabel(l10n, preset),
+                        style: styles.bodyLarge,
+                      ),
+                      // Batch-2: the tile text inherited the ambient style and
+                      // the radio used Material's default fill; both now come
+                      // from the DS tokens.
+                      activeColor: colors.primary,
                       contentPadding: EdgeInsets.zero,
                       dense: true,
                     ),
@@ -168,7 +175,11 @@ class _RejectReasonDialogState extends State<RejectReasonDialog> {
               controller: _detailController,
               maxLines: 4,
               maxLength: _maxDetailLength,
-              decoration: const InputDecoration(border: OutlineInputBorder()),
+              style: styles.bodyLarge,
+              // Batch-2: the hardcoded `OutlineInputBorder()` overrode the DS
+              // inputDecorationTheme (token fill + focus ring); dropping it
+              // restores them.
+              decoration: const InputDecoration(),
               // Custom counter rendered below — suppress the built-in one.
               buildCounter:
                   (

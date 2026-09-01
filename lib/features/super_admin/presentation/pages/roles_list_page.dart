@@ -11,7 +11,10 @@ import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../core/widgets/empty_state.dart';
+import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
+import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/role_with_counts.dart';
 import '../../domain/failures.dart';
@@ -74,6 +77,8 @@ class _RolesListView extends StatelessWidget {
       ],
       floatingActionButton: canCreate
           ? FloatingActionButton(
+              // Batch-2 a11y: the icon-only FAB had no accessible name.
+              tooltip: l10n.superAdminCreateRoleTitle,
               onPressed: () async {
                 final created = await context.push<bool>(
                   AppRoutes.superAdminRoleCreate,
@@ -90,38 +95,58 @@ class _RolesListView extends StatelessWidget {
           return switch (state) {
             RolesListInitial() ||
             RolesListLoading() => const _RolesListSkeleton(),
-            RolesListLoadFailure(:final failure) => Center(
-              child: Text(failure.message, textAlign: TextAlign.center),
-            ),
-            RolesListLoaded(:final roles) => RefreshIndicator(
-              onRefresh: () async =>
+            // Batch-2: the bare centred Text error -> the shared ErrorState,
+            // which adds the glyph badge and a Retry (there was none).
+            RolesListLoadFailure(:final failure) => ErrorState(
+              title: l10n.superAdminRolesListTitle,
+              message: failure.message,
+              onRetry: () =>
                   context.read<RolesListBloc>().add(const RefreshRoles()),
-              child: ListView.separated(
-                padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
-                itemCount: roles.length,
-                separatorBuilder: (_, __) =>
-                    const SizedBox(height: AppSpacing.sm),
-                itemBuilder: (context, index) {
-                  final role = roles[index];
-                  return RoleCard(
-                    role: role,
-                    // push (not go) so back returns here / to the admin
-                    // dashboard; refresh on return to reflect any edits.
-                    onTap: () async {
-                      await context.push(
-                        '${AppRoutes.superAdminRoles}/${role.roleId}',
-                      );
-                      if (context.mounted) {
-                        context.read<RolesListBloc>().add(const RefreshRoles());
-                      }
-                    },
-                    onLongPress: canDelete && !role.isSystem
-                        ? () => _deleteRole(context, role)
-                        : null,
-                  );
-                },
-              ),
             ),
+            RolesListLoaded(:final roles) =>
+              roles.isEmpty
+                  // Batch-2: the loaded-but-empty case rendered a blank sheet.
+                  ? EmptyState(
+                      icon: LucideIcons.shield,
+                      headline: l10n.superAdminRolesListTitle,
+                      body: l10n.superAdminCreateRoleTitle,
+                    )
+                  : RefreshIndicator(
+                      onRefresh: () async => context.read<RolesListBloc>().add(
+                        const RefreshRoles(),
+                      ),
+                      child: ListView.separated(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+                        itemCount: roles.length,
+                        separatorBuilder: (_, __) =>
+                            const SizedBox(height: AppSpacing.sm),
+                        itemBuilder: (context, index) {
+                          final role = roles[index];
+                          return StaggeredListItem(
+                            index: index,
+                            child: RoleCard(
+                              role: role,
+                              // push (not go) so back returns here / to the admin
+                              // dashboard; refresh on return to reflect edits.
+                              onTap: () async {
+                                await context.push(
+                                  '${AppRoutes.superAdminRoles}/${role.roleId}',
+                                );
+                                if (context.mounted) {
+                                  context.read<RolesListBloc>().add(
+                                    const RefreshRoles(),
+                                  );
+                                }
+                              },
+                              onLongPress: canDelete && !role.isSystem
+                                  ? () => _deleteRole(context, role)
+                                  : null,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
           };
         },
       ),

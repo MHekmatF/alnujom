@@ -23,6 +23,7 @@ import '../../../../../core/theme/typography.dart';
 import '../../../../../core/widgets/_widget_support.dart';
 import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_spinner.dart';
+import '../../../../../core/widgets/app_toggle.dart';
 import '../../../../../core/widgets/app_toast.dart';
 import '../../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../../core/widgets/press_scale.dart';
@@ -246,13 +247,9 @@ class _AdEditorPageState extends State<AdEditorPage> {
                 ),
               )
             else
-              TextButton(
-                onPressed: _save,
-                style: TextButton.styleFrom(
-                  foregroundColor: colors.onBrandHeader,
-                ),
-                child: Text(l10n.saveLabel),
-              ),
+              // Batch-2: a stock TextButton hand-repainted onto the crown
+              // became the DS DcCrownTextButton (the crown's own action idiom).
+              DcCrownTextButton(label: l10n.saveLabel, onTap: _save),
           ],
           body: Form(
             key: _formKey,
@@ -515,7 +512,9 @@ class _ActiveSwitchRow extends StatelessWidget {
             const SizedBox(width: AppSpacing.md),
             Expanded(child: Text(label, style: styles.bodyLarge)),
             const SizedBox(width: AppSpacing.sm),
-            Switch(value: value, onChanged: onChanged),
+            // Batch-2: the bare Material Switch -> the DS AppToggle, so all
+            // four internal toggle rows share one active-state treatment.
+            AppToggle(value: value, onChanged: onChanged),
           ],
         ),
       ),

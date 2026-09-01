@@ -8,6 +8,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 
@@ -18,10 +19,12 @@ import '../../../../../core/theme/radii.dart';
 import '../../../../../core/theme/spacing.dart';
 import '../../../../../core/theme/typography.dart';
 import '../../../../../core/widgets/_widget_support.dart';
-import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_spinner.dart';
 import '../../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../../core/widgets/empty_state.dart';
+import '../../../../../core/widgets/error_state.dart';
 import '../../../../../core/widgets/loading_state.dart';
+import '../../../../../core/widgets/staggered_list_item.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../domain/entities/audit_log_entry.dart';
 import '../bloc/audit_log_cubit.dart';
@@ -87,19 +90,31 @@ class _AuditLogsViewState extends State<_AuditLogsView> {
             return const _LogsSkeleton();
           }
           if (state.failure != null && state.items.isEmpty) {
-            return _ErrorState(
+            // Batch-2: the local _ErrorState clone -> shared ErrorState.
+            return ErrorState(
+              title: l10n.auditLogsTitle,
               message: state.failure!.message,
               onRetry: () => ctx.read<AuditLogCubit>().refresh(),
             );
           }
           if (state.isEmpty) {
+            // Batch-2: a bare centred Text under a hand-tuned spacer -> the
+            // shared EmptyState, still scrollable so pull-to-refresh works.
             return RefreshIndicator(
               onRefresh: () => ctx.read<AuditLogCubit>().refresh(),
-              child: ListView(
-                children: [
-                  const SizedBox(height: AppSpacing.xl),
-                  Center(child: Text(l10n.auditLogsEmpty)),
-                ],
+              child: LayoutBuilder(
+                builder: (context, constraints) => ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    SizedBox(
+                      height: constraints.maxHeight,
+                      child: EmptyState(
+                        icon: LucideIcons.history,
+                        headline: l10n.auditLogsEmpty,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           }
@@ -107,6 +122,7 @@ class _AuditLogsViewState extends State<_AuditLogsView> {
             onRefresh: () => ctx.read<AuditLogCubit>().refresh(),
             child: ListView.separated(
               controller: _scrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsetsDirectional.all(AppSpacing.md),
               itemCount: state.items.length + (state.isLoadingNextPage ? 1 : 0),
               separatorBuilder: (_, __) =>
@@ -118,7 +134,10 @@ class _AuditLogsViewState extends State<_AuditLogsView> {
                     child: AppSpinner(),
                   );
                 }
-                return _AuditLogCard(entry: state.items[index]);
+                return StaggeredListItem(
+                  index: index,
+                  child: _AuditLogCard(entry: state.items[index]),
+                );
               },
             ),
           );
@@ -160,6 +179,13 @@ class _AuditLogCard extends StatelessWidget {
         ),
         shape: const Border(),
         collapsedShape: const Border(),
+        // Batch-2: the expand caret and title used Material's default
+        // primary/onSurface pair; both now resolve from the DS tokens so the
+        // expanded state reads as brand blue in light AND dark.
+        iconColor: colors.primary,
+        collapsedIconColor: colors.textMuted,
+        textColor: colors.onSurface,
+        collapsedTextColor: colors.onSurface,
         childrenPadding: const EdgeInsetsDirectional.only(
           start: AppSpacing.lg,
           end: AppSpacing.lg,
@@ -276,39 +302,6 @@ class _JsonBlock extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _ErrorState extends StatelessWidget {
-  const _ErrorState({required this.message, required this.onRetry});
-
-  final String message;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-    final styles = AppTextStyles.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: styles.bodyLarge.copyWith(color: colors.error),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            AppButton(
-              label: AppLocalizations.of(context)!.actionReload,
-              onPressed: onRetry,
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

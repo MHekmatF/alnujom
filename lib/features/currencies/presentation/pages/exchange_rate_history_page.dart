@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
@@ -7,11 +8,14 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
-import '../../../../core/widgets/app_button.dart';
+import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../core/widgets/empty_state.dart';
+import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/locale_toggle_action.dart';
+import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/currency.dart';
 import '../../domain/usecases/list_currencies.dart';
@@ -139,24 +143,14 @@ class _HistoryErrorView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(_errorText(l10n, state.code), textAlign: TextAlign.center),
-            const SizedBox(height: AppSpacing.md),
-            AppButton(
-              label: l10n.retryButton,
-              onPressed: () => context.read<ExchangeRateHistoryBloc>().add(
-                LoadHistory(
-                  baseCurrency: baseCurrencyCode,
-                  targetFilter: state.targetFilter,
-                ),
-              ),
-            ),
-          ],
+    // Batch-2: the ad-hoc Text + AppButton column became the shared ErrorState
+    // (glyph badge + tonal Retry). Same retry event, unchanged.
+    return ErrorState(
+      title: _errorText(l10n, state.code),
+      onRetry: () => context.read<ExchangeRateHistoryBloc>().add(
+        LoadHistory(
+          baseCurrency: baseCurrencyCode,
+          targetFilter: state.targetFilter,
         ),
       ),
     );
@@ -193,13 +187,20 @@ class _HistoryLoadedView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     final targetCurrencies = currencies
         .where((currency) => currency.code != state.baseCurrency)
         .toList();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (loadingMore) const LinearProgressIndicator(minHeight: 2),
+        if (loadingMore)
+          LinearProgressIndicator(
+            minHeight: AppSpacing.xxs,
+            color: colors.primary,
+            backgroundColor: colors.surfaceVariant,
+          ),
         Padding(
           padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
           child: Wrap(
@@ -207,28 +208,38 @@ class _HistoryLoadedView extends StatelessWidget {
             runSpacing: AppSpacing.sm,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              Text(l10n.targetCurrencyFilterLabel),
-              FilterChip(
-                label: Text(l10n.targetCurrencyAnyLabel),
+              Text(
+                l10n.targetCurrencyFilterLabel,
+                style: styles.labelMedium.copyWith(color: colors.textMuted),
+              ),
+              // Batch-2: FilterChip -> ChoiceChip + selection haptic, matching
+              // the consumer StatusFilterChipRow idiom. Both already inherit the
+              // DS chipTheme; the swap is for one consistent chip family.
+              _TargetChip(
+                label: l10n.targetCurrencyAnyLabel,
                 selected: state.targetFilter == null,
-                onSelected: (_) => context.read<ExchangeRateHistoryBloc>().add(
+                onSelected: () => context.read<ExchangeRateHistoryBloc>().add(
                   const TargetFilterChanged(null),
                 ),
               ),
               for (final currency in targetCurrencies)
-                FilterChip(
-                  label: Text(currency.code),
+                _TargetChip(
+                  label: currency.code,
                   selected: state.targetFilter == currency.code,
-                  onSelected: (_) => context
-                      .read<ExchangeRateHistoryBloc>()
-                      .add(TargetFilterChanged(currency.code)),
+                  onSelected: () => context.read<ExchangeRateHistoryBloc>().add(
+                    TargetFilterChanged(currency.code),
+                  ),
                 ),
             ],
           ),
         ),
         Expanded(
           child: state.rates.isEmpty
-              ? Center(child: Text(l10n.noRatesYet))
+              // Batch-2: bare centred Text -> shared EmptyState.
+              ? EmptyState(
+                  icon: LucideIcons.chart_line,
+                  headline: l10n.noRatesYet,
+                )
               : ListView.separated(
                   controller: scrollController,
                   padding: const EdgeInsetsDirectional.only(
@@ -241,13 +252,44 @@ class _HistoryLoadedView extends StatelessWidget {
                       const SizedBox(height: AppSpacing.sm),
                   itemBuilder: (context, index) {
                     if (index >= state.rates.length) {
-                      return const AppSpinner();
+                      return const Padding(
+                        padding: EdgeInsetsDirectional.all(AppSpacing.md),
+                        child: AppSpinner(),
+                      );
                     }
-                    return ExchangeRateRow(exchangeRate: state.rates[index]);
+                    return StaggeredListItem(
+                      index: index,
+                      child: ExchangeRateRow(exchangeRate: state.rates[index]),
+                    );
                   },
                 ),
         ),
       ],
+    );
+  }
+}
+
+/// A selectable target-currency filter chip (DS `chipTheme` + selection haptic).
+class _TargetChip extends StatelessWidget {
+  const _TargetChip({
+    required this.label,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: (_) {
+        HapticFeedback.selectionClick();
+        onSelected();
+      },
     );
   }
 }
