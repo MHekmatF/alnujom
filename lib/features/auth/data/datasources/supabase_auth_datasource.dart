@@ -72,11 +72,17 @@ class SupabaseAuthDataSource {
     await _auth.signOut();
   }
 
-  Future<void> invokeRequestPasswordReset({required PhoneNumber phone}) async {
-    await supabase.Supabase.instance.client.functions.invoke(
+  /// Returns the Edge Function's `status`: `sent`, `no_email` or `not_found`.
+  /// An unrecognised or missing status is reported as `not_found` so the UI
+  /// never claims a mail was sent that was not.
+  Future<String> invokeRequestPasswordReset({required PhoneNumber phone}) async {
+    final res = await supabase.Supabase.instance.client.functions.invoke(
       'request_password_reset',
       body: {'phone': phone.e164},
     );
+    final data = res.data;
+    if (data is Map && data['status'] is String) return data['status'] as String;
+    return 'not_found';
   }
 
   /// Spec 005 D-01 — sets a new password on the CURRENTLY signed-in user.

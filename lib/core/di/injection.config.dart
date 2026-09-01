@@ -221,8 +221,12 @@ import '../../features/auth/data/datasources/supabase_auth_datasource.dart'
 import '../../features/auth/data/repositories/auth_repository_impl.dart'
     as _i153;
 import '../../features/auth/domain/repositories/auth_repository.dart' as _i787;
+import '../../features/auth/domain/usecases/request_password_reset.dart'
+    as _i956;
 import '../../features/auth/domain/usecases/update_password.dart' as _i455;
 import '../../features/auth/presentation/bloc/auth_bloc.dart' as _i797;
+import '../../features/auth/presentation/bloc/password_reset_cubit.dart'
+    as _i122;
 import '../../features/auth/presentation/bloc/set_new_password_cubit.dart'
     as _i930;
 import '../../features/chat/data/datasources/supabase_chat_datasource.dart'
@@ -769,6 +773,9 @@ _i174.GetIt $initGetIt(
   );
   gh.lazySingleton<_i24.SupabaseUserSearchDataSource>(
     () => _i24.SupabaseUserSearchDataSource(),
+  );
+  gh.factory<_i122.PasswordResetCubit>(
+    () => _i122.PasswordResetCubit(gh<_i956.RequestPasswordReset>()),
   );
   gh.lazySingleton<_i726.AnalyticsService>(
     () => _i172.SentryAnalyticsService(),

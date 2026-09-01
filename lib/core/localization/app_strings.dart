@@ -339,6 +339,26 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get reset_password_sent_message =>
+      _resolve('reset_password_sent_message', (loc) => loc.reset_password_sent_message);
+
+  @override
+  String get reset_password_not_found_message =>
+      _resolve('reset_password_not_found_message', (loc) => loc.reset_password_not_found_message);
+
+  @override
+  String get reset_password_create_account =>
+      _resolve('reset_password_create_account', (loc) => loc.reset_password_create_account);
+
+  @override
+  String get reset_password_no_email_message =>
+      _resolve('reset_password_no_email_message', (loc) => loc.reset_password_no_email_message);
+
+  @override
+  String get reset_password_no_email_no_contact =>
+      _resolve('reset_password_no_email_no_contact', (loc) => loc.reset_password_no_email_no_contact);
+
+  @override
   String get reset_password_new_title => _resolve(
     'reset_password_new_title',
     (loc) => loc.reset_password_new_title,

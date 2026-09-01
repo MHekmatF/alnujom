@@ -171,6 +171,11 @@
   "reset_password_phone_label": "رقم الهاتف",
   "reset_password_submit": "أرسل رابط الإعادة",
   "reset_password_generic_response": "إذا كان هناك حساب مرتبط بهذا الرقم، فقد تم إرسال رابط إعادة تعيين كلمة المرور.",
+  "reset_password_sent_message": "أرسلنا رابط إعادة تعيين كلمة المرور إلى البريد الإلكتروني المسجّل في حسابك. افتحه من هذا الهاتف لاختيار كلمة مرور جديدة.",
+  "reset_password_not_found_message": "لا يوجد حساب مسجّل بهذا الرقم. تأكّد من الرقم، أو أنشئ حساباً جديداً.",
+  "reset_password_create_account": "جرّب رقماً آخر",
+  "reset_password_no_email_message": "حسابك غير مرتبط ببريد إلكتروني، فلا نستطيع إرسال رابط إعادة التعيين. تواصل معنا وسنعيد تعيين كلمة المرور لك.",
+  "reset_password_no_email_no_contact": "حسابك غير مرتبط ببريد إلكتروني، فلا نستطيع إرسال رابط إعادة التعيين. يرجى التواصل مع إدارة التطبيق لإعادة تعيين كلمة المرور.",
 
   "reset_password_new_title": "اختر كلمة مرور جديدة",
   "@reset_password_new_title": {"description": "Spec 005 D-01 — reset-completion screen."},
