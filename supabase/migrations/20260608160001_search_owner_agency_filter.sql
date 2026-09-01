@@ -1,0 +1,19 @@
+-- 20260608160001_search_owner_agency_filter
+--
+-- RECONSTRUCTED 2026-07-17 (commit-only — already applied to the live DB on
+-- 2026-06-08 as tracker version 20260608160001 / name
+-- `20260608160001_search_owner_agency_filter`). DO NOT re-apply through MCP.
+--
+-- This Phase-026 migration introduced the owner-vs-agency search filter
+-- (`p_is_agency`) by CREATE OR REPLACE-ing public.search_listings. Its exact
+-- 2026-06-08 function body was NOT recoverable from the live DB (the function has
+-- since been re-defined several times — amenities in Phase 031, deed/finish/verified
+-- in Phase 035). Rather than fabricate an anachronistic body, this file is a
+-- documented no-op placeholder so the repo has an entry for this tracker version.
+--
+-- The AUTHORITATIVE, current definition of search_listings lives in:
+--   20260706171829_035_search_listings_deed_finish_verified_filters.sql  (as applied)
+--   20260717120002_fix_search_listings_price_bounds.sql                  (current fix)
+-- `p_is_agency` and its predicate `(p_is_agency IS NULL OR (v.agency_id IS NOT NULL) = p_is_agency)`
+-- are present in both. This placeholder exists only to close the DB-1 tracker/repo gap.
+do $$ begin end $$;

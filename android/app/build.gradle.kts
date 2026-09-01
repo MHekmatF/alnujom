@@ -75,6 +75,17 @@ android {
             // A release build WITHOUT a valid android/key.properties (and keystore)
             // will fail at configuration time (see signingConfigs above).
             signingConfig = signingConfigs.getByName("release")
+            // QA E2E — PERF-M5: R8 minify was VALIDATED (a release build passes with the
+            // keep rules in proguard-rules.pro) but left DISABLED on purpose: on a Flutter
+            // APK it shrinks almost nothing (~0.5 MB — the bulk is native .so, which R8
+            // does not touch) while adding release-only runtime risk. The real
+            // download-shrink is the per-ABI split, which needs no code change:
+            //   flutter build apk --release --split-per-abi --dart-define-from-file=.env.json
+            // (ships a ~arm64-only APK, roughly half of the ~90 MB fat APK). Flip the three
+            // lines below on if you later want the (minor) obfuscation:
+            //   isMinifyEnabled = true
+            //   isShrinkResources = true
+            //   proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
 }

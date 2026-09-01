@@ -162,7 +162,12 @@ class _LocationPickerBody extends StatelessWidget {
               )
             else
               LocationPickerDropdown(
-                label: l10n.locationPickerSelectArea,
+                // FUNC-M2: the add-listing form requires an area (server-side
+                // submit_listing rejects a null area_id), so drop the "(optional)"
+                // suffix there. Search passes areaRequired:false and keeps it.
+                label: areaRequired
+                    ? l10n.locationPickerSelectAreaRequired
+                    : l10n.locationPickerSelectArea,
                 items: areaItems,
                 value: state.selectedAreaId,
                 onChanged: (id) {

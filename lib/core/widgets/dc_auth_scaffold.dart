@@ -6,6 +6,7 @@ import '../theme/spacing.dart';
 import '../theme/typography.dart';
 import '../../l10n/app_localizations.dart';
 import '_widget_support.dart';
+import 'brand_mark.dart';
 
 /// The DC "Blue Crown" auth shell (`AlNujom.dc.html` §AUTH): a brand-blue top
 /// carrying the star logo + "النجوم" wordmark, over a white sheet (rounded top)
@@ -44,11 +45,7 @@ class DcAuthScaffold extends StatelessWidget {
                     color: colors.onBrandHeader,
                     borderRadius: appRadius(AppRadii.lg),
                   ),
-                  child: Icon(
-                    Icons.star,
-                    size: 38,
-                    color: colors.brandHeader,
-                  ),
+                  child: const BrandMark(size: 38),
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Text(

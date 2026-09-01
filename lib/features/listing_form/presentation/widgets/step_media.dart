@@ -21,6 +21,7 @@ import '../bloc/listing_form_bloc.dart';
 import '../bloc/listing_form_event.dart';
 import '../util/android_settings_channel.dart';
 import 'media_picker.dart';
+import 'required_field_chip.dart';
 import 'step_section.dart';
 
 /// Phase 11 — step 6 (Media) of the seven-step listing form.
@@ -72,8 +73,18 @@ class StepMedia extends StatelessWidget {
           icon: Icons.photo_library_outlined,
           title: l10n.listingFormStepMediaTitle,
           subtitle: l10n.listingFormStepMediaSubtitle,
+          // FUNC-M3: photos are effectively required (submit_listing rejects a
+          // draft with < 1 watermarked image), so mark the section required and
+          // hint it until the publisher adds their first photo.
+          trailing: isEditable && imageCount < 1
+              ? const RequiredFieldChip()
+              : null,
           children: [
             if (!isEditable) _ReadOnlyBanner(l10n: l10n),
+            if (isEditable && imageCount < 1) ...[
+              _MinPhotosHint(l10n: l10n),
+              const SizedBox(height: AppSpacing.md),
+            ],
             if (isEditable) ...[
               _AddAffordances(
                 imagesFull: imagesFull,
@@ -89,6 +100,38 @@ class StepMedia extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+/// FUNC-M3 — a subtle "at least one photo required" hint shown on the media step
+/// until the publisher adds their first image. Reuses the same localized string
+/// the submit-failure dialog shows so the requirement reads consistently.
+class _MinPhotosHint extends StatelessWidget {
+  const _MinPhotosHint({required this.l10n});
+
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          LucideIcons.circle_alert,
+          size: AppSpacing.lg,
+          color: colors.primary,
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Text(
+            l10n.submitErrorImagesBelowMinimum,
+            style: styles.bodyMedium.copyWith(color: colors.textMuted),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -116,7 +159,11 @@ class _MediaTipsStrip extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(LucideIcons.lightbulb, size: AppSpacing.lg, color: colors.primary),
+          Icon(
+            LucideIcons.lightbulb,
+            size: AppSpacing.lg,
+            color: colors.primary,
+          ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(

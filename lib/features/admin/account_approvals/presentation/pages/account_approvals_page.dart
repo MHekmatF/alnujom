@@ -140,6 +140,13 @@ class _RequestCard extends StatelessWidget {
             _Row(l10n.admin_queue_phone_label, request.registrantPhone!),
           if (request.registrantEmail != null)
             _Row(l10n.admin_queue_email_label, request.registrantEmail!),
+          // UX-7: never render an identifier-less card — when the profile has no
+          // name / phone / email yet, fall back to the user id so the admin can
+          // tell whom they are approving.
+          if (request.registrantFullName == null &&
+              request.registrantPhone == null &&
+              request.registrantEmail == null)
+            _Row(l10n.admin_queue_user_id_label, request.userId),
           _Row(l10n.admin_queue_created_at_label, dateStr),
           const SizedBox(height: AppSpacing.md),
           Row(

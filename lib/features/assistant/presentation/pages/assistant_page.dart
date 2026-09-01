@@ -229,7 +229,7 @@ class _AssistantBubble extends StatelessWidget {
           Flexible(
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.78,
+                maxWidth: MediaQuery.sizeOf(context).width * 0.78,
               ),
               child: AppSurface(
                 radius: AppRadii.lg,
