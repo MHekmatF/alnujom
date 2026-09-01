@@ -702,6 +702,8 @@
   "@mediaGalleryVideoPlay": { "description": "Phase 12 — Accessible label for the static play-button overlay on video carousel items." },
   "descriptionReadMore": "Read more",
   "@descriptionReadMore": { "description": "Phase 12 — Read-more affordance below a truncated description." },
+  "descriptionReadLess": "Read less",
+  "@descriptionReadLess": { "description": "Collapses an expanded description back to its truncated form." },
   "priceOriginallyWas": "Originally {price}",
   "@priceOriginallyWas": { "description": "Phase 12 — Secondary line on the price block showing the publisher's stored-currency price.", "placeholders": { "price": { "type": "String" } } },
 

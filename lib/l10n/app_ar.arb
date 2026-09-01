@@ -657,6 +657,7 @@
   "mediaGalleryEmpty": "لا توجد وسائط متاحة",
   "mediaGalleryVideoPlay": "تشغيل الفيديو",
   "descriptionReadMore": "قراءة المزيد",
+  "descriptionReadLess": "عرض أقل",
   "priceOriginallyWas": "بالأصل {price}",
 
   "rejectDialogTitle": "رفض هذا الإعلان — يُرجى إعلام الناشر بالسبب",

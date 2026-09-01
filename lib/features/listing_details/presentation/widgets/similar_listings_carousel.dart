@@ -112,6 +112,14 @@ class _SimilarListingsBody extends StatelessWidget {
         final cardWidth = viewportWidth * 0.72 > _maxCardWidth
             ? _maxCardWidth
             : viewportWidth * 0.72;
+        // The card is a fixed-height box around a non-scrolling Column, so the
+        // text block below the photo would overflow it once the OS text scale
+        // grows. Let the row grow with the text instead, capped so a very large
+        // scale cannot swallow the whole screen.
+        final textScale = MediaQuery.textScalerOf(
+          context,
+        ).scale(1).clamp(1.0, 1.6);
+        final rowHeight = cardWidth * 1.12 * textScale;
 
         final header = Padding(
           padding: const EdgeInsetsDirectional.fromSTEB(
@@ -132,7 +140,7 @@ class _SimilarListingsBody extends StatelessWidget {
             children: [
               header,
               SizedBox(
-                height: cardWidth * 1.12,
+                height: rowHeight,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsetsDirectional.symmetric(
@@ -158,7 +166,7 @@ class _SimilarListingsBody extends StatelessWidget {
             children: [
               header,
               SizedBox(
-                height: cardWidth * 1.12,
+                height: rowHeight,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsetsDirectional.symmetric(

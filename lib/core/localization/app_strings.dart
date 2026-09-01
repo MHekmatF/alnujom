@@ -2198,6 +2198,10 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('descriptionReadMore', (loc) => loc.descriptionReadMore);
 
   @override
+  String get descriptionReadLess =>
+      _resolve('descriptionReadLess', (loc) => loc.descriptionReadLess);
+
+  @override
   String priceOriginallyWas(String price) => _active.priceOriginallyWas(price);
 
   // ── Phase 12 / US2 — Reject flow + publisher rejection banner ────────────

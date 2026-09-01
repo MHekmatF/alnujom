@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/motion.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -41,7 +42,7 @@ class _ListingDescriptionBlockState extends State<ListingDescriptionBlock> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         AnimatedSize(
-          duration: const Duration(milliseconds: 180),
+          duration: AppMotion.fast,
           alignment: AlignmentDirectional.topStart,
           child: Text(
             widget.description,
@@ -55,18 +56,22 @@ class _ListingDescriptionBlockState extends State<ListingDescriptionBlock> {
             overflow: _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
           ),
         ),
-        if (!_expanded) ...[
-          const SizedBox(height: AppSpacing.xs),
-          TextButton(
-            onPressed: () => setState(() => _expanded = true),
+        Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: TextButton(
+            onPressed: () => setState(() => _expanded = !_expanded),
             style: TextButton.styleFrom(
-              padding: EdgeInsets.zero,
-              minimumSize: const Size(0, 32),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              padding: const EdgeInsetsDirectional.symmetric(
+                horizontal: AppSpacing.sm,
+              ),
+              // A 48dp-tall hit slot: the label alone was ~32dp.
+              minimumSize: const Size(0, AppSpacing.xxxl),
             ),
-            child: Text(l10n.descriptionReadMore),
+            child: Text(
+              _expanded ? l10n.descriptionReadLess : l10n.descriptionReadMore,
+            ),
           ),
-        ],
+        ),
       ],
     );
   }
