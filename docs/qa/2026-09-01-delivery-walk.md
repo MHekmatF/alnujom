@@ -165,6 +165,47 @@ had auto-dismissed; the `dumpsys` record above is the evidence.
 The test account was purged and the app's data cleared from the phone. Database
 back to 12 profiles, 12 auth users, 26 listings.
 
+## Fifth walk — the full signed-in tour on the Infinix
+
+A throwaway account with publisher **and** admin rights, walked on the real
+device, then purged. This covers the surfaces earlier walks could not reach.
+
+| # | Check | Result |
+|---|---|---|
+| 32 | Publisher gate | PASS — the "نشر" FAB appears only once signed in as an approved publisher |
+| 33 | Create-listing screen | PASS — the three-mode switcher, required-media card, add photo / video / 360, and the tips block |
+| 34 | Create-listing form body | PASS — governorate / city / area pickers, address, rooms, bathrooms, phone, each with its "مطلوب" chip |
+| 35 | **Exit guard** | PASS — leaving mid-form asks "الخروج دون نشر؟" and says the entry was kept as a draft. A Phase-24 fix that had never been seen working |
+| 36 | **Submit validation** | PASS — a clear "تعذّر الإرسال" sheet listing every missing field with a "تعديل" jump link per row |
+| 37 | Navigation drawer (publisher + admin) | PASS — Publishing / Administration / Conversations & viewings / More |
+| 38 | Settings screen | PASS |
+| 39 | **Dark mode** | **PASS** — switched from the app's own Appearance control; settings and home both invert cleanly. This is what adb could not do on XOS |
+| 40 | **English (LTR)** | **PASS** — the whole layout mirrors correctly: drawer, settings, home, bottom nav |
+| 41 | English + dark together | PASS |
+| 42 | Home feed listing card | PASS — verified badge, price, specs, agency name with its check, WhatsApp and Call actions |
+
+Settings were restored to Arabic + Auto, the account purged and the app's data
+cleared. Database unchanged: 12 profiles, 12 auth users, 26 listings.
+
+### Two cosmetic defects found
+
+1. **The bottom-nav label truncates in English.** "Search & Map" renders as
+   "Search & ..." in the five equal slots at 720 dp. Arabic ("بحث وخريطة") fits.
+   This is the open question `REVIEW.md` raised about the 10.5 px nav label —
+   now answered: it is Arabic that fits and English that does not.
+2. **The create-listing mode switcher truncates.** Two of its three segments show
+   as "عرض تف…" and "خطوات …" at this width.
+
+Neither blocks anything; both are width problems on a 720 dp screen, and both
+want either shorter labels or a layout that can wrap.
+
+### One false alarm worth recording
+
+Settings appeared to open as a blank grey screen on the first attempt. It is not
+a defect — the screen renders correctly every time on a clean navigation. The
+grey frame was a mis-tap landing mid-transition. Reading the widget tree
+confirmed the page always builds its five groups.
+
 ## What this walk could NOT cover
 
 - **The last hop of the password reset**: tapping the real emailed link on a
