@@ -1,4 +1,4 @@
--- 20260901120001_self_serve_account_deletion
+-- 20260901120004_self_serve_account_deletion
 --
 -- Self-serve account deletion — `public.request_account_deletion()`.
 --
@@ -8,7 +8,7 @@
 --
 -- ⚠️  NOT YET APPLIED. The Supabase project was paused/unreachable when this
 --     was written, so nothing here has run against a live database. Apply via
---     Supabase MCP `apply_migration(name='20260901120001_self_serve_account_deletion',
+--     Supabase MCP `apply_migration(name='20260901120004_self_serve_account_deletion',
 --     query='<this file body>')` — per the project gotcha, apply_migration does
 --     NOT dedupe by name, so apply exactly ONCE. Everything below is idempotent
 --     and re-runnable (create-if-not-exists / create-or-replace / drop-then-create

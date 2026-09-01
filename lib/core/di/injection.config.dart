@@ -745,12 +745,6 @@ _i174.GetIt $initGetIt(
   gh.factory<_i214.SupabaseListingMediaDatasource>(
     () => _i214.SupabaseListingMediaDatasource(),
   );
-  gh.factory<_i1020.SupabaseListingRevisionDatasource>(
-    () => _i1020.SupabaseListingRevisionDatasource(),
-  );
-  gh.factory<_i207.SupabaseListingsDatasource>(
-    () => _i207.SupabaseListingsDatasource(),
-  );
   gh.factory<_i396.ValidateSubmitPayload>(
     () => const _i396.ValidateSubmitPayload(),
   );
