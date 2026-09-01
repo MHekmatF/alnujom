@@ -44,7 +44,7 @@ class SearchResultItem extends Equatable {
   /// Phase 14 Sub-Phase F pre-work — used by [SupabaseSearchDatasource] to
   /// rewrite [mainImagePath] from a raw storage path (e.g.
   /// `listings/<uuid>/image.jpg`) into a full public URL so the presentation
-  /// layer (`SearchResultCard` + `CachedNetworkImage`) can render it directly.
+  /// layer can render it directly.
   /// Mirrors the Phase 13 `HomeListingCardDto.copyWithMainImageUrl` pattern.
   SearchResultItem copyWith({String? mainImagePath}) {
     return SearchResultItem(
