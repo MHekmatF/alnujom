@@ -17,6 +17,10 @@
 -- the relations as the role did, immediately. Run this after ANY migration that
 -- touches grants, policies, views or the boolean RLS helpers.
 --
+-- HOW TO RUN: paste the whole file into the Supabase dashboard SQL Editor and
+-- run it. (It creates a temporary table, so it will not go through tooling that
+-- refuses DDL.) Both numbers in the `failing` column must be 0.
+--
 -- Safe: read-only, counts rows only, and every probe is wrapped so one failure
 -- does not stop the sweep.
 
