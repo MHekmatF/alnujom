@@ -708,9 +708,20 @@ pauses.
 - [ ] **Host the privacy policy and set `privacy_url`** in the admin settings
       (see `docs/legal/README.md`). Required before Google Play, and good
       practice regardless.
-- [ ] **Turn on leaked-password protection** — Supabase → Authentication →
-      Passwords → "Check against HaveIBeenPwned". Thirty seconds; blocks
-      passwords known from public breaches.
+- [x] **Leaked-password protection — NOT AVAILABLE, stop chasing it.** Verified
+      on 2026-09-01: the toggle lives at Authentication → Sign In / Providers →
+      Email → "Prevent use of leaked passwords", and it is labelled *"Only
+      available on Pro plan and above."* This project is on the **Free** plan,
+      so it cannot be switched on. `get_advisors(security)` will keep reporting
+      it as a WARN — that is expected, not a task. Revisit only if the project
+      is ever upgraded.
+      What IS available on Free, and worth turning on: **"Secure password
+      change"** on the same screen, which stops a stolen old session from
+      silently changing the password. It does not break the reset flow — a
+      recovery session is brand new, so it satisfies the recency check.
+      Do **not** turn on "Require current password when updating" without
+      testing: password reset completes with a recovery session and no current
+      password, so it may block the reset flow.
 - [ ] **Restrict the Firebase Android key** — Google Cloud Console → the `AIza…`
       key → restrict to package `com.alnujom.app` plus your release signing
       fingerprint, and to the Firebase/FCM APIs only.

@@ -126,9 +126,11 @@ limited to non-end-user accounts; working password recovery is worth more.
 
 ## Still outstanding
 
-- **Leaked-password protection** is still off — a dashboard toggle
-  (Authentication → Settings), and the only remaining WARN worth acting on in
-  `get_advisors(security)`. It cannot be set through the API.
+- **Leaked-password protection — not actionable on this plan.** The toggle
+  ("Prevent use of leaked passwords", Authentication → Sign In / Providers →
+  Email) is gated behind Supabase's **Pro plan**; this project is on Free. Its
+  standing WARN in `get_advisors(security)` is expected and should not be
+  treated as an open task.
 - **`supabase/scripts/pre_launch_data_cleanup.sql`** — removes the 26 development
   listings. **Deliberately not run**: with distribution deferred, that content is
   what the app has to demo. Run it when launch is actually close. Its delete
