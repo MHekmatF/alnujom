@@ -142,8 +142,9 @@ class ListingReviewRepositoryImpl implements ListingReviewRepository {
         }
       }
 
-      // Phase 25 — featured state. `loadListingPreview` selects `*`, so the
-      // raw row already carries `featured_until` when the column is set.
+      // Phase 25 — featured state. `loadListingPreview` names every
+      // non-coordinate column (SEC-I1 replaced its `*`), `featured_until`
+      // included, so the raw row still carries it when the column is set.
       final featuredUntilRaw = raw['featured_until'];
       final featuredUntil = featuredUntilRaw is String
           ? DateTime.tryParse(featuredUntilRaw)
