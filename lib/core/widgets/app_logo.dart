@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
+
 /// The AlNujom app emblem (brand mark) shown on the auth surfaces
 /// (login / register / reset-password) in place of the painted [BrandMark].
 ///
@@ -20,7 +22,11 @@ class AppLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: 'النجوم',
+      // The brand name is the same word in both locales, but it belongs in the
+      // ARBs rather than hardcoded here — a screen reader should read whatever
+      // the app is actually called, and a future English brand name then flows
+      // through automatically.
+      label: AppLocalizations.of(context)!.appTitle,
       image: true,
       child: Image.asset(
         'assets/branding/logo_full.png',
