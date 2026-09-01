@@ -12,6 +12,7 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_dropdown.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/dc_crown_scaffold.dart';
@@ -101,6 +102,8 @@ class _SetExchangeRateViewState extends State<_SetExchangeRateView> {
           builder: (context, snapshot) {
             final currencies = snapshot.data ?? const <Currency>[];
             final locale = Localizations.localeOf(context);
+            final colors = AppColors.of(context);
+            final styles = AppTextStyles.of(context);
             final isSaving = state.status == SetRateStatus.saving;
 
             return DcCrownScaffold(
@@ -118,11 +121,13 @@ class _SetExchangeRateViewState extends State<_SetExchangeRateView> {
                   : ListView(
                       padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
                       children: [
-                        DropdownButtonFormField<String>(
-                          initialValue: state.baseCurrency,
-                          decoration: InputDecoration(
-                            labelText: l10n.baseCurrencyLabel,
-                          ),
+                        // Batch-2: the two bare DropdownButtonFormFields became
+                        // the shared AppDropdown (themed caret, rounded token
+                        // popup, card popup surface, isExpanded overflow guard).
+                        AppDropdown<String>(
+                          label: l10n.baseCurrencyLabel,
+                          value: state.baseCurrency,
+                          enabled: !isSaving,
                           items: [
                             for (final currency in currencies)
                               DropdownMenuItem(
@@ -135,18 +140,15 @@ class _SetExchangeRateViewState extends State<_SetExchangeRateView> {
                                 ),
                               ),
                           ],
-                          onChanged: isSaving
-                              ? null
-                              : (value) => context
-                                    .read<SetExchangeRateBloc>()
-                                    .add(BaseChanged(value)),
+                          onChanged: (value) => context
+                              .read<SetExchangeRateBloc>()
+                              .add(BaseChanged(value)),
                         ),
                         const SizedBox(height: AppSpacing.md),
-                        DropdownButtonFormField<String>(
-                          initialValue: state.targetCurrency,
-                          decoration: InputDecoration(
-                            labelText: l10n.targetCurrencyLabel,
-                          ),
+                        AppDropdown<String>(
+                          label: l10n.targetCurrencyLabel,
+                          value: state.targetCurrency,
+                          enabled: !isSaving,
                           items: [
                             for (final currency in currencies)
                               DropdownMenuItem(
@@ -159,21 +161,21 @@ class _SetExchangeRateViewState extends State<_SetExchangeRateView> {
                                 ),
                               ),
                           ],
-                          onChanged: isSaving
-                              ? null
-                              : (value) => context
-                                    .read<SetExchangeRateBloc>()
-                                    .add(TargetChanged(value)),
+                          onChanged: (value) => context
+                              .read<SetExchangeRateBloc>()
+                              .add(TargetChanged(value)),
                         ),
                         const SizedBox(height: AppSpacing.md),
                         TextField(
                           controller: _rate,
                           enabled: !isSaving,
+                          style: styles.bodyLarge,
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
                           ),
                           decoration: InputDecoration(
                             labelText: l10n.rateAmountLabel,
+                            labelStyle: styles.bodyMedium,
                           ),
                           onChanged: (value) => context
                               .read<SetExchangeRateBloc>()
@@ -192,6 +194,9 @@ class _SetExchangeRateViewState extends State<_SetExchangeRateView> {
                               state.targetCurrency!,
                               '${RateFormatter.format(state.derivedRatePreview!, locale)} ${state.baseCurrency!}',
                             ),
+                            style: styles.bodyMedium.copyWith(
+                              color: colors.textMuted,
+                            ),
                           ),
                         const SizedBox(height: AppSpacing.md),
                         _EffectiveAtRow(
@@ -206,8 +211,11 @@ class _SetExchangeRateViewState extends State<_SetExchangeRateView> {
                           controller: _source,
                           enabled: !isSaving,
                           maxLength: 500,
+                          style: styles.bodyLarge,
                           decoration: InputDecoration(
                             labelText: l10n.sourceLabel,
+                            labelStyle: styles.bodyMedium,
+                            counterStyle: styles.labelMedium,
                           ),
                           onChanged: (value) => context
                               .read<SetExchangeRateBloc>()
@@ -216,6 +224,7 @@ class _SetExchangeRateViewState extends State<_SetExchangeRateView> {
                         const SizedBox(height: AppSpacing.lg),
                         AppButton(
                           label: l10n.submitButton,
+                          expanded: true,
                           loading: isSaving,
                           onPressed: isSaving
                               ? null

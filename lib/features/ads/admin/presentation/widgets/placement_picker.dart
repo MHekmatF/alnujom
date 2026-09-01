@@ -5,7 +5,10 @@
 // Constitution IX: zero supabase_flutter imports.
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/colors.dart';
 import '../../../../../core/theme/spacing.dart';
+import '../../../../../core/theme/typography.dart';
+import '../../../../../core/widgets/app_checkbox.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../domain/entities/ad_placement.dart';
 import '../../../domain/entities/ad_placement_assignment.dart';
@@ -95,37 +98,42 @@ class _PlacementPickerState extends State<PlacementPicker> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l10n.adsAdminPlacementsLabel, style: theme.textTheme.titleSmall),
+        Text(l10n.adsAdminPlacementsLabel, style: styles.labelLarge),
         const SizedBox(height: AppSpacing.sm),
         ...AdPlacement.values.map((placement) {
           final selected = _isSelected(placement);
           final isNotYetLive = placement == AdPlacement.categoryBanner;
+          final label = _placementLabel(l10n, placement);
           return Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+            padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.sm),
             child: Row(
               children: [
-                Checkbox(
-                  value: selected,
-                  onChanged: (v) => _togglePlacement(placement, v ?? false),
+                // Batch-2 a11y: the bare Checkbox sat in a ~40dp slot; the DS
+                // AppCheckbox reserves the 48dp minimum tap target.
+                Semantics(
+                  label: label,
+                  child: AppCheckbox(
+                    value: selected,
+                    onChanged: (v) => _togglePlacement(placement, v ?? false),
+                  ),
                 ),
+                const SizedBox(width: AppSpacing.xs),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        _placementLabel(l10n, placement),
-                        style: theme.textTheme.bodyMedium,
-                      ),
+                      Text(label, style: styles.bodyLarge),
                       if (isNotYetLive)
                         Text(
                           l10n.adPlacementCategoryBannerNotYetLive,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: theme.colorScheme.error,
+                          style: styles.labelSmall.copyWith(
+                            color: colors.warning,
                           ),
                         ),
                     ],
@@ -134,12 +142,16 @@ class _PlacementPickerState extends State<PlacementPicker> {
                 if (selected) ...[
                   const SizedBox(width: AppSpacing.sm),
                   SizedBox(
-                    width: 64,
+                    // 64dp cramped the localized "الأولوية" label into an
+                    // ellipsis; xxxl*2 gives the number room in both locales.
+                    width: AppSpacing.xxxl * 2,
                     child: TextFormField(
                       controller: _priorityControllers[placement],
                       keyboardType: TextInputType.number,
+                      style: styles.bodyLarge,
                       decoration: InputDecoration(
                         labelText: l10n.adsAdminPriorityLabel,
+                        labelStyle: styles.labelMedium,
                         isDense: true,
                       ),
                       onChanged: (v) => _updatePriority(placement, v),

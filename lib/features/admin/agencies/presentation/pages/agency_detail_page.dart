@@ -20,6 +20,7 @@ import '../../../../../core/widgets/app_spinner.dart';
 import '../../../../../core/widgets/app_toast.dart';
 import '../../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../../core/widgets/ds/dc_status_chip.dart';
+import '../../../../../core/widgets/error_state.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../agency/domain/entities/agency_status.dart';
 import '../../domain/entities/agency_verification_item.dart';
@@ -108,24 +109,12 @@ class _AgencyDetailPageState extends State<AgencyDetailPage> {
                   onTap: () =>
                       ctx.canPop() ? ctx.pop() : ctx.go(AppRoutes.shellHome),
                 ),
-                body: Center(
-                  child: Padding(
-                    padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          _error ?? l10n.errorGeneric,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: AppSpacing.md),
-                        AppButton(
-                          label: l10n.actionReload,
-                          onPressed: _loadDetail,
-                        ),
-                      ],
-                    ),
-                  ),
+                // Batch-2: the ad-hoc Text + AppButton column became the shared
+                // ErrorState (glyph badge, title, tonal Retry). Same reload.
+                body: ErrorState(
+                  title: l10n.errorGeneric,
+                  message: _error,
+                  onRetry: _loadDetail,
                 ),
               );
             }

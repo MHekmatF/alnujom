@@ -107,6 +107,7 @@ class _SettingsPageState extends State<SettingsPage> {
           _generalGroup(context, l10n),
           _notificationsGroup(context, l10n),
           _aboutGroup(context, l10n),
+          _accountGroup(context, l10n),
           _VersionFooter(version: _version),
         ],
       ),
@@ -225,6 +226,25 @@ class _SettingsPageState extends State<SettingsPage> {
           icon: Icons.star_rate_outlined,
           title: l10n.settings_rate_app,
           onTap: _rateApp,
+        ),
+      ],
+    );
+  }
+
+  // ── Group 5 — Account ─────────────────────────────────────────────────────
+  /// Self-serve account deletion. Google Play requires an in-app deletion path
+  /// for any app with account creation, and Settings is where reviewers (and
+  /// users) look for it. Styled with the theme's error token so it reads as
+  /// destructive without being alarming enough to mis-tap.
+  Widget _accountGroup(BuildContext context, AppLocalizations l10n) {
+    return _SettingsSection(
+      title: l10n.settings_account_heading,
+      children: [
+        _SettingsDangerRow(
+          icon: Icons.delete_forever_outlined,
+          title: l10n.accountDeleteEntryTitle,
+          subtitle: l10n.accountDeleteEntrySubtitle,
+          onTap: () => context.push(AppRoutes.accountDelete),
         ),
       ],
     );
@@ -396,6 +416,83 @@ class _SettingsNavRow extends StatelessWidget {
                   style: styles.bodyMedium.copyWith(color: colors.textMuted),
                 ),
               ],
+              const SizedBox(width: AppSpacing.xs),
+              Icon(
+                isRtl ? Icons.chevron_left : Icons.chevron_right,
+                size: AppSpacing.lg,
+                color: colors.textMuted,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A destructive navigation row: same geometry as [_SettingsNavRow] but tinted
+/// with the theme's error token and carrying a supporting line, so an
+/// irreversible action never looks like an ordinary preference.
+class _SettingsDangerRow extends StatelessWidget {
+  const _SettingsDangerRow({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+    return Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
+        child: Padding(
+          padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+          child: Row(
+            children: [
+              Container(
+                width: AppSpacing.xxl + AppSpacing.sm,
+                height: AppSpacing.xxl + AppSpacing.sm,
+                alignment: AlignmentDirectional.center,
+                decoration: BoxDecoration(
+                  color: colors.error.withValues(alpha: 0.12),
+                  borderRadius: appRadius(AppRadii.md),
+                ),
+                child: Icon(icon, color: colors.error, size: AppSpacing.xl),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: styles.titleMedium.copyWith(color: colors.error),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: AppSpacing.xxs),
+                    Text(
+                      subtitle,
+                      style: styles.bodyMedium.copyWith(
+                        color: colors.textMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(width: AppSpacing.xs),
               Icon(
                 isRtl ? Icons.chevron_left : Icons.chevron_right,

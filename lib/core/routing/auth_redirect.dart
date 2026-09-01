@@ -61,6 +61,15 @@ FutureOr<String?> authRedirect(
   final authState = authBloc.state;
   final path = state.uri.path;
 
+  // Spec 005 D-01 — the password-reset COMPLETION screen is reachable in every
+  // auth state. Supabase's recovery link mints a real session, so AuthBloc
+  // resolves to Authenticated / PendingApproval / Rejected / Suspended the
+  // moment the link is processed; without this bypass the account-status
+  // redirects (or the `_authOnlyPaths` → home rule) would throw the user off
+  // the "choose a new password" screen before they could finish. The page
+  // itself handles the no-session case with an "expired link" state.
+  if (path == AppRoutes.resetPasswordComplete) return null;
+
   return switch (authState) {
     Unauthenticated() => _redirectIfProtected(path),
     Authenticating() => null,
@@ -78,7 +87,21 @@ const _authOnlyPaths = {'/login', '/register', '/reset-password'};
 // prefix check covers the deep-link entry case per Q4=D.
 // Phase 23 FC: `/maintenance` (the gate target) and `/about` (the public
 // about/support surface) are anonymous-readable — never bounce them to /login.
-const _publicPaths = {'/', '/onboarding', '/splash', '/maintenance', '/about'};
+// Phase 14 FR-015 + SC-008 and Phase 15 ("anonymous-accessible, no auth gate on
+// map viewing"): `/search` and `/map` are anonymous-readable too. They were
+// missed when the bottom-nav shell was introduced — Phase 15 shipped before any
+// shell existed — which left a guest tapping the Search/Map tab silently
+// ejected to /login. The map's whole server-side jitter mechanism exists to
+// serve anonymous clients, so gating the screen contradicted the backend.
+const _publicPaths = {
+  '/',
+  '/onboarding',
+  '/splash',
+  '/maintenance',
+  '/about',
+  '/search',
+  '/map',
+};
 
 String? _redirectIfProtected(String path) {
   if (_authOnlyPaths.contains(path) || _publicPaths.contains(path)) return null;

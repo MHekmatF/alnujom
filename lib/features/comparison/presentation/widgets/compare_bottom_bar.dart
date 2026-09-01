@@ -111,7 +111,7 @@ class CompareBottomBar extends StatelessWidget {
           switchOutCurve: AppMotion.exit,
           transitionBuilder: (child, animation) => SizeTransition(
             sizeFactor: animation,
-            axisAlignment: -1,
+            alignment: Alignment.topCenter,
             child: FadeTransition(opacity: animation, child: child),
           ),
           child: bar,

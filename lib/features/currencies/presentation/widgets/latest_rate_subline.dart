@@ -1,6 +1,8 @@
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/colors.dart';
+import '../../../../core/theme/typography.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/presentation/rate_formatter.dart';
 
@@ -25,11 +27,19 @@ class LatestRateSubline extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    // Batch-2: the two Text nodes inherited the ambient DefaultTextStyle; they
+    // now carry the DS body/muted tokens like every other card subline.
+    final muted = styles.bodyMedium.copyWith(color: colors.textMuted);
     final rate = latestRate;
     if (rate == null) {
-      return Text(l10n.rateNotSetHint);
+      return Text(l10n.rateNotSetHint, style: muted);
     }
     final amount = '${RateFormatter.format(rate, locale)} $targetCurrencyCode';
-    return Text(l10n.latestRateLineTemplate(baseCurrency, amount));
+    return Text(
+      l10n.latestRateLineTemplate(baseCurrency, amount),
+      style: muted,
+    );
   }
 }

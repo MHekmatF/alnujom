@@ -1,0 +1,144 @@
+# Supabase keep-alive — stops the FREE-tier project from auto-pausing.
+#
+# WHY THIS EXISTS
+#   The AlNujom Supabase project is on the **free plan**, which auto-pauses a
+#   project after ~7 days with no activity. A paused project makes the app
+#   unusable (every request fails) until someone restores it by hand from the
+#   dashboard. The owner has decided to stay on the free plan, so this workflow
+#   keeps the project awake instead of paying to upgrade.
+#
+# WHAT IT DOES
+#   Makes one tiny authenticated read against the Supabase REST API
+#   (`GET /rest/v1/app_settings?select=key&limit=1`). That goes through PostgREST
+#   into Postgres, so it registers as real database activity — not just an edge
+#   ping. `app_settings` is chosen deliberately: it is readable by the `anon`
+#   role (policy `app_settings_select_public`, see supabase/docs/app_settings.md),
+#   holds no personal data, and is one row.
+#
+#   It is ALSO an uptime canary: any non-2xx response, or a project that cannot
+#   be reached at all, fails the job (red X + GitHub's failure email). If you get
+#   a failure notice, read docs/ops/HANDOVER.md § "The project is paused".
+#
+# SCHEDULE
+#   Runs Monday / Wednesday / Friday at 06:00 UTC. The longest gap is ~3 days,
+#   which leaves a wide margin under the ~7-day idle window even if GitHub delays
+#   a scheduled run (cron on shared runners is best-effort, not guaranteed).
+#   Can also be run by hand: Actions tab -> "supabase keep-alive" -> Run workflow.
+#
+# ─────────────────────────────────────────────────────────────────────────────
+# REQUIRED REPOSITORY SECRETS — create these before the first run
+# ─────────────────────────────────────────────────────────────────────────────
+#   GitHub -> this repo -> Settings -> Secrets and variables -> Actions
+#     -> "New repository secret", once per row below.
+#
+#   | Secret name          | Value                                             |
+#   |----------------------|---------------------------------------------------|
+#   | SUPABASE_URL         | Supabase dashboard -> Project Settings -> Data API |
+#   |                      | -> "Project URL". Looks like                       |
+#   |                      | https://<project-ref>.supabase.co  (NO trailing /) |
+#   | SUPABASE_ANON_KEY    | Same page -> "Project API keys" -> the **anon /    |
+#   |                      | public** key. This is the SAME key that already    |
+#   |                      | ships inside the Android app.                      |
+#
+#   Use the **anon** key, never the `service_role` key. The service-role key is
+#   the master key to the whole database and must never leave the build machine
+#   (docs/decisions/0001-secrets-and-pii-storage.md).
+#
+#   The anon key is designed to be public (it is embedded in every client — see
+#   docs/release/v1.0.0.md § "APK binary secret-scan"), but it is still stored as
+#   a repository secret here, not hardcoded, so that rotating it is a one-field
+#   change and so the values never appear in this repository's history.
+#
+# NOTES
+#   - GitHub disables `schedule:` triggers on a repository with no activity for
+#     60 days and emails the owner. If pushes stop for two months, re-enable the
+#     workflow from the Actions tab.
+#   - The job never prints either secret. GitHub also masks registered secret
+#     values in logs; do not add `set -x` to the script below.
+
+name: supabase keep-alive
+
+on:
+  schedule:
+    # Mon / Wed / Fri at 06:00 UTC.
+    - cron: '0 6 * * 1,3,5'
+  workflow_dispatch:
+
+# Never let two pings overlap; a queued one is pointless.
+concurrency:
+  group: supabase-keepalive
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    name: Ping Supabase REST API
+    runs-on: ubuntu-latest
+    # Do not run on forks (they have no secrets, so it would fail every time).
+    if: github.repository == 'MHekmatF/alnujom'
+    timeout-minutes: 5
+    steps:
+      - name: Ping Supabase (fails loudly if unreachable)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${SUPABASE_URL}" ] || [ -z "${SUPABASE_ANON_KEY}" ]; then
+            echo "::error::Missing repository secrets. Create SUPABASE_URL and SUPABASE_ANON_KEY under Settings -> Secrets and variables -> Actions (see this file's header)."
+            exit 1
+          fi
+
+          # Strip a trailing slash so the path below never doubles up.
+          base="${SUPABASE_URL%/}"
+          endpoint="${base}/rest/v1/app_settings?select=key&limit=1"
+
+          # Three attempts with backoff so one transient blip does not page the
+          # owner. Only a persistent failure is a real signal.
+          attempt=1
+          max_attempts=3
+          status=""
+
+          while [ "${attempt}" -le "${max_attempts}" ]; do
+            echo "Attempt ${attempt}/${max_attempts}: GET ${base}/rest/v1/app_settings"
+
+            # Secrets are passed through a curl config on stdin so they never
+            # appear in the process arguments or in the job log.
+            set +e
+            status="$(
+              curl --silent --show-error \
+                   --connect-timeout 15 --max-time 45 \
+                   --output /tmp/keepalive-body.txt \
+                   --write-out '%{http_code}' \
+                   --config - <<CURLCFG
+          url = "${endpoint}"
+          header = "apikey: ${SUPABASE_ANON_KEY}"
+          header = "Authorization: Bearer ${SUPABASE_ANON_KEY}"
+          header = "Accept: application/json"
+          CURLCFG
+            )"
+            curl_exit=$?
+            set -e
+
+            if [ "${curl_exit}" -eq 0 ] && [ "${status}" -ge 200 ] && [ "${status}" -lt 300 ]; then
+              echo "OK — HTTP ${status}. Supabase is awake."
+              exit 0
+            fi
+
+            echo "Failed (curl exit ${curl_exit}, HTTP ${status:-none})."
+            attempt=$((attempt + 1))
+            if [ "${attempt}" -le "${max_attempts}" ]; then
+              sleep 20
+            fi
+          done
+
+          echo "::error::Supabase did not answer after ${max_attempts} attempts (last HTTP status: ${status:-none}). The project may be PAUSED, the secrets may be wrong, or Supabase may be down. Runbook: docs/ops/HANDOVER.md -> 'The project is paused — how to restore it'."
+          # Response body may carry a useful Supabase error message; it contains
+          # no secrets (the request is anon-key scoped and reads one public row).
+          echo "--- response body (first 500 bytes) ---"
+          head -c 500 /tmp/keepalive-body.txt || true
+          echo ""
+          exit 1

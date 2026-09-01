@@ -28,6 +28,7 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/dashboard_tile.dart';
 import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../core/widgets/ds/dc_quick_link_tile.dart';
+import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/locale_toggle_action.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../debug/locations_smoke_test_tile.dart';
@@ -357,7 +358,6 @@ class _AdminHomeViewState extends State<_AdminHomeView> with RouteAware {
         return labelKey;
     }
   }
-
 }
 
 // ── Group header ──────────────────────────────────────────────────────────────
@@ -426,6 +426,8 @@ class _CounterErrorNotice extends StatelessWidget {
 
 // ── Empty state (no sections visible for this user) ───────────────────────────
 
+/// Batch-2: the hand-rolled title+body column became the shared [EmptyState],
+/// which adds the DS glyph badge and the `Semantics(header:)` on the headline.
 class _EmptyState extends StatelessWidget {
   const _EmptyState({required this.l10n});
 
@@ -433,27 +435,10 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final styles = AppTextStyles.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              l10n.admin_home_empty_title,
-              style: styles.titleLarge,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              l10n.admin_home_empty_body,
-              style: styles.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
+    return EmptyState(
+      icon: LucideIcons.shield,
+      headline: l10n.admin_home_empty_title,
+      body: l10n.admin_home_empty_body,
     );
   }
 }

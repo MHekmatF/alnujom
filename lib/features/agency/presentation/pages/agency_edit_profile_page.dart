@@ -33,6 +33,7 @@ import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../core/widgets/error_state.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/agency.dart';
 import '../../domain/repositories/agency_repository.dart';
@@ -236,22 +237,9 @@ class _AgencyEditProfilePageState extends State<AgencyEditProfilePage> {
     if (_loading) {
       body = const AppSpinner.page();
     } else if (_agency == null || _loadFailed) {
-      body = Center(
-        child: Padding(
-          padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(l10n.agency_generic_error, textAlign: TextAlign.center),
-              const SizedBox(height: AppSpacing.md),
-              AppButton.filledPrimary(
-                label: l10n.action_retry,
-                onPressed: _loadAgency,
-              ),
-            ],
-          ),
-        ),
-      );
+      // Batch-2: the ad-hoc Text + AppButton column became the shared
+      // ErrorState (glyph badge, title, tonal Retry). Same reload.
+      body = ErrorState(title: l10n.agency_generic_error, onRetry: _loadAgency);
     } else {
       body = AbsorbPointer(
         absorbing: _saving,

@@ -1,8 +1,16 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_lucide/flutter_lucide.dart';
 
+import '../../../../core/widgets/search_field.dart';
+
+/// Debounced user search input for the assign-role screen.
+///
+/// Batch-2 restyle: this was a bare Material [TextField] with a `hintText` and a
+/// leading glyph — no clear affordance, and the only search input in the app not
+/// using the DS [SearchField]. It now renders [SearchField] (token fill, focus
+/// ring, floating label, clear button) while keeping the identical 300 ms
+/// debounce before [onChanged] fires.
 class UserSearchField extends StatefulWidget {
   const UserSearchField({
     required this.onChanged,
@@ -28,11 +36,8 @@ class _UserSearchFieldState extends State<UserSearchField> {
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      decoration: InputDecoration(
-        hintText: widget.hintText,
-        prefixIcon: const Icon(LucideIcons.search),
-      ),
+    return SearchField(
+      hint: widget.hintText,
       onChanged: (value) {
         _timer?.cancel();
         _timer = Timer(

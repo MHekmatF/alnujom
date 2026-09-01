@@ -17,13 +17,16 @@ import '../../domain/usecases/respond_agency_invitation.dart';
 
 /// One pending invitation enriched with the inviting agency's display name.
 class AgencyInvitation {
-  const AgencyInvitation({required this.membership, required this.agencyName});
+  const AgencyInvitation({required this.membership, this.agencyName});
 
   final AgencyMember membership;
 
-  /// Inviting agency name; falls back to the agency id when the name is not
-  /// resolvable (e.g. the agency is not approved and the view hides it).
-  final String agencyName;
+  /// Inviting agency name, or `null` when it is not resolvable — `v_agencies`
+  /// hides a not-yet-approved agency from a PENDING invitee (`is_agency_member`
+  /// requires `status = 'active'`), which is the common case for a fresh
+  /// invitation. The UI substitutes a localized placeholder; it must never show
+  /// the raw UUID, which reads as a broken screen (B-4 follow-up).
+  final String? agencyName;
 }
 
 // ---------------------------------------------------------------------------
@@ -78,10 +81,7 @@ class AgencyInvitationsCubit extends Cubit<AgencyInvitationsState> {
           final Agency? agency =
               agencyResult is Success<Agency?> ? agencyResult.value : null;
           enriched.add(
-            AgencyInvitation(
-              membership: m,
-              agencyName: agency?.name ?? m.agencyId,
-            ),
+            AgencyInvitation(membership: m, agencyName: agency?.name),
           );
         }
         emit(AgencyInvitationsLoaded(enriched));
@@ -90,13 +90,24 @@ class AgencyInvitationsCubit extends Cubit<AgencyInvitationsState> {
     }
   }
 
-  Future<void> respond({required String agencyId, required bool accept}) async {
+  /// Accepts or declines the invitation for [agencyId], then reloads.
+  ///
+  /// Returns the RPC's [Result] so the caller can react to the outcome: the
+  /// result used to be discarded, which made a failed Accept (e.g. the P0002
+  /// `no_pending_invitation`) look like a silent no-op, and left a successful
+  /// Accept sitting on an empty list instead of moving on to the agency.
+  Future<Result<void>> respond({
+    required String agencyId,
+    required bool accept,
+  }) async {
     final current = state;
     if (current is AgencyInvitationsLoaded) {
       emit(AgencyInvitationsLoaded(current.invitations, responding: true));
     }
-    await _respond(agencyId: agencyId, accept: accept);
+    final result = await _respond(agencyId: agencyId, accept: accept);
+    if (isClosed) return result;
     // Reload regardless of outcome so the list reflects the server state.
     await load();
+    return result;
   }
 }

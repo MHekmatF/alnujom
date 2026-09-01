@@ -7,10 +7,14 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
-import '../../../../core/widgets/app_spinner.dart';
+import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../core/widgets/empty_state.dart';
+import '../../../../core/widgets/error_state.dart';
+import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/locale_toggle_action.dart';
+import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/area.dart';
 import '../../domain/usecases/delete_area.dart';
@@ -67,6 +71,8 @@ class _CityDetailView extends StatelessWidget {
           ),
           actions: const [LocaleToggleAction()],
           floatingActionButton: FloatingActionButton(
+            // Batch-2 a11y: the icon-only FAB had no accessible name.
+            tooltip: l10n.addAreaButton,
             onPressed: () async {
               final result = await context.push<bool>(
                 '${AppRoutes.locationsAdminForm}'
@@ -81,9 +87,15 @@ class _CityDetailView extends StatelessWidget {
             child: const Icon(LucideIcons.plus),
           ),
           body: switch (state) {
-            CityDetailLoading() => const AppSpinner.page(),
-            CityDetailError(:final message) => Center(
-              child: Text(message, textAlign: TextAlign.center),
+            // Batch-2: full-screen spinner -> list-shaped skeleton; bare centred
+            // Text error -> shared ErrorState with a Retry.
+            CityDetailLoading() => const _AreasSkeleton(),
+            CityDetailError(:final message) => ErrorState(
+              title: l10n.locationsLoadFailed,
+              message: message,
+              onRetry: () => context.read<CityDetailBloc>().add(
+                const CityDetailRefreshRequested(),
+              ),
             ),
             CityDetailLoaded(:final city, :final governorate, :final areas) =>
               RefreshIndicator(
@@ -91,6 +103,7 @@ class _CityDetailView extends StatelessWidget {
                   const CityDetailRefreshRequested(),
                 ),
                 child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
                   padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
                   children: [
                     Row(
@@ -108,7 +121,12 @@ class _CityDetailView extends StatelessWidget {
                             style: AppTextStyles.of(context).titleMedium,
                           ),
                         ),
-                        TextButton.icon(
+                        // Batch-2: stock TextButton.icon -> DS AppButton text
+                        // variant (48dp target, PressScale, token type).
+                        AppButton(
+                          label: l10n.editAffordance,
+                          variant: AppButtonVariant.text,
+                          icon: LucideIcons.pencil,
                           onPressed: () async {
                             final result = await context.push<bool>(
                               '${AppRoutes.locationsAdminForm}'
@@ -120,30 +138,38 @@ class _CityDetailView extends StatelessWidget {
                               );
                             }
                           },
-                          icon: const Icon(LucideIcons.pencil),
-                          label: Text(l10n.editAffordance),
                         ),
                       ],
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     if (areas.isEmpty)
-                      Center(child: Text(l10n.addAreaButton))
+                      // Batch-2: a bare centred "Add area" string became a real
+                      // EmptyState (glyph badge + headline + hint).
+                      EmptyState(
+                        icon: LucideIcons.map_pin,
+                        headline: l10n.locationPickerNoAreasYet,
+                        body: l10n.addAreaButton,
+                      )
                     else
-                      ...areas.map(
-                        (area) => Padding(
+                      ...areas.indexed.map(
+                        (entry) => Padding(
                           padding: const EdgeInsetsDirectional.only(
                             bottom: AppSpacing.sm,
                           ),
-                          child: AreaCard(
-                            area: area,
-                            onEdit: () => _openAreaForm(
-                              context,
-                              mode: 'edit',
-                              id: area.id,
+                          child: StaggeredListItem(
+                            index: entry.$1,
+                            child: AreaCard(
+                              area: entry.$2,
+                              onEdit: () => _openAreaForm(
+                                context,
+                                mode: 'edit',
+                                id: entry.$2.id,
+                              ),
+                              onToggleActive: () =>
+                                  _toggleAreaActive(context, entry.$2),
+                              onDelete: () =>
+                                  _confirmDeleteArea(context, entry.$2),
                             ),
-                            onToggleActive: () =>
-                                _toggleAreaActive(context, area),
-                            onDelete: () => _confirmDeleteArea(context, area),
                           ),
                         ),
                       ),
@@ -202,5 +228,23 @@ class _CityDetailView extends StatelessWidget {
         AppToast.error(context, error.toString());
       }
     }
+  }
+}
+
+/// Shimmer placeholder rows shown while the areas list loads.
+class _AreasSkeleton extends StatelessWidget {
+  const _AreasSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+      itemCount: 6,
+      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+      itemBuilder: (_, __) => const SizedBox(
+        height: AppSpacing.xxxl + AppSpacing.xl,
+        child: LoadingState.card(),
+      ),
+    );
   }
 }

@@ -14,7 +14,10 @@ import '../../../../../core/widgets/_widget_support.dart';
 import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_dialog.dart';
 import '../../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../../core/widgets/empty_state.dart';
+import '../../../../../core/widgets/error_state.dart';
 import '../../../../../core/widgets/loading_state.dart';
+import '../../../../../core/widgets/staggered_list_item.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../domain/entities/account_approval_request.dart';
 import '../cubit/account_approvals_cubit.dart';
@@ -39,8 +42,6 @@ class _AccountApprovalsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final colors = AppColors.of(context);
-    final styles = AppTextStyles.of(context);
 
     return DcCrownScaffold(
       title: l10n.admin_queue_title,
@@ -56,23 +57,13 @@ class _AccountApprovalsView extends StatelessWidget {
             AccountApprovalsInitial() ||
             AccountApprovalsLoading() => const _QueueSkeleton(),
 
-            AccountApprovalsError(:final failure) => Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    failure.message,
-                    style: styles.bodyLarge.copyWith(color: colors.error),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  AppButton(
-                    label: l10n.admin_queue_pull_to_refresh,
-                    onPressed: () =>
-                        context.read<AccountApprovalsCubit>().loadPending(),
-                  ),
-                ],
-              ),
+            // Batch-2: the ad-hoc red Text + AppButton column became the shared
+            // ErrorState (glyph badge, title, tonal Retry). Same reload call.
+            AccountApprovalsError(:final failure) => ErrorState(
+              title: l10n.admin_queue_title,
+              message: failure.message,
+              onRetry: () =>
+                  context.read<AccountApprovalsCubit>().loadPending(),
             ),
 
             AccountApprovalsLoaded(:final requests) ||
@@ -95,7 +86,13 @@ class _AccountApprovalsView extends StatelessWidget {
     required bool isMutating,
   }) {
     if (requests.isEmpty) {
-      return Center(child: Text(l10n.admin_queue_empty));
+      // Batch-2: bare centred Text -> shared EmptyState. A cleared moderation
+      // queue is a good-news state, so it gets the verified/green glyph.
+      return EmptyState(
+        icon: LucideIcons.circle_check_big,
+        headline: l10n.admin_queue_empty,
+        body: l10n.admin_queue_pull_to_refresh,
+      );
     }
     return RefreshIndicator(
       onRefresh: () => context.read<AccountApprovalsCubit>().loadPending(),
@@ -104,11 +101,14 @@ class _AccountApprovalsView extends StatelessWidget {
         child: Opacity(
           opacity: isMutating ? 0.6 : 1.0,
           child: ListView.separated(
+            physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
             itemCount: requests.length,
             separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
-            itemBuilder: (context, index) =>
-                _RequestCard(request: requests[index]),
+            itemBuilder: (context, index) => StaggeredListItem(
+              index: index,
+              child: _RequestCard(request: requests[index]),
+            ),
           ),
         ),
       ),
@@ -178,6 +178,7 @@ class _RequestCard extends StatelessWidget {
   Future<void> _onRejectTap(BuildContext context, AppLocalizations l10n) async {
     final controller = TextEditingController();
     final formKey = GlobalKey<FormState>();
+    final styles = AppTextStyles.of(context);
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -192,8 +193,10 @@ class _RequestCard extends StatelessWidget {
           child: TextFormField(
             controller: controller,
             autofocus: true,
+            style: styles.bodyLarge,
             decoration: InputDecoration(
               labelText: l10n.admin_action_reject_reason_label,
+              labelStyle: styles.bodyMedium,
             ),
             validator: (v) => (v == null || v.trim().isEmpty)
                 ? l10n.admin_action_reject_reason_required

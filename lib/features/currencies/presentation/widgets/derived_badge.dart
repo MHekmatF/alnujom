@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
+import '../../../../core/widgets/ds/dc_status_chip.dart';
 import '../../../../l10n/app_localizations.dart';
 
+/// "Derived rate" marker — a neutral DS status chip (batch-2 restyle: was a
+/// bare Material [Chip] on `tertiaryContainer`).
 class DerivedBadge extends StatelessWidget {
   const DerivedBadge({super.key});
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Chip(
-      label: Text(
-        l10n.derivedBadgeLabel,
-        style: Theme.of(context).textTheme.labelSmall,
-      ),
-      backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
-      padding: EdgeInsets.zero,
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    return DcStatusChip(
+      label: l10n.derivedBadgeLabel,
+      tone: DcStatusTone.neutral,
+      icon: LucideIcons.git_branch,
     );
   }
 }

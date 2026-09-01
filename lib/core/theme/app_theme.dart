@@ -158,6 +158,34 @@ ThemeData buildAppTheme({
       ),
       showCheckmark: false,
     ),
+    // SegmentedButton had no theme entry at all, so every segmented control in
+    // the app — AppTabs, AppRadioGroup, AppCurrencyField, the preferred-currency
+    // toggle — rendered as stock Material next to fully-themed neighbours. This
+    // mirrors the chip treatment above: card ground, primaryContainer for the
+    // selected segment, the same outline hairline and label style.
+    segmentedButtonTheme: SegmentedButtonThemeData(
+      style: ButtonStyle(
+        backgroundColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? colors.primaryContainer
+              : colors.card,
+        ),
+        foregroundColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? colors.onPrimaryContainer
+              : colors.onSurfaceVariant,
+        ),
+        textStyle: WidgetStatePropertyAll(textStyles.labelLarge),
+        side: WidgetStatePropertyAll(BorderSide(color: colors.outline)),
+        shape: const WidgetStatePropertyAll(StadiumBorder()),
+        padding: const WidgetStatePropertyAll(
+          EdgeInsetsDirectional.symmetric(horizontal: AppSpacing.md),
+        ),
+        // Segmented controls sit inside forms and rows; a 48dp minimum keeps
+        // every segment a legal touch target.
+        minimumSize: const WidgetStatePropertyAll(Size(0, AppSpacing.xxxl)),
+      ),
+    ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: colors.surfaceVariant,

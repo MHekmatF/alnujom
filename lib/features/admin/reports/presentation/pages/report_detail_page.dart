@@ -23,6 +23,7 @@ import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_spinner.dart';
 import '../../../../../core/widgets/app_toast.dart';
 import '../../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../../core/widgets/error_state.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../reports/domain/entities/report_reason.dart';
 import '../../../../reports/domain/entities/report_status.dart';
@@ -116,24 +117,12 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
                   onTap: () =>
                       ctx.canPop() ? ctx.pop() : ctx.go(AppRoutes.shellHome),
                 ),
-                body: Center(
-                  child: Padding(
-                    padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          _error ?? l10n.errorGeneric,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: AppSpacing.md),
-                        AppButton(
-                          label: l10n.actionReload,
-                          onPressed: _loadReport,
-                        ),
-                      ],
-                    ),
-                  ),
+                // Batch-2: the ad-hoc Text + AppButton column became the shared
+                // ErrorState (glyph badge, title, tonal Retry). Same reload.
+                body: ErrorState(
+                  title: l10n.errorGeneric,
+                  message: _error,
+                  onRetry: _loadReport,
                 ),
               );
             }

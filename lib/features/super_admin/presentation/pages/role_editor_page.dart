@@ -12,6 +12,7 @@ import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../core/widgets/error_state.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../bloc/role_editor_bloc.dart';
 import '../widgets/permission_checklist.dart';
@@ -25,13 +26,17 @@ class RoleEditorPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider<RoleEditorBloc>(
       create: (_) => getIt<RoleEditorBloc>()..add(OpenRole(roleId)),
-      child: const _RoleEditorView(),
+      // Batch-2: the id is threaded through so the load-failure body can offer
+      // a Retry that re-dispatches the very same OpenRole event.
+      child: _RoleEditorView(roleId: roleId),
     );
   }
 }
 
 class _RoleEditorView extends StatelessWidget {
-  const _RoleEditorView();
+  const _RoleEditorView({required this.roleId});
+
+  final String roleId;
 
   @override
   Widget build(BuildContext context) {
@@ -105,8 +110,13 @@ class _RoleEditorView extends StatelessWidget {
             body: switch (state) {
               RoleEditorInitial() ||
               RoleEditorLoading() => const AppSpinner.page(),
-              RoleEditorLoadFailure(:final failure) => Center(
-                child: Text(failure.message, textAlign: TextAlign.center),
+              // Batch-2: the bare centred Text error (a dead end) -> the shared
+              // ErrorState with a Retry re-dispatching the same OpenRole.
+              RoleEditorLoadFailure(:final failure) => ErrorState(
+                title: l10n.superAdminRolesListTitle,
+                message: failure.message,
+                onRetry: () =>
+                    context.read<RoleEditorBloc>().add(OpenRole(roleId)),
               ),
               RoleEditorSaveSucceeded() ||
               RoleEditorSaveConflict() ||

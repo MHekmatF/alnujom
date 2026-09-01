@@ -5,7 +5,10 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/colors.dart';
+import '../../../../../core/theme/radii.dart';
 import '../../../../../core/theme/spacing.dart';
+import '../../../../../core/theme/typography.dart';
+import '../../../../../core/widgets/_widget_support.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../reports/domain/entities/report_reason.dart';
 import '../../../../reports/domain/entities/report_status.dart';
@@ -33,8 +36,15 @@ class ReportFilterBar extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final colors = AppColors.of(context);
 
+    // Batch-2: the bar filled `surfaceVariant` — the exact fill the DS input
+    // theme gives the two dropdowns inside it, so the fields vanished into the
+    // bar. It now sits on `card` under a hairline, matching the consumer
+    // StatusFilterChipRow.
     return Container(
-      color: colors.surfaceVariant,
+      decoration: BoxDecoration(
+        color: colors.card,
+        border: BorderDirectional(bottom: BorderSide(color: colors.outline)),
+      ),
       padding: const EdgeInsetsDirectional.symmetric(
         horizontal: AppSpacing.md,
         vertical: AppSpacing.sm,
@@ -91,13 +101,22 @@ class _StatusDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    // Batch-2: dropping the hardcoded `OutlineInputBorder()` lets the DS
+    // inputDecorationTheme paint the token border + focus ring; the caret,
+    // popup surface and radius now match AppDropdown.
     return DropdownButtonFormField<ReportStatus?>(
       initialValue: value,
       isExpanded: true,
+      icon: Icon(Icons.keyboard_arrow_down, color: colors.onSurfaceVariant),
+      borderRadius: appRadius(AppRadii.md),
+      dropdownColor: colors.card,
+      style: styles.bodyMedium.copyWith(color: colors.onSurface),
       decoration: InputDecoration(
         labelText: label,
+        labelStyle: styles.labelMedium,
         isDense: true,
-        border: const OutlineInputBorder(),
         contentPadding: const EdgeInsetsDirectional.symmetric(
           horizontal: AppSpacing.sm,
           vertical: AppSpacing.xs,
@@ -160,13 +179,19 @@ class _ReasonDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
     return DropdownButtonFormField<ReportReason?>(
       initialValue: value,
       isExpanded: true,
+      icon: Icon(Icons.keyboard_arrow_down, color: colors.onSurfaceVariant),
+      borderRadius: appRadius(AppRadii.md),
+      dropdownColor: colors.card,
+      style: styles.bodyMedium.copyWith(color: colors.onSurface),
       decoration: InputDecoration(
         labelText: label,
+        labelStyle: styles.labelMedium,
         isDense: true,
-        border: const OutlineInputBorder(),
         contentPadding: const EdgeInsetsDirectional.symmetric(
           horizontal: AppSpacing.sm,
           vertical: AppSpacing.xs,

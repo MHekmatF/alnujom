@@ -6,11 +6,14 @@
 // approved agencies by the caller (FR-022). Phase 2 tokens only.
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/typography.dart';
+import '../../../../core/widgets/_widget_support.dart';
 import '../../../../l10n/app_localizations.dart';
 
 class AgencyBadge extends StatelessWidget {
@@ -35,11 +38,11 @@ class AgencyBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+    final styles = AppTextStyles.of(context);
     final colors = AppColors.of(context);
 
     final logo = ClipRRect(
-      borderRadius: BorderRadius.circular(AppRadii.sm),
+      borderRadius: appRadius(AppRadii.sm),
       child: SizedBox(
         width: AppSpacing.xl,
         height: AppSpacing.xl,
@@ -58,42 +61,48 @@ class AgencyBadge extends StatelessWidget {
     // Phase 25 (Claude Design) — the verified-agency badge carries the trust
     // signal: a soft green container with a green check; the agency name stays
     // high-contrast (onSurface) for readability.
-    return Material(
-      color: colors.verifiedContainer,
-      borderRadius: BorderRadius.circular(AppRadii.lg),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(AppRadii.lg),
-        onTap: () => context.push('/agency/$agencyId'),
-        child: Padding(
-          padding: const EdgeInsetsDirectional.symmetric(
-            horizontal: AppSpacing.sm,
-            vertical: AppSpacing.xs,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              logo,
-              if (!compact) ...[
-                const SizedBox(width: AppSpacing.sm),
-                Flexible(
-                  child: Text(
-                    agencyName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: colors.onSurface,
+    return Semantics(
+      button: true,
+      label: compact ? l10n.agency_verified_badge : agencyName,
+      child: Material(
+        color: colors.verifiedContainer,
+        borderRadius: appRadius(AppRadii.lg),
+        child: InkWell(
+          borderRadius: appRadius(AppRadii.lg),
+          onTap: () => context.push('/agency/$agencyId'),
+          child: Padding(
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: AppSpacing.sm,
+              vertical: AppSpacing.xs,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                logo,
+                if (!compact) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  Flexible(
+                    child: Text(
+                      agencyName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: styles.labelLarge.copyWith(
+                        color: colors.onSurface,
+                      ),
                     ),
                   ),
+                ],
+                const SizedBox(width: AppSpacing.xs),
+                // Phase 035 craft wave — one موثّق mark app-wide: the Lucide
+                // badge-check on the `verified` token (was Icons.verified).
+                Icon(
+                  LucideIcons.badge_check,
+                  size: AppSpacing.lg,
+                  color: colors.verified,
+                  semanticLabel: l10n.agency_verified_badge,
                 ),
               ],
-              const SizedBox(width: AppSpacing.xs),
-              Icon(
-                Icons.verified,
-                size: AppSpacing.lg,
-                color: colors.verified,
-                semanticLabel: l10n.agency_verified_badge,
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -104,7 +113,7 @@ class AgencyBadge extends StatelessWidget {
     return ColoredBox(
       color: colors.surfaceVariant,
       child: Icon(
-        Icons.business_outlined,
+        LucideIcons.building_2,
         size: AppSpacing.lg,
         color: colors.onSurfaceVariant,
       ),

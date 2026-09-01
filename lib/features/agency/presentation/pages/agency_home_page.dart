@@ -22,10 +22,13 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/press_scale.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/agency.dart';
@@ -52,53 +55,70 @@ class _AgencyHomeView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return BlocConsumer<AgencyHomeCubit, AgencyHomeState>(
-      listenWhen: (prev, curr) => curr is AgencyHomeCreateFailure,
-      listener: (context, state) {
-        if (state is AgencyHomeCreateFailure) {
-          final message = switch (state.messageKey) {
-            'not_a_publisher' => l10n.agency_create_not_publisher,
-            'already_owns_agency' => l10n.agency_already_owns,
-            _ => l10n.agency_action_failed,
-          };
-          AppToast.error(context, message);
-        }
-      },
-      builder: (context, state) {
-        return DcCrownScaffold(
-          dense: true,
-          leading: DcCrownIconButton(
-            icon: Icons.arrow_forward,
-            onTap: () => Navigator.of(context).maybePop(),
-          ),
-          title: switch (state) {
-            AgencyHomeNone() ||
-            AgencyHomeCreating() ||
-            AgencyHomeCreateFailure() => l10n.agency_create_title,
-            AgencyHomeInvited() => l10n.agency_invitations_title,
-            _ => l10n.agency_profile_title,
-          },
-          body: switch (state) {
-            AgencyHomeLoading() => const AppSpinner.page(),
-            AgencyHomeError() => Center(child: Text(l10n.agency_generic_error)),
-            AgencyHomeNone() ||
-            AgencyHomeCreating() ||
-            AgencyHomeCreateFailure() => _CreateAgencyForm(
-              submitting: state is AgencyHomeCreating,
+    // Spec 019 B-4 follow-up — a deep link (or any cold-start entry) can mount
+    // this page before Supabase has restored the session; every read then
+    // returns anonymous-empty and `load()` settles on AgencyHomeNone, i.e. the
+    // "create an agency" form, even for an invited user. Re-load the moment
+    // AuthBloc leaves [Authenticating] so the hub re-resolves to Owner /
+    // Member / Invited instead of getting stuck on the create form.
+    return BlocListener<AuthBloc, AuthState>(
+      listenWhen: (prev, curr) =>
+          prev is Authenticating && curr is! Authenticating,
+      listener: (context, _) => context.read<AgencyHomeCubit>().load(),
+      child: BlocConsumer<AgencyHomeCubit, AgencyHomeState>(
+        listenWhen: (prev, curr) => curr is AgencyHomeCreateFailure,
+        listener: (context, state) {
+          if (state is AgencyHomeCreateFailure) {
+            final message = switch (state.messageKey) {
+              'not_a_publisher' => l10n.agency_create_not_publisher,
+              'already_owns_agency' => l10n.agency_already_owns,
+              _ => l10n.agency_action_failed,
+            };
+            AppToast.error(context, message);
+          }
+        },
+        builder: (context, state) {
+          return DcCrownScaffold(
+            dense: true,
+            leading: DcCrownIconButton(
+              icon: Icons.arrow_forward,
+              onTap: () => Navigator.of(context).maybePop(),
             ),
-            AgencyHomeInvited(:final invitations, :final responding) =>
-              _InvitedView(invitations: invitations, responding: responding),
-            AgencyHomeOwner(:final agency) => _ManagementSurface(
-              agency: agency,
-              isOwner: true,
-            ),
-            AgencyHomeMember(:final agency) => _ManagementSurface(
-              agency: agency,
-              isOwner: false,
-            ),
-          },
-        );
-      },
+            title: switch (state) {
+              AgencyHomeNone() ||
+              AgencyHomeCreating() ||
+              AgencyHomeCreateFailure() => l10n.agency_create_title,
+              AgencyHomeInvited() => l10n.agency_invitations_title,
+              _ => l10n.agency_profile_title,
+            },
+            body: switch (state) {
+              AgencyHomeLoading() => const AppSpinner.page(),
+              // Batch-2: a bare centred Text was the only thing shown on a load
+              // failure — no way back. Now the shared ErrorState with a Retry
+              // that re-calls the very same load().
+              AgencyHomeError() => ErrorState(
+                title: l10n.agency_generic_error,
+                onRetry: () => context.read<AgencyHomeCubit>().load(),
+              ),
+              AgencyHomeNone() ||
+              AgencyHomeCreating() ||
+              AgencyHomeCreateFailure() => _CreateAgencyForm(
+                submitting: state is AgencyHomeCreating,
+              ),
+              AgencyHomeInvited(:final invitations, :final responding) =>
+                _InvitedView(invitations: invitations, responding: responding),
+              AgencyHomeOwner(:final agency) => _ManagementSurface(
+                agency: agency,
+                isOwner: true,
+              ),
+              AgencyHomeMember(:final agency) => _ManagementSurface(
+                agency: agency,
+                isOwner: false,
+              ),
+            },
+          );
+        },
+      ),
     );
   }
 }
@@ -237,7 +257,12 @@ class _InvitedView extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      l10n.agency_invitation_pending_from(invite.agencyName),
+                      l10n.agency_invitation_pending_from(
+                        // Never render the raw agency UUID — `v_agencies` hides
+                        // a not-yet-approved agency from a PENDING invitee.
+                        invite.agencyName ??
+                            l10n.agency_invitation_unnamed_agency,
+                      ),
                       style: styles.bodyMedium,
                     ),
                   ),
@@ -399,8 +424,12 @@ class _ManageTile extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
+              // Batch-2 RTL: a bare chevron_right does not mirror in Arabic;
+              // this matches the DS app bar and the super-admin/currency cards.
               Icon(
-                LucideIcons.chevron_right,
+                Directionality.of(context) == TextDirection.rtl
+                    ? LucideIcons.chevron_left
+                    : LucideIcons.chevron_right,
                 size: AppSpacing.xl,
                 color: colors.textMuted,
               ),

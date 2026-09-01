@@ -7,17 +7,18 @@
 // Constitution IX: zero Supabase imports.
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/di/injection.dart';
 import '../../../../../core/routing/app_router.dart';
-import '../../../../../core/theme/colors.dart';
 import '../../../../../core/theme/spacing.dart';
-import '../../../../../core/theme/typography.dart';
-import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_spinner.dart';
 import '../../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../../core/widgets/empty_state.dart';
+import '../../../../../core/widgets/error_state.dart';
 import '../../../../../core/widgets/loading_state.dart';
+import '../../../../../core/widgets/staggered_list_item.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../bloc/reports_queue_bloc.dart';
 import '../bloc/reports_queue_state.dart';
@@ -118,7 +119,9 @@ class _ReportsQueueViewState extends State<_ReportsQueueView> {
                   return const _QueueSkeleton();
                 }
                 if (state.failure != null && state.items.isEmpty) {
-                  return _ErrorState(
+                  // Batch-2: the local _ErrorState clone -> shared ErrorState.
+                  return ErrorState(
+                    title: l10n.reports_queue_title,
                     message: state.failure!.message,
                     onRetry: () => ctx.read<ReportsQueueBloc>().add(
                       const ReportsQueueRefresh(),
@@ -126,17 +129,28 @@ class _ReportsQueueViewState extends State<_ReportsQueueView> {
                   );
                 }
                 if (state.isEmpty) {
+                  // Batch-2: a bare centred Text under a hand-tuned spacer ->
+                  // the shared EmptyState, still inside a scrollable so the
+                  // existing pull-to-refresh keeps working while empty.
                   return RefreshIndicator(
                     onRefresh: () async {
                       ctx.read<ReportsQueueBloc>().add(
                         const ReportsQueueRefresh(),
                       );
                     },
-                    child: ListView(
-                      children: [
-                        const SizedBox(height: AppSpacing.xl),
-                        Center(child: Text(l10n.reports_queue_empty)),
-                      ],
+                    child: LayoutBuilder(
+                      builder: (context, constraints) => ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          SizedBox(
+                            height: constraints.maxHeight,
+                            child: EmptyState(
+                              icon: LucideIcons.flag,
+                              headline: l10n.reports_queue_empty,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 }
@@ -148,6 +162,7 @@ class _ReportsQueueViewState extends State<_ReportsQueueView> {
                   },
                   child: ListView.separated(
                     controller: _scrollController,
+                    physics: const AlwaysScrollableScrollPhysics(),
                     padding: const EdgeInsetsDirectional.all(AppSpacing.md),
                     itemCount:
                         state.items.length + (state.isLoadingNextPage ? 1 : 0),
@@ -161,16 +176,19 @@ class _ReportsQueueViewState extends State<_ReportsQueueView> {
                         );
                       }
                       final item = state.items[index];
-                      return ReportQueueCard(
-                        item: item,
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute<void>(
-                              builder: (_) =>
-                                  ReportDetailPage(reportId: item.id),
-                            ),
-                          );
-                        },
+                      return StaggeredListItem(
+                        index: index,
+                        child: ReportQueueCard(
+                          item: item,
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) =>
+                                    ReportDetailPage(reportId: item.id),
+                              ),
+                            );
+                          },
+                        ),
                       );
                     },
                   ),
@@ -179,39 +197,6 @@ class _ReportsQueueViewState extends State<_ReportsQueueView> {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _ErrorState extends StatelessWidget {
-  const _ErrorState({required this.message, required this.onRetry});
-
-  final String message;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-    final styles = AppTextStyles.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: styles.bodyLarge.copyWith(color: colors.error),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            AppButton(
-              label: AppLocalizations.of(context)!.actionReload,
-              onPressed: onRetry,
-            ),
-          ],
-        ),
       ),
     );
   }

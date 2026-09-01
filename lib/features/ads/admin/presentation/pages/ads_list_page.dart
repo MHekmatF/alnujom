@@ -22,8 +22,11 @@ import '../../../../../core/widgets/app_dialog.dart';
 import '../../../../../core/widgets/app_spinner.dart';
 import '../../../../../core/widgets/app_toast.dart';
 import '../../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../../core/widgets/empty_state.dart';
+import '../../../../../core/widgets/error_state.dart';
 import '../../../../../core/widgets/loading_state.dart';
 import '../../../../../core/widgets/press_scale.dart';
+import '../../../../../core/widgets/staggered_list_item.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../domain/entities/ad.dart';
 import '../bloc/ads_admin_cubit.dart';
@@ -92,40 +95,42 @@ class _AdsListView extends StatelessWidget {
           }
           if (state is AdsAdminList) {
             if (state.ads.isEmpty) {
-              return Center(child: Text(l10n.adsAdminEmptyList));
+              // Batch-2: the bare centred Text became the shared EmptyState so
+              // the admin console matches the consumer surfaces.
+              return EmptyState(
+                icon: LucideIcons.megaphone,
+                headline: l10n.adsAdminEmptyList,
+              );
             }
             return RefreshIndicator(
               onRefresh: () => ctx.read<AdsAdminCubit>().loadAds(
                 includeArchived: state.includeArchived,
               ),
               child: ListView.separated(
+                physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
                 itemCount: state.ads.length,
                 separatorBuilder: (_, __) =>
                     const SizedBox(height: AppSpacing.sm),
                 itemBuilder: (ctx, i) {
                   final ad = state.ads[i];
-                  return _AdListTile(
-                    ad: ad,
-                    onTap: () => _openEditor(ctx, ad: ad),
+                  return StaggeredListItem(
+                    index: i,
+                    child: _AdListTile(
+                      ad: ad,
+                      onTap: () => _openEditor(ctx, ad: ad),
+                    ),
                   );
                 },
               ),
             );
           }
           if (state is AdsAdminError) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(l10n.errorGeneric),
-                  const SizedBox(height: AppSpacing.md),
-                  FilledButton(
-                    onPressed: () => ctx.read<AdsAdminCubit>().loadAds(),
-                    child: Text(l10n.errorRetryAction),
-                  ),
-                ],
-              ),
+            // Batch-2: the ad-hoc Text + FilledButton became the shared
+            // ErrorState (glyph badge, title, tonal Retry).
+            return ErrorState(
+              title: l10n.errorGeneric,
+              onRetry: () => ctx.read<AdsAdminCubit>().loadAds(),
             );
           }
           // AdsAdminSaving / AdsAdminSaveSuccess / AdsAdminImageUploaded /

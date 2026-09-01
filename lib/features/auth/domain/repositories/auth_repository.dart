@@ -36,6 +36,23 @@ abstract class AuthRepository {
   /// Always returns Success on parseable input; only transport failures surface.
   Future<Result<void>> requestPasswordReset({required PhoneNumber phone});
 
+  /// Spec 005 D-01 — fires once each time an incoming password-recovery deep
+  /// link (`alnujom://auth/reset-password`) has been exchanged for a recovery
+  /// session, i.e. the user may now choose a new password.
+  ///
+  /// A recovery that lands during app start (before any widget is mounted) is
+  /// held and replayed to the first subscriber, so the listener never misses a
+  /// cold-launch reset link.
+  Stream<void> get passwordRecoveryStream;
+
+  /// Spec 005 D-01 — sets a new password for the session established by the
+  /// recovery link.
+  ///
+  /// Returns [UnknownAuthError] with message `recovery_session_missing` when
+  /// there is no active session (expired or already-consumed link), so the UI
+  /// can offer "request a new link" instead of a generic error.
+  Future<Result<void>> updatePassword({required String newPassword});
+
   /// Fetches the latest rejection reason for [userId], or null.
   /// Used by the Rejected screen to show why the admin rejected the account.
   Future<String?> fetchRejectionReason({required String userId});

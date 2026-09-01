@@ -98,6 +98,9 @@ class _SettingsForm extends StatelessWidget {
     return RefreshIndicator(
       onRefresh: cubit.load,
       child: ListView(
+        // Batch-2: without this, pull-to-refresh does not trigger when the form
+        // is shorter than the viewport (e.g. a partially-permitted admin).
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
         children: [
           // ── General ────────────────────────────────────────────────────────

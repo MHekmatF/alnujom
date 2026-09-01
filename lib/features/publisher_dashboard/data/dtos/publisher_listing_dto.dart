@@ -68,6 +68,13 @@ class PublisherListingDto {
   final String? cityId;
   final String? areaId;
   final String? addressText;
+
+  /// SEC-I1: `v_publisher_listings` no longer projects the coordinates
+  /// (migration `20260901120001_gate_listing_coordinates.sql`), so these are
+  /// ALWAYS null here. My Listings is a list screen and never rendered a pin;
+  /// the edit form loads the owner's own coordinates through the gated
+  /// `get_listing_coordinates` RPC. Kept (rather than deleted) so the DTO stays
+  /// a faithful 1:1 of the `Listing` entity shape.
   final Decimal? latitude;
   final Decimal? longitude;
   final String locationVisibility;

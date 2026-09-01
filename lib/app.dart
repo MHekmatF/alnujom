@@ -14,6 +14,7 @@ import 'debug/palette_tester.dart';
 import 'features/app_update/presentation/bloc/app_update_cubit.dart';
 import 'features/app_update/presentation/widgets/update_prompt_dialog.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/auth/presentation/widgets/password_recovery_listener.dart';
 import 'features/notifications/presentation/widgets/notification_push_listener.dart';
 import 'features/settings/presentation/bloc/app_settings_cubit.dart';
 import 'l10n/app_localizations.dart';
@@ -49,8 +50,12 @@ class _AppState extends State<App> with WidgetsBindingObserver {
     // Initial load (fail-open on failure — never blocks app start).
     _appSettingsCubit.load();
     // Cold-start update check — fail-silent (FR-010); dialog shown from the
-    // BlocListener in [build] when [UpdateAvailable] is emitted.
-    _appUpdateCubit.check();
+    // BlocListener in [build] when [UpdateAvailable] is emitted. Skipped
+    // entirely on a Play build, where prompting a sideloaded install is against
+    // policy (see [kInAppUpdatePromptEnabled]).
+    if (kInAppUpdatePromptEnabled) {
+      _appUpdateCubit.check();
+    }
     // Phase 24 (CR / T007) — QA-only forced-crash affordance, gated by the
     // `SENTRY_TEST_CRASH` dart-define. INERT in the shipped release (the flag
     // defaults false and is never set in a release build). Throws an uncaught
@@ -160,11 +165,18 @@ class _AppState extends State<App> with WidgetsBindingObserver {
                           }
                         },
                         child: NotificationPushListener(
-                          child: Stack(
-                            children: [
-                              child ?? const SizedBox.shrink(),
-                              if (showPaletteTester) const PaletteTester(),
-                            ],
+                          // Spec 005 D-01 — routes to the "set a new password"
+                          // screen when a recovery deep link is exchanged for
+                          // a session (warm resume AND cold launch; the
+                          // repository replays a recovery that landed before
+                          // this widget mounted).
+                          child: PasswordRecoveryListener(
+                            child: Stack(
+                              children: [
+                                child ?? const SizedBox.shrink(),
+                                if (showPaletteTester) const PaletteTester(),
+                              ],
+                            ),
                           ),
                         ),
                       );

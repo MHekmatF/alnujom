@@ -1,20 +1,24 @@
 // lib/features/agency/presentation/widgets/agency_status_chip.dart
 //
 // Phase 19 (spec/019-agencies) Sub-Phase H (T050).
-// Canonical localized AgencyStatus pill. Mirrors report_status_chip.dart.
-// Phase 2 tokens only; no inline hex/font-size/padding.
+// Canonical localized AgencyStatus pill.
+// Batch-2 restyle: was a bare Material Chip driven off raw `colorScheme`
+// containers; now the shared DS [DcStatusChip] so it matches every other status
+// pill in the app (reports, listings, viewings, ads).
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
+import '../../../../core/widgets/ds/dc_status_chip.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/agency_status.dart';
 
-/// A small status chip visualising an [AgencyStatus] using token colors.
+/// A small status chip visualising an [AgencyStatus] with the DS status tones.
 ///
-/// Token mapping (Phase 2 colorScheme):
-///   pending   → secondaryContainer / onSecondaryContainer
-///   approved  → primaryContainer   / onPrimaryContainer
-///   rejected  → errorContainer     / onErrorContainer
-///   suspended → surfaceContainerHighest / onSurface (muted)
+/// Tone mapping:
+///   pending   → neutral (surfaceVariant)
+///   approved  → green   (verifiedContainer)
+///   rejected  → red     (errorContainer)
+///   suspended → outline (hairline, de-emphasized)
 class AgencyStatusChip extends StatelessWidget {
   const AgencyStatusChip(this.status, {super.key});
 
@@ -23,43 +27,30 @@ class AgencyStatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final scheme = Theme.of(context).colorScheme;
 
-    final label = switch (status) {
-      AgencyStatus.pending => l10n.agency_status_pending,
-      AgencyStatus.approved => l10n.agency_status_approved,
-      AgencyStatus.rejected => l10n.agency_status_rejected,
-      AgencyStatus.suspended => l10n.agency_status_suspended,
-    };
-
-    final (background, foreground) = switch (status) {
+    final (label, tone, icon) = switch (status) {
       AgencyStatus.pending => (
-          scheme.secondaryContainer,
-          scheme.onSecondaryContainer,
-        ),
+        l10n.agency_status_pending,
+        DcStatusTone.neutral,
+        LucideIcons.clock,
+      ),
       AgencyStatus.approved => (
-          scheme.primaryContainer,
-          scheme.onPrimaryContainer,
-        ),
+        l10n.agency_status_approved,
+        DcStatusTone.green,
+        LucideIcons.badge_check,
+      ),
       AgencyStatus.rejected => (
-          scheme.errorContainer,
-          scheme.onErrorContainer,
-        ),
+        l10n.agency_status_rejected,
+        DcStatusTone.red,
+        LucideIcons.circle_x,
+      ),
       AgencyStatus.suspended => (
-          scheme.surfaceContainerHighest,
-          scheme.onSurface,
-        ),
+        l10n.agency_status_suspended,
+        DcStatusTone.outline,
+        LucideIcons.ban,
+      ),
     };
 
-    return Chip(
-      label: Text(label),
-      backgroundColor: background,
-      labelStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: foreground,
-          ),
-      side: BorderSide.none,
-      padding: EdgeInsets.zero,
-      visualDensity: VisualDensity.compact,
-    );
+    return DcStatusChip(label: label, tone: tone, icon: icon);
   }
 }

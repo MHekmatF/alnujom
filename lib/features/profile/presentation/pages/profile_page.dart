@@ -177,6 +177,19 @@ class _ProfileView extends StatelessWidget {
                   },
                   ),
                 ),
+
+                // ── Delete account (Google Play in-app deletion requirement) ─
+                // Deliberately quieter than Sign out — a plain text link, not a
+                // second card — so the two destructive actions can't be
+                // confused, while still being reachable from the screen users
+                // associate with their account.
+                const SizedBox(height: AppSpacing.lg),
+                StaggeredListItem(
+                  index: 3,
+                  child: _DeleteAccountLink(
+                    onTap: () => context.push(AppRoutes.accountDelete),
+                  ),
+                ),
               ],
             ),
           ),
@@ -757,6 +770,50 @@ class _SignOutButton extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The account-deletion entry point: an understated, error-tinted text link.
+/// It only opens the confirmation screen — nothing is deleted from here.
+class _DeleteAccountLink extends StatelessWidget {
+  const _DeleteAccountLink({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+
+    return Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        borderRadius: appRadius(AppRadii.md),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsetsDirectional.all(AppSpacing.md),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.delete_forever_outlined,
+                color: colors.error,
+                size: AppSpacing.lg,
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Flexible(
+                child: Text(
+                  l10n.accountDeleteEntryTitle,
+                  style: styles.bodyMedium.copyWith(color: colors.error),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
           ),
         ),
       ),

@@ -12,6 +12,7 @@ import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/glass_pill.dart';
+import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/press_scale.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -23,9 +24,9 @@ import '../pages/reels_feed_page.dart';
 /// Phase 029 (Reels W4) — the home "Reels" rail: a horizontally-scrolling row
 /// of 9:16 poster cards. Self-wired — it hosts its OWN [ReelsRailCubit] (via
 /// [getIt] + a page-scoped [BlocProvider]) and loads the first page when it
-/// mounts. Mirrors the [FeaturedListingsCarousel] idiom: the section hides
-/// itself entirely (zero height) on empty / failure / loading so it never
-/// disrupts the home feed.
+/// mounts. While loading it holds its height with a skeleton so the feed below
+/// does not jump; on empty / failure it collapses to zero height so it never
+/// leaves a hole in the home feed.
 ///
 /// Tapping a card opens the fullscreen [ReelsFeedPage], seeded with the rail's
 /// already-loaded reels so the feed paints without a second round-trip.
@@ -53,8 +54,19 @@ class _ReelsRailView extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ReelsRailCubit, ReelsRailState>(
       builder: (context, state) {
-        // Render ONLY when loaded with at least one reel; empty / failure /
-        // loading collapse the section to nothing.
+        // While the reels are still in flight, hold the section's height with a
+        // skeleton row instead of collapsing it — otherwise the rest of the
+        // home feed shifts downwards the moment the reels arrive.
+        if (state.status == ReelsRailStatus.initial ||
+            state.status == ReelsRailStatus.loading) {
+          return const _ReelsRailSkeleton(
+            cardWidth: _cardWidth,
+            cardHeight: _cardHeight,
+          );
+        }
+
+        // Empty and failure genuinely have nothing to show, so the section
+        // collapses to nothing rather than leaving a hole in the feed.
         if (state.status != ReelsRailStatus.loaded || state.reels.isEmpty) {
           return const SizedBox.shrink();
         }
@@ -109,6 +121,50 @@ class _ReelsRailView extends StatelessWidget {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => ReelsFeedPage(initialReels: ordered),
+      ),
+    );
+  }
+}
+
+/// Placeholder occupying exactly the loaded rail's height, so the home feed
+/// below it does not jump when the reels resolve. Non-interactive and unlabelled
+/// — there is nothing here for a screen reader to announce yet.
+class _ReelsRailSkeleton extends StatelessWidget {
+  const _ReelsRailSkeleton({required this.cardWidth, required this.cardHeight});
+
+  final double cardWidth;
+  final double cardHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    return ExcludeSemantics(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsetsDirectional.fromSTEB(
+              AppSpacing.lg,
+              AppSpacing.lg,
+              AppSpacing.sm,
+              AppSpacing.sm,
+            ),
+            child: LoadingState.heading(),
+          ),
+          SizedBox(
+            height: cardHeight,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsetsDirectional.symmetric(
+                horizontal: AppSpacing.lg,
+              ),
+              itemCount: 3,
+              separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
+              itemBuilder: (_, __) =>
+                  SizedBox(width: cardWidth, child: const LoadingState.card()),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -223,8 +279,9 @@ class _ReelPosterCard extends StatelessWidget {
                           shape: BoxShape.circle,
                         ),
                         child: Padding(
-                          padding:
-                              const EdgeInsetsDirectional.all(AppSpacing.sm),
+                          padding: const EdgeInsetsDirectional.all(
+                            AppSpacing.sm,
+                          ),
                           child: Icon(
                             LucideIcons.play,
                             color: colors.onPhoto,
@@ -237,8 +294,9 @@ class _ReelPosterCard extends StatelessWidget {
                       Align(
                         alignment: AlignmentDirectional.bottomStart,
                         child: Padding(
-                          padding:
-                              const EdgeInsetsDirectional.all(AppSpacing.sm),
+                          padding: const EdgeInsetsDirectional.all(
+                            AppSpacing.sm,
+                          ),
                           child: GlassPill(
                             label: MoneyFormatter.formatAmount(
                               num.tryParse(reel.priceAmount!) ?? 0,

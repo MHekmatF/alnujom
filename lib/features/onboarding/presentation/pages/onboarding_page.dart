@@ -131,76 +131,99 @@ class _OnboardingViewState extends State<_OnboardingView> {
                             ),
                           ],
                         ),
-                        const Spacer(),
-                        AnimatedSwitcher(
-                          duration: AppMotion.slow,
-                          switchInCurve: AppMotion.curve,
-                          switchOutCurve: AppMotion.curve,
-                          layoutBuilder: (currentChild, previousChildren) =>
-                              Stack(
-                                alignment: AlignmentDirectional.centerStart,
-                                children: [
-                                  ...previousChildren,
-                                  if (currentChild != null) currentChild,
-                                ],
-                              ),
-                          child: Column(
-                            key: ValueKey<int>(step),
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                current.title,
-                                style: styles.displayMedium.copyWith(
-                                  color: colors.onPhoto,
-                                ),
-                              ),
-                              const SizedBox(height: AppSpacing.md),
-                              Text(
-                                current.body,
-                                style: styles.bodyLarge.copyWith(
-                                  color: colors.onPhoto,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.xl),
-                        Semantics(
-                          container: true,
-                          label: l10n.stepCounter(step + 1, total),
-                          child: ExcludeSemantics(
-                            child: Row(
-                              children: List.generate(total, (i) {
-                                final active = i == step;
-                                return AnimatedContainer(
-                                  duration: AppMotion.base,
-                                  curve: AppMotion.curve,
-                                  margin: const EdgeInsetsDirectional.only(
-                                    end: AppSpacing.xs,
+                        // Bottom-anchored, but scrollable so the headline and CTA
+                        // still fit at the largest OS text scales instead of
+                        // overflowing the SafeArea.
+                        Expanded(
+                          child: SingleChildScrollView(
+                            reverse: true,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                AnimatedSwitcher(
+                                  duration: AppMotion.slow,
+                                  switchInCurve: AppMotion.curve,
+                                  switchOutCurve: AppMotion.curve,
+                                  layoutBuilder:
+                                      (currentChild, previousChildren) => Stack(
+                                        alignment:
+                                            AlignmentDirectional.centerStart,
+                                        children: [
+                                          ...previousChildren,
+                                          if (currentChild != null)
+                                            currentChild,
+                                        ],
+                                      ),
+                                  child: Column(
+                                    key: ValueKey<int>(step),
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        current.title,
+                                        style: styles.displayMedium.copyWith(
+                                          color: colors.onPhoto,
+                                        ),
+                                      ),
+                                      const SizedBox(height: AppSpacing.md),
+                                      Text(
+                                        current.body,
+                                        style: styles.bodyLarge.copyWith(
+                                          color: colors.onPhoto,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  width: active ? AppSpacing.xl : AppSpacing.sm,
-                                  height: AppSpacing.sm,
-                                  decoration: BoxDecoration(
-                                    color: active
-                                        ? colors.primary
-                                        : colors.onPhoto.withValues(alpha: 0.5),
-                                    borderRadius: appRadius(AppRadii.pill),
+                                ),
+                                const SizedBox(height: AppSpacing.xl),
+                                Semantics(
+                                  container: true,
+                                  label: l10n.stepCounter(step + 1, total),
+                                  child: ExcludeSemantics(
+                                    child: Row(
+                                      children: List.generate(total, (i) {
+                                        final active = i == step;
+                                        return AnimatedContainer(
+                                          duration: AppMotion.base,
+                                          curve: AppMotion.curve,
+                                          margin:
+                                              const EdgeInsetsDirectional.only(
+                                                end: AppSpacing.xs,
+                                              ),
+                                          width: active
+                                              ? AppSpacing.xl
+                                              : AppSpacing.sm,
+                                          height: AppSpacing.sm,
+                                          decoration: BoxDecoration(
+                                            color: active
+                                                ? colors.primary
+                                                : colors.onPhoto.withValues(
+                                                    alpha: 0.5,
+                                                  ),
+                                            borderRadius: appRadius(
+                                              AppRadii.pill,
+                                            ),
+                                          ),
+                                        );
+                                      }),
+                                    ),
                                   ),
-                                );
-                              }),
+                                ),
+                                const SizedBox(height: AppSpacing.lg),
+                                AppButton.filledPrimary(
+                                  label: step >= total - 1
+                                      ? l10n.onboarding_get_started
+                                      : l10n.onboarding_next,
+                                  expanded: true,
+                                  onPressed: () => context
+                                      .read<OnboardingCubit>()
+                                      .nextStep(),
+                                ),
+                                const SizedBox(height: AppSpacing.xl),
+                              ],
                             ),
                           ),
                         ),
-                        const SizedBox(height: AppSpacing.lg),
-                        AppButton.filledPrimary(
-                          label: step >= total - 1
-                              ? l10n.onboarding_get_started
-                              : l10n.onboarding_next,
-                          expanded: true,
-                          onPressed: () =>
-                              context.read<OnboardingCubit>().nextStep(),
-                        ),
-                        const SizedBox(height: AppSpacing.xl),
                       ],
                     ),
                   ),

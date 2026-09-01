@@ -10,10 +10,12 @@ import '../../../../../core/theme/radii.dart';
 import '../../../../../core/theme/spacing.dart';
 import '../../../../../core/theme/typography.dart';
 import '../../../../../core/widgets/_widget_support.dart';
-import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_spinner.dart';
 import '../../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../../core/widgets/empty_state.dart';
+import '../../../../../core/widgets/error_state.dart';
 import '../../../../../core/widgets/loading_state.dart';
+import '../../../../../core/widgets/staggered_list_item.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../listing_form/domain/entities/pending_revision.dart';
 import '../bloc/pending_queue_bloc.dart';
@@ -104,22 +106,35 @@ class _PendingQueueViewState extends State<_PendingQueueView> {
           return const _QueueSkeleton();
         }
         if (state.failure != null && state.listings.isEmpty) {
-          return _ErrorState(
+          // Batch-2: the local _ErrorState clone became the shared ErrorState.
+          return ErrorState(
+            title: l10n.adminQueueTitle,
             message: state.failure!.message,
             onRetry: () =>
                 ctx.read<PendingQueueBloc>().add(const PendingQueueRefresh()),
           );
         }
         if (state.isEmpty) {
+          // Batch-2: a bare centred Text under a hand-tuned 80dp spacer became
+          // the shared EmptyState, still inside a scrollable so the existing
+          // pull-to-refresh keeps working while empty.
           return RefreshIndicator(
             onRefresh: () async {
               ctx.read<PendingQueueBloc>().add(const PendingQueueRefresh());
             },
-            child: ListView(
-              children: [
-                const SizedBox(height: AppSpacing.xxxl + AppSpacing.xxl),
-                Center(child: Text(l10n.adminQueueEmpty)),
-              ],
+            child: LayoutBuilder(
+              builder: (context, constraints) => ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [
+                  SizedBox(
+                    height: constraints.maxHeight,
+                    child: EmptyState(
+                      icon: LucideIcons.circle_check_big,
+                      headline: l10n.adminQueueEmpty,
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         }
@@ -130,6 +145,7 @@ class _PendingQueueViewState extends State<_PendingQueueView> {
           },
           child: ListView.separated(
             controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsetsDirectional.all(AppSpacing.md),
             itemCount:
                 state.listings.length + (state.isLoadingNextPage ? 1 : 0),
@@ -141,7 +157,10 @@ class _PendingQueueViewState extends State<_PendingQueueView> {
                   child: AppSpinner(),
                 );
               }
-              return PendingQueueCard(summary: state.listings[index]);
+              return StaggeredListItem(
+                index: index,
+                child: PendingQueueCard(summary: state.listings[index]),
+              );
             },
           ),
         );
@@ -234,7 +253,15 @@ class _PendingRevisionCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(LucideIcons.chevron_right, color: colors.textMuted),
+              // Batch-2 RTL: a bare chevron_right does not mirror in Arabic;
+              // this matches the directional disclosure used by the DS app bar,
+              // settings rows and the super-admin/currency cards.
+              Icon(
+                Directionality.of(context) == TextDirection.rtl
+                    ? LucideIcons.chevron_left
+                    : LucideIcons.chevron_right,
+                color: colors.textMuted,
+              ),
             ],
           ),
         ),
@@ -254,39 +281,6 @@ class _PendingRevisionCard extends StatelessWidget {
     );
     // Re-load on return so an applied/rejected revision drops off the queue.
     await cubit.load();
-  }
-}
-
-class _ErrorState extends StatelessWidget {
-  const _ErrorState({required this.message, required this.onRetry});
-
-  final String message;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-    final styles = AppTextStyles.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: styles.bodyLarge.copyWith(color: colors.error),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            AppButton(
-              label: AppLocalizations.of(context)!.actionReload,
-              onPressed: onRetry,
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
 

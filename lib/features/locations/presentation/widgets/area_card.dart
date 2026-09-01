@@ -87,6 +87,14 @@ class AreaCard extends StatelessWidget {
           ],
           PopupMenuButton<_CardAction>(
             icon: Icon(LucideIcons.ellipsis_vertical, color: colors.textMuted),
+            // Batch-2: token popup surface + radius, matching the DS
+            // ListingViewModeSwitcher menu (was the bare Material default).
+            position: PopupMenuPosition.under,
+            color: colors.card,
+            shape: RoundedRectangleBorder(
+              borderRadius: appRadius(AppRadii.lg),
+              side: BorderSide(color: colors.outline),
+            ),
             onSelected: (action) => switch (action) {
               _CardAction.edit => onEdit(),
               _CardAction.toggleActive => onToggleActive(),

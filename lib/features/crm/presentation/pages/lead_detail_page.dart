@@ -199,9 +199,10 @@ class _StageChips extends StatelessWidget {
               ChoiceChip(
                 label: Text(crmStageLabel(stage, l10n)),
                 selected: stage == current,
-                selectedColor: crmStageColor(stage, colors).withValues(
-                  alpha: 0.18,
-                ),
+                selectedColor: crmStageColor(
+                  stage,
+                  colors,
+                ).withValues(alpha: 0.18),
                 onSelected: (_) =>
                     context.read<LeadDetailCubit>().changeStage(stage),
               ),
@@ -347,7 +348,10 @@ class _RemindersSection extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: Text(l10n.crmRemindersSectionTitle, style: styles.labelLarge),
+              child: Text(
+                l10n.crmRemindersSectionTitle,
+                style: styles.labelLarge,
+              ),
             ),
             AppButton(
               label: l10n.crmReminderAddAction,
@@ -381,7 +385,7 @@ class _RemindersSection extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       builder: (sheetContext) => Padding(
-        padding: EdgeInsets.only(
+        padding: EdgeInsetsDirectional.only(
           bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
         ),
         child: _AddReminderSheet(controller: controller, cubit: cubit),
@@ -599,9 +603,10 @@ class _ActivityTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: styles.bodyMedium.copyWith(
-                  color: colors.onSurface,
-                )),
+                Text(
+                  title,
+                  style: styles.bodyMedium.copyWith(color: colors.onSurface),
+                ),
                 if (body != null && body.trim().isNotEmpty)
                   Text(
                     body,
@@ -616,7 +621,11 @@ class _ActivityTile extends StatelessWidget {
           ),
           if (row.isNote)
             IconButton(
-              icon: Icon(LucideIcons.trash_2, color: colors.error, size: AppSpacing.lg),
+              icon: Icon(
+                LucideIcons.trash_2,
+                color: colors.error,
+                size: AppSpacing.lg,
+              ),
               tooltip: l10n.crmDeleteAction,
               onPressed: () => _confirmDeleteNote(context, cubit),
             ),

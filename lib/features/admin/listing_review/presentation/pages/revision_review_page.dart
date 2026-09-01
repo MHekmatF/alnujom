@@ -13,6 +13,7 @@ import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_spinner.dart';
 import '../../../../../core/widgets/app_toast.dart';
 import '../../../../../core/widgets/dc_crown_scaffold.dart';
+import '../../../../../core/widgets/error_state.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../../shared/presentation/widgets/listing_display/listing_gallery.dart';
 import '../../domain/entities/revision_diff.dart';
@@ -41,13 +42,21 @@ class RevisionReviewPage extends StatelessWidget {
     return BlocProvider<RevisionReviewBloc>(
       create: (_) => getIt<RevisionReviewBloc>()
         ..add(RevisionReviewLoad(revisionId: revisionId, listingId: listingId)),
-      child: const _RevisionReviewView(),
+      // Batch-2: the ids are threaded through so the load-failure body can offer
+      // a Retry that re-dispatches the very same RevisionReviewLoad event.
+      child: _RevisionReviewView(revisionId: revisionId, listingId: listingId),
     );
   }
 }
 
 class _RevisionReviewView extends StatelessWidget {
-  const _RevisionReviewView();
+  const _RevisionReviewView({
+    required this.revisionId,
+    required this.listingId,
+  });
+
+  final String revisionId;
+  final String listingId;
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +92,18 @@ class _RevisionReviewView extends StatelessWidget {
             return const AppSpinner.page();
           }
           if (state.failure != null && state.diff == null) {
-            return _ErrorState(message: state.failure!.message);
+            // Batch-2: the local _ErrorState clone (a lone red paragraph with
+            // no way out) -> the shared ErrorState, which adds a Retry.
+            return ErrorState(
+              title: l10n.errorGeneric,
+              message: state.failure!.message,
+              onRetry: () => ctx.read<RevisionReviewBloc>().add(
+                RevisionReviewLoad(
+                  revisionId: revisionId,
+                  listingId: listingId,
+                ),
+              ),
+            );
           }
           if (state.diff == null) return const SizedBox.shrink();
           return _RevisionBody(diff: state.diff!);
@@ -336,26 +356,5 @@ class _BottomBar extends StatelessWidget {
         ),
       );
     }
-  }
-}
-
-class _ErrorState extends StatelessWidget {
-  const _ErrorState({required this.message});
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-    final styles = AppTextStyles.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
-        child: Text(
-          message,
-          textAlign: TextAlign.center,
-          style: styles.bodyLarge.copyWith(color: colors.error),
-        ),
-      ),
-    );
   }
 }

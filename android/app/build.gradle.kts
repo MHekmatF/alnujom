@@ -13,6 +13,20 @@ plugins {
 // the build succeeds with NoopPushMessagingService bound (SC-003/SC-010/FR-024).
 if (file("google-services.json").exists()) {
     apply(plugin = "com.google.gms.google-services")
+} else if (gradle.startParameter.taskNames.any { it.contains("Release", ignoreCase = true) }) {
+    // The file is gitignored, so a fresh clone does not have it. Degraded mode
+    // is deliberate, but silently shipping a RELEASE with no push at all is not
+    // something anyone should discover after the fact — say so loudly.
+    logger.warn(
+        "\n" + "=".repeat(78) +
+        "\n  WARNING: android/app/google-services.json is missing." +
+        "\n  This RELEASE build will ship WITHOUT push notifications:" +
+        "\n  NoopPushMessagingService is bound and no device will ever receive one." +
+        "\n" +
+        "\n  If that is not what you want, copy the file into android/app/ and" +
+        "\n  rebuild. See docs/ops/HANDOVER.md section 6 (Push notifications)." +
+        "\n" + "=".repeat(78) + "\n"
+    )
 }
 
 // Phase 24 RB — Fail-closed release signing (R-213, FR-003).

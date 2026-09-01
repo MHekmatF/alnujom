@@ -21,6 +21,7 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/security/permission_checker.dart';
 import '../../../../core/security/permission_keys.dart';
 import '../../../../core/widgets/app_spinner.dart';
+import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/publisher_status.dart';
@@ -57,12 +58,22 @@ class _PublisherOrEmpty extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
+    // Batch-2: this was the only internal surface still on a bare
+    // Scaffold+AppBar, so it landed on a plain white bar between two blue-crown
+    // screens (the admin console it forwards to, and the profile drawer it is
+    // opened from). Both branches now use the DS DcCrownScaffold with the same
+    // back affordance AdminHomePage uses.
     return BlocBuilder<ProfileCubit, ProfileState>(
       builder: (context, state) {
         if (state.status == ProfileStatus.loading ||
             state.status == ProfileStatus.initial) {
-          return Scaffold(
-            appBar: AppBar(title: Text(l10n.dashboardEntryTitle)),
+          return DcCrownScaffold(
+            title: l10n.dashboardEntryTitle,
+            dense: true,
+            leading: DcCrownIconButton(
+              icon: Icons.arrow_forward,
+              onTap: () => Navigator.of(context).maybePop(),
+            ),
             body: const AppSpinner.page(),
           );
         }
@@ -73,8 +84,13 @@ class _PublisherOrEmpty extends StatelessWidget {
           return const PublisherDashboardPage();
         }
 
-        return Scaffold(
-          appBar: AppBar(title: Text(l10n.dashboardEntryTitle)),
+        return DcCrownScaffold(
+          title: l10n.dashboardEntryTitle,
+          dense: true,
+          leading: DcCrownIconButton(
+            icon: Icons.arrow_forward,
+            onTap: () => Navigator.of(context).maybePop(),
+          ),
           body: EmptyState(
             icon: LucideIcons.layout_dashboard,
             headline: l10n.dashboardEntryEmptyTitle,

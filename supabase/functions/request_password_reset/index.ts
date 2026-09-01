@@ -18,6 +18,13 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "@supabase/supabase-js";
 
+// Spec 005 D-01 — where GoTrue sends the browser after it verifies the recovery
+// token. Must match the Android intent-filter on MainActivity
+// (scheme `alnujom`, host `auth`, path `/reset-password`) AND be present in
+// Supabase Dashboard → Authentication → URL Configuration → Redirect URLs,
+// otherwise /auth/v1/verify answers `{"error":"requested path is invalid"}`.
+const RESET_REDIRECT_URL = "alnujom://auth/reset-password";
+
 // ─── Phone normalization (TS port of lib/shared/domain/value_objects/phone_number.dart) ───
 // The Dart and TS implementations MUST agree on the canonical form.
 function normalizeToE164(raw: string): string | null {
@@ -107,13 +114,35 @@ Deno.serve(async (req: Request) => {
       // Still return generic success per FR-017.
     } else if (data && typeof data.email === "string" && data.email.trim().length > 0) {
       // 6. Real email on file → trigger reset.
+      //
+      // `redirectTo` only works once RESET_REDIRECT_URL is on the project's
+      // Redirect URLs allow-list (Authentication → URL Configuration). GoTrue
+      // rejects an unlisted address outright, which would mean NO mail at all —
+      // strictly worse than the old behaviour of falling back to Site URL.
+      //
+      // So: ask for the deep link, and if that specific call is refused, send
+      // the mail without it rather than sending nothing. The two log lines below
+      // tell the operator which path ran, i.e. whether the allow-list entry is
+      // actually in place.
       const { error: linkErr } = await admin.auth.admin.generateLink({
         type: "recovery",
         email: data.email,
+        options: { redirectTo: RESET_REDIRECT_URL },
       });
       if (linkErr) {
-        log("generate_link_failed", { code: linkErr.status });
-        // Still return generic success.
+        log("generate_link_redirect_rejected", { code: linkErr.status });
+        const { error: fallbackErr } = await admin.auth.admin.generateLink({
+          type: "recovery",
+          email: data.email,
+        });
+        if (fallbackErr) {
+          log("generate_link_failed", { code: fallbackErr.status });
+          // Still return generic success.
+        } else {
+          // Mail sent, but the link lands on Site URL, not the app. Add
+          // RESET_REDIRECT_URL to the allow-list to complete the flow.
+          log("reset_email_sent_without_deeplink", { user_id: data.user_id });
+        }
       } else {
         log("reset_email_sent", { user_id: data.user_id });
       }

@@ -68,6 +68,15 @@ abstract class ProfileRepository {
   /// [localeCode] with fallback per FR-017 (other locale → role key).
   Future<List<AssignedRole>> loadAssignedRoles(String localeCode);
 
+  /// Permanently deletes the signed-in user's own account (Google Play's
+  /// in-app account-deletion requirement).
+  ///
+  /// Server-side this erases the caller's personal data, pulls their listings
+  /// off every public surface and tombstones the profile as `deleted`. It takes
+  /// no user id — the server always acts on the authenticated caller — and it
+  /// cannot be undone. Callers MUST sign the user out on success.
+  Future<Result<void>> requestAccountDeletion();
+
   /// Release the internal broadcast stream controller.
   Future<void> dispose();
 }
@@ -107,6 +116,13 @@ final class InvalidAvatarUrl extends ProfileFailure {
 final class NotAuthenticated extends ProfileFailure {
   const NotAuthenticated({super.cause, super.stackTrace})
     : super('not_authenticated');
+}
+
+/// The `request_account_deletion` RPC did not complete — the account is
+/// untouched and the user is still signed in.
+final class AccountDeletionFailed extends ProfileFailure {
+  const AccountDeletionFailed({super.cause, super.stackTrace})
+    : super('account_deletion_failed');
 }
 
 final class UnknownProfileError extends ProfileFailure {

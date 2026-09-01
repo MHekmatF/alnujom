@@ -2,6 +2,8 @@ import 'package:decimal/decimal.dart';
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
+import '../../../../core/listing/listing_columns.dart';
+import '../../../../core/listing/listing_coordinates_reader.dart';
 import '../../domain/entities/submit_failure.dart';
 import '../dtos/listing_details_dto.dart';
 import '../dtos/listing_dto.dart';
@@ -10,30 +12,41 @@ import '../dtos/submit_listing_response_dto.dart';
 
 @injectable
 class SupabaseListingsDatasource {
-  SupabaseListingsDatasource();
+  SupabaseListingsDatasource(this._coordinates);
+
+  /// SEC-I1: exact coordinates no longer come back with the row — they are
+  /// fetched through the owner/admin-gated `get_listing_coordinates` RPC and
+  /// merged back under the same keys, so [ListingDto.fromMap] is unchanged.
+  final ListingCoordinatesReader _coordinates;
 
   supabase.SupabaseClient get _client => supabase.Supabase.instance.client;
 
   Future<ListingDto?> findDraftForPublisher(String publisherUserId) async {
     final rows = await _client
         .from('listings')
-        .select()
+        // SEC-I1: `.select()` (= `select=*`) would now 42501 — latitude and
+        // longitude are no longer granted to `authenticated`.
+        .select(listingColumnsWithoutCoordinates)
         .eq('publisher_user_id', publisherUserId)
         .eq('status', 'draft')
         .order('created_at', ascending: false)
         .limit(1);
     if (rows.isEmpty) return null;
-    return ListingDto.fromMap(Map<String, dynamic>.from(rows.first));
+    final row = Map<String, dynamic>.from(rows.first);
+    await _coordinates.mergeInto(row, listingId: row['id'] as String);
+    return ListingDto.fromMap(row);
   }
 
   Future<ListingDto?> loadListing(String listingId) async {
     final rows = await _client
         .from('listings')
-        .select()
+        .select(listingColumnsWithoutCoordinates) // SEC-I1 — see above.
         .eq('id', listingId)
         .limit(1);
     if (rows.isEmpty) return null;
-    return ListingDto.fromMap(Map<String, dynamic>.from(rows.first));
+    final row = Map<String, dynamic>.from(rows.first);
+    await _coordinates.mergeInto(row, listingId: listingId);
+    return ListingDto.fromMap(row);
   }
 
   Future<ListingDto> insertDraft(String publisherUserId) async {
@@ -43,10 +56,14 @@ class SupabaseListingsDatasource {
     // time. The other NOT-NULL columns DO have DEFAULTs: status='draft',
     // location_visibility='approximate', contact_name_visibility='public',
     // created_at=now(), updated_at=now().
+    //
+    // SEC-I1: the projection also drives the INSERT's RETURNING clause, so a
+    // bare `.select()` here would 42501 exactly like a read would. A fresh
+    // draft has no coordinates yet, so nothing has to be merged back.
     final row = await _client
         .from('listings')
         .insert(<String, dynamic>{'publisher_user_id': publisherUserId})
-        .select()
+        .select(listingColumnsWithoutCoordinates)
         .single();
     return ListingDto.fromMap(Map<String, dynamic>.from(row));
   }

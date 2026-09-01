@@ -339,6 +339,72 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get reset_password_new_title => _resolve(
+    'reset_password_new_title',
+    (loc) => loc.reset_password_new_title,
+  );
+
+  @override
+  String get reset_password_new_subtitle => _resolve(
+    'reset_password_new_subtitle',
+    (loc) => loc.reset_password_new_subtitle,
+  );
+
+  @override
+  String get reset_password_new_label => _resolve(
+    'reset_password_new_label',
+    (loc) => loc.reset_password_new_label,
+  );
+
+  @override
+  String get reset_password_confirm_label => _resolve(
+    'reset_password_confirm_label',
+    (loc) => loc.reset_password_confirm_label,
+  );
+
+  @override
+  String get reset_password_mismatch =>
+      _resolve('reset_password_mismatch', (loc) => loc.reset_password_mismatch);
+
+  @override
+  String get reset_password_save =>
+      _resolve('reset_password_save', (loc) => loc.reset_password_save);
+
+  @override
+  String get reset_password_success_title => _resolve(
+    'reset_password_success_title',
+    (loc) => loc.reset_password_success_title,
+  );
+
+  @override
+  String get reset_password_success_body => _resolve(
+    'reset_password_success_body',
+    (loc) => loc.reset_password_success_body,
+  );
+
+  @override
+  String get reset_password_continue =>
+      _resolve('reset_password_continue', (loc) => loc.reset_password_continue);
+
+  @override
+  String get reset_password_link_expired_title => _resolve(
+    'reset_password_link_expired_title',
+    (loc) => loc.reset_password_link_expired_title,
+  );
+
+  @override
+  String get reset_password_link_expired_body => _resolve(
+    'reset_password_link_expired_body',
+    (loc) => loc.reset_password_link_expired_body,
+  );
+
+  @override
+  String get reset_password_request_new_link => _resolve(
+    'reset_password_request_new_link',
+    (loc) => loc.reset_password_request_new_link,
+  );
+
+  @override
   String get phone_required =>
       _resolve('phone_required', (loc) => loc.phone_required);
 
@@ -2198,6 +2264,46 @@ final class _DebugAppLocalizations extends AppLocalizations {
       _resolve('descriptionReadMore', (loc) => loc.descriptionReadMore);
 
   @override
+  String get descriptionReadLess =>
+      _resolve('descriptionReadLess', (loc) => loc.descriptionReadLess);
+
+  @override
+  String get listingStatusDraft =>
+      _resolve('listingStatusDraft', (loc) => loc.listingStatusDraft);
+
+  @override
+  String get listingStatusPendingReview =>
+      _resolve('listingStatusPendingReview', (loc) => loc.listingStatusPendingReview);
+
+  @override
+  String get listingStatusApproved =>
+      _resolve('listingStatusApproved', (loc) => loc.listingStatusApproved);
+
+  @override
+  String get listingStatusRejected =>
+      _resolve('listingStatusRejected', (loc) => loc.listingStatusRejected);
+
+  @override
+  String get listingStatusPaused =>
+      _resolve('listingStatusPaused', (loc) => loc.listingStatusPaused);
+
+  @override
+  String get listingStatusSold =>
+      _resolve('listingStatusSold', (loc) => loc.listingStatusSold);
+
+  @override
+  String get listingStatusRented =>
+      _resolve('listingStatusRented', (loc) => loc.listingStatusRented);
+
+  @override
+  String get listingStatusExpired =>
+      _resolve('listingStatusExpired', (loc) => loc.listingStatusExpired);
+
+  @override
+  String get listingStatusDeleted =>
+      _resolve('listingStatusDeleted', (loc) => loc.listingStatusDeleted);
+
+  @override
   String priceOriginallyWas(String price) => _active.priceOriginallyWas(price);
 
   // ── Phase 12 / US2 — Reject flow + publisher rejection banner ────────────
@@ -3496,6 +3602,18 @@ final class _DebugAppLocalizations extends AppLocalizations {
   String agency_invitation_pending_from(String agencyName) => _resolve(
     'agency_invitation_pending_from',
     (loc) => loc.agency_invitation_pending_from(agencyName),
+  );
+
+  @override
+  String get agency_invitation_unnamed_agency => _resolve(
+    'agency_invitation_unnamed_agency',
+    (loc) => loc.agency_invitation_unnamed_agency,
+  );
+
+  @override
+  String get agency_invitations_page_intro => _resolve(
+    'agency_invitations_page_intro',
+    (loc) => loc.agency_invitations_page_intro,
   );
 
   @override
@@ -7133,5 +7251,111 @@ final class _DebugAppLocalizations extends AppLocalizations {
   String get adminAnalyticsActivityTitle => _resolve(
     'adminAnalyticsActivityTitle',
     (loc) => loc.adminAnalyticsActivityTitle,
+  );
+  @override
+  String get settings_account_heading => _resolve(
+    'settings_account_heading',
+    (loc) => loc.settings_account_heading,
+  );
+  @override
+  String get accountDeleteEntryTitle =>
+      _resolve('accountDeleteEntryTitle', (loc) => loc.accountDeleteEntryTitle);
+  @override
+  String get accountDeleteEntrySubtitle => _resolve(
+    'accountDeleteEntrySubtitle',
+    (loc) => loc.accountDeleteEntrySubtitle,
+  );
+  @override
+  String get accountDeletePageTitle =>
+      _resolve('accountDeletePageTitle', (loc) => loc.accountDeletePageTitle);
+  @override
+  String get accountDeleteWarningTitle => _resolve(
+    'accountDeleteWarningTitle',
+    (loc) => loc.accountDeleteWarningTitle,
+  );
+  @override
+  String get accountDeleteHeadline =>
+      _resolve('accountDeleteHeadline', (loc) => loc.accountDeleteHeadline);
+  @override
+  String get accountDeleteIntro =>
+      _resolve('accountDeleteIntro', (loc) => loc.accountDeleteIntro);
+  @override
+  String get accountDeleteWarningBody => _resolve(
+    'accountDeleteWarningBody',
+    (loc) => loc.accountDeleteWarningBody,
+  );
+  @override
+  String get accountDeleteWhatGoesTitle => _resolve(
+    'accountDeleteWhatGoesTitle',
+    (loc) => loc.accountDeleteWhatGoesTitle,
+  );
+  @override
+  String get accountDeleteItemProfile => _resolve(
+    'accountDeleteItemProfile',
+    (loc) => loc.accountDeleteItemProfile,
+  );
+  @override
+  String get accountDeleteItemListings => _resolve(
+    'accountDeleteItemListings',
+    (loc) => loc.accountDeleteItemListings,
+  );
+  @override
+  String get accountDeleteItemMessages => _resolve(
+    'accountDeleteItemMessages',
+    (loc) => loc.accountDeleteItemMessages,
+  );
+  @override
+  String get accountDeleteItemCrm =>
+      _resolve('accountDeleteItemCrm', (loc) => loc.accountDeleteItemCrm);
+  @override
+  String get accountDeleteKeepsTitle =>
+      _resolve('accountDeleteKeepsTitle', (loc) => loc.accountDeleteKeepsTitle);
+  @override
+  String get accountDeleteKeepsBody =>
+      _resolve('accountDeleteKeepsBody', (loc) => loc.accountDeleteKeepsBody);
+  @override
+  String get accountDeleteAcknowledge => _resolve(
+    'accountDeleteAcknowledge',
+    (loc) => loc.accountDeleteAcknowledge,
+  );
+  @override
+  String get accountDeleteConfirmButton => _resolve(
+    'accountDeleteConfirmButton',
+    (loc) => loc.accountDeleteConfirmButton,
+  );
+  @override
+  String get accountDeleteCancelButton => _resolve(
+    'accountDeleteCancelButton',
+    (loc) => loc.accountDeleteCancelButton,
+  );
+  @override
+  String get accountDeleteDialogTitle => _resolve(
+    'accountDeleteDialogTitle',
+    (loc) => loc.accountDeleteDialogTitle,
+  );
+  @override
+  String get accountDeleteDialogMessage => _resolve(
+    'accountDeleteDialogMessage',
+    (loc) => loc.accountDeleteDialogMessage,
+  );
+  @override
+  String get accountDeleteDialogConfirm => _resolve(
+    'accountDeleteDialogConfirm',
+    (loc) => loc.accountDeleteDialogConfirm,
+  );
+  @override
+  String get accountDeleteSuccessToast => _resolve(
+    'accountDeleteSuccessToast',
+    (loc) => loc.accountDeleteSuccessToast,
+  );
+  @override
+  String get accountDeleteErrorGeneric => _resolve(
+    'accountDeleteErrorGeneric',
+    (loc) => loc.accountDeleteErrorGeneric,
+  );
+  @override
+  String get accountDeleteErrorNotSignedIn => _resolve(
+    'accountDeleteErrorNotSignedIn',
+    (loc) => loc.accountDeleteErrorNotSignedIn,
   );
 }

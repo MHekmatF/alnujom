@@ -132,127 +132,133 @@ class _LoginPageState extends State<LoginPage> {
                   header,
                   const SizedBox(height: AppSpacing.xl),
                   AuthField(
-                        label: l10n.login_phone_label,
-                        child: TextFormField(
-                          controller: _phoneController,
-                          keyboardType: TextInputType.phone,
-                          textInputAction: TextInputAction.next,
-                          decoration: authFieldDecoration(context),
-                          validator: (v) {
-                            if (v == null || v.trim().isEmpty) {
-                              return l10n.phone_required;
-                            }
-                            if (PhoneNumber.tryParse(v.trim()) == null) {
-                              return l10n.phone_invalid;
-                            }
-                            return null;
-                          },
-                          onChanged: (_) => setState(() => _errorText = null),
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      AuthField(
-                        label: l10n.login_password_label,
-                        child: TextFormField(
-                          controller: _passwordController,
-                          obscureText: _obscure,
-                          decoration: authFieldDecoration(
-                            context,
-                            suffixIcon: IconButton(
-                              onPressed: () =>
-                                  setState(() => _obscure = !_obscure),
-                              icon: Icon(
-                                _obscure
-                                    ? LucideIcons.eye
-                                    : LucideIcons.eye_off,
-                              ),
-                              tooltip: _obscure
-                                  ? l10n.password_show
-                                  : l10n.password_hide,
-                            ),
+                    label: l10n.login_phone_label,
+                    child: TextFormField(
+                      controller: _phoneController,
+                      keyboardType: TextInputType.phone,
+                      textInputAction: TextInputAction.next,
+                      decoration: authFieldDecoration(context),
+                      validator: (v) {
+                        if (v == null || v.trim().isEmpty) {
+                          return l10n.phone_required;
+                        }
+                        if (PhoneNumber.tryParse(v.trim()) == null) {
+                          return l10n.phone_invalid;
+                        }
+                        return null;
+                      },
+                      onChanged: (_) => setState(() => _errorText = null),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  AuthField(
+                    label: l10n.login_password_label,
+                    child: TextFormField(
+                      controller: _passwordController,
+                      obscureText: _obscure,
+                      decoration: authFieldDecoration(
+                        context,
+                        suffixIcon: IconButton(
+                          onPressed: () => setState(() => _obscure = !_obscure),
+                          icon: Icon(
+                            _obscure ? LucideIcons.eye : LucideIcons.eye_off,
                           ),
-                          validator: (v) {
-                            if (v == null || v.isEmpty) {
-                              return l10n.password_too_short;
-                            }
-                            return null;
-                          },
-                          onChanged: (_) => setState(() => _errorText = null),
+                          tooltip: _obscure
+                              ? l10n.password_show
+                              : l10n.password_hide,
                         ),
                       ),
-                      const SizedBox(height: AppSpacing.sm),
-                      Align(
-                        alignment: AlignmentDirectional.centerEnd,
-                        child: TextButton(
-                          style: TextButton.styleFrom(
-                            foregroundColor: colors.primary,
+                      validator: (v) {
+                        if (v == null || v.isEmpty) {
+                          return l10n.password_too_short;
+                        }
+                        return null;
+                      },
+                      onChanged: (_) => setState(() => _errorText = null),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Align(
+                    alignment: AlignmentDirectional.centerEnd,
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        foregroundColor: colors.primary,
+                      ),
+                      // Disabled mid-login: navigating away while the
+                      // AuthBloc is Authenticating strands the request and
+                      // lands the user on a screen the redirect will move
+                      // again the moment it resolves.
+                      onPressed: isLoading
+                          ? null
+                          : () => context.push(AppRoutes.resetPassword),
+                      child: Text(l10n.login_forgot_password),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  if (_errorText != null) ...[
+                    Semantics(
+                      liveRegion: true,
+                      container: true,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            LucideIcons.circle_alert,
+                            size: AppSpacing.lg,
+                            color: colors.error,
                           ),
-                          onPressed: () =>
-                              context.push(AppRoutes.resetPassword),
-                          child: Text(l10n.login_forgot_password),
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      if (_errorText != null) ...[
-                        Semantics(
-                          liveRegion: true,
-                          container: true,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Icon(
-                                LucideIcons.circle_alert,
-                                size: AppSpacing.lg,
+                          const SizedBox(width: AppSpacing.xs),
+                          Flexible(
+                            child: Text(
+                              _errorText!,
+                              style: styles.bodyMedium.copyWith(
                                 color: colors.error,
                               ),
-                              const SizedBox(width: AppSpacing.xs),
-                              Flexible(
-                                child: Text(
-                                  _errorText!,
-                                  style: styles.bodyMedium.copyWith(
-                                    color: colors.error,
-                                  ),
-                                  textAlign: TextAlign.start,
-                                ),
-                              ),
-                            ],
+                              textAlign: TextAlign.start,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                      ],
-                      AppButton.filledPrimary(
-                        label: l10n.login_submit,
-                        loading: isLoading,
-                        expanded: true,
-                        onPressed: isLoading ? null : () => _submit(l10n),
+                        ],
                       ),
-                      const SizedBox(height: AppSpacing.md),
-                      // Phase 035 — browse the app without an account (Home +
-                      // listings are anonymous-readable). Design "الدخول كزائر".
-                      // Promoted to a clear secondary (outlined) action so the
-                      // marketplace's key anonymous path reads as a real CTA.
-                      AppButton(
-                        label: l10n.auth_continue_as_guest,
-                        variant: AppButtonVariant.outlined,
-                        expanded: true,
-                        icon: LucideIcons.store,
-                        onPressed: () => context.go(AppRoutes.home),
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      TextButton(
-                        style: TextButton.styleFrom(
-                          foregroundColor: colors.primary,
-                        ),
-                        onPressed: () => context.push(AppRoutes.register),
-                        child: Text(l10n.login_no_account),
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      AuthTrustNote(text: l10n.auth_trust_note),
-                    ],
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                  ],
+                  AppButton.filledPrimary(
+                    label: l10n.login_submit,
+                    loading: isLoading,
+                    expanded: true,
+                    onPressed: isLoading ? null : () => _submit(l10n),
                   ),
-                ),
-              );
+                  const SizedBox(height: AppSpacing.md),
+                  // Phase 035 — browse the app without an account (Home +
+                  // listings are anonymous-readable). Design "الدخول كزائر".
+                  // Promoted to a clear secondary (outlined) action so the
+                  // marketplace's key anonymous path reads as a real CTA.
+                  AppButton(
+                    label: l10n.auth_continue_as_guest,
+                    variant: AppButtonVariant.outlined,
+                    expanded: true,
+                    icon: LucideIcons.store,
+                    onPressed: isLoading
+                        ? null
+                        : () => context.go(AppRoutes.home),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      foregroundColor: colors.primary,
+                    ),
+                    onPressed: isLoading
+                        ? null
+                        : () => context.push(AppRoutes.register),
+                    child: Text(l10n.login_no_account),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  AuthTrustNote(text: l10n.auth_trust_note),
+                ],
+              ),
+            ),
+          );
         },
       ),
     );
