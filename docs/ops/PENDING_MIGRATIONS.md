@@ -72,6 +72,31 @@ that.
 
 ---
 
+## ✅ 2b. `20260902120001_restore_anon_execute_on_permission_helper.sql` — APPLIED 2026-09-02
+
+**A second live guest-facing defect, the same shape as the first.**
+
+`v_agencies` is a SECURITY DEFINER view, so its WHERE clause is its only
+visibility gate — and that clause calls `current_user_has_permission()`. Function
+EXECUTE is checked against the **calling** role even inside a definer view, and
+`anon` held none, so **every anonymous read of the agencies directory failed**
+with `42501: permission denied for function current_user_has_permission`.
+
+Verified before: `42501`. After: the approved agencies come back.
+
+Granting it to `anon` is safe — the helper answers only "does the CURRENT caller
+hold this permission", keyed on `auth.uid()`, so an anonymous caller gets FALSE
+and learns nothing. The July audit had left the boolean RLS helpers alone for
+exactly this reason.
+
+**How it was found, and how to find the next one:** not by reading grants or
+policies — both looked correct. By actually reading every relation *as* the role.
+`supabase/scripts/probe_role_read_access.sql` does that sweep. **Run it after any
+migration that touches grants, policies, views or the RLS helpers** — including
+after applying migration 3 below, which revokes columns.
+
+---
+
 ## ⏸ 3. `20260901120002_revoke_authenticated_listing_coordinates.sql` — HOLD until the new build is out
 
 ⚠️ **Do not apply this until users have the build from this branch.** It revokes
