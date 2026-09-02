@@ -7378,4 +7378,54 @@ final class _DebugAppLocalizations extends AppLocalizations {
     'accountDeleteErrorNotSignedIn',
     (loc) => loc.accountDeleteErrorNotSignedIn,
   );
+  @override
+  String get guest_gate_title => _resolve(
+    'guest_gate_title',
+    (loc) => loc.guest_gate_title,
+  );
+  @override
+  String get guest_gate_reason_favorites => _resolve(
+    'guest_gate_reason_favorites',
+    (loc) => loc.guest_gate_reason_favorites,
+  );
+  @override
+  String get guest_gate_reason_messages => _resolve(
+    'guest_gate_reason_messages',
+    (loc) => loc.guest_gate_reason_messages,
+  );
+  @override
+  String get guest_gate_reason_profile => _resolve(
+    'guest_gate_reason_profile',
+    (loc) => loc.guest_gate_reason_profile,
+  );
+  @override
+  String get guest_gate_reason_notifications => _resolve(
+    'guest_gate_reason_notifications',
+    (loc) => loc.guest_gate_reason_notifications,
+  );
+  @override
+  String get guest_gate_reason_publish => _resolve(
+    'guest_gate_reason_publish',
+    (loc) => loc.guest_gate_reason_publish,
+  );
+  @override
+  String get guest_gate_sign_in => _resolve(
+    'guest_gate_sign_in',
+    (loc) => loc.guest_gate_sign_in,
+  );
+  @override
+  String get guest_gate_register => _resolve(
+    'guest_gate_register',
+    (loc) => loc.guest_gate_register,
+  );
+  @override
+  String get guest_gate_keep_browsing => _resolve(
+    'guest_gate_keep_browsing',
+    (loc) => loc.guest_gate_keep_browsing,
+  );
+  @override
+  String get home_empty_get_approved_to_publish => _resolve(
+    'home_empty_get_approved_to_publish',
+    (loc) => loc.home_empty_get_approved_to_publish,
+  );
 }

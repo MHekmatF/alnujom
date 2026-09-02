@@ -164,3 +164,68 @@ Same phone, release build, live backend.
 - **A real reset email.** Sending one means mailing a real person. Separately,
   Supabase's built-in SMTP is development-only, so this cannot be honestly
   tested until custom SMTP is configured — see `docs/ops/HANDOVER.md` section 2.
+
+---
+
+# Second walk, same day — the guest tabs
+
+The first walk fixed screens that *should* have been public and were being
+bounced. This one asked the opposite question: what happens on the screens that
+genuinely do need an account?
+
+## Three of the five bottom tabs were a one-way exit
+
+Tapping **المفضلة (Saved)**, **الرسائل (Messages)** or **ملفي الشخصي (Profile)**
+as a guest put the login screen up — no explanation, and the bottom bar gone.
+Then this, which is the part that matters:
+
+> Press Back from there and **the app closes.**
+
+Verified on the device: Back from the bounced login screen went to the Android
+home screen. Not to the listing they were reading, not to the feed — out. To get
+back in, relaunch and tap "الدخول كزائر" again.
+
+So a guest who taps two of the five tabs out of ordinary curiosity is ejected
+from the product. That is the entire top of the funnel: guest browsing exists to
+turn a visitor into an account, and this turned a visitor into an ex-visitor.
+
+The nav bar already computed `isSignedIn` — Messages and Profile used it to call
+`context.go(login)` on purpose, and Saved did not check at all and let the global
+redirect do the same thing. The bug was not a missing check. It was that
+`context.go` roots the navigation stack at the destination, so /login became the
+only entry and Back had nowhere to go.
+
+Two more of the same, both on the very first screen: the Home header's **message
+icon** (`context.go(/chat)` with no auth check — same one-way exit) and its
+**notification bell** (pushed, so Back worked, but still dropped a signed-out
+visitor on a login form with no reason given).
+
+**Fixed** with a small sheet — `lib/core/widgets/guest_sign_in_sheet.dart` —
+that opens over wherever the guest already is and does not navigate at all. It
+names what signing in would actually get them, per destination ("احفظ العقارات
+التي أعجبتك، وارجع إليها من أي جهاز"), and offers Sign in / Create an account /
+**متابعة التصفح**. Dismissing it puts them back exactly where they were.
+
+Also on the same pass: the Home empty-state CTA said "sign in to publish" to
+*everyone* who was not an approved publisher, including people who were already
+signed in — for them it pointed at /login, which the redirect bounced straight
+back, so the button did nothing at all. Each of the three cases now gets the
+step that is actually next for them. And the drawer's own sign-in panel switched
+from `go` to `push`, so changing your mind returns you to the app.
+
+## Verified after the fix
+
+Same phone, release build, live backend.
+
+| Check | Result |
+|---|---|
+| Guest taps Saved / Messages / Profile | Sheet over Home; the page stays visible behind it |
+| Guest taps the Home header's message icon | Sheet (messages reason) |
+| Guest taps the Home header's bell | Sheet (notifications reason) |
+| Back from the sheet | Home, bottom bar intact |
+| Sheet → "تسجيل الدخول" → Back | **Home** — and `pidof` confirms the app is still running |
+| Sheet in dark theme | Correct: dark surface, light text, dark-theme primary on the button |
+| Grab handle | One. The first build drew a second on top of the themed one — `bottomSheetTheme` already sets `showDragHandle: true`, so the sheet must not draw its own |
+| Cold start | 2.0–2.3 s (was 3.2–5.9 s on the first walk) |
+
+Device theme was left back on **تلقائي**, as it was found.
