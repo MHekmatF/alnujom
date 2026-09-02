@@ -204,6 +204,20 @@ class AppNavDrawer extends StatelessWidget {
                           () => context.push(AppRoutes.reports),
                         ),
                       ),
+                    // Smart search assistant — public (anonymous-accessible).
+                    // Until 2026-09-02 NOTHING in the app navigated to
+                    // `/assistant`: the whole Phase-28/031 feature shipped with
+                    // no entry point and was reachable only by editing the URL.
+                    // The drawer's "more" list is where secondary destinations
+                    // live, so it goes here rather than costing a nav slot.
+                    DrawerRow(
+                      icon: LucideIcons.sparkles,
+                      title: AppLocalizations.of(context)!.assistantTitle,
+                      onTap: () => _closeThen(
+                        context,
+                        () => context.push(AppRoutes.assistant),
+                      ),
+                    ),
                     // Settings — public (anonymous-accessible route).
                     DrawerRow(
                       icon: Icons.settings_outlined,
