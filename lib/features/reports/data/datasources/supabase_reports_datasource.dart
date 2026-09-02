@@ -82,10 +82,25 @@ class SupabaseReportsDatasource {
 
     return (rows as List<dynamic>)
         .map(
-          (row) =>
-              ReportDto.fromJson(Map<String, dynamic>.from(row as Map)),
+          (row) => ReportDto.fromJson(
+            _withPublicImageUrl(Map<String, dynamic>.from(row as Map)),
+          ),
         )
         .toList();
+  }
+
+  /// `v_reports.main_image_path` is a raw storage path, and the My-reports list
+  /// hands it straight to CachedNetworkImage — so every row showed a broken
+  /// image. Same rewrite every other listing surface does (home, search, map,
+  /// favorites, agency profile); the `http` guard covers an already-full URL.
+  Map<String, dynamic> _withPublicImageUrl(Map<String, dynamic> row) {
+    final path = row['main_image_path'];
+    if (path is String && path.isNotEmpty && !path.startsWith('http')) {
+      row['main_image_path'] = _client.storage
+          .from('listing-images')
+          .getPublicUrl(path);
+    }
+    return row;
   }
 
   /// Returns the most-recent report the current user filed against [listingId],
@@ -109,7 +124,7 @@ class SupabaseReportsDatasource {
     final list = rows as List<dynamic>;
     if (list.isEmpty) return null;
     return ReportDto.fromJson(
-      Map<String, dynamic>.from(list.first as Map),
+      _withPublicImageUrl(Map<String, dynamic>.from(list.first as Map)),
     );
   }
 }

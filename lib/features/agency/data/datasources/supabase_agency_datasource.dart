@@ -395,9 +395,24 @@ class SupabaseAgencyDatasource {
         .order('published_at', ascending: false)
         .limit(limit);
 
-    return (rows as List<dynamic>)
-        .map((row) => Map<String, dynamic>.from(row as Map))
-        .toList();
+    return (rows as List<dynamic>).map((row) {
+      final map = Map<String, dynamic>.from(row as Map);
+      // `v_listings_public` hands back a raw storage path (e.g.
+      // `<uuid>/living-luxury-1.jpg`). Every other listing surface rewrites it
+      // to a public URL before the presentation layer sees it — the home feed,
+      // search, the map, similar listings, chat. This one did not, so the agency
+      // profile showed a broken-image placeholder on every listing it owns while
+      // the titles and prices loaded fine. Same idiom as
+      // SupabaseHomeFeedDatasource; the `http` guard covers a value that is
+      // already a full URL.
+      final path = map['main_image_path'];
+      if (path is String && path.isNotEmpty && !path.startsWith('http')) {
+        map['main_image_path'] = _client.storage
+            .from('listing-images')
+            .getPublicUrl(path);
+      }
+      return map;
+    }).toList();
   }
 
   // ---------------------------------------------------------------------------

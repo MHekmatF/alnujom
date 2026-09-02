@@ -582,7 +582,7 @@ new app build:
 
 | Setting | What it does |
 |---|---|
-| `default_language` | Language a brand-new account starts in (`"ar"`) |
+| `default_language` | Language a brand-new account starts in. Seeded as `"ar"`, **but the live value is `"en"`** — see below. |
 | `default_currency` | Currency a brand-new account starts in (`"SYP"`) |
 | `default_publisher_name_visibility` | Whether a new listing shows the seller's name by default |
 | `default_location_visibility` | Whether a new listing's map pin is exact or approximate by default (`"approximate"`) |
@@ -592,6 +592,33 @@ new app build:
 
 Changing a default only affects **new** accounts and **new** listings. Existing
 ones keep what they had.
+
+### What those settings actually hold right now (read live, 2026-09-02)
+
+Three of them are not what the app was built to assume. None of them break
+anything today, but two should be set before real users arrive.
+
+**1. `default_language` is `"en"`, not `"ar"` — change it.** The migration seeds
+it to Arabic; it was switched to English from this screen on 2026-06-02, most
+likely while trying the screen out. Nothing reads a user's stored language today
+(the interface picks Arabic on its own, and the server does not use the value),
+so no one has seen an English app because of it. But it is the wrong default for
+an Arabic-first product to be carrying into launch, and the moment anything does
+start reading it — a notification template, an email — every account created
+until then would be flagged English. **Admin → Settings → Default language → set
+to Arabic.** One click.
+
+**2. `support_contact` is completely empty** — no phone, no WhatsApp, no email.
+The screens that offer support handle this correctly (they hide the buttons and
+say no contact is available rather than showing dead links), so nothing looks
+broken. But it means a user who is locked out of their account reaches a dead
+end: the "we cannot email you a reset" screen is exactly where the WhatsApp
+button belongs. **Set at least the WhatsApp number before launch.**
+
+**3. `terms_url` and `privacy_url` are empty**, so the About screen shows no
+legal links at all. The privacy policy is already written (`docs/legal/`), it is
+simply not hosted anywhere. Not urgent for Telegram distribution; **required**
+before Google Play will accept the app.
 
 ---
 
@@ -698,6 +725,9 @@ pauses.
       (section 2).
 - [ ] **Turn on custom SMTP** (section 2). Without it, reset mail does not
       reliably reach real users — and it fails silently, which is the worst kind.
+- [ ] **Set the default language back to Arabic** and **fill in the support
+      WhatsApp number** — Admin → Settings. Both are one click and both are
+      wrong right now (section 8).
 - [ ] **Add the two GitHub secrets and run the keep-alive robot by hand** — watch
       it go green (section 10). Do this early; it is what stops the app dying
       after a quiet week.
@@ -781,11 +811,31 @@ At the time of writing, the headline items are:
   phone-number lookup reveals the real email for three non-end-user accounts.
   Both are described precisely in
   [`docs/qa/e2e-2026-07-16/SECURITY_AUDIT.md`](../qa/e2e-2026-07-16/SECURITY_AUDIT.md).
-- **Phone numbers are not verified by SMS** — there is no reliable SMS gateway
-  for the region, so someone can register a number they do not own. Verify
-  numbers manually in admin where it matters.
-- **Push notifications do not pop up as banners**, only into the pull-down shade
-  (section 6).
+- **Phone numbers are not verified by SMS** — someone can register a number they
+  do not own. Verify numbers manually in admin where it matters.
+
+  **"Can we just send a free SMS code instead?"** — no, and it is worth knowing
+  why so the question does not keep coming back. Supabase can send login codes
+  by SMS, but only through a paid gateway you connect yourself (Twilio,
+  MessageBird, Vonage). None of them are free, all of them charge per message,
+  and — the part that actually decides it — none of them deliver reliably to
+  Syrian `+963` numbers. Sanctions and carrier agreements, not price, are the
+  blocker. Paying would not fix it.
+
+  What works instead, in rough order of effort:
+  1. **WhatsApp.** Practically everyone here has it, it reaches `+963` fine, and
+     the app already treats it as the support channel. A code sent by hand over
+     WhatsApp costs nothing today; a WhatsApp Business API sends them
+     automatically later.
+  2. **Manual reset in admin** — already documented in section 2, and fine at
+     current volume.
+  3. **A real email at sign-up.** The reset flow works properly for anyone who
+     gives one, which is why the register screen asks.
+- ~~Push notifications do not pop up as banners~~ — **fixed and verified.** They
+  now arrive as heads-up banners. An Android channel's importance is frozen the
+  moment it is created, so the fix had to ship a new channel id
+  (`alnujom_notifications_v2`) rather than raise the old one. Confirmed on the
+  Infinix Note 8 with `importance=4` (section 6).
 - **Two-device checks** carried over from earlier phases are still unverified.
 
 **Branding is done** — the placeholder blue star described in older versions of

@@ -53,10 +53,14 @@ final class SupabaseClientWrapperImpl implements SupabaseClientWrapper {
           ),
           pkceAsyncStorage: SecureGotrueAsyncStorage(),
           // Spec 005 D-01 (password-reset completion) — the recovery mail is
-          // generated SERVER-SIDE by the `request_password_reset` Edge Function
-          // via `auth.admin.generateLink({type:'recovery'})`. That path never
-          // hands the device a PKCE code verifier, so GoTrue's /verify redirect
-          // carries implicit tokens in the URL fragment
+          // sent SERVER-SIDE by the `request_password_reset` Edge Function,
+          // which POSTs to GoTrue's `/auth/v1/recover`. (It used to call
+          // `auth.admin.generateLink({type:'recovery'})`, which only *generates*
+          // a link and mails nothing — that was the bug fixed on 2026-09-02.
+          // The reasoning below is unchanged by the swap: neither call supplies
+          // a PKCE code challenge, so the emailed link stays implicit either
+          // way.) That path never hands the device a PKCE code verifier, so
+          // GoTrue's /verify redirect carries implicit tokens in the URL fragment
           // (`alnujom://auth/reset-password#access_token=…&type=recovery`)
           // rather than a `?code=` query. supabase_flutter's deep-link observer
           // only forwards fragment links to `getSessionFromUrl` when the flow

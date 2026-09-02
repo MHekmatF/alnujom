@@ -46,7 +46,7 @@ and [`docs/ops/HANDOVER.md`](docs/ops/HANDOVER.md).
   `android/app/google-services.json` is gitignored and build-machine-only — a
   release build without it ships with no push at all, and now warns loudly.
 
-## Verify suite — all four must pass before any commit
+## Verify suite — all six must pass before any commit
 
 ```
 flutter analyze
@@ -54,13 +54,25 @@ dart run tool/lint_design_tokens.dart
 dart run tool/lint_l10n_parity.dart
 dart run tool/lint_l10n_literals.dart
 dart run tool/lint_di_graph.dart
+dart run tool/lint_public_routes.dart
 ```
 
-The last one exists because `injectable` does **not** check that everything the
-generated injector resolves is also registered: a class asking for a
-collaborator that was never annotated `@injectable` builds green and throws at
-runtime. In a release build that is a blank screen and nothing in the log, since
-the crash reporter is inert without a DSN.
+The last two exist because the same failure keeps happening: something is wrong
+in a way nothing reports, and a user finds it instead of the build.
+
+`lint_di_graph` — `injectable` does **not** check that everything the generated
+injector resolves is also registered. A class asking for a collaborator that was
+never annotated `@injectable` builds green and throws at runtime. In a release
+build that is a blank screen and nothing in the log, since the crash reporter is
+inert without a DSN.
+
+`lint_public_routes` — `app_router.dart` and `auth_redirect.dart` disagree
+silently. A `GoRoute` with no `redirect:` reads as public, but the global
+`authRedirect` still runs on every navigation and bounces anything it does not
+recognise to `/login`. Three separate batches of screens shipped that way
+(`/search` + `/map`, then `/agency/:id`, then `/settings` + `/assistant` +
+`/reels`). Mark a guest-reachable route `Anonymous-accessible` in the comment
+above it and this linter will hold the redirect to it.
 
 CI is paused, so this local run is the only gate.
 

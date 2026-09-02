@@ -69,8 +69,18 @@ class AdBannerCard extends StatelessWidget {
                     ),
                   ),
                   // The advertiser's creative.
+                  //
+                  // 16:5 is the ad artwork spec — 1200x375, which is what the
+                  // ad editor's compressor targets and what every banner in the
+                  // system is drawn at. This box was 16:7, so `cover` scaled the
+                  // creative to fill the height and cropped ~20% off EACH side.
+                  // On an Arabic banner that removed the start of the headline
+                  // and most of the call-to-action button: the ad rendered, and
+                  // was unreadable. AdCarousel already assumed 16:5 (see its
+                  // comment, which says it matches this card) — this is the
+                  // third piece finally agreeing with the other two.
                   AspectRatio(
-                    aspectRatio: 16 / 7,
+                    aspectRatio: 16 / 5,
                     child: CachedNetworkImage(
                       imageUrl: imageUrl,
                       fit: BoxFit.cover,
