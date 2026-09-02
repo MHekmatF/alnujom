@@ -9,10 +9,19 @@ import 'reels_feed_page.dart';
 
 /// Phase 030 (W4) — the Reels bottom-nav tab (it replaced the Search tab).
 ///
-/// Reached via `context.go(AppRoutes.reels)` from [MainBottomNav], so it sits
-/// as a clean stack root with the persistent bottom navigation bar. Hosts its
-/// OWN [ReelsFeedCubit] (page-scoped [BlocProvider]) and loads the first page
-/// on mount — unlike the pushed [ReelsFeedPage], it never receives a rail seed.
+/// ⚠ NOTHING REACHES THIS PAGE TODAY. Phase 035 rebuilt the bottom bar around
+/// Home · Search+Map · Saved · Messages · Account, and Reels lost its slot;
+/// [ReelsRail], the other way in, is not rendered on any screen either. The
+/// route still resolves, so a deep link works, but there is no tap that gets
+/// here. Deliberately left that way for now: `listing_media` holds zero rows of
+/// kind `video`, so surfacing it would only show every user an empty feed.
+/// Give it an entry point when there is something to watch — see
+/// `docs/qa/2026-09-02-device-walk.md`.
+///
+/// Designed to be reached via `context.go(AppRoutes.reels)`, so it sits as a
+/// clean stack root with the persistent bottom navigation bar. Hosts its OWN
+/// [ReelsFeedCubit] (page-scoped [BlocProvider]) and loads the first page on
+/// mount — unlike the pushed [ReelsFeedPage], it never receives a rail seed.
 ///
 /// The feed itself is the shared [ReelsFeedBody], which owns the vertical
 /// [PageView] and the ≤3 [VideoPlayerController] window, disposing them when

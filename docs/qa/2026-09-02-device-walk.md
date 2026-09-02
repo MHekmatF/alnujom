@@ -229,3 +229,50 @@ Same phone, release build, live backend.
 | Cold start | 2.0–2.3 s (was 3.2–5.9 s on the first walk) |
 
 Device theme was left back on **تلقائي**, as it was found.
+
+## Two shipped features had no way in
+
+Sweeping every `context.go` into a protected route turned up something else:
+**nothing in the app navigated to `/assistant` or `/reels`.**
+
+- **The smart search assistant** (Phase 28 / 031) — parses "شقة للبيع في دمشق
+  تحت ٥٠٠ مليون", answers price questions from `market_area_stats`, hands you a
+  filled-in search. Built, wired, working. Zero entry points. Reachable only by
+  editing the URL.
+- **Reels** (Phase 029 / 030) — the video feed. Phase 035 rebuilt the bottom bar
+  around Home · Search+Map · Saved · Messages · Account and Reels lost its slot;
+  `ReelsRail`, the other way in, is not rendered on any screen either. Its own
+  doc comment still claimed it was "reached via `context.go(AppRoutes.reels)`
+  from MainBottomNav", which stopped being true a phase ago.
+
+Both routes were added to the redirect's public list yesterday, correctly — the
+router declared them anonymous-accessible and the redirect disagreed. That fixed
+the disagreement. It did not give either one a tap that gets there.
+
+**The assistant now sits in the drawer's "أخرى" list**, above Settings, as
+"مساعد البحث الذكي". That list is where secondary destinations already live, so
+it costs no nav slot. Verified on the device as a guest: the row appears, the
+page opens, and tapping "متوسط أسعار حلب" answers *"متوسط السعر المطلوب في حلب:
+75.1 ألف $ (4 إعلان)"* with location chips and a "عرض النتائج" button. It works
+— it was simply unreachable.
+
+**Reels is deliberately left unreachable**, and its doc comment now says so
+instead of describing a tab that no longer exists. `listing_media` holds **zero**
+rows of kind `video`, so an entry point today would show every user an empty
+feed. Give it one when there is something to watch — that is a product call, and
+it needs content first.
+
+## Checked and fine — two things I was wrong about
+
+Worth recording, because both looked like defects on the device and neither was:
+
+- **"Save search" as a guest.** The dialog opens, you type a name, tap حفظ, and
+  it closes with no visible result. It actually toasts *"سجّل الدخول لحفظ عمليات
+  البحث"* — my screenshot loop took several seconds and the toast had already
+  faded. Handled correctly, including a distinct `authRequired` outcome.
+- **"مراسلة" on a listing as a guest.** Same story: it toasts *"سجّل الدخول
+  لمراسلة الناشر."* just above the sticky contact bar.
+
+Lesson for the next walk: **a toast will not survive a screenshot loop.** Capture
+two or three frames back-to-back immediately after the tap, and read the code
+path before calling a silent button a defect.
