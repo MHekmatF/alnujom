@@ -36,7 +36,8 @@ review. Those files stay the *evidence*; this file is the *queue*.
 | Security advisors | 6 ERROR `security_definer_view` (by design, July audit); 16 anon-executable definer functions (each reviewed 2026-09-02 — see A4); `pg_net` in public; leaked-password WARN (Pro-only, ignore) | `get_advisors(security)` |
 | Performance advisors | 27 WARN `multiple_permissive_policies`, 16 INFO unindexed FKs, 38 INFO unused indexes — none matter at 26 rows | `get_advisors(performance)` |
 | Data | **26 listings** (16 approved · 5 sold · 3 rejected · 2 draft), **all owned by staff accounts**; 12 accounts (11 approved, 1 pending); 51 images, **0 videos**; 14 governorates / 64 cities / 380 areas; 1 push token registered | SQL |
-| `app_settings` | `default_language = "en"` ⚠, `support_contact` all null ⚠, `privacy_url` / `terms_url` null ⚠, `maintenance_mode` off, `default_currency` SYP | SQL |
+| `app_settings` | **Updated 2026-09-02:** `default_language` now `"ar"`, `support_contact` now filled (placeholder values — see A9). Still null: `privacy_url`, `terms_url` ⚠. `maintenance_mode` off, `default_currency` SYP | SQL |
+| Test devices | The **Infinix X692** (Android 10) is connected over USB and Claude drives it with `F:\mm\sdk\platform-tools\adb.exe` — no emulator needed for single-account work, and no load on the build machine. AVDs available: `Pixel_8_Pro`, `almaeda28`, `almaeda_aosp` | `adb devices`, `emulator -list-avds` |
 | Build machine | `android/key.properties`, `android/app/google-services.json`, `.env.json` (with `SENTRY_DSN`) all present | `ls` |
 | GitHub | Secrets `SUPABASE_URL` + `SUPABASE_ANON_KEY` exist (2026-09-01); keep-alive ran green by hand 2026-09-01; CI auto-triggers paused (manual only); one open issue, #39 | `gh` |
 | Dependencies | 14 direct deps a major version behind (firebase_core 3→4, firebase_messaging 15→16, flutter_local_notifications 19→22, flutter_map 7→8, go_router 17→18, get_it 8→9, injectable 2→3, geolocator 13→14, permission_handler 11→13, share_plus 10→13, flutter_secure_storage 10→11, sentry_flutter 8→9, cached_network_image 3→4, flutter_timezone 4→5); supabase_flutter 2.12.4 → 2.17.2 | `flutter pub outdated` |
@@ -117,11 +118,13 @@ storage objects remain (`PENDING_MIGRATIONS.md` §2 "Still owed").
 - [ ] Set `app_settings.privacy_url` and `terms_url` (the policy covers both until a separate terms page exists) via SQL; confirm the About page shows the links and hides nothing else.
 - Verified by: the URL opens from a phone outside the app with no login; the About screen shows the two rows.
 
-### A9 — Settings the founder answers, Claude applies · S · **blocked on B3**
-- [ ] `default_language` → `"ar"` (do this one now; it is the Arabic-first app's own rule — only an objection from the founder stops it).
-- [ ] `support_contact` → the WhatsApp / phone / email values from B3 (`update public.app_settings set value = jsonb_build_object(...) where key = 'support_contact'`).
-- [ ] Record the new live values in `HANDOVER.md` §8 "What those settings actually hold right now".
-- Verified by: the About page and the maintenance screen show the channels; a fresh registration lands in Arabic.
+### A9 — Settings the founder answers, Claude applies · S · ✅ DONE 2026-09-02
+- [x] `default_language` `"en"` → `"ar"`. Applied.
+- [x] `support_contact` → `{phone: "+963991883342", whatsapp: "+963991883342", email: "m.hekmatfanari@gmail.com"}`. Applied.
+- [x] Verified on the Infinix, release build `1.1.0+2`: **حول التطبيق والدعم** shows exactly three rows — اتصل بنا, واتساب, راسلنا عبر البريد — with those values, and no empty or broken row where `privacy_url` / `terms_url` are still null. That is the "unset ones stay hidden" half of issue #39's first box.
+- [ ] Record the values in `HANDOVER.md` §8 once they are the *final* ones (see the warning below).
+- [ ] **⚠️ These three are the founder's personal contacts, given as placeholders (his words: "بس هدول تجريبيات يعني ذكرني نغيرن بالاخير"). Ask for the real support channels before launch and re-run the same update.** This is a launch blocker in the same sense as the demo listings: shipping with them means real users phoning his personal number.
+- [ ] The remaining half of #39's first box (set a privacy/terms URL → the links appear) closes with **A8**.
 
 ### A10 — Version manifest · S · **blocked on A3 + B5 (the Telegram post URL)**
 - [ ] Write `latest.json` per `docs/release/version-manifest.example.json` with `latest_version: "1.1.1"`, `latest_build: 3`, `telegram_url` = the post, Arabic + English notes from A3.
@@ -157,8 +160,8 @@ storage objects remain (`PENDING_MIGRATIONS.md` §2 "Still owed").
 | # | What | Why it matters | Time |
 |---|---|---|---|
 | **B1** | **Custom SMTP** — Supabase → Authentication → Emails → SMTP Settings; any free tier (Resend, Brevo, SendGrid). Then send yourself one real reset from the app. | Without it password-reset mail reaches nobody; the function says "sent" and nothing looks wrong. | 20 min |
-| **B2** | **Sign in on the Infinix** with your account, and with a second account on the Pixel 8 Pro AVD (or a second phone), then tell Claude. | Claude may not enter passwords, so every signed-in screen is unverified on hardware. Unblocks A2. | 5 min |
-| **B3** | **Support channels**: WhatsApp number, phone, email — send them in chat. | All three are null; a locked-out user has nowhere to go. Claude applies them (A9). | 2 min |
+| **B2** | **Type your password once** on the Infinix. It is connected by USB and Claude drives it directly — the app is already sitting on the sign-in screen, so this is two fields and a tap. Claude may not type passwords, and that is the only step in the whole walk that needs you. A second account for the two-way chat / viewing tests can come later on the `Pixel_8_Pro` AVD, which Claude starts itself. | Every signed-in screen is unverified on hardware. Unblocks A2. | 1 min |
+| ~~**B3**~~ | ~~**Support channels**~~ — **done 2026-09-02**, applied and seen on the device (A9). **But they are the founder's own personal number and gmail, given as placeholders.** Before launch: send the real support channels so A9 can be re-run. | Otherwise real users call his personal phone. | ⚠️ redo before launch |
 | **B4** | **Privacy policy blanks**: legal entity name + country of registration; a contact email someone reads; governing law. Plus a clear **yes** to publishing it on GitHub Pages. | The policy must be live (a real URL) before Play and is good practice for Telegram distribution too. Unblocks A8. | 10 min |
 | **B5** | **Telegram channel**: create it, post the APK Claude hands you with the Arabic note, send back the post URL. | The one outstanding launch item since June. Unblocks A10 and, a week later, A5. | 15 min |
 | **B6** | **Database password as a GitHub secret** named `SUPABASE_DB_URL` (the session-pooler URI from Supabase → Project Settings → Database). Add it yourself in GitHub → Settings → Secrets; never paste it in chat. | Free plan = no backups. Unblocks A6. | 5 min |
@@ -189,6 +192,35 @@ after launch ──► A13
 
 Launch = A3 posted (B5), A9 and A8 done, A11 done, B1 done. Everything else can
 follow it.
+
+---
+
+## C2. Two questions settled on 2026-09-02
+
+**"Can we test on a web build instead? It would be lighter."** — No, and it is
+not needed. The project has **no web target at all**: there is no `web/` folder,
+and Android is the declared platform. Adding one means `flutter create
+--platforms=web .` and then working around every plugin with no web
+implementation — `flutter_local_notifications`, `flutter_image_compress`,
+`permission_handler` at minimum. And the result would test a *different* app:
+web exercises no push notification, no notification icon, no Android back-stack,
+no deep link, no update prompt, no camera — which is precisely where every defect
+of the last three sessions was found (#105 back-stack, #106 notification icon,
+#107 tab exits). It would be a day of work to build a surface that cannot see the
+class of bug we keep finding.
+
+The lighter option already exists and is in use: **the Infinix is connected over
+USB**, driven straight from `adb`. It costs the build machine nothing — no
+emulator process, no RAM — and it is the exact hardware and Android version a
+user has. The `Pixel_8_Pro` AVD is only needed for the *second* account in the
+two-way chat and viewing tests, and only while those run.
+
+**The stale package on the test phone.** The Infinix carries two builds:
+`com.alnujom.app` (`1.1.0+2`, the real one, updated 2026-09-02) and
+`com.alnujom.alnujom_app` (`1.0.0+1`, from 2026-03-07, an old application id that
+no longer exists in the codebase). The old one is dead weight and can confuse a
+walk — uninstall it before the A2 walk, but ask first, since it is a delete on
+the founder's own device.
 
 ---
 
