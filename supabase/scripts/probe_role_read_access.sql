@@ -18,8 +18,12 @@
 -- touches grants, policies, views or the boolean RLS helpers.
 --
 -- HOW TO RUN: paste the whole file into the Supabase dashboard SQL Editor and
--- run it. (It creates a temporary table, so it will not go through tooling that
--- refuses DDL.) Both numbers in the `failing` column must be 0.
+-- run it. It also runs through the Supabase MCP `execute_sql` tool as one batch
+-- (verified 2026-09-02) — drop the BEGIN/COMMIT if you go that way, since the
+-- tool supplies its own transaction. Both numbers in `failing` must be 0.
+--
+-- Last run 2026-09-02 after 20260902120002: anon 44 relations / 0 failing,
+-- authenticated 53 / 0 failing.
 --
 -- Safe: read-only, counts rows only, and every probe is wrapped so one failure
 -- does not stop the sweep.

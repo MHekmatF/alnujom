@@ -40,8 +40,11 @@ class LocalReminderScheduler {
   Future<void> ensureInitialized() async {
     if (_initialized) return;
     try {
+      // The same flat white silhouette FCM uses, not the launcher icon —
+      // Android keeps only a small icon's alpha, so anything opaque shows up
+      // as a white square. See android/app/src/main/AndroidManifest.xml.
       const androidSettings = AndroidInitializationSettings(
-        '@mipmap/ic_launcher',
+        '@drawable/ic_notification',
       );
       const initSettings = InitializationSettings(android: androidSettings);
       await _plugin.initialize(initSettings);

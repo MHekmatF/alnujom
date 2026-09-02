@@ -95,6 +95,19 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="alnujom_notifications_v2" />
+        <!-- The status-bar icon. Without this meta-data FCM falls back to
+             android:icon (@mipmap/launcher_icon), and since Android 5.0 the
+             system keeps only a small icon's ALPHA and paints every opaque
+             pixel white. launcher_icon is 100% opaque, so every push landed as
+             a solid white square. @drawable/ic_notification is the flat white
+             silhouette that shape actually requires. Keep it alpha-only — a
+             coloured or fully-opaque replacement brings the white square back. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notification" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/notification_accent" />
         <!-- Phase 29 (F1): flutter_local_notifications receivers for scheduled
              (zonedSchedule) CRM follow-up reminders + reboot re-registration. -->
         <receiver
