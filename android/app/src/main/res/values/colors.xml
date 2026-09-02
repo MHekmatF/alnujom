@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="ic_launcher_background">#0B182B</color>
+    <!-- Tint Android applies to the notification's small icon and its app-name
+         line. Matches ColorPalette.light.primary in lib/core/theme/color_palette.dart. -->
+    <color name="notification_accent">#1F4FE6</color>
 </resources>

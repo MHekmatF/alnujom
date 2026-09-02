@@ -1,7 +1,8 @@
-# Migration status — 2026-09-01
+# Migration status — 2026-09-02
 
-Four migrations were written on 2026-09-01. **Two are applied and verified. Two
-are deliberately held back** — each for a specific reason, below.
+Four migrations were written on 2026-09-01 and two more on 2026-09-02. **Four
+are applied and verified. Two are deliberately held back** — each for a specific
+reason, below.
 
 Apply the remaining ones with the Supabase MCP `apply_migration` tool, one file
 at a time. Do not use `supabase db push` — this project's CLI database path does
@@ -94,6 +95,57 @@ policies — both looked correct. By actually reading every relation *as* the ro
 `supabase/scripts/probe_role_read_access.sql` does that sweep. **Run it after any
 migration that touches grants, policies, views or the RLS helpers** — including
 after applying migration 3 below, which revokes columns.
+
+---
+
+## ✅ 2c. `20260902120002_seal_map_jitter_oracle.sql` — APPLIED 2026-09-02
+
+**A privacy control that could be undone by anyone holding the public anon key.**
+
+Listings set to `approximate` location visibility are shown on a *jittered* pin —
+the true position plus a secret offset derived from `sha256(listing_id || vault
+salt)`. The offset has to be deterministic, or the pin would wander between page
+loads. That determinism was fine. What was not fine is that
+`map_jitter_coordinates()` took the true coordinates as **caller-supplied
+arguments** and was executable by `anon`, which made it an oracle:
+
+```
+1. read the public marker                     m  = true + offset
+2. call the jitter RPC with m as the anchor   m' = m + offset
+3. offset = m' - m      →      true = m - offset
+```
+
+Two RPC calls, no account. **Verified against the live database on 2026-09-02
+using only `SUPABASE_ANON_KEY`: recovered `33.511000 / 36.306000` for a listing
+stored at `33.511000 / 36.306000` — error 0.000000 on both axes.**
+
+The ±0.02° clamp around the area centroid happens to defeat this for listings
+that sit far from their centroid (both readings clamp to the same bound). That
+is luck, not a control: a listing near its area centroid — the normal case —
+gave up its exact pin every time.
+
+Fixed in two layers:
+
+- **The function no longer trusts the caller for the thing it protects.** It now
+  reads `listings.latitude/longitude` for `p_listing_id` itself;
+  `p_original_lat` / `p_original_lng` are ignored, kept only so the signature and
+  its one caller are unchanged. Proven live: calls with anchor `0,0` and with
+  anchor = the published marker now return the *same* point, equal to the marker.
+- **EXECUTE revoked from `anon` and `authenticated`.** The oracle call now
+  answers `42501 permission denied for function map_jitter_coordinates`.
+
+**No pin moved.** `listing_marker_coordinates` already passed exactly the
+coordinates the function now looks up; the guest map returned byte-identical
+markers before and after.
+
+Why the revoke is safe now though it was not in July: `20260717120010` left the
+anon grant deliberately, noting the function was "called by the security_invoker
+view `v_listings_map_public`". That note went stale *the day before* — migration
+1 above rebuilt that view on top of `listing_marker_coordinates`, which is
+SECURITY DEFINER, so the inner call is authorised as the function owner and needs
+nothing from the caller. **The lesson: a grant justified by one call site
+outlives the call site. When a migration re-points a view, re-check the grants
+the old shape needed.**
 
 ---
 

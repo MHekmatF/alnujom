@@ -177,10 +177,15 @@ out of any chat.
 Until that is done, treat password reset as working only for you and anyone else
 on the project team, and fall back to the manual reset below for real users.
 
-### While you are on that screen, verify two more settings
+### While you are on that screen, verify three more settings
 
 - **Authentication → Settings → Password → Minimum length** = **8**
 - **Authentication → Providers → Email → Confirm email** = **OFF / unchecked**
+- **Authentication → Policies → Leaked password protection** = **ON**
+  — currently **off** (Supabase's own advisor flags it). With it on, Supabase
+  refuses a password that already appears in public breach dumps. It costs one
+  toggle and nothing in the app changes. Worth doing before real users sign up,
+  not after.
 
 Email confirmation must stay off. The app signs people up with a made-up email
 built from their phone number (`+9639XXXXXXXX@alnujom.local`) — that mailbox does
@@ -434,13 +439,31 @@ listing.
 5. **Did the user allow notifications?** Android 13 and newer ask permission. A
    user who declined gets nothing until they re-enable it in Android settings.
 
-### A known cosmetic issue
+### Two appearance problems, both fixed — what to expect now
 
-Notifications arrive in the pull-down shade but do **not** pop up as a banner over
-the screen. The Android notification channel `alnujom_notifications` is never
-created with "high importance", so Android uses a quiet default. Notifications
-still deliver and still open the right screen. Fixing it is a small developer
-task.
+This section used to say notifications never popped up as a banner, and that was
+right at the time. Both of the things that made pushes look broken are fixed in
+code now, so if you are testing on a device, this is what "working" looks like.
+
+**They pop over the screen.** Android channels own the importance, not the
+message, and the app never created the channel it pointed FCM at — so the SDK
+fell back to a quiet default and everything landed silently in the shade. The
+app now creates `alnujom_notifications_v2` with high importance at startup. The
+`_v2` is load-bearing: a channel is immutable once created, and Android
+deliberately remembers deleted channels, so the only way an existing install
+picks up the upgrade is a new id.
+
+**They no longer show a white square.** The manifest never declared a
+notification icon, so FCM fell back to the launcher icon — and since Android 5.0
+the system keeps only the icon's transparency and paints everything else white.
+The launcher icon is completely opaque, so every push arrived as a plain white
+block. There is now a proper flat-white `ic_notification` drawable at five sizes.
+
+⚠️ **If a designer ever replaces that icon, it must be white-on-transparent
+only.** A full-colour image brings the white square straight back and nothing in
+the build will warn you.
+
+Both need a **new build** to reach anyone — they are app-side, not server-side.
 
 ---
 
