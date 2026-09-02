@@ -2,7 +2,9 @@
 Current phase: **delivery preparation** — not a feature spec. The app is
 feature-complete at `1.1.0+2`; what remains is getting it into users' hands.
 
-**Read first:** [`docs/ops/PENDING_MIGRATIONS.md`](docs/ops/PENDING_MIGRATIONS.md)
+**Read first:** [`docs/ops/DELIVERY_PLAN.md`](docs/ops/DELIVERY_PLAN.md) — the
+ordered work queue from the 2026-09-02 review of everything, with what is blocked
+on the owner — then [`docs/ops/PENDING_MIGRATIONS.md`](docs/ops/PENDING_MIGRATIONS.md)
 and [`docs/ops/HANDOVER.md`](docs/ops/HANDOVER.md).
 
 ## The state of things
