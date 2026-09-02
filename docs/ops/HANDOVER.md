@@ -181,11 +181,12 @@ on the project team, and fall back to the manual reset below for real users.
 
 - **Authentication → Settings → Password → Minimum length** = **8**
 - **Authentication → Providers → Email → Confirm email** = **OFF / unchecked**
-- **Authentication → Policies → Leaked password protection** = **ON**
-  — currently **off** (Supabase's own advisor flags it). With it on, Supabase
-  refuses a password that already appears in public breach dumps. It costs one
-  toggle and nothing in the app changes. Worth doing before real users sign up,
-  not after.
+- **Authentication → Sign In / Providers → Email → Secure password change**
+  = **ON** — stops a stolen old session from silently changing the password. A
+  reset still works, because a recovery session is brand new.
+  (**Not** "Prevent use of leaked passwords". That toggle is Pro-plan only and
+  cannot be switched on here — see section 11. An earlier version of this list
+  said to turn it on; it was wrong.)
 
 Email confirmation must stay off. The app signs people up with a made-up email
 built from their phone number (`+9639XXXXXXXX@alnujom.local`) — that mailbox does
@@ -751,9 +752,10 @@ pauses.
 - [ ] **Set the default language back to Arabic** and **fill in the support
       WhatsApp number** — Admin → Settings. Both are one click and both are
       wrong right now (section 8).
-- [ ] **Add the two GitHub secrets and run the keep-alive robot by hand** — watch
-      it go green (section 10). Do this early; it is what stops the app dying
-      after a quiet week.
+- [x] **Add the two GitHub secrets and run the keep-alive robot by hand** — done
+      2026-09-01: `SUPABASE_URL` and `SUPABASE_ANON_KEY` are in the repository
+      secrets and the manual run went green in 10 s. It now runs on its
+      schedule; keep an eye out for the red email (section 10).
 - [ ] **Save all the secrets in a password manager**: the keystore file and its
       passwords, `.env.admin.json`'s master key, the GlitchTip DSN, and the five
       operator Vault secrets (section 4). Losing the keystore is unrecoverable.
