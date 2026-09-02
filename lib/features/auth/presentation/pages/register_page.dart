@@ -17,6 +17,7 @@ import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 import '../../../auth/domain/entities/auth_failure.dart';
+import '../widgets/dismiss_when_signed_in.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -101,6 +102,10 @@ class _RegisterPageState extends State<RegisterPage> {
         } else {
           setState(() => _errorText = null);
         }
+        // Same shape as the login page: the guest sheet pushes /register too,
+        // and a new account lands in PendingApproval — still a session, so the
+        // page must get out of the way. See [dismissWhenSignedIn].
+        dismissWhenSignedIn(context, state);
       },
       child: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
@@ -124,97 +129,95 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   const SizedBox(height: AppSpacing.xl),
                   AuthField(
-                        label: l10n.register_phone_label,
-                        child: TextFormField(
-                          controller: _phoneController,
-                          keyboardType: TextInputType.phone,
-                          textInputAction: TextInputAction.next,
-                          decoration: authFieldDecoration(
-                            context,
-                            hint: l10n.register_phone_hint,
-                          ),
-                          validator: (v) {
-                            if (v == null || v.trim().isEmpty) {
-                              return l10n.phone_required;
-                            }
-                            if (PhoneNumber.tryParse(v.trim()) == null) {
-                              return l10n.phone_invalid;
-                            }
-                            return null;
-                          },
-                          onChanged: (_) => setState(() => _errorText = null),
-                        ),
+                    label: l10n.register_phone_label,
+                    child: TextFormField(
+                      controller: _phoneController,
+                      keyboardType: TextInputType.phone,
+                      textInputAction: TextInputAction.next,
+                      decoration: authFieldDecoration(
+                        context,
+                        hint: l10n.register_phone_hint,
                       ),
-                      const SizedBox(height: AppSpacing.lg),
-                      AuthField(
-                        label: l10n.register_password_label,
-                        child: TextFormField(
-                          controller: _passwordController,
-                          obscureText: true,
-                          textInputAction: TextInputAction.next,
-                          decoration: authFieldDecoration(
-                            context,
-                            hint: l10n.register_password_hint,
-                          ),
-                          validator: (v) {
-                            if (v == null || v.length < 8) {
-                              return l10n.password_too_short;
-                            }
-                            return null;
-                          },
-                          onChanged: (_) => setState(() => _errorText = null),
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      AuthField(
-                        label: l10n.register_full_name_label,
-                        child: TextFormField(
-                          controller: _nameController,
-                          keyboardType: TextInputType.name,
-                          textInputAction: TextInputAction.next,
-                          decoration: authFieldDecoration(context),
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      AuthField(
-                        label: l10n.register_real_email_label_optional,
-                        child: TextFormField(
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          decoration: authFieldDecoration(context),
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.xl),
-                      if (_errorText != null) ...[
-                        Text(
-                          _errorText!,
-                          style: styles.bodyMedium.copyWith(
-                            color: colors.error,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                      ],
-                      AppButton.filledPrimary(
-                        label: l10n.register_submit,
-                        loading: isLoading,
-                        expanded: true,
-                        onPressed: isLoading ? null : () => _submit(l10n),
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      TextButton(
-                        style: TextButton.styleFrom(
-                          foregroundColor: colors.primary,
-                        ),
-                        onPressed: () => context.go(AppRoutes.login),
-                        child: Text(l10n.register_have_account),
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      AuthTrustNote(text: l10n.auth_trust_note),
-                    ],
+                      validator: (v) {
+                        if (v == null || v.trim().isEmpty) {
+                          return l10n.phone_required;
+                        }
+                        if (PhoneNumber.tryParse(v.trim()) == null) {
+                          return l10n.phone_invalid;
+                        }
+                        return null;
+                      },
+                      onChanged: (_) => setState(() => _errorText = null),
+                    ),
                   ),
-                ),
-              );
+                  const SizedBox(height: AppSpacing.lg),
+                  AuthField(
+                    label: l10n.register_password_label,
+                    child: TextFormField(
+                      controller: _passwordController,
+                      obscureText: true,
+                      textInputAction: TextInputAction.next,
+                      decoration: authFieldDecoration(
+                        context,
+                        hint: l10n.register_password_hint,
+                      ),
+                      validator: (v) {
+                        if (v == null || v.length < 8) {
+                          return l10n.password_too_short;
+                        }
+                        return null;
+                      },
+                      onChanged: (_) => setState(() => _errorText = null),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  AuthField(
+                    label: l10n.register_full_name_label,
+                    child: TextFormField(
+                      controller: _nameController,
+                      keyboardType: TextInputType.name,
+                      textInputAction: TextInputAction.next,
+                      decoration: authFieldDecoration(context),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  AuthField(
+                    label: l10n.register_real_email_label_optional,
+                    child: TextFormField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: authFieldDecoration(context),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  if (_errorText != null) ...[
+                    Text(
+                      _errorText!,
+                      style: styles.bodyMedium.copyWith(color: colors.error),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                  ],
+                  AppButton.filledPrimary(
+                    label: l10n.register_submit,
+                    loading: isLoading,
+                    expanded: true,
+                    onPressed: isLoading ? null : () => _submit(l10n),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      foregroundColor: colors.primary,
+                    ),
+                    onPressed: () => context.go(AppRoutes.login),
+                    child: Text(l10n.register_have_account),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  AuthTrustNote(text: l10n.auth_trust_note),
+                ],
+              ),
+            ),
+          );
         },
       ),
     );

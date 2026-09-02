@@ -20,6 +20,7 @@ import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 import '../../../auth/domain/entities/auth_failure.dart';
+import '../widgets/dismiss_when_signed_in.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -119,6 +120,11 @@ class _LoginPageState extends State<LoginPage> {
         } else {
           setState(() => _errorText = null);
         }
+        // Reached by `context.push` from the guest sheet, the drawer, the
+        // favourite heart and the listing contact block — so on success this
+        // page is left sitting on top of an already-correct stack. See
+        // [dismissWhenSignedIn]; a no-op when /login is the stack root.
+        dismissWhenSignedIn(context, state);
       },
       child: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
