@@ -56,15 +56,18 @@ Effort: **S** ≤ 1 h · **M** ≈ half a day · **L** ≈ a day or more.
 - [x] Add this file and point `CLAUDE.md` at it.
 - Verified by: this PR merged on `main`.
 
-### A2 — Signed-in device walk · M · **blocked on B2**
-The one big hole in the QA record. Guest mode was walked twice on 2026-09-02;
-nothing signed-in has been exercised on hardware since the July pass.
-- [ ] With the founder signed in on the Infinix and a second account on the AVD, drive both over adb (see `project_adb_screencap_windows` memory for the screenshot idiom).
-- [ ] Walk: sign-in → profile edit → create listing (Express + Detail) with photos → submit → approve from the admin account → stay-live edit revision → favorites → chat both directions (optimistic send + realtime inbound) → request a viewing, confirm it → push notification arrives on the other phone as a heads-up banner → saved search → reports → sign-out (the freeze fix) → sign back in.
-- [ ] Close the four boxes in issue #39 (About page with support values, offline fail-open launch, four-combination render, forward-only defaults for a new account).
-- [ ] Also: super-admin role editor, currency history page, governorate → city admin pages — reachable only by path interpolation, so confirm they open.
-- [ ] Fix what breaks (own PR per cluster, same style as #105).
-- Verified by: a dated section appended to `docs/qa/2026-09-02-device-walk.md` (or a new file) with the observed result per step; `v1.0.0.md` rows 415–418 updated.
+### A2 — Signed-in device walk · M · **first pass done 2026-09-03**
+The one big hole in the QA record. Record:
+[`docs/qa/2026-09-03-signed-in-walk.md`](../qa/2026-09-03-signed-in-walk.md).
+
+- [x] Single-account walk on the Infinix over USB: Home, Saved, Messages, Profile, Notifications, add-listing form, admin home, account-approval queue, agencies, reports. All correct.
+- [x] **Two defects found and fixed.** Sign-in appeared to fail and had not — a pushed `/login` never dismissed itself once the session existed (the owner hit this on his first try). And one admin card printed its date in English, the only locale-less `DateFormat` in the repo.
+- [x] Sign-out verified on hardware for the first time — no freeze, back on guest Home in under 1.5 s.
+- [x] Session survives a cold start and an `install -r`.
+- [ ] **Second account on the `Pixel_8_Pro` AVD** for the two-way work: chat optimistic send + realtime inbound, a viewing request and its confirmation, a push notification landing on the other device as a heads-up banner.
+- [ ] Create a listing end to end with photos → approve → stay-live edit → revision. **Hold until A11**: it writes real rows into a database whose demo content is about to be deleted.
+- [ ] The remaining three boxes in issue #39 (offline fail-open launch, four-combination light/dark × ar/en render, forward-only defaults for a new account). The About-page box is done — see A9.
+- [ ] Super-admin role editor, currency history, governorate → city admin pages — reachable only by path interpolation, so confirm they open.
 
 ### A3 — Release build `1.1.1+3` · S · after A2
 - [ ] Bump `pubspec.yaml` to `1.1.1+3`.
