@@ -38,14 +38,29 @@ abstract final class NotificationPrefs {
   /// [load] resolves; until then it holds the default. The first access creates
   /// every category's notifier and kicks off a lazy load.
   static ValueNotifier<bool> notifier(NotificationCategory category) {
-    if (_notifiers.isEmpty) {
-      for (final c in NotificationCategory.values) {
-        _notifiers[c] = ValueNotifier<bool>(_defaultFor(c));
-      }
-      // Fire-and-forget lazy load; notifiers update when disk resolves.
-      load();
-    }
-    return _notifiers[category]!;
+    // Create the ONE notifier being asked for, rather than assuming the map is
+    // either empty or complete.
+    //
+    // It used to populate every category only when `_notifiers.isEmpty`, then
+    // return `_notifiers[category]!`. But `load()` awaits secure storage INSIDE
+    // its loop, so the moment it reads the first category it yields — leaving
+    // the map non-empty and missing the rest. A build in that window skipped the
+    // population branch and the `!` threw on the next category.
+    //
+    // That is not a rare race: it is what happens every time the Settings screen
+    // opens, because it calls `load()` in initState and reads the notifiers in
+    // the very next build. Settings crashed for everyone, and in release it was
+    // a blank grey screen with nothing in the log. Found on the Infinix Note 8,
+    // 2026-09-02.
+    final existing = _notifiers[category];
+    if (existing != null) return existing;
+    final created = _notifiers[category] = ValueNotifier<bool>(
+      _defaultFor(category),
+    );
+    // Fire-and-forget lazy load; notifiers update when disk resolves. Safe to
+    // call repeatedly — `load()` returns early once it has run.
+    load();
+    return created;
   }
 
   /// Whether [category] is currently ON.

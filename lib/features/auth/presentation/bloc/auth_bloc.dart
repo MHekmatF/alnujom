@@ -72,6 +72,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> with WidgetsBindingObserver {
   final DeregisterPushToken _deregisterPushToken;
   final PushMessagingService _pushMessaging;
   final RealtimeSignals _realtimeSignals;
+  /// The user id whose signal wiring is currently running. Wiring is started
+  /// unawaited now, so two session events in quick succession could otherwise
+  /// both pass the `_wiredUserId` check while the first is still awaiting.
+  String? _wiringInFlightFor;
   late final StreamSubscription<Session?> _sessionSub;
   late final StreamSubscription<String> _tokenRefreshSub;
 
@@ -186,16 +190,39 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> with WidgetsBindingObserver {
     await _permissionChecker.load();
     final profileResult = await _profileRepository.getCurrentProfile();
     if (profileResult is Success<Profile>) {
-      // Phase 22 (T039/T040): wire push-token registration + the user_roles
-      // permission-refresh channel for this session — regardless of
-      // account_status, so a pending user still receives the approval push and
-      // a live role grant refreshes their permissions (R-191/FR-011/FR-017).
-      await _wireSessionSignals(session.userId);
+      // Show the signed-in screen FIRST, then wire the session's background
+      // signals behind it.
+      //
+      // Phase 22 (T039/T040) wiring registers this device's push token and
+      // opens the `user_roles` Realtime channel — regardless of account_status,
+      // so a pending user still receives the approval push and a live role
+      // grant refreshes their permissions (R-191/FR-011/FR-017).
+      //
+      // But it fetches an FCM token and writes a row, both on the network.
+      // Awaiting it here meant every sign-in and every foreground-resume sat on
+      // the network before the UI could change — the same freeze that made
+      // sign-out look hung, on a far hotter path. `_wireSessionSignals` claims
+      // the user id synchronously before its first await, so letting it run
+      // behind the rendered screen cannot double-wire.
       emit(await _stateFromProfile(profileResult.value));
+      unawaited(
+        Future<void>(() async {
+          try {
+            await _wireSessionSignals(session.userId);
+          } on Object {
+            // Best-effort: no push token and no live role channel is a degraded
+            // session, not a broken one. Never let it reach the UI.
+          }
+        }),
+      );
     } else {
-      await _teardownSessionSignals();
+      // Same order as the signed-out branch above: free the UI, then clean up.
+      // This branch is reached when the profile fetch failed — usually because
+      // the network is bad — so awaiting yet more network calls before emitting
+      // froze the app exactly when it was least able to afford it.
       _permissionChecker.clear();
       emit(const Unauthenticated());
+      unawaited(_teardownSessionSignals());
     }
   }
 
@@ -205,7 +232,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> with WidgetsBindingObserver {
   /// 4th observation point (the existing three in `_onSessionRefreshed.load`,
   /// `_onAppResumedRefresh`, and sign-out `clear` stay intact). FR-017.
   Future<void> _wireSessionSignals(String userId) async {
-    if (_wiredUserId == userId) return; // already wired for this user
+    // Already wired, or wiring right now — either way there is nothing to do.
+    if (_wiredUserId == userId || _wiringInFlightFor == userId) return;
+    _wiringInFlightFor = userId;
+    try {
+      await _wireSessionSignalsInner(userId);
+    } finally {
+      _wiringInFlightFor = null;
+    }
+  }
+
+  Future<void> _wireSessionSignalsInner(String userId) async {
     if (_wiredUserId != null) {
       // Different user took over without an intervening sign-out — reset first.
       await _teardownSessionSignals();

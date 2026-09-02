@@ -66,6 +66,13 @@ jobs:
       - name: Lint DI graph
         run: dart run tool/lint_di_graph.dart
 
+      # The router and the redirect disagree silently. A GoRoute that adds no
+      # `redirect:` looks public, but authRedirect still runs on every
+      # navigation and sends anything it does not recognise to /login. Three
+      # batches of screens shipped that way; guests found them, not the build.
+      - name: Lint public routes
+        run: dart run tool/lint_public_routes.dart
+
       - name: Guard Supabase SDK boundary (Constitution IX — no package:supabase_flutter in any domain/)
         run: |
           # Constitution IX / SC-014: Supabase types may appear in core/network wrappers

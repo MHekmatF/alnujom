@@ -20,34 +20,53 @@ class AppErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const ColoredBox(
-      color: Color(0xFFF4F6FA),
-      child: Center(
-        child: Padding(
-          padding: EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.error_outline, size: 40, color: Color(0xFFC43D3D)),
-              SizedBox(height: 12),
-              Text(
-                'تعذّر عرض هذه الشاشة',
-                textDirection: TextDirection.rtl,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF0E1A2E),
-                ),
+    // `inherit: false` on every style, plus an explicit Directionality and
+    // DefaultTextStyle around them.
+    //
+    // An ErrorWidget replaces whatever threw, which means it can land ABOVE the
+    // MaterialApp — with no Directionality and no DefaultTextStyle in scope. A
+    // Text that has to fall back there renders in Flutter's unmissable
+    // yellow-on-underline debug style, so the screen meant to say "something
+    // went wrong, calmly" instead looked like a second, uglier failure. Seen on
+    // the Infinix Note 8, 2026-09-02.
+    return const Directionality(
+      textDirection: TextDirection.rtl,
+      child: DefaultTextStyle(
+        style: TextStyle(
+          inherit: false,
+          fontSize: 14,
+          color: Color(0xFF5B6577),
+          decoration: TextDecoration.none,
+        ),
+        child: ColoredBox(
+          color: Color(0xFFF4F6FA),
+          child: Center(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.error_outline, size: 40, color: Color(0xFFC43D3D)),
+                  SizedBox(height: 12),
+                  Text(
+                    'تعذّر عرض هذه الشاشة',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      inherit: false,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF0E1A2E),
+                      decoration: TextDecoration.none,
+                    ),
+                  ),
+                  SizedBox(height: 6),
+                  Text(
+                    'ارجع وحاول مرة أخرى.',
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
-              SizedBox(height: 6),
-              Text(
-                'ارجع وحاول مرة أخرى.',
-                textDirection: TextDirection.rtl,
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14, color: Color(0xFF5B6577)),
-              ),
-            ],
+            ),
           ),
         ),
       ),

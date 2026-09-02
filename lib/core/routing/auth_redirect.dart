@@ -101,11 +101,39 @@ const _publicPaths = {
   '/about',
   '/search',
   '/map',
+  // Every route below declares itself anonymous-accessible in app_router.dart
+  // and was still being bounced to /login by this function. `/settings` is the
+  // one users actually hit: a signed-out visitor's drawer offers exactly two
+  // destinations, About and Settings, and tapping Settings threw them to the
+  // login screen.
+  '/assistant',
+  '/reels',
+  '/settings',
 };
+
+final _agencyProfilePath = RegExp(
+  r'^/agency/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-'
+  r'[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+);
 
 String? _redirectIfProtected(String path) {
   if (_authOnlyPaths.contains(path) || _publicPaths.contains(path)) return null;
   if (path.startsWith('/listings/')) return null;
+  // `/agency/<uuid>` — the public agency profile. The route in app_router.dart
+  // says "no auth redirect", but that only means the ROUTE adds none; this
+  // function still runs on every navigation and was sending guests to /login.
+  // The page and `v_agencies` both enforce approved-only on their own, which is
+  // what the route comment was relying on.
+  //
+  // Matched on a UUID rather than a bare `/agency/` prefix on purpose. The
+  // owner-only screens live under the same prefix — /agency/members,
+  // /agency/listings, /agency/analytics, /agency/verify, /agency/edit,
+  // /agency/invitations — and each carries its own sign-in redirect today. A
+  // prefix rule would drop this function's backstop for all of them, so the day
+  // someone adds an /agency/something without its own guard it would be public
+  // and nothing would say so. A named segment does not look like a UUID, so it
+  // stays protected by default.
+  if (_agencyProfilePath.hasMatch(path)) return null;
   return '/login';
 }
 

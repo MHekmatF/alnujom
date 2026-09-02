@@ -125,7 +125,14 @@ class SupabaseCurrenciesDatasource {
   }
 
   Future<void> writeUserDisplayCurrency(String code) async {
-    final userId = _client.auth.currentUser!.id;
+    // A signed-out visitor has no row to write to. This used to read
+    // `currentUser!.id`, which threw for guests — and the Settings screen's
+    // currency control seeds a value on first open, so simply opening Settings
+    // as a guest produced a red "تعذّر إكمال العملية" under the currency picker.
+    // `readUserDisplayCurrency` already returns null in this case; the write
+    // now matches it instead of throwing.
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) return;
     await _client
         .from('user_preferences')
         .update({'display_currency': code})

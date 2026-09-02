@@ -24,6 +24,8 @@ import '../../../../core/widgets/segmented_control.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../currencies/presentation/widgets/preferred_currency_toggle.dart';
 import '../../data/datasources/notification_prefs_remote.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/bloc/auth_state.dart';
 
 /// Phase 035 — the unified user Settings screen (Tier-D "Chrome" design).
 ///
@@ -107,7 +109,11 @@ class _SettingsPageState extends State<SettingsPage> {
           _generalGroup(context, l10n),
           _notificationsGroup(context, l10n),
           _aboutGroup(context, l10n),
-          _accountGroup(context, l10n),
+          // Only for someone who actually has an account. A signed-out visitor
+          // was being offered "delete my account", which had nothing to delete
+          // and bounced them to the login screen.
+          if (context.watch<AuthBloc>().state is Authenticated)
+            _accountGroup(context, l10n),
           _VersionFooter(version: _version),
         ],
       ),
