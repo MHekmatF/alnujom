@@ -345,7 +345,10 @@ class _DrawerSignInCta extends StatelessWidget {
               child: InkWell(
                 onTap: () {
                   Navigator.of(context).pop();
-                  context.go(AppRoutes.login);
+                  // push, not go: a guest who taps this and changes their mind
+                  // must get their place back on Back. `go` roots the stack at
+                  // /login, and Back from there quits the app.
+                  context.push(AppRoutes.login);
                 },
                 child: Padding(
                   padding: const EdgeInsetsDirectional.all(AppSpacing.lg),

@@ -16,6 +16,7 @@ import '../../../../core/widgets/app_spinner.dart';
 import '../../../../core/widgets/crown_underline_tabs.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
+import '../../../../core/widgets/guest_sign_in_sheet.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/settings/listing_view_mode.dart';
 import '../../../../core/widgets/ds/ds_listing_card.dart';
@@ -481,12 +482,24 @@ class _HomeCrown extends StatelessWidget {
                 ),
               ),
               const Spacer(),
+              // Both of these are account-only. A guest tapping the message
+              // icon used to be thrown to /login by the global redirect — and
+              // because this used `go`, Back then quit the app. The bell at
+              // least pushed, but still landed a signed-out visitor on a login
+              // form with no idea why. Ask, in place, instead.
               _CrownAction(
                 icon: Icons.chat_bubble_outline,
-                onTap: () => context.go(AppRoutes.chat),
+                onTap: () => context.read<AuthBloc>().state is Authenticated
+                    ? context.go(AppRoutes.chat)
+                    : showGuestSignInSheet(context, gate: GuestGate.messages),
               ),
               _CrownNotificationAction(
-                onTap: () => context.push(AppRoutes.notifications),
+                onTap: () => context.read<AuthBloc>().state is Authenticated
+                    ? context.push(AppRoutes.notifications)
+                    : showGuestSignInSheet(
+                        context,
+                        gate: GuestGate.notifications,
+                      ),
               ),
             ],
           ),
@@ -862,15 +875,28 @@ class _EmptyView extends StatelessWidget {
             profile.accountStatus == AccountStatus.approved &&
             profile.publisherStatus == PublisherStatus.approved;
 
+        // Three different people land here, and until 2026-09-02 two of them
+        // got the same wrong answer: "sign in to publish", pointing at /login
+        // via `context.go`. For a guest that wiped the stack — Back then quit
+        // the app. For a signed-in user who simply is not an approved
+        // publisher yet it was worse than useless: they ARE signed in, so the
+        // redirect bounced them straight back and the button did nothing at
+        // all. Each case now gets the step that is actually next for them.
+        final isGuest = profile == null;
+
         return EmptyState(
           icon: Icons.home_outlined,
           headline: l10n.home_no_listings_yet,
           ctaLabel: isApprovedPublisher
               ? l10n.home_empty_publish_first_listing
-              : l10n.home_empty_sign_in_to_publish,
+              : isGuest
+              ? l10n.home_empty_sign_in_to_publish
+              : l10n.home_empty_get_approved_to_publish,
           onCtaPressed: isApprovedPublisher
               ? () => context.pushNamed(AppRouteNames.publisherListingsCreate)
-              : () => context.go(AppRoutes.login),
+              : isGuest
+              ? () => showGuestSignInSheet(context, gate: GuestGate.publish)
+              : () => context.pushNamed(AppRouteNames.publisherApprovalPending),
         );
       },
     );

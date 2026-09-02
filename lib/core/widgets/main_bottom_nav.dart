@@ -12,6 +12,7 @@ import '../theme/radii.dart';
 import '../theme/spacing.dart';
 import '../theme/typography.dart';
 import '_widget_support.dart';
+import 'guest_sign_in_sheet.dart';
 
 /// The primary destinations of the public app shell.
 ///
@@ -61,28 +62,38 @@ class MainBottomNav extends StatelessWidget {
             selected: !none && current == MainTab.search,
             onTap: () => context.go(AppRoutes.search),
           ),
+          // The three account tabs. A guest tapping one used to be sent to
+          // /login with `context.go`, which replaces the whole stack — so they
+          // lost their place, got no explanation, and Back quit the app
+          // outright (device walk 2026-09-02: three of five tabs were a
+          // one-way exit). They now get a sheet over the page they were
+          // already on, and dismissing it puts them straight back.
           _NavTab(
             iconOutline: Icons.bookmark_border,
             iconFilled: Icons.bookmark,
             label: l10n.favorites_page_title,
             selected: !none && current == MainTab.favorites,
-            onTap: () => context.go(AppRoutes.favorites),
+            onTap: () => isSignedIn
+                ? context.go(AppRoutes.favorites)
+                : showGuestSignInSheet(context, gate: GuestGate.favorites),
           ),
           _NavTab(
             iconOutline: Icons.forum_outlined,
             iconFilled: Icons.forum,
             label: l10n.nav_messages,
             selected: !none && current == MainTab.chat,
-            onTap: () =>
-                context.go(isSignedIn ? AppRoutes.chat : AppRoutes.login),
+            onTap: () => isSignedIn
+                ? context.go(AppRoutes.chat)
+                : showGuestSignInSheet(context, gate: GuestGate.messages),
           ),
           _NavTab(
             iconOutline: Icons.person_outline,
             iconFilled: Icons.person,
             label: l10n.profile_title,
             selected: !none && current == MainTab.profile,
-            onTap: () =>
-                context.go(isSignedIn ? AppRoutes.profile : AppRoutes.login),
+            onTap: () => isSignedIn
+                ? context.go(AppRoutes.profile)
+                : showGuestSignInSheet(context, gate: GuestGate.profile),
           ),
         ];
 
