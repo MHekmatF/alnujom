@@ -132,3 +132,41 @@ the app.
 - **A web page where someone can request account deletion without installing the
   app.** Google Play requires this **in addition** to the in-app deletion button.
   Details in [`docs/release/google-play-readiness.md`](../release/google-play-readiness.md).
+
+---
+
+## Published — 2026-09-03
+
+Both files are filled in and live. **There are no `TODO(owner)` markers left.**
+
+| | |
+|---|---|
+| **Arabic (authoritative)** | <https://mhekmatf.github.io/alnujom/> |
+| **English** | <https://mhekmatf.github.io/alnujom/en.html> |
+
+The facts the owner supplied on 2026-09-03: the operator is **النجوم للتسويق
+العقاري** (Al Nujoom for Real Estate Marketing), a real-estate office in the
+Syrian Arab Republic; the contact address is `m.hekmatfanari@gmail.com`; and
+Syrian law governs. Hosting stays as recorded — Supabase `us-east-2`.
+
+### How to change it
+
+Edit the markdown, then regenerate and push:
+
+```bash
+python tool/build_privacy_site.py docs/legal/site
+```
+
+`tool/build_privacy_site.py` refuses to render a file that still contains
+`TODO(owner)`, so a half-finished policy cannot reach the web by accident. The
+rendered pages are committed under `docs/legal/site/` and mirrored to the
+`gh-pages` branch, which is what GitHub Pages serves.
+
+### Two things still worth doing
+
+- **The contact address is a personal Gmail.** Fine legally, and it is the
+  address Google Play will test. Swap it for a business address when one exists —
+  and remember `app_settings.support_contact` holds the same value.
+- **No street address is published**, only the entity name and country. That is
+  normal for a small operator and satisfies the policy itself; a Play Console
+  developer account asks for a full address separately.
