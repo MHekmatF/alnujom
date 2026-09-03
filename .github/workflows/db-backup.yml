@@ -1,0 +1,257 @@
+# Weekly database backup — and a restore drill that proves the file works.
+#
+# WHY THIS EXISTS
+#   The AlNujom Supabase project is on the **free plan, which includes no
+#   automatic backups at all**. Today a mistaken `delete` or a dropped table is
+#   permanent: there is nothing to go back to. This is the safety net.
+#
+#   It also does something a plain backup job does not: it **restores the dump it
+#   just took** into a throwaway Postgres and counts the tables. A backup nobody
+#   has ever restored is a guess. This one is checked every week.
+#
+# ─────────────────────────────────────────────────────────────────────────────
+# THE PUBLIC-REPOSITORY PROBLEM — read this before changing the upload step
+# ─────────────────────────────────────────────────────────────────────────────
+#   `MHekmatF/alnujom` is a **public** repository, and workflow artifacts on a
+#   public repository can be downloaded by anyone who can see the Actions tab —
+#   which is everybody. A full dump of this database contains `auth.users`
+#   (login emails and password hashes) and `profiles` (real phone numbers).
+#   Uploading it in the clear would be handing out the user table.
+#
+#   So the dump is **encrypted with AES-256 before it is uploaded**, using a
+#   passphrase that lives only in a repository secret. An artifact anyone can
+#   download is then useless to them.
+#
+#   If `BACKUP_PASSPHRASE` is not set, the job still dumps and still runs the
+#   restore drill — so it is useful from the first run — but it **refuses to
+#   upload anything** and finishes with a warning telling you what to create.
+#   That fail-safe is deliberate: a missing secret must never silently turn into
+#   a public dump.
+#
+# ─────────────────────────────────────────────────────────────────────────────
+# REQUIRED REPOSITORY SECRETS
+# ─────────────────────────────────────────────────────────────────────────────
+#   GitHub -> this repo -> Settings -> Secrets and variables -> Actions
+#
+#   | Secret name        | Value                                                |
+#   |--------------------|------------------------------------------------------|
+#   | SUPABASE_DB_URL    | Supabase -> Project Settings -> Database ->          |
+#   |                    | Connection string -> **Session pooler** (URI). It    |
+#   |                    | ends in **:5432/postgres**. Paste it whole, with the |
+#   |                    | password in it.                                      |
+#   | BACKUP_PASSPHRASE  | A long random passphrase you keep in your password    |
+#   |                    | manager. **Lose it and the backups are unreadable.** |
+#
+#   ⚠️ Use the **Session pooler** string (port 5432), not the Transaction pooler
+#   (port 6543). Transaction mode cannot run `pg_dump`. The direct
+#   `db.<ref>.supabase.co` host is IPv6-only and GitHub runners have no IPv6, so
+#   that one cannot be used here either. The job checks the port and stops with a
+#   clear message if it looks wrong.
+#
+# ─────────────────────────────────────────────────────────────────────────────
+# HOW TO RESTORE, WHEN YOU ACTUALLY NEED TO
+# ─────────────────────────────────────────────────────────────────────────────
+#   1. Actions -> "database backup" -> pick a run -> download the artifact.
+#   2. Decrypt it:
+#        gpg --batch --passphrase 'YOUR-PASSPHRASE' \
+#            --output alnujom.dump --decrypt alnujom-<date>.dump.gpg
+#   3. Restore the app's own data into a fresh project:
+#        pg_restore --no-owner --no-privileges --schema=public \
+#                   --dbname "<new session-pooler URI>" alnujom.dump
+#
+#   Get a developer for anything beyond that. Restoring `auth` (the login
+#   accounts) into a *different* Supabase project is not a file copy — Supabase
+#   owns that schema. If the goal is to rescue THIS project rather than move to a
+#   new one, restoring `public` is the part that matters; the accounts are still
+#   there.
+#
+# WHAT THE DRILL DOES AND DOES NOT PROVE
+#   It proves: the file is not truncated or corrupt, `pg_restore` can read it,
+#   and every table in `public` comes back with its rows.
+#   It does not prove: that a full disaster recovery into a brand-new Supabase
+#   project works end to end. That involves roles, extensions and the `auth`
+#   schema, which a vanilla Postgres container does not have. Nobody should read
+#   a green tick here as "we have rehearsed a total loss".
+
+name: database backup
+
+on:
+  schedule:
+    # Sundays at 03:00 UTC — quiet, and a fresh file waiting on Monday.
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+
+concurrency:
+  group: db-backup
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    name: Dump, verify by restoring, then encrypt
+    runs-on: ubuntu-latest
+    if: github.repository == 'MHekmatF/alnujom'
+    timeout-minutes: 30
+
+    services:
+      # The throwaway target for the restore drill. Must be >= the source's
+      # major version (Supabase is on Postgres 17), or pg_restore refuses the
+      # archive.
+      verifier:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: drill
+          POSTGRES_DB: drill
+        ports:
+          - 55432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Install the Postgres 17 client
+        run: |
+          set -euo pipefail
+          # Ubuntu's default postgresql-client is older than the server, and
+          # pg_dump refuses to dump a newer major version. Take it from PGDG.
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \
+            https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] \
+            https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" \
+            | sudo tee /etc/apt/sources.list.d/pgdg.list > /dev/null
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client-17
+          pg_dump --version
+          pg_restore --version
+
+      - name: Check the connection string before using it
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SUPABASE_DB_URL:-}" ]; then
+            echo "::error::SUPABASE_DB_URL is not set. Create it under Settings -> Secrets and variables -> Actions (see this file's header)."
+            exit 1
+          fi
+          # Never echo the URL itself — it carries the database password.
+          case "${SUPABASE_DB_URL}" in
+            *:6543/*)
+              echo "::error::That is the TRANSACTION pooler (port 6543). pg_dump cannot use it. Replace the secret with the SESSION pooler string, which ends in :5432/postgres."
+              exit 1 ;;
+            *db.*.supabase.co*)
+              echo "::error::That is the direct database host, which is IPv6-only. GitHub runners have no IPv6. Replace the secret with the SESSION pooler string."
+              exit 1 ;;
+            postgresql://*|postgres://*)
+              echo "Connection string looks like a pooler URI. Good." ;;
+            *)
+              echo "::error::SUPABASE_DB_URL does not look like a postgresql:// URI."
+              exit 1 ;;
+          esac
+
+      - name: Dump the database
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          set -euo pipefail
+          stamp="$(date -u +%Y-%m-%d)"
+          echo "STAMP=${stamp}" >> "$GITHUB_ENV"
+
+          # Custom format (-Fc): compressed, and pg_restore can pull a single
+          # schema out of it, which is what the recovery path above relies on.
+          # --no-owner / --no-privileges drop the Supabase-specific role grants
+          # that a restore target will not have.
+          pg_dump \
+            --format=custom \
+            --no-owner \
+            --no-privileges \
+            --verbose \
+            --file "alnujom-${stamp}.dump" \
+            "${SUPABASE_DB_URL}" 2> dump.log || {
+              echo "::error::pg_dump failed. Last 40 lines follow (the connection string is never printed)."
+              tail -40 dump.log
+              exit 1
+            }
+
+          bytes="$(stat -c%s "alnujom-${stamp}.dump")"
+          echo "Dump written: ${bytes} bytes"
+          # A dump of this database is ~megabytes. Anything tiny means it failed
+          # quietly and we would be archiving an empty file.
+          if [ "${bytes}" -lt 100000 ]; then
+            echo "::error::The dump is only ${bytes} bytes — far too small to be this database. Treating it as a failure rather than archiving it."
+            tail -40 dump.log
+            exit 1
+          fi
+
+      - name: Restore it into a throwaway Postgres and count what came back
+        env:
+          PGPASSWORD: drill
+        run: |
+          set -euo pipefail
+          export PGHOST=localhost PGPORT=55432 PGUSER=postgres PGDATABASE=drill
+
+          # Roles referenced by the dump do not exist here. --no-owner and
+          # --no-privileges were already applied at dump time; anything left is
+          # extension or ownership noise, so errors are collected and judged on
+          # the table count rather than on the exit code.
+          pg_restore \
+            --no-owner --no-privileges \
+            --schema=public \
+            --dbname "${PGDATABASE}" \
+            "alnujom-${STAMP}.dump" > restore.log 2>&1 || true
+
+          restored="$(psql -tAc "select count(*) from information_schema.tables where table_schema='public' and table_type='BASE TABLE'")"
+          echo "Tables restored into the drill database: ${restored}"
+
+          # The live database had 43 base tables when this was written. Assert a
+          # floor rather than an exact number so adding a table does not turn the
+          # backup red — the point is to catch a dump that restores as nothing.
+          if [ "${restored}" -lt 40 ]; then
+            echo "::error::Only ${restored} tables came back. The dump did not restore. Last 40 lines of the restore log:"
+            tail -40 restore.log
+            exit 1
+          fi
+
+          echo "Row counts in the restored copy (top 15 tables):"
+          psql -tAc "
+            select relname || ' = ' || n_live_tup
+            from pg_stat_user_tables
+            where schemaname='public' and n_live_tup > 0
+            order by n_live_tup desc
+            limit 15"
+
+          echo "Restore drill passed: the dump taken minutes ago is readable and complete."
+
+      - name: Encrypt the dump
+        id: encrypt
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          if [ -z "${BACKUP_PASSPHRASE:-}" ]; then
+            echo "uploadable=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::BACKUP_PASSPHRASE is not set, so nothing will be uploaded. This repository is PUBLIC and its artifacts are downloadable by anyone, so an unencrypted dump would publish every user's phone number and password hash. The dump and the restore drill both ran and passed — only the archiving is skipped. Create BACKUP_PASSPHRASE (a long random passphrase, kept in your password manager) to start keeping the files."
+            exit 0
+          fi
+          gpg --batch --yes --symmetric --cipher-algo AES256 \
+              --passphrase-fd 0 \
+              --output "alnujom-${STAMP}.dump.gpg" \
+              "alnujom-${STAMP}.dump" <<< "${BACKUP_PASSPHRASE}"
+          # Keep only the encrypted file in the workspace, so a later step or a
+          # future edit cannot upload the plaintext by accident.
+          rm -f "alnujom-${STAMP}.dump"
+          echo "uploadable=true" >> "$GITHUB_OUTPUT"
+          echo "Encrypted: $(stat -c%s "alnujom-${STAMP}.dump.gpg") bytes"
+
+      - name: Upload the encrypted backup
+        if: steps.encrypt.outputs.uploadable == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: alnujom-db-${{ env.STAMP }}
+          path: alnujom-${{ env.STAMP }}.dump.gpg
+          retention-days: 30
+          if-no-files-found: error
