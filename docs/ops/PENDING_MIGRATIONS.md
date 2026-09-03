@@ -149,6 +149,52 @@ the old shape needed.**
 
 ---
 
+## ✅ 2d. `20260903120001_revoke_anon_execute_on_owner_coordinate_rpc.sql` — APPLIED 2026-09-03
+
+**A grant nobody wrote, for the third time in this schema.**
+
+`get_listing_coordinates(uuid)` hands back a listing's exact latitude and
+longitude to its owner or a moderator. The migration that created it
+(20260901120001) states plainly that it is "authenticated ONLY — deliberately no
+anon grant", and grants only `authenticated`. Production nonetheless answered
+`has_function_privilege('anon', ..., 'EXECUTE') = true`.
+
+Nobody granted it. Postgres gives every new function **EXECUTE to PUBLIC**, and
+`anon` inherits that; naming `authenticated` explicitly does not displace it.
+The same default has now quietly widened this schema three times.
+
+**Not a live leak, and worth saying so.** The function resolves `auth.uid()` and
+checks `listings.view_all` in its own body, so an anonymous caller got NULL — the
+same NULL a missing listing returns. What this closes is the gap between what the
+schema says and what it grants, and it removes a standing `get_advisors(security)`
+entry. The body's guard is no longer the only thing between a guest and an exact
+coordinate.
+
+Checked before applying: no view and no RLS policy in `public` references the
+function (0 rows each), and every caller in the app — publisher edit form,
+revision snapshot, admin listing review, publisher dashboard DTO — runs
+authenticated.
+
+Verified after, against production:
+
+- `anon` -> `42501 permission denied for function get_listing_coordinates`;
+  `authenticated` still holds EXECUTE.
+- The guest map view still returns jittered `marker_lat`/`marker_lng` for the
+  anon key, and `v_listings_public` still answers 200.
+- Grant sweep across all four coordinate/permission functions is now exactly as
+  intended: `listing_marker_coordinates` anon yes (the public map needs it),
+  `current_user_has_permission` anon yes (**an anon-scoped RLS policy calls it —
+  do not revoke this one**), `map_jitter_coordinates` neither, this one
+  authenticated only.
+- Role read sweep over all 54 public relations: the only denials are grant-level
+  `42501` on nine private/admin relations for `anon` (`inquiries`,
+  `lead_events`, `listing_revisions`, `account_deletion_requests`, and the five
+  owner/admin views) and `lead_events` for `authenticated`, which reads them
+  through `v_lead_events_publisher` instead. Every one of those is a table the
+  role is not meant to read. Nothing a guest surface depends on is denied.
+
+---
+
 ## ⏸ 3. `20260901120002_revoke_authenticated_listing_coordinates.sql` — HOLD until the new build is out
 
 ⚠️ **Do not apply this until users have the build from this branch.** It revokes

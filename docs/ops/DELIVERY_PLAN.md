@@ -78,20 +78,23 @@ The one big hole in the QA record. Record:
 - [ ] Write the Arabic release note (3 lines, plain) into `docs/release/notes/1.1.1.ar.md` for the Telegram post and the manifest.
 - Verified by: the dossier row shows the date, the hashes and the device it was smoke-tested on.
 
-### A4 — Security hardening batch · S · no dependency
-From the 16 anon-executable SECURITY DEFINER functions, all reviewed 2026-09-02:
-`current_user_has_permission`, `is_agency_admin`, `is_agency_member`,
-`publisher_owns_approved_listing` are boolean helpers keyed on `auth.uid()`
-(anon gets FALSE — and revoking one that an anon-scoped policy calls breaks that
-policy with 42501, the exact bug of 2026-09-02); `listing_marker_coordinates`,
-`list_video_reels`, `market_area_stats`, `market_price_trend`,
-`publisher_rating_distribution`, `publisher_response_stats` are the intended
-public reads; `record_ad_event`, `record_lead_event`, `submit_inquiry` are
-intentionally guest-callable. That leaves one:
-- [ ] Migration `20260903120001_revoke_anon_get_listing_coordinates.sql`: `REVOKE EXECUTE ON FUNCTION public.get_listing_coordinates(uuid) FROM anon;` — it is the owner/admin read and returns nothing to a guest anyway.
-- [ ] Before touching any of the four boolean helpers: `select policyname, tablename, roles from pg_policies where qual ilike '%<fn>%' or with_check ilike '%<fn>%'` — revoke from anon **only** if no policy scoped to `anon`/`public` calls it. Expect to leave them alone.
-- [ ] Apply via MCP `apply_migration`; then run `supabase/scripts/probe_role_read_access.sql` (both roles) and `get_advisors(security)`.
-- Verified by: probe sweep still 0 failures for anon and authenticated; the advisor list is one entry shorter; the file is recorded in `PENDING_MIGRATIONS.md`.
+### A4 — Security hardening batch · S · **DONE 2026-09-03**
+All 16 anon-executable SECURITY DEFINER functions were reviewed. Fifteen are
+correct: `current_user_has_permission`, `is_agency_admin`, `is_agency_member`
+and `publisher_owns_approved_listing` are boolean helpers keyed on `auth.uid()`
+(**and revoking one that an anon-scoped policy calls returns 42501 to every
+guest — that was the 2026-09-02 outage, do not tidy them up**);
+`listing_marker_coordinates`, `list_video_reels`, `market_area_stats`,
+`market_price_trend`, `publisher_rating_distribution` and
+`publisher_response_stats` are the intended public reads; `record_ad_event`,
+`record_lead_event` and `submit_inquiry` are intentionally guest-callable.
+
+- [x] `20260903120001` applied: EXECUTE on `get_listing_coordinates(uuid)`
+      revoked from `PUBLIC` and `anon`. The grant was never written — it was
+      Postgres's default EXECUTE-to-PUBLIC, which `anon` inherits.
+- [x] Verified: anon -> `42501`; authenticated keeps it; the guest map and feed
+      unchanged; role sweep over 54 relations shows no unintended denial.
+- Recorded in `PENDING_MIGRATIONS.md` section 2d.
 
 ### A5 — Apply the held coordinate revoke · S · **blocked on A3 + B5 (users on the new build)**
 - [ ] Wait until the Telegram post for `1.1.1+3` has been up for about a week (the old build reads the columns directly — see `PENDING_MIGRATIONS.md` §3).
@@ -100,12 +103,29 @@ intentionally guest-callable. That leaves one:
 - [ ] Run the probe script again.
 - Verified by: the §3 block in `PENDING_MIGRATIONS.md` flipped to ✅ with the date and the verification lines; `v1.0.0.md` row 293 closed.
 
-### A6 — Database backups · M · **blocked on B6 (the `SUPABASE_DB_URL` secret)**
-The Free plan has **no automatic backups**; a mistake today is permanent.
-- [ ] `.github/workflows/db-backup.yml`: weekly cron + `workflow_dispatch`; `pg_dump --no-owner --no-privileges -Fc` through the **session pooler** (IPv4; the direct host is IPv6-only and GitHub runners have no IPv6); upload as a workflow artifact with 30-day retention.
-- [ ] Restore drill *inside the same job*: start a `postgres:15` service container, `pg_restore` into it, `select count(*) from information_schema.tables where table_schema='public'` must equal the live count (43 today) — the dump is proven usable every week, not just produced.
-- [ ] Document in `HANDOVER.md` §11 ("Confirm backups…") how to download one and restore it by hand.
-- Verified by: one green scheduled run whose restore step printed the table count; the `HANDOVER.md` box ticked with the run URL.
+### A6 — Database backups · M · **BUILT 2026-09-03, one owner step left**
+The Free plan includes **no automatic backups**; today a mistaken delete is
+permanent. `.github/workflows/db-backup.yml`:
+
+- [x] Weekly (Sundays 03:00 UTC) plus `workflow_dispatch`. Installs the Postgres
+      **17** client from PGDG — Supabase runs 17.6 and an older `pg_dump`
+      refuses a newer server.
+- [x] Rejects the wrong connection string with a plain message: the transaction
+      pooler (`:6543`) cannot run `pg_dump`, and the direct `db.<ref>` host is
+      IPv6-only where GitHub runners have none.
+- [x] **Restores the dump it just took** into a `postgres:17` service container
+      and asserts at least 40 base tables come back (production has 43). A
+      backup nobody has restored is a guess.
+- [x] Refuses to archive anything unless `BACKUP_PASSPHRASE` exists. **This
+      repository is public and its artifacts are downloadable by anyone**, and a
+      full dump carries `auth.users` password hashes and every real phone
+      number. With the secret it uploads AES-256-encrypted; without it the dump
+      and the drill still run and only the upload is skipped.
+- [ ] **Owner: create `BACKUP_PASSPHRASE`** (a long random passphrase, kept in a
+      password manager — lose it and the backups are unreadable). Until then
+      nothing is being kept.
+- [ ] Then tick the `HANDOVER.md` section 11 "Confirm backups and do one restore
+      drill" box with the run URL.
 
 ### A7 — Purge job for deleted accounts · M · no dependency
 `request_account_deletion()` soft-deletes; the `auth.users` row and the account's
