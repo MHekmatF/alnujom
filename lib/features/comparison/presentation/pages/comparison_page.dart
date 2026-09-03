@@ -393,7 +393,6 @@ class _PropertyColumn extends StatelessWidget {
       ),
     );
   }
-
 }
 
 /// A round, over-photo "remove this column" affordance — a dark glass circle
@@ -449,7 +448,6 @@ class _ColumnHero extends StatelessWidget {
           aspectRatio: 16 / 10,
           child: AppNetworkImage(
             url: item.isAvailable ? item.mainImagePath : null,
-            semanticLabel: l10n.image_unavailable,
           ),
         ),
         if (!item.isAvailable)

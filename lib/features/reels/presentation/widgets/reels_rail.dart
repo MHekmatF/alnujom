@@ -238,7 +238,6 @@ class _ReelPosterCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final colors = AppColors.of(context);
     final elevation = AppElevation.of(context);
 
@@ -260,10 +259,7 @@ class _ReelPosterCard extends StatelessWidget {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    AppNetworkImage(
-                      url: reel.posterImageUrl,
-                      semanticLabel: l10n.image_unavailable,
-                    ),
+                    AppNetworkImage(url: reel.posterImageUrl),
                     Positioned.fill(
                       child: DecoratedBox(
                         decoration: BoxDecoration(

@@ -309,7 +309,6 @@ class _Hero extends StatelessWidget {
       child: AppNetworkImage(
         url: imageUrl,
         heroTag: listingImageHeroTag(listingId),
-        semanticLabel: l10n.image_unavailable,
       ),
     );
 

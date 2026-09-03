@@ -194,6 +194,9 @@ class _SetExchangeRateViewState extends State<_SetExchangeRateView> {
                               state.targetCurrency!,
                               '${RateFormatter.format(state.derivedRatePreview!, locale)} ${state.baseCurrency!}',
                             ),
+                            // An equation, not a sentence — see
+                            // LatestRateSubline for what RTL does to it.
+                            textDirection: TextDirection.ltr,
                             style: styles.bodyMedium.copyWith(
                               color: colors.textMuted,
                             ),

@@ -85,7 +85,6 @@ class DsListingCard extends StatelessWidget {
 
   Widget _image(BuildContext context) {
     final colors = AppColors.of(context);
-    final l10n = AppLocalizations.of(context)!;
     return AspectRatio(
       aspectRatio: 16 / 10,
       child: Stack(
@@ -97,7 +96,6 @@ class DsListingCard extends StatelessWidget {
             // A featured listing can also appear in the feed below; only the
             // feed card claims the shared Hero tag so the two never collide.
             heroTag: featured ? null : listingImageHeroTag(data.id),
-            semanticLabel: l10n.image_unavailable,
           ),
           // Trust cluster — visually top-right in Arabic RTL (logical start),
           // matching the DC. Featured prepends the gold "مميّز" chip.
@@ -297,7 +295,13 @@ class DsListingCard extends StatelessWidget {
     final items = <Widget>[];
     if (isLand) {
       items.add(
-        _spec(Icons.landscape, l10n.propertyTypeLand, iconSize, textStyle, colors),
+        _spec(
+          Icons.landscape,
+          l10n.propertyTypeLand,
+          iconSize,
+          textStyle,
+          colors,
+        ),
       );
       items.add(_spec(Icons.square_foot, area(), iconSize, textStyle, colors));
     } else {
@@ -324,7 +328,9 @@ class DsListingCard extends StatelessWidget {
         );
       }
       if (data.areaSize != null) {
-        items.add(_spec(Icons.square_foot, area(), iconSize, textStyle, colors));
+        items.add(
+          _spec(Icons.square_foot, area(), iconSize, textStyle, colors),
+        );
       }
     }
 

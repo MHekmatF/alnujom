@@ -264,264 +264,283 @@ class _SuccessBodyState extends State<_SuccessBody> {
           children: [
             CustomScrollView(
               slivers: [
-            // 2. Parallax collapsing gallery + FR-027 video-tap overlay.
-            //    Phase 12 Q8=A ListingGallery wrapped (not edited) per SC-016;
-            //    it also owns the Hero destination flown from the home card.
-            SliverAppBar(
-              pinned: true,
-              expandedHeight: galleryHeight,
-              backgroundColor: Colors.transparent,
-              surfaceTintColor: Colors.transparent,
-              scrolledUnderElevation: 0,
-              elevation: 0,
-              foregroundColor: AppColors.of(context).onPhoto,
-              leading: const DeepLinkAwareBackButton(),
-              // 035 craft wave — favoriting lives HERE (the gallery heart,
-              // same affordance as the feed cards); the old duplicate
-              // Favorite button in the bottom action block was removed.
-              actions: [
-                Padding(
-                  padding: const EdgeInsetsDirectional.only(end: AppSpacing.md),
-                  child: FavoriteHeartButton(
-                    listingId: aggregate.listing.id,
-                    style: FavoriteHeartStyle.onImage,
+                // 2. Parallax collapsing gallery + FR-027 video-tap overlay.
+                //    Phase 12 Q8=A ListingGallery wrapped (not edited) per SC-016;
+                //    it also owns the Hero destination flown from the home card.
+                SliverAppBar(
+                  pinned: true,
+                  expandedHeight: galleryHeight,
+                  // Opaque once collapsed. It used to be fully transparent, and a
+                  // PINNED transparent bar does not hide what scrolls beneath it —
+                  // so past the gallery the body slid under the status bar and the
+                  // spec cards collided with the clock and the signal icons (seen
+                  // on the device, 2026-09-03). While the gallery is expanded the
+                  // flexibleSpace paints over this colour, so nothing changes
+                  // there; it only appears once FlexibleSpaceBar has faded the
+                  // photo out, which is exactly when the bar needs a floor.
+                  backgroundColor: AppColors.of(context).card,
+                  surfaceTintColor: Colors.transparent,
+                  scrolledUnderElevation: 0,
+                  elevation: 0,
+                  // Both controls carry their own disc (see [OnPhotoChip]) so they
+                  // stay readable over any photograph AND over the collapsed bar in
+                  // either theme — a single fixed foreground colour cannot do both.
+                  leading: const Padding(
+                    padding: EdgeInsetsDirectional.only(start: AppSpacing.sm),
+                    child: DeepLinkAwareBackButton(onPhoto: true),
+                  ),
+                  // 035 craft wave — favoriting lives HERE (the gallery heart,
+                  // same affordance as the feed cards); the old duplicate
+                  // Favorite button in the bottom action block was removed.
+                  actions: [
+                    Padding(
+                      padding: const EdgeInsetsDirectional.only(
+                        end: AppSpacing.md,
+                      ),
+                      child: FavoriteHeartButton(
+                        listingId: aggregate.listing.id,
+                        style: FavoriteHeartStyle.onImage,
+                      ),
+                    ),
+                  ],
+                  flexibleSpace: FlexibleSpaceBar(
+                    collapseMode: CollapseMode.parallax,
+                    background: _GalleryWithVideoTap(
+                      media: aggregate.media,
+                      heroTag: listingImageHeroTag(aggregate.listing.id),
+                    ),
                   ),
                 ),
-              ],
-              flexibleSpace: FlexibleSpaceBar(
-                collapseMode: CollapseMode.parallax,
-                background: _GalleryWithVideoTap(
-                  media: aggregate.media,
-                  heroTag: listingImageHeroTag(aggregate.listing.id),
-                ),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: StaggeredListItem(
-                index: 1,
-                child: Padding(
-                  padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Phase 18: Reporter status banner (renders nothing for non-
-                      // reporters / anon). Self-contained: hosts its own cubit.
-                      ReporterStatusBanner(listingId: aggregate.listing.id),
-                      // DS: a soft-primary sale/rent tag chip leads the body,
-                      // sitting just above the title (purely visual signal).
-                      _PurposeTagChip(purpose: aggregate.listing.purpose),
-                      const SizedBox(height: AppSpacing.sm),
-                      // 3. Listing title — DS headlineMedium (Tajawal display slot).
-                      Text(
-                        aggregate.listing.title,
-                        style: AppTextStyles.of(context).headlineMedium,
-                      ),
-                      if (aggregate.publisher.fullName.isNotEmpty) ...[
-                        const SizedBox(height: AppSpacing.xs),
-                        Text(
-                          l10n.listing_details_publisher_label(
-                            aggregate.publisher.fullName,
+                SliverToBoxAdapter(
+                  child: StaggeredListItem(
+                    index: 1,
+                    child: Padding(
+                      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Phase 18: Reporter status banner (renders nothing for non-
+                          // reporters / anon). Self-contained: hosts its own cubit.
+                          ReporterStatusBanner(listingId: aggregate.listing.id),
+                          // DS: a soft-primary sale/rent tag chip leads the body,
+                          // sitting just above the title (purely visual signal).
+                          _PurposeTagChip(purpose: aggregate.listing.purpose),
+                          const SizedBox(height: AppSpacing.sm),
+                          // 3. Listing title — DS headlineMedium (Tajawal display slot).
+                          Text(
+                            aggregate.listing.title,
+                            style: AppTextStyles.of(context).headlineMedium,
                           ),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
+                          if (aggregate.publisher.fullName.isNotEmpty) ...[
+                            const SizedBox(height: AppSpacing.xs),
+                            Text(
+                              l10n.listing_details_publisher_label(
+                                aggregate.publisher.fullName,
+                              ),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                          // Phase 19 (FR-022/T061): verified-agency badge. Renders
+                          // nothing unless the listing's agency is approved. Does NOT
+                          // alter the Phase 13/17/18 Favorite/Share/Report CTAs.
+                          if (aggregate.listing.agencyId != null)
+                            ListingAgencyBadge(
+                              agencyId: aggregate.listing.agencyId!,
+                            ),
+                          const SizedBox(height: AppSpacing.md),
+                          // 4. Price block — Phase 12 Q8=A VERBATIM
+                          if (displayCurrency != null &&
+                              aggregate.prices.isNotEmpty) ...[
+                            ListingPriceBlock(
+                              prices: aggregate.prices,
+                              displayCurrency: displayCurrency,
+                            ),
+                            const SizedBox(height: AppSpacing.md),
+                          ],
+                          // 4b. Premium uplift v2 — key facts grid (beds·baths·area·
+                          //     floor·type) right under the title/price. Collapses to
+                          //     nothing when the listing has none of these.
+                          ListingFactsBlock(listing: aggregate.listing),
+                          const SizedBox(height: AppSpacing.md),
+                          // Phase 035 Stage 3 — field-verification trust block +
+                          // deed (الطابو) / finish (الكسوة) tiles. Self-hides when
+                          // none of the data is present.
+                          ListingVerificationSection(
+                            isVerified: aggregate.isVerified,
+                            deedType: aggregate.deedType,
+                            finishLevel: aggregate.finishLevel,
                           ),
-                        ),
-                      ],
-                      // Phase 19 (FR-022/T061): verified-agency badge. Renders
-                      // nothing unless the listing's agency is approved. Does NOT
-                      // alter the Phase 13/17/18 Favorite/Share/Report CTAs.
-                      if (aggregate.listing.agencyId != null)
-                        ListingAgencyBadge(
-                          agencyId: aggregate.listing.agencyId!,
-                        ),
-                      const SizedBox(height: AppSpacing.md),
-                      // 4. Price block — Phase 12 Q8=A VERBATIM
-                      if (displayCurrency != null &&
-                          aggregate.prices.isNotEmpty) ...[
-                        ListingPriceBlock(
-                          prices: aggregate.prices,
-                          displayCurrency: displayCurrency,
-                        ),
-                        const SizedBox(height: AppSpacing.md),
-                      ],
-                      // 4b. Premium uplift v2 — key facts grid (beds·baths·area·
-                      //     floor·type) right under the title/price. Collapses to
-                      //     nothing when the listing has none of these.
-                      ListingFactsBlock(listing: aggregate.listing),
-                      const SizedBox(height: AppSpacing.md),
-                      // Phase 035 Stage 3 — field-verification trust block +
-                      // deed (الطابو) / finish (الكسوة) tiles. Self-hides when
-                      // none of the data is present.
-                      ListingVerificationSection(
-                        isVerified: aggregate.isVerified,
-                        deedType: aggregate.deedType,
-                        finishLevel: aggregate.finishLevel,
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      // 4c. Premium uplift — financing ("حاسبة التمويل")
-                      //     calculator, expandable, seeded with the primary price.
-                      //     Indicative only; no currency conversion, no network.
-                      if (displayCurrency != null &&
-                          aggregate.prices.isNotEmpty) ...[
-                        AffordabilityCalculator(
-                          price: _primaryPrice(aggregate).amount,
-                          currencyCode: _primaryPrice(aggregate).currencyCode,
-                        ),
-                        const SizedBox(height: AppSpacing.md),
-                      ],
-                      // 4d. Spec 028 — market insights: monthly avg asking-price
-                      //     trend for this governorate + property type (narrowed
-                      //     by the listing's own city/purpose), in the listing's
-                      //     primary currency. Self-contained (hosts its own
-                      //     cubit); collapses when the RPC fails or the sample is
-                      //     too thin (< 3 monthly points) — manages its own
-                      //     trailing gap so a collapse leaves zero extra space.
-                      MarketInsightsSection(
-                        governorateId: aggregate.listing.governorateId,
-                        propertyType: aggregate.listing.propertyType
-                            .toDbValue(),
-                        purpose: aggregate.listing.purpose.toDbValue(),
-                        cityId: aggregate.listing.cityId,
-                        currencyCode: aggregate.prices.isEmpty
-                            ? null
-                            : _primaryPrice(aggregate).currencyCode,
-                      ),
-                      // 5. Location block — Phase 12 Q8=A VERBATIM (widget itself unmodified)
-                      ListingLocationBlock(
-                        governorate: aggregate.governorate,
-                        city: aggregate.city,
-                        area: aggregate.area,
-                        addressText: aggregate.listing.addressText,
-                      ),
-                      // 5b. Phase 15 G2: "View on map" affordance — consumer wrap.
-                      //     Only rendered when location_visibility permits map presence.
-                      //     ListingLocationBlock itself is NOT modified (Phase 12 Q8=A purity).
-                      if (_canShowOnMap(aggregate.listing))
-                        Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                            AppSpacing.lg,
-                            AppSpacing.xs,
-                            AppSpacing.lg,
-                            AppSpacing.md,
+                          const SizedBox(height: AppSpacing.md),
+                          // 4c. Premium uplift — financing ("حاسبة التمويل")
+                          //     calculator, expandable, seeded with the primary price.
+                          //     Indicative only; no currency conversion, no network.
+                          if (displayCurrency != null &&
+                              aggregate.prices.isNotEmpty) ...[
+                            AffordabilityCalculator(
+                              price: _primaryPrice(aggregate).amount,
+                              currencyCode: _primaryPrice(
+                                aggregate,
+                              ).currencyCode,
+                            ),
+                            const SizedBox(height: AppSpacing.md),
+                          ],
+                          // 4d. Spec 028 — market insights: monthly avg asking-price
+                          //     trend for this governorate + property type (narrowed
+                          //     by the listing's own city/purpose), in the listing's
+                          //     primary currency. Self-contained (hosts its own
+                          //     cubit); collapses when the RPC fails or the sample is
+                          //     too thin (< 3 monthly points) — manages its own
+                          //     trailing gap so a collapse leaves zero extra space.
+                          MarketInsightsSection(
+                            governorateId: aggregate.listing.governorateId,
+                            propertyType: aggregate.listing.propertyType
+                                .toDbValue(),
+                            purpose: aggregate.listing.purpose.toDbValue(),
+                            cityId: aggregate.listing.cityId,
+                            currencyCode: aggregate.prices.isEmpty
+                                ? null
+                                : _primaryPrice(aggregate).currencyCode,
                           ),
-                          child: Align(
-                            alignment: AlignmentDirectional.centerStart,
-                            child: TextButton.icon(
-                              onPressed: () => context.go(
-                                AppRoutes.map,
-                                extra: MapEntryFromListing(
-                                  listingId: aggregate.listing.id,
-                                  position: MarkerCoordinates(
-                                    latitude: aggregate.listing.latitude!,
-                                    longitude: aggregate.listing.longitude!,
+                          // 5. Location block — Phase 12 Q8=A VERBATIM (widget itself unmodified)
+                          ListingLocationBlock(
+                            governorate: aggregate.governorate,
+                            city: aggregate.city,
+                            area: aggregate.area,
+                            addressText: aggregate.listing.addressText,
+                          ),
+                          // 5b. Phase 15 G2: "View on map" affordance — consumer wrap.
+                          //     Only rendered when location_visibility permits map presence.
+                          //     ListingLocationBlock itself is NOT modified (Phase 12 Q8=A purity).
+                          if (_canShowOnMap(aggregate.listing))
+                            Padding(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
+                                AppSpacing.lg,
+                                AppSpacing.xs,
+                                AppSpacing.lg,
+                                AppSpacing.md,
+                              ),
+                              child: Align(
+                                alignment: AlignmentDirectional.centerStart,
+                                child: TextButton.icon(
+                                  onPressed: () => context.go(
+                                    AppRoutes.map,
+                                    extra: MapEntryFromListing(
+                                      listingId: aggregate.listing.id,
+                                      position: MarkerCoordinates(
+                                        latitude: aggregate.listing.latitude!,
+                                        longitude: aggregate.listing.longitude!,
+                                      ),
+                                    ),
+                                  ),
+                                  icon: const Icon(Icons.map_outlined),
+                                  label: Text(
+                                    l10n.listing_details_view_on_map_action,
                                   ),
                                 ),
                               ),
-                              icon: const Icon(Icons.map_outlined),
-                              label: Text(
-                                l10n.listing_details_view_on_map_action,
-                              ),
+                            ),
+                          const SizedBox(height: AppSpacing.md),
+                          // 5b-2. Spec 028 — "Nearby" amenities chips (schools /
+                          //       hospitals / pharmacies / markets / mosques) from
+                          //       OpenStreetMap via Overpass. Self-contained (hosts
+                          //       its own cubit); collapses under Data saver
+                          //       (LiteMode), when coordinates are absent, or when
+                          //       the fetch fails / finds nothing — manages its own
+                          //       trailing gap so a collapse leaves zero extra space.
+                          NearbyAmenitiesSection(
+                            listingId: aggregate.listing.id,
+                            latitude: aggregate.listing.latitude,
+                            longitude: aggregate.listing.longitude,
+                          ),
+                          // 5c. Premium uplift — buyer-safety reassurance banner,
+                          //     placed just above the contact section so the buyer
+                          //     reads it before reaching out. Informational only.
+                          const BuyerSafetyBanner(),
+                          const SizedBox(height: AppSpacing.md),
+                          // 6. Contact block — Phase 16 rewired (listing passed for
+                          //    ContactCtaCubit). Premium uplift v2: richer AgentCard
+                          //    surface seeded with the publisher's name + username.
+                          ContactBlock(
+                            listing: aggregate.listing,
+                            // The DC sticky bottom bar owns اتصال / واتساب; the
+                            // inline card keeps the agent header + trust + quiet
+                            // secondary actions.
+                            showPrimaryActions: false,
+                            contactName: aggregate.publisher.fullName.isNotEmpty
+                                ? aggregate.publisher.fullName
+                                : null,
+                            subtitle:
+                                aggregate.publisher.username != null &&
+                                    aggregate.publisher.username!.isNotEmpty
+                                ? l10n.listing_details_contact_username(
+                                    aggregate.publisher.username!,
+                                  )
+                                : null,
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          // 6b. Seller-trust "Reviews" section — header (avg + count),
+                          //     recent reviews, and a context-aware write affordance.
+                          //     Reads the page-level SellerTrustCubit; collapses when
+                          //     there's nothing to show and the viewer can't write.
+                          SellerReviewsSection(
+                            sellerId: aggregate.listing.publisherUserId,
+                            listingId: aggregate.listing.id,
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          // 7. Amenities block — Phase 12 Q8=A VERBATIM
+                          ListingAmenitiesBlock(
+                            amenities: aggregate.details.amenities,
+                          ),
+                          if (aggregate.details.amenities.isNotEmpty)
+                            const SizedBox(height: AppSpacing.md),
+                          // 8. Description block — Phase 12 Q8=A VERBATIM
+                          if (aggregate.details.description != null &&
+                              aggregate.details.description!
+                                  .trim()
+                                  .isNotEmpty) ...[
+                            ListingDescriptionBlock(
+                              description: aggregate.details.description!,
+                            ),
+                            const SizedBox(height: AppSpacing.md),
+                          ],
+                          // Phase 21 / DC: the sponsored slot sits low in the page
+                          // (after the description), collapsing to zero height when
+                          // no eligible ad is served (FR-012, no reflow).
+                          const AdSlot(
+                            placement: AdPlacement.listingDetailsBanner,
+                          ),
+                          // 9. Per-listing action block — quiet Share + Report text
+                          //    buttons (035: duplicate Favorite CTA removed).
+                          PerListingActionBlock(
+                            listingId: aggregate.listing.id,
+                            shareTitle: aggregate.listing.title,
+                            sharePrice: _sharePriceText(
+                              context,
+                              aggregate,
+                              displayCurrency,
                             ),
                           ),
-                        ),
-                      const SizedBox(height: AppSpacing.md),
-                      // 5b-2. Spec 028 — "Nearby" amenities chips (schools /
-                      //       hospitals / pharmacies / markets / mosques) from
-                      //       OpenStreetMap via Overpass. Self-contained (hosts
-                      //       its own cubit); collapses under Data saver
-                      //       (LiteMode), when coordinates are absent, or when
-                      //       the fetch fails / finds nothing — manages its own
-                      //       trailing gap so a collapse leaves zero extra space.
-                      NearbyAmenitiesSection(
-                        listingId: aggregate.listing.id,
-                        latitude: aggregate.listing.latitude,
-                        longitude: aggregate.listing.longitude,
+                          const SizedBox(height: AppSpacing.lg),
+                        ],
                       ),
-                      // 5c. Premium uplift — buyer-safety reassurance banner,
-                      //     placed just above the contact section so the buyer
-                      //     reads it before reaching out. Informational only.
-                      const BuyerSafetyBanner(),
-                      const SizedBox(height: AppSpacing.md),
-                      // 6. Contact block — Phase 16 rewired (listing passed for
-                      //    ContactCtaCubit). Premium uplift v2: richer AgentCard
-                      //    surface seeded with the publisher's name + username.
-                      ContactBlock(
-                        listing: aggregate.listing,
-                        // The DC sticky bottom bar owns اتصال / واتساب; the
-                        // inline card keeps the agent header + trust + quiet
-                        // secondary actions.
-                        showPrimaryActions: false,
-                        contactName: aggregate.publisher.fullName.isNotEmpty
-                            ? aggregate.publisher.fullName
-                            : null,
-                        subtitle:
-                            aggregate.publisher.username != null &&
-                                aggregate.publisher.username!.isNotEmpty
-                            ? l10n.listing_details_contact_username(
-                                aggregate.publisher.username!,
-                              )
-                            : null,
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      // 6b. Seller-trust "Reviews" section — header (avg + count),
-                      //     recent reviews, and a context-aware write affordance.
-                      //     Reads the page-level SellerTrustCubit; collapses when
-                      //     there's nothing to show and the viewer can't write.
-                      SellerReviewsSection(
-                        sellerId: aggregate.listing.publisherUserId,
-                        listingId: aggregate.listing.id,
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      // 7. Amenities block — Phase 12 Q8=A VERBATIM
-                      ListingAmenitiesBlock(
-                        amenities: aggregate.details.amenities,
-                      ),
-                      if (aggregate.details.amenities.isNotEmpty)
-                        const SizedBox(height: AppSpacing.md),
-                      // 8. Description block — Phase 12 Q8=A VERBATIM
-                      if (aggregate.details.description != null &&
-                          aggregate.details.description!.trim().isNotEmpty) ...[
-                        ListingDescriptionBlock(
-                          description: aggregate.details.description!,
-                        ),
-                        const SizedBox(height: AppSpacing.md),
-                      ],
-                      // Phase 21 / DC: the sponsored slot sits low in the page
-                      // (after the description), collapsing to zero height when
-                      // no eligible ad is served (FR-012, no reflow).
-                      const AdSlot(
-                        placement: AdPlacement.listingDetailsBanner,
-                      ),
-                      // 9. Per-listing action block — quiet Share + Report text
-                      //    buttons (035: duplicate Favorite CTA removed).
-                      PerListingActionBlock(
-                        listingId: aggregate.listing.id,
-                        shareTitle: aggregate.listing.title,
-                        sharePrice: _sharePriceText(
-                          context,
-                          aggregate,
-                          displayCurrency,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            ),
-            // 10. Premium uplift v2 — "similar listings" carousel: same property
-            //     type + governorate, excluding this listing. Self-contained
-            //     (hosts its own cubit); collapses when the pool is empty.
-            SliverToBoxAdapter(
-              child: SimilarListingsCarousel(
-                listingId: aggregate.listing.id,
-                propertyType: aggregate.listing.propertyType.toDbValue(),
-                propertyTypeEnum: aggregate.listing.propertyType,
-                governorateId: aggregate.listing.governorateId,
-                staggerIndex: 2,
-              ),
-            ),
-            const SliverToBoxAdapter(child: SizedBox(height: 104)),
+                // 10. Premium uplift v2 — "similar listings" carousel: same property
+                //     type + governorate, excluding this listing. Self-contained
+                //     (hosts its own cubit); collapses when the pool is empty.
+                SliverToBoxAdapter(
+                  child: SimilarListingsCarousel(
+                    listingId: aggregate.listing.id,
+                    propertyType: aggregate.listing.propertyType.toDbValue(),
+                    propertyTypeEnum: aggregate.listing.propertyType,
+                    governorateId: aggregate.listing.governorateId,
+                    staggerIndex: 2,
+                  ),
+                ),
+                const SliverToBoxAdapter(child: SizedBox(height: 104)),
               ],
             ),
             PositionedDirectional(

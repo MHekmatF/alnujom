@@ -39,6 +39,12 @@ class LatestRateSubline extends StatelessWidget {
     final amount = '${RateFormatter.format(rate, locale)} $targetCurrencyCode';
     return Text(
       l10n.latestRateLineTemplate(baseCurrency, amount),
+      // "1 SYP = 0.00006 USD" is an equation, not a sentence. Left to the
+      // ambient RTL it renders as "SYP = 0.00006 USD 1" — the leading 1 is
+      // reordered to the far end, and an exchange rate that reads backwards is
+      // one an admin can act on wrongly. Seen on the device, 2026-09-03. Same
+      // idiom the price tag and the listing cards already use.
+      textDirection: TextDirection.ltr,
       style: muted,
     );
   }
