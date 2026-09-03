@@ -136,44 +136,48 @@ password rather than a URI (my instructions asked for both at different times);
 over the 17 that had just been installed; and judging a Supabase dump by whether
 a vanilla Postgres can replay every statement was the wrong test.
 
-### A7 — Purge job for deleted accounts · **L, not M — re-scoped 2026-09-03**
+### A7 — Purge job for deleted accounts · M · **BUILT + DEPLOYED 2026-09-03**
+
+> **Correction.** An earlier version of this entry claimed a purge could never
+> find the departed user's files — that `request_account_deletion` deleted the
+> listing rows, taking the only link to their storage paths with them, and that
+> every day without a schema change made another deletion permanently
+> un-purgeable. **That was wrong, and it was wrong in the alarming direction.**
+> Reading the migration properly: it runs `UPDATE public.listings SET
+> status='deleted'`. The row survives, `publisher_user_id` is never nulled, and
+> `listing_media` is not touched at all. Nothing is lost, there is no race, and
+> no schema change is needed. There is also no `pg_cron` in this project and no
+> migration that hard-deletes from `public.listings`, so no background job can
+> break that chain either.
+
 `request_account_deletion()` soft-deletes and anonymises; the `auth.users` row
-and the account's uploaded files both remain. **The published privacy policy now
-promises this deletion works**, so the gap is a live commitment, not a nicety.
+and the uploaded files remain. The published privacy policy promises the
+deletion is real, so the sweep has to exist.
 
-**The part that was mis-estimated.** A purge cannot simply delete everything
-under a `<user-id>/` prefix, because that is not how storage is laid out.
-Listing images are keyed by **listing**, not by user —
-`listing-images/<listing_id>/<file>.jpg` — and `request_account_deletion` has
-already removed those listing rows by the time anything could read their ids.
-`account_deletion_requests` records only counts (`listings_removed`), not the
-ids. So after a deletion **nothing in the database knows which files belonged to
-the departed user**, and the files sit in a *public* bucket, still reachable by
-anyone holding the URL.
-
-That makes this three pieces of work, not one:
-
-- [ ] **Amend `request_account_deletion` to record what it is about to orphan** —
-      a `text[]` of storage prefixes (or listing ids) on
-      `account_deletion_requests`, written inside the same transaction that
-      deletes the listings. Without this the current queue rows are already
-      unrecoverable: their files can never be located again. **This is the
-      urgent half** — every day it is not done, another deletion becomes
-      permanently un-purgeable.
-- [ ] **Edge Function `purge_deleted_accounts`** (service role): for each row
-      older than 30 days with `purge_status = 'pending_auth_purge'`, remove the
-      recorded storage objects, call `auth.admin.deleteUser(id)`, set
-      `purge_status = 'purged'` + `purged_at`, and write an `audit_logs` row.
-      Follow the guard pattern in `supabase/functions/approve_listing/index.ts`.
-- [ ] **Schedule it** — `pg_cron` weekly through `pg_net` with the service key
-      from Vault, or a documented manual invoke in `HANDOVER.md`.
-- [ ] **Test with a throwaway account the owner creates and deletes** (Claude may
-      not create accounts). Verify afterwards: the `auth.users` row is gone, the
-      files 404, and the queue row says `purged`.
-
-Buckets in play: `listing-images` and `listing-videos` (public, listing-keyed),
-`agency-assets` (public) and `agency-documents` (private) — the last two are
-agency-keyed and only matter for a sole agency owner.
+- [x] `supabase/functions/purge_deleted_accounts` written and **deployed
+      (version 1)**. For each queue row older than `grace_days` (default 30) it
+      removes the storage objects found by joining `listing_media` to the user's
+      listings, deletes the `auth.users` row, and marks the request `purged`.
+      Files first, deliberately: if the auth delete fails the row stays pending
+      and the next run retries, whereas the other order would strand objects
+      with no owner to find them by.
+- [x] Gated on `users.suspend` checked as the **caller** — the same shape as
+      `approve_listing`. (There is no `users.manage`; the four rights are view /
+      approve / reject / suspend.)
+- [x] Guards verified against the live function: `GET` → `invalid_request`,
+      anon `POST` → `permission_denied`, no `Authorization` → 401 at the
+      gateway, `grace_days: 999` → 400 with the reason.
+- [x] Supports `{"dry_run": true}` so the first real use can be a report.
+- [ ] **The purge path itself is unexercised.** There are zero deletion requests
+      in production, and testing it needs an admin JWT plus a throwaway account
+      the owner creates and deletes. Do that before relying on it, and check
+      afterwards: the `auth.users` row gone, the files 404, the queue row
+      `purged`.
+- [ ] **Scheduling is deliberately not automated.** A GitHub workflow would need
+      the service-role key in CI, which ADR-0001 forbids; `pg_cron` reading the
+      key from Vault would work but the extension is not installed. Run it by
+      hand until one of those is decided — at zero requests that is
+      proportionate. Procedure in `HANDOVER.md`.
 
 ### A8 — Privacy policy live · S · **DONE 2026-09-03**
 - [x] Replaced all 8 `TODO(owner)` markers. Operator: **النجوم للتسويق العقاري**, a real-estate office in the Syrian Arab Republic; contact `m.hekmatfanari@gmail.com`; Syrian law governs.
