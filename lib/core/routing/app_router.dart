@@ -675,6 +675,14 @@ GoRouter buildAppRouter({
         builder: (context, state) => const SavedSearchesPage(),
       ),
       // ─── Phase 25 uplift v2 — role-aware dashboard ───
+      // No in-app caller, deliberately kept. `/dashboard` below is the entry
+      // point everything actually taps — it is role-aware and renders THIS
+      // page for an approved publisher. This route stays because it is the
+      // canonical publisher-dashboard URL, it is documented as such in
+      // specs/035 and specs/010, and it is the path prefix of
+      // `/publisher/dashboard/my-listings`, which is used. Removing it would
+      // break any deep link to it for no gain. (Noted during the route sweep
+      // of 2026-09-02.)
       GoRoute(
         path: AppRoutes.publisherDashboard,
         name: AppRouteNames.publisherDashboard,

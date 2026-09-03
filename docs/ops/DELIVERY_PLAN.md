@@ -136,13 +136,44 @@ password rather than a URI (my instructions asked for both at different times);
 over the 17 that had just been installed; and judging a Supabase dump by whether
 a vanilla Postgres can replay every statement was the wrong test.
 
-### A7 — Purge job for deleted accounts · M · no dependency
-`request_account_deletion()` soft-deletes; the `auth.users` row and the account's
-storage objects remain (`PENDING_MIGRATIONS.md` §2 "Still owed").
-- [ ] Edge Function `purge_deleted_accounts` (service role): for each `account_deletion_requests` row with `purge_status` pending and `requested_at` older than 30 days — delete the user's objects in every bucket (prefix = user id), `auth.admin.deleteUser(id)`, set `purge_status = 'purged'` + timestamp; write an `audit_logs` row.
-- [ ] Schedule: `pg_cron` weekly calling it through `pg_net` with the service key from Vault (same pattern as the existing cron jobs) — or, if that proves fiddly, a documented manual invoke in `HANDOVER.md`.
-- [ ] Test with a throwaway account the founder creates and deletes (Claude cannot create accounts).
-- Verified by: the throwaway's `auth.users` row and files are gone; the request row says `purged`.
+### A7 — Purge job for deleted accounts · **L, not M — re-scoped 2026-09-03**
+`request_account_deletion()` soft-deletes and anonymises; the `auth.users` row
+and the account's uploaded files both remain. **The published privacy policy now
+promises this deletion works**, so the gap is a live commitment, not a nicety.
+
+**The part that was mis-estimated.** A purge cannot simply delete everything
+under a `<user-id>/` prefix, because that is not how storage is laid out.
+Listing images are keyed by **listing**, not by user —
+`listing-images/<listing_id>/<file>.jpg` — and `request_account_deletion` has
+already removed those listing rows by the time anything could read their ids.
+`account_deletion_requests` records only counts (`listings_removed`), not the
+ids. So after a deletion **nothing in the database knows which files belonged to
+the departed user**, and the files sit in a *public* bucket, still reachable by
+anyone holding the URL.
+
+That makes this three pieces of work, not one:
+
+- [ ] **Amend `request_account_deletion` to record what it is about to orphan** —
+      a `text[]` of storage prefixes (or listing ids) on
+      `account_deletion_requests`, written inside the same transaction that
+      deletes the listings. Without this the current queue rows are already
+      unrecoverable: their files can never be located again. **This is the
+      urgent half** — every day it is not done, another deletion becomes
+      permanently un-purgeable.
+- [ ] **Edge Function `purge_deleted_accounts`** (service role): for each row
+      older than 30 days with `purge_status = 'pending_auth_purge'`, remove the
+      recorded storage objects, call `auth.admin.deleteUser(id)`, set
+      `purge_status = 'purged'` + `purged_at`, and write an `audit_logs` row.
+      Follow the guard pattern in `supabase/functions/approve_listing/index.ts`.
+- [ ] **Schedule it** — `pg_cron` weekly through `pg_net` with the service key
+      from Vault, or a documented manual invoke in `HANDOVER.md`.
+- [ ] **Test with a throwaway account the owner creates and deletes** (Claude may
+      not create accounts). Verify afterwards: the `auth.users` row is gone, the
+      files 404, and the queue row says `purged`.
+
+Buckets in play: `listing-images` and `listing-videos` (public, listing-keyed),
+`agency-assets` (public) and `agency-documents` (private) — the last two are
+agency-keyed and only matter for a sole agency owner.
 
 ### A8 — Privacy policy live · S · **DONE 2026-09-03**
 - [x] Replaced all 8 `TODO(owner)` markers. Operator: **النجوم للتسويق العقاري**, a real-estate office in the Syrian Arab Republic; contact `m.hekmatfanari@gmail.com`; Syrian law governs.
@@ -168,7 +199,7 @@ storage objects remain (`PENDING_MIGRATIONS.md` §2 "Still owed").
 - Verified by: the counts before/after appended to the script header.
 
 ### A12 — Small hygiene, bundle into any nearby PR · S
-- [ ] Remove the `/publisher/dashboard` route + its two constants (no caller; `/dashboard` renders the same page) — or leave it with a one-line comment saying so. Run `lint_public_routes` after.
+- [x] `/publisher/dashboard` — **kept, and now says why in the router.** It has no in-app caller, but it is the canonical publisher-dashboard URL, `specs/035` and `specs/010` both document it, and it is the path prefix of `/publisher/dashboard/my-listings`, which is used. Deleting it would break deep links for no gain.
 - [ ] `v1.0.0.md` row 171 (new icon + splash in light/dark on device) — observe it during A3 and close it.
 - [ ] Issue #39 — close it when A2 ticks its boxes.
 
