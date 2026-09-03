@@ -103,29 +103,38 @@ guest — that was the 2026-09-02 outage, do not tidy them up**);
 - [ ] Run the probe script again.
 - Verified by: the §3 block in `PENDING_MIGRATIONS.md` flipped to ✅ with the date and the verification lines; `v1.0.0.md` row 293 closed.
 
-### A6 — Database backups · M · **BUILT 2026-09-03, one owner step left**
-The Free plan includes **no automatic backups**; today a mistaken delete is
-permanent. `.github/workflows/db-backup.yml`:
+### A6 — Database backups · M · **WORKING 2026-09-03, one owner step left**
+The Free plan includes **no automatic backups**; before this, a mistaken delete
+was permanent. `.github/workflows/db-backup.yml`, verified green on
+[run 33767219231](https://github.com/MHekmatF/alnujom/actions/runs/33767219231):
 
-- [x] Weekly (Sundays 03:00 UTC) plus `workflow_dispatch`. Installs the Postgres
-      **17** client from PGDG — Supabase runs 17.6 and an older `pg_dump`
-      refuses a newer server.
-- [x] Rejects the wrong connection string with a plain message: the transaction
-      pooler (`:6543`) cannot run `pg_dump`, and the direct `db.<ref>` host is
-      IPv6-only where GitHub runners have none.
-- [x] **Restores the dump it just took** into a `postgres:17` service container
-      and asserts at least 40 base tables come back (production has 43). A
-      backup nobody has restored is a guess.
-- [x] Refuses to archive anything unless `BACKUP_PASSPHRASE` exists. **This
-      repository is public and its artifacts are downloadable by anyone**, and a
-      full dump carries `auth.users` password hashes and every real phone
-      number. With the secret it uploads AES-256-encrypted; without it the dump
-      and the drill still run and only the upload is skipped.
+- [x] Weekly (Sundays 03:00 UTC) plus `workflow_dispatch`.
+- [x] **Dump succeeds: 1,022,411 bytes**, taken with `pg_dump 17.11` through the
+      session pooler at `aws-1-us-east-2.pooler.supabase.com`.
+- [x] **The archive lists data for all 43 public tables** — exactly the number
+      production has. This is the primary assertion: `pg_restore --list` reads
+      the file directly, so it catches a truncated or corrupt dump and a missing
+      table without needing any Supabase furniture.
+- [x] The secondary restore drill rebuilds 36 of 43 tables in a throwaway
+      `postgres:17`. The gap is expected and is **not** a bad backup: `pgsodium`,
+      `supabase_vault` and `pg_net` cannot be installed in a plain Postgres, so
+      some DDL never replays. It fails only on a collapse (under 30).
+- [x] Refuses to archive anything while `BACKUP_PASSPHRASE` is unset — confirmed
+      on this run, which warned and uploaded nothing. **This repository is public
+      and its artifacts are downloadable by anyone**, and a full dump carries
+      `auth.users` password hashes and every real phone number.
 - [ ] **Owner: create `BACKUP_PASSPHRASE`** (a long random passphrase, kept in a
-      password manager — lose it and the backups are unreadable). Until then
-      nothing is being kept.
+      password manager — lose it and the backups are unreadable). Until then the
+      job proves a backup is possible every week but keeps no file.
 - [ ] Then tick the `HANDOVER.md` section 11 "Confirm backups and do one restore
       drill" box with the run URL.
+
+Four failed runs got here, each for its own reason, all recorded in the
+workflow's comments so they are not rediscovered: the secret held a bare
+password rather than a URI (my instructions asked for both at different times);
+`/usr/bin/pg_dump` is Debian's `pg_wrapper` and picked the runner's Postgres 16
+over the 17 that had just been installed; and judging a Supabase dump by whether
+a vanilla Postgres can replay every statement was the wrong test.
 
 ### A7 — Purge job for deleted accounts · M · no dependency
 `request_account_deletion()` soft-deletes; the `auth.users` row and the account's
