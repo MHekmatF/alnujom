@@ -124,9 +124,13 @@ class _RequestCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final dateStr = DateFormat.yMMMd().add_Hm().format(
-      request.createdAt.toLocal(),
-    );
+    // Pass the locale. Without it `intl` falls back to en_US and this one card
+    // printed "Jun 5, 2026 02:03" in the middle of an otherwise Arabic screen —
+    // seen on the device, 2026-09-03. Every other DateFormat call in the app
+    // already passes it; this was the only one that did not.
+    final dateStr = DateFormat.yMMMd(
+      Localizations.localeOf(context).toString(),
+    ).add_Hm().format(request.createdAt.toLocal());
 
     return AppSurface(
       radius: AppRadii.lg,

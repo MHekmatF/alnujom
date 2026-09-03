@@ -1,6 +1,6 @@
 # Privacy Policy — AlNujom
 
-**Last updated:** 2026-09-01
+**Last updated:** 2026-09-03
 **Applies to:** the **AlNujom** Android app (`com.alnujom.app`) — a real-estate marketplace for Syria.
 **Arabic version:** [privacy-policy.md](privacy-policy.md). The Arabic version is authoritative if the two differ.
 
@@ -8,7 +8,7 @@
 
 ## 1. Who we are
 
-`TODO(owner): the registered legal name of the entity that operates the app, and its country of registration.`
+**Al Nujoom for Real Estate Marketing** (النجوم للتسويق العقاري) — a real-estate office in the Syrian Arab Republic, which owns and operates the AlNujom app.
 
 We operate AlNujom, an app that lets property owners and real-estate agencies list properties, and lets buyers browse listings and contact the people behind them.
 
@@ -164,7 +164,7 @@ Crash reporting **only works if it was enabled when the app build was made**. If
 
 **Where:** on **Supabase** infrastructure. Per the project record, the project is provisioned in the `us-east-2` region (US East), meaning your data is processed and stored outside Syria.
 
-`TODO(owner): confirm the hosting country and the governing law, and name the legal entity responsible as data controller.`
+**The party responsible for your data** is Al Nujoom for Real Estate Marketing, in the Syrian Arab Republic. This policy, and anything arising from it, is governed by Syrian law — even though the data itself is stored on Supabase infrastructure in the United States, as described above.
 
 **How long:**
 
@@ -234,8 +234,8 @@ We may update this policy. The last-updated date is at the top of the page, and 
 
 ## 14. How to contact us
 
-`TODO(owner): the contact email address for privacy questions and account-deletion requests. Google Play requires this to be a working address that is actually monitored.`
+**Email:** m.hekmatfanari@gmail.com
 
-`TODO(owner): the legal entity name and address.`
+**Legal entity:** Al Nujoom for Real Estate Marketing — Syrian Arab Republic.
 
 For privacy questions or complaints, or to request deletion of your account when you cannot reach the app, write to the address above.
