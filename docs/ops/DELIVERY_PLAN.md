@@ -115,19 +115,16 @@ storage objects remain (`PENDING_MIGRATIONS.md` §2 "Still owed").
 - [ ] Test with a throwaway account the founder creates and deletes (Claude cannot create accounts).
 - Verified by: the throwaway's `auth.users` row and files are gone; the request row says `purged`.
 
-### A8 — Privacy policy live · S · **blocked on B4**
-- [ ] Replace the 8 `TODO(owner)` markers in `docs/legal/privacy-policy.md` and `.en.md` with the founder's answers.
-- [ ] Render both to HTML into `docs/legal/site/` (Arabic at `index.html`, English at `en.html`); enable GitHub Pages on the repo for that folder — **publishing is outward-facing: do it only after the founder's explicit yes in B4**.
-- [ ] Set `app_settings.privacy_url` and `terms_url` (the policy covers both until a separate terms page exists) via SQL; confirm the About page shows the links and hides nothing else.
-- Verified by: the URL opens from a phone outside the app with no login; the About screen shows the two rows.
+### A8 — Privacy policy live · S · **DONE 2026-09-03**
+- [x] Replaced all 8 `TODO(owner)` markers. Operator: **النجوم للتسويق العقاري**, a real-estate office in the Syrian Arab Republic; contact `m.hekmatfanari@gmail.com`; Syrian law governs.
+- [x] `tool/build_privacy_site.py` renders both files to `docs/legal/site/`, mirrored to the `gh-pages` branch. It refuses to render a file that still holds a placeholder.
+- [x] Live and checked with `curl`: **<https://mhekmatf.github.io/alnujom/>** (ar, authoritative) and **<https://mhekmatf.github.io/alnujom/en.html>** — both 200, no login, no placeholders.
+- [x] `app_settings.privacy_url` set; the About page now shows an **الأحكام القانونية** section. `terms_url` deliberately left null — a privacy policy is not terms of service, and the About page correctly hides what is unset. **Terms of service is a separate document nobody has written.**
 
-### A9 — Settings the founder answers, Claude applies · S · ✅ DONE 2026-09-02
-- [x] `default_language` `"en"` → `"ar"`. Applied.
-- [x] `support_contact` → `{phone: "+963991883342", whatsapp: "+963991883342", email: "m.hekmatfanari@gmail.com"}`. Applied.
-- [x] Verified on the Infinix, release build `1.1.0+2`: **حول التطبيق والدعم** shows exactly three rows — اتصل بنا, واتساب, راسلنا عبر البريد — with those values, and no empty or broken row where `privacy_url` / `terms_url` are still null. That is the "unset ones stay hidden" half of issue #39's first box.
-- [ ] Record the values in `HANDOVER.md` §8 once they are the *final* ones (see the warning below).
-- [ ] **⚠️ These three are the founder's personal contacts, given as placeholders (his words: "بس هدول تجريبيات يعني ذكرني نغيرن بالاخير"). Ask for the real support channels before launch and re-run the same update.** This is a launch blocker in the same sense as the demo listings: shipping with them means real users phoning his personal number.
-- [ ] The remaining half of #39's first box (set a privacy/terms URL → the links appear) closes with **A8**.
+### A9 — Settings the founder answers, Claude applies · S · **DONE 2026-09-03**
+- [x] `default_language` → `"ar"`.
+- [x] `support_contact` → phone and WhatsApp `+963991883342`, email `m.hekmatfanari@gmail.com`. Verified on the device: all three rows render on the About page. **The owner says these are provisional — remind him to swap them for business details before launch** (they also appear in the published privacy policy).
+- [ ] Record the new live values in `HANDOVER.md` §8.
 
 ### A10 — Version manifest · S · **blocked on A3 + B5 (the Telegram post URL)**
 - [ ] Write `latest.json` per `docs/release/version-manifest.example.json` with `latest_version: "1.1.1"`, `latest_build: 3`, `telegram_url` = the post, Arabic + English notes from A3.
