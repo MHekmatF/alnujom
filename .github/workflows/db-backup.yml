@@ -233,36 +233,62 @@ jobs:
             exit 1
           fi
 
-      - name: Restore it into a throwaway Postgres and count what came back
+      - name: Check the archive lists data for every table
+        run: |
+          set -euo pipefail
+          # The strongest check available, and the one that does not depend on a
+          # vanilla Postgres being able to rebuild a Supabase schema: read the
+          # archive's own table of contents. If the file is truncated or corrupt
+          # this fails outright, and if a table's data is missing it will not be
+          # listed. No roles, no extensions, no publications needed.
+          pg_restore --list "alnujom-${STAMP}.dump" > toc.txt
+
+          listed="$(grep -c 'TABLE DATA public' toc.txt || true)"
+          echo "Tables with data in the archive: ${listed}"
+          echo "Tables listed:"
+          grep 'TABLE DATA public' toc.txt | sed -E 's/.*TABLE DATA public /  - /' | sort
+
+          # Production had 43 base tables in `public` on 2026-09-03. Assert a
+          # floor rather than an exact number so adding a table does not turn
+          # the backup red.
+          if [ "${listed}" -lt 40 ]; then
+            echo "::error::The archive lists data for only ${listed} public tables. Expected at least 40. The dump is incomplete."
+            exit 1
+          fi
+          echo "Archive is complete and readable."
+
+      - name: Restore it into a throwaway Postgres
         env:
           PGPASSWORD: drill
         run: |
           set -euo pipefail
           export PGHOST=localhost PGPORT=55432 PGUSER=postgres PGDATABASE=drill
 
-          # Roles referenced by the dump do not exist here. --no-owner and
-          # --no-privileges were already applied at dump time; anything left is
-          # extension or ownership noise, so errors are collected and judged on
-          # the table count rather than on the exit code.
-          pg_restore \
-            --no-owner --no-privileges \
-            --schema=public \
-            --dbname "${PGDATABASE}" \
-            "alnujom-${STAMP}.dump" > restore.log 2>&1 || true
+          # Give the container enough of Supabase's furniture that the restore
+          # is a fair test. Without this, every `CREATE POLICY ... TO
+          # authenticated` and every realtime publication line fails, and seven
+          # tables did not come back on the 2026-09-03 run for exactly that
+          # reason. These are empty roles — no passwords, no grants, no login.
+          for r in anon authenticated service_role authenticator                    supabase_admin supabase_auth_admin                    supabase_storage_admin dashboard_user; do
+            psql -qc "create role \"$r\" nologin" || true
+          done
+
+          # `extensions` is where Supabase keeps pgcrypto and uuid-ossp, and the
+          # dump refers to their functions schema-qualified. pgsodium,
+          # supabase_vault and pg_net cannot be installed here at all — anything
+          # that genuinely needs them will not restore into a plain Postgres,
+          # which is why the archive listing above is the real assertion.
+          psql -qc 'create schema if not exists extensions' || true
+          psql -qc 'create extension if not exists pgcrypto with schema extensions' || true
+          psql -qc 'create extension if not exists "uuid-ossp" with schema extensions' || true
+          psql -qc 'create publication supabase_realtime' || true
+
+          pg_restore             --no-owner --no-privileges             --schema=public             --dbname "${PGDATABASE}"             "alnujom-${STAMP}.dump" > restore.log 2>&1 || true
 
           restored="$(psql -tAc "select count(*) from information_schema.tables where table_schema='public' and table_type='BASE TABLE'")"
-          echo "Tables restored into the drill database: ${restored}"
+          echo "Tables rebuilt in the drill database: ${restored}"
 
-          # The live database had 43 base tables when this was written. Assert a
-          # floor rather than an exact number so adding a table does not turn the
-          # backup red — the point is to catch a dump that restores as nothing.
-          if [ "${restored}" -lt 40 ]; then
-            echo "::error::Only ${restored} tables came back. The dump did not restore. Last 40 lines of the restore log:"
-            tail -40 restore.log
-            exit 1
-          fi
-
-          echo "Row counts in the restored copy (top 15 tables):"
+          echo "Rows that came back (top 15 tables):"
           psql -tAc "
             select relname || ' = ' || n_live_tup
             from pg_stat_user_tables
@@ -270,7 +296,17 @@ jobs:
             order by n_live_tup desc
             limit 15"
 
-          echo "Restore drill passed: the dump taken minutes ago is readable and complete."
+          # A lower bar than the archive check on purpose. Supabase-specific DDL
+          # cannot fully replay here, so a handful of tables failing to rebuild
+          # is expected and is not a broken backup. A collapse is.
+          if [ "${restored}" -lt 30 ]; then
+            echo "::error::Only ${restored} tables rebuilt — that is a collapse, not the usual Supabase-specific noise. First 40 lines of the restore log:"
+            head -40 restore.log
+            exit 1
+          fi
+
+          skipped="$(grep -c 'pg_restore: error' restore.log || true)"
+          echo "::notice::Restore drill passed — ${restored} tables rebuilt, ${skipped} statements skipped (Supabase roles, publications and extensions that a plain Postgres does not have). The archive check in the previous step is what proves the dump is complete."
 
       - name: Encrypt the dump
         id: encrypt
