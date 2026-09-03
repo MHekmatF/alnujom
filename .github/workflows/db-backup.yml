@@ -35,10 +35,13 @@
 #
 #   | Secret name        | Value                                                |
 #   |--------------------|------------------------------------------------------|
-#   | SUPABASE_DB_URL    | Supabase -> Project Settings -> Database ->          |
-#   |                    | Connection string -> **Session pooler** (URI). It    |
-#   |                    | ends in **:5432/postgres**. Paste it whole, with the |
-#   |                    | password in it.                                      |
+#   | SUPABASE_DB_URL    | Either the **Session pooler** connection string     |
+#   |                    | (Supabase -> Project Settings -> Database ->        |
+#   |                    | Connection string -> Session pooler; ends in       |
+#   |                    | `:5432/postgres`), **or** just the database        |
+#   |                    | password on its own — the job completes a bare      |
+#   |                    | password into a URI using the project reference     |
+#   |                    | from `SUPABASE_URL`.                                |
 #   | BACKUP_PASSPHRASE  | A long random passphrase you keep in your password    |
 #   |                    | manager. **Lose it and the backups are unreadable.** |
 #
@@ -129,49 +132,81 @@ jobs:
           pg_dump --version
           pg_restore --version
 
-      - name: Check the connection string before using it
+      - name: Dump the database
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
         run: |
           set -euo pipefail
+
           if [ -z "${SUPABASE_DB_URL:-}" ]; then
             echo "::error::SUPABASE_DB_URL is not set. Create it under Settings -> Secrets and variables -> Actions (see this file's header)."
             exit 1
           fi
-          # Never echo the URL itself — it carries the database password.
+
+          # The secret may hold either shape, because "the database password" and
+          # "the session-pooler URI" both got asked for at different times:
+          #
+          #   a) a full postgresql://... connection string, or
+          #   b) just the database password.
+          #
+          # (b) is completed here. The username Supabase's pooler expects is
+          # `postgres.<project-ref>`, and the ref is the first label of
+          # SUPABASE_URL, which is already a secret in this repository — so
+          # nothing new has to be pasted. The regional pooler hostname cannot be
+          # derived: `aws-0-us-east-2` and `aws-1-us-east-2` both exist and both
+          # resolve, and only the project's own one will authenticate. So each
+          # candidate is tried until one answers, and the winner is printed so
+          # this list can be trimmed later.
+          #
+          # The URI is built and used inside THIS step only. It is never written
+          # to $GITHUB_ENV or a file, so the password does not outlive the step.
           case "${SUPABASE_DB_URL}" in
             *:6543/*)
-              echo "::error::That is the TRANSACTION pooler (port 6543). pg_dump cannot use it. Replace the secret with the SESSION pooler string, which ends in :5432/postgres."
+              echo "::error::That is the TRANSACTION pooler (port 6543), which cannot run pg_dump. Replace the secret with the SESSION pooler string (it ends in :5432/postgres), or with just the database password."
               exit 1 ;;
             *db.*.supabase.co*)
-              echo "::error::That is the direct database host, which is IPv6-only. GitHub runners have no IPv6. Replace the secret with the SESSION pooler string."
+              echo "::error::That is the direct database host, which is IPv6-only, and GitHub runners have no IPv6. Replace the secret with the SESSION pooler string, or with just the database password."
               exit 1 ;;
             postgresql://*|postgres://*)
-              echo "Connection string looks like a pooler URI. Good." ;;
+              echo "Secret holds a connection URI. Using it as given."
+              DB_URI="${SUPABASE_DB_URL}" ;;
             *)
-              echo "::error::SUPABASE_DB_URL does not look like a postgresql:// URI."
-              exit 1 ;;
+              echo "Secret does not look like a URI, so treating it as the database password and building the pooler URI."
+              if [ -z "${SUPABASE_URL:-}" ]; then
+                echo "::error::Deriving the connection string needs SUPABASE_URL as well (it supplies the project reference). Either add that secret, or replace SUPABASE_DB_URL with the full session-pooler URI."
+                exit 1
+              fi
+              host_part="${SUPABASE_URL#*://}"
+              ref="${host_part%%.*}"
+              echo "Project reference taken from SUPABASE_URL: ${ref}"
+              DB_URI=""
+              for pooler in                 aws-0-us-east-2 aws-1-us-east-2                 aws-0-us-east-1 aws-1-us-east-1                 aws-0-eu-central-1 aws-1-eu-central-1
+              do
+                candidate="postgresql://postgres.${ref}:${SUPABASE_DB_URL}@${pooler}.pooler.supabase.com:5432/postgres"
+                printf 'Trying %s ... ' "${pooler}"
+                if psql "${candidate}?connect_timeout=10" -tAc 'select 1' > /dev/null 2>&1; then
+                  echo "connected."
+                  DB_URI="${candidate}"
+                  echo "::notice::Pooler host for this project is ${pooler}.pooler.supabase.com — the candidate list in db-backup.yml can be trimmed to just this one."
+                  break
+                fi
+                echo "no."
+              done
+              if [ -z "${DB_URI}" ]; then
+                echo "::error::None of the candidate pooler hosts accepted the password. Either the password is wrong, or this project sits in a region not in the list. Fix: Supabase -> Project Settings -> Database -> Connection string -> Session pooler, copy the whole URI, and paste that into SUPABASE_DB_URL instead of the bare password."
+                exit 1
+              fi ;;
           esac
 
-      - name: Dump the database
-        env:
-          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
-        run: |
-          set -euo pipefail
           stamp="$(date -u +%Y-%m-%d)"
           echo "STAMP=${stamp}" >> "$GITHUB_ENV"
 
           # Custom format (-Fc): compressed, and pg_restore can pull a single
-          # schema out of it, which is what the recovery path above relies on.
-          # --no-owner / --no-privileges drop the Supabase-specific role grants
-          # that a restore target will not have.
-          pg_dump \
-            --format=custom \
-            --no-owner \
-            --no-privileges \
-            --verbose \
-            --file "alnujom-${stamp}.dump" \
-            "${SUPABASE_DB_URL}" 2> dump.log || {
+          # schema out of it, which is what the recovery path in the header
+          # relies on. --no-owner / --no-privileges drop the Supabase-specific
+          # role grants that a restore target will not have.
+          pg_dump             --format=custom             --no-owner             --no-privileges             --verbose             --file "alnujom-${stamp}.dump"             "${DB_URI}" 2> dump.log || {
               echo "::error::pg_dump failed. Last 40 lines follow (the connection string is never printed)."
               tail -40 dump.log
               exit 1
@@ -179,7 +214,7 @@ jobs:
 
           bytes="$(stat -c%s "alnujom-${stamp}.dump")"
           echo "Dump written: ${bytes} bytes"
-          # A dump of this database is ~megabytes. Anything tiny means it failed
+          # A dump of this database is megabytes. Anything tiny means it failed
           # quietly and we would be archiving an empty file.
           if [ "${bytes}" -lt 100000 ]; then
             echo "::error::The dump is only ${bytes} bytes — far too small to be this database. Treating it as a failure rather than archiving it."
