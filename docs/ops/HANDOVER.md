@@ -36,6 +36,7 @@ held back, and one of those needs a decision from you.
 5. [Server functions (Edge Functions)](#5-server-functions-edge-functions)
 6. [Push notifications — how they work and how to fix them](#6-push-notifications--how-they-work-and-how-to-fix-them)
 7. [Shipping a new version](#7-shipping-a-new-version)
+7b. [Finishing an account deletion](#7b-finishing-an-account-deletion)
 8. [Maintenance mode — taking the app down safely](#8-maintenance-mode--taking-the-app-down-safely)
 9. [The project is paused — how to restore it](#9-the-project-is-paused--how-to-restore-it)
 10. [The keep-alive robot](#10-the-keep-alive-robot)
@@ -567,6 +568,55 @@ Tap **Update** and confirm Telegram opens on the right post.
 
 Manifest **last**. If you update `latest.json` before the APK is on Telegram,
 every user is prompted to update and the Update button takes them to nothing.
+
+---
+
+## 7b. Finishing an account deletion
+
+When someone taps **Delete my account**, the app does most of the work at once:
+their name, phone and email are wiped, their listings drop out of search and the
+map, and their chats and saved items are removed. Two things are deliberately
+left behind for a while:
+
+- the **login row** itself, and
+- the **photos** they had uploaded.
+
+That is on purpose. People delete accounts by mistake, and this is the only
+window in which it can be undone. After **30 days** the rest should go.
+
+**How to finish it.** Supabase dashboard -> **Edge Functions** ->
+`purge_deleted_accounts` -> **Invoke**, with your own admin login. Send this
+first, to see what *would* happen without changing anything:
+
+```json
+{ "dry_run": true }
+```
+
+It answers with how many accounts are due and how many files each one has. If
+that looks right, send it again without the dry run:
+
+```json
+{}
+```
+
+It then deletes the photos, removes the login row, and marks each request done.
+The reply lists what it did per account.
+
+**When to run it:** once a month is plenty. There is nothing to do until someone
+actually deletes an account — with an empty queue the function simply reports
+zero and changes nothing.
+
+**Who can run it:** only an account holding the **suspend users** permission.
+Anyone else gets "permission denied", and so does a request with no login at
+all.
+
+> Not on a timer, on purpose. Automating it would mean putting the master key
+> into GitHub, which the project's own rule forbids
+> (`docs/decisions/0001-secrets-and-pii-storage.md`). Running it by hand once a
+> month is the honest trade at this size. **The purge itself has never been
+> exercised on a real account** — do it once with a throwaway account before
+> trusting it, and check afterwards that the photos give a "not found" and the
+> request shows as purged.
 
 ---
 
