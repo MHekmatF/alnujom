@@ -173,10 +173,7 @@ class _Hero extends StatelessWidget {
 
     final image = AspectRatio(
       aspectRatio: 16 / 10,
-      child: AppNetworkImage(
-        url: item.isAvailable ? item.mainImagePath : null,
-        semanticLabel: l10n.image_unavailable,
-      ),
+      child: AppNetworkImage(url: item.isAvailable ? item.mainImagePath : null),
     );
 
     return Stack(

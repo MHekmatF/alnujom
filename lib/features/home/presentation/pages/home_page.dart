@@ -459,6 +459,7 @@ class _HomeCrown extends StatelessWidget {
               Builder(
                 builder: (context) => _CrownAction(
                   icon: Icons.menu,
+                  label: MaterialLocalizations.of(context).openAppDrawerTooltip,
                   onTap: () => Scaffold.of(context).openDrawer(),
                 ),
               ),
@@ -489,6 +490,7 @@ class _HomeCrown extends StatelessWidget {
               // form with no idea why. Ask, in place, instead.
               _CrownAction(
                 icon: Icons.chat_bubble_outline,
+                label: l10n.nav_messages,
                 onTap: () => context.read<AuthBloc>().state is Authenticated
                     ? context.go(AppRoutes.chat)
                     : showGuestSignInSheet(context, gate: GuestGate.messages),
@@ -608,29 +610,45 @@ class _HomeCrown extends StatelessWidget {
 
 /// A 42px circular action button on the blue crown (white icon).
 class _CrownAction extends StatelessWidget {
-  const _CrownAction({required this.icon, required this.onTap, this.badge});
+  const _CrownAction({
+    required this.icon,
+    required this.onTap,
+    required this.label,
+    this.badge,
+  });
 
   final IconData icon;
   final VoidCallback onTap;
+
+  /// Spoken name of the control. These are bare glyphs on a coloured bar —
+  /// without this the whole crown reads as three unnamed buttons to a screen
+  /// reader, which `uiautomator` confirmed on the device (2026-09-03: the app
+  /// bar contributed no labelled node at all). Required, so a fourth action
+  /// cannot be added without one.
+  final String label;
   final Widget? badge;
 
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    return InkWell(
-      onTap: onTap,
-      customBorder: const CircleBorder(),
-      child: SizedBox(
-        width: 42,
-        height: 42,
-        child: Stack(
-          alignment: Alignment.center,
-          clipBehavior: Clip.none,
-          children: [
-            Icon(icon, size: 24, color: colors.onBrandHeader),
-            if (badge != null)
-              PositionedDirectional(top: 5, end: 5, child: badge!),
-          ],
+    return Semantics(
+      button: true,
+      label: label,
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const CircleBorder(),
+        child: SizedBox(
+          width: 42,
+          height: 42,
+          child: Stack(
+            alignment: Alignment.center,
+            clipBehavior: Clip.none,
+            children: [
+              Icon(icon, size: 24, color: colors.onBrandHeader),
+              if (badge != null)
+                PositionedDirectional(top: 5, end: 5, child: badge!),
+            ],
+          ),
         ),
       ),
     );
@@ -651,6 +669,7 @@ class _CrownNotificationAction extends StatelessWidget {
         builder: (context, state) {
           return _CrownAction(
             icon: Icons.notifications_none,
+            label: AppLocalizations.of(context)!.notification_bell_tooltip,
             onTap: onTap,
             badge: state.count > 0 ? _CountBadge(count: state.count) : null,
           );

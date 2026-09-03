@@ -163,10 +163,7 @@ class _RailCard extends StatelessWidget {
                   children: [
                     SizedBox(
                       height: 120,
-                      child: AppNetworkImage(
-                        url: card.mainImageUrl,
-                        semanticLabel: l10n.image_unavailable,
-                      ),
+                      child: AppNetworkImage(url: card.mainImageUrl),
                     ),
                     PositionedDirectional(
                       top: AppSpacing.sm,

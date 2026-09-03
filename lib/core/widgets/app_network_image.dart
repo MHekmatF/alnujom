@@ -5,6 +5,7 @@ import '../settings/lite_mode.dart';
 import '../theme/colors.dart';
 import '../theme/motion.dart';
 import '../theme/spacing.dart';
+import '../../l10n/app_localizations.dart';
 import 'loading_state.dart';
 import 'reduce_motion.dart';
 
@@ -100,8 +101,18 @@ class AppNetworkImage extends StatelessWidget {
       );
     }
 
-    if (semanticLabel != null) {
-      result = Semantics(label: semanticLabel, image: true, child: result);
+    // The label describes what the image SHOWS. When there is nothing to show —
+    // no url, or the fetch failed — say so instead. Every caller used to pass
+    // "image unavailable" as the label outright, so a photograph that loaded
+    // perfectly well still announced itself as missing to a screen reader
+    // (found on the device, 2026-09-03). Deciding it here keeps the two cases
+    // from drifting apart again.
+    final hasImage = url != null && url!.isNotEmpty;
+    final label = hasImage
+        ? semanticLabel
+        : AppLocalizations.of(context)?.image_unavailable;
+    if (label != null) {
+      result = Semantics(label: label, image: true, child: result);
     }
     if (heroTag != null) {
       result = Hero(tag: heroTag!, child: result);
