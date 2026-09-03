@@ -497,6 +497,23 @@ flutter build apk --release \
 Before you hand the file out, **install it on a real phone and open it.** Check
 the icon and splash look right, log in, and browse.
 
+> **If the build suddenly fails with "no versions of androidx.test:rules are
+> available"** — nothing is broken and nothing needs installing. `dl.google.com`,
+> which hosts Google's Maven repository, answers **404 for every path from this
+> network**. Two of the app's test dependencies are requested as open ranges
+> (`1.2+`, `3.3+`), and a range has to be re-checked against the repository once
+> a day. When that check cannot be made, Gradle fails the whole build rather
+> than using the copy it already has.
+>
+> `android/build.gradle.kts` now pins those two to the exact versions on disk, so
+> the question is never asked. If it ever comes back, the fix is the same shape:
+> find the range in the error, pin it to a version already in
+> `~/.gradle/caches/modules-2/files-2.1/`.
+>
+> The wider point: **this machine cannot reach Google's Maven.** A fresh build
+> machine will need one build from a network that can, or a copy of the
+> `~/.gradle` folder from this one.
+
 ### Step 2 — Post it to Telegram
 
 Upload the APK to the Telegram channel as a **file attachment**, and copy the
