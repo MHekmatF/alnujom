@@ -155,3 +155,65 @@ back:
   an image is the expected affordance. Product call, not a defect.
 - Month names come out as `يونيو`/`سبتمبر` (standard `ar` locale) rather than the
   Levantine `حزيران`/`أيلول`. A custom pattern would change it everywhere.
+
+---
+
+# Later the same day — the two checks that needed the phone unlocked
+
+Both are boxes from issue #39. The phone had locked itself during an earlier
+attempt and a PIN is not something Claude may enter; the owner unlocked it.
+
+## Offline cold start — PASS
+
+Radios off (`svc wifi disable` + `svc data disable`, confirmed by
+`ping: Network is unreachable`), then force-stop and cold launch.
+
+The app crossed the splash and settled on the **sign-in screen**. Not the
+maintenance screen, no crash, process alive throughout. That is what the
+requirement asks for: the maintenance gate fails **open** when it cannot reach
+the server, rather than locking everyone out on a bad connection.
+
+**Worth knowing, though it is not a failure.** A signed-in user who opens the app
+with no network is shown the sign-in screen, because the session cannot be
+confirmed against Supabase. **The session is not destroyed** — verified
+immediately afterwards: radios back on, cold launch, and the app went straight
+to the signed-in Home with the publish FAB. So nothing is lost, but on a flaky
+connection someone may believe they have been logged out and re-enter their
+password for no reason. Telling "no session" apart from "cannot reach the
+server" is a change in the auth bootstrap, not a one-line fix, so it is recorded
+here rather than attempted blind.
+
+The network was restored in a `finally` block so a failure mid-test could not
+leave the phone offline, and connectivity was confirmed afterwards.
+
+## Light / dark × Arabic / English — PASS
+
+All four rendered correctly, and the layout genuinely flips rather than merely
+translating: in English the drawer button moves to the left of the app bar and
+the bell to the right (which is how the first attempt mis-tapped — the tap
+coordinates from the Arabic run hit the bell instead).
+
+| Combination | Result |
+|---|---|
+| Light · Arabic | Correct (the whole sweep above ran in it) |
+| Dark · Arabic | Dark navy ground, readable text, tinted category tiles, light-on-dark FAB |
+| Dark · English | Correct, fully LTR |
+| Light · English | Correct, fully LTR |
+
+Settings were put back as found: theme **تلقائي**, language **العربية**,
+currency **ليرة سورية**, data saver off.
+
+**One content note, not a defect.** The sponsored banner stays Arabic in English
+mode — its caption localises but the artwork is an uploaded image. An English
+creative would have to be uploaded separately. Low priority for an Arabic-first
+app, but worth knowing before showing the English build to anyone.
+
+## Issue #39 — three of four boxes now closed
+
+- [x] About page shows only the channels that are set, and the privacy link.
+- [x] Offline launch fails open.
+- [x] Four-combination render.
+- [ ] **Forward-only defaults for a new account** — needs registering a fresh
+      account, which Claude may not do. One sign-up by the owner would settle
+      it: a new account should come up in Arabic with SYP, and a new listing
+      should pre-select "approximate" location and a public publisher name.
