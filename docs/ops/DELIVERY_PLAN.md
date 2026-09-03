@@ -66,7 +66,8 @@ The one big hole in the QA record. Record:
 - [x] Session survives a cold start and an `install -r`.
 - [ ] **Second account on the `Pixel_8_Pro` AVD** for the two-way work: chat optimistic send + realtime inbound, a viewing request and its confirmation, a push notification landing on the other device as a heads-up banner.
 - [ ] Create a listing end to end with photos → approve → stay-live edit → revision. **Hold until A11**: it writes real rows into a database whose demo content is about to be deleted.
-- [ ] The remaining three boxes in issue #39 (offline fail-open launch, four-combination light/dark × ar/en render, forward-only defaults for a new account). The About-page box is done — see A9.
+- [x] Issue #39: offline fail-open launch **PASS** (opens to sign-in, not the maintenance screen, no crash; the session survives and returns on reconnect) and the four-combination light/dark × ar/en render **PASS**. With the About-page box from A9 that is three of four.
+- [ ] Issue #39's last box — forward-only defaults for a **new** account. Needs a sign-up, which Claude may not perform. One registration by the owner settles it.
 - [ ] Super-admin role editor, currency history, governorate → city admin pages — reachable only by path interpolation, so confirm they open.
 
 ### A3 — Release build `1.1.1+3` · S · after A2
