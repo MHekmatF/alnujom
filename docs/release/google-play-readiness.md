@@ -243,8 +243,8 @@ the app is Arabic-first) and add English as a second language.
 | Contact email | Public on the listing |
 
 The branding assets already exist — the Phase 033 "orbit" identity in
-`assets/branding/` (`app_icon_orbit.png`, `icon_fg_orbit.png`,
-`splash_orbit.png`) — so the icon can be derived from what is already shipping.
+`branding/` (`app_icon_orbit.png`, `icon_fg_orbit.png`, `splash_orbit.png`)
+— so the icon can be derived from art the project already holds.
 
 ---
 

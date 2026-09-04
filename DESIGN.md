@@ -16,7 +16,7 @@ verification are central. WCAG-AA throughout (`color_scheme_contrast_test`).
 The shipped identity (PRs #72/#73) is the **N-logo**: a deep-blue "N" inside a
 ring of stars over a skyline arc, with the Arabic wordmark **النّجوم** and the
 English line *Al Nujoom Real Estate Marketing*. Assets:
-`assets/branding/icon.png` (adaptive-icon foreground) + `icon_legacy.png`;
+`branding/icon.png` (adaptive-icon foreground) + `icon_legacy.png`;
 `splash_full.png` (splash, light+dark); `logo_mark.png` (emblem only) and
 `logo_full.png` (full lockup — rendered by the in-app `AppLogo` on
 login/register/reset, sized by width). A logo is never mirrored for RTL.
