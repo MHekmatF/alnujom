@@ -1,7 +1,7 @@
 name: alnujom
 description: AlNujom Android app foundation.
 publish_to: 'none'
-version: 1.1.0+2
+version: 1.1.1+3
 
 environment:
   sdk: ^3.9.0
@@ -97,6 +97,11 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/watermark/
+    # Only the three files the app loads at runtime live here — the logo, the
+    # brand mark and the in-app splash. The launcher-icon and native-splash
+    # source art lives in `branding/` at the repo root instead: a declared
+    # asset directory ships **every** file in it, and those ten were 2.9 MB of
+    # build-time-only artwork riding along inside every APK.
     - assets/branding/
     - assets/onboarding/
     - assets/lottie/
@@ -132,29 +137,43 @@ flutter:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: false
-  # Phase 033 — new "orbit" emblem (silver skyline + stars + orbit ring) on the
-  # brand navy. Legacy icon = the full emblem-on-navy square; the adaptive icon
+  # Phase 033 — the "orbit" emblem (silver skyline + stars + orbit ring) on the
+  # brand navy. Legacy icon = the emblem-on-navy square; the adaptive icon
   # composes the transparent emblem foreground over the same navy.
-  image_path: "assets/branding/app_icon_orbit.png"
+  #
+  # Both are DERIVED from branding/app_icon_orbit.png by
+  # tool/build_orbit_icon_assets.py — do not point these at the raw artwork.
+  # It is a crop of a taller lockup, so it carries a sliced-off wordmark along
+  # its bottom edge, and the foreground cut from it in 1.1.0 kept a hard-edged
+  # slab of pale sky that every launcher drew as a rectangle behind the emblem.
+  # Regenerate with the script, then `dart run flutter_launcher_icons`.
+  image_path: "branding/app_icon_orbit_square.png"
   adaptive_icon_background: "#0B182B"
-  adaptive_icon_foreground: "assets/branding/icon_fg_orbit.png"
+  adaptive_icon_foreground: "branding/icon_fg_orbit.png"
   min_sdk_android: 24
 
 # Phase 24 RB — flutter_native_splash config (R-212; light + dark)
 # Phase 25 — repalette to the Claude Design brand (deep blue + dark navy).
 # Generates splash drawables + values/values-night
 flutter_native_splash:
-  # Phase 033 — orbit emblem + ALNUJOM REAL ESTATE wordmark on brand navy
-  # (#0B182B), light + dark identical. Pre-Android-12 uses the full-bleed
-  # portrait artwork; Android 12+ shows the emblem centered on the navy.
+  # Phase 033 — brand navy (#0B182B), light and dark identical.
+  #
+  # Android 12+ shows `splash_icon_orbit.png` centred on the navy. **Pre-Android
+  # -12 shows the navy alone** — checked on the Infinix (Android 10) on
+  # 2026-09-04: the generated `drawable/background.png` is a 1x1 solid colour,
+  # so `background_image` never reaches that path however it is set. That is
+  # left as it is rather than forced, because the app draws its own splash the
+  # moment Flutter starts and a flat navy hand-off is quieter than a second
+  # piece of artwork appearing for a fraction of a second. `background_image`
+  # stays declared so the intent is not lost.
   color: "#0B182B"
-  background_image: assets/branding/splash_orbit.png
+  background_image: branding/splash_orbit.png
   color_dark: "#0B182B"
-  background_image_dark: assets/branding/splash_orbit.png
+  background_image_dark: branding/splash_orbit.png
   android: true
   ios: false
   android_12:
     color: "#0B182B"
-    image: assets/branding/icon_fg_orbit.png
+    image: branding/splash_icon_orbit.png
     color_dark: "#0B182B"
-    image_dark: assets/branding/icon_fg_orbit.png
+    image_dark: branding/splash_icon_orbit.png

@@ -68,16 +68,32 @@ The one big hole in the QA record. Record:
 - [ ] Create a listing end to end with photos → approve → stay-live edit → revision. **Hold until A11**: it writes real rows into a database whose demo content is about to be deleted.
 - [x] Issue #39: offline fail-open launch **PASS** (opens to sign-in, not the maintenance screen, no crash; the session survives and returns on reconnect) and the four-combination light/dark × ar/en render **PASS**. With the About-page box from A9 that is three of four.
 - [ ] Issue #39's last box — forward-only defaults for a **new** account. Needs a sign-up, which Claude may not perform. One registration by the owner settles it.
-- [ ] Super-admin role editor, currency history, governorate → city admin pages — reachable only by path interpolation, so confirm they open.
+- [ ] Super-admin role editor, currency history, governorate → city admin pages — reachable only by path interpolation, so confirm they open. (The list pages above them were all walked on 2026-09-03; it is the drill-in that is unconfirmed.)
 
-### A3 — Release build `1.1.1+3` · S · after A2
-- [ ] Bump `pubspec.yaml` to `1.1.1+3`.
-- [ ] `flutter build apk --release --split-per-abi --obfuscate --split-debug-info=build/symbols --dart-define-from-file=.env.json`
-- [ ] Copy `build/symbols` to `H:\alnujom-symbols\1.1.1+3\` (outside the repo — without it crash reports from this build are unreadable).
-- [ ] Install `app-arm64-v8a-release.apk` on the Infinix; cold start; icon + splash in light and dark; guest browse; sign in.
-- [ ] Record SHA-256 of the two APKs (arm64 + armeabi-v7a) in `docs/release/v1.0.0.md` and fill the "Built? NOT VERIFIED" row.
-- [ ] Write the Arabic release note (3 lines, plain) into `docs/release/notes/1.1.1.ar.md` for the Telegram post and the manifest.
-- Verified by: the dossier row shows the date, the hashes and the device it was smoke-tested on.
+### A3 — Release build `1.1.1+3` · S · **DONE 2026-09-04**
+- [x] `pubspec.yaml` bumped to `1.1.1+3`.
+- [x] Built with `--split-per-abi --obfuscate --split-debug-info=build/symbols
+      --dart-define-from-file=.env.json`. Signed with the release key —
+      `apksigner` reports `CN=Hekmat Fanari, OU=AlNujom`, v2 scheme, not debug.
+- [x] Symbols copied to `H:\alnujom-symbols\1.1.1+3\` with a `SHA256SUMS.txt`
+      beside them. Without those files a crash report from this obfuscated build
+      is unreadable.
+- [x] Installed on the Infinix over `install -r`; cold start **1.98 s** to first
+      frame; the signed-in session survived the upgrade; Home rendered with the
+      publish FAB.
+- [x] **The icon and splash check found two real defects** — a slab of pale sky
+      behind the emblem in the adaptive icon, and the same slab on the splash —
+      and both are fixed and rebuilt. Full account in `v1.0.0.md`; the assets are
+      now derived by `tool/build_orbit_icon_assets.py` so the next person to
+      regenerate them cannot reintroduce it.
+- [x] Moving the build-time-only branding art out of `assets/branding/` took
+      **2.9 MB** out of every APK on the way past.
+- [x] SHA-256 of all three APKs recorded in `docs/release/v1.0.0.md`, and the
+      "Built? NOT VERIFIED" row replaced with a real verification table.
+- [x] Arabic release note in `docs/release/notes/1.1.1.ar.md` (English beside
+      it) — three lines for the Telegram post, the same three for the manifest.
+- Verified by: the dossier's `1.1.1+3` verification table, dated, with the
+  hashes and the device it was smoke-tested on.
 
 ### A4 — Security hardening batch · S · **DONE 2026-09-03**
 All 16 anon-executable SECURITY DEFINER functions were reviewed. Fifteen are
@@ -191,8 +207,14 @@ deletion is real, so the sweep has to exist.
 - [x] `support_contact` → phone and WhatsApp `+963991883342`, email `m.hekmatfanari@gmail.com`. Verified on the device: all three rows render on the About page. **The owner says these are provisional — remind him to swap them for business details before launch** (they also appear in the published privacy policy).
 - [ ] Record the new live values in `HANDOVER.md` §8.
 
-### A10 — Version manifest · S · **blocked on A3 + B5 (the Telegram post URL)**
-- [ ] Write `latest.json` per `docs/release/version-manifest.example.json` with `latest_version: "1.1.1"`, `latest_build: 3`, `telegram_url` = the post, Arabic + English notes from A3.
+### A10 — Version manifest · S · **blocked on B5 (the Telegram post URL) only — A3 is done**
+- [ ] Write `latest.json` per `docs/release/version-manifest.example.json` with
+      `latest_version: "1.1.1"`, **`latest_build: 2003`**, `telegram_url` = the
+      post, Arabic + English notes from `docs/release/notes/1.1.1.*.md`.
+      **Not `3`.** `PackageInfo.buildNumber` is Android's versionCode, and
+      `--split-per-abi` offsets it per ABI — the arm64 APK, the one that gets
+      posted, reports **2003**. Writing `3` is invisible today and silently
+      disables the prompt for any same-version hotfix. See `v1.0.0.md`.
 - [ ] Upload to bucket `app-release`, path `android/latest.json`, via the storage REST API with the service-role key from `.env.admin.json` (never `.env.json`).
 - [ ] On a phone still running the old build: cold start → prompt appears → Update opens the Telegram post. This closes `v1.0.0.md` row 233.
 - Verified by: the prompt screenshot and the row updated.
@@ -205,7 +227,10 @@ deletion is real, so the sweep has to exist.
 
 ### A12 — Small hygiene, bundle into any nearby PR · S
 - [x] `/publisher/dashboard` — **kept, and now says why in the router.** It has no in-app caller, but it is the canonical publisher-dashboard URL, `specs/035` and `specs/010` both document it, and it is the path prefix of `/publisher/dashboard/my-listings`, which is used. Deleting it would break deep links for no gain.
-- [ ] `v1.0.0.md` row 171 (new icon + splash in light/dark on device) — observe it during A3 and close it.
+- [x] `v1.0.0.md` row 171 (new icon + splash in light/dark on device) — done
+      during A3 on 2026-09-04, and it did not pass on sight: it found the slab
+      behind the emblem and the same slab on the splash. Both fixed and rebuilt;
+      the row now records what was wrong rather than a tick.
 - [ ] Issue #39 — close it when A2 ticks its boxes.
 
 ### A13 — After launch, not before

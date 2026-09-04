@@ -673,7 +673,7 @@ new app build:
 
 | Setting | What it does |
 |---|---|
-| `default_language` | Language a brand-new account starts in. Seeded as `"ar"`, **but the live value is `"en"`** — see below. |
+| `default_language` | Language a brand-new account starts in. Live value `"ar"` — see below. |
 | `default_currency` | Currency a brand-new account starts in (`"SYP"`) |
 | `default_publisher_name_visibility` | Whether a new listing shows the seller's name by default |
 | `default_location_visibility` | Whether a new listing's map pin is exact or approximate by default (`"approximate"`) |
@@ -684,32 +684,52 @@ new app build:
 Changing a default only affects **new** accounts and **new** listings. Existing
 ones keep what they had.
 
-### What those settings actually hold right now (read live, 2026-09-02)
+### What those settings actually hold right now (read live, 2026-09-04)
 
-Three of them are not what the app was built to assume. None of them break
-anything today, but two should be set before real users arrive.
+Every value below was read straight out of `app_settings` on the date in the
+heading, not copied from a migration. `updated_at` is the table's own.
 
-**1. `default_language` is `"en"`, not `"ar"` — change it.** The migration seeds
-it to Arabic; it was switched to English from this screen on 2026-06-02, most
-likely while trying the screen out. Nothing reads a user's stored language today
-(the interface picks Arabic on its own, and the server does not use the value),
-so no one has seen an English app because of it. But it is the wrong default for
-an Arabic-first product to be carrying into launch, and the moment anything does
-start reading it — a notification template, an email — every account created
-until then would be flagged English. **Admin → Settings → Default language → set
-to Arabic.** One click.
+| Setting | Live value | Set on |
+|---|---|---|
+| `default_language` | `"ar"` | 2026-09-02 |
+| `default_currency` | `"SYP"` | seeded |
+| `default_publisher_name_visibility` | `"public"` | seeded |
+| `default_location_visibility` | `"approximate"` | seeded |
+| `support_contact` | phone **+963991883342**, WhatsApp **+963991883342**, email **m.hekmatfanari@gmail.com** | 2026-09-02 |
+| `privacy_url` | <https://mhekmatf.github.io/alnujom/> | 2026-09-03 |
+| `terms_url` | `null` — deliberate | — |
+| `maintenance_mode` | off, no message | — |
 
-**2. `support_contact` is completely empty** — no phone, no WhatsApp, no email.
-The screens that offer support handle this correctly (they hide the buttons and
-say no contact is available rather than showing dead links), so nothing looks
-broken. But it means a user who is locked out of their account reaches a dead
-end: the "we cannot email you a reset" screen is exactly where the WhatsApp
-button belongs. **Set at least the WhatsApp number before launch.**
+**The three problems this section used to describe are fixed.** For the record,
+because the fix is not obvious from the values alone:
 
-**3. `terms_url` and `privacy_url` are empty**, so the About screen shows no
-legal links at all. The privacy policy is already written (`docs/legal/`), it is
-simply not hosted anywhere. Not urgent for Telegram distribution; **required**
-before Google Play will accept the app.
+- `default_language` was `"en"` on a product that is Arabic-first. Nothing read
+  it yet, so nobody had seen an English app because of it — but every account
+  created until something *did* read it would have carried the wrong flag.
+  Now `"ar"`.
+- `support_contact` was completely empty, which left a locked-out user at a dead
+  end: the "we cannot email you a reset" screen is exactly where the WhatsApp
+  button belongs. All three channels are set and were seen rendering on the
+  device on 2026-09-03.
+- `privacy_url` was empty because the policy was written but hosted nowhere. It
+  is now live at the URL above and the About page shows an **الأحكام القانونية**
+  section.
+
+**Two things to know about these values.**
+
+⚠️ **The support contacts are provisional.** They are the owner's personal
+number and personal Gmail, given as placeholders on 2026-09-02 with an explicit
+"remind me to change these at the end". They must be swapped for real business
+channels before launch — and note they are **also in the published privacy
+policy**, so changing them means re-running `tool/build_privacy_site.py` and
+pushing `gh-pages`, not just editing this row.
+
+`terms_url` is null **on purpose**. A privacy policy is not terms of service;
+they are different documents and nobody has written the second one. The About
+page correctly hides a row whose URL is unset, so the gap is invisible rather
+than broken. Google Play will want both.
+
+Changing any default only affects **new** accounts and **new** listings.
 
 ---
 
