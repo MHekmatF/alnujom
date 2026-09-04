@@ -488,10 +488,53 @@ conversation list and the similar rail need the client change, so those pick it
 up in the next build.
 
 
-### A19 — Page the chat thread · S · **next — any time**
-Review §4 C2. `.limit(50)` on the stream, ordered newest-first then reversed
-for display; "load earlier" fetches the previous 50 with `.lt('created_at',
-oldest)`. Verified by a 120-message thread on the AVD.
+### A19 — Page the chat thread · S · **DONE 2026-09-04**
+Review §4 C2. `watchMessages` was `.stream().eq(conversation).order(created_at)`
+with no limit — the Realtime stream's initial load was the **whole thread**, on
+every open, and it stayed resident for as long as the page was up.
+
+- [x] The stream is now a **window**: `.order('created_at', ascending: false)`
+      + `.limit(kChatPageSize)` (50). `SupabaseStreamBuilder.limit` applies to
+      the initial fetch *and* to every later emit (`sort` then `take`), so the
+      window stays pinned to the newest 50 as messages arrive.
+- [x] `loadOlderMessages` — a plain `select` with
+      `.lt('created_at', cursor).order(desc).limit(50)`, not a second Realtime
+      channel: history cannot change (A14 revoked `UPDATE`/`DELETE` on
+      `messages` for `authenticated` apart from `read_at`), so a subscription
+      would have nothing to deliver. Served by the existing
+      `idx_messages_conversation (conversation_id, created_at)` read backwards
+      — no new index.
+- [x] The cubit holds every message it has shown in a **map by id**, because
+      the two sources overlap at the seam and because a message that falls out
+      of the fixed-size window as newer ones arrive must stay on screen. The
+      window writes over what is there (its rows carry the live `read_at`); a
+      fetched page only fills gaps, so a stale history row can never clobber a
+      live one.
+- [x] The page pages on scroll toward the old end, with a sentinel at the
+      visual top: a spinner in flight, a tappable row otherwise — which is
+      also the retry after a failed page, and the way forward on a thread too
+      short to scroll. `chatLoadEarlier` / `chatLoadEarlierRetry`, both locales.
+- [x] `markRead` now fires on a change of **newest id**, not of message count,
+      so paging history in no longer sends a pointless read receipt.
+
+**It also fixes a bug nobody had hit yet.** `SupabaseStreamBuilder.order()`
+defaults to `ascending: false`, so the bare `.order('created_at')` was already
+returning **newest-first** while every comment said oldest-first and the page
+then applied `.reversed` on top of a `ListView(reverse: true)`. The thread
+rendered **upside down** — oldest at the bottom, newest at the top — from the
+second message onward. Nothing caught it because `messages` is **empty in
+production**: 1 conversation, 0 messages, and the two-account walk (A2) has
+never been run. The whole feature now reads newest-first end to end, and the
+page does no re-ordering at all.
+
+- Verified by: the six-linter suite; the `supabase-2.10.6` stream-builder source
+  for both the `order` default and the `limit` semantics; and the column grants
+  on `messages` (`SELECT` all columns, `UPDATE (read_at)` only), which the plain
+  select and `markRead` both depend on.
+- **Not verified on a device.** Chat needs two accounts in one thread — that is
+  A2, and it is still owner-blocked. This is the one item where the on-device
+  walk would tell us something the code cannot.
+
 
 ### A20 — Make shared links open something · S · **blocked on B16 (domain)**
 Review §1 M3. Until a domain exists, point `_shareLinkBase` at the GitHub Pages

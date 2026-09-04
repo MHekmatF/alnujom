@@ -60,6 +60,35 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
+  Future<Result<List<Message>>> loadOlderMessages({
+    required String conversationId,
+    required DateTime before,
+  }) async {
+    try {
+      final uid = _datasource.currentUserId ?? '';
+      final dtos = await _datasource.loadOlderMessages(
+        conversationId: conversationId,
+        before: before,
+      );
+      return Success(dtos.map((d) => d.toEntity(uid)).toList());
+    } on SocketException catch (e, st) {
+      return FailureResult(NetworkFailure(e.message, cause: e, stackTrace: st));
+    } on TimeoutException catch (e, st) {
+      return FailureResult(
+        NetworkFailure(
+          e.message ?? 'Request timed out',
+          cause: e,
+          stackTrace: st,
+        ),
+      );
+    } catch (e, st) {
+      return FailureResult(
+        UnknownFailure('loadOlderMessages failed: $e', cause: e, stackTrace: st),
+      );
+    }
+  }
+
+  @override
   Future<Result<void>> sendMessage({
     required String conversationId,
     required String body,

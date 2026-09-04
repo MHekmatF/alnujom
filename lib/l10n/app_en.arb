@@ -4905,6 +4905,14 @@
   "@chatMessageRead": {
     "description": "UI/UX pass (035)."
   },
+  "chatLoadEarlier": "Earlier messages",
+  "@chatLoadEarlier": {
+    "description": "Plan A19 — the sentinel at the top of a chat thread that pulls in the previous page of history."
+  },
+  "chatLoadEarlierRetry": "Couldn't load. Tap to try again",
+  "@chatLoadEarlierRetry": {
+    "description": "Plan A19 — shown in place of chatLoadEarlier when the previous page of chat history failed to load."
+  },
   "profileLoadErrorTitle": "We couldn't load your profile",
   "@profileLoadErrorTitle": {
     "description": "UI/UX pass (035)."

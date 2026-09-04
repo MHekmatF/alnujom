@@ -7166,6 +7166,12 @@ final class _DebugAppLocalizations extends AppLocalizations {
   String get chatMessageRead =>
       _resolve('chatMessageRead', (loc) => loc.chatMessageRead);
   @override
+  String get chatLoadEarlier =>
+      _resolve('chatLoadEarlier', (loc) => loc.chatLoadEarlier);
+  @override
+  String get chatLoadEarlierRetry =>
+      _resolve('chatLoadEarlierRetry', (loc) => loc.chatLoadEarlierRetry);
+  @override
   String get profileLoadErrorTitle =>
       _resolve('profileLoadErrorTitle', (loc) => loc.profileLoadErrorTitle);
   @override
