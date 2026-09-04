@@ -35,7 +35,7 @@ class SupabaseSimilarListingsDatasource {
           'id, title, property_type, purpose, governorate_id, city_id, '
           'rooms, bathrooms, area_size, '
           'listing_prices!inner(currency_code, amount, is_primary), '
-          'listing_media(storage_path, ordering, is_main, kind), '
+          'listing_media(storage_path, thumbnail_path, ordering, is_main, kind), '
           'governorate:governorates(display_name), '
           'city:cities(display_name)',
         );

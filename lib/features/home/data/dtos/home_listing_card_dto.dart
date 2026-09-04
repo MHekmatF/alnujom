@@ -146,7 +146,12 @@ class HomeListingCardDto {
         }
       }
       mainRow ??= Map<String, dynamic>.from(mediaRaw.first as Map);
-      final path = mainRow['storage_path'];
+      // Plan A18 — `thumbnail_path` is the card-sized copy; prefer it and fall
+      // back to the full file, mirroring the COALESCE the card VIEWS use.
+      final thumb = mainRow['thumbnail_path'];
+      final path = (thumb is String && thumb.isNotEmpty)
+          ? thumb
+          : mainRow['storage_path'];
       if (path is String && path.isNotEmpty) {
         mainImage = HomeListingMediaDto(
           storagePath: path,

@@ -21,12 +21,14 @@ class UploadImage {
     required Uint8List watermarkedBytes,
     required int ordering,
     required bool isMain,
+    Uint8List? thumbnailBytes,
   }) {
     return _repository.uploadImage(
       listingId: listingId,
       watermarkedBytes: watermarkedBytes,
       ordering: ordering,
       isMain: isMain,
+      thumbnailBytes: thumbnailBytes,
     );
   }
 }

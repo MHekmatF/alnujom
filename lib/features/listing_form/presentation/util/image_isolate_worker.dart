@@ -63,11 +63,19 @@ class _ImageResult {
   /// Non-null on success.
   final Uint8List? bytes;
 
+  /// The card thumbnail, non-null only for the watermark pipeline. The panorama
+  /// pipeline leaves it null: a panorama is never a card image (the card
+  /// LATERALs all filter `kind = 'image'`), so making one would be wasted work.
+  final Uint8List? thumbnailBytes;
+
   /// Non-null on failure.
   final Object? error;
 
-  const _ImageResult.success(Uint8List this.bytes) : error = null;
-  const _ImageResult.failure(Object this.error) : bytes = null;
+  const _ImageResult.success(Uint8List this.bytes, {this.thumbnailBytes})
+    : error = null;
+  const _ImageResult.failure(Object this.error)
+    : bytes = null,
+      thumbnailBytes = null;
 }
 
 // ---------------------------------------------------------------------------
@@ -87,12 +95,17 @@ void _workerEntry(SendPort mainSendPort) {
   receivePort.listen((message) async {
     if (message is _ImageJob) {
       try {
-        final resultBytes = await processImageForUpload(
+        final processed = await processImageForUpload(
           sourceBytes: message.sourceBytes,
           watermarkAssetBytes: message.watermarkAssetBytes,
           isRtl: message.isRtl,
         );
-        message.replyTo.send(_ImageResult.success(resultBytes));
+        message.replyTo.send(
+          _ImageResult.success(
+            processed.full,
+            thumbnailBytes: processed.thumbnail,
+          ),
+        );
       } catch (e) {
         message.replyTo.send(_ImageResult.failure(e));
       }
@@ -151,13 +164,15 @@ class ImageIsolateWorker {
 
   /// Sends [sourceBytes] to the background isolate for watermark processing.
   ///
-  /// Returns the processed JPEG bytes on success.
+  /// Returns the full-resolution JPEG **and** its card thumbnail
+  /// ([ProcessedImage]); both are made from the same decoded pixels in one pass,
+  /// so the thumbnail costs no second decode.
   /// Throws the original exception (wrapped) on failure.
   ///
   /// Jobs are processed sequentially on the isolate side. Callers MUST
   /// await this call before issuing the next job to maintain the sequential
   /// R-25 invariant (bounding peak RAM at ~100 MB).
-  Future<Uint8List> processImage({
+  Future<ProcessedImage> processImage({
     required Uint8List sourceBytes,
     required Uint8List watermarkAssetBytes,
     required bool isRtl,
@@ -169,13 +184,15 @@ class ImageIsolateWorker {
     }
 
     final replyPort = ReceivePort();
-    final completer = Completer<Uint8List>();
+    final completer = Completer<ProcessedImage>();
 
     replyPort.listen((message) {
       replyPort.close();
       if (message is _ImageResult) {
-        if (message.bytes != null) {
-          completer.complete(message.bytes);
+        final full = message.bytes;
+        final thumb = message.thumbnailBytes;
+        if (full != null && thumb != null) {
+          completer.complete(ProcessedImage(full: full, thumbnail: thumb));
         } else {
           completer.completeError(
             message.error ?? Exception('Unknown isolate error'),

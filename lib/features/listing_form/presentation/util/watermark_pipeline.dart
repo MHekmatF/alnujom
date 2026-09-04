@@ -73,7 +73,7 @@ class WatermarkAssetMissingException implements Exception {
 /// - [WatermarkAssetMissingException] — watermark PNG cannot be decoded.
 ///
 /// Constitution IX: no package:supabase_flutter. Pure Dart — runs on isolate.
-Future<Uint8List> processImageForUpload({
+Future<ProcessedImage> processImageForUpload({
   required Uint8List sourceBytes,
   required Uint8List watermarkAssetBytes,
   required bool isRtl,
@@ -205,7 +205,59 @@ Future<Uint8List> processImageForUpload({
   final jpegOut = img.encodeJpg(decoded, quality: 85);
 
   // -------------------------------------------------------------------------
-  // (g) Return bytes
+  // (g) CARD THUMBNAIL — long edge <= 480 px, quality 75
   // -------------------------------------------------------------------------
-  return Uint8List.fromList(jpegOut);
+  // Made here, from the already-decoded and already-watermarked pixels, because
+  // this is the one place in the app where the image is in memory on a
+  // background isolate. Doing it later would mean decoding a 1920-px JPEG a
+  // second time on the UI isolate.
+  //
+  // It carries the watermark, so a thumbnail can never be the un-watermarked
+  // copy of a photo (R-23 holds for every size that leaves the device).
+  //
+  // 480 px is about 2x the widest card slot on a 3x-density phone, so it still
+  // looks sharp; at quality 75 it lands around 30 KB against the full file's
+  // ~156 KB. A feed of twenty cards goes from roughly 3 MB to 0.6 MB.
+  final thumbLong = decoded.width > decoded.height
+      ? decoded.width
+      : decoded.height;
+  final img.Image thumbSource;
+  if (thumbLong > _kThumbnailLongEdge) {
+    final scale = _kThumbnailLongEdge / thumbLong;
+    thumbSource = img.copyResize(
+      decoded,
+      width: (decoded.width * scale).round(),
+      height: (decoded.height * scale).round(),
+      interpolation: img.Interpolation.average,
+    );
+  } else {
+    // Already small enough — re-encoding at 75 is still worth it, but there is
+    // nothing to scale.
+    thumbSource = decoded;
+  }
+  final thumbOut = img.encodeJpg(thumbSource, quality: 75);
+
+  return ProcessedImage(
+    full: Uint8List.fromList(jpegOut),
+    thumbnail: Uint8List.fromList(thumbOut),
+  );
+}
+
+/// Long edge, in pixels, of the card thumbnail produced alongside every upload.
+const int _kThumbnailLongEdge = 480;
+
+/// What [processImageForUpload] hands back: the full-resolution watermarked
+/// JPEG that the detail gallery shows, and the small one every card shows.
+///
+/// Both are watermarked and both are stripped of EXIF — they are the same
+/// pixels at two sizes, not two different processing paths.
+class ProcessedImage {
+  const ProcessedImage({required this.full, required this.thumbnail});
+
+  /// Long edge <= 1920 px, JPEG quality 85. Goes to `listing_media.storage_path`.
+  final Uint8List full;
+
+  /// Long edge <= 480 px, JPEG quality 75. Goes to
+  /// `listing_media.thumbnail_path`, which every card view now prefers.
+  final Uint8List thumbnail;
 }

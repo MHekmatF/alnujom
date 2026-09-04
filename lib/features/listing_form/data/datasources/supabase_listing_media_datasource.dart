@@ -81,11 +81,13 @@ class SupabaseListingMediaDatasource {
     required Uint8List watermarkedJpegBytes,
     required int ordering,
     required bool isMain,
+    Uint8List? thumbnailJpegBytes,
   }) async {
     // Per task #29 follow-up: `ordering` is no longer embedded in the path,
     // and we send 0 as the sentinel — the listing_media_assign_ordering
     // BEFORE INSERT trigger computes the actual value server-side.
-    final path = '$listingId/${_randomSuffix()}.jpg';
+    final suffix = _randomSuffix();
+    final path = '$listingId/$suffix.jpg';
     await _client.storage
         .from(_imagesBucket)
         .uploadBinary(
@@ -96,6 +98,32 @@ class SupabaseListingMediaDatasource {
             upsert: false,
           ),
         );
+
+    // Plan A18 — the card thumbnail, beside the full file and sharing its
+    // suffix. Best-effort on purpose: every card view reads
+    // `coalesce(thumbnail_path, storage_path)`, so a listing whose thumbnail
+    // upload failed still shows its photo, just at full size. Failing the whole
+    // upload over the small copy would be the wrong trade.
+    String? thumbnailPath;
+    if (thumbnailJpegBytes != null) {
+      final candidate = '$listingId/${suffix}_thumb.jpg';
+      try {
+        await _client.storage
+            .from(_imagesBucket)
+            .uploadBinary(
+              candidate,
+              thumbnailJpegBytes,
+              fileOptions: const supabase.FileOptions(
+                contentType: 'image/jpeg',
+                upsert: false,
+              ),
+            );
+        thumbnailPath = candidate;
+      } catch (_) {
+        thumbnailPath = null;
+      }
+    }
+
     try {
       final row = await _client
           .from('listing_media')
@@ -103,6 +131,7 @@ class SupabaseListingMediaDatasource {
             'listing_id': listingId,
             'kind': 'image',
             'storage_path': path,
+            'thumbnail_path': thumbnailPath,
             'external_url': null,
             'ordering': 0, // sentinel — trigger assigns max(ordering)+1
             'is_main': isMain,
@@ -115,7 +144,10 @@ class SupabaseListingMediaDatasource {
     } catch (e) {
       // On INSERT failure (cap trigger fire, RLS deny, etc.) — orphan cleanup.
       try {
-        await _client.storage.from(_imagesBucket).remove([path]);
+        await _client.storage.from(_imagesBucket).remove([
+          path,
+          if (thumbnailPath != null) thumbnailPath,
+        ]);
       } catch (_) {
         // Swallow cleanup failure — the bucket object becomes a true orphan;
         // the Phase 23 reconciliation job will eventually clean it up (R-28).
