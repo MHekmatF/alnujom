@@ -591,12 +591,61 @@ switch the base and add the `https` intent filter with `autoVerify` +
 Review §4. Swap the three `urlTemplate`s for the provider's URL with the key
 from `.env.json` (a new dart-define, never committed). Keep the OSM attribution.
 
-### A22 — Stop the audit log eating the database · S · any time
-Review §4 C3. Drop the three row-level audit triggers on `listing_media` (the
-listing-level audit already records the media change through the revision), and
-add a monthly `DELETE FROM audit_logs WHERE created_at < now() - interval '180
-days'` run by hand until `pg_cron` is decided (same note as A7). Verified by the
-row count and `pg_total_relation_size` before/after.
+### A22 — Stop the audit log eating the database · S · **DONE 2026-09-04**
+Review §4 C3. Measured before the change — 1,410 rows / 1,576 kB:
+
+| action | rows | bytes each |
+|---|---|---|
+| `listing.updated` | 247 | 1,861 |
+| `listing_media.updated` | 130 | 939 |
+| `listing_media.created` | 95 | 538 |
+| `listing.created` | 73 | 957 |
+| `listing.approved` / `.rejected` / `.submitted` / `.paused` | 44 | ~1,850 |
+
+Reading it turned up **two causes the review had not separated**, both bigger
+than the one it named:
+
+- [x] **Every listing UPDATE stored the whole row twice** — `to_jsonb(OLD)` and
+      `to_jsonb(NEW)` — so changing one price cost 1.9 KB. It now stores only
+      the keys that differ. Easier to read, too: the admin viewer shows what
+      changed instead of two near-identical blobs to diff by eye.
+- [x] **A status change wrote the same thing twice.** `listing.updated` fired,
+      then `listing.approved` fired carrying an identical pair of snapshots. One
+      row now, under the status verb when there is one — the generic verb is the
+      fallback, not an extra.
+- [x] **The three row-level `listing_media` triggers are dropped** (the item as
+      written). One audit row per photo insert/update/delete, whole row each
+      way, for machine noise — A18's thumbnail backfill alone wrote 51
+      `listing_media.updated` rows for a column no human set. Media stays
+      auditable through the listing and through `listing_revisions`, which is
+      what an admin actually reviews. The three *functional* triggers on that
+      table (ordering, the media cap, `updated_at`) are untouched.
+- [x] A no-op UPDATE no longer writes an audit row at all.
+- [x] `purge_audit_logs(p_retain interval default '180 days')` — SECURITY
+      DEFINER, `EXECUTE` revoked from PUBLIC/anon/authenticated, returns the
+      count deleted, and **refuses any retention under 30 days** so a
+      fat-fingered `interval '0'` cannot empty the table.
+- Verified in a rolled-back transaction on a real listing:
+
+  | change | before | after |
+  |---|---|---|
+  | title edit | 1 row, 1,861 B | **1 row, 584 B** (`title`, `search_vector`, `updated_at`) — 69% less |
+  | status change | 2 rows, ~3,682 B | **1 row, 176 B** (`status`) — 95% less |
+
+  Plus: the three media triggers gone and the three functional ones still there;
+  `anon`, `authenticated` and `PUBLIC` all denied EXECUTE on the purge; and
+  `purge_audit_logs(interval '0 days')` rejected while the row count stayed at
+  1,410.
+
+**Nothing was deleted.** `purge_audit_logs()` at its default returns **0** today
+— the oldest audit row is 2026-05-09, so nothing qualifies until 2026-11-05.
+
+- [ ] **Owner decision — schedule it, or run it by hand?** `pg_cron` 1.6.4 is
+      available on this project but not installed, and the plan defers that to
+      the owner along with A7's. The one-liner for both is in the migration
+      header. Until then the retention exists but never runs, and the table just
+      grows more slowly.
+
 
 ### A23 — Filter the publisher dashboard's Realtime subscription · S · after A17
 Review §4. `subscribeTables(['listings','inquiries'])` → filter
