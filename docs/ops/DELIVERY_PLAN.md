@@ -68,7 +68,14 @@ The one big hole in the QA record. Record:
 - [ ] Create a listing end to end with photos → approve → stay-live edit → revision. **Hold until A11**: it writes real rows into a database whose demo content is about to be deleted.
 - [x] Issue #39: offline fail-open launch **PASS** (opens to sign-in, not the maintenance screen, no crash; the session survives and returns on reconnect) and the four-combination light/dark × ar/en render **PASS**. With the About-page box from A9 that is three of four.
 - [ ] Issue #39's last box — forward-only defaults for a **new** account. Needs a sign-up, which Claude may not perform. One registration by the owner settles it.
-- [ ] Super-admin role editor, currency history, governorate → city admin pages — reachable only by path interpolation, so confirm they open. (The list pages above them were all walked on 2026-09-03; it is the drill-in that is unconfirmed.)
+- [x] Super-admin role editor, currency history, governorate → city → area admin
+      pages — **all three open with real data, 2026-09-04**. The role editor was
+      the one worth checking: its first screenful is entirely unchecked, and an
+      editor that opened blank would let an admin save and silently wipe a role.
+      It does not — `users.view` is ticked further down. Record:
+      [`2026-09-04-release-1.1.1-and-admin-drilldowns.md`](../qa/2026-09-04-release-1.1.1-and-admin-drilldowns.md).
+      One gap found there: the permission catalogue is English only, and it is
+      database text, so `lint_l10n_literals` is blind to it.
 
 ### A3 — Release build `1.1.1+3` · S · **DONE 2026-09-04**
 - [x] `pubspec.yaml` bumped to `1.1.1+3`.
