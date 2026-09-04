@@ -15,6 +15,9 @@ class PublisherDashboardRepositoryImpl implements PublisherDashboardRepository {
   final SupabasePublisherDashboardDatasource _datasource;
 
   @override
+  String? get currentUserId => _datasource.currentUserId;
+
+  @override
   Future<List<PublisherListing>> listMyListings({
     ListingStatus? statusFilter,
     int offset = 0,

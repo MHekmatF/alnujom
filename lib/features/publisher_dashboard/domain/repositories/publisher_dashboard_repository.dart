@@ -4,6 +4,12 @@ import '../entities/moderation_history_entry.dart';
 import '../entities/publisher_listing.dart';
 
 abstract class PublisherDashboardRepository {
+  /// The signed-in user id, or `null` when signed out. Exposed so presentation
+  /// can narrow a Realtime subscription to this publisher's own rows (Plan A23)
+  /// without reaching into the data layer — the same seam [ChatRepository]
+  /// opens for `isMine`.
+  String? get currentUserId;
+
   Future<List<PublisherListing>> listMyListings({
     ListingStatus? statusFilter,
     int offset = 0,

@@ -56,20 +56,29 @@ final class RealtimeSignalsImpl implements RealtimeSignals {
 
   @override
   RealtimeSubscriptionHandle subscribeTables({
-    required List<String> tables,
+    required List<RealtimeTableWatch> watches,
     required void Function() onChange,
     void Function()? onResubscribe,
   }) {
     final client = _client;
     if (client == null) return const _NoopHandle();
 
-    final name = 'phase22:tables:${tables.join('+')}';
+    // The filter values are part of the name: two dashboards open for different
+    // publishers must not land on the same topic (Plan A23).
+    final name = 'phase22:tables:${watches.map((w) => w.topicPart).join('+')}';
     final channel = client.channel(name);
-    for (final table in tables) {
+    for (final watch in watches) {
       channel.onPostgresChanges(
         event: supabase.PostgresChangeEvent.all,
         schema: 'public',
-        table: table,
+        table: watch.table,
+        filter: watch.isFiltered
+            ? supabase.PostgresChangeFilter(
+                type: supabase.PostgresChangeFilterType.eq,
+                column: watch.column!,
+                value: watch.value!,
+              )
+            : null,
         callback: (_) => _safe(onChange),
       );
     }

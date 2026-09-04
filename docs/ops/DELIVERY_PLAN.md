@@ -647,12 +647,67 @@ than the one it named:
       grows more slowly.
 
 
-### A23 — Filter the publisher dashboard's Realtime subscription · S · after A17
-Review §4. `subscribeTables(['listings','inquiries'])` → filter
-`publisher_user_id=eq.<uid>` on `listings` and route `inquiries` through a
-per-user channel; both need `REPLICA IDENTITY FULL` on those tables (see the
-2026-06 Realtime note) or the filtered events never arrive. Admin dashboard
-stays unfiltered (a handful of admins).
+### A23 — Filter the publisher dashboard's Realtime subscription · S · **DONE 2026-09-04**
+Review §4. `subscribeTables(['listings','inquiries'])` was unfiltered, so every
+write in the system woke every open dashboard — a Realtime message each, and an
+RLS check per subscriber per event.
+
+**The `inquiries` half was not merely unfiltered — it had never delivered
+anything**, for two independent reasons:
+
+1. `public.inquiries` is **not in the `supabase_realtime` publication**, so no
+   change on it was ever published. (`listings`, `reports`, `messages`,
+   `user_roles` and `conversations` are; `inquiries` and `notifications` were
+   not.)
+2. The table carried **no column naming the publisher** — only `listing_id` —
+   so the client could not have narrowed the subscription even if events had
+   arrived.
+
+A publisher's counter has therefore never moved when an inquiry landed. It moved
+on the next manual refresh, or on the channel's resubscribe reconcile.
+
+- [x] `20260904120009_filter_the_publisher_dashboard.sql` — `inquiries` gains
+      `publisher_user_id`, **derived, never client-supplied**: a
+      `BEFORE INSERT OR UPDATE OF listing_id` trigger recomputes it from the
+      listing and overwrites whatever arrived, which is what makes it safe to
+      hang RLS on. Backfilled, `NOT NULL`, indexed `(publisher_user_id,
+      created_at DESC)`.
+- [x] `inquiries_select_publisher` and `inquiries_update_publisher` drop their
+      `EXISTS (SELECT 1 FROM listings ...)` for one column comparison — the
+      same rows, and that join was the per-event cost Realtime pays for every
+      subscriber, not just on a page load.
+- [x] **`REPLICA IDENTITY FULL` on `listings` and `inquiries`.** A filter on a
+      non-PK column needs the old row to decide whether a subscriber could see
+      the record before the change; with the default identity the old record is
+      the primary key alone, so filtered UPDATE/DELETE events are silently
+      dropped while INSERT keeps working — which is exactly how this hides.
+      Same lesson as `user_roles` and `messages`, both already FULL. The cost is
+      the whole old row in the WAL per UPDATE, which is the right trade on two
+      low-write tables and would not be on a hot one.
+- [x] `inquiries` added to the `supabase_realtime` publication.
+- [x] `subscribeTables` now takes `List<RealtimeTableWatch>` —
+      `.all(table)` or `.where(table, column:, value:)` — and the filter values
+      are part of the channel name, so two dashboards open for different
+      publishers cannot land on the same topic. The publisher cubit narrows both
+      bindings to its own `publisher_user_id` and **does not open a channel at
+      all when signed out**; the admin dashboard stays `.all` on purpose (a
+      handful of admins, and they moderate everything).
+- [x] The user id reaches the cubit through `PublisherDashboardRepository
+      .currentUserId`, the same seam `ChatRepository` already opens for
+      `isMine` — no SDK in a bloc.
+- Verified: six linters green; the trigger **overwrote a deliberately forged
+  `publisher_user_id`** on insert; the new policy proven both ways in a
+  rolled-back transaction with `set local role authenticated` — the listing's
+  publisher sees the inquiry (1), another authenticated user does not (0); both
+  tables report `full` replica identity and `inquiries` is now in the
+  publication.
+- [ ] **⚠️ PARTIAL — the live channel is not walked on a device.** `inquiries`
+      is empty in production (0 rows) and the AVD will not start (see
+      `docs/dev/android-emulator-windows.md`), so "an inquiry arrives and the
+      counter moves without a refresh" is unproven end to end. Everything it
+      depends on — publication, replica identity, RLS, the filter column — is
+      proven server-side. Fold into the next device pass.
+
 
 ### A24 — Sharpen the throttle to a real client key · S · after one real device use
 A14's caps are per-listing and per-user because no per-caller key was available:
