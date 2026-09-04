@@ -177,7 +177,32 @@ class SupabaseListingsDatasource {
     }
   }
 
+  /// Deletes a listing row, and **fails loudly when RLS refuses**.
+  ///
+  /// `listings` has exactly one DELETE policy — `listings_delete_admin`, gated on
+  /// `listings.delete_any` — so an ordinary publisher deleting their own draft
+  /// matches no policy. A PostgREST delete that matches nothing is not an error:
+  /// it returns zero rows and a 2xx. Without the `.select()` below, this method
+  /// returned normally, `ListingFormBloc` reset the form as though the draft were
+  /// gone, and the draft reappeared in My Listings on the next load. Every draft
+  /// in production today belongs to staff who hold `delete_any`, which is why
+  /// nobody had seen it (review 2026-09-04, M2).
+  ///
+  /// `.select('id')` makes PostgREST return the deleted rows, so an empty list
+  /// means "refused" and the caller learns about it. The real fix for publishers
+  /// is the owner-checked status RPC in plan item A15; this only stops the
+  /// silence.
   Future<void> deleteListing(String listingId) async {
-    await _client.from('listings').delete().eq('id', listingId);
+    final deleted = await _client
+        .from('listings')
+        .delete()
+        .eq('id', listingId)
+        .select('id');
+    if ((deleted as List<dynamic>).isEmpty) {
+      throw StateError(
+        'delete_listing_refused: no row deleted for $listingId '
+        '(row-level security refused, or it no longer exists)',
+      );
+    }
   }
 }

@@ -3093,6 +3093,12 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get inquiry_form_rate_limited => _resolve(
+    'inquiry_form_rate_limited',
+    (loc) => loc.inquiry_form_rate_limited,
+  );
+
+  @override
   String get inquiry_form_submission_failed => _resolve(
     'inquiry_form_submission_failed',
     (loc) => loc.inquiry_form_submission_failed,

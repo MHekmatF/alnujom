@@ -31,6 +31,22 @@ class InquiryRepositoryImpl implements InquiryRepository {
     try {
       final id = await _datasource.submitInquiry(submission);
       return Success(id);
+    } on PostgrestException catch (e, st) {
+      // `submit_inquiry` grew an hourly ceiling on 2026-09-04 (20 per listing,
+      // 10 per signed-in sender) so a script cannot flood a publisher's phone.
+      // Surface it as its own code: without this it fell through to
+      // UnknownFailure and the sheet showed the generic "couldn't send" toast,
+      // which invites the immediate retry that hits the same ceiling again.
+      if (e.code == '23514' && e.message.contains('rate_limited')) {
+        return const FailureResult(ValidationFailure('rate_limited'));
+      }
+      return FailureResult(
+        UnknownFailure(
+          'submitInquiry failed: ${e.message}',
+          cause: e,
+          stackTrace: st,
+        ),
+      );
     } on SocketException catch (e, st) {
       return FailureResult(NetworkFailure(e.message, cause: e, stackTrace: st));
     } on TimeoutException catch (e, st) {
