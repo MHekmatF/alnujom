@@ -437,21 +437,58 @@ Review §4 C1.
 - Verified by: `EXPLAIN` shows the index on `(status, …)` plus the bounds
   filter; the map still shows the 16 markers at Damascus zoom.
 
-### A18 — Thumbnails for listing photos · M · any time — the biggest bandwidth win
-Review §3 P1. Feed of 20 cards: ~3 MB → ~0.5 MB.
-- [ ] In `watermark_pipeline.dart`, also emit a 480-px long-edge JPEG q75 of
-      the same (watermarked) image; upload it as `<listing>/<id>.thumb.jpg`;
-      write `listing_media.thumbnail_path` (column exists).
-- [ ] `v_listings_public`, `v_listings_map_public`, the home-feed embedded
-      select, favourites, conversations and search results use
-      `coalesce(thumbnail_path, storage_path)` for card images; detail galleries
-      keep the full file.
-- [ ] Backfill: a one-off script (service-role, build machine) that downloads
-      each existing image, makes the thumb, uploads, updates the row — 80 files.
-- Verified by: bytes per home open measured on the device before/after
-  (`dumpsys netstats` or the proxy); no card shows the placeholder.
+### A18 — Thumbnails for listing photos · M · **DONE 2026-09-04**
+Review P1, and the biggest bandwidth item in the app. Uploads are stored at a
+1920-px long edge, ~156 KB average, and every **card** was downloading that full
+file — a home feed of twenty is about **3 MB per open**. `memCacheWidth` caps
+the decode and Data-saver caps the disk cache; neither caps the transfer.
 
-### A19 — Page the chat thread · S · any time
+Measured on the real 51 images: **9,057 KB → 1,234 KB, 87% less.** Over the CDN a
+card image is now 27.8 KB where it was 192.7 KB.
+
+- [x] `watermark_pipeline.dart` emits a second JPEG — 480-px long edge, quality
+      75 — from the **already-decoded, already-watermarked** pixels, so the
+      thumbnail costs no second decode and can never be an un-watermarked copy.
+      `ProcessedImage {full, thumbnail}` replaces the bare `Uint8List` through
+      the isolate, the use case, the repository and the datasource.
+- [x] Uploaded beside the original as `<path>_thumb.jpg` into
+      `listing_media.thumbnail_path` (the column already existed for video
+      posters). **Best-effort**: a failed thumbnail upload leaves the row's
+      `thumbnail_path` null rather than failing the photo.
+- [x] `20260904120006_card_images_prefer_thumbnail.sql` — all four card views
+      (`v_listings_public`, `v_listings_map_public`, `v_favorites`, `v_reports`)
+      now select `COALESCE(thumbnail_path, storage_path)`. Column names, types
+      and order are unchanged, and the `security_invoker` reloption is
+      re-stated because `CREATE OR REPLACE VIEW` drops it otherwise.
+- [x] The three client selects that bypass the views — home feed, conversation
+      list, similar-listings rail — request `thumbnail_path` and prefer it.
+- [x] **The detail gallery is untouched** and still pulls the full file. Having
+      both sizes is the point.
+- [x] `tool/backfill_listing_thumbnails.py` — service-role, build-machine only
+      per ADR-0001, `--dry-run` first, idempotent, and it survives one bad
+      object rather than aborting. **Run: 51 of 51, 0 failed.** Every image row
+      now has a thumbnail.
+- [x] Storage grew 12 MB → 13 MB. That is the trade: ~1.2 MB stored once
+      against 87% off every card view, forever.
+- [ ] **The staged revision path still has no thumbnail.** Editing an *approved*
+      listing stages images into a manifest that `apply_listing_revision`
+      reconciles, and the manifest has no thumbnail slot. Those images fall back
+      to the full file through the same COALESCE, so nothing is broken — it is
+      the one upload route that does not benefit yet. Widening the manifest and
+      the RPC is a follow-up.
+- Verified by: the six-linter suite; the backfill's own before/after totals; the
+  CDN serving `_thumb.jpg` at 27.8 KB against 192.7 KB for the full file;
+  `search_listings` returning `_thumb.jpg` paths; and all 51 rows carrying a
+  `thumbnail_path`.
+
+**Live for the build the owner already has.** Search, map, favourites and
+reports read their image through the four views, so `1.1.3+5` on the phone is
+already downloading thumbnails there without a rebuild. The home feed, the
+conversation list and the similar rail need the client change, so those pick it
+up in the next build.
+
+
+### A19 — Page the chat thread · S · **next — any time**
 Review §4 C2. `.limit(50)` on the stream, ordered newest-first then reversed
 for display; "load earlier" fetches the previous 50 with `.lt('created_at',
 oldest)`. Verified by a 120-message thread on the AVD.

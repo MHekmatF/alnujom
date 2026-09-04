@@ -100,11 +100,15 @@ abstract class ListingsRepository {
 
   /// Uploads watermarked JPEG bytes to `listing-images` then inserts the
   /// `listing_media` row per FR-014 / FR-015 (atomic-from-publisher-perspective).
+  /// [thumbnailBytes] is the card-sized copy produced by the same pipeline pass
+  /// (plan A18). Optional so an older caller still compiles; when absent the row
+  /// keeps a null `thumbnail_path` and every card falls back to the full file.
   Future<ListingMedia> uploadImage({
     required String listingId,
     required Uint8List watermarkedBytes,
     required int ordering,
     required bool isMain,
+    Uint8List? thumbnailBytes,
   });
 
   /// Uploads an MP4 file to `listing-videos` then inserts the row. No

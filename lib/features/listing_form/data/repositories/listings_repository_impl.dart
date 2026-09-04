@@ -175,12 +175,14 @@ class ListingsRepositoryImpl implements ListingsRepository {
     required Uint8List watermarkedBytes,
     required int ordering,
     required bool isMain,
+    Uint8List? thumbnailBytes,
   }) async {
     final dto = await _mediaDs.uploadImage(
       listingId: listingId,
       watermarkedJpegBytes: watermarkedBytes,
       ordering: ordering,
       isMain: isMain,
+      thumbnailJpegBytes: thumbnailBytes,
     );
     return dto.toEntity();
   }

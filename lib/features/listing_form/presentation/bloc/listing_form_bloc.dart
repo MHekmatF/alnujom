@@ -1030,7 +1030,10 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
         if (state.isRevision) {
           final stagedPath = await () async {
             final sourceBytes = await file.readAsBytes();
-            final watermarkedJpeg = await _imageWorker!.processImage(
+            // Plan A18 note: the staged revision manifest has no thumbnail
+            // slot, so only the full file is staged here. Its card falls back
+            // to the full file until the manifest grows one (A18 follow-up).
+            final processed = await _imageWorker!.processImage(
               sourceBytes: sourceBytes,
               watermarkAssetBytes: _watermarkAssetBytes!,
               isRtl: event.isRtl,
@@ -1045,7 +1048,7 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
             );
             return await _uploadStagedImage(
               listingId: listingId,
-              watermarkedBytes: watermarkedJpeg,
+              watermarkedBytes: processed.full,
             );
           }().timeout(const Duration(seconds: 60));
 
@@ -1063,7 +1066,7 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
 
         final inserted = await () async {
           final sourceBytes = await file.readAsBytes();
-          final watermarkedJpeg = await _imageWorker!.processImage(
+          final processed = await _imageWorker!.processImage(
             sourceBytes: sourceBytes,
             watermarkAssetBytes: _watermarkAssetBytes!,
             isRtl: event.isRtl,
@@ -1088,7 +1091,8 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
 
           return await _uploadImage(
             listingId: listingId,
-            watermarkedBytes: watermarkedJpeg,
+            watermarkedBytes: processed.full,
+            thumbnailBytes: processed.thumbnail,
             ordering: 0, // sentinel — trigger assigns per task #29 fix
             isMain: isMain,
           );

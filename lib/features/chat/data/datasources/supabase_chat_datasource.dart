@@ -35,7 +35,7 @@ class SupabaseChatDatasource {
   static const String _conversationSelect =
       'id, listing_id, buyer_user_id, publisher_user_id, '
       'created_at, last_message_at, '
-      'listing:listings(title, listing_media(storage_path, is_main, kind))';
+      'listing:listings(title, listing_media(storage_path, thumbnail_path, is_main, kind))';
 
   /// Loads every conversation the caller participates in (RLS scopes it to
   /// rows where auth.uid() is the buyer or publisher), newest-activity-first.
@@ -67,7 +67,11 @@ class SupabaseChatDatasource {
         break;
       }
     }
-    final path = mainRow?['storage_path'];
+    // Plan A18 — prefer the card-sized copy, fall back to the full file.
+    final thumb = mainRow?['thumbnail_path'];
+    final path = (thumb is String && thumb.isNotEmpty)
+        ? thumb
+        : mainRow?['storage_path'];
     if (path is! String || path.isEmpty) return dto;
     final url = _client.storage.from('listing-images').getPublicUrl(path);
     return dto.copyWithListingImageUrl(url);
