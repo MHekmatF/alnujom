@@ -1,5 +1,21 @@
 # Security audit — AlNujom (2026-07-17)
 
+> **Correction, 2026-09-04.** Two statements below were re-tested during the
+> full review ([`docs/ops/REVIEW_2026-09-04.md`](../../ops/REVIEW_2026-09-04.md))
+> and are not accurate as written:
+>
+> - *"file storage … only serves approved public content"* — `listing-images` is
+>   a **public bucket**, and a public bucket's CDN path is served with no auth
+>   and no RLS. A rejected listing's photo returned `HTTP 200` to an unauthenticated
+>   `curl`; only the `listing_media` *row* is hidden. The SELECT policy gates the
+>   API listing of objects, not the files. Owner decision B14.
+> - *"a user only sees their own private data"* holds for reads, but two UPDATE
+>   policies had no `WITH CHECK` and no column restriction: either party in a chat
+>   could rewrite the other's message text and sender, and a viewing requester
+>   could confirm their own viewing. Both **proven** and queued as A14.
+>
+> Everything else in this document was re-confirmed unchanged.
+
 A focused security review of the whole app: how login tokens are stored, whether
 debug builds leak anything, whether the API endpoints are locked down, and
 whether any secret is exposed. Run with three parallel code audits (auth/session,

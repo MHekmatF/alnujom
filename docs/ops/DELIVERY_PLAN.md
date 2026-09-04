@@ -5,6 +5,10 @@
 > سر). القسم **A** أنفّذه أنا بالترتيب. القسم **C** هو الترتيب الزمني الذي يربط
 > الاثنين. اقرأ **B** و **C** فقط إذا كان وقتك ضيقاً.
 
+**2026-09-04:** section **E** below adds what the full review of the app found —
+evidence in [`REVIEW_2026-09-04.md`](REVIEW_2026-09-04.md). Two of its items
+(A14) are launch-relevant and go before everything else that is not blocked.
+
 This is the ordered work queue for the next sessions. It replaces the scattered
 "still owed" lists in `HANDOVER.md`, `PENDING_MIGRATIONS.md`, `v1.0.0.md`,
 `REVIEW.md` and the 35 `DEFERRED.md` files — all of which were read for this
@@ -255,6 +259,124 @@ deletion is real, so the sweep has to exist.
 - [ ] **Google Play**: `docs/release/google-play-readiness.md` — AAB, `--dart-define=IN_APP_UPDATE_PROMPT=false`, photo/video permission declaration, web deletion-request URL; gated on B9.
 - [ ] Move `pg_net` out of `public` if Supabase ever allows it on this plan (advisor WARN, cosmetic).
 
+### A14 — Fix what the 2026-09-04 review proved · S · **first — two are launch-relevant**
+Evidence: [`REVIEW_2026-09-04.md`](REVIEW_2026-09-04.md) §5, §2. One migration
+plus a one-line client change; nothing here has a trade-off.
+- [ ] Widen `notifications_type_check` to include `saved_search_match` (and,
+      for A16, `message_received`, `viewing_requested`, `viewing_confirmed`,
+      `viewing_declined`, `listing_expiring`). **Until this lands, approving any
+      listing that matches a saved search fails.** Verify: the rolled-back
+      INSERT from §5 succeeds; approve a listing with a catch-all saved search
+      present.
+- [ ] `messages`: revoke table-wide UPDATE from `authenticated`; grant
+      `UPDATE (read_at)` only, and add `WITH CHECK` so a member can mark only the
+      **counterpart's** rows read. Verify: the §S1 transaction now fails on
+      `body`.
+- [ ] `viewings`: drop `viewings_update_member`; all status changes already go
+      through `update_viewing_status`. Verify: the §S2 transaction fails; the
+      Viewings screen still confirms/declines/cancels.
+- [ ] `conversations`: revoke UPDATE from `authenticated` (the client never
+      updates it; the trigger runs as definer).
+- [ ] Throttle the three guest-callable writers inside the function:
+      `submit_inquiry` max 3 per listing per phone per hour and 20 per IP per
+      hour; `record_lead_event` / `record_ad_event` max 30 per IP per hour
+      (count recent rows by `metadata->>'ip'`). Raise `23514` past the cap.
+- [ ] `deleteListing` in `supabase_listings_datasource.dart`: append
+      `.select('id')` and throw when the result is empty, so an RLS denial is an
+      error and not a success. (The real fix for publishers is A15.)
+- Verified by: the four proofs in the review re-run and now failing; advisors
+  unchanged; the device walk of chat, viewings and inquiries still green.
+
+### A15 — Let a publisher close a listing · M · after A14
+Review §1 M1 + M2. Today a listing can only be revised, renewed or left to
+expire.
+- [ ] RPC `set_own_listing_status(p_listing_id, p_status)` as owner-checked
+      SECURITY DEFINER: `approved → sold | rented | paused`, `paused → approved`
+      (re-publish, keeps `published_at`), `draft | rejected → deleted`. Writes
+      the status-history row via the existing trigger. `REVOKE FROM anon`.
+- [ ] My Listings card action sheet: **تم البيع / تم التأجير / إيقاف مؤقت /
+      إعادة النشر / حذف**, each with a confirm; l10n in both ARBs +
+      `app_strings.dart`.
+- [ ] Sold/rented listings stay visible on the publisher's own list under their
+      tab, disappear from public surfaces (the public view already filters on
+      `status = 'approved'`).
+- [ ] Drop the client-side `deleteDraft` path in favour of the RPC.
+- Verified by: on the device, as a plain publisher account (B2's second
+  account), each transition round-trips and the public feed/map/search no longer
+  show the listing.
+
+### A16 — Tell people about messages and viewings · M · after A14
+Review §1 M4.
+- [ ] Trigger on `messages` INSERT → `enqueue_notification(counterpart,
+      'message_received', {conversation_id, listing_id})`, skipped when an
+      unread `message_received` for the same conversation is younger than 10
+      minutes (no per-keystroke spam).
+- [ ] `request_viewing` → `viewing_requested` to the publisher;
+      `update_viewing_status` → `viewing_confirmed` / `viewing_declined` to the
+      requester.
+- [ ] Client: the three new types map to deep links (`/chat` thread,
+      `/inquiries`… viewings list) in the notification tap handler and the
+      in-app centre; l10n strings for each.
+- Verified by: two devices (A2's second account): message → push lands as a
+  heads-up on the other phone within seconds; viewing request → push; confirm →
+  push back.
+
+### A17 — Bound the map · S · any time
+Review §4 C1.
+- [ ] `search_map` gains `p_min_lat, p_max_lat, p_min_lng, p_max_lng` and
+      `LIMIT 500`; `v_listings_map_public` reads stay for the admin centroid
+      picker only.
+- [ ] Client passes the visible bounds and refetches on `onMapEvent` (debounced
+      300 ms); `loadAll()` removed.
+- Verified by: `EXPLAIN` shows the index on `(status, …)` plus the bounds
+  filter; the map still shows the 16 markers at Damascus zoom.
+
+### A18 — Thumbnails for listing photos · M · any time — the biggest bandwidth win
+Review §3 P1. Feed of 20 cards: ~3 MB → ~0.5 MB.
+- [ ] In `watermark_pipeline.dart`, also emit a 480-px long-edge JPEG q75 of
+      the same (watermarked) image; upload it as `<listing>/<id>.thumb.jpg`;
+      write `listing_media.thumbnail_path` (column exists).
+- [ ] `v_listings_public`, `v_listings_map_public`, the home-feed embedded
+      select, favourites, conversations and search results use
+      `coalesce(thumbnail_path, storage_path)` for card images; detail galleries
+      keep the full file.
+- [ ] Backfill: a one-off script (service-role, build machine) that downloads
+      each existing image, makes the thumb, uploads, updates the row — 80 files.
+- Verified by: bytes per home open measured on the device before/after
+  (`dumpsys netstats` or the proxy); no card shows the placeholder.
+
+### A19 — Page the chat thread · S · any time
+Review §4 C2. `.limit(50)` on the stream, ordered newest-first then reversed
+for display; "load earlier" fetches the previous 50 with `.lt('created_at',
+oldest)`. Verified by a 120-message thread on the AVD.
+
+### A20 — Make shared links open something · S · **blocked on B16 (domain)**
+Review §1 M3. Until a domain exists, point `_shareLinkBase` at the GitHub Pages
+site and add `docs/legal/site/l/index.html`: a tiny page that reads the listing
+id from the path, fetches `v_listings_public` with the public anon key, shows
+title / price / main photo, and offers **Open in app** (`alnujom://listings/<id>`,
+add that intent filter) and **Download** (the Telegram post). When B16 lands,
+switch the base and add the `https` intent filter with `autoVerify` +
+`assetlinks.json`.
+
+### A21 — A tile provider that allows apps · S · **blocked on B17 (a key)**
+Review §4. Swap the three `urlTemplate`s for the provider's URL with the key
+from `.env.json` (a new dart-define, never committed). Keep the OSM attribution.
+
+### A22 — Stop the audit log eating the database · S · any time
+Review §4 C3. Drop the three row-level audit triggers on `listing_media` (the
+listing-level audit already records the media change through the revision), and
+add a monthly `DELETE FROM audit_logs WHERE created_at < now() - interval '180
+days'` run by hand until `pg_cron` is decided (same note as A7). Verified by the
+row count and `pg_total_relation_size` before/after.
+
+### A23 — Filter the publisher dashboard's Realtime subscription · S · after A17
+Review §4. `subscribeTables(['listings','inquiries'])` → filter
+`publisher_user_id=eq.<uid>` on `listings` and route `inquiries` through a
+per-user channel; both need `REPLICA IDENTITY FULL` on those tables (see the
+2026-06 Realtime note) or the filtered events never arrive. Admin dashboard
+stays unfiltered (a handful of admins).
+
 ---
 
 ## B. Founder — only you can do these
@@ -274,6 +396,10 @@ deletion is real, so the sweep has to exist.
 | **B11** | **Restrict the Firebase Android key** (Google Cloud Console → the `AIza…` key → package `com.alnujom.app` + release fingerprint + FCM APIs only). | A leaked unrestricted key can be abused on your quota. | 10 min |
 | **B12** | **A backup super-admin** and your moderators enrolled from the in-app Roles screen. | So someone else can get in if you lose your phone. | 10 min |
 | **B13** | **Reels**: agree it stays hidden until there are ~10 videos. | Product call; no work either way today. | decision |
+| **B14** | **Decide the photo-bucket stance.** Photos of rejected / deleted / pending listings are downloadable by anyone who has the URL (review §2 S3). Paths are unguessable and the purge removes them after account deletion. **Accept** (recommended: simplest, fastest, what every listings site does) or **make the bucket private** (every image URL becomes a signed URL — slower first paint, and cache-unfriendly). | Today's behaviour contradicts what the July audit told you. | decision |
+| **B15** | **Budget for the Pro plan (~$25/month) at about 1,000 listings.** Storage (1 GB) is the first wall, egress (5 GB/month) the second, Realtime connections (200) the third; Pro removes all three and adds daily backups and image resizing (review §4). | Otherwise the app stops accepting photos one day with no warning. | decision + card |
+| **B16** | **A domain** for shareable links — `alnujom.app` is unregistered and every share today is a dead link (review §1 M3). Any registrar; ~$15/year. Send the name and I wire it (A20). | Sharing is the growth loop for a Telegram-distributed app. | 15 min |
+| **B17** | **A map-tile account** (MapTiler or Stadia Maps, both have a free tier) and its key, into `.env.json` on the build machine, never in chat. OpenStreetMap's own servers forbid being an app's default tile source (review §4). | A blank map the day the app gets traffic. | 10 min |
 
 ---
 
@@ -292,8 +418,18 @@ B7 (+ ≥5 real listings) ──► A11 delete demo data ──► launch announ
 after launch ──► A13
 ```
 
-Launch = A3 posted (B5), A9 and A8 done, A11 done, B1 done. Everything else can
-follow it.
+Launch = A3 posted (B5), A9 and A8 done, A11 done, B1 done, **and A14 applied**
+(without it the first saved search breaks listing approval). Everything else
+can follow it.
+
+**Added 2026-09-04 (section E):**
+
+```
+now ──► A14 fixes (proven bugs) ──► A15 close a listing ──► A16 message/viewing alerts
+        A17 map bounds · A18 thumbnails · A19 chat paging · A22 audit retention ── any time
+B16 domain ──► A20 share links        B17 tile key ──► A21 tiles
+B14 bucket stance (decision only)      B15 Pro plan at ~1,000 listings
+```
 
 ---
 
@@ -323,6 +459,30 @@ two-way chat and viewing tests, and only while those run.
 no longer exists in the codebase). The old one is dead weight and can confuse a
 walk — uninstall it before the A2 walk, but ask first, since it is a delete on
 the founder's own device.
+
+---
+
+## E. What the 2026-09-04 full review adds
+
+The review asked four questions — complete? secure? fast? scales? — and answered
+each from the live project, with every claim that could be run, run. The
+queue items are A14–A23 above and B14–B17; the evidence and the proofs are in
+[`REVIEW_2026-09-04.md`](REVIEW_2026-09-04.md). In one line each:
+
+- **Not complete:** a publisher cannot mark a listing sold / rented / paused,
+  cannot delete (the draft delete silently fails), shared links point at an
+  unregistered domain, and nobody is notified of a new message or a viewing
+  request.
+- **Not fully secure:** chat messages can be rewritten by the other party and
+  a viewing requester can self-confirm (both proven, both one migration to
+  close); photos of unapproved listings are public by URL (owner decision).
+- **Fast today:** 1.98 s cold start, 69 ms search; images are the drag.
+- **Scales in code, not in plan:** two unbounded queries and the audit log
+  need fixing; the Free plan's 1 GB storage and 5 GB egress are the real
+  ceilings at roughly 1,000 listings.
+- **One latent bug:** the notifications CHECK constraint rejects the
+  saved-search alert type — the first saved search will make listing
+  approval fail. A14.
 
 ---
 
