@@ -212,7 +212,12 @@ deletion is real, so the sweep has to exist.
 ### A9 — Settings the founder answers, Claude applies · S · **DONE 2026-09-03**
 - [x] `default_language` → `"ar"`.
 - [x] `support_contact` → phone and WhatsApp `+963991883342`, email `m.hekmatfanari@gmail.com`. Verified on the device: all three rows render on the About page. **The owner says these are provisional — remind him to swap them for business details before launch** (they also appear in the published privacy policy).
-- [ ] Record the new live values in `HANDOVER.md` §8.
+- [x] Live values recorded in `HANDOVER.md`, read straight out of `app_settings`
+      on 2026-09-04 rather than copied from a migration. The three problems that
+      section used to describe are all fixed; the ⚠️ on the provisional contacts
+      is stated there, including that changing them means re-running
+      `tool/build_privacy_site.py` and pushing `gh-pages`, since they are in the
+      **published** policy too.
 
 ### A10 — Version manifest · S · **blocked on B5 (the Telegram post URL) only — A3 is done**
 - [ ] Write `latest.json` per `docs/release/version-manifest.example.json` with
