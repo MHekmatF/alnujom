@@ -36,7 +36,12 @@ type NotificationType =
   | "listing_rejected"
   | "inquiry_received"
   | "agency_invitation"
-  | "saved_search_match";
+  | "saved_search_match"
+  | "message_received"
+  | "viewing_requested"
+  | "viewing_confirmed"
+  | "viewing_declined"
+  | "viewing_cancelled";
 
 interface DispatchBody {
   notification_id?: unknown;
@@ -95,6 +100,29 @@ const COPY: Record<NotificationType, { ar: [string, string]; en: [string, string
   saved_search_match: {
     ar: ["عقار جديد مطابق", "نزل عقار جديد يطابق بحثك المحفوظ"],
     en: ["New matching listing", "A new listing matches your saved search"],
+  },
+  // Plan A16 — the two things that actually bring someone back to the app.
+  // The message BODY is deliberately absent: this copy lands in the OS tray,
+  // which is visible on a locked screen, and FR-004 keeps free text out of it.
+  message_received: {
+    ar: ["رسالة جديدة", "وصلتك رسالة جديدة — اضغط لقراءتها"],
+    en: ["New message", "You have a new message — tap to read it"],
+  },
+  viewing_requested: {
+    ar: ["طلب معاينة", "طلب أحدهم معاينة لأحد إعلاناتك"],
+    en: ["Viewing request", "Someone requested a viewing of your listing"],
+  },
+  viewing_confirmed: {
+    ar: ["تم تأكيد المعاينة", "تم تأكيد موعد المعاينة"],
+    en: ["Viewing confirmed", "Your viewing appointment is confirmed"],
+  },
+  viewing_declined: {
+    ar: ["تعذّر الموعد", "لم يتم قبول موعد المعاينة — اضغط للتفاصيل"],
+    en: ["Viewing not accepted", "Your viewing request was declined — tap for details"],
+  },
+  viewing_cancelled: {
+    ar: ["إلغاء معاينة", "تم إلغاء موعد معاينة"],
+    en: ["Viewing cancelled", "A viewing appointment was cancelled"],
   },
 };
 
@@ -265,9 +293,20 @@ Deno.serve(async (req: Request) => {
     // Phase 035 — per-category mute. Transactional types (account/listing
     // approval + rejection) are ALWAYS delivered; only the user-muteable
     // categories gate here. History rows are written by the trigger regardless.
+    // Plan A16 — chat and viewings join the muteable "messages" category.
+    // Account and listing decisions stay transactional and are always delivered.
+    const MESSAGE_CATEGORY = new Set([
+      "inquiry_received",
+      "agency_invitation",
+      "message_received",
+      "viewing_requested",
+      "viewing_confirmed",
+      "viewing_declined",
+      "viewing_cancelled",
+    ]);
     const categoryColumn = type === "saved_search_match"
       ? "notif_new_matches"
-      : (type === "inquiry_received" || type === "agency_invitation")
+      : MESSAGE_CATEGORY.has(type)
       ? "notif_messages"
       : null;
     if (

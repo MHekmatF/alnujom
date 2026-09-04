@@ -33,8 +33,6 @@ import 'app_network_image.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/bloc/auth_state.dart';
 import '../../features/crm/presentation/pages/crm_page.dart';
-import '../../features/viewings/presentation/cubit/viewings_cubit.dart';
-import '../../features/viewings/presentation/pages/viewings_list_page.dart';
 import '../../l10n/app_localizations.dart';
 import '../../shared/domain/entities/profile.dart';
 import '../../shared/domain/value_objects/publisher_status.dart';
@@ -174,16 +172,12 @@ class AppNavDrawer extends StatelessWidget {
                       DrawerRow(
                         icon: Icons.calendar_today_outlined,
                         title: AppLocalizations.of(context)!.viewingsTile,
+                        // Plan A16 — goes through the route now, so the drawer
+                        // and a viewing notification land on the same screen
+                        // rather than two stacked copies of it.
                         onTap: () => _closeThen(
                           context,
-                          () => Navigator.of(context).push(
-                            MaterialPageRoute<void>(
-                              builder: (_) => BlocProvider<ViewingsCubit>(
-                                create: (_) => getIt<ViewingsCubit>(),
-                                child: const ViewingsListPage(),
-                              ),
-                            ),
-                          ),
+                          () => context.go(AppRoutes.viewings),
                         ),
                       ),
                     ],

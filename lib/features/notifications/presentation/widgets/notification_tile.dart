@@ -157,6 +157,15 @@ class NotificationTile extends StatelessWidget {
       case NotificationType.savedSearchMatch:
         // Phase 25 — bell/search-style mark for a saved-search match alert.
         return LucideIcons.bell_ring;
+      case NotificationType.messageReceived:
+        return Icons.chat_bubble_outline;
+      case NotificationType.viewingRequested:
+        return Icons.calendar_today_outlined;
+      case NotificationType.viewingConfirmed:
+        return Icons.event_available_outlined;
+      case NotificationType.viewingDeclined:
+      case NotificationType.viewingCancelled:
+        return Icons.event_busy_outlined;
     }
   }
 
@@ -170,9 +179,16 @@ class NotificationTile extends StatelessWidget {
       case NotificationType.accountRejected:
       case NotificationType.listingRejected:
         return colors.error;
+      case NotificationType.viewingConfirmed:
+        return colors.success;
+      case NotificationType.viewingDeclined:
+      case NotificationType.viewingCancelled:
+        return colors.error;
       case NotificationType.inquiryReceived:
       case NotificationType.agencyInvitation:
       case NotificationType.savedSearchMatch:
+      case NotificationType.messageReceived:
+      case NotificationType.viewingRequested:
         return colors.primary;
     }
   }
@@ -193,6 +209,16 @@ class NotificationTile extends StatelessWidget {
         return l10n.notification_type_agency_invitation;
       case NotificationType.savedSearchMatch:
         return l10n.notification_type_saved_search_match;
+      case NotificationType.messageReceived:
+        return l10n.notification_type_message_received;
+      case NotificationType.viewingRequested:
+        return l10n.notification_type_viewing_requested;
+      case NotificationType.viewingConfirmed:
+        return l10n.notification_type_viewing_confirmed;
+      case NotificationType.viewingDeclined:
+        return l10n.notification_type_viewing_declined;
+      case NotificationType.viewingCancelled:
+        return l10n.notification_type_viewing_cancelled;
     }
   }
 
@@ -214,12 +240,20 @@ class NotificationTile extends StatelessWidget {
           listingTitle,
           savedSearchLabel,
         );
+      // The A16 types carry UUIDs only — the message body and the counterpart's
+      // name are deliberately not in `params`, because the same payload reaches
+      // the OS tray on a locked screen. The title alone says enough.
       case NotificationType.accountApproved:
       case NotificationType.accountRejected:
       case NotificationType.listingApproved:
       case NotificationType.listingRejected:
       case NotificationType.inquiryReceived:
       case NotificationType.agencyInvitation:
+      case NotificationType.messageReceived:
+      case NotificationType.viewingRequested:
+      case NotificationType.viewingConfirmed:
+      case NotificationType.viewingDeclined:
+      case NotificationType.viewingCancelled:
         return null;
     }
   }

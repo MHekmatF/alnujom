@@ -3156,6 +3156,26 @@
   "@comparisonValueNone": {
     "description": "Phase 25 — Placeholder for a missing value cell in the comparison table."
   },
+  "notification_type_message_received": "رسالة جديدة",
+  "@notification_type_message_received": {
+    "description": "Plan A16 - notification centre title for a chat/viewing alert."
+  },
+  "notification_type_viewing_requested": "طلب معاينة",
+  "@notification_type_viewing_requested": {
+    "description": "Plan A16 - notification centre title for a chat/viewing alert."
+  },
+  "notification_type_viewing_confirmed": "تم تأكيد المعاينة",
+  "@notification_type_viewing_confirmed": {
+    "description": "Plan A16 - notification centre title for a chat/viewing alert."
+  },
+  "notification_type_viewing_declined": "تعذّر موعد المعاينة",
+  "@notification_type_viewing_declined": {
+    "description": "Plan A16 - notification centre title for a chat/viewing alert."
+  },
+  "notification_type_viewing_cancelled": "إلغاء معاينة",
+  "@notification_type_viewing_cancelled": {
+    "description": "Plan A16 - notification centre title for a chat/viewing alert."
+  },
   "notification_type_saved_search_match": "عقار جديد يطابق بحثك المحفوظ",
   "@notification_type_saved_search_match": {
     "description": "Growth — saved-search-match notification title."

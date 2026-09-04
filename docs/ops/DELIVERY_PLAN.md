@@ -376,23 +376,58 @@ transactions:
   is still owed — see the PARTIAL line above.
 
 
-### A16 — Tell people about messages and viewings · M · **next — unblocked**
-Review §1 M4.
-- [ ] Trigger on `messages` INSERT → `enqueue_notification(counterpart,
-      'message_received', {conversation_id, listing_id})`, skipped when an
-      unread `message_received` for the same conversation is younger than 10
-      minutes (no per-keystroke spam).
-- [ ] `request_viewing` → `viewing_requested` to the publisher;
-      `update_viewing_status` → `viewing_confirmed` / `viewing_declined` to the
-      requester.
-- [ ] Client: the three new types map to deep links (`/chat` thread,
-      `/inquiries`… viewings list) in the notification tap handler and the
-      in-app centre; l10n strings for each.
-- Verified by: two devices (A2's second account): message → push lands as a
-  heads-up on the other phone within seconds; viewing request → push; confirm →
-  push back.
+### A16 — Tell people about messages and viewings · M · **DONE 2026-09-04**
+Review M4. Six notification types existed and every one was about moderation.
+Nothing fired for the two things that actually need a person to come back:
+`bump_conversation_last_message` only moved a timestamp, and `request_viewing` /
+`update_viewing_status` enqueued nothing at all.
 
-### A17 — Bound the map · S · any time
+Migration `20260904120005_message_and_viewing_alerts.sql`, applied and verified
+in a rolled-back transaction:
+
+- [x] `notify_new_message()` on `messages` AFTER INSERT. The recipient is derived
+      from the conversation, never from the payload, so a hand-crafted insert
+      cannot address someone else's notification.
+- [x] **Debounced.** A conversation is a burst of short messages and one push per
+      message would be unusable. It notifies once, then stays quiet until the
+      recipient has read it or ten minutes pass. **Verified: three messages in a
+      row produced exactly one alert.**
+- [x] `request_viewing` → `viewing_requested` to the publisher.
+      `update_viewing_status` → `viewing_confirmed` / `viewing_declined` /
+      `viewing_cancelled` to **the other party** — confirm and decline are the
+      publisher's to make so they reach the requester; cancel can come from
+      either side so it reaches whoever did not press it.
+- [x] `viewing_cancelled` added to the CHECK: a cancellation leaves the other
+      person with a dead appointment in their calendar, which is the same gap
+      pointing the other way.
+- [x] Payloads carry **UUIDs only** — no message body, no counterpart name. The
+      same payload reaches the OS tray, which is readable on a locked screen.
+- [x] `dispatch_push` **redeployed (version 5)** with bilingual tray copy for all
+      five types, and they join the user-muteable `notif_messages` category
+      rather than the always-delivered transactional one. The deployed source
+      was read back and matches the repo byte for byte; the endpoint answers
+      `401` to an unauthenticated call and `{"code":"unauthorized"}` to a wrong
+      token.
+- [x] Client: five new `NotificationType` values, tray icons and semantic
+      colours (confirmed green, declined/cancelled red), titles in both ARBs
+      plus the `_DebugAppLocalizations` overrides, and deep links — a message
+      opens `/chat`, any viewing alert opens `/viewings`.
+- [x] **`/viewings` is a route now.** It had none: the drawer pushed the page
+      directly, so a viewing notification had nowhere to navigate to. It is
+      auth-gated exactly like `/chat`, and the drawer goes through the route so
+      the two cannot land on stacked copies of the same screen.
+- [ ] **⚠️ PARTIAL — no push has been seen landing on a phone.** Everything up to
+      the device token is proven: the rows are written, the debounce holds, the
+      dispatcher accepts the new types and is live. What is unverified is the
+      last hop — FCM to a handset — because it needs two signed-in accounts
+      messaging each other. That is the same second account A2 has been waiting
+      on; when it exists, this and A2's chat/viewing walk are one test.
+- Verified by: the six-linter suite; the rolled-back proof above (1 alert for 3
+  messages, `viewing_requested` to the publisher, `viewing_confirmed` back to
+  the requester); the redeployed function read back and probed.
+
+
+### A17 — Bound the map · S · **next — any time**
 Review §4 C1.
 - [ ] `search_map` gains `p_min_lat, p_max_lat, p_min_lng, p_max_lng` and
       `LIMIT 500`; `v_listings_map_public` reads stay for the admin centroid
