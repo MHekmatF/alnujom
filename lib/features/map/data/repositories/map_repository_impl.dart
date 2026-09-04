@@ -14,6 +14,7 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/errors/failure.dart';
 import '../../../../core/errors/result.dart';
 import '../../../search/domain/entities/filter_state.dart';
+import '../../domain/entities/map_bounds.dart';
 import '../../domain/entities/map_marker.dart';
 import '../../domain/repositories/map_repository.dart';
 import '../datasources/supabase_map_datasource.dart';
@@ -25,11 +26,15 @@ class MapRepositoryImpl implements MapRepository {
   final SupabaseMapDatasource _datasource;
 
   @override
-  Future<Result<List<MapMarker>>> loadMarkers({FilterState? filter}) async {
+  Future<Result<List<MapMarker>>> loadMarkers({
+    FilterState? filter,
+    MapBounds? bounds,
+  }) async {
     try {
-      final markers = filter == null
-          ? await _datasource.loadAll()
-          : await _datasource.loadFiltered(filter);
+      final markers = await _datasource.loadMarkers(
+        filter: filter,
+        bounds: bounds,
+      );
       return Success(markers);
     } on SocketException catch (e, st) {
       return FailureResult(NetworkFailure(e.message, cause: e, stackTrace: st));

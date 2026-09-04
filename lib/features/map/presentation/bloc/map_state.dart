@@ -24,6 +24,7 @@ import 'package:flutter_map/flutter_map.dart' show CameraFit;
 
 import '../../../../core/errors/failure.dart';
 import '../../../search/domain/entities/filter_state.dart';
+import '../../domain/entities/map_bounds.dart';
 import '../../domain/entities/map_marker.dart';
 
 /// Geolocation sub-state machine per phase15-geolocation-envelope.md.
@@ -64,9 +65,20 @@ final class MapLoaded extends MapState {
     this.activeFilter,
     required this.showFilterAlert,
     required this.geolocationStatus,
+    this.loadedBounds,
+    this.markersCapped = false,
   });
 
   final List<MapMarker> markers;
+
+  /// Plan A17 — the box [markers] were fetched for. `null` means the fetch was
+  /// unbounded, i.e. the whole country.
+  final MapBounds? loadedBounds;
+
+  /// The server returned a full page ([kMapMarkerCap]), so [markers] is a
+  /// truncation of what is really in [loadedBounds] and cannot be reused for a
+  /// smaller viewport — zooming in has to re-ask.
+  final bool markersCapped;
 
   /// flutter_map's camera descriptor. Set by [MapOpened]
   /// (entry-context-driven), by [GeolocationPermissionGranted]
@@ -97,6 +109,9 @@ final class MapLoaded extends MapState {
     bool clearActiveFilter = false,
     bool? showFilterAlert,
     GeolocationStatus? geolocationStatus,
+    MapBounds? loadedBounds,
+    bool clearLoadedBounds = false,
+    bool? markersCapped,
   }) {
     return MapLoaded(
       markers: markers ?? this.markers,
@@ -109,12 +124,18 @@ final class MapLoaded extends MapState {
           : (activeFilter ?? this.activeFilter),
       showFilterAlert: showFilterAlert ?? this.showFilterAlert,
       geolocationStatus: geolocationStatus ?? this.geolocationStatus,
+      loadedBounds: clearLoadedBounds
+          ? null
+          : (loadedBounds ?? this.loadedBounds),
+      markersCapped: markersCapped ?? this.markersCapped,
     );
   }
 
   @override
   List<Object?> get props => [
     markers,
+    loadedBounds,
+    markersCapped,
     // CameraFit is not Equatable in flutter_map ^7 — identity-compare is
     // acceptable since handlers always emit a fresh instance.
     identityHashCode(cameraFit),

@@ -4,9 +4,12 @@
 // `lib/features/map/` per Constitution IX (grep gate in `quickstart.md` §8c
 // must show exactly ONE matching file).
 //
-// Two load paths:
-//   - loadAll()             → SELECT * FROM v_listings_map_public
-//   - loadFiltered(filter)  → RPC search_map(...) with 16 filter params
+// ONE load path (Plan A17): loadMarkers({filter, bounds}) → RPC search_map(...).
+//
+// It used to be two, and the unfiltered one read `v_listings_map_public` whole —
+// every approved listing in the country, on every map open, with no cap. Both
+// paths now go through the RPC, which takes the viewport and hard-caps the
+// result at [kMapMarkerCap], so there is no longer a way to ask for everything.
 //
 // R-75 — price-range currency conversion: mirrors Phase 14's
 // `SupabaseSearchDatasource.fetchPage` for the non-USD/non-SYP fallback path
@@ -19,6 +22,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import '../../../listing_form/domain/entities/listing.dart';
 import '../../../search/domain/entities/count_filter_mode.dart';
 import '../../../search/domain/entities/filter_state.dart';
+import '../../domain/entities/map_bounds.dart';
 import '../../domain/entities/map_marker.dart';
 import '../models/map_marker_dto.dart';
 
@@ -28,15 +32,22 @@ class SupabaseMapDatasource {
 
   final supabase.SupabaseClient _client;
 
-  /// Fetches every approved+visible marker via the unfiltered view.
-  Future<List<MapMarker>> loadAll() async {
-    final result = await _client.from('v_listings_map_public').select();
-    return _rowsToMarkers(result as List<dynamic>);
-  }
-
-  /// Fetches markers narrowed by [filter] via the `search_map` RPC.
-  Future<List<MapMarker>> loadFiltered(FilterState filter) async {
-    final params = await _filterToRpcParams(filter);
+  /// Fetches the markers inside [bounds], narrowed by [filter]. Both are
+  /// optional: a null filter sends no narrowing parameters, and null bounds
+  /// send no box (the server still caps the result — Plan A17).
+  Future<List<MapMarker>> loadMarkers({
+    FilterState? filter,
+    MapBounds? bounds,
+  }) async {
+    final params = filter == null
+        ? <String, dynamic>{}
+        : await _filterToRpcParams(filter);
+    if (bounds != null) {
+      params['p_min_lat'] = bounds.minLat;
+      params['p_max_lat'] = bounds.maxLat;
+      params['p_min_lng'] = bounds.minLng;
+      params['p_max_lng'] = bounds.maxLng;
+    }
     final result = await _client.rpc('search_map', params: params);
     return _rowsToMarkers(result as List<dynamic>);
   }

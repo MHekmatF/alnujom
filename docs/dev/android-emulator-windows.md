@@ -58,6 +58,45 @@ cd H:\alnujom-project
 flutter run --device-id=emulator-5554 --dart-define-from-file=.env.json --debug
 ```
 
+## Open: "too many emulator instances" — blocked since 2026-09-04
+
+The AVD stopped starting at all. Every launch dies within seconds on:
+
+```
+ERROR        | It seems too many emulator instances are running on this machine. Aborting.
+```
+
+**with no emulator running.** Confirmed each time: no `qemu-system-x86_64` and no
+`emulator` process, and `adb devices` listing only the physical Infinix.
+
+Ruled out, in this order:
+
+- **Not the window-placement problem above** — the process exits, it does not
+  merely hide.
+- **Not the hypervisor.** The same log says `Windows Hypervisor Platform
+  accelerator is operational` and `Hypervisor compatibility ... are met` a few
+  lines before the abort.
+- **Not the AVD's own locks.** Deleting `hardware-qemu.ini.lock` (a directory,
+  needs `-Recurse`) and `multiinstance.lock` from
+  `C:\Users\<user>\.android\avd\Pixel_8_Pro.avd` clears them, and the very
+  next launch aborts the same way and re-creates them.
+- **Not the discovery directory.** `%LOCALAPPDATA%\Temp\avd\running` exists and
+  is **empty**, so nothing is registered as running.
+- **Probably not the GPU**, though the log does carry
+  `Critical: Failed to load opengl32sw` → `falling back to system OpenGL` a few
+  lines earlier, under `-gpu swiftshader_indirect`. Worth eliminating next by
+  trying `-gpu host` and `-gpu guest`.
+
+Left to try: another AVD (`Pixel_5_API_28`) to tell an AVD-specific fault from a
+machine-wide one; `-port 5560` in case the console-port probe is what is
+failing; `-read-only`; and emulator 36.5.11's own
+`%LOCALAPPDATA%\Temp\AndroidEmulator\` state.
+
+**Consequence:** the project's accepted QA surface is unavailable. On-device
+verification currently needs the owner's Infinix, and a debug install shares
+`com.alnujom.app` with the release build he is carrying — it would replace it.
+So device walks are queued behind him, not merely behind a boot.
+
 ## Why this matters
 
 Without this fix, the emulator looks broken every time — the agent has to rediscover that the QEMU VM is healthy and only the window placement is wrong, then write the SetWindowPos call from scratch. Centralising it here means future sessions can paste the PowerShell snippet and move on within a minute.
