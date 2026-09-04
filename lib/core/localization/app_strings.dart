@@ -5832,6 +5832,26 @@ final class _DebugAppLocalizations extends AppLocalizations {
 
   // ── Growth (Batch 1 — alerts + data saver) ───────────────────────────────
   @override
+  String get notification_type_message_received =>
+      _resolve('notification_type_message_received', (loc) => loc.notification_type_message_received);
+
+  @override
+  String get notification_type_viewing_requested =>
+      _resolve('notification_type_viewing_requested', (loc) => loc.notification_type_viewing_requested);
+
+  @override
+  String get notification_type_viewing_confirmed =>
+      _resolve('notification_type_viewing_confirmed', (loc) => loc.notification_type_viewing_confirmed);
+
+  @override
+  String get notification_type_viewing_declined =>
+      _resolve('notification_type_viewing_declined', (loc) => loc.notification_type_viewing_declined);
+
+  @override
+  String get notification_type_viewing_cancelled =>
+      _resolve('notification_type_viewing_cancelled', (loc) => loc.notification_type_viewing_cancelled);
+
+  @override
   String get notification_type_saved_search_match => _resolve(
     'notification_type_saved_search_match',
     (loc) => loc.notification_type_saved_search_match,

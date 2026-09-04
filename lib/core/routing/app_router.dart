@@ -67,6 +67,8 @@ import '../../features/map/presentation/pages/map_page.dart';
 import '../../features/assistant/presentation/pages/assistant_page.dart';
 import '../../features/reels/presentation/pages/reels_tab_page.dart';
 import '../../features/search/presentation/pages/search_page.dart';
+import '../../features/viewings/presentation/cubit/viewings_cubit.dart';
+import '../../features/viewings/presentation/pages/viewings_list_page.dart';
 import '../../features/search/presentation/pages/saved_searches_page.dart';
 import '../../features/search/domain/entities/filter_state.dart';
 import '../../features/publisher_dashboard/presentation/pages/publisher_dashboard_page.dart';
@@ -151,6 +153,10 @@ abstract final class AppRoutes {
   static const favorites = '/favorites';
   // Phase 035: authenticated Messages (chat) tab route.
   static const chat = '/chat';
+  // Plan A16 — the viewings list. It had no route at all: the drawer pushed
+  // the page directly, which meant a `viewing_requested` notification had
+  // nowhere to navigate to. Auth-gated exactly like /chat.
+  static const viewings = '/viewings';
   // Phase 18 FR-022: authenticated My-Reports page route.
   static const reports = '/reports';
   // Phase 18 FR-019: admin moderation queue route.
@@ -268,6 +274,8 @@ abstract final class AppRouteNames {
   static const favorites = 'favorites';
   // Phase 035: authenticated Messages (chat) tab route name.
   static const chat = 'chat';
+  // Plan A16 — viewings list route name.
+  static const viewings = 'viewings';
   // Phase 18 FR-022: authenticated My-Reports page route name.
   static const reports = 'reports';
   // Phase 18 FR-019: admin moderation queue route name.
@@ -757,6 +765,21 @@ GoRouter buildAppRouter({
         builder: (context, state) => BlocProvider<ConversationsCubit>(
           create: (_) => getIt<ConversationsCubit>(),
           child: const ConversationsListPage(),
+        ),
+      ),
+
+      // ─── Plan A16 — authenticated viewings list ───
+      // Requires sign-in; anonymous deep-links redirect to /login (mirrors
+      // /chat). Exists so the viewing notifications have somewhere to land —
+      // before this the page was only reachable by pushing it from the drawer.
+      GoRoute(
+        path: AppRoutes.viewings,
+        name: AppRouteNames.viewings,
+        redirect: (context, state) =>
+            authBloc.state is Unauthenticated ? AppRoutes.login : null,
+        builder: (context, state) => BlocProvider<ViewingsCubit>(
+          create: (_) => getIt<ViewingsCubit>(),
+          child: const ViewingsListPage(),
         ),
       ),
 

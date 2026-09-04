@@ -3473,6 +3473,26 @@
   "@comparisonValueNone": {
     "description": "Phase 25 — Placeholder for a missing value cell in the comparison table."
   },
+  "notification_type_message_received": "New message",
+  "@notification_type_message_received": {
+    "description": "Plan A16 - notification centre title for a chat/viewing alert."
+  },
+  "notification_type_viewing_requested": "Viewing request",
+  "@notification_type_viewing_requested": {
+    "description": "Plan A16 - notification centre title for a chat/viewing alert."
+  },
+  "notification_type_viewing_confirmed": "Viewing confirmed",
+  "@notification_type_viewing_confirmed": {
+    "description": "Plan A16 - notification centre title for a chat/viewing alert."
+  },
+  "notification_type_viewing_declined": "Viewing not accepted",
+  "@notification_type_viewing_declined": {
+    "description": "Plan A16 - notification centre title for a chat/viewing alert."
+  },
+  "notification_type_viewing_cancelled": "Viewing cancelled",
+  "@notification_type_viewing_cancelled": {
+    "description": "Plan A16 - notification centre title for a chat/viewing alert."
+  },
   "notification_type_saved_search_match": "New match for your saved search",
   "@notification_type_saved_search_match": {
     "description": "Growth — saved-search-match notification title."

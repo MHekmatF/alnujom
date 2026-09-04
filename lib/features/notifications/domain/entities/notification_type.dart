@@ -16,7 +16,13 @@ enum NotificationType {
   listingRejected,
   inquiryReceived,
   agencyInvitation,
-  savedSearchMatch;
+  savedSearchMatch,
+  // Plan A16 — the two things that actually bring someone back to the app.
+  messageReceived,
+  viewingRequested,
+  viewingConfirmed,
+  viewingDeclined,
+  viewingCancelled;
 
   /// The wire key stored in the database and carried in push payloads.
   String get key {
@@ -35,6 +41,16 @@ enum NotificationType {
         return 'agency_invitation';
       case NotificationType.savedSearchMatch:
         return 'saved_search_match';
+      case NotificationType.messageReceived:
+        return 'message_received';
+      case NotificationType.viewingRequested:
+        return 'viewing_requested';
+      case NotificationType.viewingConfirmed:
+        return 'viewing_confirmed';
+      case NotificationType.viewingDeclined:
+        return 'viewing_declined';
+      case NotificationType.viewingCancelled:
+        return 'viewing_cancelled';
     }
   }
 

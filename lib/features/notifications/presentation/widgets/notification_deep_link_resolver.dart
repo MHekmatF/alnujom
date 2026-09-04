@@ -157,6 +157,16 @@ abstract final class NotificationDeepLinkResolver {
           AppRouteNames.listingDetails,
           pathParams: {'id': id},
         );
+      // Plan A16 — chat lands on the conversation list rather than the thread:
+      // a thread has no route of its own (it is pushed from the list), and the
+      // list puts the newest activity first, so the message is one tap away.
+      case NotificationType.messageReceived:
+        return const _NavRoute(AppRoutes.chat);
+      case NotificationType.viewingRequested:
+      case NotificationType.viewingConfirmed:
+      case NotificationType.viewingDeclined:
+      case NotificationType.viewingCancelled:
+        return const _NavRoute(AppRoutes.viewings);
     }
   }
 
