@@ -83,6 +83,11 @@ class _MyListingsViewState extends State<_MyListingsView> {
   int _lastRenewSuccessToken = 0;
   int _lastRenewErrorToken = 0;
 
+  // The same pair for the A15 lifecycle actions (sold / rented / paused /
+  // re-published / deleted).
+  int _lastStatusSuccessToken = 0;
+  int _lastStatusErrorToken = 0;
+
   @override
   void initState() {
     super.initState();
@@ -119,27 +124,62 @@ class _MyListingsViewState extends State<_MyListingsView> {
           final currenciesByCode = <String, Currency>{
             for (final c in currencySnap.data ?? const <Currency>[]) c.code: c,
           };
-          return BlocListener<MyListingsBloc, MyListingsState>(
-            listenWhen: (prev, curr) =>
-                prev.renewSuccessToken != curr.renewSuccessToken ||
-                prev.renewErrorToken != curr.renewErrorToken,
-            listener: (context, state) {
-              final succeeded =
-                  state.renewSuccessToken != _lastRenewSuccessToken;
-              final failed = state.renewErrorToken != _lastRenewErrorToken;
-              _lastRenewSuccessToken = state.renewSuccessToken;
-              _lastRenewErrorToken = state.renewErrorToken;
-              if (!succeeded && !failed) return;
-              AppToast.show(
-                context,
-                succeeded
-                    ? l10n.myListingsRenewSuccess
-                    : l10n.myListingsRenewError,
-                variant: succeeded
-                    ? AppToastVariant.success
-                    : AppToastVariant.error,
-              );
-            },
+          return MultiBlocListener(
+            listeners: [
+              BlocListener<MyListingsBloc, MyListingsState>(
+                listenWhen: (prev, curr) =>
+                    prev.renewSuccessToken != curr.renewSuccessToken ||
+                    prev.renewErrorToken != curr.renewErrorToken,
+                listener: (context, state) {
+                  final succeeded =
+                      state.renewSuccessToken != _lastRenewSuccessToken;
+                  final failed = state.renewErrorToken != _lastRenewErrorToken;
+                  _lastRenewSuccessToken = state.renewSuccessToken;
+                  _lastRenewErrorToken = state.renewErrorToken;
+                  if (!succeeded && !failed) return;
+                  AppToast.show(
+                    context,
+                    succeeded
+                        ? l10n.myListingsRenewSuccess
+                        : l10n.myListingsRenewError,
+                    variant: succeeded
+                        ? AppToastVariant.success
+                        : AppToastVariant.error,
+                  );
+                },
+              ),
+              // Plan A15 — sold / rented / paused / re-published / deleted.
+              // Same one-shot-token idiom as renew above: the state carries a
+              // counter, not a flag, so a repeat of the same outcome still
+              // fires exactly one toast.
+              BlocListener<MyListingsBloc, MyListingsState>(
+                listenWhen: (prev, curr) =>
+                    prev.statusChangeSuccessToken !=
+                        curr.statusChangeSuccessToken ||
+                    prev.statusChangeErrorToken != curr.statusChangeErrorToken,
+                listener: (context, state) {
+                  final succeeded =
+                      state.statusChangeSuccessToken != _lastStatusSuccessToken;
+                  final failed =
+                      state.statusChangeErrorToken != _lastStatusErrorToken;
+                  _lastStatusSuccessToken = state.statusChangeSuccessToken;
+                  _lastStatusErrorToken = state.statusChangeErrorToken;
+                  if (!succeeded && !failed) return;
+                  final moved = state.lastStatusChange;
+                  AppToast.show(
+                    context,
+                    succeeded && moved != null
+                        ? l10n.myListingsStatusChangeSuccess(
+                            StatusBadge.labelFor(moved, l10n),
+                          )
+                        : l10n.myListingsStatusChangeFailed,
+                    variant: succeeded
+                        ? AppToastVariant.success
+                        : AppToastVariant.error,
+                  );
+                },
+              ),
+            ],
             child: BlocBuilder<MyListingsBloc, MyListingsState>(
               builder: (context, state) {
                 if (state.loading && state.listings.isEmpty) {

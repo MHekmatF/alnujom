@@ -2,9 +2,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/errors/result.dart';
+import '../../../listing_form/domain/entities/listing.dart';
 import '../../domain/entities/publisher_listing.dart';
 import '../../domain/usecases/list_my_listings.dart';
 import '../../domain/usecases/renew_listing.dart';
+import '../../domain/usecases/set_own_listing_status.dart';
 import 'my_listings_event.dart';
 import 'my_listings_state.dart';
 
@@ -12,17 +14,22 @@ const int _pageSize = 20;
 
 @injectable
 class MyListingsBloc extends Bloc<MyListingsEvent, MyListingsState> {
-  MyListingsBloc(this._listMyListings, this._renewListing)
-    : super(const MyListingsState()) {
+  MyListingsBloc(
+    this._listMyListings,
+    this._renewListing,
+    this._setOwnListingStatus,
+  ) : super(const MyListingsState()) {
     on<LoadMyListings>(_onLoad);
     on<ChangeStatusFilter>(_onChangeFilter);
     on<LoadMore>(_onLoadMore);
     on<Refresh>(_onRefresh);
     on<MyListingsRenewRequested>(_onRenewRequested);
+    on<MyListingsStatusChangeRequested>(_onStatusChangeRequested);
   }
 
   final ListMyListings _listMyListings;
   final RenewListing _renewListing;
+  final SetOwnListingStatus _setOwnListingStatus;
 
   Future<void> _onLoad(
     LoadMyListings event,
@@ -159,6 +166,56 @@ class MyListingsBloc extends Bloc<MyListingsEvent, MyListingsState> {
           state.copyWith(
             renewingId: null,
             renewErrorToken: state.renewErrorToken + 1,
+          ),
+        );
+    }
+  }
+
+  /// Marks a listing sold / rented / paused, re-publishes it, or soft-deletes
+  /// it. On success the row is updated in place rather than re-fetched, so the
+  /// list does not jump — and it is dropped entirely when it no longer belongs
+  /// in the current tab (deleted always; a status filter it no longer matches).
+  Future<void> _onStatusChangeRequested(
+    MyListingsStatusChangeRequested event,
+    Emitter<MyListingsState> emit,
+  ) async {
+    if (state.statusChangingId != null) return;
+    emit(state.copyWith(statusChangingId: event.listingId));
+
+    final result = await _setOwnListingStatus(
+      listingId: event.listingId,
+      status: event.status,
+    );
+
+    switch (result) {
+      case Success<void>():
+        final leavesTheList =
+            event.status == ListingStatus.deleted ||
+            (state.statusFilter != null && state.statusFilter != event.status);
+        final updated = <PublisherListing>[
+          for (final pl in state.listings)
+            if (pl.listing.id != event.listingId)
+              pl
+            else if (!leavesTheList)
+              PublisherListing(
+                listing: pl.listing.copyWith(status: event.status),
+                latestStatusHistoryEntry: pl.latestStatusHistoryEntry,
+                primaryPrice: pl.primaryPrice,
+              ),
+        ];
+        emit(
+          state.copyWith(
+            statusChangingId: null,
+            listings: updated,
+            lastStatusChange: event.status,
+            statusChangeSuccessToken: state.statusChangeSuccessToken + 1,
+          ),
+        );
+      case FailureResult<void>():
+        emit(
+          state.copyWith(
+            statusChangingId: null,
+            statusChangeErrorToken: state.statusChangeErrorToken + 1,
           ),
         );
     }

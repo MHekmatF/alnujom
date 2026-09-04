@@ -2831,6 +2831,67 @@
       }
     }
   },
+  "myListingsActionsTitle": "خيارات الإعلان",
+  "@myListingsActionsTitle": {
+    "description": "Plan A15 - publisher listing lifecycle actions (My Listings card menu)."
+  },
+  "myListingsActionMarkSold": "تمّ البيع",
+  "@myListingsActionMarkSold": {
+    "description": "Plan A15 - publisher listing lifecycle actions (My Listings card menu)."
+  },
+  "myListingsActionMarkRented": "تمّ التأجير",
+  "@myListingsActionMarkRented": {
+    "description": "Plan A15 - publisher listing lifecycle actions (My Listings card menu)."
+  },
+  "myListingsActionMarkSoldSubtitle": "ينزاح من نتائج البحث ويبقى في قائمتك",
+  "@myListingsActionMarkSoldSubtitle": {
+    "description": "Plan A15 - publisher listing lifecycle actions (My Listings card menu)."
+  },
+  "myListingsActionPause": "إيقاف مؤقّت",
+  "@myListingsActionPause": {
+    "description": "Plan A15 - publisher listing lifecycle actions (My Listings card menu)."
+  },
+  "myListingsActionPauseSubtitle": "يختفي من البحث، وتقدر ترجّعه وقت ما بدك",
+  "@myListingsActionPauseSubtitle": {
+    "description": "Plan A15 - publisher listing lifecycle actions (My Listings card menu)."
+  },
+  "myListingsActionRepublish": "إعادة النشر",
+  "@myListingsActionRepublish": {
+    "description": "Plan A15 - publisher listing lifecycle actions (My Listings card menu)."
+  },
+  "myListingsActionRepublishSubtitle": "يرجع للظهور فوراً بدون مراجعة جديدة",
+  "@myListingsActionRepublishSubtitle": {
+    "description": "Plan A15 - publisher listing lifecycle actions (My Listings card menu)."
+  },
+  "myListingsActionDelete": "حذف الإعلان",
+  "@myListingsActionDelete": {
+    "description": "Plan A15 - publisher listing lifecycle actions (My Listings card menu)."
+  },
+  "myListingsActionDeleteSubtitle": "يختفي من قائمتك",
+  "@myListingsActionDeleteSubtitle": {
+    "description": "Plan A15 - publisher listing lifecycle actions (My Listings card menu)."
+  },
+  "myListingsDeleteConfirmTitle": "حذف هذا الإعلان؟",
+  "@myListingsDeleteConfirmTitle": {
+    "description": "Plan A15 - publisher listing lifecycle actions (My Listings card menu)."
+  },
+  "myListingsDeleteConfirmMessage": "لن تتمكّن من التراجع من داخل التطبيق.",
+  "@myListingsDeleteConfirmMessage": {
+    "description": "Plan A15 - publisher listing lifecycle actions (My Listings card menu)."
+  },
+  "myListingsStatusChangeFailed": "تعذّر تحديث حالة الإعلان — حاول مجدّداً",
+  "@myListingsStatusChangeFailed": {
+    "description": "Plan A15 - publisher listing lifecycle actions (My Listings card menu)."
+  },
+  "myListingsStatusChangeSuccess": "تمّ التحديث: {status}",
+  "@myListingsStatusChangeSuccess": {
+    "description": "Plan A15 - publisher listing lifecycle actions (My Listings card menu).",
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
   "myListingsExpiredLabel": "منتهي",
   "@myListingsExpiredLabel": {
     "description": "Phase 25 — My Listings: expired indicator."

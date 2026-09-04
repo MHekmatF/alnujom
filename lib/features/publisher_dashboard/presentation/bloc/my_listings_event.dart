@@ -33,6 +33,16 @@ class Refresh extends MyListingsEvent {
 /// Renews the listing identified by [listingId] for [days] days. On success the
 /// bloc updates that listing's `expiresAt` in place and emits a one-shot
 /// success signal so the page can show a confirmation snackbar.
+class MyListingsStatusChangeRequested extends MyListingsEvent {
+  const MyListingsStatusChangeRequested(this.listingId, this.status);
+
+  final String listingId;
+  final ListingStatus status;
+
+  @override
+  List<Object?> get props => [listingId, status];
+}
+
 class MyListingsRenewRequested extends MyListingsEvent {
   const MyListingsRenewRequested(this.listingId, {this.days = 30});
 
