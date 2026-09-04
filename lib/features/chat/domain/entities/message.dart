@@ -2,6 +2,11 @@
 //
 // In-app chat — domain entity for one message in a thread.
 
+/// How many messages a thread holds at once — the size of the live Realtime
+/// window, and of one "load earlier" page (Plan A19). Before this, the stream's
+/// initial load was the *entire* thread on every open.
+const int kChatPageSize = 50;
+
 /// Immutable domain representation of a `public.messages` row.
 class Message {
   const Message({

@@ -8,7 +8,8 @@
 //
 // Operations:
 //   - `from('conversations')` select joined w/ listing title + main image
-//   - `from('messages').stream(...)` live thread (Realtime)
+//   - `from('messages').stream(...)` live thread window (Realtime)
+//   - `from('messages').select(...)` one page of older history (plain read)
 //   - `from('messages').insert(...)` send (sender_user_id DB-defaulted)
 //   - `rpc('get_or_create_conversation')` open/create from a listing
 //   - `from('messages').update(read_at=now())` mark counterpart's msgs read
@@ -16,6 +17,7 @@
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
+import '../../domain/entities/message.dart' show kChatPageSize;
 import '../dtos/conversation_dto.dart';
 import '../dtos/message_dto.dart';
 
@@ -77,19 +79,56 @@ class SupabaseChatDatasource {
     return dto.copyWithListingImageUrl(url);
   }
 
-  /// A live stream of the thread's messages (oldest-first). Backed by
-  /// Realtime — INSERTs/UPDATEs (read receipts) push new lists automatically.
+  /// A live stream of the thread's newest [kChatPageSize] messages,
+  /// **newest-first**. Backed by Realtime — INSERTs/UPDATEs (read receipts)
+  /// push new lists automatically.
+  ///
+  /// Plan A19. Two things about `SupabaseStreamBuilder` shape this:
+  ///
+  ///  * `order()` defaults to **descending**, so the bare `.order('created_at')`
+  ///    this replaces was already returning newest-first while every comment
+  ///    and the page's `.reversed` assumed the opposite. `ascending: false` is
+  ///    now written out, and the whole feature reads newest-first.
+  ///  * `limit()` applies to the initial fetch *and* to every subsequent emit
+  ///    (`sort` then `take`), so with a descending order the window stays
+  ///    pinned to the newest [kChatPageSize] as messages arrive. Anything that
+  ///    falls out the bottom is still held by the cubit, which merges by id.
   Stream<List<MessageDto>> watchMessages(String conversationId) {
     return _client
         .from('messages')
         .stream(primaryKey: ['id'])
         .eq('conversation_id', conversationId)
-        .order('created_at')
+        .order('created_at', ascending: false)
+        .limit(kChatPageSize)
         .map(
           (rows) => rows
               .map((r) => MessageDto.fromJson(Map<String, dynamic>.from(r)))
               .toList(),
         );
+  }
+
+  /// One page of history strictly older than [before], newest-first.
+  ///
+  /// A plain select, not a second Realtime channel: history does not change
+  /// (`UPDATE`/`DELETE` on `messages` are revoked for `authenticated` apart
+  /// from `read_at`), so there is nothing for a subscription to deliver.
+  /// Served by `idx_messages_conversation (conversation_id, created_at)` read
+  /// backwards.
+  Future<List<MessageDto>> loadOlderMessages({
+    required String conversationId,
+    required DateTime before,
+  }) async {
+    final rows = await _client
+        .from('messages')
+        .select()
+        .eq('conversation_id', conversationId)
+        .lt('created_at', before.toUtc().toIso8601String())
+        .order('created_at', ascending: false)
+        .limit(kChatPageSize);
+
+    return (rows as List<dynamic>)
+        .map((r) => MessageDto.fromJson(Map<String, dynamic>.from(r as Map)))
+        .toList();
   }
 
   /// Sends a message. NEVER set `sender_user_id` — the DB defaults it to

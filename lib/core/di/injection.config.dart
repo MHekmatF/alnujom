@@ -237,6 +237,7 @@ import '../../features/chat/domain/repositories/chat_repository.dart' as _i420;
 import '../../features/chat/domain/usecases/get_or_create_conversation.dart'
     as _i714;
 import '../../features/chat/domain/usecases/list_conversations.dart' as _i929;
+import '../../features/chat/domain/usecases/load_older_messages.dart' as _i1056;
 import '../../features/chat/domain/usecases/mark_conversation_read.dart'
     as _i211;
 import '../../features/chat/domain/usecases/send_message.dart' as _i76;
@@ -1506,6 +1507,9 @@ _i174.GetIt $initGetIt(
   gh.factory<_i929.ListConversations>(
     () => _i929.ListConversations(gh<_i420.ChatRepository>()),
   );
+  gh.factory<_i1056.LoadOlderMessages>(
+    () => _i1056.LoadOlderMessages(gh<_i420.ChatRepository>()),
+  );
   gh.factory<_i211.MarkConversationRead>(
     () => _i211.MarkConversationRead(gh<_i420.ChatRepository>()),
   );
@@ -1574,6 +1578,14 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i225.SubmitReview>(
     () => _i225.SubmitReview(gh<_i412.ReviewsRepository>()),
+  );
+  gh.factory<_i968.ChatThreadCubit>(
+    () => _i968.ChatThreadCubit(
+      gh<_i929.WatchMessages>(),
+      gh<_i76.SendMessage>(),
+      gh<_i211.MarkConversationRead>(),
+      gh<_i1056.LoadOlderMessages>(),
+    ),
   );
   gh.factory<_i230.ArchiveAd>(
     () => _i230.ArchiveAd(gh<_i241.AdsAdminRepository>()),
@@ -1706,13 +1718,6 @@ _i174.GetIt $initGetIt(
       gh<_i650.AssignRoleToUser>(),
       gh<_i950.RevokeRoleFromUser>(),
       gh<_i1018.ListRoles>(),
-    ),
-  );
-  gh.factory<_i968.ChatThreadCubit>(
-    () => _i968.ChatThreadCubit(
-      gh<_i929.WatchMessages>(),
-      gh<_i76.SendMessage>(),
-      gh<_i211.MarkConversationRead>(),
     ),
   );
   gh.factory<_i956.RequestPasswordReset>(

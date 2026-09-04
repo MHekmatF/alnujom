@@ -5,6 +5,10 @@
 // = surface + start-aligned, each with a time), and a bottom composer
 // (multiline field + send icon). Marks read on open; auto-scrolls to newest.
 //
+// Plan A19 — the cubit hands over the newest page, newest-first, which is
+// exactly the order `ListView(reverse: true)` wants (index 0 sits at the
+// bottom). Scrolling toward the top pages the history in behind a sentinel.
+//
 // Token-only + RTL-correct (own bubbles align to the END, others to the START
 // — which mirrors automatically under RTL because we use AlignmentDirectional /
 // CrossAxisAlignment.start|end inside a directional column).
@@ -44,18 +48,34 @@ class ChatThreadPage extends StatefulWidget {
 
 class _ChatThreadPageState extends State<ChatThreadPage> {
   final TextEditingController _composer = TextEditingController();
-  int _lastCount = 0;
+  final ScrollController _scroll = ScrollController();
+  String? _lastNewestId;
 
   @override
   void initState() {
     super.initState();
     context.read<ChatThreadCubit>().open(widget.conversationId);
+    _scroll.addListener(_onScroll);
   }
 
   @override
   void dispose() {
+    _scroll.removeListener(_onScroll);
+    _scroll.dispose();
     _composer.dispose();
     super.dispose();
+  }
+
+  /// The list is reversed, so `maxScrollExtent` is the OLD end. Approaching it
+  /// pulls in the next page (Plan A19). `loadOlder` is a no-op while a page is
+  /// in flight or once the thread has been read to its start, so firing this
+  /// on every scroll tick is safe.
+  void _onScroll() {
+    if (!_scroll.hasClients) return;
+    final position = _scroll.position;
+    if (position.pixels >= position.maxScrollExtent - _kLoadOlderThreshold) {
+      context.read<ChatThreadCubit>().loadOlder();
+    }
   }
 
   void _onSend() {
@@ -96,11 +116,17 @@ class _ChatThreadPageState extends State<ChatThreadPage> {
         children: [
           Expanded(
             child: BlocConsumer<ChatThreadCubit, ChatThreadState>(
-              // Re-mark read whenever new inbound messages land while open.
+              // Re-mark read whenever a NEWER message lands while open. Keyed
+              // on the newest id, not the count, so paging older messages in
+              // doesn't fire a pointless read receipt.
               listener: (context, state) {
-                if (state.status == ChatThreadStatus.messages &&
-                    state.messages.length != _lastCount) {
-                  _lastCount = state.messages.length;
+                if (state.status != ChatThreadStatus.messages ||
+                    state.messages.isEmpty) {
+                  return;
+                }
+                final newestId = state.messages.first.id;
+                if (newestId != _lastNewestId) {
+                  _lastNewestId = newestId;
                   context.read<ChatThreadCubit>().markRead();
                 }
               },
@@ -123,18 +149,30 @@ class _ChatThreadPageState extends State<ChatThreadPage> {
                         body: l10n.chatThreadEmptyBody,
                       );
                     }
-                    // Reversed list: newest at the (visual) bottom, oldest on
-                    // top. We feed it reversed so index 0 is the newest.
-                    final reversed = state.messages.reversed.toList();
+                    // Reversed list: index 0 sits at the visual BOTTOM, and the
+                    // cubit hands the messages over newest-first, so index 0 is
+                    // the newest with no re-ordering here. The extra tail item
+                    // is the "load earlier" sentinel, which lands at the top.
+                    final messages = state.messages;
                     return ListView.builder(
+                      controller: _scroll,
                       reverse: true,
                       padding: const EdgeInsetsDirectional.symmetric(
                         horizontal: AppSpacing.lg,
                         vertical: AppSpacing.md,
                       ),
-                      itemCount: reversed.length,
-                      itemBuilder: (context, i) =>
-                          _MessageBubble(message: reversed[i]),
+                      itemCount: messages.length + (state.hasMore ? 1 : 0),
+                      itemBuilder: (context, i) {
+                        if (i >= messages.length) {
+                          return _LoadEarlier(
+                            loading: state.loadingOlder,
+                            failed: state.olderFailed,
+                            onRetry: () =>
+                                context.read<ChatThreadCubit>().loadOlder(),
+                          );
+                        }
+                        return _MessageBubble(message: messages[i]);
+                      },
                     );
                 }
               },
@@ -146,6 +184,55 @@ class _ChatThreadPageState extends State<ChatThreadPage> {
             hintColor: colors.onSurfaceVariant,
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// How close to the old end of the thread the user has to get before the next
+/// page is fetched — roughly one screen of bubbles' worth of warning.
+const double _kLoadOlderThreshold = 400;
+
+/// The tail item of the reversed list, so it sits at the visual top: a spinner
+/// while a page of history is in flight, and a tappable row otherwise. Scroll
+/// normally reaches it first; the tap is the way back after a failed page, and
+/// the way forward on a thread short enough not to scroll.
+class _LoadEarlier extends StatelessWidget {
+  const _LoadEarlier({
+    required this.loading,
+    required this.failed,
+    required this.onRetry,
+  });
+
+  final bool loading;
+  final bool failed;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+
+    return Padding(
+      padding: const EdgeInsetsDirectional.symmetric(vertical: AppSpacing.md),
+      child: Center(
+        child: loading
+            ? const AppSpinner()
+            : TextButton.icon(
+                onPressed: onRetry,
+                icon: Icon(
+                  failed ? Icons.refresh : Icons.expand_less,
+                  size: AppSpacing.lg,
+                  color: failed ? colors.error : colors.onSurfaceVariant,
+                ),
+                label: Text(
+                  failed ? l10n.chatLoadEarlierRetry : l10n.chatLoadEarlier,
+                  style: styles.labelMedium.copyWith(
+                    color: failed ? colors.error : colors.onSurfaceVariant,
+                  ),
+                ),
+              ),
       ),
     );
   }
