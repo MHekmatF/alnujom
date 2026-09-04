@@ -1532,6 +1532,13 @@ _i174.GetIt $initGetIt(
       initialLocale,
     ),
   );
+  gh.factory<_i803.PublisherDashboardSummaryCubit>(
+    () => _i803.PublisherDashboardSummaryCubit(
+      gh<_i373.LoadPublisherDashboardCounts>(),
+      gh<_i591.RealtimeSignals>(),
+      gh<_i754.PublisherDashboardRepository>(),
+    ),
+  );
   gh.factory<_i552.SearchBloc>(
     () => _i552.SearchBloc(gh<_i190.SearchListingsUseCase>()),
   );
@@ -1692,12 +1699,6 @@ _i174.GetIt $initGetIt(
       gh<_i505.CurrenciesRepository>(),
     ),
     dispose: (i) => i.dispose(),
-  );
-  gh.factory<_i803.PublisherDashboardSummaryCubit>(
-    () => _i803.PublisherDashboardSummaryCubit(
-      gh<_i373.LoadPublisherDashboardCounts>(),
-      gh<_i591.RealtimeSignals>(),
-    ),
   );
   gh.factory<_i929.RecentSearchesCubit>(
     () => _i929.RecentSearchesCubit(gh<_i193.RecentSearchesStorage>()),

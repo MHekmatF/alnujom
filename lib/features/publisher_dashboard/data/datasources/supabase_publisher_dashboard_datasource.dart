@@ -20,6 +20,11 @@ class SupabasePublisherDashboardDatasource {
 
   final SupabaseClient _client;
 
+  /// The signed-in user id, or `null` when signed out. Exposed so the summary
+  /// cubit can narrow its Realtime subscription to its own rows (Plan A23)
+  /// without reaching into the SDK itself.
+  String? get currentUserId => _client.auth.currentUser?.id;
+
   Future<List<PublisherListingDto>> listMyListings({
     String? statusFilter,
     int offset = 0,

@@ -50,7 +50,13 @@ class DashboardCubit extends Cubit<DashboardState> {
   void _openChannel() {
     if (_channel != null) return;
     _channel = _realtimeSignals.subscribeTables(
-      tables: const ['listings', 'reports'],
+      // Deliberately unfiltered (Plan A23): an admin's counters cover every
+      // listing and every report, and there is a handful of admins — the
+      // fan-out this avoids on the publisher side does not apply here.
+      watches: const [
+        RealtimeTableWatch.all('listings'),
+        RealtimeTableWatch.all('reports'),
+      ],
       onChange: _scheduleRefresh,
       onResubscribe: () => unawaited(refresh()),
     );

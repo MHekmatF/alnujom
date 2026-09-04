@@ -8,6 +8,12 @@
 // reconciles with a fresh fetch so a change missed during a drop self-heals.
 // The channel + debounce timer are torn down on close() (no leak). Counts
 // always come from a full RPC fetch — no client-side incremental math.
+//
+// Plan A23 — both bindings are narrowed to THIS publisher's rows. Unfiltered,
+// every listing edit and every inquiry anywhere in the system woke every open
+// dashboard, and the server ran an RLS check per subscriber per event. The
+// reconcile-on-resubscribe above is what makes the narrowing safe: even if a
+// filtered event is missed, the counters are re-fetched whole.
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,17 +21,22 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../core/errors/result.dart';
 import '../../../../core/network/realtime_signals.dart';
+import '../../domain/repositories/publisher_dashboard_repository.dart';
 import '../../domain/usecases/load_publisher_dashboard_counts.dart';
 import 'publisher_dashboard_summary_state.dart';
 
 @injectable
 class PublisherDashboardSummaryCubit
     extends Cubit<PublisherDashboardSummaryState> {
-  PublisherDashboardSummaryCubit(this._loadCounts, this._realtimeSignals)
-    : super(const PublisherDashboardSummaryLoading());
+  PublisherDashboardSummaryCubit(
+    this._loadCounts,
+    this._realtimeSignals,
+    this._repository,
+  ) : super(const PublisherDashboardSummaryLoading());
 
   final LoadPublisherDashboardCounts _loadCounts;
   final RealtimeSignals _realtimeSignals;
+  final PublisherDashboardRepository _repository;
 
   /// Collapse window for rapid Realtime events → one re-fetch.
   static const _debounce = Duration(milliseconds: 400);
@@ -46,8 +57,27 @@ class PublisherDashboardSummaryCubit
 
   void _openChannel() {
     if (_channel != null) return;
+    final uid = _repository.currentUserId;
+    // Signed out there is no dashboard to keep fresh, and an unfiltered channel
+    // would be the very fan-out this replaced. Leave it closed; `load()` still
+    // fetches, and the next `load()` after sign-in opens it.
+    if (uid == null) return;
     _channel = _realtimeSignals.subscribeTables(
-      tables: const ['listings', 'inquiries'],
+      watches: [
+        RealtimeTableWatch.where(
+          'listings',
+          column: 'publisher_user_id',
+          value: uid,
+        ),
+        // `inquiries.publisher_user_id` is denormalised for exactly this
+        // (20260904120009) — the table carries no other column naming the
+        // publisher.
+        RealtimeTableWatch.where(
+          'inquiries',
+          column: 'publisher_user_id',
+          value: uid,
+        ),
+      ],
       onChange: _scheduleRefresh,
       onResubscribe: () => unawaited(refresh()),
     );
