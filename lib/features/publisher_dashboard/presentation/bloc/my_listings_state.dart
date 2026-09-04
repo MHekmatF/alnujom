@@ -15,6 +15,10 @@ class MyListingsState extends Equatable {
     this.renewingId,
     this.renewSuccessToken = 0,
     this.renewErrorToken = 0,
+    this.statusChangingId,
+    this.statusChangeSuccessToken = 0,
+    this.statusChangeErrorToken = 0,
+    this.lastStatusChange,
   });
 
   final bool loading;
@@ -37,6 +41,18 @@ class MyListingsState extends Equatable {
   /// can surface an error snackbar.
   final int renewErrorToken;
 
+  /// The listing id whose status is being changed (null when idle). Disables
+  /// the card's action menu while the RPC is in flight.
+  final String? statusChangingId;
+
+  /// One-shot signals for the status change, mirroring the renew pair.
+  final int statusChangeSuccessToken;
+  final int statusChangeErrorToken;
+
+  /// The status the last change moved to, so the confirmation can name it —
+  /// "marked sold" reads better than "done".
+  final ListingStatus? lastStatusChange;
+
   MyListingsState copyWith({
     bool? loading,
     bool? loadingMore,
@@ -48,6 +64,10 @@ class MyListingsState extends Equatable {
     Object? renewingId = _sentinel,
     int? renewSuccessToken,
     int? renewErrorToken,
+    Object? statusChangingId = _sentinel,
+    int? statusChangeSuccessToken,
+    int? statusChangeErrorToken,
+    Object? lastStatusChange = _sentinel,
   }) {
     return MyListingsState(
       loading: loading ?? this.loading,
@@ -66,6 +86,16 @@ class MyListingsState extends Equatable {
           : renewingId as String?,
       renewSuccessToken: renewSuccessToken ?? this.renewSuccessToken,
       renewErrorToken: renewErrorToken ?? this.renewErrorToken,
+      statusChangingId: identical(statusChangingId, _sentinel)
+          ? this.statusChangingId
+          : statusChangingId as String?,
+      statusChangeSuccessToken:
+          statusChangeSuccessToken ?? this.statusChangeSuccessToken,
+      statusChangeErrorToken:
+          statusChangeErrorToken ?? this.statusChangeErrorToken,
+      lastStatusChange: identical(lastStatusChange, _sentinel)
+          ? this.lastStatusChange
+          : lastStatusChange as ListingStatus?,
     );
   }
 
@@ -81,6 +111,10 @@ class MyListingsState extends Equatable {
     renewingId,
     renewSuccessToken,
     renewErrorToken,
+    statusChangingId,
+    statusChangeSuccessToken,
+    statusChangeErrorToken,
+    lastStatusChange,
   ];
 }
 

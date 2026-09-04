@@ -177,32 +177,26 @@ class SupabaseListingsDatasource {
     }
   }
 
-  /// Deletes a listing row, and **fails loudly when RLS refuses**.
+  /// Deletes one of the caller's own listings — a **soft** delete through the
+  /// owner-gated `set_own_listing_status` RPC (plan A15).
   ///
-  /// `listings` has exactly one DELETE policy — `listings_delete_admin`, gated on
-  /// `listings.delete_any` — so an ordinary publisher deleting their own draft
-  /// matches no policy. A PostgREST delete that matches nothing is not an error:
-  /// it returns zero rows and a 2xx. Without the `.select()` below, this method
-  /// returned normally, `ListingFormBloc` reset the form as though the draft were
-  /// gone, and the draft reappeared in My Listings on the next load. Every draft
-  /// in production today belongs to staff who hold `delete_any`, which is why
-  /// nobody had seen it (review 2026-09-04, M2).
+  /// This used to be a bare `delete().eq('id', …)`, and for an ordinary
+  /// publisher it did nothing at all: `listings` has exactly one DELETE policy,
+  /// `listings_delete_admin`, gated on `listings.delete_any`. A PostgREST delete
+  /// that matches no row is not an error — zero rows, 2xx — so the call returned
+  /// normally, `ListingFormBloc` reset the form as though the draft were gone,
+  /// and it reappeared in My Listings on the next load. Both drafts in
+  /// production belong to staff who hold `delete_any`, which is why it had never
+  /// been noticed (review 2026-09-04, M2).
   ///
-  /// `.select('id')` makes PostgREST return the deleted rows, so an empty list
-  /// means "refused" and the caller learns about it. The real fix for publishers
-  /// is the owner-checked status RPC in plan item A15; this only stops the
-  /// silence.
+  /// The RPC checks ownership and the transition, raises on refusal, and marks
+  /// the row `deleted` rather than removing it — the same terminal status
+  /// `request_account_deletion` uses, so the media stays reachable for the purge
+  /// job and the audit trail survives.
   Future<void> deleteListing(String listingId) async {
-    final deleted = await _client
-        .from('listings')
-        .delete()
-        .eq('id', listingId)
-        .select('id');
-    if ((deleted as List<dynamic>).isEmpty) {
-      throw StateError(
-        'delete_listing_refused: no row deleted for $listingId '
-        '(row-level security refused, or it no longer exists)',
-      );
-    }
+    await _client.rpc<dynamic>(
+      'set_own_listing_status',
+      params: {'p_listing_id': listingId, 'p_status': 'deleted'},
+    );
   }
 }

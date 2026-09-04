@@ -36,7 +36,12 @@ class SupabasePublisherDashboardDatasource {
     var query = _client
         .from('v_publisher_listings')
         .select()
-        .eq('publisher_user_id', uid);
+        .eq('publisher_user_id', uid)
+        // A publisher's own delete is a SOFT delete (status = 'deleted', the
+        // same terminal state request_account_deletion uses), so the row is
+        // still theirs and still visible to this query. Without this the
+        // listing they just deleted reappeared under the "All" tab.
+        .neq('status', 'deleted');
     if (statusFilter != null) {
       query = query.eq('status', statusFilter);
     }
@@ -60,6 +65,25 @@ class SupabasePublisherDashboardDatasource {
     );
     if (result == null) return null;
     return DateTime.parse(result as String);
+  }
+
+  /// Moves one of the caller's OWN listings to [status] via the owner-gated
+  /// `public.set_own_listing_status` SECURITY DEFINER RPC (plan A15).
+  ///
+  /// The RPC owns the transition table — approved → sold/rented/paused,
+  /// paused → approved, and the dead statuses → deleted — and raises `22023`
+  /// for anything else, `42501` when the caller is not the publisher. Nothing
+  /// here re-checks: the client's idea of what is allowed is a convenience for
+  /// the menu, never the gate.
+  Future<String> setOwnListingStatus({
+    required String listingId,
+    required String status,
+  }) async {
+    final result = await _client.rpc<dynamic>(
+      'set_own_listing_status',
+      params: {'p_listing_id': listingId, 'p_status': status},
+    );
+    return result as String;
   }
 
   // ─── Phase 12 / US2 — moderation history ────────────────────────────────

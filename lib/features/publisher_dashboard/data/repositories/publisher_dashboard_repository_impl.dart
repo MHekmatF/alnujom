@@ -29,6 +29,24 @@ class PublisherDashboardRepositoryImpl implements PublisherDashboardRepository {
   }
 
   @override
+  Future<Result<void>> setOwnListingStatus({
+    required String listingId,
+    required ListingStatus status,
+  }) async {
+    try {
+      await _datasource.setOwnListingStatus(
+        listingId: listingId,
+        status: status.toDbValue(),
+      );
+      return const Success(null);
+    } on Object catch (error, stackTrace) {
+      return FailureResult(
+        UnknownFailure(error.toString(), cause: error, stackTrace: stackTrace),
+      );
+    }
+  }
+
+  @override
   Future<Result<DateTime?>> renewListing({
     required String listingId,
     int days = 30,

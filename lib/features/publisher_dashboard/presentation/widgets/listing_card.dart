@@ -26,6 +26,7 @@ import '../../domain/entities/publisher_listing.dart';
 import '../bloc/my_listings_bloc.dart';
 import '../bloc/my_listings_event.dart';
 import '../bloc/my_listings_state.dart';
+import 'listing_actions_sheet.dart';
 import 'read_only_listing_preview.dart';
 import 'rejection_reason_block.dart';
 import 'resubmit_cta.dart';
@@ -116,6 +117,12 @@ class ListingCard extends StatelessWidget {
                         ),
                         const SizedBox(width: AppSpacing.sm),
                         _dcStatusChip(listing.status, l10n),
+                        // Plan A15 — sold / rented / paused / re-publish /
+                        // delete. Renders nothing for a status with no moves.
+                        ListingActionsButton(
+                          listingId: listing.id,
+                          status: listing.status,
+                        ),
                       ],
                     ),
                     if (price != null) ...[

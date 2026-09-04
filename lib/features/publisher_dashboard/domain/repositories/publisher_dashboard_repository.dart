@@ -12,6 +12,13 @@ abstract class PublisherDashboardRepository {
 
   /// Renews [listingId] by extending its `expires_at` by [days] days (owner-
   /// gated server-side). Returns the new `expires_at` on success.
+  /// Moves one of the caller's own listings to [status] (plan A15). The server
+  /// owns the transition table; a refused move comes back as a failure.
+  Future<Result<void>> setOwnListingStatus({
+    required String listingId,
+    required ListingStatus status,
+  });
+
   Future<Result<DateTime?>> renewListing({
     required String listingId,
     int days = 30,

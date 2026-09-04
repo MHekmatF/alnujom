@@ -5506,6 +5506,64 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get myListingsActionsTitle =>
+      _resolve('myListingsActionsTitle', (loc) => loc.myListingsActionsTitle);
+
+  @override
+  String get myListingsActionMarkSold =>
+      _resolve('myListingsActionMarkSold', (loc) => loc.myListingsActionMarkSold);
+
+  @override
+  String get myListingsActionMarkRented =>
+      _resolve('myListingsActionMarkRented', (loc) => loc.myListingsActionMarkRented);
+
+  @override
+  String get myListingsActionMarkSoldSubtitle =>
+      _resolve('myListingsActionMarkSoldSubtitle', (loc) => loc.myListingsActionMarkSoldSubtitle);
+
+  @override
+  String get myListingsActionPause =>
+      _resolve('myListingsActionPause', (loc) => loc.myListingsActionPause);
+
+  @override
+  String get myListingsActionPauseSubtitle =>
+      _resolve('myListingsActionPauseSubtitle', (loc) => loc.myListingsActionPauseSubtitle);
+
+  @override
+  String get myListingsActionRepublish =>
+      _resolve('myListingsActionRepublish', (loc) => loc.myListingsActionRepublish);
+
+  @override
+  String get myListingsActionRepublishSubtitle =>
+      _resolve('myListingsActionRepublishSubtitle', (loc) => loc.myListingsActionRepublishSubtitle);
+
+  @override
+  String get myListingsActionDelete =>
+      _resolve('myListingsActionDelete', (loc) => loc.myListingsActionDelete);
+
+  @override
+  String get myListingsActionDeleteSubtitle =>
+      _resolve('myListingsActionDeleteSubtitle', (loc) => loc.myListingsActionDeleteSubtitle);
+
+  @override
+  String get myListingsDeleteConfirmTitle =>
+      _resolve('myListingsDeleteConfirmTitle', (loc) => loc.myListingsDeleteConfirmTitle);
+
+  @override
+  String get myListingsDeleteConfirmMessage =>
+      _resolve('myListingsDeleteConfirmMessage', (loc) => loc.myListingsDeleteConfirmMessage);
+
+  @override
+  String get myListingsStatusChangeFailed =>
+      _resolve('myListingsStatusChangeFailed', (loc) => loc.myListingsStatusChangeFailed);
+
+  @override
+  String myListingsStatusChangeSuccess(String status) => _resolve(
+    'myListingsStatusChangeSuccess',
+    (loc) => loc.myListingsStatusChangeSuccess(status),
+  );
+
+  @override
   String get myListingsExpiredLabel =>
       _resolve('myListingsExpiredLabel', (loc) => loc.myListingsExpiredLabel);
 

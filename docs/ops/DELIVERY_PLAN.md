@@ -320,25 +320,63 @@ Client, in the same PR:
   lockdown is server-side, so the build the owner already has is protected by it.
 
 
-### A15 — Let a publisher close a listing · M · after A14
-Review §1 M1 + M2. Today a listing can only be revised, renewed or left to
-expire.
-- [ ] RPC `set_own_listing_status(p_listing_id, p_status)` as owner-checked
-      SECURITY DEFINER: `approved → sold | rented | paused`, `paused → approved`
-      (re-publish, keeps `published_at`), `draft | rejected → deleted`. Writes
-      the status-history row via the existing trigger. `REVOKE FROM anon`.
-- [ ] My Listings card action sheet: **تم البيع / تم التأجير / إيقاف مؤقت /
-      إعادة النشر / حذف**, each with a confirm; l10n in both ARBs +
-      `app_strings.dart`.
-- [ ] Sold/rented listings stay visible on the publisher's own list under their
-      tab, disappear from public surfaces (the public view already filters on
-      `status = 'approved'`).
-- [ ] Drop the client-side `deleteDraft` path in favour of the RPC.
-- Verified by: on the device, as a plain publisher account (B2's second
-  account), each transition round-trips and the public feed/map/search no longer
-  show the listing.
+### A15 — Let a publisher close a listing · M · **DONE 2026-09-04**
+The biggest functional gap the review found (M1 + M2). `sold`, `rented` and
+`paused` existed in the schema and rendered everywhere, but nothing could set
+them; and an ordinary publisher could delete nothing at all.
 
-### A16 — Tell people about messages and viewings · M · after A14
+Migrations `20260904120003_set_own_listing_status.sql` and
+`20260904120004_relist_sold_listings.sql`, applied and verified in rolled-back
+transactions:
+
+- [x] `set_own_listing_status(p_listing_id, p_status)` — owner-checked
+      SECURITY DEFINER, `authenticated`-only. Transition table:
+      `approved → sold | rented | paused`,
+      `paused | sold | rented → approved`,
+      `draft | rejected | expired | sold | rented → deleted` (soft).
+      Everything else raises `22023`; a non-owner raises `42501`.
+- [x] **Sold and rented are not terminal.** The first cut made them so, which
+      was wrong for this business — a buyer backs out, a tenant does not sign,
+      the wrong button gets tapped — and the only alternative was re-creating
+      the listing and queueing for moderation again. Re-listing keeps the
+      original approval and `published_at`, so it does not jump the feed.
+- [x] **Re-appearing does not re-alert.** `notify_saved_search_matches` fires on
+      any `→ approved` transition, so un-pausing or re-listing would have blasted
+      every matching saved search, repeatedly if someone toggled. A
+      transaction-local GUC (`app.skip_saved_search_alert`) set by this RPC
+      suppresses it. Verified both ways: the RPC path is silent, and a genuine
+      re-approval by direct UPDATE still produces exactly one alert.
+- [x] `pending_review` deliberately offers nothing: a submission under review
+      belongs to the moderator until they decide.
+- [x] My Listings card: an overflow button opens an action sheet with
+      **تمّ البيع / تمّ التأجير / إيقاف مؤقّت / إعادة النشر / حذف الإعلان**,
+      each with a one-line explanation of what it does. Delete asks for
+      confirmation. 14 new keys in both ARBs plus the `_DebugAppLocalizations`
+      overrides.
+- [x] The bloc updates the row in place, and drops it from the list when it no
+      longer belongs in the current tab. Success and failure use the same
+      one-shot-token idiom as Renew.
+- [x] Sold / rented / paused listings leave the public surfaces automatically —
+      `v_listings_public` filters on `status = 'approved'`. Verified.
+- [x] The listing form's "delete draft" now goes through the same RPC instead of
+      a raw DELETE that RLS silently refused, and `deleted` rows are filtered out
+      of My Listings and out of the dashboard's total count.
+- [ ] **⚠️ PARTIAL — the on-device round trip was not completed.** `1.1.2+4` was
+      installed on the Infinix and the action sheet was **seen rendering
+      correctly** on an approved listing: all three actions in Arabic RTL, each
+      with its one-line explanation, icons on the correct side. The owner picked
+      the phone up mid-test (another app came to the foreground), so the
+      remaining steps were not driven: tap إيقاف مؤقّت → toast → the chip
+      changes → the listing leaves guest search → tap إعادة النشر → it comes
+      back. Every one of those transitions is proven at the database level; what
+      is unproven is the button wiring behind them.
+- Verified by: the six-linter suite; four rolled-back proofs (owner path,
+  non-owner `42501`, invalid transition `22023`, re-list keeps `published_at`
+  and stays quiet); the sheet rendering on `1.1.2+4`. The tap-through round trip
+  is still owed — see the PARTIAL line above.
+
+
+### A16 — Tell people about messages and viewings · M · **next — unblocked**
 Review §1 M4.
 - [ ] Trigger on `messages` INSERT → `enqueue_notification(counterpart,
       'message_received', {conversation_id, listing_id})`, skipped when an

@@ -569,6 +569,8 @@ import '../../features/publisher_dashboard/domain/usecases/load_publisher_listin
     as _i1026;
 import '../../features/publisher_dashboard/domain/usecases/renew_listing.dart'
     as _i576;
+import '../../features/publisher_dashboard/domain/usecases/set_own_listing_status.dart'
+    as _i782;
 import '../../features/publisher_dashboard/presentation/bloc/moderation_history_cubit.dart'
     as _i711;
 import '../../features/publisher_dashboard/presentation/bloc/my_listings_bloc.dart'
@@ -1317,6 +1319,9 @@ _i174.GetIt $initGetIt(
   gh.factory<_i576.RenewListing>(
     () => _i576.RenewListing(gh<_i754.PublisherDashboardRepository>()),
   );
+  gh.factory<_i782.SetOwnListingStatus>(
+    () => _i782.SetOwnListingStatus(gh<_i754.PublisherDashboardRepository>()),
+  );
   gh.lazySingleton<_i241.AdsAdminRepository>(
     () => _i634.AdsAdminRepositoryImpl(gh<_i185.SupabaseAdsAdminDatasource>()),
   );
@@ -1646,6 +1651,13 @@ _i174.GetIt $initGetIt(
   gh.factory<_i349.UpdateSetting>(
     () => _i349.UpdateSetting(gh<_i673.AppSettingsRepository>()),
   );
+  gh.factory<_i417.MyListingsBloc>(
+    () => _i417.MyListingsBloc(
+      gh<_i891.ListMyListings>(),
+      gh<_i576.RenewListing>(),
+      gh<_i782.SetOwnListingStatus>(),
+    ),
+  );
   gh.factory<_i1073.CityDetailBloc>(
     () => _i1073.CityDetailBloc(
       gh<_i645.LoadCityDetail>(),
@@ -1951,12 +1963,6 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i916.AgencyQueueBloc>(
     () => _i916.AgencyQueueBloc(gh<_i998.LoadAgencyVerificationQueue>()),
-  );
-  gh.factory<_i417.MyListingsBloc>(
-    () => _i417.MyListingsBloc(
-      gh<_i891.ListMyListings>(),
-      gh<_i576.RenewListing>(),
-    ),
   );
   gh.factory<_i682.AdsAdminCubit>(
     () => _i682.AdsAdminCubit(

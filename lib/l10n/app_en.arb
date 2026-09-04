@@ -3148,6 +3148,67 @@
       }
     }
   },
+  "myListingsActionsTitle": "Listing options",
+  "@myListingsActionsTitle": {
+    "description": "Plan A15 - publisher listing lifecycle actions (My Listings card menu)."
+  },
+  "myListingsActionMarkSold": "Mark as sold",
+  "@myListingsActionMarkSold": {
+    "description": "Plan A15 - publisher listing lifecycle actions (My Listings card menu)."
+  },
+  "myListingsActionMarkRented": "Mark as rented",
+  "@myListingsActionMarkRented": {
+    "description": "Plan A15 - publisher listing lifecycle actions (My Listings card menu)."
+  },
+  "myListingsActionMarkSoldSubtitle": "Removed from search, kept in your list",
+  "@myListingsActionMarkSoldSubtitle": {
+    "description": "Plan A15 - publisher listing lifecycle actions (My Listings card menu)."
+  },
+  "myListingsActionPause": "Pause",
+  "@myListingsActionPause": {
+    "description": "Plan A15 - publisher listing lifecycle actions (My Listings card menu)."
+  },
+  "myListingsActionPauseSubtitle": "Hidden from search; put it back whenever you like",
+  "@myListingsActionPauseSubtitle": {
+    "description": "Plan A15 - publisher listing lifecycle actions (My Listings card menu)."
+  },
+  "myListingsActionRepublish": "Re-publish",
+  "@myListingsActionRepublish": {
+    "description": "Plan A15 - publisher listing lifecycle actions (My Listings card menu)."
+  },
+  "myListingsActionRepublishSubtitle": "Visible again straight away, no new review",
+  "@myListingsActionRepublishSubtitle": {
+    "description": "Plan A15 - publisher listing lifecycle actions (My Listings card menu)."
+  },
+  "myListingsActionDelete": "Delete listing",
+  "@myListingsActionDelete": {
+    "description": "Plan A15 - publisher listing lifecycle actions (My Listings card menu)."
+  },
+  "myListingsActionDeleteSubtitle": "Removed from your list",
+  "@myListingsActionDeleteSubtitle": {
+    "description": "Plan A15 - publisher listing lifecycle actions (My Listings card menu)."
+  },
+  "myListingsDeleteConfirmTitle": "Delete this listing?",
+  "@myListingsDeleteConfirmTitle": {
+    "description": "Plan A15 - publisher listing lifecycle actions (My Listings card menu)."
+  },
+  "myListingsDeleteConfirmMessage": "You won't be able to undo this from the app.",
+  "@myListingsDeleteConfirmMessage": {
+    "description": "Plan A15 - publisher listing lifecycle actions (My Listings card menu)."
+  },
+  "myListingsStatusChangeFailed": "Couldn't update the listing — please try again",
+  "@myListingsStatusChangeFailed": {
+    "description": "Plan A15 - publisher listing lifecycle actions (My Listings card menu)."
+  },
+  "myListingsStatusChangeSuccess": "Updated: {status}",
+  "@myListingsStatusChangeSuccess": {
+    "description": "Plan A15 - publisher listing lifecycle actions (My Listings card menu).",
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
   "myListingsExpiredLabel": "Expired",
   "@myListingsExpiredLabel": {
     "description": "Phase 25 — My Listings: expired indicator."
