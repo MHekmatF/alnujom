@@ -1192,6 +1192,10 @@
   "@inquiry_form_validation_message_too_long": {
     "description": "Phase 16 — Validation error when the message exceeds 2000 characters."
   },
+  "inquiry_form_rate_limited": "وصلنا استفسارات كثيرة على هذا الإعلان الآن — جرّب بعد قليل، أو اتصل مباشرة",
+  "@inquiry_form_rate_limited": {
+    "description": "Shown when submit_inquiry refuses with rate_limited (20/listing/hour, 10/sender/hour, added 2026-09-04)."
+  },
   "inquiry_form_submission_failed": "تعذّر إرسال الاستفسار — حاول مجدّداً",
   "@inquiry_form_submission_failed": {
     "description": "Phase 16 — Snackbar when the inquiry submission RPC fails."

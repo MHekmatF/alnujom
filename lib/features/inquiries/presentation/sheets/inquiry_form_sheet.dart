@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/errors/failure.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
@@ -161,7 +162,17 @@ class _InquiryFormSheetState extends State<InquiryFormSheet> {
             Navigator.of(context).pop(true);
           } else if (state is InquiryFormFailed) {
             final l10n = AppLocalizations.of(context)!;
-            AppToast.error(context, l10n.inquiry_form_submission_failed);
+            // The hourly ceiling on submit_inquiry needs its own line: told only
+            // "couldn't send", a sender retries at once and hits it again.
+            final failure = state.failure;
+            final rateLimited =
+                failure is ValidationFailure && failure.code == 'rate_limited';
+            AppToast.error(
+              context,
+              rateLimited
+                  ? l10n.inquiry_form_rate_limited
+                  : l10n.inquiry_form_submission_failed,
+            );
           }
         },
         child: DraggableScrollableSheet(

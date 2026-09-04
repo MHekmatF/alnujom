@@ -259,33 +259,66 @@ deletion is real, so the sweep has to exist.
 - [ ] **Google Play**: `docs/release/google-play-readiness.md` — AAB, `--dart-define=IN_APP_UPDATE_PROMPT=false`, photo/video permission declaration, web deletion-request URL; gated on B9.
 - [ ] Move `pg_net` out of `public` if Supabase ever allows it on this plan (advisor WARN, cosmetic).
 
-### A14 — Fix what the 2026-09-04 review proved · S · **first — two are launch-relevant**
-Evidence: [`REVIEW_2026-09-04.md`](REVIEW_2026-09-04.md) §5, §2. One migration
-plus a one-line client change; nothing here has a trade-off.
-- [ ] Widen `notifications_type_check` to include `saved_search_match` (and,
-      for A16, `message_received`, `viewing_requested`, `viewing_confirmed`,
-      `viewing_declined`, `listing_expiring`). **Until this lands, approving any
-      listing that matches a saved search fails.** Verify: the rolled-back
-      INSERT from §5 succeeds; approve a listing with a catch-all saved search
-      present.
-- [ ] `messages`: revoke table-wide UPDATE from `authenticated`; grant
-      `UPDATE (read_at)` only, and add `WITH CHECK` so a member can mark only the
-      **counterpart's** rows read. Verify: the §S1 transaction now fails on
-      `body`.
-- [ ] `viewings`: drop `viewings_update_member`; all status changes already go
-      through `update_viewing_status`. Verify: the §S2 transaction fails; the
-      Viewings screen still confirms/declines/cancels.
-- [ ] `conversations`: revoke UPDATE from `authenticated` (the client never
-      updates it; the trigger runs as definer).
-- [ ] Throttle the three guest-callable writers inside the function:
-      `submit_inquiry` max 3 per listing per phone per hour and 20 per IP per
-      hour; `record_lead_event` / `record_ad_event` max 30 per IP per hour
-      (count recent rows by `metadata->>'ip'`). Raise `23514` past the cap.
-- [ ] `deleteListing` in `supabase_listings_datasource.dart`: append
-      `.select('id')` and throw when the result is empty, so an RLS denial is an
-      error and not a success. (The real fix for publishers is A15.)
-- Verified by: the four proofs in the review re-run and now failing; advisors
-  unchanged; the device walk of chat, viewings and inquiries still green.
+### A14 — Fix what the 2026-09-04 review proved · S · **DONE 2026-09-04**
+Two migrations, applied and verified against the live project. Every fix was
+re-tested with the same harness that broke it — the `authenticated` role with a
+forged JWT claim inside `BEGIN … ROLLBACK`, so nothing persisted (row counts
+before and after are identical).
+
+`20260904120001_close_proven_write_holes.sql`:
+
+- [x] `notifications_type_check` widened to twelve types. **This was the one that
+      would have bitten first:** `saved_search_match` was rejected, and that
+      INSERT happens inside `approve_listing_internal`'s UPDATE, so the first
+      saved search would have made listing approval fail. Verified: the INSERT
+      that raised `23514` now succeeds. The five A16 types and `listing_expiring`
+      were added at the same time, so A16 needs no further migration here.
+- [x] `messages`: table-wide UPDATE revoked, `UPDATE (read_at)` granted instead,
+      and the policy given a `WITH CHECK` plus `sender_user_id <> auth.uid()` so
+      only the **counterpart's** rows can be touched. Verified: the tamper now
+      fails with `42501 permission denied for table messages` — refused at the
+      grant, before RLS is even consulted. The read receipt and sending still
+      work (1 row marked read, 2 messages in the thread).
+- [x] `viewings`: both write policies dropped and INSERT/UPDATE/DELETE revoked;
+      `request_viewing` and `update_viewing_status` are SECURITY DEFINER and
+      unaffected. Verified: the self-confirm now fails with `42501`; the RPC path
+      still confirms as the publisher and still refuses the requester with
+      "only the publisher can confirm or decline". The INSERT policy went too —
+      it checked *who* was inserting but not *what*, so a hand-crafted row could
+      arrive already `confirmed`.
+- [x] `conversations`: INSERT/UPDATE/DELETE revoked, insert policy dropped. It
+      let a caller name any `publisher_user_id`, so a stranger could be opened a
+      conversation against. `get_or_create_conversation` derives the publisher
+      from the listing.
+- [x] `anon` now holds **no** grant at all on those three tables.
+
+`20260904120002_throttle_guest_writers.sql`:
+
+- [x] Hourly ceilings on the three guest-callable writers: `submit_inquiry`
+      20/listing and 10/signed-in-sender; `record_lead_event` 60/listing and
+      120/user; `record_ad_event` 500/ad and 200/user. Verified: the 21st inquiry
+      in an hour raises `rate_limited`, and a valid submission still encrypts the
+      phone, writes the lead event and notifies the publisher.
+- [x] **Not per-IP, and the reason is recorded in the migration.** All three
+      already stored `inet_client_addr()`, and every row ever written says
+      `"ip": "::1/128"` — PostgREST's loopback, identical for every caller. A cap
+      on that would have throttled the whole internet as one client. See A24.
+- [x] `app_client_fingerprint()` added (forwarded header, else NULL) and recorded
+      into `metadata->>'client'`, but **not** used as a cap yet — A24.
+
+Client, in the same PR:
+
+- [x] `deleteListing` now appends `.select('id')` and throws when nothing came
+      back. A publisher's draft delete matched no DELETE policy, returned zero
+      rows and a 2xx, and the bloc reset the form as though it had worked.
+- [x] A `rate_limited` inquiry gets its own message in both languages instead of
+      the generic "couldn't send", which invited the retry that hits the same
+      ceiling.
+- Verified by: the six-linter suite green; the four proofs re-run and now
+  failing; chat, the thread and the viewings screen opened on the Infinix
+  against the **already-installed 1.1.1+3** and all reading correctly — the
+  lockdown is server-side, so the build the owner already has is protected by it.
+
 
 ### A15 — Let a publisher close a listing · M · after A14
 Review §1 M1 + M2. Today a listing can only be revised, renewed or left to
@@ -376,6 +409,19 @@ Review §4. `subscribeTables(['listings','inquiries'])` → filter
 per-user channel; both need `REPLICA IDENTITY FULL` on those tables (see the
 2026-06 Realtime note) or the filtered events never arrive. Admin dashboard
 stays unfiltered (a handful of admins).
+
+### A24 — Sharpen the throttle to a real client key · S · after one real device use
+A14's caps are per-listing and per-user because no per-caller key was available:
+`inet_client_addr()` is `::1` for every PostgREST request. `app_client_fingerprint()`
+now records the forwarded header into `metadata->>'client'` on every inquiry, lead
+event and ad click.
+
+- [ ] After the next real use from a phone, read it:
+      `select metadata->>'client' from public.lead_events order by created_at desc limit 5;`
+- [ ] If it is a real address, add a per-fingerprint cap to the three functions
+      and an index on `((metadata->>'client'), created_at desc)`.
+- [ ] If it is still null, the gateway strips the header — record that and leave
+      the per-listing caps as the answer.
 
 ---
 
