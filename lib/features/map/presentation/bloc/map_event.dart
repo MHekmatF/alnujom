@@ -12,6 +12,7 @@
 //                          GeolocationPermissionDenied,
 //                          GeolocationFixFailed
 //   • Filter alert (US6):  FilterAlertDismissed, FilterResetRequested
+import '../../domain/entities/map_bounds.dart';
 import '../../domain/entities/map_entry_context.dart';
 import '../../domain/entities/marker_coordinates.dart';
 
@@ -30,6 +31,15 @@ final class MapOpened extends MapEvent {
 /// [MapLoaded.activeFilter] (preserving the camera).
 final class MarkersRefreshRequested extends MapEvent {
   const MarkersRefreshRequested();
+}
+
+/// Plan A17 — fired when the camera has settled somewhere new (the widget
+/// debounces `onMapEvent`). Carries the visible viewport so the BLoC can fetch
+/// the markers for it instead of the whole country. The camera is NOT touched
+/// by the handler: the user moved it, not us.
+final class MapViewportChanged extends MapEvent {
+  const MapViewportChanged({required this.bounds});
+  final MapBounds bounds;
 }
 
 /// Fired when the user taps any marker on the map.

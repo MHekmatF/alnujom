@@ -33,6 +33,7 @@ import '../../../map/presentation/bloc/map_state.dart';
 import '../../../map/presentation/widgets/marker_pins.dart';
 import '../../../map/presentation/widgets/marker_preview_popover.dart';
 import '../../../map/presentation/widgets/osm_attribution_widget.dart';
+import '../../../map/presentation/widgets/viewport_reporter.dart';
 import '../../domain/entities/filter_state.dart';
 
 class SearchMapView extends StatelessWidget {
@@ -127,11 +128,25 @@ class _LoadedMapState extends State<_LoadedMap> {
   static const int _liteMapMaxZoom = 15;
 
   CameraFit? _appliedFit;
+  late final ViewportReporter _viewport;
 
   @override
   void initState() {
     super.initState();
     _appliedFit = widget.state.cameraFit;
+    // Plan A17 — same viewport-bounded fetch as the standalone map.
+    _viewport = ViewportReporter(
+      onSettled: (bounds) {
+        if (!mounted) return;
+        context.read<MapBloc>().add(MapViewportChanged(bounds: bounds));
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _viewport.dispose();
+    super.dispose();
   }
 
   @override
@@ -177,6 +192,8 @@ class _LoadedMapState extends State<_LoadedMap> {
                 context.read<MapBloc>().add(const PopoverDismissed());
               }
             },
+            // Plan A17 — debounced down to one fetch per settled viewport.
+            onMapEvent: _viewport.report,
           ),
           children: [
             TileLayer(

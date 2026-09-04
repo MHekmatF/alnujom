@@ -427,15 +427,57 @@ in a rolled-back transaction:
   the requester); the redeployed function read back and probed.
 
 
-### A17 — Bound the map · S · **next — any time**
-Review §4 C1.
-- [ ] `search_map` gains `p_min_lat, p_max_lat, p_min_lng, p_max_lng` and
-      `LIMIT 500`; `v_listings_map_public` reads stay for the admin centroid
-      picker only.
-- [ ] Client passes the visible bounds and refetches on `onMapEvent` (debounced
-      300 ms); `loadAll()` removed.
-- Verified by: `EXPLAIN` shows the index on `(status, …)` plus the bounds
-  filter; the map still shows the 16 markers at Damascus zoom.
+### A17 — Bound the map · S · **DONE 2026-09-04** (device walk outstanding)
+Review §4 C1. `search_map` had no LIMIT and no bounding box, and the unfiltered
+path did not even go through it — the client read `v_listings_map_public` whole.
+At 5,000 approved listings that is a ~1 MB payload downloaded, parsed and turned
+into 5,000 marker widgets on every map open.
+
+- [x] `20260904120007_bound_the_map.sql` — `search_map` gains `p_min_lat`,
+      `p_max_lat`, `p_min_lng`, `p_max_lng` (all default NULL, so a half-box or
+      no box still works) and a hard `LIMIT 500`, ordered `published_at DESC`
+      so a viewport holding more than the cap keeps the freshest listings.
+      Adding parameters is not a replace — the old 16-argument function is
+      dropped explicitly, or PostgREST would see two overloads.
+- [x] **The box is measured against `marker_lat`/`marker_lng`** — the published
+      coordinates, which for an `approximate` listing are the area-centroid
+      jitter. Never `listings.latitude/longitude`: filtering on the true
+      position would re-open the exact oracle
+      `20260902120002_seal_map_jitter_oracle.sql` closed (shrink the box, ask
+      again, and the jitter is undone).
+- [x] `loadAll()` is gone. Both the filtered and the unfiltered path now go
+      through the RPC, so there is no longer a call that can ask for every
+      listing in the country.
+- [x] The client sends the visible bounds **padded 25%** after the camera has
+      been still for 300 ms (`ViewportReporter`, shared by `/map` and the
+      search page's embedded map — `onMapEvent` fires on every frame of a drag).
+- [x] The BLoC skips the fetch when it already holds a complete, un-truncated
+      result covering the new viewport — including the unbounded first load,
+      which covers everywhere. **At today's 16 listings the map therefore still
+      issues exactly one request and never re-asks.** The handler emits no
+      `MapLoading` (that would tear the map down mid-pan), never touches the
+      camera, and swallows a failed fetch rather than replacing the map with a
+      full-screen error.
+- Verified by: the six-linter suite; `search_map()` unbounded returning all 16
+  rows exactly as the view does (no regression), a Damascus box 10, a Latakia
+  box 1, an off-Syria box 0; the same three calls over PostgREST **with the real
+  anon key**, whose JSON carries every key `MapMarkerDto.fromJson` reads; and
+  `EXPLAIN (analyze, buffers)`.
+- **The measurement is honest about what moved.** Bounded 15.0 ms / 2174
+  buffers against unbounded 15.5 ms / 2216 — the same server work, for **6.3 KB
+  on the wire instead of 10.1 KB**. The box cuts the payload, not the scan:
+  `marker_lat` is computed per row by `listing_marker_coordinates()` in the
+  view's LATERAL, so rows are visited before they can be excluded, and Postgres
+  will not inline a SECURITY DEFINER function so `EXPLAIN` sees one opaque
+  `Function Scan`. The payload is what C1 was about; the scan fix (a coarse
+  pre-filter below the LATERAL) is written down in the migration header for the
+  day it matters.
+- [ ] **⚠️ PARTIAL — not walked on a device.** The AVD would not stay up this
+      session, and the Infinix is the owner's phone carrying the release build
+      he is about to publish: a debug install shares `com.alnujom.app` and would
+      replace it. What a device would add over the above is the feel of the
+      pan/zoom refetch, not its correctness. Fold it into the next device pass.
+
 
 ### A18 — Thumbnails for listing photos · M · **DONE 2026-09-04**
 Review P1, and the biggest bandwidth item in the app. Uploads are stored at a

@@ -35,6 +35,7 @@ import 'package:latlong2/latlong.dart' show LatLng;
 
 import '../../../../core/errors/result.dart';
 import '../../../search/domain/entities/filter_state.dart';
+import '../../domain/entities/map_bounds.dart';
 import '../../domain/entities/map_entry_context.dart';
 import '../../domain/entities/map_marker.dart';
 import '../../domain/entities/marker_coordinates.dart';
@@ -71,11 +72,16 @@ CameraFit _fitToMarkers(List<MapMarker> markers) {
   );
 }
 
+/// Plan A17 — how much bigger than the visible box we ask for, as a fraction of
+/// the box on each side. A short pan then finds its markers already in hand.
+const double _kViewportPadFraction = 0.25;
+
 @injectable
 class MapBloc extends Bloc<MapEvent, MapState> {
   MapBloc(this._loadMapMarkers) : super(const MapInitial()) {
     on<MapOpened>(_onOpened);
     on<MarkersRefreshRequested>(_onRefresh);
+    on<MapViewportChanged>(_onViewportChanged);
     on<MarkerTapped>(_onMarkerTapped);
     on<PopoverDismissed>(_onPopoverDismissed);
     on<CenterOnMyLocationRequested>(_onCenterOnMyLocationRequested);
@@ -115,6 +121,10 @@ class MapBloc extends Bloc<MapEvent, MapState> {
             activeFilter: filter,
             showFilterAlert: showFilterAlert,
             geolocationStatus: GeolocationStatus.unknown,
+            // Plan A17 — the first load is unbounded (the camera does not
+            // exist yet, and the search entry derives it FROM these markers),
+            // so `loadedBounds` stays null: everywhere, capped at 500.
+            markersCapped: value.length >= kMapMarkerCap,
           ),
         );
       case FailureResult<List<MapMarker>>(:final failure):
@@ -129,8 +139,10 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     final current = state;
     if (current is! MapLoaded) return;
     final filter = current.activeFilter;
+    // Plan A17 — re-ask for what is on screen, not for the whole country.
+    final bounds = current.loadedBounds;
     emit(const MapLoading());
-    final result = await _loadMapMarkers(filter: filter);
+    final result = await _loadMapMarkers(filter: filter, bounds: bounds);
     switch (result) {
       case Success<List<MapMarker>>(:final value):
         emit(
@@ -143,10 +155,61 @@ class MapBloc extends Bloc<MapEvent, MapState> {
             // one-shot UX moment tied to the search-handoff entry.
             showFilterAlert: false,
             geolocationStatus: current.geolocationStatus,
+            loadedBounds: bounds,
+            markersCapped: value.length >= kMapMarkerCap,
           ),
         );
       case FailureResult<List<MapMarker>>(:final failure):
         emit(MapError(failure: failure));
+    }
+  }
+
+  /// Plan A17 — the camera settled somewhere new. Fetch the markers for it, or
+  /// decide we already have them.
+  ///
+  /// Three deliberate choices:
+  ///  * **No `MapLoading`.** Emitting it would tear the map down and rebuild it
+  ///    mid-pan. The old markers stay on screen until the new ones land.
+  ///  * **No `cameraFit`.** The user moved the camera; moving it back would
+  ///    fight them.
+  ///  * **A failure is swallowed.** A dropped request while panning should
+  ///    leave the map as it was, not replace it with a full-screen error. The
+  ///    refresh button is still there, and the next pan tries again.
+  Future<void> _onViewportChanged(
+    MapViewportChanged event,
+    Emitter<MapState> emit,
+  ) async {
+    final current = state;
+    if (current is! MapLoaded) return;
+
+    // A complete (un-truncated) result covering the new viewport is still
+    // valid — including the unbounded first load, which covers everywhere.
+    if (!current.markersCapped) {
+      final loaded = current.loadedBounds;
+      if (loaded == null || loaded.contains(event.bounds)) return;
+    }
+
+    final requested = event.bounds.padded(_kViewportPadFraction);
+    final result = await _loadMapMarkers(
+      filter: current.activeFilter,
+      bounds: requested,
+    );
+    // The state can have moved on while the request was in flight (a marker
+    // tap, a geolocation fix); re-read it rather than emitting over the top.
+    final latest = state;
+    if (latest is! MapLoaded) return;
+
+    switch (result) {
+      case Success<List<MapMarker>>(:final value):
+        emit(
+          latest.copyWith(
+            markers: value,
+            loadedBounds: requested,
+            markersCapped: value.length >= kMapMarkerCap,
+          ),
+        );
+      case FailureResult<List<MapMarker>>():
+        break;
     }
   }
 
@@ -238,6 +301,9 @@ class MapBloc extends Bloc<MapEvent, MapState> {
             activeFilter: null,
             showFilterAlert: false,
             geolocationStatus: GeolocationStatus.unknown,
+            // Resetting filters snaps the camera back to Syria-wide, so this
+            // load is unbounded too (Plan A17).
+            markersCapped: value.length >= kMapMarkerCap,
           ),
         );
       case FailureResult<List<MapMarker>>(:final failure):

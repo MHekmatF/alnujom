@@ -73,6 +73,7 @@ import '../widgets/map_refresh_button.dart';
 import '../widgets/marker_pins.dart';
 import '../widgets/marker_preview_popover.dart';
 import '../widgets/osm_attribution_widget.dart';
+import '../widgets/viewport_reporter.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key, this.entryContext});
@@ -172,6 +173,7 @@ class _LoadedBodyState extends State<_LoadedBody> {
   static const int _liteMapMaxZoom = 15;
 
   late final MapController _controller;
+  late final ViewportReporter _viewport;
   CameraFit? _appliedFit;
 
   @override
@@ -179,6 +181,14 @@ class _LoadedBodyState extends State<_LoadedBody> {
     super.initState();
     _controller = MapController();
     _appliedFit = widget.state.cameraFit;
+    // Plan A17 — ask the server for the markers in view, once the camera has
+    // settled. The BLoC decides whether the move actually needs a fetch.
+    _viewport = ViewportReporter(
+      onSettled: (bounds) {
+        if (!mounted) return;
+        context.read<MapBloc>().add(MapViewportChanged(bounds: bounds));
+      },
+    );
   }
 
   @override
@@ -197,6 +207,7 @@ class _LoadedBodyState extends State<_LoadedBody> {
 
   @override
   void dispose() {
+    _viewport.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -280,6 +291,9 @@ class _LoadedBodyState extends State<_LoadedBody> {
                 context.read<MapBloc>().add(const PopoverDismissed());
               }
             },
+            // Plan A17 — every camera event, debounced down to one fetch per
+            // settled viewport.
+            onMapEvent: _viewport.report,
           ),
           children: [
             TileLayer(
