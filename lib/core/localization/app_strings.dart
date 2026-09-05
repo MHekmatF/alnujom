@@ -4511,6 +4511,18 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get settingsEditorListingValidityLabel => _resolve(
+    'settingsEditorListingValidityLabel',
+    (loc) => loc.settingsEditorListingValidityLabel,
+  );
+
+  @override
+  String get settingsValidationListingValidity => _resolve(
+    'settingsValidationListingValidity',
+    (loc) => loc.settingsValidationListingValidity,
+  );
+
+  @override
   String get settingsEditorPrivacyUrlLabel => _resolve(
     'settingsEditorPrivacyUrlLabel',
     (loc) => loc.settingsEditorPrivacyUrlLabel,
@@ -5867,6 +5879,30 @@ final class _DebugAppLocalizations extends AppLocalizations {
       listingTitle,
       savedSearchLabel,
     ),
+  );
+
+  @override
+  String get notification_type_listing_expiring => _resolve(
+    'notification_type_listing_expiring',
+    (loc) => loc.notification_type_listing_expiring,
+  );
+
+  @override
+  String get notification_type_listing_expired => _resolve(
+    'notification_type_listing_expired',
+    (loc) => loc.notification_type_listing_expired,
+  );
+
+  @override
+  String notification_body_listing_expiring(String listingTitle) => _resolve(
+    'notification_body_listing_expiring',
+    (loc) => loc.notification_body_listing_expiring(listingTitle),
+  );
+
+  @override
+  String notification_body_listing_expired(String listingTitle) => _resolve(
+    'notification_body_listing_expired',
+    (loc) => loc.notification_body_listing_expired(listingTitle),
   );
 
   @override

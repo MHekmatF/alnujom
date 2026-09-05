@@ -2699,6 +2699,14 @@
   "@settingsEditorTermsUrlLabel": {
     "description": "Phase 23 FA — Label for terms_url text field."
   },
+  "settingsEditorListingValidityLabel": "Listing validity in days (7 to 365)",
+  "@settingsEditorListingValidityLabel": {
+    "description": "Plan A26 — label for the listing_validity_days setting."
+  },
+  "settingsValidationListingValidity": "Enter a number between 7 and 365.",
+  "@settingsValidationListingValidity": {
+    "description": "Plan A26 — validation error for listing_validity_days."
+  },
   "settingsEditorPrivacyUrlLabel": "Privacy Policy URL",
   "@settingsEditorPrivacyUrlLabel": {
     "description": "Phase 23 FA — Label for privacy_url text field."
@@ -3505,6 +3513,32 @@
         "type": "String"
       },
       "savedSearchLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "notification_type_listing_expiring": "Your listing expires soon",
+  "@notification_type_listing_expiring": {
+    "description": "Plan A26 — notification centre title: a listing lapses in 3 days."
+  },
+  "notification_type_listing_expired": "Your listing has expired",
+  "@notification_type_listing_expired": {
+    "description": "Plan A26 — notification centre title: a listing has lapsed."
+  },
+  "notification_body_listing_expiring": "\"{listingTitle}\" expires in 3 days — renew it to stay visible",
+  "@notification_body_listing_expiring": {
+    "description": "Plan A26 — expiring-listing notification body.",
+    "placeholders": {
+      "listingTitle": {
+        "type": "String"
+      }
+    }
+  },
+  "notification_body_listing_expired": "\"{listingTitle}\" is no longer visible to visitors — renew it from My Listings",
+  "@notification_body_listing_expired": {
+    "description": "Plan A26 — expired-listing notification body.",
+    "placeholders": {
+      "listingTitle": {
         "type": "String"
       }
     }

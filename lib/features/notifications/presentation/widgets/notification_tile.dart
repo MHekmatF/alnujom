@@ -166,6 +166,10 @@ class NotificationTile extends StatelessWidget {
       case NotificationType.viewingDeclined:
       case NotificationType.viewingCancelled:
         return Icons.event_busy_outlined;
+      case NotificationType.listingExpiring:
+        return LucideIcons.clock_alert;
+      case NotificationType.listingExpired:
+        return Icons.timer_off_outlined;
     }
   }
 
@@ -190,6 +194,10 @@ class NotificationTile extends StatelessWidget {
       case NotificationType.messageReceived:
       case NotificationType.viewingRequested:
         return colors.primary;
+      case NotificationType.listingExpiring:
+        return colors.warning;
+      case NotificationType.listingExpired:
+        return colors.error;
     }
   }
 
@@ -219,6 +227,10 @@ class NotificationTile extends StatelessWidget {
         return l10n.notification_type_viewing_declined;
       case NotificationType.viewingCancelled:
         return l10n.notification_type_viewing_cancelled;
+      case NotificationType.listingExpiring:
+        return l10n.notification_type_listing_expiring;
+      case NotificationType.listingExpired:
+        return l10n.notification_type_listing_expired;
     }
   }
 
@@ -240,6 +252,15 @@ class NotificationTile extends StatelessWidget {
           listingTitle,
           savedSearchLabel,
         );
+      case NotificationType.listingExpiring:
+      case NotificationType.listingExpired:
+        // Plan A26 — the title is the publisher's own listing, so it may sit
+        // in the tray. The sweep put it in `params` for exactly this line.
+        final expiringTitle = params['listing_title'] as String?;
+        if (expiringTitle == null || expiringTitle.isEmpty) return null;
+        return type == NotificationType.listingExpiring
+            ? l10n.notification_body_listing_expiring(expiringTitle)
+            : l10n.notification_body_listing_expired(expiringTitle);
       // The A16 types carry UUIDs only — the message body and the counterpart's
       // name are deliberately not in `params`, because the same payload reaches
       // the OS tray on a locked screen. The title alone says enough.

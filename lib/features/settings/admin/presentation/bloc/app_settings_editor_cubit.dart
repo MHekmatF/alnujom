@@ -208,6 +208,10 @@ class AppSettingsEditorCubit extends Cubit<AppSettingsEditorState> {
         if (!hasAny) {
           return l10n.settingsEditorSupportAtLeastOneError;
         }
+      case AppSettingKey.listingValidityDays:
+        if (value is! int || value < 7 || value > 365) {
+          return l10n.settingsValidationListingValidity;
+        }
       case AppSettingKey.termsUrl:
       case AppSettingKey.privacyUrl:
         // Nullable — empty string is accepted (treated as "unset").

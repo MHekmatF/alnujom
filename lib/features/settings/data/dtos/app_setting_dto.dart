@@ -114,6 +114,18 @@ class AppSettingDto {
     );
   }
 
+  /// Plan A26 — `listing_validity_days` is a JSON number (or, after a hand
+  /// edit, a numeric string). Anything else falls back to the server default.
+  static int _decodeValidityDays(Object? raw) {
+    final n = raw is num
+        ? raw.toInt()
+        : (raw is String ? int.tryParse(raw.trim()) : null);
+    if (n == null) return 60;
+    if (n < 7) return 7;
+    if (n > 365) return 365;
+    return n;
+  }
+
   static String? _decodeNullableString(Object? raw) {
     if (raw == null) return null;
     final s = raw as String?;
@@ -148,6 +160,9 @@ class AppSettingDto {
       ),
       supportContact: _decodeSupportContact(
         byKey[AppSettingKey.supportContact.key],
+      ),
+      listingValidityDays: _decodeValidityDays(
+        byKey[AppSettingKey.listingValidityDays.key],
       ),
       termsUrl: _decodeNullableString(byKey[AppSettingKey.termsUrl.key]),
       privacyUrl: _decodeNullableString(byKey[AppSettingKey.privacyUrl.key]),

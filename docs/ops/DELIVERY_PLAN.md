@@ -906,10 +906,22 @@ writes `expires_at` at approval; the backup workflow **keeps no file** without
 - [ ] **A25 — Storage hygiene** · S. Dry-run orphan sweep, then delete
       (owner yes: it is a delete); purge extended to soft-deleted listings past
       the 30-day window; photo replacement removes the old object.
-- [ ] **A26 — Listings expire, publisher hears first** · S–M. `expires_at`
-      set at approval/relist; a `listing_expiring` alert 3 days before with
-      Renew as the action; expiry stays read-time. **Needs F1: 30 / 60 / 90
-      days.** Also settles the 2026-10-06 cliff for whatever survives B7.
+- [x] **A26 — Listings expire, publisher hears first** · **DONE 2026-09-05**,
+      migration `20260905120001` applied. **F1 answered by making it a setting:**
+      `listing_validity_days` (60 by default, 7–365, editable from Admin →
+      Settings → Listing Defaults). First approval and a lapsed relist stamp
+      `expires_at`; `renew_listing` defaults to the setting, is limited to
+      `approved`/`expired`, and brings an `expired` listing back.
+      `sweep_listing_expiry()` (hourly under A32) warns 3 days out with
+      `listing_expiring` — once per expiry date — and flips lapsed rows to
+      `expired` with `listing_expired`; both types are in the CHECK, the app
+      (tile, body, deep link to My Listings) and the push copy. The client no
+      longer hard-codes 30 days on Renew. **Proven in a rolled-back
+      transaction:** approve → `+60d`; sweep at 2 days out → `warned=1`, again
+      → `warned=0`; past date → `expired=1`, status `expired`, one
+      `listing_expired` row; owner renew → `approved +60d`; a stranger →
+      `42501`. The 2026-10-06 cliff stands for the demo rows by design (B7).
+      Not walked on a device (no publisher account on the AVD).
 - [ ] **A27 — Terms of service** · M. AR + EN beside the privacy policy,
       `terms_url` set, acceptance checkbox at sign-up with the timestamp on the
       profile. Needs B4 facts and the owner's yes on the text and on publishing.

@@ -9,6 +9,8 @@ enum AppSettingKey {
   defaultPublisherNameVisibility('default_publisher_name_visibility'),
   defaultLocationVisibility('default_location_visibility'),
   maintenanceMode('maintenance_mode'),
+  // Plan A26 — days a listing stays public after approval or renewal (7–365).
+  listingValidityDays('listing_validity_days'),
   supportContact('support_contact'),
   termsUrl('terms_url'),
   privacyUrl('privacy_url');

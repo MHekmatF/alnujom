@@ -118,6 +118,8 @@ class _SettingsForm extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
           _LocationVisibilityPicker(state: state, l10n: l10n, cubit: cubit),
+          const SizedBox(height: AppSpacing.sm),
+          _ListingValidityRow(state: state, l10n: l10n, cubit: cubit),
 
           // ── Maintenance Mode ───────────────────────────────────────────────
           SettingsSectionHeader(l10n.settingsEditorSectionMaintenance),
@@ -572,6 +574,40 @@ class _LegalUrlsSection extends StatelessWidget {
           },
         ),
       ],
+    );
+  }
+}
+
+// ─── Listing validity (Plan A26) ──────────────────────────────────────────────
+
+class _ListingValidityRow extends StatelessWidget {
+  const _ListingValidityRow({
+    required this.state,
+    required this.l10n,
+    required this.cubit,
+  });
+
+  final AppSettingsEditorLoaded state;
+  final AppLocalizations l10n;
+  final AppSettingsEditorCubit cubit;
+
+  @override
+  Widget build(BuildContext context) {
+    final raw = state.settingFor(AppSettingKey.listingValidityDays)?.value;
+    final current = raw is num
+        ? raw.toInt().toString()
+        : (raw is String ? raw : '');
+    return SettingsTextRow(
+      label: l10n.settingsEditorListingValidityLabel,
+      initialValue: current,
+      isSaving: state.savingKey == AppSettingKey.listingValidityDays,
+      saveLabel: l10n.settingsEditorSaveButton,
+      keyboardType: TextInputType.number,
+      onSave: (text) async {
+        final days = int.tryParse(text.trim());
+        if (days == null) return l10n.settingsValidationListingValidity;
+        return cubit.save(AppSettingKey.listingValidityDays, days, l10n);
+      },
     );
   }
 }

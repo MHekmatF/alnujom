@@ -23,6 +23,7 @@ class AppSettings {
     required this.defaultLocationVisibility,
     required this.maintenance,
     required this.supportContact,
+    this.listingValidityDays = 60,
     this.termsUrl,
     this.privacyUrl,
   });
@@ -37,6 +38,7 @@ class AppSettings {
       defaultLocationVisibility = LocationVisibility.approximate,
       maintenance = const MaintenanceState(isOn: false),
       supportContact = const SupportContact(),
+      listingValidityDays = 60,
       termsUrl = null,
       privacyUrl = null;
 
@@ -58,6 +60,10 @@ class AppSettings {
   /// Support contact channels surfaced in-app and on the maintenance screen
   /// (FR-013).
   final SupportContact supportContact;
+
+  /// Plan A26 — days a listing stays public after approval or renewal.
+  /// The server clamps it to 7–365 and uses 60 when unset.
+  final int listingValidityDays;
 
   /// Terms-of-service URL, or null if not configured (FR-013).
   final String? termsUrl;
@@ -85,6 +91,7 @@ class AppSettings {
           defaultLocationVisibility == other.defaultLocationVisibility &&
           maintenance == other.maintenance &&
           supportContact == other.supportContact &&
+          listingValidityDays == other.listingValidityDays &&
           termsUrl == other.termsUrl &&
           privacyUrl == other.privacyUrl;
 
@@ -96,6 +103,7 @@ class AppSettings {
       defaultLocationVisibility.hashCode ^
       maintenance.hashCode ^
       supportContact.hashCode ^
+      listingValidityDays.hashCode ^
       termsUrl.hashCode ^
       privacyUrl.hashCode;
 }

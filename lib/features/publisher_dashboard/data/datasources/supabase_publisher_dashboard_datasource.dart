@@ -62,11 +62,12 @@ class SupabasePublisherDashboardDatasource {
   /// listing's publisher, so no extra owner check is needed here.
   Future<DateTime?> renewListing({
     required String listingId,
-    int days = 30,
+    int? days,
   }) async {
+    // Plan A26 — omit p_days and the RPC applies the configured validity.
     final result = await _client.rpc<dynamic>(
       'renew_listing',
-      params: {'p_listing_id': listingId, 'p_days': days},
+      params: {'p_listing_id': listingId, if (days != null) 'p_days': days},
     );
     if (result == null) return null;
     return DateTime.parse(result as String);

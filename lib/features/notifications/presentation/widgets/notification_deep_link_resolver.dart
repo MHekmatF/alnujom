@@ -167,6 +167,11 @@ abstract final class NotificationDeepLinkResolver {
       case NotificationType.viewingDeclined:
       case NotificationType.viewingCancelled:
         return const _NavRoute(AppRoutes.viewings);
+      // Plan A26 — both land on My Listings, where the card carries the
+      // expiry label and the Renew button.
+      case NotificationType.listingExpiring:
+      case NotificationType.listingExpired:
+        return const _NavRoute(AppRoutes.publisherMyListings);
     }
   }
 
