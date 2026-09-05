@@ -6,8 +6,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/di/injection.dart';
+import '../../../../core/errors/result.dart';
 import '../../../../core/localization/locale_cubit.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/settings/lite_mode.dart';
@@ -18,11 +21,13 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/theme_cubit.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/app_toggle.dart';
 import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../core/widgets/segmented_control.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../currencies/presentation/widgets/preferred_currency_toggle.dart';
+import '../../../data_export/domain/usecases/export_my_data.dart';
 import '../../data/datasources/notification_prefs_remote.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
@@ -44,6 +49,7 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   String? _version;
+  bool _exporting = false;
 
   static const _storeUrl =
       'https://play.google.com/store/apps/details?id=com.alnujom.app';
@@ -252,6 +258,14 @@ class _SettingsPageState extends State<SettingsPage> {
           title: l10n.settings_blocked_users_row,
           onTap: () => context.push(AppRoutes.blockedUsers),
         ),
+        // Plan A38 — a copy of everything the app holds about this person,
+        // composed on the server with their own token and handed to the
+        // share sheet as a JSON file.
+        _SettingsNavRow(
+          icon: Icons.download_outlined,
+          title: l10n.settings_export_data_row,
+          onTap: () => _exportData(context),
+        ),
         _SettingsDangerRow(
           icon: Icons.delete_forever_outlined,
           title: l10n.accountDeleteEntryTitle,
@@ -260,6 +274,34 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
       ],
     );
+  }
+
+  Future<void> _exportData(BuildContext context) async {
+    if (_exporting) return;
+    final l10n = AppLocalizations.of(context)!;
+    _exporting = true;
+    AppToast.info(context, l10n.settings_export_data_preparing);
+    try {
+      final result = await getIt<ExportMyData>()();
+      if (!context.mounted) return;
+      switch (result) {
+        case Success(:final value):
+          await Share.shareXFiles(
+            [
+              XFile.fromData(
+                value.bytes,
+                mimeType: 'application/json',
+                name: value.fileName,
+              ),
+            ],
+            subject: l10n.settings_export_data_subject,
+          );
+        case FailureResult():
+          AppToast.error(context, l10n.settings_export_data_failed);
+      }
+    } finally {
+      _exporting = false;
+    }
   }
 
   void _rateApp() {

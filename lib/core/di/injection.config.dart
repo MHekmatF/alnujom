@@ -286,6 +286,14 @@ import '../../features/currencies/presentation/bloc/exchange_rate_history_bloc.d
     as _i949;
 import '../../features/currencies/presentation/bloc/set_exchange_rate_bloc.dart'
     as _i293;
+import '../../features/data_export/data/datasources/supabase_data_export_datasource.dart'
+    as _i1014;
+import '../../features/data_export/data/repositories/data_export_repository_impl.dart'
+    as _i271;
+import '../../features/data_export/domain/repositories/data_export_repository.dart'
+    as _i257;
+import '../../features/data_export/domain/usecases/export_my_data.dart'
+    as _i801;
 import '../../features/favorites/data/datasources/supabase_favorites_datasource.dart'
     as _i8;
 import '../../features/favorites/data/repositories/favorites_repository_impl.dart'
@@ -301,6 +309,15 @@ import '../../features/favorites/presentation/bloc/favorites_cubit.dart'
     as _i991;
 import '../../features/favorites/presentation/bloc/favorites_page_bloc.dart'
     as _i171;
+import '../../features/feedback/data/datasources/supabase_feedback_datasource.dart'
+    as _i251;
+import '../../features/feedback/data/repositories/feedback_repository_impl.dart'
+    as _i961;
+import '../../features/feedback/domain/repositories/feedback_repository.dart'
+    as _i619;
+import '../../features/feedback/domain/usecases/submit_feedback.dart' as _i345;
+import '../../features/feedback/presentation/cubit/feedback_submission_cubit.dart'
+    as _i639;
 import '../../features/home/data/datasources/supabase_home_feed_datasource.dart'
     as _i732;
 import '../../features/home/data/repositories/home_feed_repository_impl.dart'
@@ -374,6 +391,8 @@ import '../../features/listing_details/domain/usecases/load_listing_details.dart
     as _i281;
 import '../../features/listing_details/domain/usecases/load_similar_listings.dart'
     as _i981;
+import '../../features/listing_details/domain/usecases/record_listing_view.dart'
+    as _i954;
 import '../../features/listing_details/presentation/bloc/listing_details_bloc.dart'
     as _i935;
 import '../../features/listing_details/presentation/bloc/market_insights_cubit.dart'
@@ -749,6 +768,7 @@ import '../notifications/local_reminder_scheduler.dart' as _i562;
 import '../notifications/push_notification_channel.dart' as _i1066;
 import '../security/permission_catalog_repository.dart' as _i1015;
 import '../security/permission_checker.dart' as _i650;
+import '../storage/install_id.dart' as _i177;
 import '../storage/preferences_store.dart' as _i753;
 import '../storage/secure_preferences_store.dart' as _i190;
 import '../theme/palette_cubit.dart' as _i394;
@@ -784,6 +804,7 @@ _i174.GetIt $initGetIt(
   gh.singleton<_i373.EnvConfig>(() => const _i373.EnvConfig());
   gh.lazySingleton<_i454.SupabaseClient>(() => supabaseModule.supabaseClient());
   gh.lazySingleton<_i838.ConnectivityCubit>(() => _i838.ConnectivityCubit());
+  gh.lazySingleton<_i177.InstallId>(() => _i177.InstallId());
   gh.lazySingleton<_i394.SupabaseAccountApprovalsDatasource>(
     () => _i394.SupabaseAccountApprovalsDatasource(),
   );
@@ -850,8 +871,14 @@ _i174.GetIt $initGetIt(
   gh.factory<_i311.SupabaseCurrenciesDatasource>(
     () => _i311.SupabaseCurrenciesDatasource(gh<_i454.SupabaseClient>()),
   );
+  gh.factory<_i1014.SupabaseDataExportDatasource>(
+    () => _i1014.SupabaseDataExportDatasource(gh<_i454.SupabaseClient>()),
+  );
   gh.factory<_i8.SupabaseFavoritesDatasource>(
     () => _i8.SupabaseFavoritesDatasource(gh<_i454.SupabaseClient>()),
+  );
+  gh.factory<_i251.SupabaseFeedbackDatasource>(
+    () => _i251.SupabaseFeedbackDatasource(gh<_i454.SupabaseClient>()),
   );
   gh.factory<_i732.SupabaseHomeFeedDatasource>(
     () => _i732.SupabaseHomeFeedDatasource(gh<_i454.SupabaseClient>()),
@@ -941,6 +968,9 @@ _i174.GetIt $initGetIt(
   );
   gh.lazySingleton<_i695.ReelsRepository>(
     () => _i1070.ReelsRepositoryImpl(gh<_i496.SupabaseReelsDatasource>()),
+  );
+  gh.factory<_i619.FeedbackRepository>(
+    () => _i961.FeedbackRepositoryImpl(gh<_i251.SupabaseFeedbackDatasource>()),
   );
   gh.lazySingleton<_i662.DashboardRepository>(
     () => _i469.DashboardRepositoryImpl(
@@ -1119,6 +1149,12 @@ _i174.GetIt $initGetIt(
       gh<_i354.AppLogger>(),
     ),
   );
+  gh.lazySingleton<_i257.DataExportRepository>(
+    () => _i271.DataExportRepositoryImpl(
+      gh<_i1014.SupabaseDataExportDatasource>(),
+      gh<_i354.AppLogger>(),
+    ),
+  );
   gh.lazySingleton<_i563.PublisherDashboardCountsRepository>(
     () => _i815.PublisherDashboardCountsRepositoryImpl(
       gh<_i157.PublisherDashboardCountsDatasource>(),
@@ -1246,6 +1282,9 @@ _i174.GetIt $initGetIt(
       gh<_i377.SubmitAgencyVerification>(),
       gh<_i977.LoadMyVerificationRequest>(),
     ),
+  );
+  gh.factory<_i801.ExportMyData>(
+    () => _i801.ExportMyData(gh<_i257.DataExportRepository>()),
   );
   gh.lazySingleton<_i412.ReviewsRepository>(
     () => _i388.ReviewsRepositoryImpl(
@@ -1628,6 +1667,9 @@ _i174.GetIt $initGetIt(
   gh.factory<_i225.SubmitReview>(
     () => _i225.SubmitReview(gh<_i412.ReviewsRepository>()),
   );
+  gh.factory<_i345.SubmitFeedback>(
+    () => _i345.SubmitFeedback(gh<_i619.FeedbackRepository>()),
+  );
   gh.factory<_i230.ArchiveAd>(
     () => _i230.ArchiveAd(gh<_i241.AdsAdminRepository>()),
   );
@@ -1784,6 +1826,12 @@ _i174.GetIt $initGetIt(
     () => _i902.ReportResolveCubit(
       gh<_i771.StartReportReview>(),
       gh<_i943.ResolveReport>(),
+    ),
+  );
+  gh.factory<_i954.RecordListingView>(
+    () => _i954.RecordListingView(
+      gh<_i895.ListingDetailsRepository>(),
+      gh<_i177.InstallId>(),
     ),
   );
   gh.factory<_i968.ChatThreadCubit>(
@@ -1997,6 +2045,9 @@ _i174.GetIt $initGetIt(
   gh.factory<_i669.LocationsListBloc>(
     () => _i669.LocationsListBloc(gh<_i533.ListGovernorates>()),
   );
+  gh.factory<_i639.FeedbackSubmissionCubit>(
+    () => _i639.FeedbackSubmissionCubit(gh<_i345.SubmitFeedback>()),
+  );
   gh.factory<_i749.MyReportsBloc>(
     () => _i749.MyReportsBloc(gh<_i991.LoadMyReports>()),
   );
@@ -2100,6 +2151,13 @@ _i174.GetIt $initGetIt(
   gh.factory<_i490.UploadVideo>(
     () => _i490.UploadVideo(gh<_i340.ListingsRepository>()),
   );
+  gh.factory<_i935.ListingDetailsBloc>(
+    () => _i935.ListingDetailsBloc(
+      gh<_i281.LoadListingDetails>(),
+      gh<_i797.AuthBloc>(),
+      gh<_i954.RecordListingView>(),
+    ),
+  );
   gh.factory<_i122.PasswordResetCubit>(
     () => _i122.PasswordResetCubit(gh<_i956.RequestPasswordReset>()),
   );
@@ -2155,12 +2213,6 @@ _i174.GetIt $initGetIt(
       gh<_i797.AuthBloc>(),
     ),
     dispose: (i) => i.dispose(),
-  );
-  gh.factory<_i935.ListingDetailsBloc>(
-    () => _i935.ListingDetailsBloc(
-      gh<_i281.LoadListingDetails>(),
-      gh<_i797.AuthBloc>(),
-    ),
   );
   return getIt;
 }

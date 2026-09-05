@@ -14,4 +14,8 @@ import '../entities/listing_details_aggregate.dart';
 /// `lib/core/errors/failure.dart` per R-68.
 abstract class ListingDetailsRepository {
   Future<Result<ListingDetailsAggregate>> fetchListing(String id);
+
+  /// Plan A35 — tell the server the listing was opened. Best-effort: never
+  /// throws, never fails the caller.
+  Future<void> recordView(String id, {String? viewerKey});
 }

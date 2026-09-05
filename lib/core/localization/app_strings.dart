@@ -4973,6 +4973,120 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get about_feedback => _resolve(
+    'about_feedback',
+    (loc) => loc.about_feedback,
+  );
+
+  @override
+  String get feedback_sheet_title => _resolve(
+    'feedback_sheet_title',
+    (loc) => loc.feedback_sheet_title,
+  );
+
+  @override
+  String get feedback_sheet_subtitle => _resolve(
+    'feedback_sheet_subtitle',
+    (loc) => loc.feedback_sheet_subtitle,
+  );
+
+  @override
+  String get feedback_category_label => _resolve(
+    'feedback_category_label',
+    (loc) => loc.feedback_category_label,
+  );
+
+  @override
+  String get feedback_category_bug => _resolve(
+    'feedback_category_bug',
+    (loc) => loc.feedback_category_bug,
+  );
+
+  @override
+  String get feedback_category_idea => _resolve(
+    'feedback_category_idea',
+    (loc) => loc.feedback_category_idea,
+  );
+
+  @override
+  String get feedback_category_question => _resolve(
+    'feedback_category_question',
+    (loc) => loc.feedback_category_question,
+  );
+
+  @override
+  String get feedback_category_other => _resolve(
+    'feedback_category_other',
+    (loc) => loc.feedback_category_other,
+  );
+
+  @override
+  String get feedback_message_hint => _resolve(
+    'feedback_message_hint',
+    (loc) => loc.feedback_message_hint,
+  );
+
+  @override
+  String get feedback_send => _resolve(
+    'feedback_send',
+    (loc) => loc.feedback_send,
+  );
+
+  @override
+  String get feedback_sent => _resolve(
+    'feedback_sent',
+    (loc) => loc.feedback_sent,
+  );
+
+  @override
+  String get feedback_failed => _resolve(
+    'feedback_failed',
+    (loc) => loc.feedback_failed,
+  );
+
+  @override
+  String get feedback_rate_limited => _resolve(
+    'feedback_rate_limited',
+    (loc) => loc.feedback_rate_limited,
+  );
+
+  @override
+  String get feedback_sign_in_prompt => _resolve(
+    'feedback_sign_in_prompt',
+    (loc) => loc.feedback_sign_in_prompt,
+  );
+
+  @override
+  String myListingsViews(int count) => _resolve(
+    'myListingsViews',
+    (loc) => loc.myListingsViews(count),
+  );
+
+  @override
+  String get settings_export_data_row => _resolve(
+    'settings_export_data_row',
+    (loc) => loc.settings_export_data_row,
+  );
+
+  @override
+  String get settings_export_data_preparing => _resolve(
+    'settings_export_data_preparing',
+    (loc) => loc.settings_export_data_preparing,
+  );
+
+  @override
+  String get settings_export_data_failed => _resolve(
+    'settings_export_data_failed',
+    (loc) => loc.settings_export_data_failed,
+  );
+
+  @override
+  String get settings_export_data_subject => _resolve(
+    'settings_export_data_subject',
+    (loc) => loc.settings_export_data_subject,
+  );
+
+  @override
   String get settingsEditorPrivacyUrlLabel => _resolve(
     'settingsEditorPrivacyUrlLabel',
     (loc) => loc.settingsEditorPrivacyUrlLabel,

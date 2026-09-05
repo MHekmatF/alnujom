@@ -150,6 +150,7 @@ class MyListingsBloc extends Bloc<MyListingsEvent, MyListingsState> {
                       listing: pl.listing.copyWith(expiresAt: newExpiresAt),
                       latestStatusHistoryEntry: pl.latestStatusHistoryEntry,
                       primaryPrice: pl.primaryPrice,
+                      viewsCount: pl.viewsCount,
                     )
                   : pl,
             )
@@ -201,6 +202,7 @@ class MyListingsBloc extends Bloc<MyListingsEvent, MyListingsState> {
                 listing: pl.listing.copyWith(status: event.status),
                 latestStatusHistoryEntry: pl.latestStatusHistoryEntry,
                 primaryPrice: pl.primaryPrice,
+                viewsCount: pl.viewsCount,
               ),
         ];
         emit(

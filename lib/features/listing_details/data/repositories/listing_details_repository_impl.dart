@@ -44,4 +44,19 @@ class ListingDetailsRepositoryImpl implements ListingDetailsRepository {
       );
     }
   }
+
+  @override
+  Future<void> recordView(String id, {String? viewerKey}) async {
+    try {
+      await _datasource.recordView(id, viewerKey: viewerKey);
+    } on Object catch (error, stackTrace) {
+      // A lost view is not worth a retry or a toast.
+      _logger.debug(
+        'recordView failed for id=$id',
+        error: error,
+        stackTrace: stackTrace,
+        tag: _tag,
+      );
+    }
+  }
 }

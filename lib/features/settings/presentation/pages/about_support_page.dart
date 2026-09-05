@@ -15,6 +15,9 @@ import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/bloc/auth_state.dart';
+import '../../../feedback/presentation/widgets/feedback_sheet.dart';
 import '../../domain/entities/support_contact.dart';
 import '../bloc/app_settings_cubit.dart';
 import '../widgets/support_contact_row.dart';
@@ -31,6 +34,9 @@ class AboutSupportPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    // Plan A34 — the feedback sheet needs an account (the RPC refuses
+    // guests), so the tile shows only to someone who has one.
+    final signedIn = context.watch<AuthBloc>().state is Authenticated;
 
     return DcCrownScaffold(
       title: l10n.about_title,
@@ -47,10 +53,19 @@ class AboutSupportPage extends StatelessWidget {
           // exists and the page is never empty.
 
           final sections = <Widget>[
-            if (contact.hasAny)
+            if (contact.hasAny || signedIn)
               _SettingsSection(
                 title: l10n.about_support_heading,
-                children: _buildContactRows(l10n, contact),
+                children: [
+                  ..._buildContactRows(l10n, contact),
+                  // Plan A34 — a problem or an idea, from inside the app.
+                  if (signedIn)
+                    _PageTile(
+                      icon: Icons.chat_bubble_outline,
+                      label: l10n.about_feedback,
+                      onTap: () => _openFeedback(context),
+                    ),
+                ],
               ),
             _SettingsSection(
                 title: l10n.about_legal_heading,
@@ -90,6 +105,14 @@ class AboutSupportPage extends StatelessWidget {
   }
 
   static bool _hasAny(String? value) => value != null && value.isNotEmpty;
+
+  void _openFeedback(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => const FeedbackSheet(),
+    );
+  }
 
   List<Widget> _buildContactRows(
     AppLocalizations l10n,

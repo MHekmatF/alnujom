@@ -23,6 +23,19 @@ class SupabaseListingDetailsDatasource {
 
   final supabase.SupabaseClient _client;
 
+  /// Plan A35 — one row per viewer per listing per day. The RPC ignores the
+  /// publisher's own opens, non-approved listings and a missing key, so a
+  /// failure here is never surfaced to the person.
+  Future<void> recordView(String listingId, {String? viewerKey}) async {
+    await _client.rpc(
+      'record_listing_view',
+      params: {
+        'p_listing_id': listingId,
+        if (viewerKey != null) 'p_viewer_key': viewerKey,
+      },
+    );
+  }
+
   Future<ListingDetailsAggregateDto?> fetchListing(String listingId) async {
     final row = await _client
         .from('listings')
