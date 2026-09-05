@@ -38,7 +38,7 @@ class SupabaseRoleCatalogDataSource {
   Future<List<PermissionDto>> loadPermissionCatalog() async {
     final response = await _client
         .from('permissions')
-        .select('id, key, category, description')
+        .select('id, key, category, description, description_ar')
         .order('category', ascending: true)
         .order('key', ascending: true);
 

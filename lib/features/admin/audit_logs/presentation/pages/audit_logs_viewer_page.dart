@@ -26,6 +26,7 @@ import '../../../../../core/widgets/error_state.dart';
 import '../../../../../core/widgets/loading_state.dart';
 import '../../../../../core/widgets/staggered_list_item.dart';
 import '../../../../../l10n/app_localizations.dart';
+import '../audit_action_labels.dart';
 import '../../domain/entities/audit_log_entry.dart';
 import '../bloc/audit_log_cubit.dart';
 import '../bloc/audit_log_state.dart';
@@ -191,7 +192,10 @@ class _AuditLogCard extends StatelessWidget {
           end: AppSpacing.lg,
           bottom: AppSpacing.lg,
         ),
-        title: Text(entry.action, style: styles.titleMedium),
+        title: Text(
+          localizedAuditAction(l10n, entry.action),
+          style: styles.titleMedium,
+        ),
         subtitle: Padding(
           padding: const EdgeInsetsDirectional.only(top: AppSpacing.xs),
           child: Column(
@@ -200,8 +204,8 @@ class _AuditLogCard extends StatelessWidget {
               _FieldRow(
                 label: l10n.auditLogsTargetLabel,
                 value: entry.targetId == null
-                    ? entry.targetType
-                    : '${entry.targetType} · ${entry.targetId}',
+                    ? localizedAuditTarget(l10n, entry.targetType)
+                    : '${localizedAuditTarget(l10n, entry.targetType)} · ${entry.targetId}',
               ),
               _FieldRow(
                 label: l10n.auditLogsActorLabel,

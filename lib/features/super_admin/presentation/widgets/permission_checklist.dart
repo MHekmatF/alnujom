@@ -117,7 +117,11 @@ class _PermissionRow extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        permission.description ?? permission.key,
+                        // Plan A33 — the database's Arabic text on an Arabic
+                        // screen; English otherwise; the key as last resort.
+                        permission.labelFor(
+                          Localizations.localeOf(context).languageCode,
+                        ),
                         style: styles.bodyLarge,
                       ),
                       const SizedBox(height: AppSpacing.xxs),

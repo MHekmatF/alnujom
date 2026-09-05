@@ -4697,6 +4697,228 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get auditEntity_account_approval => _resolve(
+    'auditEntity_account_approval',
+    (loc) => loc.auditEntity_account_approval,
+  );
+
+  @override
+  String get auditEntity_ad => _resolve(
+    'auditEntity_ad',
+    (loc) => loc.auditEntity_ad,
+  );
+
+  @override
+  String get auditEntity_agency_member => _resolve(
+    'auditEntity_agency_member',
+    (loc) => loc.auditEntity_agency_member,
+  );
+
+  @override
+  String get auditEntity_agency_verification => _resolve(
+    'auditEntity_agency_verification',
+    (loc) => loc.auditEntity_agency_verification,
+  );
+
+  @override
+  String get auditEntity_agency => _resolve(
+    'auditEntity_agency',
+    (loc) => loc.auditEntity_agency,
+  );
+
+  @override
+  String get auditEntity_area => _resolve(
+    'auditEntity_area',
+    (loc) => loc.auditEntity_area,
+  );
+
+  @override
+  String get auditEntity_city => _resolve(
+    'auditEntity_city',
+    (loc) => loc.auditEntity_city,
+  );
+
+  @override
+  String get auditEntity_currency => _resolve(
+    'auditEntity_currency',
+    (loc) => loc.auditEntity_currency,
+  );
+
+  @override
+  String get auditEntity_exchange_rate => _resolve(
+    'auditEntity_exchange_rate',
+    (loc) => loc.auditEntity_exchange_rate,
+  );
+
+  @override
+  String get auditEntity_governorate => _resolve(
+    'auditEntity_governorate',
+    (loc) => loc.auditEntity_governorate,
+  );
+
+  @override
+  String get auditEntity_listing_media => _resolve(
+    'auditEntity_listing_media',
+    (loc) => loc.auditEntity_listing_media,
+  );
+
+  @override
+  String get auditEntity_listing_revision => _resolve(
+    'auditEntity_listing_revision',
+    (loc) => loc.auditEntity_listing_revision,
+  );
+
+  @override
+  String get auditEntity_listing => _resolve(
+    'auditEntity_listing',
+    (loc) => loc.auditEntity_listing,
+  );
+
+  @override
+  String get auditEntity_profile => _resolve(
+    'auditEntity_profile',
+    (loc) => loc.auditEntity_profile,
+  );
+
+  @override
+  String get auditEntity_report => _resolve(
+    'auditEntity_report',
+    (loc) => loc.auditEntity_report,
+  );
+
+  @override
+  String get auditEntity_role_permission => _resolve(
+    'auditEntity_role_permission',
+    (loc) => loc.auditEntity_role_permission,
+  );
+
+  @override
+  String get auditEntity_role => _resolve(
+    'auditEntity_role',
+    (loc) => loc.auditEntity_role,
+  );
+
+  @override
+  String get auditEntity_settings => _resolve(
+    'auditEntity_settings',
+    (loc) => loc.auditEntity_settings,
+  );
+
+  @override
+  String get auditEntity_user_role => _resolve(
+    'auditEntity_user_role',
+    (loc) => loc.auditEntity_user_role,
+  );
+
+  @override
+  String get auditVerb_status_changed => _resolve(
+    'auditVerb_status_changed',
+    (loc) => loc.auditVerb_status_changed,
+  );
+
+  @override
+  String get auditVerb_created => _resolve(
+    'auditVerb_created',
+    (loc) => loc.auditVerb_created,
+  );
+
+  @override
+  String get auditVerb_changed => _resolve(
+    'auditVerb_changed',
+    (loc) => loc.auditVerb_changed,
+  );
+
+  @override
+  String get auditVerb_decided => _resolve(
+    'auditVerb_decided',
+    (loc) => loc.auditVerb_decided,
+  );
+
+  @override
+  String get auditVerb_deleted => _resolve(
+    'auditVerb_deleted',
+    (loc) => loc.auditVerb_deleted,
+  );
+
+  @override
+  String get auditVerb_updated => _resolve(
+    'auditVerb_updated',
+    (loc) => loc.auditVerb_updated,
+  );
+
+  @override
+  String get auditVerb_applied => _resolve(
+    'auditVerb_applied',
+    (loc) => loc.auditVerb_applied,
+  );
+
+  @override
+  String get auditVerb_withdrawn => _resolve(
+    'auditVerb_withdrawn',
+    (loc) => loc.auditVerb_withdrawn,
+  );
+
+  @override
+  String get auditVerb_approved => _resolve(
+    'auditVerb_approved',
+    (loc) => loc.auditVerb_approved,
+  );
+
+  @override
+  String get auditVerb_paused => _resolve(
+    'auditVerb_paused',
+    (loc) => loc.auditVerb_paused,
+  );
+
+  @override
+  String get auditVerb_rejected => _resolve(
+    'auditVerb_rejected',
+    (loc) => loc.auditVerb_rejected,
+  );
+
+  @override
+  String get auditVerb_submitted => _resolve(
+    'auditVerb_submitted',
+    (loc) => loc.auditVerb_submitted,
+  );
+
+  @override
+  String get auditVerb_resolved => _resolve(
+    'auditVerb_resolved',
+    (loc) => loc.auditVerb_resolved,
+  );
+
+  @override
+  String get auditVerb_granted => _resolve(
+    'auditVerb_granted',
+    (loc) => loc.auditVerb_granted,
+  );
+
+  @override
+  String get auditVerb_revoked => _resolve(
+    'auditVerb_revoked',
+    (loc) => loc.auditVerb_revoked,
+  );
+
+  @override
+  String get auditVerb_sold => _resolve(
+    'auditVerb_sold',
+    (loc) => loc.auditVerb_sold,
+  );
+
+  @override
+  String get auditVerb_rented => _resolve(
+    'auditVerb_rented',
+    (loc) => loc.auditVerb_rented,
+  );
+
+  @override
+  String get auditVerb_expired => _resolve(
+    'auditVerb_expired',
+    (loc) => loc.auditVerb_expired,
+  );
+
+  @override
   String get settingsEditorPrivacyUrlLabel => _resolve(
     'settingsEditorPrivacyUrlLabel',
     (loc) => loc.settingsEditorPrivacyUrlLabel,

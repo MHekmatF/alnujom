@@ -6,6 +6,7 @@ class PermissionDto {
     required this.key,
     required this.category,
     required this.description,
+    this.descriptionAr,
   });
 
   factory PermissionDto.fromJson(Map<String, dynamic> json) {
@@ -14,6 +15,7 @@ class PermissionDto {
       key: json['key'] as String,
       category: json['category'] as String,
       description: json['description'] as String?,
+      descriptionAr: json['description_ar'] as String?,
     );
   }
 
@@ -21,12 +23,14 @@ class PermissionDto {
   final String key;
   final String category;
   final String? description;
+  final String? descriptionAr;
 
   PermissionCatalogEntry toEntity() {
     return PermissionCatalogEntry(
       key: key,
       category: category,
       description: description,
+      descriptionAr: descriptionAr,
     );
   }
 }

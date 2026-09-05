@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/validators/phone_validator.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/util/localized_dates.dart';
 import '../../domain/entities/listing.dart';
 import '../../domain/entities/listing_form_state.dart';
 import '../bloc/listing_form_bloc.dart';
@@ -101,9 +102,10 @@ class _StepVisibilityState extends State<StepVisibility> {
                   icon: const Icon(Icons.event),
                   label: Text(
                     state.draftVisibility?.hideUntil != null
-                        ? state.draftVisibility!.hideUntil!
-                              .toIso8601String()
-                              .substring(0, 10)
+                        ? formatLocalizedDate(
+                            state.draftVisibility!.hideUntil!,
+                            Localizations.localeOf(context),
+                          )
                         : l10n.fieldLabelHideUntilPick,
                   ),
                   onPressed: () async {
