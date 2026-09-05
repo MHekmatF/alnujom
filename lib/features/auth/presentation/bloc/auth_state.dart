@@ -6,9 +6,15 @@ sealed class AuthState {
   const AuthState();
 }
 
+/// Why the app is showing the sign-in screen (plan A30). `none` is the
+/// ordinary case: a fresh install, or a sign-out the user asked for.
+enum SignedOutReason { none, sessionExpired }
+
 /// No authenticated session.
 final class Unauthenticated extends AuthState {
-  const Unauthenticated();
+  const Unauthenticated({this.reason = SignedOutReason.none});
+
+  final SignedOutReason reason;
 }
 
 /// Sign-in / register / logout in progress.

@@ -8,6 +8,7 @@ import '../errors/result.dart';
 import '../logging/app_logger.dart';
 import 'secure_session_storage.dart';
 import 'supabase_client_wrapper.dart';
+import 'timeout_http_client.dart';
 import 'types/auth_state.dart';
 import 'types/realtime_channel.dart';
 
@@ -47,6 +48,9 @@ final class SupabaseClientWrapperImpl implements SupabaseClientWrapper {
       await supabase.Supabase.initialize(
         url: url,
         anonKey: anonKey,
+        // Plan A30 — a deadline on every request (20 s; 3 min for Storage
+        // bodies), so a dead connection ends in an error state, not a spinner.
+        httpClient: TimeoutHttpClient(),
         authOptions: supabase.FlutterAuthClientOptions(
           localStorage: SecureLocalStorage(
             legacyPersistSessionKey: legacyPersistSessionKey,

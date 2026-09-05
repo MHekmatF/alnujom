@@ -53,7 +53,13 @@ class AppUpdateRepositoryImpl implements AppUpdateRepository {
 
       final cmp = manifest.latest.compareTo(installed);
       if (cmp > 0) {
-        return Success(UpdateAvailable(manifest));
+        // Plan A31 — below the floor, the prompt is not dismissible. Only
+        // meaningful when there is a newer build to move to, hence inside
+        // the cmp > 0 branch: a floor above the latest is a manifest mistake
+        // and must not lock anyone out.
+        final floor = manifest.minSupported;
+        final required = floor != null && installed.compareTo(floor) < 0;
+        return Success(UpdateAvailable(manifest, required: required));
       }
       return const Success(UpToDate());
     } on Object catch (e, st) {

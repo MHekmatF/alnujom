@@ -43,7 +43,13 @@ class AppUpdateCubit extends Cubit<AppUpdateState> {
         };
         final VersionManifest? manifest =
             value is UpdateAvailable ? value.manifest : null;
-        emit(AppUpdateState(status: status, manifest: manifest));
+        emit(
+          AppUpdateState(
+            status: status,
+            manifest: manifest,
+            updateRequired: value is UpdateAvailable && value.required,
+          ),
+        );
       case FailureResult():
         // Repository always returns Success — this branch is for safety only.
         emit(const AppUpdateState(status: AppUpdateStatus.checkFailed));

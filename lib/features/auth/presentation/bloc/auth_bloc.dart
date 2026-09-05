@@ -88,6 +88,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> with WidgetsBindingObserver {
   /// exactly that device's token on logout (per-device, R-191/SC-011).
   String? _registeredToken;
 
+  /// Plan A30 — set by [_onLogoutRequested] so the null session that follows
+  /// reads as a sign-out, not an expiry.
+  bool _logoutRequested = false;
+
+  /// Plan A30 — true once a session has produced a signed-in state; a null
+  /// session after that, with no sign-out asked for, is an expiry.
+  bool _wasSignedIn = false;
+
   /// The open `user_roles` Realtime channel (the 4th PermissionChecker
   /// observation point, T040). Torn down on logout.
   RealtimeSubscriptionHandle? _userRolesChannel;
@@ -146,6 +154,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> with WidgetsBindingObserver {
     LogoutRequested event,
     Emitter<AuthState> emit,
   ) async {
+    _logoutRequested = true;
     // Deregister this device's push token BEFORE dropping the session. The
     // delete is RLS-scoped to the signed-in user, so doing it after logout (as
     // the teardown path used to) could only ever fail — and it failed slowly,
@@ -183,11 +192,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> with WidgetsBindingObserver {
       // for seconds, and the late state change then made the router jump
       // through several routes at once. Unblock, then clean up behind it.
       _permissionChecker.clear();
-      emit(const Unauthenticated());
+      // Plan A30 — a session that vanished while we were signed in, with no
+      // sign-out asked for, is an expiry: the sign-in screen says so.
+      final expired = _wasSignedIn && !_logoutRequested;
+      _logoutRequested = false;
+      _wasSignedIn = false;
+      emit(
+        Unauthenticated(
+          reason: expired
+              ? SignedOutReason.sessionExpired
+              : SignedOutReason.none,
+        ),
+      );
       unawaited(_teardownSessionSignals());
       return;
     }
     await _permissionChecker.load();
+    _wasSignedIn = true;
     final profileResult = await _profileRepository.getCurrentProfile();
     if (profileResult is Success<Profile>) {
       // Show the signed-in screen FIRST, then wire the session's background

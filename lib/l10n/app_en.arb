@@ -2903,6 +2903,18 @@
   "@about_no_info": {
     "description": "Phase 23 FC — Empty-state copy when no support channels or legal links are configured."
   },
+  "authSessionExpiredNotice": "Your session has expired. Sign in again to continue.",
+  "@authSessionExpiredNotice": {
+    "description": "Plan A30 — toast on the sign-in screen after a session lapsed."
+  },
+  "authOfflineNotice": "No internet connection. Sign in once you are back online.",
+  "@authOfflineNotice": {
+    "description": "Plan A30 — toast on the sign-in screen when the phone is offline."
+  },
+  "updatePromptRequiredBody": "This version is no longer supported. Update the app to continue.",
+  "@updatePromptRequiredBody": {
+    "description": "Plan A31 — body of the update prompt when the installed build is below min_supported_version."
+  },
   "updatePromptTitle": "Update Available",
   "@updatePromptTitle": {
     "description": "Phase 24 UP — Title of the in-app update prompt dialog (FR-009)."

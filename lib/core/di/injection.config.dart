@@ -740,6 +740,7 @@ import '../logging/console_logger.dart' as _i1026;
 import '../logging/crash_reporter.dart' as _i237;
 import '../logging/sentry_crash_reporter.dart' as _i889;
 import '../messaging/push_messaging_service.dart' as _i563;
+import '../network/connectivity_cubit.dart' as _i838;
 import '../network/realtime_signals.dart' as _i591;
 import '../network/realtime_signals_impl.dart' as _i854;
 import '../network/supabase_client_wrapper.dart' as _i752;
@@ -782,6 +783,7 @@ _i174.GetIt $initGetIt(
   );
   gh.singleton<_i373.EnvConfig>(() => const _i373.EnvConfig());
   gh.lazySingleton<_i454.SupabaseClient>(() => supabaseModule.supabaseClient());
+  gh.lazySingleton<_i838.ConnectivityCubit>(() => _i838.ConnectivityCubit());
   gh.lazySingleton<_i394.SupabaseAccountApprovalsDatasource>(
     () => _i394.SupabaseAccountApprovalsDatasource(),
   );

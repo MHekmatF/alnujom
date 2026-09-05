@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import 'core/network/connectivity_cubit.dart';
+import 'core/widgets/offline_banner.dart';
 import 'core/di/injection.dart';
 import 'core/flags/app_flags.dart';
 import 'core/localization/locale_cubit.dart';
@@ -105,6 +107,10 @@ class _AppState extends State<App> with WidgetsBindingObserver {
         // Phase 24 UP — provide the update cubit app-wide so the listener
         // below can react to UpdateAvailable.
         BlocProvider<AppUpdateCubit>.value(value: _appUpdateCubit),
+        // Plan A30 — connectivity, for the offline strip and the sign-in notice.
+        BlocProvider<ConnectivityCubit>.value(
+          value: getIt<ConnectivityCubit>(),
+        ),
       ],
       child: BlocBuilder<ThemeCubit, AppThemeMode>(
         builder: (context, appThemeMode) {
@@ -162,7 +168,11 @@ class _AppState extends State<App> with WidgetsBindingObserver {
                           // dialog attaches correctly (Phase 24 UP live-QA fix).
                           final navContext = rootNavigatorKey.currentContext;
                           if (navContext != null) {
-                            showUpdatePrompt(navContext, state.manifest!);
+                            showUpdatePrompt(
+                              navContext,
+                              state.manifest!,
+                              required: state.updateRequired,
+                            );
                           }
                         },
                         child: NotificationPushListener(
@@ -183,6 +193,8 @@ class _AppState extends State<App> with WidgetsBindingObserver {
                                 children: [
                                   child ?? const SizedBox.shrink(),
                                   if (showPaletteTester) const PaletteTester(),
+                                  // Plan A30 — "you appear to be offline".
+                                  const OfflineBanner(),
                                 ],
                               ),
                             ),

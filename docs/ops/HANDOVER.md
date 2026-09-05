@@ -522,6 +522,13 @@ Upload the APK to the Telegram channel as a **file attachment**, and copy the
 
 ### Step 3 — Update the version manifest
 
+> **`min_supported_version` is a real switch since 2026-09-05 (plan A31).** A
+> phone running a build *below* it gets an update prompt it cannot dismiss:
+> no "later", no back, only the Update button. Leave it `null` for an ordinary
+> release; set it to the oldest version you still accept only when an older
+> build must stop being used (a security fix, a broken API). Never set it above
+> `latest_version`.
+
 The app checks a small file on Supabase Storage once per launch and shows an
 "Update available" prompt if the file says a newer version exists.
 

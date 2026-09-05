@@ -6,7 +6,8 @@ import 'localized_text.dart';
 /// Hosted on Supabase Storage (public-read); the client reads it on cold start
 /// and compares [latest] to the installed version to decide whether to prompt.
 ///
-/// [minSupported] is parsed but **not enforced** in v1 (forward-stated).
+/// [minSupported] is the forced-update floor since plan A31 (2026-09-05):
+/// an installed build below it gets a prompt it cannot dismiss.
 class VersionManifest {
   const VersionManifest({
     required this.latest,
@@ -19,8 +20,8 @@ class VersionManifest {
   /// The latest released version.  Used for the semver+build comparison.
   final AppVersion latest;
 
-  /// The minimum supported version.  Parsed but ignored in v1 — reserved for
-  /// a future force-update gate (forward-stated — data-model §1).
+  /// The minimum supported version. Below it the update prompt has no
+  /// "later" and no back (plan A31). Null means no floor.
   final AppVersion? minSupported;
 
   /// Primary download channel (Telegram).  Preferred target of the Update

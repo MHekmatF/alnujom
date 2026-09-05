@@ -22,17 +22,25 @@ enum AppUpdateStatus {
 
 /// Immutable state for [AppUpdateCubit].
 class AppUpdateState extends Equatable {
-  const AppUpdateState({required this.status, this.manifest});
+  const AppUpdateState({
+    required this.status,
+    this.manifest,
+    this.updateRequired = false,
+  });
 
   const AppUpdateState.initial()
       : status = AppUpdateStatus.initial,
-        manifest = null;
+        manifest = null,
+        updateRequired = false;
 
   final AppUpdateStatus status;
 
   /// Non-null only when [status] == [AppUpdateStatus.updateAvailable].
   final VersionManifest? manifest;
 
+  /// Plan A31 — the installed build is below `min_supported_version`.
+  final bool updateRequired;
+
   @override
-  List<Object?> get props => [status, manifest];
+  List<Object?> get props => [status, manifest, updateRequired];
 }
