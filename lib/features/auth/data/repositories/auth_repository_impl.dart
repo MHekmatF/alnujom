@@ -255,6 +255,22 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Result<void>> acceptTerms({required String version}) async {
+    try {
+      await _authDs.acceptTerms(version: version);
+      return const Success(null);
+    } on Object catch (error, stackTrace) {
+      _logger.warning(
+        'acceptTerms failed.',
+        error: error,
+        stackTrace: stackTrace,
+        tag: _tag,
+      );
+      return FailureResult(_authDs.mapAuthException(error, stackTrace));
+    }
+  }
+
+  @override
   Future<String?> fetchRejectionReason({required String userId}) async {
     try {
       return await _authDs.fetchMyRejectionReason(userId: userId);

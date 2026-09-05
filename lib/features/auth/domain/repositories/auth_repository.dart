@@ -57,6 +57,10 @@ abstract class AuthRepository {
   /// can offer "request a new link" instead of a generic error.
   Future<Result<void>> updatePassword({required String newPassword});
 
+  /// Plan A27 — record acceptance of the terms of service at [version] on the
+  /// signed-in user's profile.
+  Future<Result<void>> acceptTerms({required String version});
+
   /// Fetches the latest rejection reason for [userId], or null.
   /// Used by the Rejected screen to show why the admin rejected the account.
   Future<String?> fetchRejectionReason({required String userId});

@@ -3063,6 +3063,34 @@
   "@auditVerb_expired": {
     "description": "Plan A33 — audit log verb label for `expired`."
   },
+  "register_terms_consent_prefix": "I agree to the ",
+  "@register_terms_consent_prefix": {
+    "description": "Plan A27 — consent row, text before the terms link (keep the trailing space)."
+  },
+  "register_terms_link": "Terms of Service",
+  "@register_terms_link": {
+    "description": "Plan A27 — consent row, tappable terms link."
+  },
+  "register_terms_conjunction": " and the ",
+  "@register_terms_conjunction": {
+    "description": "Plan A27 — consent row, text between the two links (keep the spaces)."
+  },
+  "register_privacy_link": "Privacy Policy",
+  "@register_privacy_link": {
+    "description": "Plan A27 — consent row, tappable privacy link."
+  },
+  "register_terms_required": "You need to agree to the Terms of Service to continue.",
+  "@register_terms_required": {
+    "description": "Plan A27 — register error when the consent box is not ticked."
+  },
+  "terms_page_title": "Terms of Service",
+  "@terms_page_title": {
+    "description": "Plan A27 — in-app terms page title."
+  },
+  "terms_page_load_failed": "Couldn't open the terms",
+  "@terms_page_load_failed": {
+    "description": "Plan A27 — in-app terms page error state."
+  },
   "updatePromptTitle": "Update Available",
   "@updatePromptTitle": {
     "description": "Phase 24 UP — Title of the in-app update prompt dialog (FR-009)."

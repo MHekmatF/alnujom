@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/errors/result.dart';
+import '../../../../core/legal/terms_version.dart';
 import '../../../../core/messaging/push_messaging_service.dart';
 import '../../../../core/network/realtime_signals.dart';
 import '../../../../core/security/permission_checker.dart';
@@ -126,6 +127,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> with WidgetsBindingObserver {
           failure is AuthFailure ? failure : UnknownAuthError(failure.message),
         ),
       );
+    }
+    if (result is Success<Session>) {
+      // Plan A27 — the register screen cannot submit without the consent box
+      // ticked; record that on the new profile. Best-effort: a failure here is
+      // logged by the repository and must not hold up the sign-in.
+      unawaited(_authRepository.acceptTerms(version: kTermsVersion));
     }
     // On Success: sessionStream fires SessionRefreshed which computes the state.
   }

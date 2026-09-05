@@ -2746,6 +2746,34 @@
   "@auditVerb_expired": {
     "description": "Plan A33 — audit log verb label for `expired`."
   },
+  "register_terms_consent_prefix": "أوافق على ",
+  "@register_terms_consent_prefix": {
+    "description": "Plan A27 — consent row, text before the terms link (keep the trailing space)."
+  },
+  "register_terms_link": "شروط الاستخدام",
+  "@register_terms_link": {
+    "description": "Plan A27 — consent row, tappable terms link."
+  },
+  "register_terms_conjunction": " و",
+  "@register_terms_conjunction": {
+    "description": "Plan A27 — consent row, text between the two links (keep the spaces)."
+  },
+  "register_privacy_link": "سياسة الخصوصية",
+  "@register_privacy_link": {
+    "description": "Plan A27 — consent row, tappable privacy link."
+  },
+  "register_terms_required": "يجب الموافقة على شروط الاستخدام للمتابعة.",
+  "@register_terms_required": {
+    "description": "Plan A27 — register error when the consent box is not ticked."
+  },
+  "terms_page_title": "شروط الاستخدام",
+  "@terms_page_title": {
+    "description": "Plan A27 — in-app terms page title."
+  },
+  "terms_page_load_failed": "تعذّر فتح الشروط",
+  "@terms_page_load_failed": {
+    "description": "Plan A27 — in-app terms page error state."
+  },
   "updatePromptTitle": "تحديث متاح",
   "@updatePromptTitle": {
     "description": "Phase 24 UP — Title of the in-app update prompt dialog (FR-009)."

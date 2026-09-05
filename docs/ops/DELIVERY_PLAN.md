@@ -944,9 +944,25 @@ writes `expires_at` at approval; the backup workflow **keeps no file** without
       `listing_expired` row; owner renew → `approved +60d`; a stranger →
       `42501`. The 2026-10-06 cliff stands for the demo rows by design (B7).
       Not walked on a device (no publisher account on the AVD).
-- [ ] **A27 — Terms of service** · M. AR + EN beside the privacy policy,
-      `terms_url` set, acceptance checkbox at sign-up with the timestamp on the
-      profile. Needs B4 facts and the owner's yes on the text and on publishing.
+- [x] **A27 — Terms of service** · **BUILT 2026-09-05 — publishing is one
+      owner yes.** `docs/legal/terms-of-service.md` (Arabic, the authority) and
+      `.en.md`, written from the privacy policy's own facts (entity, contact,
+      Syrian law) and the app's real rules (18+, one account, publisher
+      approval, truthful listings, review before publication, expiry and
+      renewal, block / report / suspend, free today, marketplace-not-party,
+      "never pay before a viewing"). Version `2026-09-05`. **In the app:** the
+      two markdown files are bundled as assets and rendered by a small
+      in-app page (`/terms`, anonymous-accessible), reachable from About and
+      from the register screen, so nobody needs a website to read them. **At
+      sign-up:** a required consent box — "أوافق على شروط الاستخدام وسياسة
+      الخصوصية" with both tappable — and, on success, `accept_terms('2026-09-05')`
+      stamps `profiles.terms_accepted_at` / `terms_version` (migration
+      `20260905120007`). **On the website:** `tool/build_privacy_site.py` now
+      renders `terms.html` / `terms.en.html` beside the policy with
+      cross-links in every footer. Not published: pushing to `gh-pages` is the
+      owner's call, together with the share page (A20) — one push carries
+      both. `terms_url` stays unset until then (the in-app page does not need
+      it). Not walked on a device (registration is the owner's action).
 - [x] **A28 — Throttle chat and posting** · **DONE 2026-09-05**, migration
       `20260905120004` applied. `messages`: 60 per conversation per hour, 120
       per sender per hour (BEFORE INSERT; new index on sender + created_at,

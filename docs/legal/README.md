@@ -177,3 +177,16 @@ is `docs/landing/l/index.html`, the page a shared listing link opens (review
 - **No street address is published**, only the entity name and country. That is
   normal for a small operator and satisfies the policy itself; a Play Console
   developer account asks for a full address separately.
+
+## Terms of service (plan A27, 2026-09-05)
+
+`terms-of-service.md` (Arabic, authoritative) and `terms-of-service.en.md` sit
+beside the policies and are built the same way (`terms.html`, `terms.en.html`,
+cross-linked from every footer). They are **also bundled into the app** as
+assets and rendered by the in-app terms page, which the register screen's
+consent box links to — so the app and the website read the same file and can
+never disagree. When the text changes materially, bump the **Version** line at
+the top of the Arabic file AND `kTermsVersion` in
+`lib/core/legal/terms_version.dart`; `profiles.terms_version` records what each
+person accepted, which is how a future "please accept the new terms" step will
+know whom to ask.

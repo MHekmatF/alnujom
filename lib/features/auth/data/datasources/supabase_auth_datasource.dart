@@ -96,6 +96,15 @@ class SupabaseAuthDataSource {
     await _auth.updateUser(supabase.UserAttributes(password: newPassword));
   }
 
+  /// Plan A27 — records that the signed-in user accepted the terms at
+  /// [version] (`accept_terms` RPC; writes the caller's own profile only).
+  Future<void> acceptTerms({required String version}) async {
+    await supabase.Supabase.instance.client.rpc<dynamic>(
+      'accept_terms',
+      params: {'p_version': version},
+    );
+  }
+
   /// Whether the incoming auth-state event signals that a password-recovery
   /// deep link was processed and a recovery session is now active.
   ///
