@@ -15,6 +15,7 @@ import '../../../../core/widgets/ds/dc_status_chip.dart';
 import '../../../../core/widgets/press_scale.dart';
 import '../../../../core/widgets/property_specs.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/util/localized_dates.dart';
 import '../../../../shared/domain/value_objects/money.dart';
 import '../../../../shared/presentation/money_formatter.dart';
 import '../../../currencies/domain/entities/currency.dart';
@@ -162,7 +163,10 @@ class ListingCard extends StatelessWidget {
                         ),
                         const SizedBox(width: AppSpacing.xs),
                         Text(
-                          _formatDate(listing.createdAt),
+                          formatLocalizedDate(
+                            listing.createdAt,
+                            Localizations.localeOf(context),
+                          ),
                           style: styles.labelMedium.copyWith(
                             color: colors.textMuted,
                           ),
@@ -223,13 +227,6 @@ class ListingCard extends StatelessWidget {
       if (areaName != null && areaName.isNotEmpty) areaName,
     ];
     return parts.join(' • ');
-  }
-
-  String _formatDate(DateTime when) {
-    final y = when.year.toString().padLeft(4, '0');
-    final m = when.month.toString().padLeft(2, '0');
-    final d = when.day.toString().padLeft(2, '0');
-    return '$y-$m-$d';
   }
 
   void _onTap(BuildContext context) {

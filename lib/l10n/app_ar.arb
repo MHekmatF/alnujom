@@ -2598,6 +2598,154 @@
   "@updatePromptRequiredBody": {
     "description": "Plan A31 — body of the update prompt when the installed build is below min_supported_version."
   },
+  "auditEntity_account_approval": "طلب اعتماد حساب",
+  "@auditEntity_account_approval": {
+    "description": "Plan A33 — audit log entity label for `account_approval`."
+  },
+  "auditEntity_ad": "إعلان ترويجي",
+  "@auditEntity_ad": {
+    "description": "Plan A33 — audit log entity label for `ad`."
+  },
+  "auditEntity_agency_member": "عضو مكتب",
+  "@auditEntity_agency_member": {
+    "description": "Plan A33 — audit log entity label for `agency_member`."
+  },
+  "auditEntity_agency_verification": "توثيق مكتب",
+  "@auditEntity_agency_verification": {
+    "description": "Plan A33 — audit log entity label for `agency_verification`."
+  },
+  "auditEntity_agency": "مكتب عقاري",
+  "@auditEntity_agency": {
+    "description": "Plan A33 — audit log entity label for `agency`."
+  },
+  "auditEntity_area": "منطقة",
+  "@auditEntity_area": {
+    "description": "Plan A33 — audit log entity label for `area`."
+  },
+  "auditEntity_city": "مدينة",
+  "@auditEntity_city": {
+    "description": "Plan A33 — audit log entity label for `city`."
+  },
+  "auditEntity_currency": "عملة",
+  "@auditEntity_currency": {
+    "description": "Plan A33 — audit log entity label for `currency`."
+  },
+  "auditEntity_exchange_rate": "سعر صرف",
+  "@auditEntity_exchange_rate": {
+    "description": "Plan A33 — audit log entity label for `exchange_rate`."
+  },
+  "auditEntity_governorate": "محافظة",
+  "@auditEntity_governorate": {
+    "description": "Plan A33 — audit log entity label for `governorate`."
+  },
+  "auditEntity_listing_media": "صور إعلان",
+  "@auditEntity_listing_media": {
+    "description": "Plan A33 — audit log entity label for `listing_media`."
+  },
+  "auditEntity_listing_revision": "تعديل إعلان",
+  "@auditEntity_listing_revision": {
+    "description": "Plan A33 — audit log entity label for `listing_revision`."
+  },
+  "auditEntity_listing": "إعلان",
+  "@auditEntity_listing": {
+    "description": "Plan A33 — audit log entity label for `listing`."
+  },
+  "auditEntity_profile": "حساب",
+  "@auditEntity_profile": {
+    "description": "Plan A33 — audit log entity label for `profile`."
+  },
+  "auditEntity_report": "بلاغ",
+  "@auditEntity_report": {
+    "description": "Plan A33 — audit log entity label for `report`."
+  },
+  "auditEntity_role_permission": "صلاحية دور",
+  "@auditEntity_role_permission": {
+    "description": "Plan A33 — audit log entity label for `role_permission`."
+  },
+  "auditEntity_role": "دور",
+  "@auditEntity_role": {
+    "description": "Plan A33 — audit log entity label for `role`."
+  },
+  "auditEntity_settings": "الإعدادات",
+  "@auditEntity_settings": {
+    "description": "Plan A33 — audit log entity label for `settings`."
+  },
+  "auditEntity_user_role": "دور مستخدم",
+  "@auditEntity_user_role": {
+    "description": "Plan A33 — audit log entity label for `user_role`."
+  },
+  "auditVerb_status_changed": "تغيّرت حالته",
+  "@auditVerb_status_changed": {
+    "description": "Plan A33 — audit log verb label for `status_changed`."
+  },
+  "auditVerb_created": "أُنشئ",
+  "@auditVerb_created": {
+    "description": "Plan A33 — audit log verb label for `created`."
+  },
+  "auditVerb_changed": "تغيّر",
+  "@auditVerb_changed": {
+    "description": "Plan A33 — audit log verb label for `changed`."
+  },
+  "auditVerb_decided": "تم البتّ فيه",
+  "@auditVerb_decided": {
+    "description": "Plan A33 — audit log verb label for `decided`."
+  },
+  "auditVerb_deleted": "حُذف",
+  "@auditVerb_deleted": {
+    "description": "Plan A33 — audit log verb label for `deleted`."
+  },
+  "auditVerb_updated": "عُدّل",
+  "@auditVerb_updated": {
+    "description": "Plan A33 — audit log verb label for `updated`."
+  },
+  "auditVerb_applied": "طُبّق",
+  "@auditVerb_applied": {
+    "description": "Plan A33 — audit log verb label for `applied`."
+  },
+  "auditVerb_withdrawn": "سُحب",
+  "@auditVerb_withdrawn": {
+    "description": "Plan A33 — audit log verb label for `withdrawn`."
+  },
+  "auditVerb_approved": "تمت الموافقة عليه",
+  "@auditVerb_approved": {
+    "description": "Plan A33 — audit log verb label for `approved`."
+  },
+  "auditVerb_paused": "أُوقف مؤقتاً",
+  "@auditVerb_paused": {
+    "description": "Plan A33 — audit log verb label for `paused`."
+  },
+  "auditVerb_rejected": "رُفض",
+  "@auditVerb_rejected": {
+    "description": "Plan A33 — audit log verb label for `rejected`."
+  },
+  "auditVerb_submitted": "أُرسل للمراجعة",
+  "@auditVerb_submitted": {
+    "description": "Plan A33 — audit log verb label for `submitted`."
+  },
+  "auditVerb_resolved": "عولج",
+  "@auditVerb_resolved": {
+    "description": "Plan A33 — audit log verb label for `resolved`."
+  },
+  "auditVerb_granted": "مُنح",
+  "@auditVerb_granted": {
+    "description": "Plan A33 — audit log verb label for `granted`."
+  },
+  "auditVerb_revoked": "سُحب",
+  "@auditVerb_revoked": {
+    "description": "Plan A33 — audit log verb label for `revoked`."
+  },
+  "auditVerb_sold": "بيع",
+  "@auditVerb_sold": {
+    "description": "Plan A33 — audit log verb label for `sold`."
+  },
+  "auditVerb_rented": "أُجّر",
+  "@auditVerb_rented": {
+    "description": "Plan A33 — audit log verb label for `rented`."
+  },
+  "auditVerb_expired": "انتهت صلاحيته",
+  "@auditVerb_expired": {
+    "description": "Plan A33 — audit log verb label for `expired`."
+  },
   "updatePromptTitle": "تحديث متاح",
   "@updatePromptTitle": {
     "description": "Phase 24 UP — Title of the in-app update prompt dialog (FR-009)."
@@ -4422,11 +4570,11 @@
   "@navDrawerAbout": {
     "description": "Phase 30."
   },
-  "createToggleDetailView": "عرض تفصيلي",
+  "createToggleDetailView": "تفصيلي",
   "@createToggleDetailView": {
     "description": "Phase 31."
   },
-  "createToggleClassicSteps": "خطوات تقليدية",
+  "createToggleClassicSteps": "تقليدي",
   "@createToggleClassicSteps": {
     "description": "Phase 31."
   },

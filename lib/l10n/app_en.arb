@@ -2915,6 +2915,154 @@
   "@updatePromptRequiredBody": {
     "description": "Plan A31 — body of the update prompt when the installed build is below min_supported_version."
   },
+  "auditEntity_account_approval": "Account request",
+  "@auditEntity_account_approval": {
+    "description": "Plan A33 — audit log entity label for `account_approval`."
+  },
+  "auditEntity_ad": "Ad",
+  "@auditEntity_ad": {
+    "description": "Plan A33 — audit log entity label for `ad`."
+  },
+  "auditEntity_agency_member": "Agency member",
+  "@auditEntity_agency_member": {
+    "description": "Plan A33 — audit log entity label for `agency_member`."
+  },
+  "auditEntity_agency_verification": "Agency verification",
+  "@auditEntity_agency_verification": {
+    "description": "Plan A33 — audit log entity label for `agency_verification`."
+  },
+  "auditEntity_agency": "Agency",
+  "@auditEntity_agency": {
+    "description": "Plan A33 — audit log entity label for `agency`."
+  },
+  "auditEntity_area": "Area",
+  "@auditEntity_area": {
+    "description": "Plan A33 — audit log entity label for `area`."
+  },
+  "auditEntity_city": "City",
+  "@auditEntity_city": {
+    "description": "Plan A33 — audit log entity label for `city`."
+  },
+  "auditEntity_currency": "Currency",
+  "@auditEntity_currency": {
+    "description": "Plan A33 — audit log entity label for `currency`."
+  },
+  "auditEntity_exchange_rate": "Exchange rate",
+  "@auditEntity_exchange_rate": {
+    "description": "Plan A33 — audit log entity label for `exchange_rate`."
+  },
+  "auditEntity_governorate": "Governorate",
+  "@auditEntity_governorate": {
+    "description": "Plan A33 — audit log entity label for `governorate`."
+  },
+  "auditEntity_listing_media": "Listing photos",
+  "@auditEntity_listing_media": {
+    "description": "Plan A33 — audit log entity label for `listing_media`."
+  },
+  "auditEntity_listing_revision": "Listing revision",
+  "@auditEntity_listing_revision": {
+    "description": "Plan A33 — audit log entity label for `listing_revision`."
+  },
+  "auditEntity_listing": "Listing",
+  "@auditEntity_listing": {
+    "description": "Plan A33 — audit log entity label for `listing`."
+  },
+  "auditEntity_profile": "Account",
+  "@auditEntity_profile": {
+    "description": "Plan A33 — audit log entity label for `profile`."
+  },
+  "auditEntity_report": "Report",
+  "@auditEntity_report": {
+    "description": "Plan A33 — audit log entity label for `report`."
+  },
+  "auditEntity_role_permission": "Role permission",
+  "@auditEntity_role_permission": {
+    "description": "Plan A33 — audit log entity label for `role_permission`."
+  },
+  "auditEntity_role": "Role",
+  "@auditEntity_role": {
+    "description": "Plan A33 — audit log entity label for `role`."
+  },
+  "auditEntity_settings": "Settings",
+  "@auditEntity_settings": {
+    "description": "Plan A33 — audit log entity label for `settings`."
+  },
+  "auditEntity_user_role": "User role",
+  "@auditEntity_user_role": {
+    "description": "Plan A33 — audit log entity label for `user_role`."
+  },
+  "auditVerb_status_changed": "status changed",
+  "@auditVerb_status_changed": {
+    "description": "Plan A33 — audit log verb label for `status_changed`."
+  },
+  "auditVerb_created": "created",
+  "@auditVerb_created": {
+    "description": "Plan A33 — audit log verb label for `created`."
+  },
+  "auditVerb_changed": "changed",
+  "@auditVerb_changed": {
+    "description": "Plan A33 — audit log verb label for `changed`."
+  },
+  "auditVerb_decided": "decided",
+  "@auditVerb_decided": {
+    "description": "Plan A33 — audit log verb label for `decided`."
+  },
+  "auditVerb_deleted": "deleted",
+  "@auditVerb_deleted": {
+    "description": "Plan A33 — audit log verb label for `deleted`."
+  },
+  "auditVerb_updated": "updated",
+  "@auditVerb_updated": {
+    "description": "Plan A33 — audit log verb label for `updated`."
+  },
+  "auditVerb_applied": "applied",
+  "@auditVerb_applied": {
+    "description": "Plan A33 — audit log verb label for `applied`."
+  },
+  "auditVerb_withdrawn": "withdrawn",
+  "@auditVerb_withdrawn": {
+    "description": "Plan A33 — audit log verb label for `withdrawn`."
+  },
+  "auditVerb_approved": "approved",
+  "@auditVerb_approved": {
+    "description": "Plan A33 — audit log verb label for `approved`."
+  },
+  "auditVerb_paused": "paused",
+  "@auditVerb_paused": {
+    "description": "Plan A33 — audit log verb label for `paused`."
+  },
+  "auditVerb_rejected": "rejected",
+  "@auditVerb_rejected": {
+    "description": "Plan A33 — audit log verb label for `rejected`."
+  },
+  "auditVerb_submitted": "submitted",
+  "@auditVerb_submitted": {
+    "description": "Plan A33 — audit log verb label for `submitted`."
+  },
+  "auditVerb_resolved": "resolved",
+  "@auditVerb_resolved": {
+    "description": "Plan A33 — audit log verb label for `resolved`."
+  },
+  "auditVerb_granted": "granted",
+  "@auditVerb_granted": {
+    "description": "Plan A33 — audit log verb label for `granted`."
+  },
+  "auditVerb_revoked": "revoked",
+  "@auditVerb_revoked": {
+    "description": "Plan A33 — audit log verb label for `revoked`."
+  },
+  "auditVerb_sold": "sold",
+  "@auditVerb_sold": {
+    "description": "Plan A33 — audit log verb label for `sold`."
+  },
+  "auditVerb_rented": "rented",
+  "@auditVerb_rented": {
+    "description": "Plan A33 — audit log verb label for `rented`."
+  },
+  "auditVerb_expired": "expired",
+  "@auditVerb_expired": {
+    "description": "Plan A33 — audit log verb label for `expired`."
+  },
   "updatePromptTitle": "Update Available",
   "@updatePromptTitle": {
     "description": "Phase 24 UP — Title of the in-app update prompt dialog (FR-009)."
@@ -2943,7 +3091,7 @@
   "@nav_publish": {
     "description": "Phase 25 — Bottom navigation bar label for the Publish (create listing) action; shown only to approved publishers."
   },
-  "nav_search_map": "Search & Map",
+  "nav_search_map": "Search",
   "@nav_search_map": {
     "description": "Phase 035 — Bottom navigation bar label for the Search + Map tab."
   },
@@ -4764,11 +4912,11 @@
   "@navDrawerAbout": {
     "description": "Phase 30."
   },
-  "createToggleDetailView": "Detail view",
+  "createToggleDetailView": "Detailed",
   "@createToggleDetailView": {
     "description": "Phase 31."
   },
-  "createToggleClassicSteps": "Classic steps",
+  "createToggleClassicSteps": "Classic",
   "@createToggleClassicSteps": {
     "description": "Phase 31."
   },

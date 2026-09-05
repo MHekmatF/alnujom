@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import 'shared/util/localized_dates.dart';
 import 'core/network/connectivity_cubit.dart';
 import 'core/widgets/offline_banner.dart';
 import 'core/di/injection.dart';
@@ -156,6 +157,10 @@ class _AppState extends State<App> with WidgetsBindingObserver {
                       // Phase 24 UP — BlocListener shows the update prompt
                       // exactly once per cold start when UpdateAvailable is
                       // emitted (session-once; no persisted state — R-211).
+                      // Plan A33 — after the localizations delegate has loaded
+                      // the Arabic symbols (it rewrites them on every locale
+                      // load), make them Levantine. Idempotent.
+                      ensureLevantineArabicDateSymbols();
                       return BlocListener<AppUpdateCubit, AppUpdateState>(
                         listenWhen: (_, current) =>
                             current.status == AppUpdateStatus.updateAvailable &&

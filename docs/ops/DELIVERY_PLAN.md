@@ -1015,10 +1015,21 @@ writes `expires_at` at approval; the backup workflow **keeps no file** without
       already tells the dispatcher which ones are dead. Taken as the owner's
       "كمل كلشي" of 2026-09-05; every job can be stopped with
       `cron.unschedule(name)`.
-- [ ] **A33 — Arabic completeness** · S. Permission catalogue and audit
-      action names in Arabic; locale dates with Levantine months; the two
-      truncated labels. **Needs F2: translate in the database (recommended) or
-      in the app.**
+- [x] **A33 — Arabic completeness** · **DONE 2026-09-05** (F2: in the
+      database). Migration `20260905120006` adds `permissions.description_ar`
+      and seeds all 24; the role editor shows it on an Arabic screen, English
+      otherwise, the key last. The audit-log viewer no longer prints
+      `listing.approved` and `listings`: 19 entity + 18 verb labels in both
+      languages, composed as "إعلان: تمت الموافقة عليه", raw id for anything
+      new. Every Arabic date in the app now says حزيران, not يونيو — one
+      in-place patch of intl's `ar` symbol table (`ensureLevantineArabicDateSymbols`,
+      re-applied from the app shell on each build because the localizations
+      delegate rewrites the table on locale load) rather than twenty call
+      sites. The two bare ISO dates (My Listings card, hide-until picker) go
+      through `DateFormat` now. The English bottom-nav label is "Search" and
+      the create-listing toggles are one word each, so nothing truncates.
+      Digits stay Western on purpose. Not walked on a device (the admin screens
+      need an admin sign-in).
 
 ### Tier 2 — first weeks after launch
 
