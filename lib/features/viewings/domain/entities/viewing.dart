@@ -4,6 +4,9 @@
 
 import '../../../listing_form/domain/entities/listing.dart' show PropertyType;
 
+/// Plan A36 — rows per page of the viewings list (keyset on `scheduled_at`).
+const int kViewingsPageSize = 30;
+
 /// The lifecycle status of a viewing request.
 ///
 /// A requester opens a viewing as [requested]; the publisher then

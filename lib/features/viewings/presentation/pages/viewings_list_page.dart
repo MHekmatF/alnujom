@@ -26,6 +26,7 @@ import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../core/widgets/ds/dc_status_chip.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
+import '../../../../core/widgets/load_more_row.dart';
 import '../../../../core/widgets/loading_state.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../crm/presentation/widgets/add_to_crm_action.dart';
@@ -92,13 +93,23 @@ class _ViewingsListPageState extends State<ViewingsListPage> {
                 child: ListView.separated(
                   physics: const AlwaysScrollableScrollPhysics(),
                   padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
-                  itemCount: state.viewings.length,
+                  // Plan A36 — paged; the row at the end fetches the next page.
+                  itemCount: state.viewings.length + (state.hasMore ? 1 : 0),
                   separatorBuilder: (_, __) =>
                       const SizedBox(height: AppSpacing.md),
-                  itemBuilder: (context, i) => StaggeredListItem(
-                    index: i,
-                    child: _ViewingCard(viewing: state.viewings[i]),
-                  ),
+                  itemBuilder: (context, i) {
+                    if (i >= state.viewings.length) {
+                      return LoadMoreRow(
+                        loading: state.loadingMore,
+                        onLoad: () =>
+                            context.read<ViewingsCubit>().loadMore(),
+                      );
+                    }
+                    return StaggeredListItem(
+                      index: i,
+                      child: _ViewingCard(viewing: state.viewings[i]),
+                    );
+                  },
                 ),
               );
           }

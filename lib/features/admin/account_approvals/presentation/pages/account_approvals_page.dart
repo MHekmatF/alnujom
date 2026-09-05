@@ -16,6 +16,7 @@ import '../../../../../core/widgets/app_dialog.dart';
 import '../../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../../core/widgets/empty_state.dart';
 import '../../../../../core/widgets/error_state.dart';
+import '../../../../../core/widgets/load_more_row.dart';
 import '../../../../../core/widgets/loading_state.dart';
 import '../../../../../core/widgets/staggered_list_item.dart';
 import '../../../../../l10n/app_localizations.dart';
@@ -66,12 +67,26 @@ class _AccountApprovalsView extends StatelessWidget {
                   context.read<AccountApprovalsCubit>().loadPending(),
             ),
 
-            AccountApprovalsLoaded(:final requests) ||
+            AccountApprovalsLoaded(
+              :final requests,
+              :final hasMore,
+              :final loadingMore,
+            ) =>
+              _buildList(
+                context,
+                l10n,
+                requests,
+                isMutating: false,
+                hasMore: hasMore,
+                loadingMore: loadingMore,
+              ),
             AccountApprovalsMutating(:final requests) => _buildList(
               context,
               l10n,
               requests,
-              isMutating: state is AccountApprovalsMutating,
+              isMutating: true,
+              hasMore: false,
+              loadingMore: false,
             ),
           };
         },
@@ -84,6 +99,8 @@ class _AccountApprovalsView extends StatelessWidget {
     AppLocalizations l10n,
     List<AccountApprovalRequest> requests, {
     required bool isMutating,
+    required bool hasMore,
+    required bool loadingMore,
   }) {
     if (requests.isEmpty) {
       // Batch-2: bare centred Text -> shared EmptyState. A cleared moderation
@@ -103,12 +120,22 @@ class _AccountApprovalsView extends StatelessWidget {
           child: ListView.separated(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
-            itemCount: requests.length,
+            // Plan A36 — paged; the row at the end fetches the next page.
+            itemCount: requests.length + (hasMore ? 1 : 0),
             separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
-            itemBuilder: (context, index) => StaggeredListItem(
-              index: index,
-              child: _RequestCard(request: requests[index]),
-            ),
+            itemBuilder: (context, index) {
+              if (index >= requests.length) {
+                return LoadMoreRow(
+                  loading: loadingMore,
+                  onLoad: () =>
+                      context.read<AccountApprovalsCubit>().loadMore(),
+                );
+              }
+              return StaggeredListItem(
+                index: index,
+                child: _RequestCard(request: requests[index]),
+              );
+            },
           ),
         ),
       ),

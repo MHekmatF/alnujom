@@ -10,6 +10,8 @@ class LoadPendingQueue {
 
   final AccountApprovalsRepository _repository;
 
-  Future<Result<List<AccountApprovalRequest>>> call() =>
-      _repository.loadPendingQueue();
+  Future<Result<List<AccountApprovalRequest>>> call({
+    DateTime? before,
+    int limit = kApprovalsPageSize,
+  }) => _repository.loadPendingQueue(before: before, limit: limit);
 }

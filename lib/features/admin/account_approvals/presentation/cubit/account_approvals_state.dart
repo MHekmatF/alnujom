@@ -22,12 +22,20 @@ final class AccountApprovalsLoading extends AccountApprovalsState {
 }
 
 final class AccountApprovalsLoaded extends AccountApprovalsState {
-  const AccountApprovalsLoaded(this.requests);
+  const AccountApprovalsLoaded(
+    this.requests, {
+    this.hasMore = false,
+    this.loadingMore = false,
+  });
 
   final List<AccountApprovalRequest> requests;
 
+  /// Plan A36 — another page may exist after the last row shown.
+  final bool hasMore;
+  final bool loadingMore;
+
   @override
-  List<Object?> get props => [requests];
+  List<Object?> get props => [requests, hasMore, loadingMore];
 }
 
 final class AccountApprovalsError extends AccountApprovalsState {

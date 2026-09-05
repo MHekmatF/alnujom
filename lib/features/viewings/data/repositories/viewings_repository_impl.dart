@@ -25,10 +25,13 @@ class ViewingsRepositoryImpl implements ViewingsRepository {
   final SupabaseViewingsDatasource _datasource;
 
   @override
-  Future<Result<List<Viewing>>> listMyViewings() async {
+  Future<Result<List<Viewing>>> listMyViewings({
+    DateTime? before,
+    int limit = kViewingsPageSize,
+  }) async {
     try {
       final uid = _datasource.currentUserId ?? '';
-      final dtos = await _datasource.listMyViewings();
+      final dtos = await _datasource.listMyViewings(before: before, limit: limit);
       return Success(dtos.map((d) => d.toEntity(uid)).toList());
     } on SocketException catch (e, st) {
       return FailureResult(NetworkFailure(e.message, cause: e, stackTrace: st));

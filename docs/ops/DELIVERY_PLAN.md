@@ -1054,15 +1054,30 @@ writes `expires_at` at approval; the backup workflow **keeps no file** without
 - [ ] **A35 — Usage analytics and view counts** · M. Funnel events on the
       existing seam; a deduplicated `listing_views` counter on the publisher
       card.
-- [ ] **A36 — Page the last two lists** · S. Viewings, approvals queue; CRM
-      timeline "load more".
-- [ ] **A37 — Accessibility pass** · M. Label every icon-only control; a
-      TalkBack walk of the ten main screens (needs a device).
+- [x] **A36 — Page the last two lists** · **DONE 2026-09-05.** The viewings
+      list (30 per page, keyset on `scheduled_at`) and the admin approvals
+      queue (50 per page, keyset on `created_at`) now fetch a page at a time;
+      a shared `LoadMoreRow` at the tail asks for the next page as soon as it
+      scrolls into view and doubles as the retry. The CRM lead timeline keeps
+      its fixed 100 — one lead's history does not reach that, and the RPC
+      would need a cursor of its own. Not walked on a device.
+- [~] **A37 — Accessibility pass** · **first half 2026-09-05.** Sixty-seven of
+      the seventy crown icon buttons are the back arrow and none carried a
+      label, so TalkBack read "button"; the widget now labels the arrow itself
+      ("رجوع" / "Back") and marks it a button, and the two unlabelled crown
+      actions got tooltips. **Still open:** the ~40 feature-level
+      `IconButton`s without tooltips, and the TalkBack walk itself, which
+      needs a device.
 - [ ] **A38 — Data export** · S–M. "Download my data" through an edge
       function with the caller's own token. Play prerequisite.
 - [ ] **A39 — Dark map tiles** · S. After B17.
-- [ ] **A40 — Manifest guard** · S. With A10: refuse to upload a
-      `latest.json` whose `latest_build` is lower than the current.
+- [x] **A40 — Manifest guard** · **DONE 2026-09-05.** `tool/publish_manifest.py`
+      reads the live manifest first and refuses a build that is not higher
+      (a lower or equal number switches the prompt off for everyone), checks
+      the version shapes and that a forced-update floor is not above the
+      version, uploads with the build-machine key, and reads the file back the
+      way a phone does. `--dry-run` proven against the live June placeholder.
+      A10 still waits on B5 (the post URL is a required argument).
 - A13 stands as written (dependency majors, FK indexes + policy consolidation,
   the 13 tests, REVIEW.md batch-2, Reels entry, `pg_net` schema).
 

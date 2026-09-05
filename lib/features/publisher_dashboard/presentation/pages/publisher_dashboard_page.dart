@@ -77,6 +77,7 @@ class _PublisherDashboardView extends StatelessWidget {
       actions: [
         DcCrownIconButton(
           icon: Icons.notifications_none,
+          tooltip: l10n.notification_center_title,
           onTap: () => context.push(AppRoutes.notifications),
         ),
       ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../localization/app_strings.dart';
 import '../theme/colors.dart';
 import '../theme/radii.dart';
 import '../theme/spacing.dart';
@@ -160,6 +161,12 @@ class DcCrownIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
+    // Plan A37 — sixty-odd crown buttons are the back arrow and none carried
+    // a label, so TalkBack read "button". The arrow gets one here, once; any
+    // other icon says what it does through [tooltip].
+    final isBack = icon == Icons.arrow_forward || icon == Icons.arrow_back;
+    final label =
+        tooltip ?? (isBack ? AppStrings.of(context).loc.a11yBack : null);
     final button = InkWell(
       onTap: onTap,
       customBorder: const CircleBorder(),
@@ -169,7 +176,17 @@ class DcCrownIconButton extends StatelessWidget {
         child: Icon(icon, size: 24, color: colors.onBrandHeader),
       ),
     );
-    return tooltip == null ? button : Tooltip(message: tooltip!, child: button);
+    final labelled = label == null
+        ? button
+        : Semantics(
+            button: true,
+            label: label,
+            excludeSemantics: true,
+            child: button,
+          );
+    return tooltip == null
+        ? labelled
+        : Tooltip(message: tooltip!, child: labelled);
   }
 }
 

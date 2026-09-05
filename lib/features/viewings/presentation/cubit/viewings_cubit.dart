@@ -31,16 +31,59 @@ class ViewingsCubit extends Cubit<ViewingsState> {
   final RequestViewing _requestViewing;
   final UpdateViewingStatus _updateViewingStatus;
 
-  /// Initial (and retry) load — replaces any prior state.
+  bool _loadingMore = false;
+
+  /// Initial (and retry) load — replaces any prior state with the first page.
   Future<void> load() async {
     emit(const ViewingsState.loading());
     final result = await _loadMyViewings();
     if (isClosed) return;
     switch (result) {
       case Success(:final value):
-        emit(ViewingsState.list(value));
+        emit(
+          ViewingsState.list(
+            value,
+            hasMore: value.length >= kViewingsPageSize,
+          ),
+        );
       case FailureResult():
         emit(const ViewingsState.error());
+    }
+  }
+
+  /// Plan A36 — the next page, keyed on the last row shown. No-op while one is
+  /// in flight or when the list has been read to its end.
+  Future<void> loadMore() async {
+    final current = state;
+    if (current.status != ViewingsStatus.list ||
+        !current.hasMore ||
+        _loadingMore ||
+        current.viewings.isEmpty) {
+      return;
+    }
+    _loadingMore = true;
+    emit(ViewingsState.list(current.viewings, hasMore: true, loadingMore: true));
+    final result = await _loadMyViewings(
+      before: current.viewings.last.scheduledAt,
+    );
+    _loadingMore = false;
+    if (isClosed) return;
+    switch (result) {
+      case Success(:final value):
+        final seen = current.viewings.map((v) => v.id).toSet();
+        final merged = [
+          ...current.viewings,
+          ...value.where((v) => !seen.contains(v.id)),
+        ];
+        emit(
+          ViewingsState.list(
+            merged,
+            hasMore: value.length >= kViewingsPageSize,
+          ),
+        );
+      case FailureResult():
+        // Keep what is on screen; the row's button is the retry.
+        emit(ViewingsState.list(current.viewings, hasMore: true));
     }
   }
 

@@ -13,7 +13,11 @@ import '../entities/viewing.dart';
 /// from the authenticated Supabase session inside the data layer.
 abstract interface class ViewingsRepository {
   /// Loads the caller's viewings, newest-scheduled-first.
-  Future<Result<List<Viewing>>> listMyViewings();
+  /// One page (plan A36): rows scheduled before [before], newest first.
+  Future<Result<List<Viewing>>> listMyViewings({
+    DateTime? before,
+    int limit = kViewingsPageSize,
+  });
 
   /// Requests a viewing on [listingId] at [scheduledAtUtc] (UTC) with an
   /// optional [note]; returns the new viewing's id.

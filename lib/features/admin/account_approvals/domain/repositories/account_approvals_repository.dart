@@ -6,7 +6,11 @@ import '../entities/account_approval_request.dart';
 ///
 /// Constitution IX: no Supabase types.
 abstract class AccountApprovalsRepository {
-  Future<Result<List<AccountApprovalRequest>>> loadPendingQueue();
+  /// One page (plan A36): requests created before [before], newest first.
+  Future<Result<List<AccountApprovalRequest>>> loadPendingQueue({
+    DateTime? before,
+    int limit = kApprovalsPageSize,
+  });
   Future<Result<void>> approve({required String userId});
   Future<Result<void>> reject({required String userId, required String reason});
 }
