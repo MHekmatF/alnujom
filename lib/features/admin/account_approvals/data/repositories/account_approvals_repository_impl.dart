@@ -17,9 +17,12 @@ class AccountApprovalsRepositoryImpl implements AccountApprovalsRepository {
   final AppLogger _logger;
 
   @override
-  Future<Result<List<AccountApprovalRequest>>> loadPendingQueue() async {
+  Future<Result<List<AccountApprovalRequest>>> loadPendingQueue({
+    DateTime? before,
+    int limit = kApprovalsPageSize,
+  }) async {
     try {
-      final list = await _ds.loadPendingQueue();
+      final list = await _ds.loadPendingQueue(before: before, limit: limit);
       return Success(list);
     } on Object catch (error, stackTrace) {
       return FailureResult(_mapError(error, stackTrace));

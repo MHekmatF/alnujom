@@ -532,8 +532,19 @@ Upload the APK to the Telegram channel as a **file attachment**, and copy the
 The app checks a small file on Supabase Storage once per launch and shows an
 "Update available" prompt if the file says a newer version exists.
 
-Supabase dashboard → **Storage** → bucket **`app-release`** → folder **`android`**
-→ replace **`latest.json`**.
+**The safe way (plan A40, 2026-09-05):** from the repo root on the build machine,
+
+```
+python tool/publish_manifest.py --version 1.1.3 --build 2005 --telegram-url https://t.me/<channel>/<post>
+```
+
+It reads the live file first and **refuses to publish a build that is not
+higher** than the one people already run — a lower or equal number silently
+switches the update prompt off for everyone. `--dry-run` shows the file without
+uploading; `--min-supported 1.1.0` sets the forced-update floor (A31).
+
+By hand instead: Supabase dashboard → **Storage** → bucket **`app-release`** →
+folder **`android`** → replace **`latest.json`**.
 
 Its shape (the template lives at `docs/release/version-manifest.example.json`):
 

@@ -15,6 +15,7 @@ import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 import '../dtos/viewing_dto.dart';
+import '../../domain/entities/viewing.dart' show kViewingsPageSize;
 
 @injectable
 class SupabaseViewingsDatasource {
@@ -36,11 +37,18 @@ class SupabaseViewingsDatasource {
 
   /// Loads every viewing the caller participates in (RLS scopes it to rows
   /// where auth.uid() is the requester or publisher), newest-first.
-  Future<List<ViewingDto>> listMyViewings() async {
-    final rows = await _client
-        .from('viewings')
-        .select(_viewingSelect)
-        .order('scheduled_at', ascending: false);
+  Future<List<ViewingDto>> listMyViewings({
+    DateTime? before,
+    int limit = kViewingsPageSize,
+  }) async {
+    var query = _client.from('viewings').select(_viewingSelect);
+    // Plan A36 — keyset paging: everything scheduled before the last row shown.
+    if (before != null) {
+      query = query.lt('scheduled_at', before.toUtc().toIso8601String());
+    }
+    final rows = await query
+        .order('scheduled_at', ascending: false)
+        .limit(limit);
 
     return (rows as List<dynamic>)
         .map((r) => ViewingDto.fromJson(Map<String, dynamic>.from(r as Map)))

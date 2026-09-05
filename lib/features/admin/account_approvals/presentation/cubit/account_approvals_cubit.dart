@@ -20,15 +20,58 @@ class AccountApprovalsCubit extends Cubit<AccountApprovalsState> {
   final ApproveAccount _approveAccount;
   final RejectAccount _rejectAccount;
 
+  bool _loadingMore = false;
+
   Future<void> loadPending() async {
     emit(const AccountApprovalsLoading());
     final result = await _loadPendingQueue();
     if (isClosed) return;
     switch (result) {
       case Success<List<AccountApprovalRequest>>(:final value):
-        emit(AccountApprovalsLoaded(value));
+        emit(
+          AccountApprovalsLoaded(
+            value,
+            hasMore: value.length >= kApprovalsPageSize,
+          ),
+        );
       case FailureResult<List<AccountApprovalRequest>>(:final failure):
         emit(AccountApprovalsError(failure));
+    }
+  }
+
+  /// Plan A36 — the next page of the queue, keyed on the last row shown.
+  Future<void> loadMore() async {
+    final current = state;
+    if (current is! AccountApprovalsLoaded ||
+        !current.hasMore ||
+        _loadingMore ||
+        current.requests.isEmpty) {
+      return;
+    }
+    _loadingMore = true;
+    emit(
+      AccountApprovalsLoaded(current.requests, hasMore: true, loadingMore: true),
+    );
+    final result = await _loadPendingQueue(
+      before: current.requests.last.createdAt,
+    );
+    _loadingMore = false;
+    if (isClosed) return;
+    switch (result) {
+      case Success<List<AccountApprovalRequest>>(:final value):
+        final seen = current.requests.map((r) => r.id).toSet();
+        final merged = [
+          ...current.requests,
+          ...value.where((r) => !seen.contains(r.id)),
+        ];
+        emit(
+          AccountApprovalsLoaded(
+            merged,
+            hasMore: value.length >= kApprovalsPageSize,
+          ),
+        );
+      case FailureResult<List<AccountApprovalRequest>>():
+        emit(AccountApprovalsLoaded(current.requests, hasMore: true));
     }
   }
 

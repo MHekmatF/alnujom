@@ -14,5 +14,6 @@ class LoadMyViewings {
 
   final ViewingsRepository _repository;
 
-  Future<Result<List<Viewing>>> call() => _repository.listMyViewings();
+  Future<Result<List<Viewing>>> call({DateTime? before, int limit = kViewingsPageSize}) =>
+      _repository.listMyViewings(before: before, limit: limit);
 }

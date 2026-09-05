@@ -1,5 +1,8 @@
 import 'package:equatable/equatable.dart';
 
+/// Plan A36 — rows per page of the approvals queue (keyset on `created_at`).
+const int kApprovalsPageSize = 50;
+
 /// Approval queue lifecycle values (matches `account_approval_status` SQL enum, minus suspended).
 enum AccountApprovalStatus { pending, approved, rejected }
 

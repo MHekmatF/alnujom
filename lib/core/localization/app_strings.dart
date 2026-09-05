@@ -4961,6 +4961,18 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get listLoadMore => _resolve(
+    'listLoadMore',
+    (loc) => loc.listLoadMore,
+  );
+
+  @override
+  String get a11yBack => _resolve(
+    'a11yBack',
+    (loc) => loc.a11yBack,
+  );
+
+  @override
   String get settingsEditorPrivacyUrlLabel => _resolve(
     'settingsEditorPrivacyUrlLabel',
     (loc) => loc.settingsEditorPrivacyUrlLabel,

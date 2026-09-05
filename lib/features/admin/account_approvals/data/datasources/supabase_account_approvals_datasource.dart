@@ -14,15 +14,24 @@ class SupabaseAccountApprovalsDatasource {
 
   supabase.SupabaseClient get _client => supabase.Supabase.instance.client;
 
-  Future<List<AccountApprovalRequest>> loadPendingQueue() async {
+  Future<List<AccountApprovalRequest>> loadPendingQueue({
+    DateTime? before,
+    int limit = kApprovalsPageSize,
+  }) async {
     // Single request: embedded select joins profiles via the FK added in Phase 5.
     // Timeout guards against HiOS throttling; TimeoutException propagates to repository.
-    final Future<List<dynamic>> queueFuture = _client
+    var query = _client
         .from('account_approval_requests')
         .select('*, profiles(phone, email, full_name)')
-        .eq('status', 'pending')
-        .order('created_at', ascending: false);
-    final requests = await queueFuture.timeout(const Duration(seconds: 15));
+        .eq('status', 'pending');
+    // Plan A36 — keyset paging on created_at, newest first.
+    if (before != null) {
+      query = query.lt('created_at', before.toUtc().toIso8601String());
+    }
+    final List<dynamic> requests = await query
+        .order('created_at', ascending: false)
+        .limit(limit)
+        .timeout(const Duration(seconds: 15));
 
     if (requests.isEmpty) return [];
 

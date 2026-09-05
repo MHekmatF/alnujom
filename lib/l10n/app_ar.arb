@@ -2774,6 +2774,14 @@
   "@terms_page_load_failed": {
     "description": "Plan A27 — in-app terms page error state."
   },
+  "listLoadMore": "المزيد",
+  "@listLoadMore": {
+    "description": "Plan A36 — the button at the end of a paged list."
+  },
+  "a11yBack": "رجوع",
+  "@a11yBack": {
+    "description": "Plan A37 — screen-reader label for the crown back arrow."
+  },
   "updatePromptTitle": "تحديث متاح",
   "@updatePromptTitle": {
     "description": "Phase 24 UP — Title of the in-app update prompt dialog (FR-009)."
