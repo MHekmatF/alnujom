@@ -246,6 +246,12 @@ class _SettingsPageState extends State<SettingsPage> {
     return _SettingsSection(
       title: l10n.settings_account_heading,
       children: [
+        // Plan A29 — everyone this account has blocked from chat.
+        _SettingsNavRow(
+          icon: Icons.block_outlined,
+          title: l10n.settings_blocked_users_row,
+          onTap: () => context.push(AppRoutes.blockedUsers),
+        ),
         _SettingsDangerRow(
           icon: Icons.delete_forever_outlined,
           title: l10n.accountDeleteEntryTitle,

@@ -5,7 +5,7 @@
 //
 // POST /functions/v1/resolve_report
 //   Headers: Authorization: Bearer <user JWT>, Content-Type: application/json
-//   Body in:  { report_id: "<UUID>", action: "dismiss"|"hide"|"mark_duplicate"|"delete", note?: "<string>" }
+//   Body in:  { report_id: "<UUID>", action: "dismiss"|"hide"|"mark_duplicate"|"delete"|"suspend_user", note?: "<string>" }
 //   Body out (200): { report_status, listing_id, listing_status }
 //
 // Dual-layer authorization (FR-012 / FR-033 / SC-010):
@@ -20,7 +20,8 @@ import { createClient } from "@supabase/supabase-js";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-const ACTIONS = ["dismiss", "hide", "mark_duplicate", "delete"] as const;
+// Plan A29 — suspend_user: the reported person, or a listing's publisher.
+const ACTIONS = ["dismiss", "hide", "mark_duplicate", "delete", "suspend_user"] as const;
 
 function json(body: unknown, status: number): Response {
   return new Response(JSON.stringify(body), {

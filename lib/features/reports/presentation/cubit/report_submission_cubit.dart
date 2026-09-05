@@ -9,6 +9,7 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/errors/result.dart';
 import '../../domain/entities/report_reason.dart';
 import '../../domain/usecases/submit_report.dart';
+import '../../domain/usecases/submit_user_report.dart';
 
 part 'report_submission_state.dart';
 
@@ -17,10 +18,11 @@ part 'report_submission_state.dart';
 /// Registered as @injectable (one per sheet instance — not a singleton).
 @injectable
 class ReportSubmissionCubit extends Cubit<ReportSubmissionState> {
-  ReportSubmissionCubit(this._submitReport)
+  ReportSubmissionCubit(this._submitReport, this._submitUserReport)
       : super(const ReportSubmissionState());
 
   final SubmitReport _submitReport;
+  final SubmitUserReport _submitUserReport;
 
   /// Updates the currently selected [reason].
   void reasonChanged(ReportReason? reason) {
@@ -42,13 +44,19 @@ class ReportSubmissionCubit extends Cubit<ReportSubmissionState> {
   /// Emits [ReportSubmissionSubmitting] while the RPC is in flight, then one
   /// of [ReportSubmissionSuccess] / [ReportSubmissionAlreadyReported] /
   /// [ReportSubmissionFailure].
-  Future<void> submit(String listingId) async {
+  Future<void> submit(String listingId) => submitFor(listingId: listingId);
+
+  /// Plan A29 — one submit for both targets: a listing, or a person.
+  Future<void> submitFor({String? listingId, String? userId}) async {
     final reason = state.reason;
     if (reason == null) return; // guard — submit button is disabled when null.
+    if (listingId == null && userId == null) return;
 
     emit(state.copyWith(isSubmitting: true, clearError: true));
 
-    final result = await _submitReport(listingId, reason, state.note);
+    final result = userId != null
+        ? await _submitUserReport(userId, reason, state.note)
+        : await _submitReport(listingId!, reason, state.note);
     if (isClosed) return;
 
     switch (result) {

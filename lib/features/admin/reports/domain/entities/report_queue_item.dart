@@ -12,7 +12,7 @@ import '../../../../reports/domain/entities/report_status.dart';
 class ReportQueueItem extends Equatable {
   const ReportQueueItem({
     required this.id,
-    required this.listingId,
+    this.listingId,
     required this.reporterUserId,
     required this.reason,
     required this.status,
@@ -22,6 +22,8 @@ class ReportQueueItem extends Equatable {
     this.resolvedAt,
     this.reviewingBy,
     this.resolvedBy,
+    this.targetUserId,
+    this.targetUserName,
     // Joined listing-card fields:
     required this.listingTitle,
     required this.listingStatus,
@@ -33,7 +35,19 @@ class ReportQueueItem extends Equatable {
   });
 
   final String id;
-  final String listingId;
+
+  /// Null when the report is about a person (plan A29).
+  final String? listingId;
+
+  /// Plan A29 — set, with [listingId] null, when the report is about a person.
+  final String? targetUserId;
+  final String? targetUserName;
+
+  bool get isUserReport => targetUserId != null;
+
+  /// The listing title, or the reported person's name.
+  String get displayTitle =>
+      listingTitle.isNotEmpty ? listingTitle : (targetUserName ?? '');
 
   /// Reporter's auth.users.id — visible only to reports.manage holders.
   final String reporterUserId;

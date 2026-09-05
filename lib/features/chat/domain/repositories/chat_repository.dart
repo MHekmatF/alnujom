@@ -20,6 +20,10 @@ abstract interface class ChatRepository {
   /// Loads the caller's conversations, newest-activity-first.
   Future<Result<List<Conversation>>> listConversations();
 
+  /// Plan A29 — the OTHER person's user id in [conversationId], or null when
+  /// the conversation is not visible to the caller.
+  Future<Result<String?>> loadCounterpartUserId(String conversationId);
+
   /// A live stream of a thread's newest messages, **newest-first** and capped
   /// at one page (Plan A19). The stream itself is not wrapped in [Result] —
   /// subscription errors surface via the cubit's `onError`.

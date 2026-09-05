@@ -8,13 +8,15 @@ import 'report_status.dart';
 class Report extends Equatable {
   const Report({
     required this.id,
-    required this.listingId,
+    this.listingId,
     required this.reason,
     required this.status,
     required this.createdAt,
     this.note,
     this.resolution,
     this.resolvedAt,
+    this.targetUserId,
+    this.targetUserName,
     // Joined v_reports listing-card fields (for My-Reports rendering):
     required this.listingTitle,
     required this.listingStatus,        // raw listings.status string
@@ -26,7 +28,18 @@ class Report extends Equatable {
   });
 
   final String id;
-  final String listingId;
+  /// Null when the report is about a person (plan A29).
+  final String? listingId;
+
+  /// Plan A29 — set, with [listingId] null, when the report is about a person.
+  final String? targetUserId;
+  final String? targetUserName;
+
+  bool get isUserReport => targetUserId != null;
+
+  /// The listing title, or the reported person's name.
+  String get displayTitle =>
+      listingTitle.isNotEmpty ? listingTitle : (targetUserName ?? '');
   final ReportReason reason;
   final ReportStatus status;
   final DateTime createdAt;

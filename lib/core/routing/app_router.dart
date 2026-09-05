@@ -75,6 +75,7 @@ import '../../features/publisher_dashboard/presentation/pages/publisher_dashboar
 import '../../features/dashboard/presentation/pages/dashboard_entry_page.dart';
 import '../../features/settings/presentation/bloc/app_settings_cubit.dart';
 import '../../features/settings/presentation/pages/about_support_page.dart';
+import '../../features/user_blocks/presentation/pages/blocked_users_page.dart';
 import '../../features/settings/presentation/pages/maintenance_screen.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/settings/presentation/widgets/maintenance_gate.dart';
@@ -188,6 +189,8 @@ abstract final class AppRoutes {
   static const maintenance = maintenanceRoute;
   // Phase 23 FC — public about/support surface (FR-013).
   static const about = '/about';
+  // Plan A29 — Settings → blocked users (signed-in only).
+  static const blockedUsers = '/settings/blocked-users';
   // Phase 035: unified user settings screen.
   static const settings = '/settings';
   static const themeGallery = '/_debug/theme-gallery';
@@ -304,6 +307,7 @@ abstract final class AppRouteNames {
   // Phase 23 FC — maintenance gate + about/support route names.
   static const maintenance = 'maintenance';
   static const about = 'about';
+  static const blockedUsers = 'blocked-users';
   // Phase 035: settings screen route name.
   static const settings = 'settings';
   static const themeGallery = 'theme-gallery';
@@ -908,6 +912,13 @@ GoRouter buildAppRouter({
         path: AppRoutes.about,
         name: AppRouteNames.about,
         builder: (context, state) => const AboutSupportPage(),
+      ),
+
+      // ─── Plan A29 — blocked users (signed-in; the global redirect gates it) ──
+      GoRoute(
+        path: AppRoutes.blockedUsers,
+        name: AppRouteNames.blockedUsers,
+        builder: (context, state) => const BlockedUsersPage(),
       ),
 
       // ─── Phase 035 — unified user settings (anonymous-accessible, pushed) ──

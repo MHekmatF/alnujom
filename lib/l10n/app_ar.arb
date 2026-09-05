@@ -1368,6 +1368,110 @@
   "@report_reason_other": {
     "description": "Phase 18 — Report reason label: catch-all other reason."
   },
+  "report_reason_harassment": "مضايقة أو تهديد",
+  "@report_reason_harassment": {
+    "description": "Plan A29 — report reason about a person."
+  },
+  "report_reason_scam": "احتيال أو نصب",
+  "@report_reason_scam": {
+    "description": "Plan A29 — report reason about a person."
+  },
+  "report_reason_impersonation": "انتحال شخصية",
+  "@report_reason_impersonation": {
+    "description": "Plan A29 — report reason about a person."
+  },
+  "report_user_sheet_title": "الإبلاغ عن مستخدم",
+  "@report_user_sheet_title": {
+    "description": "Plan A29 — report sheet title when the target is a person."
+  },
+  "report_user_sheet_subtitle": "أخبرنا بما حدث، وسيراجع فريقنا البلاغ.",
+  "@report_user_sheet_subtitle": {
+    "description": "Plan A29 — report sheet subtitle when the target is a person."
+  },
+  "resolve_action_suspend_user": "تعليق حساب المستخدم",
+  "@resolve_action_suspend_user": {
+    "description": "Plan A29 — admin resolve action: suspend the reported person / publisher."
+  },
+  "admin_report_about_user_label": "بلاغ عن المستخدم",
+  "@admin_report_about_user_label": {
+    "description": "Plan A29 — admin report detail: who the report is about."
+  },
+  "chatMenuTooltip": "خيارات",
+  "@chatMenuTooltip": {
+    "description": "Plan A29 — chat thread overflow menu tooltip."
+  },
+  "chatMenuReportUser": "الإبلاغ عن المستخدم",
+  "@chatMenuReportUser": {
+    "description": "Plan A29 — chat thread menu item."
+  },
+  "chatMenuBlockUser": "حظر المستخدم",
+  "@chatMenuBlockUser": {
+    "description": "Plan A29 — chat thread menu item."
+  },
+  "chatMenuUnblockUser": "إلغاء الحظر",
+  "@chatMenuUnblockUser": {
+    "description": "Plan A29 — chat thread menu item."
+  },
+  "chatBlockConfirmTitle": "حظر هذا المستخدم؟",
+  "@chatBlockConfirmTitle": {
+    "description": "Plan A29 — block confirmation title."
+  },
+  "chatBlockConfirmBody": "لن يتمكن من مراسلتك أو طلب معاينة أو إرسال استفسار إليك. يمكنك إلغاء الحظر لاحقاً من الإعدادات.",
+  "@chatBlockConfirmBody": {
+    "description": "Plan A29 — block confirmation body."
+  },
+  "chatBlockedToast": "تم حظر المستخدم",
+  "@chatBlockedToast": {
+    "description": "Plan A29 — toast after a block."
+  },
+  "chatUnblockedToast": "تم إلغاء الحظر",
+  "@chatUnblockedToast": {
+    "description": "Plan A29 — toast after an unblock."
+  },
+  "chatBlockFailedToast": "تعذّر تنفيذ الطلب، حاول مرة أخرى",
+  "@chatBlockFailedToast": {
+    "description": "Plan A29 — toast when block / unblock fails."
+  },
+  "chatCounterpartBlockedBanner": "حظرت هذا المستخدم. ألغِ الحظر لمتابعة المحادثة.",
+  "@chatCounterpartBlockedBanner": {
+    "description": "Plan A29 — banner above the composer while a block stands."
+  },
+  "settings_blocked_users_row": "المستخدمون المحظورون",
+  "@settings_blocked_users_row": {
+    "description": "Plan A29 — settings row opening the blocked-users page."
+  },
+  "blockedUsersTitle": "المستخدمون المحظورون",
+  "@blockedUsersTitle": {
+    "description": "Plan A29 — blocked-users page title."
+  },
+  "blockedUsersEmptyTitle": "لم تحظر أحداً",
+  "@blockedUsersEmptyTitle": {
+    "description": "Plan A29 — blocked-users page empty state headline."
+  },
+  "blockedUsersEmptyBody": "يمكنك حظر أي مستخدم من قائمة المحادثة.",
+  "@blockedUsersEmptyBody": {
+    "description": "Plan A29 — blocked-users page empty state body."
+  },
+  "blockedUsersUnblockButton": "إلغاء الحظر",
+  "@blockedUsersUnblockButton": {
+    "description": "Plan A29 — blocked-users row action."
+  },
+  "blockedUsersUnknownName": "مستخدم",
+  "@blockedUsersUnknownName": {
+    "description": "Plan A29 — fallback name for a blocked user whose profile is gone."
+  },
+  "blockedUsersErrorTitle": "تعذّر تحميل القائمة",
+  "@blockedUsersErrorTitle": {
+    "description": "Plan A29 — blocked-users page error state title."
+  },
+  "notification_type_account_suspended": "تم تعليق حسابك",
+  "@notification_type_account_suspended": {
+    "description": "Plan A29 — notification centre title."
+  },
+  "notification_type_account_reinstated": "تمت إعادة تفعيل حسابك",
+  "@notification_type_account_reinstated": {
+    "description": "Plan A29 — notification centre title."
+  },
   "report_sheet_title": "الإبلاغ عن العقار",
   "@report_sheet_title": {
     "description": "Phase 18 — Title of the report bottom sheet."

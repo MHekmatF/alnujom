@@ -23,14 +23,20 @@ class ResolveActionResult {
 }
 
 class ResolveActionDialog extends StatefulWidget {
-  const ResolveActionDialog({super.key});
+  const ResolveActionDialog({super.key, this.isUserReport = false});
+
+  /// Plan A29 — a report about a person offers dismiss / suspend only.
+  final bool isUserReport;
 
   /// Opens the dialog and returns a [ResolveActionResult] on confirm, or null
   /// when the admin cancels.
-  static Future<ResolveActionResult?> show(BuildContext context) {
+  static Future<ResolveActionResult?> show(
+    BuildContext context, {
+    bool isUserReport = false,
+  }) {
     return showDialog<ResolveActionResult>(
       context: context,
-      builder: (_) => const ResolveActionDialog(),
+      builder: (_) => ResolveActionDialog(isUserReport: isUserReport),
     );
   }
 
@@ -49,6 +55,11 @@ class _ResolveActionDialogState extends State<ResolveActionDialog> {
 
   final TextEditingController _noteController = TextEditingController();
 
+  /// Plan A29 — the actions that apply to this report's target.
+  List<ModerationActionType> get _actions => widget.isUserReport
+      ? const [ModerationActionType.dismiss, ModerationActionType.suspendUser]
+      : ModerationActionType.values;
+
   @override
   void dispose() {
     _noteController.dispose();
@@ -65,6 +76,8 @@ class _ResolveActionDialogState extends State<ResolveActionDialog> {
         return l10n.resolve_action_mark_duplicate;
       case ModerationActionType.delete:
         return l10n.resolve_action_delete;
+      case ModerationActionType.suspendUser:
+        return l10n.resolve_action_suspend_user;
     }
   }
 
@@ -137,7 +150,7 @@ class _ResolveActionDialogState extends State<ResolveActionDialog> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  for (final action in ModerationActionType.values)
+                  for (final action in _actions)
                     RadioListTile<ModerationActionType>(
                       value: action,
                       title: Text(

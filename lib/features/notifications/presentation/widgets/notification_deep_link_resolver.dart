@@ -129,6 +129,11 @@ abstract final class NotificationDeepLinkResolver {
         return const _NavRoute(AppRoutes.home);
       case NotificationType.accountRejected:
         return const _NavRoute(AppRoutes.rejected);
+      // Plan A29 — the auth gate decides what a suspended / reinstated account
+      // sees; home is the right door in both cases.
+      case NotificationType.accountSuspended:
+      case NotificationType.accountReinstated:
+        return const _NavRoute(AppRoutes.home);
       case NotificationType.listingApproved:
         final id = params['listing_id'] as String?;
         if (id == null) return null;

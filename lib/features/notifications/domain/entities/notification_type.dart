@@ -12,6 +12,9 @@
 enum NotificationType {
   accountApproved,
   accountRejected,
+  // Plan A29 — moderation outcomes, for the person concerned.
+  accountSuspended,
+  accountReinstated,
   listingApproved,
   listingRejected,
   inquiryReceived,
@@ -35,6 +38,10 @@ enum NotificationType {
         return 'account_approved';
       case NotificationType.accountRejected:
         return 'account_rejected';
+      case NotificationType.accountSuspended:
+        return 'account_suspended';
+      case NotificationType.accountReinstated:
+        return 'account_reinstated';
       case NotificationType.listingApproved:
         return 'listing_approved';
       case NotificationType.listingRejected:

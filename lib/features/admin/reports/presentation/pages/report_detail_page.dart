@@ -172,6 +172,12 @@ class _ReportDetailView extends StatelessWidget {
         return l10n.report_reason_inappropriate_content;
       case ReportReason.other:
         return l10n.report_reason_other;
+      case ReportReason.harassment:
+        return l10n.report_reason_harassment;
+      case ReportReason.scam:
+        return l10n.report_reason_scam;
+      case ReportReason.impersonation:
+        return l10n.report_reason_impersonation;
     }
   }
 
@@ -199,14 +205,22 @@ class _ReportDetailView extends StatelessWidget {
           children: [
             // ── Listing info ─────────────────────────────────────────────
             Text(
-              item.listingTitle.isEmpty ? '—' : item.listingTitle,
+              item.displayTitle.isEmpty ? '—' : item.displayTitle,
               style: styles.titleLarge,
             ),
             const SizedBox(height: AppSpacing.xs),
-            _InfoRow(
-              label: l10n.admin_report_listing_status_label,
-              value: item.listingStatus,
-            ),
+            // Plan A29 — a report about a person has no listing status; say
+            // who it is about instead.
+            if (item.isUserReport)
+              _InfoRow(
+                label: l10n.admin_report_about_user_label,
+                value: item.targetUserName ?? item.targetUserId ?? '—',
+              )
+            else
+              _InfoRow(
+                label: l10n.admin_report_listing_status_label,
+                value: item.listingStatus,
+              ),
             const SizedBox(height: AppSpacing.md),
 
             // ── Report info ──────────────────────────────────────────────
@@ -259,6 +273,7 @@ class _ReportDetailView extends StatelessWidget {
                         : () async {
                             final result = await ResolveActionDialog.show(
                               context,
+                              isUserReport: item.isUserReport,
                             );
                             if (result != null && ctx.mounted) {
                               await ctx.read<ReportResolveCubit>().resolve(

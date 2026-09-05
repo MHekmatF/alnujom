@@ -22,12 +22,15 @@ import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
+import '../../../../core/widgets/app_dialog.dart';
 import '../../../../core/widgets/app_spinner.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/dc_crown_scaffold.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/press_scale.dart';
 import '../../../crm/presentation/widgets/add_to_crm_action.dart';
+import '../../../reports/presentation/widgets/report_sheet.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/message.dart';
 import '../bloc/chat_thread_cubit.dart';
@@ -111,6 +114,8 @@ class _ChatThreadPageState extends State<ChatThreadPage> {
             displayName: widget.listingTitle,
           ),
         ),
+        // Plan A29 — report / block the other person.
+        const _ThreadMenu(),
       ],
       body: Column(
         children: [
@@ -177,6 +182,13 @@ class _ChatThreadPageState extends State<ChatThreadPage> {
                 }
               },
             ),
+          ),
+          // Plan A29 — sends are refused server-side while a block stands;
+          // say so instead of letting the bubble roll back in silence.
+          BlocSelector<ChatThreadCubit, ChatThreadState, bool>(
+            selector: (state) => state.counterpartBlocked,
+            builder: (context, blocked) =>
+                blocked ? const _BlockedBanner() : const SizedBox.shrink(),
           ),
           _Composer(
             controller: _composer,
@@ -464,6 +476,118 @@ class _Composer extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ─── Plan A29 — report / block the other person ─────────────────────────────
+
+enum _ThreadMenuAction { report, block, unblock }
+
+class _ThreadMenu extends StatelessWidget {
+  const _ThreadMenu();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    return BlocBuilder<ChatThreadCubit, ChatThreadState>(
+      buildWhen: (prev, curr) =>
+          prev.otherUserId != curr.otherUserId ||
+          prev.counterpartBlocked != curr.counterpartBlocked,
+      builder: (context, state) {
+        final other = state.otherUserId;
+        if (other == null) return const SizedBox.shrink();
+        final blocked = state.counterpartBlocked;
+        return PopupMenuButton<_ThreadMenuAction>(
+          tooltip: l10n.chatMenuTooltip,
+          icon: Icon(Icons.more_vert, color: colors.onPrimary),
+          onSelected: (action) => _onSelected(context, action, other),
+          itemBuilder: (_) => [
+            PopupMenuItem(
+              value: _ThreadMenuAction.report,
+              child: Text(l10n.chatMenuReportUser),
+            ),
+            PopupMenuItem(
+              value: blocked
+                  ? _ThreadMenuAction.unblock
+                  : _ThreadMenuAction.block,
+              child: Text(
+                blocked ? l10n.chatMenuUnblockUser : l10n.chatMenuBlockUser,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _onSelected(
+    BuildContext context,
+    _ThreadMenuAction action,
+    String otherUserId,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    final cubit = context.read<ChatThreadCubit>();
+    switch (action) {
+      case _ThreadMenuAction.report:
+        await showModalBottomSheet<void>(
+          context: context,
+          isScrollControlled: true,
+          builder: (_) => ReportSheet(userId: otherUserId),
+        );
+      case _ThreadMenuAction.block:
+        final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AppDialog(
+            icon: Icons.block_outlined,
+            title: l10n.chatBlockConfirmTitle,
+            message: l10n.chatBlockConfirmBody,
+            cancelLabel: l10n.report_cancel_button,
+            actionLabel: l10n.chatMenuBlockUser,
+            onAction: () => Navigator.of(dialogContext).pop(true),
+          ),
+        );
+        if (confirmed != true || !context.mounted) return;
+        final done = await cubit.blockCounterpart();
+        if (!context.mounted) return;
+        if (done) {
+          AppToast.success(context, l10n.chatBlockedToast);
+        } else {
+          AppToast.error(context, l10n.chatBlockFailedToast);
+        }
+      case _ThreadMenuAction.unblock:
+        final done = await cubit.unblockCounterpart();
+        if (!context.mounted) return;
+        if (done) {
+          AppToast.success(context, l10n.chatUnblockedToast);
+        } else {
+          AppToast.error(context, l10n.chatBlockFailedToast);
+        }
+    }
+  }
+}
+
+class _BlockedBanner extends StatelessWidget {
+  const _BlockedBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    return Container(
+      width: double.infinity,
+      color: colors.surfaceVariant,
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.sm,
+      ),
+      child: Text(
+        l10n.chatCounterpartBlockedBanner,
+        style: styles.bodyMedium.copyWith(color: colors.onSurfaceVariant),
+        textAlign: TextAlign.center,
       ),
     );
   }

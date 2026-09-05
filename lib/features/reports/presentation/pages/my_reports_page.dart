@@ -199,7 +199,11 @@ class _ReportCard extends StatelessWidget {
             child: InkWell(
               onTap: () {
                 HapticFeedback.selectionClick();
-                context.push(AppRoutes.listingDetailsFor(item.listingId));
+                // Plan A29 — a report about a person has no listing to open.
+                final listingId = item.listingId;
+                if (listingId != null) {
+                  context.push(AppRoutes.listingDetailsFor(listingId));
+                }
               },
               child: Padding(
                 padding: const EdgeInsetsDirectional.all(AppSpacing.md),
@@ -242,9 +246,9 @@ class _ReportCard extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (item.listingTitle.isNotEmpty)
+                          if (item.displayTitle.isNotEmpty)
                             Text(
-                              item.listingTitle,
+                              item.displayTitle,
                               style: styles.titleMedium,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
@@ -284,6 +288,9 @@ class _ReportCard extends StatelessWidget {
       ReportReason.inappropriateContent =>
         l10n.report_reason_inappropriate_content,
       ReportReason.other => l10n.report_reason_other,
+      ReportReason.harassment => l10n.report_reason_harassment,
+      ReportReason.scam => l10n.report_reason_scam,
+      ReportReason.impersonation => l10n.report_reason_impersonation,
     };
   }
 }

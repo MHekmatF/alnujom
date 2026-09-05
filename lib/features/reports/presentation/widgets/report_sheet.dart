@@ -18,28 +18,34 @@ import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/report_reason.dart';
 import '../cubit/report_submission_cubit.dart';
 
-/// Modal bottom sheet for submitting a report against [listingId].
+/// Modal bottom sheet for submitting a report against [listingId] — or, with
+/// [userId] set instead (plan A29), against a person.
 ///
 /// Provide a fresh [ReportSubmissionCubit] from DI so each sheet instance has
 /// isolated form state.
 class ReportSheet extends StatelessWidget {
-  const ReportSheet({super.key, required this.listingId});
+  const ReportSheet({super.key, this.listingId, this.userId})
+    : assert(listingId != null || userId != null, 'one target is required');
 
-  final String listingId;
+  final String? listingId;
+
+  /// Plan A29 — when set, the sheet reports a person, not a listing.
+  final String? userId;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider<ReportSubmissionCubit>(
       create: (_) => getIt<ReportSubmissionCubit>(),
-      child: _ReportSheetBody(listingId: listingId),
+      child: _ReportSheetBody(listingId: listingId, userId: userId),
     );
   }
 }
 
 class _ReportSheetBody extends StatefulWidget {
-  const _ReportSheetBody({required this.listingId});
+  const _ReportSheetBody({this.listingId, this.userId});
 
-  final String listingId;
+  final String? listingId;
+  final String? userId;
 
   @override
   State<_ReportSheetBody> createState() => _ReportSheetBodyState();
@@ -89,10 +95,17 @@ class _ReportSheetBodyState extends State<_ReportSheetBody> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Title
-                Text(l10n.report_sheet_title, style: styles.titleLarge),
+                Text(
+                  widget.userId != null
+                      ? l10n.report_user_sheet_title
+                      : l10n.report_sheet_title,
+                  style: styles.titleLarge,
+                ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  l10n.report_sheet_subtitle,
+                  widget.userId != null
+                      ? l10n.report_user_sheet_subtitle
+                      : l10n.report_sheet_subtitle,
                   style: styles.bodyMedium.copyWith(color: colors.textMuted),
                 ),
                 const SizedBox(height: AppSpacing.lg),
@@ -103,7 +116,10 @@ class _ReportSheetBodyState extends State<_ReportSheetBody> {
                   return AppDropdown<ReportReason>(
                     label: l10n.report_reason_field_label,
                     value: state.reason,
-                    items: ReportReason.values.map((reason) {
+                    items: (widget.userId != null
+                            ? ReportReason.userReasons
+                            : ReportReason.listingReasons)
+                        .map((reason) {
                       return DropdownMenuItem<ReportReason>(
                         value: reason,
                         child: Text(_reasonLabel(l10n, reason)),
@@ -153,7 +169,10 @@ class _ReportSheetBodyState extends State<_ReportSheetBody> {
                           onPressed: state.canSubmit
                               ? () => context
                                     .read<ReportSubmissionCubit>()
-                                    .submit(widget.listingId)
+                                    .submitFor(
+                                      listingId: widget.listingId,
+                                      userId: widget.userId,
+                                    )
                               : null,
                         ),
                       ),
@@ -181,6 +200,9 @@ class _ReportSheetBodyState extends State<_ReportSheetBody> {
       ReportReason.inappropriateContent =>
         l10n.report_reason_inappropriate_content,
       ReportReason.other => l10n.report_reason_other,
+      ReportReason.harassment => l10n.report_reason_harassment,
+      ReportReason.scam => l10n.report_reason_scam,
+      ReportReason.impersonation => l10n.report_reason_impersonation,
     };
   }
 }

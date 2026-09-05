@@ -4523,6 +4523,162 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get report_reason_harassment => _resolve(
+    'report_reason_harassment',
+    (loc) => loc.report_reason_harassment,
+  );
+
+  @override
+  String get report_reason_scam => _resolve(
+    'report_reason_scam',
+    (loc) => loc.report_reason_scam,
+  );
+
+  @override
+  String get report_reason_impersonation => _resolve(
+    'report_reason_impersonation',
+    (loc) => loc.report_reason_impersonation,
+  );
+
+  @override
+  String get report_user_sheet_title => _resolve(
+    'report_user_sheet_title',
+    (loc) => loc.report_user_sheet_title,
+  );
+
+  @override
+  String get report_user_sheet_subtitle => _resolve(
+    'report_user_sheet_subtitle',
+    (loc) => loc.report_user_sheet_subtitle,
+  );
+
+  @override
+  String get resolve_action_suspend_user => _resolve(
+    'resolve_action_suspend_user',
+    (loc) => loc.resolve_action_suspend_user,
+  );
+
+  @override
+  String get admin_report_about_user_label => _resolve(
+    'admin_report_about_user_label',
+    (loc) => loc.admin_report_about_user_label,
+  );
+
+  @override
+  String get chatMenuTooltip => _resolve(
+    'chatMenuTooltip',
+    (loc) => loc.chatMenuTooltip,
+  );
+
+  @override
+  String get chatMenuReportUser => _resolve(
+    'chatMenuReportUser',
+    (loc) => loc.chatMenuReportUser,
+  );
+
+  @override
+  String get chatMenuBlockUser => _resolve(
+    'chatMenuBlockUser',
+    (loc) => loc.chatMenuBlockUser,
+  );
+
+  @override
+  String get chatMenuUnblockUser => _resolve(
+    'chatMenuUnblockUser',
+    (loc) => loc.chatMenuUnblockUser,
+  );
+
+  @override
+  String get chatBlockConfirmTitle => _resolve(
+    'chatBlockConfirmTitle',
+    (loc) => loc.chatBlockConfirmTitle,
+  );
+
+  @override
+  String get chatBlockConfirmBody => _resolve(
+    'chatBlockConfirmBody',
+    (loc) => loc.chatBlockConfirmBody,
+  );
+
+  @override
+  String get chatBlockedToast => _resolve(
+    'chatBlockedToast',
+    (loc) => loc.chatBlockedToast,
+  );
+
+  @override
+  String get chatUnblockedToast => _resolve(
+    'chatUnblockedToast',
+    (loc) => loc.chatUnblockedToast,
+  );
+
+  @override
+  String get chatBlockFailedToast => _resolve(
+    'chatBlockFailedToast',
+    (loc) => loc.chatBlockFailedToast,
+  );
+
+  @override
+  String get chatCounterpartBlockedBanner => _resolve(
+    'chatCounterpartBlockedBanner',
+    (loc) => loc.chatCounterpartBlockedBanner,
+  );
+
+  @override
+  String get settings_blocked_users_row => _resolve(
+    'settings_blocked_users_row',
+    (loc) => loc.settings_blocked_users_row,
+  );
+
+  @override
+  String get blockedUsersTitle => _resolve(
+    'blockedUsersTitle',
+    (loc) => loc.blockedUsersTitle,
+  );
+
+  @override
+  String get blockedUsersEmptyTitle => _resolve(
+    'blockedUsersEmptyTitle',
+    (loc) => loc.blockedUsersEmptyTitle,
+  );
+
+  @override
+  String get blockedUsersEmptyBody => _resolve(
+    'blockedUsersEmptyBody',
+    (loc) => loc.blockedUsersEmptyBody,
+  );
+
+  @override
+  String get blockedUsersUnblockButton => _resolve(
+    'blockedUsersUnblockButton',
+    (loc) => loc.blockedUsersUnblockButton,
+  );
+
+  @override
+  String get blockedUsersUnknownName => _resolve(
+    'blockedUsersUnknownName',
+    (loc) => loc.blockedUsersUnknownName,
+  );
+
+  @override
+  String get blockedUsersErrorTitle => _resolve(
+    'blockedUsersErrorTitle',
+    (loc) => loc.blockedUsersErrorTitle,
+  );
+
+  @override
+  String get notification_type_account_suspended => _resolve(
+    'notification_type_account_suspended',
+    (loc) => loc.notification_type_account_suspended,
+  );
+
+  @override
+  String get notification_type_account_reinstated => _resolve(
+    'notification_type_account_reinstated',
+    (loc) => loc.notification_type_account_reinstated,
+  );
+
+  @override
   String get settingsEditorPrivacyUrlLabel => _resolve(
     'settingsEditorPrivacyUrlLabel',
     (loc) => loc.settingsEditorPrivacyUrlLabel,

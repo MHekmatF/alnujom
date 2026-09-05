@@ -52,6 +52,20 @@ class SupabaseChatDatasource {
         .toList();
   }
 
+  /// Plan A29 — one conversation row, or null when RLS hides it. Used by the
+  /// thread to learn who the OTHER person is (report / block).
+  Future<ConversationDto?> fetchConversation(String conversationId) async {
+    final row = await _client
+        .from('conversations')
+        .select(
+          'id, listing_id, buyer_user_id, publisher_user_id, created_at, last_message_at',
+        )
+        .eq('id', conversationId)
+        .maybeSingle();
+    if (row == null) return null;
+    return ConversationDto.fromJson(Map<String, dynamic>.from(row));
+  }
+
   /// Resolves the listing main-image public URL from the embedded
   /// `listing.listing_media` rows (first is_main image), mirroring the home
   /// feed's storage idiom.
