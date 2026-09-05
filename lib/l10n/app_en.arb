@@ -3099,6 +3099,9 @@
   "@a11yBack": {
     "description": "Plan A37 — screen-reader label for the crown back arrow."
   },
+  "a11yShowPassword": "Show password",
+  "a11yHidePassword": "Hide password",
+  "a11yClearSearch": "Clear search",
   "about_feedback": "Send feedback or report a problem",
   "@about_feedback": {
     "description": "Plan A34 — About page tile that opens the feedback sheet."
