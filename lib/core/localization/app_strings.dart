@@ -4679,6 +4679,24 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get authSessionExpiredNotice => _resolve(
+    'authSessionExpiredNotice',
+    (loc) => loc.authSessionExpiredNotice,
+  );
+
+  @override
+  String get authOfflineNotice => _resolve(
+    'authOfflineNotice',
+    (loc) => loc.authOfflineNotice,
+  );
+
+  @override
+  String get updatePromptRequiredBody => _resolve(
+    'updatePromptRequiredBody',
+    (loc) => loc.updatePromptRequiredBody,
+  );
+
+  @override
   String get settingsEditorPrivacyUrlLabel => _resolve(
     'settingsEditorPrivacyUrlLabel',
     (loc) => loc.settingsEditorPrivacyUrlLabel,

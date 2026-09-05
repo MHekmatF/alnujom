@@ -83,6 +83,7 @@ dependencies:
   # listing videos don't fill Storage (they upload RAW today). Best-effort:
   # always falls back to the original on failure.
   video_compress: ^3.1.4
+  connectivity_plus: ^7.3.1
 
 dev_dependencies:
   flutter_test:

@@ -979,11 +979,28 @@ writes `expires_at` at approval; the backup workflow **keeps no file** without
       moderation row, the notification; double suspend `invalid_transition`;
       reinstate through the public RPC; a holder of no `users.suspend` →
       `permission_denied`. Not walked on a device (needs two accounts).
-- [ ] **A30 — Offline and timeouts** · M. Connectivity banner; a default
-      timeout on every repository call using the unused `errorOffline` copy; a
-      "session expired" message on the auth bounce.
-- [ ] **A31 — Forced-update floor** · S. Honour `min_supported_version`;
-      below it the update dialog cannot be dismissed.
+- [x] **A30 — Offline and timeouts** · **DONE 2026-09-05.** One
+      `TimeoutHttpClient` handed to `Supabase.initialize(httpClient:)` puts a
+      deadline on every REST / auth / functions call (20 s) and every Storage
+      call (3 min for a photo body) — a dead connection now ends in the
+      existing error state with Retry, not a spinner. `connectivity_plus`
+      (7.3.1) feeds a `ConnectivityCubit`; `OfflineBanner` sits above the whole
+      navigator and shows the until-now-unused `errorOffline` copy while no
+      network interface is up. The auth bloc now tells a session that lapsed
+      apart from a sign-out that was asked for (`Unauthenticated.reason`), and
+      the sign-in screen says so once — "your session expired" online, "no
+      connection" offline — instead of a silent bounce. Not walked on a
+      device: the offline strip and the timeout need airplane mode on the AVD
+      (next walk); the expired-session notice needs a session to lapse.
+- [x] **A31 — Forced-update floor** · **DONE 2026-09-05.** The repository
+      compares the installed build to `min_supported_version` (only when a
+      newer build exists — a floor above the latest is a manifest mistake and
+      must not lock anyone out); below it the prompt has no "later", no back
+      (`PopScope`), a body that says the version is no longer supported, and an
+      Update button that opens the post and leaves the dialog up. `latest.json`
+      needs no new field: `min_supported_version` has been in the schema since
+      Phase 24 and was parsed and ignored. Not walked on a device (needs a
+      manifest with a floor above the installed build).
 - [x] **A32 — Schedule the recurring jobs** · **DONE 2026-09-05**, migration
       `20260905120003` applied: `pg_cron` 1.6.4 installed, four jobs (UTC):
       `housekeeping_listing_expiry` hourly at :10 · `housekeeping_audit_purge`

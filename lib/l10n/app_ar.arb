@@ -2586,6 +2586,18 @@
   "@about_no_info": {
     "description": "Phase 23 FC — Empty-state copy when no support channels or legal links are configured."
   },
+  "authSessionExpiredNotice": "انتهت جلستك. سجّل الدخول من جديد للمتابعة.",
+  "@authSessionExpiredNotice": {
+    "description": "Plan A30 — toast on the sign-in screen after a session lapsed."
+  },
+  "authOfflineNotice": "لا يوجد اتصال بالإنترنت. سجّل الدخول عند عودة الاتصال.",
+  "@authOfflineNotice": {
+    "description": "Plan A30 — toast on the sign-in screen when the phone is offline."
+  },
+  "updatePromptRequiredBody": "هذا الإصدار لم يعد مدعوماً. حدّث التطبيق للمتابعة.",
+  "@updatePromptRequiredBody": {
+    "description": "Plan A31 — body of the update prompt when the installed build is below min_supported_version."
+  },
   "updatePromptTitle": "تحديث متاح",
   "@updatePromptTitle": {
     "description": "Phase 24 UP — Title of the in-app update prompt dialog (FR-009)."

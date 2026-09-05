@@ -13,9 +13,13 @@ sealed class UpdateAvailability {
 
 /// A newer version is available.
 final class UpdateAvailable extends UpdateAvailability {
-  const UpdateAvailable(this.manifest);
+  const UpdateAvailable(this.manifest, {this.required = false});
 
   final VersionManifest manifest;
+
+  /// Plan A31 — the installed build is below the manifest's
+  /// `min_supported_version`: the prompt cannot be dismissed.
+  final bool required;
 }
 
 /// The installed version is up to date.

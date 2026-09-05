@@ -20,18 +20,26 @@ import '../../domain/entities/version_manifest.dart';
 ///   (`telegram_url ?? website_url` — R-211); then dismisses the dialog.
 /// - **Later** button → dismisses for the current session (no persisted state).
 /// - If [manifest.downloadUrl] is null, the Update button is hidden.
-Future<void> showUpdatePrompt(BuildContext context, VersionManifest manifest) {
+Future<void> showUpdatePrompt(
+  BuildContext context,
+  VersionManifest manifest, {
+  bool required = false,
+}) {
   return showDialog<void>(
     context: context,
     barrierDismissible: false,
-    builder: (dialogContext) => _UpdatePromptDialog(manifest: manifest),
+    builder: (dialogContext) =>
+        _UpdatePromptDialog(manifest: manifest, required: required),
   );
 }
 
 class _UpdatePromptDialog extends StatelessWidget {
-  const _UpdatePromptDialog({required this.manifest});
+  const _UpdatePromptDialog({required this.manifest, required this.required});
 
   final VersionManifest manifest;
+
+  /// Plan A31 — below the floor: no "later", no back, the only way on is up.
+  final bool required;
 
   @override
   Widget build(BuildContext context) {
@@ -60,25 +68,63 @@ class _UpdatePromptDialog extends StatelessWidget {
           )
         : null;
 
+    final iconBadge = Container(
+      width: AppSpacing.xxxl,
+      height: AppSpacing.xxxl,
+      decoration: BoxDecoration(
+        color: colors.primary.withValues(alpha: 0.12),
+        shape: BoxShape.circle,
+      ),
+      child: Icon(
+        LucideIcons.circle_arrow_up,
+        color: colors.primary,
+        size: AppSpacing.xl,
+      ),
+    );
+
+    if (required && downloadUrl != null) {
+      // Plan A31 — the installed build is below min_supported_version. The
+      // dialog stays up after the tap: the person leaves to install, and the
+      // next launch is the new build.
+      return PopScope(
+        canPop: false,
+        child: AlertDialog(
+          icon: iconBadge,
+          title: Text(loc.updatePromptTitle, style: styles.titleLarge),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(loc.updatePromptRequiredBody, style: styles.bodyMedium),
+              if (releaseNotesBlock != null) ...[
+                const SizedBox(height: AppSpacing.lg),
+                releaseNotesBlock,
+              ],
+            ],
+          ),
+          actions: [
+            AppButton.filledPrimary(
+              label: loc.updatePromptUpdate,
+              onPressed: () async {
+                final uri = Uri.tryParse(downloadUrl);
+                if (uri != null) {
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                }
+              },
+            ),
+            const SizedBox(width: AppSpacing.xs),
+          ],
+        ),
+      );
+    }
+
     if (downloadUrl == null) {
       // No download URL in the manifest → only the "Later" dismissal exists.
       // AppDialog's fixed cancel/action pair cannot express a single-button
       // dialog, so this rare branch keeps a hand-rolled [AlertDialog] styled
       // like the AppDialog idiom (tinted glyph, token type, AppButton action).
       return AlertDialog(
-        icon: Container(
-          width: AppSpacing.xxxl,
-          height: AppSpacing.xxxl,
-          decoration: BoxDecoration(
-            color: colors.primary.withValues(alpha: 0.12),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            LucideIcons.circle_arrow_up,
-            color: colors.primary,
-            size: AppSpacing.xl,
-          ),
-        ),
+        icon: iconBadge,
         title: Text(loc.updatePromptTitle, style: styles.titleLarge),
         content: Column(
           mainAxisSize: MainAxisSize.min,

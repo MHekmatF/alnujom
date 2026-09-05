@@ -16,6 +16,8 @@ import '../widgets/auth_trust_note.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/domain/value_objects/phone_number.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/network/connectivity_cubit.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -36,6 +38,27 @@ class _LoginPageState extends State<LoginPage> {
 
   String? _errorText;
   bool _obscure = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Plan A30 — say WHY the user is looking at this screen when the app put
+    // them here: the session lapsed, or the phone is offline and the session
+    // could not be confirmed. Nothing is shown for a plain sign-out.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final auth = context.read<AuthBloc>().state;
+      if (auth is! Unauthenticated || auth.reason == SignedOutReason.none) {
+        return;
+      }
+      final l10n = AppLocalizations.of(context)!;
+      final online = context.read<ConnectivityCubit>().state;
+      AppToast.info(
+        context,
+        online ? l10n.authSessionExpiredNotice : l10n.authOfflineNotice,
+      );
+    });
+  }
 
   @override
   void dispose() {
