@@ -363,7 +363,7 @@ Full detail, including rotation: `supabase/docs/map_jitter_coordinates.md`.
 
 ## 5. Server functions (Edge Functions)
 
-Seven small programs run on Supabase's servers rather than in the app. They exist
+Ten small programs run on Supabase's servers rather than in the app. They exist
 for jobs that must not be trusted to a phone. You can see them at **Supabase
 dashboard → Edge Functions**.
 
@@ -376,6 +376,9 @@ dashboard → Edge Functions**.
 | `dispatch_push` | Sends the actual push notification through Firebase | Only the database, using the shared `push_dispatch_token` |
 | `request_password_reset` | Starts a password reset from a phone number | Anyone. It now answers `sent` / `no_email` / `not_found` so the screen can tell the user what actually happened. That deliberately gives up the old "identical answer for every number" property — see section 2. |
 | `lookup_email_by_phone` | Translates a phone number into the made-up login email at sign-in | Anyone (same enumeration-resistant design) |
+| `purge_deleted_accounts` | Finishes an account deletion after the grace period: removes the sign-in row and the uploaded files (section 7b) | An admin with `users.suspend`, or the scheduled housekeeping job (plan A32) |
+| `sweep_storage` | Deletes uploaded files that no listing, agency or avatar points at any more | Only the weekly housekeeping job, using the shared `housekeeping_token` |
+| `export_my_data` | Composes Settings → "Download a copy of my data": one JSON file with everything the app holds about the person asking | Any signed-in person, for their own data only |
 
 **You will rarely touch these.** They are already deployed and running. A
 developer redeploys one only after changing its code:
@@ -880,6 +883,10 @@ pauses.
       their **account** and their **publisher** status are approved.
 - [ ] **Approve or reject listings** before they go public.
 - [ ] **Work the reports queue** from the admin **Reports** screen.
+- [ ] **Read what people sent from the app** — Supabase dashboard → Table
+      Editor → `feedback` (plan A34). Nobody is notified when a row arrives;
+      move `status` from `new` to `seen` or `done` by hand so the next person
+      knows what was handled.
 - [ ] **Watch GlitchTip a few times a week.** A spike after a release means
       something broke — send the report to your developer.
 - [ ] **Watch the keep-alive robot's emails.** Red means look now.

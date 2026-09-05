@@ -8,6 +8,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show PostgrestException;
 
+import '../../../../core/analytics/analytics_service.dart';
+import '../../../../core/di/injection.dart';
 import '../../../../core/errors/result.dart';
 import '../../../../core/validators/video_file_validator.dart';
 import '../../../agency/domain/entities/agency.dart';
@@ -799,6 +801,15 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
     emit(state.copyWith(currentStep: event.step));
   }
 
+  /// Plan A35 — the publisher funnel's last step. Best-effort; a no-op when
+  /// telemetry is off.
+  static void _trackSubmitted(String listingId, {required bool revision}) {
+    getIt<AnalyticsService>().logEvent(
+      'listing_submitted',
+      props: {'listingId': listingId, 'revision': revision},
+    );
+  }
+
   Future<void> _onSubmitRequested(
     SubmitRequested event,
     Emitter<ListingFormState> emit,
@@ -836,6 +847,7 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
         }
         await _persistRevision();
         await _submitRevision(revisionId);
+        _trackSubmitted(listing.id, revision: true);
         emit(state.copyWith(submitInProgress: false, submitSucceeded: true));
         return;
       }
@@ -856,6 +868,7 @@ class ListingFormBloc extends Bloc<ListingFormEvent, ListingFormState> {
         await _saveFormStep(state, step);
       }
       final result = await _submitListing(listing.id);
+      _trackSubmitted(listing.id, revision: false);
       emit(
         state.copyWith(
           submitInProgress: false,

@@ -54,6 +54,7 @@ class PublisherListingDto {
     required this.primaryPriceId,
     required this.primaryPriceCurrencyCode,
     required this.primaryPriceAmount,
+    required this.viewsCount,
   });
 
   // Listing parent columns
@@ -103,6 +104,10 @@ class PublisherListingDto {
   final String? primaryPriceCurrencyCode;
   final Decimal? primaryPriceAmount;
 
+  // Plan A35 — `views_count`: distinct viewers, all time (integer, never
+  // null; the view coalesces to zero).
+  final int viewsCount;
+
   static PublisherListingDto fromMap(Map<String, dynamic> row) {
     return PublisherListingDto(
       listingId: row['listing_id'] as String,
@@ -150,6 +155,7 @@ class PublisherListingDto {
       primaryPriceId: row['primary_price_id'] as String?,
       primaryPriceCurrencyCode: row['primary_price_currency_code'] as String?,
       primaryPriceAmount: _decimalOrNull(row['primary_price_amount']),
+      viewsCount: (row['views_count'] as num?)?.toInt() ?? 0,
     );
   }
 
@@ -216,6 +222,7 @@ class PublisherListingDto {
       listing: listing,
       latestStatusHistoryEntry: history,
       primaryPrice: price,
+      viewsCount: viewsCount,
     );
   }
 }

@@ -27,6 +27,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/analytics/analytics_service.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
@@ -138,6 +139,13 @@ class _SearchPageViewState extends State<_SearchPageView> {
   /// True while the search bar holds focus AND its text is empty — the
   /// recent-searches panel overlays the results in that window.
   bool _showRecent = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Plan A35 — the funnel's first step (search → open → contact).
+    getIt<AnalyticsService>().logScreen('search');
+  }
 
   void _onFocusEmptyChanged(bool show) {
     if (_showRecent == show) return;

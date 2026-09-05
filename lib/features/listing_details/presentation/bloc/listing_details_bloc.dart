@@ -10,6 +10,7 @@ import '../../../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../../../features/auth/presentation/bloc/auth_state.dart';
 import '../../domain/entities/listing_details_aggregate.dart';
 import '../../domain/usecases/load_listing_details.dart';
+import '../../domain/usecases/record_listing_view.dart';
 
 // ─── Events ───────────────────────────────────────────────────────────────────
 
@@ -106,8 +107,11 @@ class ListingDetailsState extends Equatable {
 @injectable
 class ListingDetailsBloc
     extends Bloc<ListingDetailsEvent, ListingDetailsState> {
-  ListingDetailsBloc(this._loadListingDetails, this._authBloc)
-    : super(const ListingDetailsState()) {
+  ListingDetailsBloc(
+    this._loadListingDetails,
+    this._authBloc,
+    this._recordListingView,
+  ) : super(const ListingDetailsState()) {
     on<ListingDetailsLoadRequested>(_onLoadRequested);
     on<ListingDetailsAuthStateChanged>(_onAuthStateChanged);
     on<ListingDetailsRetryRequested>(_onRetryRequested);
@@ -119,6 +123,7 @@ class ListingDetailsBloc
   }
 
   final LoadListingDetails _loadListingDetails;
+  final RecordListingView _recordListingView;
   final AuthBloc _authBloc;
   late final StreamSubscription<AuthState> _authSub;
 
@@ -168,6 +173,9 @@ class ListingDetailsBloc
             aggregate: result.value,
           ),
         );
+        // Plan A35 — count the open. Fire-and-forget; the repository swallows
+        // every failure, so this can never touch the state above.
+        unawaited(_recordListingView(id));
       case FailureResult<ListingDetailsAggregate>():
         if (result.failure is ListingNotFoundFailure) {
           emit(

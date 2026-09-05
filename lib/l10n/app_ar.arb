@@ -2782,6 +2782,39 @@
   "@a11yBack": {
     "description": "Plan A37 — screen-reader label for the crown back arrow."
   },
+  "about_feedback": "أرسل ملاحظة أو بلّغ عن مشكلة",
+  "@about_feedback": {
+    "description": "Plan A34 — About page tile that opens the feedback sheet."
+  },
+  "feedback_sheet_title": "أخبرنا",
+  "feedback_sheet_subtitle": "مشكلة، فكرة، أو سؤال. نقرأ كل رسالة.",
+  "feedback_category_label": "نوع الرسالة",
+  "feedback_category_bug": "مشكلة في التطبيق",
+  "feedback_category_idea": "فكرة أو اقتراح",
+  "feedback_category_question": "سؤال",
+  "feedback_category_other": "شيء آخر",
+  "feedback_message_hint": "اكتب رسالتك",
+  "feedback_send": "إرسال",
+  "feedback_sent": "وصلتنا رسالتك، شكرًا لك.",
+  "feedback_failed": "تعذّر الإرسال. حاول مرة أخرى.",
+  "feedback_rate_limited": "أرسلت رسائل كثيرة خلال ساعة. انتظر قليلًا ثم حاول.",
+  "feedback_sign_in_prompt": "انتهت جلستك. سجّل الدخول ثم أعد المحاولة.",
+  "myListingsViews": "{count, plural, zero{بلا مشاهدات} one{مشاهدة واحدة} two{مشاهدتان} few{{count} مشاهدات} many{{count} مشاهدة} other{{count} مشاهدة}}",
+  "@myListingsViews": {
+    "description": "Plan A35 — distinct viewers on the publisher listing card.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settings_export_data_row": "تنزيل نسخة من بياناتي",
+  "@settings_export_data_row": {
+    "description": "Plan A38 — Settings row that composes and shares the data export."
+  },
+  "settings_export_data_preparing": "جارٍ تجهيز بياناتك…",
+  "settings_export_data_failed": "تعذّر تجهيز البيانات. حاول مرة أخرى.",
+  "settings_export_data_subject": "بياناتي في النجوم",
   "updatePromptTitle": "تحديث متاح",
   "@updatePromptTitle": {
     "description": "Phase 24 UP — Title of the in-app update prompt dialog (FR-009)."

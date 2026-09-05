@@ -895,7 +895,7 @@ queue items are A14–A23 above and B14–B17; the evidence and the proofs are i
 
 ---
 
-## F. What the 2026-09-05 gap review adds — PROPOSED, nothing started
+## F. What the 2026-09-05 gap review adds — DONE 2026-09-05 except A39 (waits on B17) and the second half of A37
 
 The founder asked for three things and no execution: is anything still
 unverified, did we forget anything, and what does the app lack. The evidence is
@@ -1049,11 +1049,25 @@ writes `expires_at` at approval; the backup workflow **keeps no file** without
 
 ### Tier 2 — first weeks after launch
 
-- [ ] **A34 — In-app feedback** · S–M. A "report a problem" sheet under
-      About, a `feedback` table, admins notified, build attached.
-- [ ] **A35 — Usage analytics and view counts** · M. Funnel events on the
-      existing seam; a deduplicated `listing_views` counter on the publisher
-      card.
+- [x] **A34 — In-app feedback** · **DONE 2026-09-05.** A `feedback` table
+      written only through `submit_feedback()` (signed-in, 1–2000 characters,
+      ten an hour), and a "send feedback" sheet under About for anyone with an
+      account: category, message, the running build and platform attached
+      without asking. Admins are **not** notified on purpose — the founder
+      reads the table from the dashboard (HANDOVER §11) and moves `status` by
+      hand; a push per message would be noise before there is a team. Proven
+      in a rolled-back transaction; not walked on a device.
+- [x] **A35 — Usage analytics and view counts** · **DONE 2026-09-05.**
+      `listing_views` keeps one row per viewer per listing per day (account id
+      when signed in, else a random install id kept in secure storage; the
+      publisher's own opens and non-approved listings are ignored; 5,000 a
+      day is the runaway ceiling), `record_listing_view()` fires once the
+      details load, and `v_publisher_listings.views_count` puts the total on
+      the publisher's card. Funnel events on the existing analytics seam:
+      `search` screen, `contact_tapped` with the channel (call / WhatsApp /
+      chat / inquiry), `listing_submitted`; `listing_viewed` and
+      `inquiry_submitted` already existed. Proven in a rolled-back
+      transaction; not walked on a device.
 - [x] **A36 — Page the last two lists** · **DONE 2026-09-05.** The viewings
       list (30 per page, keyset on `scheduled_at`) and the admin approvals
       queue (50 per page, keyset on `created_at`) now fetch a page at a time;
@@ -1068,8 +1082,12 @@ writes `expires_at` at approval; the backup workflow **keeps no file** without
       actions got tooltips. **Still open:** the ~40 feature-level
       `IconButton`s without tooltips, and the TalkBack walk itself, which
       needs a device.
-- [ ] **A38 — Data export** · S–M. "Download my data" through an edge
-      function with the caller's own token. Play prerequisite.
+- [x] **A38 — Data export** · **DONE 2026-09-05.** `export_my_data` (v1)
+      accepts only the caller's own access token, asks GoTrue who it belongs
+      to, then composes one JSON document from every table keyed on that id
+      (own messages only; the encrypted inquirer phone, moderators' notes and
+      push tokens left out on purpose). Settings → "Download a copy of my
+      data" hands the file to the share sheet. Not walked on a device.
 - [ ] **A39 — Dark map tiles** · S. After B17.
 - [x] **A40 — Manifest guard** · **DONE 2026-09-05.** `tool/publish_manifest.py`
       reads the live manifest first and refuses a build that is not higher

@@ -12,6 +12,7 @@ class PublisherListing extends Equatable {
     required this.listing,
     required this.latestStatusHistoryEntry,
     required this.primaryPrice,
+    this.viewsCount = 0,
   });
 
   final Listing listing;
@@ -23,6 +24,11 @@ class PublisherListing extends Equatable {
 
   /// Null until the publisher saves the prices step.
   final ListingPrice? primaryPrice;
+
+  /// Plan A35 — how many distinct people opened the listing (one per viewer
+  /// per day, the publisher excluded). Zero for drafts and for anything
+  /// nobody has opened yet.
+  final int viewsCount;
 
   /// In-place edit: draft/rejected listings edit themselves directly.
   bool get isEditable =>
@@ -46,5 +52,10 @@ class PublisherListing extends Equatable {
       latestStatusHistoryEntry!.reason!.trim().isNotEmpty;
 
   @override
-  List<Object?> get props => [listing, latestStatusHistoryEntry, primaryPrice];
+  List<Object?> get props => [
+    listing,
+    latestStatusHistoryEntry,
+    primaryPrice,
+    viewsCount,
+  ];
 }

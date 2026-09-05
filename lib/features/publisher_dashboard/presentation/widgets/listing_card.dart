@@ -171,6 +171,23 @@ class ListingCard extends StatelessWidget {
                             color: colors.textMuted,
                           ),
                         ),
+                        // Plan A35 — distinct people who opened it. A draft
+                        // cannot have any, so the chip waits for submission.
+                        if (listing.status != ListingStatus.draft) ...[
+                          const SizedBox(width: AppSpacing.md),
+                          Icon(
+                            LucideIcons.eye,
+                            size: AppSpacing.md,
+                            color: colors.textMuted,
+                          ),
+                          const SizedBox(width: AppSpacing.xs),
+                          Text(
+                            l10n.myListingsViews(publisherListing.viewsCount),
+                            style: styles.labelMedium.copyWith(
+                              color: colors.textMuted,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                     _ExpirySection(listing: listing),

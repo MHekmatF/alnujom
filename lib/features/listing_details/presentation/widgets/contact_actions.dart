@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/analytics/analytics_service.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/errors/result.dart';
 import '../../../../core/routing/app_router.dart';
@@ -34,6 +35,7 @@ abstract final class ContactActions {
     Listing listing,
     String phone,
   ) async {
+    _track('call', listing);
     await getIt<RecordLeadEvent>()(
       listingId: listing.id,
       eventType: LeadEventType.phoneRevealed,
@@ -65,6 +67,7 @@ abstract final class ContactActions {
         'text': l10n.contactWhatsappPrefill(listing.title, link),
       },
     );
+    _track('whatsapp', listing);
     await getIt<RecordLeadEvent>()(
       listingId: listing.id,
       eventType: LeadEventType.whatsappClicked,
@@ -77,6 +80,7 @@ abstract final class ContactActions {
 
   /// Opens the inquiry form sheet (FR-001c).
   static void sendInquiry(BuildContext context, Listing listing) {
+    _track('inquiry', listing);
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -114,6 +118,7 @@ abstract final class ContactActions {
       AppToast.warning(context, l10n.chatSignInPrompt);
       return;
     }
+    _track('chat', listing);
     final result = await getIt<GetOrCreateConversation>()(listing.id);
     if (!context.mounted) return;
     switch (result) {
@@ -132,5 +137,15 @@ abstract final class ContactActions {
       case FailureResult():
         AppToast.error(context, l10n.chatOpenError);
     }
+  }
+
+  /// Plan A35 — the funnel's third step (search → open → contact), one event
+  /// for every channel so they can be compared. Best-effort; a no-op when
+  /// telemetry is off.
+  static void _track(String channel, Listing listing) {
+    getIt<AnalyticsService>().logEvent(
+      'contact_tapped',
+      props: {'channel': channel, 'listingId': listing.id},
+    );
   }
 }

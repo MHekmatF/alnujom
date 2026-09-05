@@ -3099,6 +3099,39 @@
   "@a11yBack": {
     "description": "Plan A37 — screen-reader label for the crown back arrow."
   },
+  "about_feedback": "Send feedback or report a problem",
+  "@about_feedback": {
+    "description": "Plan A34 — About page tile that opens the feedback sheet."
+  },
+  "feedback_sheet_title": "Tell us",
+  "feedback_sheet_subtitle": "A problem, an idea, or a question. We read every message.",
+  "feedback_category_label": "What is it about?",
+  "feedback_category_bug": "A problem in the app",
+  "feedback_category_idea": "An idea or suggestion",
+  "feedback_category_question": "A question",
+  "feedback_category_other": "Something else",
+  "feedback_message_hint": "Write your message",
+  "feedback_send": "Send",
+  "feedback_sent": "Got it. Thank you.",
+  "feedback_failed": "Could not send. Please try again.",
+  "feedback_rate_limited": "Too many messages in one hour. Wait a little, then try again.",
+  "feedback_sign_in_prompt": "Your session ended. Sign in and try again.",
+  "myListingsViews": "{count, plural, zero{No views yet} one{1 view} other{{count} views}}",
+  "@myListingsViews": {
+    "description": "Plan A35 — distinct viewers on the publisher listing card.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settings_export_data_row": "Download a copy of my data",
+  "@settings_export_data_row": {
+    "description": "Plan A38 — Settings row that composes and shares the data export."
+  },
+  "settings_export_data_preparing": "Preparing your data…",
+  "settings_export_data_failed": "Could not prepare your data. Please try again.",
+  "settings_export_data_subject": "My Al Nujom data",
   "updatePromptTitle": "Update Available",
   "@updatePromptTitle": {
     "description": "Phase 24 UP — Title of the in-app update prompt dialog (FR-009)."

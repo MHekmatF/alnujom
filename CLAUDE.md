@@ -6,7 +6,8 @@ feature-complete at `1.1.0+2`; what remains is getting it into users' hands.
 ordered work queue from the 2026-09-02 review of everything, extended by the
 2026-09-04 full review (`docs/ops/REVIEW_2026-09-04.md`, section E of the plan)
 and the 2026-09-05 gap review (`docs/ops/REVIEW_2026-09-05.md`, section F —
-proposed, nothing started), with what is blocked on the owner — then [`docs/ops/PENDING_MIGRATIONS.md`](docs/ops/PENDING_MIGRATIONS.md)
+all done and merged on 2026-09-05 except A39, which waits on the owner's map-tile
+key, and the TalkBack half of A37), with what is blocked on the owner — then [`docs/ops/PENDING_MIGRATIONS.md`](docs/ops/PENDING_MIGRATIONS.md)
 and [`docs/ops/HANDOVER.md`](docs/ops/HANDOVER.md).
 
 ## The state of things
