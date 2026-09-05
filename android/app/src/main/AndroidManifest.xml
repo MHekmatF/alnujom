@@ -44,7 +44,13 @@
                  EXISTING `/reset-password` request-a-reset page, dropping the user
                  on the wrong screen.  Disable it: the intent still reaches the
                  activity (and therefore app_links); only the router hand-off is
-                 suppressed, and there are no other deep links in the app. -->
+                 suppressed.
+
+                 Review §1 M3 — there IS now a second deep link (a shared
+                 listing, below), and it does not change this.  It is read the
+                 same way, off app_links, by `DeepLinkListener`, whose
+                 `resolveDeepLink` returns null for `alnujom://auth/...` so the
+                 two never both act on one URI. -->
             <meta-data
               android:name="flutter_deeplinking_enabled"
               android:value="false"
@@ -75,6 +81,28 @@
                     android:scheme="alnujom"
                     android:host="auth"
                     android:pathPrefix="/reset-password"/>
+            </intent-filter>
+            <!-- Review §1 M3 — a shared listing link.
+                 `alnujom://listings/<uuid>` is what the web landing page's
+                 "Open in app" button fires, and it is the ONLY form that works
+                 today: a private scheme needs no domain and no verification.
+
+                 An `https` filter is deliberately NOT here yet.  Without
+                 `autoVerify` + a matching `/.well-known/assetlinks.json` at the
+                 host ROOT, Android shows a chooser instead of opening the app —
+                 and a GitHub *project* Pages site cannot serve that file at the
+                 root.  It lands with the real domain (plan B16), together with
+                 `android:autoVerify="true"`.
+
+                 Read by `DeepLinkListener`, not by Flutter's router hand-off
+                 (see `flutter_deeplinking_enabled` above). -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data
+                    android:scheme="alnujom"
+                    android:host="listings"/>
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.

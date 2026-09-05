@@ -6,6 +6,7 @@ import 'core/di/injection.dart';
 import 'core/flags/app_flags.dart';
 import 'core/localization/locale_cubit.dart';
 import 'core/routing/app_router.dart';
+import 'core/routing/deep_link_listener.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/color_palette.dart';
 import 'core/theme/palette_cubit.dart';
@@ -171,11 +172,19 @@ class _AppState extends State<App> with WidgetsBindingObserver {
                           // repository replays a recovery that landed before
                           // this widget mounted).
                           child: PasswordRecoveryListener(
-                            child: Stack(
-                              children: [
-                                child ?? const SizedBox.shrink(),
-                                if (showPaletteTester) const PaletteTester(),
-                              ],
+                            // Review §1 M3 — opens a shared listing link
+                            // (`alnujom://listings/<id>`, and the https forms
+                            // once a domain exists). Sits INSIDE the recovery
+                            // listener because the two split one scheme:
+                            // `resolveDeepLink` returns null for
+                            // `alnujom://auth/...`, which supabase_flutter owns.
+                            child: DeepLinkListener(
+                              child: Stack(
+                                children: [
+                                  child ?? const SizedBox.shrink(),
+                                  if (showPaletteTester) const PaletteTester(),
+                                ],
+                              ),
                             ),
                           ),
                         ),

@@ -1,19 +1,29 @@
 # -*- coding: utf-8 -*-
-"""Render the two privacy-policy markdown files into a small static site.
+"""Render the published static site: the two privacy policies, plus any
+hand-written pages under `docs/landing/`.
 
-Deliberately hand-rolled: the documents use only headings, paragraphs, bold,
-inline code, links, bullet lists, tables and horizontal rules, and the build
-machine has no markdown package. Anything outside that subset would silently
-render as literal text, so the converter asserts on constructs it does not know.
+The markdown converter is deliberately hand-rolled: the documents use only
+headings, paragraphs, bold, inline code, links, bullet lists, tables and
+horizontal rules, and the build machine has no markdown package. Anything
+outside that subset would silently render as literal text, so the converter
+asserts on constructs it does not know.
+
+`docs/landing/` is copied verbatim. It holds pages that are written as HTML
+rather than generated from markdown — today the shared-listing page at `l/`
+(review §1 M3). It is a **tracked source**: the output directory is gitignored,
+so anything written straight into it is lost on the next run and never reaches
+review.
 """
 import html
 import io
 import os
 import re
+import shutil
 import sys
 
 SRC_AR = 'docs/legal/privacy-policy.md'
 SRC_EN = 'docs/legal/privacy-policy.en.md'
+SRC_STATIC = 'docs/landing'
 OUT = sys.argv[1] if len(sys.argv) > 1 else 'site'
 
 
@@ -201,3 +211,17 @@ for s in specs:
     path = os.path.join(OUT, s['out'])
     io.open(path, 'w', encoding='utf-8', newline='\n').write(page)
     print('wrote %s (%d bytes)' % (path, len(page.encode('utf-8'))))
+
+# Hand-written pages, copied as-is. Overwrites on purpose: the source in
+# docs/landing/ is the one under review, so it always wins over whatever is
+# sitting in the output directory.
+if os.path.isdir(SRC_STATIC):
+    for root, _dirs, files in os.walk(SRC_STATIC):
+        rel = os.path.relpath(root, SRC_STATIC)
+        dest_dir = OUT if rel == '.' else os.path.join(OUT, rel)
+        os.makedirs(dest_dir, exist_ok=True)
+        for name in files:
+            src = os.path.join(root, name)
+            dest = os.path.join(dest_dir, name)
+            shutil.copyfile(src, dest)
+            print('copied %s (%d bytes)' % (dest, os.path.getsize(dest)))
