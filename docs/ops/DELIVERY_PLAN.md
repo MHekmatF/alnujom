@@ -9,6 +9,11 @@
 evidence in [`REVIEW_2026-09-04.md`](REVIEW_2026-09-04.md). Two of its items
 (A14) are launch-relevant and go before everything else that is not blocked.
 
+**2026-09-05:** section **F** adds the gap review — what is still unverified,
+what was found that nobody had written down, and what the app lacks — as a
+**proposed** queue (A25–A40). Nothing in it has started; §7 of
+[`REVIEW_2026-09-05.md`](REVIEW_2026-09-05.md) ranks what only the founder can do.
+
 This is the ordered work queue for the next sessions. It replaces the scattered
 "still owed" lists in `HANDOVER.md`, `PENDING_MIGRATIONS.md`, `v1.0.0.md`,
 `REVIEW.md` and the 35 `DEFERRED.md` files — all of which were read for this
@@ -877,6 +882,96 @@ queue items are A14–A23 above and B14–B17; the evidence and the proofs are i
 - **One latent bug:** the notifications CHECK constraint rejects the
   saved-search alert type — the first saved search will make listing
   approval fail. A14.
+
+---
+
+## F. What the 2026-09-05 gap review adds — PROPOSED, nothing started
+
+The founder asked for three things and no execution: is anything still
+unverified, did we forget anything, and what does the app lack. The evidence is
+[`REVIEW_2026-09-05.md`](REVIEW_2026-09-05.md); this section is the queue it
+proposes. **None of A25–A40 has been started.** Sizes: S under half a day,
+M a day or two; one PR each.
+
+**Found and not previously recorded:** orphaned files are **57% of storage**
+(29 images + 2 videos, 12.5 MB, from pre-A15 hard deletes, replaced photos and
+one failed video upload); **every public listing goes dark on 2026-10-06**
+(all 16 carry that `expires_at`); new listings never expire because nothing
+writes `expires_at` at approval; the backup workflow **keeps no file** without
+`BACKUP_PASSPHRASE`; the live update manifest is a June placeholder
+(`1.1.0` / build `1` / `t.me/alnujom`).
+
+### Tier 1 — before the first real users
+
+- [ ] **A25 — Storage hygiene** · S. Dry-run orphan sweep, then delete
+      (owner yes: it is a delete); purge extended to soft-deleted listings past
+      the 30-day window; photo replacement removes the old object.
+- [ ] **A26 — Listings expire, publisher hears first** · S–M. `expires_at`
+      set at approval/relist; a `listing_expiring` alert 3 days before with
+      Renew as the action; expiry stays read-time. **Needs F1: 30 / 60 / 90
+      days.** Also settles the 2026-10-06 cliff for whatever survives B7.
+- [ ] **A27 — Terms of service** · M. AR + EN beside the privacy policy,
+      `terms_url` set, acceptance checkbox at sign-up with the timestamp on the
+      profile. Needs B4 facts and the owner's yes on the text and on publishing.
+- [ ] **A28 — Throttle chat and posting** · S. Per-user hourly caps on
+      `messages` insert and `submit_listing`, same shape as A4's throttle.
+- [ ] **A29 — Suspend, block, report a person** · M. `moderate_user` RPC +
+      admin row action; `user_blocks` honoured by chat, inquiry and viewing
+      policies; report-a-user on the existing reports flow.
+- [ ] **A30 — Offline and timeouts** · M. Connectivity banner; a default
+      timeout on every repository call using the unused `errorOffline` copy; a
+      "session expired" message on the auth bounce.
+- [ ] **A31 — Forced-update floor** · S. Honour `min_supported_version`;
+      below it the update dialog cannot be dismissed.
+- [ ] **A32 — Schedule the recurring jobs** · S. `pg_cron`: weekly audit
+      purge (A22 recipe), daily `purge_deleted_accounts` via `pg_net`, weekly
+      token sweep, the A25 orphan sweep. **Needs the owner's yes** (asked
+      2026-09-04, unanswered).
+- [ ] **A33 — Arabic completeness** · S. Permission catalogue and audit
+      action names in Arabic; locale dates with Levantine months; the two
+      truncated labels. **Needs F2: translate in the database (recommended) or
+      in the app.**
+
+### Tier 2 — first weeks after launch
+
+- [ ] **A34 — In-app feedback** · S–M. A "report a problem" sheet under
+      About, a `feedback` table, admins notified, build attached.
+- [ ] **A35 — Usage analytics and view counts** · M. Funnel events on the
+      existing seam; a deduplicated `listing_views` counter on the publisher
+      card.
+- [ ] **A36 — Page the last two lists** · S. Viewings, approvals queue; CRM
+      timeline "load more".
+- [ ] **A37 — Accessibility pass** · M. Label every icon-only control; a
+      TalkBack walk of the ten main screens (needs a device).
+- [ ] **A38 — Data export** · S–M. "Download my data" through an edge
+      function with the caller's own token. Play prerequisite.
+- [ ] **A39 — Dark map tiles** · S. After B17.
+- [ ] **A40 — Manifest guard** · S. With A10: refuse to upload a
+      `latest.json` whose `latest_build` is lower than the current.
+- A13 stands as written (dependency majors, FK indexes + policy consolidation,
+  the 13 tests, REVIEW.md batch-2, Reels entry, `pg_net` schema).
+
+### Tier 3 — decisions, not work
+
+WhatsApp phone verification; Reels at ~10 videos (B13); Google Play (B9);
+Pro at ~1,000 listings (B15); a real model behind the assistant; agency-shared
+CRM; video poster frames; the `REVIEW.md` §5 polish backlog.
+
+### Founder, ranked by what it unblocks (review §7)
+
+1. **A second test account**, signed in once by you on a second device
+   (Claude may not type a password) → twelve unverified rows, issue #39, the
+   three PARTIAL marks on A15/A16/A23.
+2. **B5** the Telegram post → A10, the update-prompt test, A5, the share
+   page's download button.
+3. **B1** SMTP → password recovery for real users.
+4. **`BACKUP_PASSPHRASE`** (A6) → the weekly backup starts keeping files.
+5. **Six one-word answers:** publish the share page (A20) · schedule the
+   purges (A32) · **F1** validity 30/60/90 · **F2** DB or app · B7 demo
+   data · B14 bucket.
+6. **B4** legal facts → A27 and the policy's placeholders. **B3** real
+   support channels. **B16** domain, **B17** tile key. **B10/B11/B12** the
+   safety nets. Later: B9, B15, the logo, REVIEW.md's questions.
 
 ---
 
