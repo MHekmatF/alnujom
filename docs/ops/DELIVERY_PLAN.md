@@ -477,7 +477,13 @@ into 5,000 marker widgets on every map open.
   `Function Scan`. The payload is what C1 was about; the scan fix (a coarse
   pre-filter below the LATERAL) is written down in the migration header for the
   day it matters.
-- [ ] **⚠️ PARTIAL — not walked on a device.** The AVD would not stay up this
+- [x] **Walked on the Pixel 8 Pro AVD 2026-09-05, as a guest:** the
+      search-and-map tab's map view rendered clusters (4, 10) and pins, and a
+      pan across the coast reloaded tiles and kept the markers — no blank map,
+      no crash. What a guest walk cannot show is the *network* side (whether
+      the pan issued a bounded re-fetch), so the row below stays as the record
+      of what is still unmeasured.
+- [ ] **⚠️ PARTIAL — the re-fetch on pan is not measured.** The AVD would not stay up this
       session, and the Infinix is the owner's phone carrying the release build
       he is about to publish: a debug install shares `com.alnujom.app` and would
       replace it. What a device would add over the above is the feel of the
@@ -615,6 +621,10 @@ Both halves are built. Neither is switched on, because the switch is the owner's
       hostile or malformed ones map to null, including the auth callback.
       Six linters green, and the merged manifest carries both intent filters
       with `flutter_deeplinking_enabled` still `false`.
+- [x] **Walked on the Pixel 8 Pro AVD 2026-09-05** (once the port fix in
+      `docs/dev/android-emulator-windows.md` brought it back): a debug build,
+      `am start -a VIEW -d alnujom://listings/<id>` from the guest home → the
+      listing detail page opened directly (title, price, chips, contact row).
 - [x] `docs/landing/` is a **tracked source** that `tool/build_privacy_site.py`
       copies into the output. The output directory is gitignored, so a page
       written straight into it would be lost on the next run and never reach
@@ -945,9 +955,30 @@ writes `expires_at` at approval; the backup workflow **keeps no file** without
       from the status history. All raise `rate_limited` / 23514 like the guest
       throttle. **Proven, rolled back:** as the buyer, 60 messages land and the
       61st is refused; as a publisher, 20 drafts land and the 21st is refused.
-- [ ] **A29 — Suspend, block, report a person** · M. `moderate_user` RPC +
-      admin row action; `user_blocks` honoured by chat, inquiry and viewing
-      policies; report-a-user on the existing reports flow.
+- [x] **A29 — Suspend, block, report a person** · **DONE 2026-09-05**, migration
+      `20260905120005` applied. **Block:** `user_blocks` (no client grants;
+      RPCs `block_user` / `unblock_user` / `list_my_blocks` /
+      `is_user_blocked_by_me`); a block in either direction closes the
+      `messages` insert policy, `get_or_create_conversation`, `request_viewing`
+      and `submit_inquiry`. In the app: the chat thread's ⋮ menu (report /
+      block / unblock), a banner while a block stands, and Settings → Blocked
+      users. **Report a person:** `reports.target_user_id` (exactly one of
+      listing / user), three new reasons, `submit_user_report`, `v_reports`
+      LEFT-joins the listing and carries `target_user_name`; the report sheet,
+      My Reports and the admin queue render both kinds. **Suspend:**
+      `moderate_user(user, suspend|reinstate)` gated on `users.suspend` — both
+      statuses to `suspended`, approved listings paused, sessions ended, one
+      `moderation_actions` row, `account_suspended` / `account_reinstated`
+      notifications (in the CHECK, the app and the push copy); the admin
+      queue reaches it as the `suspend_user` resolution on a report about a
+      person or a listing (its publisher). `resolve_report` v4, `dispatch_push`
+      v7. **Proven, rolled back (19 checks):** block → message `42501`,
+      conversation and viewing `user_blocked`; unblock → message lands; second
+      report `23505`; the reporter sees the person's name in `v_reports`;
+      `suspend_user` → `suspended/suspended`, `approved_left=0 paused=1`, the
+      moderation row, the notification; double suspend `invalid_transition`;
+      reinstate through the public RPC; a holder of no `users.suspend` →
+      `permission_denied`. Not walked on a device (needs two accounts).
 - [ ] **A30 — Offline and timeouts** · M. Connectivity banner; a default
       timeout on every repository call using the unused `errorOffline` copy; a
       "session expired" message on the auth bounce.

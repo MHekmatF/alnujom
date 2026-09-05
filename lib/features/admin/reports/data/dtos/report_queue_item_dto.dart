@@ -9,7 +9,7 @@ import '../../domain/entities/report_queue_item.dart';
 class ReportQueueItemDto {
   const ReportQueueItemDto({
     required this.id,
-    required this.listingId,
+    this.listingId,
     required this.reporterUserId,
     required this.reason,
     required this.status,
@@ -19,6 +19,8 @@ class ReportQueueItemDto {
     this.resolvedAt,
     this.reviewingBy,
     this.resolvedBy,
+    this.targetUserId,
+    this.targetUserName,
     required this.listingTitle,
     required this.listingStatus,
     this.mainImagePath,
@@ -29,7 +31,9 @@ class ReportQueueItemDto {
   });
 
   final String id;
-  final String listingId;
+  final String? listingId;
+  final String? targetUserId;
+  final String? targetUserName;
   final String reporterUserId;
   final String reason;
   final String status;
@@ -50,7 +54,9 @@ class ReportQueueItemDto {
   factory ReportQueueItemDto.fromJson(Map<String, dynamic> json) {
     return ReportQueueItemDto(
       id: json['id'] as String,
-      listingId: json['listing_id'] as String,
+      listingId: json['listing_id'] as String?,
+      targetUserId: json['target_user_id'] as String?,
+      targetUserName: json['target_user_name'] as String?,
       reporterUserId: json['reporter_user_id'] as String,
       reason: json['reason'] as String,
       status: json['status'] as String,
@@ -83,6 +89,8 @@ class ReportQueueItemDto {
       resolvedAt: resolvedAt != null ? DateTime.parse(resolvedAt!) : null,
       reviewingBy: reviewingBy,
       resolvedBy: resolvedBy,
+      targetUserId: targetUserId,
+      targetUserName: targetUserName,
       listingTitle: listingTitle,
       listingStatus: listingStatus,
       mainImagePath: mainImagePath,

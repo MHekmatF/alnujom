@@ -22,6 +22,10 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../core/errors/result.dart';
 import '../../domain/entities/message.dart';
+import '../../../user_blocks/domain/usecases/block_user.dart';
+import '../../../user_blocks/domain/usecases/is_user_blocked.dart';
+import '../../../user_blocks/domain/usecases/unblock_user.dart';
+import '../../domain/usecases/load_conversation_counterpart.dart';
 import '../../domain/usecases/load_older_messages.dart';
 import '../../domain/usecases/mark_conversation_read.dart';
 import '../../domain/usecases/send_message.dart';
@@ -36,12 +40,24 @@ class ChatThreadCubit extends Cubit<ChatThreadState> {
     this._sendMessage,
     this._markRead,
     this._loadOlderMessages,
+    this._loadCounterpart,
+    this._isUserBlocked,
+    this._blockUser,
+    this._unblockUser,
   ) : super(const ChatThreadState.loading());
 
   final WatchMessages _watchMessages;
   final SendMessage _sendMessage;
   final MarkConversationRead _markRead;
   final LoadOlderMessages _loadOlderMessages;
+  final LoadConversationCounterpart _loadCounterpart;
+  final IsUserBlocked _isUserBlocked;
+  final BlockUser _blockUser;
+  final UnblockUser _unblockUser;
+
+  // Plan A29 — who the other person is, and whether we have blocked them.
+  String? _otherUserId;
+  bool _counterpartBlocked = false;
 
   StreamSubscription<List<Message>>? _sub;
   String? _conversationId;
@@ -94,6 +110,44 @@ class ChatThreadCubit extends Cubit<ChatThreadState> {
     );
     // Fire-and-forget read receipt for already-delivered messages.
     unawaited(_markRead(conversationId));
+    // Plan A29 — learn who the other person is, behind the rendered thread.
+    unawaited(_resolveCounterpart(conversationId));
+  }
+
+  Future<void> _resolveCounterpart(String conversationId) async {
+    final who = await _loadCounterpart(conversationId);
+    if (isClosed || who is! Success<String?>) return;
+    final other = who.value;
+    if (other == null) return;
+    _otherUserId = other;
+    final blocked = await _isUserBlocked(other);
+    if (isClosed) return;
+    if (blocked is Success<bool>) _counterpartBlocked = blocked.value;
+    if (state.status == ChatThreadStatus.messages) _emitMessages();
+  }
+
+  /// Plan A29 — block the other person. Returns whether it took effect.
+  Future<bool> blockCounterpart() async {
+    final other = _otherUserId;
+    if (other == null) return false;
+    final result = await _blockUser(other);
+    if (isClosed) return false;
+    if (result is! Success<void>) return false;
+    _counterpartBlocked = true;
+    if (state.status == ChatThreadStatus.messages) _emitMessages();
+    return true;
+  }
+
+  /// Plan A29 — lift the block. Returns whether it took effect.
+  Future<bool> unblockCounterpart() async {
+    final other = _otherUserId;
+    if (other == null) return false;
+    final result = await _unblockUser(other);
+    if (isClosed) return false;
+    if (result is! Success<void>) return false;
+    _counterpartBlocked = false;
+    if (state.status == ChatThreadStatus.messages) _emitMessages();
+    return true;
   }
 
   /// Fetches the page of history before the oldest message on screen. No-op
@@ -166,6 +220,8 @@ class ChatThreadCubit extends Cubit<ChatThreadState> {
         hasMore: !_atStart && _known.isNotEmpty,
         loadingOlder: _loadingOlder,
         olderFailed: _olderFailed,
+        otherUserId: _otherUserId,
+        counterpartBlocked: _counterpartBlocked,
       ),
     );
   }

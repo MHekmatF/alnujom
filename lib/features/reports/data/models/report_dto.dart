@@ -22,13 +22,15 @@ import '../../domain/entities/report_status.dart';
 class ReportDto {
   const ReportDto({
     required this.id,
-    required this.listingId,
+    this.listingId,
     required this.reason,
     required this.status,
     required this.createdAt,
     this.note,
     this.resolution,
     this.resolvedAt,
+    this.targetUserId,
+    this.targetUserName,
     required this.listingTitle,
     required this.listingStatus,
     this.mainImagePath,
@@ -39,7 +41,9 @@ class ReportDto {
   });
 
   final String id;
-  final String listingId;
+  final String? listingId;
+  final String? targetUserId;
+  final String? targetUserName;
   final ReportReason reason;
   final ReportStatus status;
   final DateTime createdAt;
@@ -57,7 +61,9 @@ class ReportDto {
   factory ReportDto.fromJson(Map<String, dynamic> json) {
     return ReportDto(
       id: json['id'] as String,
-      listingId: json['listing_id'] as String,
+      listingId: json['listing_id'] as String?,
+      targetUserId: json['target_user_id'] as String?,
+      targetUserName: json['target_user_name'] as String?,
       reason: ReportReason.fromWire(json['reason'] as String),
       status: ReportStatus.fromWire(json['status'] as String),
       createdAt: DateTime.parse(json['created_at'] as String),
@@ -86,6 +92,8 @@ class ReportDto {
       note: note,
       resolution: resolution,
       resolvedAt: resolvedAt,
+      targetUserId: targetUserId,
+      targetUserName: targetUserName,
       listingTitle: listingTitle,
       listingStatus: listingStatus,
       mainImagePath: mainImagePath,

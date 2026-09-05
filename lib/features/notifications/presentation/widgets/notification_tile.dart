@@ -150,6 +150,10 @@ class NotificationTile extends StatelessWidget {
         return Icons.home_outlined;
       case NotificationType.listingRejected:
         return Icons.home_repair_service_outlined;
+      case NotificationType.accountSuspended:
+        return Icons.block_outlined;
+      case NotificationType.accountReinstated:
+        return Icons.verified_user_outlined;
       case NotificationType.inquiryReceived:
         return Icons.mail_outline;
       case NotificationType.agencyInvitation:
@@ -182,7 +186,10 @@ class NotificationTile extends StatelessWidget {
         return colors.success;
       case NotificationType.accountRejected:
       case NotificationType.listingRejected:
+      case NotificationType.accountSuspended:
         return colors.error;
+      case NotificationType.accountReinstated:
+        return colors.success;
       case NotificationType.viewingConfirmed:
         return colors.success;
       case NotificationType.viewingDeclined:
@@ -207,6 +214,10 @@ class NotificationTile extends StatelessWidget {
         return l10n.notification_type_account_approved;
       case NotificationType.accountRejected:
         return l10n.notification_type_account_rejected;
+      case NotificationType.accountSuspended:
+        return l10n.notification_type_account_suspended;
+      case NotificationType.accountReinstated:
+        return l10n.notification_type_account_reinstated;
       case NotificationType.listingApproved:
         return l10n.notification_type_listing_approved;
       case NotificationType.listingRejected:
@@ -266,6 +277,8 @@ class NotificationTile extends StatelessWidget {
       // the OS tray on a locked screen. The title alone says enough.
       case NotificationType.accountApproved:
       case NotificationType.accountRejected:
+      case NotificationType.accountSuspended:
+      case NotificationType.accountReinstated:
       case NotificationType.listingApproved:
       case NotificationType.listingRejected:
       case NotificationType.inquiryReceived:

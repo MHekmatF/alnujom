@@ -47,6 +47,25 @@ class SupabaseReportsDatasource {
     return result as String;
   }
 
+  /// Plan A29 — `submit_user_report(p_user_id, p_reason, p_note)`. Same
+  /// error shape as [submitReport]; adds `cannot_report_self` (22023) and
+  /// `user_not_found` (23503).
+  Future<String> submitUserReport(
+    String userId,
+    String reasonWireValue,
+    String? note,
+  ) async {
+    final result = await _client.rpc(
+      'submit_user_report',
+      params: {
+        'p_user_id': userId,
+        'p_reason': reasonWireValue,
+        'p_note': note,
+      },
+    );
+    return result as String;
+  }
+
   // ---------------------------------------------------------------------------
   // Read path
   // ---------------------------------------------------------------------------

@@ -1685,6 +1685,110 @@
   "@report_reason_other": {
     "description": "Phase 18 — Report reason label: catch-all other reason."
   },
+  "report_reason_harassment": "Harassment or threats",
+  "@report_reason_harassment": {
+    "description": "Plan A29 — report reason about a person."
+  },
+  "report_reason_scam": "Scam or fraud",
+  "@report_reason_scam": {
+    "description": "Plan A29 — report reason about a person."
+  },
+  "report_reason_impersonation": "Impersonation",
+  "@report_reason_impersonation": {
+    "description": "Plan A29 — report reason about a person."
+  },
+  "report_user_sheet_title": "Report user",
+  "@report_user_sheet_title": {
+    "description": "Plan A29 — report sheet title when the target is a person."
+  },
+  "report_user_sheet_subtitle": "Tell us what happened. Our team will review it.",
+  "@report_user_sheet_subtitle": {
+    "description": "Plan A29 — report sheet subtitle when the target is a person."
+  },
+  "resolve_action_suspend_user": "Suspend the user",
+  "@resolve_action_suspend_user": {
+    "description": "Plan A29 — admin resolve action: suspend the reported person / publisher."
+  },
+  "admin_report_about_user_label": "Reported user",
+  "@admin_report_about_user_label": {
+    "description": "Plan A29 — admin report detail: who the report is about."
+  },
+  "chatMenuTooltip": "Options",
+  "@chatMenuTooltip": {
+    "description": "Plan A29 — chat thread overflow menu tooltip."
+  },
+  "chatMenuReportUser": "Report user",
+  "@chatMenuReportUser": {
+    "description": "Plan A29 — chat thread menu item."
+  },
+  "chatMenuBlockUser": "Block user",
+  "@chatMenuBlockUser": {
+    "description": "Plan A29 — chat thread menu item."
+  },
+  "chatMenuUnblockUser": "Unblock user",
+  "@chatMenuUnblockUser": {
+    "description": "Plan A29 — chat thread menu item."
+  },
+  "chatBlockConfirmTitle": "Block this user?",
+  "@chatBlockConfirmTitle": {
+    "description": "Plan A29 — block confirmation title."
+  },
+  "chatBlockConfirmBody": "They will no longer be able to message you, request a viewing, or send you an inquiry. You can unblock them later from Settings.",
+  "@chatBlockConfirmBody": {
+    "description": "Plan A29 — block confirmation body."
+  },
+  "chatBlockedToast": "User blocked",
+  "@chatBlockedToast": {
+    "description": "Plan A29 — toast after a block."
+  },
+  "chatUnblockedToast": "User unblocked",
+  "@chatUnblockedToast": {
+    "description": "Plan A29 — toast after an unblock."
+  },
+  "chatBlockFailedToast": "That did not go through — please try again",
+  "@chatBlockFailedToast": {
+    "description": "Plan A29 — toast when block / unblock fails."
+  },
+  "chatCounterpartBlockedBanner": "You blocked this user. Unblock them to continue the conversation.",
+  "@chatCounterpartBlockedBanner": {
+    "description": "Plan A29 — banner above the composer while a block stands."
+  },
+  "settings_blocked_users_row": "Blocked users",
+  "@settings_blocked_users_row": {
+    "description": "Plan A29 — settings row opening the blocked-users page."
+  },
+  "blockedUsersTitle": "Blocked users",
+  "@blockedUsersTitle": {
+    "description": "Plan A29 — blocked-users page title."
+  },
+  "blockedUsersEmptyTitle": "No one is blocked",
+  "@blockedUsersEmptyTitle": {
+    "description": "Plan A29 — blocked-users page empty state headline."
+  },
+  "blockedUsersEmptyBody": "You can block someone from the options menu inside a conversation.",
+  "@blockedUsersEmptyBody": {
+    "description": "Plan A29 — blocked-users page empty state body."
+  },
+  "blockedUsersUnblockButton": "Unblock",
+  "@blockedUsersUnblockButton": {
+    "description": "Plan A29 — blocked-users row action."
+  },
+  "blockedUsersUnknownName": "User",
+  "@blockedUsersUnknownName": {
+    "description": "Plan A29 — fallback name for a blocked user whose profile is gone."
+  },
+  "blockedUsersErrorTitle": "Couldn't load the list",
+  "@blockedUsersErrorTitle": {
+    "description": "Plan A29 — blocked-users page error state title."
+  },
+  "notification_type_account_suspended": "Your account has been suspended",
+  "@notification_type_account_suspended": {
+    "description": "Plan A29 — notification centre title."
+  },
+  "notification_type_account_reinstated": "Your account has been reinstated",
+  "@notification_type_account_reinstated": {
+    "description": "Plan A29 — notification centre title."
+  },
   "report_sheet_title": "Report listing",
   "@report_sheet_title": {
     "description": "Phase 18 — Title of the report bottom sheet."

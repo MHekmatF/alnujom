@@ -237,6 +237,8 @@ import '../../features/chat/domain/repositories/chat_repository.dart' as _i420;
 import '../../features/chat/domain/usecases/get_or_create_conversation.dart'
     as _i714;
 import '../../features/chat/domain/usecases/list_conversations.dart' as _i929;
+import '../../features/chat/domain/usecases/load_conversation_counterpart.dart'
+    as _i489;
 import '../../features/chat/domain/usecases/load_older_messages.dart' as _i1056;
 import '../../features/chat/domain/usecases/mark_conversation_read.dart'
     as _i211;
@@ -605,6 +607,8 @@ import '../../features/reports/domain/usecases/load_my_report_for_listing.dart'
     as _i682;
 import '../../features/reports/domain/usecases/load_my_reports.dart' as _i991;
 import '../../features/reports/domain/usecases/submit_report.dart' as _i684;
+import '../../features/reports/domain/usecases/submit_user_report.dart'
+    as _i838;
 import '../../features/reports/presentation/cubit/listing_report_status_cubit.dart'
     as _i1007;
 import '../../features/reports/presentation/cubit/my_reports_bloc.dart'
@@ -699,6 +703,20 @@ import '../../features/super_admin/presentation/bloc/role_editor_bloc.dart'
     as _i885;
 import '../../features/super_admin/presentation/bloc/roles_list_bloc.dart'
     as _i329;
+import '../../features/user_blocks/data/datasources/supabase_user_blocks_datasource.dart'
+    as _i885;
+import '../../features/user_blocks/data/repositories/user_blocks_repository_impl.dart'
+    as _i17;
+import '../../features/user_blocks/domain/repositories/user_blocks_repository.dart'
+    as _i68;
+import '../../features/user_blocks/domain/usecases/block_user.dart' as _i662;
+import '../../features/user_blocks/domain/usecases/is_user_blocked.dart'
+    as _i354;
+import '../../features/user_blocks/domain/usecases/load_blocked_users.dart'
+    as _i817;
+import '../../features/user_blocks/domain/usecases/unblock_user.dart' as _i469;
+import '../../features/user_blocks/presentation/cubit/blocked_users_cubit.dart'
+    as _i982;
 import '../../features/viewings/data/datasources/supabase_viewings_datasource.dart'
     as _i222;
 import '../../features/viewings/data/repositories/viewings_repository_impl.dart'
@@ -885,6 +903,9 @@ _i174.GetIt $initGetIt(
   gh.factory<_i835.SupabaseAppSettingsDatasource>(
     () => _i835.SupabaseAppSettingsDatasource(gh<_i454.SupabaseClient>()),
   );
+  gh.factory<_i885.SupabaseUserBlocksDatasource>(
+    () => _i885.SupabaseUserBlocksDatasource(gh<_i454.SupabaseClient>()),
+  );
   gh.factory<_i222.SupabaseViewingsDatasource>(
     () => _i222.SupabaseViewingsDatasource(gh<_i454.SupabaseClient>()),
   );
@@ -930,6 +951,10 @@ _i174.GetIt $initGetIt(
       gh<_i1064.SupabaseRoleCatalogDataSource>(),
       gh<_i354.AppLogger>(),
     ),
+  );
+  gh.lazySingleton<_i68.UserBlocksRepository>(
+    () =>
+        _i17.UserBlocksRepositoryImpl(gh<_i885.SupabaseUserBlocksDatasource>()),
   );
   gh.factoryParam<_i95.ContactCtaCubit, _i699.Listing, dynamic>(
     (listing, _) => _i95.ContactCtaCubit(listing),
@@ -1283,6 +1308,18 @@ _i174.GetIt $initGetIt(
       gh<_i354.AppLogger>(),
     ),
   );
+  gh.factory<_i662.BlockUser>(
+    () => _i662.BlockUser(gh<_i68.UserBlocksRepository>()),
+  );
+  gh.factory<_i354.IsUserBlocked>(
+    () => _i354.IsUserBlocked(gh<_i68.UserBlocksRepository>()),
+  );
+  gh.factory<_i817.LoadBlockedUsers>(
+    () => _i817.LoadBlockedUsers(gh<_i68.UserBlocksRepository>()),
+  );
+  gh.factory<_i469.UnblockUser>(
+    () => _i469.UnblockUser(gh<_i68.UserBlocksRepository>()),
+  );
   gh.factory<_i840.AgencyAnalyticsCubit>(
     () => _i840.AgencyAnalyticsCubit(gh<_i570.LoadAgencyAnalytics>()),
   );
@@ -1507,6 +1544,9 @@ _i174.GetIt $initGetIt(
   gh.factory<_i929.ListConversations>(
     () => _i929.ListConversations(gh<_i420.ChatRepository>()),
   );
+  gh.factory<_i489.LoadConversationCounterpart>(
+    () => _i489.LoadConversationCounterpart(gh<_i420.ChatRepository>()),
+  );
   gh.factory<_i1056.LoadOlderMessages>(
     () => _i1056.LoadOlderMessages(gh<_i420.ChatRepository>()),
   );
@@ -1585,14 +1625,6 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i225.SubmitReview>(
     () => _i225.SubmitReview(gh<_i412.ReviewsRepository>()),
-  );
-  gh.factory<_i968.ChatThreadCubit>(
-    () => _i968.ChatThreadCubit(
-      gh<_i929.WatchMessages>(),
-      gh<_i76.SendMessage>(),
-      gh<_i211.MarkConversationRead>(),
-      gh<_i1056.LoadOlderMessages>(),
-    ),
   );
   gh.factory<_i230.ArchiveAd>(
     () => _i230.ArchiveAd(gh<_i241.AdsAdminRepository>()),
@@ -1752,6 +1784,18 @@ _i174.GetIt $initGetIt(
       gh<_i943.ResolveReport>(),
     ),
   );
+  gh.factory<_i968.ChatThreadCubit>(
+    () => _i968.ChatThreadCubit(
+      gh<_i929.WatchMessages>(),
+      gh<_i76.SendMessage>(),
+      gh<_i211.MarkConversationRead>(),
+      gh<_i1056.LoadOlderMessages>(),
+      gh<_i489.LoadConversationCounterpart>(),
+      gh<_i354.IsUserBlocked>(),
+      gh<_i662.BlockUser>(),
+      gh<_i469.UnblockUser>(),
+    ),
+  );
   gh.lazySingleton<_i74.InquiriesUnreadCubit>(
     () => _i74.InquiriesUnreadCubit(
       gh<_i868.LoadInboxUnreadCount>(),
@@ -1791,6 +1835,15 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i684.SubmitReport>(
     () => _i684.SubmitReport(gh<_i808.ReportsRepository>()),
+  );
+  gh.factory<_i838.SubmitUserReport>(
+    () => _i838.SubmitUserReport(gh<_i808.ReportsRepository>()),
+  );
+  gh.factory<_i980.ReportSubmissionCubit>(
+    () => _i980.ReportSubmissionCubit(
+      gh<_i684.SubmitReport>(),
+      gh<_i838.SubmitUserReport>(),
+    ),
   );
   gh.factory<_i930.SetNewPasswordCubit>(
     () => _i930.SetNewPasswordCubit(gh<_i455.UpdatePassword>()),
@@ -1970,6 +2023,12 @@ _i174.GetIt $initGetIt(
   gh.factory<_i916.AgencyQueueBloc>(
     () => _i916.AgencyQueueBloc(gh<_i998.LoadAgencyVerificationQueue>()),
   );
+  gh.factory<_i982.BlockedUsersCubit>(
+    () => _i982.BlockedUsersCubit(
+      gh<_i817.LoadBlockedUsers>(),
+      gh<_i469.UnblockUser>(),
+    ),
+  );
   gh.factory<_i682.AdsAdminCubit>(
     () => _i682.AdsAdminCubit(
       gh<_i347.LoadAds>(),
@@ -1992,9 +2051,6 @@ _i174.GetIt $initGetIt(
   );
   gh.factory<_i697.AssistantCubit>(
     () => _i697.AssistantCubit(gh<_i84.AssistantBrain>()),
-  );
-  gh.factory<_i980.ReportSubmissionCubit>(
-    () => _i980.ReportSubmissionCubit(gh<_i684.SubmitReport>()),
   );
   gh.factory<_i202.HomeBloc>(() => _i202.HomeBloc(gh<_i321.LoadHomeFeed>()));
   gh.lazySingleton<_i797.AuthBloc>(

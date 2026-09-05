@@ -68,6 +68,38 @@ class ReportsRepositoryImpl implements ReportsRepository {
   }
 
   @override
+  Future<Result<String>> submitUserReport(
+    String userId,
+    ReportReason reason,
+    String? note,
+  ) async {
+    try {
+      final id = await _datasource.submitUserReport(
+        userId,
+        reason.wireValue,
+        note,
+      );
+      return Success(id);
+    } on PostgrestException catch (e, st) {
+      return FailureResult(_mapRpcError(e, st, 'submitUserReport'));
+    } on SocketException catch (e, st) {
+      return FailureResult(NetworkFailure(e.message, cause: e, stackTrace: st));
+    } on TimeoutException catch (e, st) {
+      return FailureResult(
+        NetworkFailure(
+          e.message ?? 'Request timed out',
+          cause: e,
+          stackTrace: st,
+        ),
+      );
+    } catch (e, st) {
+      return FailureResult(
+        UnknownFailure('submitUserReport failed: $e', cause: e, stackTrace: st),
+      );
+    }
+  }
+
+  @override
   Future<Result<List<Report>>> loadMyReports({
     String? cursor,
     int limit = 30,

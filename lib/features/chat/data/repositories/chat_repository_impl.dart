@@ -52,6 +52,36 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
+  Future<Result<String?>> loadCounterpartUserId(String conversationId) async {
+    try {
+      final uid = _datasource.currentUserId;
+      final dto = await _datasource.fetchConversation(conversationId);
+      if (dto == null || uid == null) return const Success(null);
+      return Success(
+        dto.buyerUserId == uid ? dto.publisherUserId : dto.buyerUserId,
+      );
+    } on SocketException catch (e, st) {
+      return FailureResult(NetworkFailure(e.message, cause: e, stackTrace: st));
+    } on TimeoutException catch (e, st) {
+      return FailureResult(
+        NetworkFailure(
+          e.message ?? 'Request timed out',
+          cause: e,
+          stackTrace: st,
+        ),
+      );
+    } catch (e, st) {
+      return FailureResult(
+        UnknownFailure(
+          'loadCounterpartUserId failed: $e',
+          cause: e,
+          stackTrace: st,
+        ),
+      );
+    }
+  }
+
+  @override
   Stream<List<Message>> watchMessages(String conversationId) {
     final uid = _datasource.currentUserId ?? '';
     return _datasource

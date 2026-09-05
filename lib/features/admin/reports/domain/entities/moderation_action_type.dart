@@ -6,7 +6,9 @@ enum ModerationActionType {
   dismiss('dismiss'),
   hide('hide'),
   markDuplicate('mark_duplicate'),
-  delete('delete');
+  delete('delete'),
+  // Plan A29 — suspend the person: the reported user, or a listing's publisher.
+  suspendUser('suspend_user');
 
   const ModerationActionType(this.wireValue);
 

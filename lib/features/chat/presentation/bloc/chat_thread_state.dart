@@ -9,6 +9,8 @@ final class ChatThreadState extends Equatable {
     this.hasMore = false,
     this.loadingOlder = false,
     this.olderFailed = false,
+    this.otherUserId,
+    this.counterpartBlocked = false,
   });
 
   const ChatThreadState.loading() : this._(status: ChatThreadStatus.loading);
@@ -18,12 +20,16 @@ final class ChatThreadState extends Equatable {
     bool hasMore = false,
     bool loadingOlder = false,
     bool olderFailed = false,
+    String? otherUserId,
+    bool counterpartBlocked = false,
   }) : this._(
          status: ChatThreadStatus.messages,
          messages: messages,
          hasMore: hasMore,
          loadingOlder: loadingOlder,
          olderFailed: olderFailed,
+         otherUserId: otherUserId,
+         counterpartBlocked: counterpartBlocked,
        );
 
   const ChatThreadState.error() : this._(status: ChatThreadStatus.error);
@@ -43,6 +49,14 @@ final class ChatThreadState extends Equatable {
   /// spinner that never resolves.
   final bool olderFailed;
 
+  /// Plan A29 — the OTHER person in this conversation, once known. Drives the
+  /// report / block menu; null until resolved (or when hidden by RLS).
+  final String? otherUserId;
+
+  /// Plan A29 — the caller has blocked the counterpart. Sends will be refused
+  /// server-side; the page shows a banner instead of a silent failure.
+  final bool counterpartBlocked;
+
   @override
   List<Object?> get props => [
     status,
@@ -50,5 +64,7 @@ final class ChatThreadState extends Equatable {
     hasMore,
     loadingOlder,
     olderFailed,
+    otherUserId,
+    counterpartBlocked,
   ];
 }

@@ -26,6 +26,14 @@ abstract interface class ReportsRepository {
     String? note,
   );
 
+  /// Plan A29 — report a PERSON. Same contract as [submitReport], keyed on
+  /// the reported user instead of a listing.
+  Future<Result<String>> submitUserReport(
+    String userId,
+    ReportReason reason,
+    String? note,
+  );
+
   /// Pages through the authenticated user's own reports via `public.v_reports`
   /// (self-scoped by RLS), ordered newest-first by `created_at DESC`.
   ///

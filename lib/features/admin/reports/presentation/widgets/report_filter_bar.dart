@@ -173,6 +173,12 @@ class _ReasonDropdown extends StatelessWidget {
         return l10n.report_reason_inappropriate_content;
       case ReportReason.other:
         return l10n.report_reason_other;
+      case ReportReason.harassment:
+        return l10n.report_reason_harassment;
+      case ReportReason.scam:
+        return l10n.report_reason_scam;
+      case ReportReason.impersonation:
+        return l10n.report_reason_impersonation;
     }
   }
 

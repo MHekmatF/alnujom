@@ -32,6 +32,8 @@ const TOKEN_URI_DEFAULT = "https://oauth2.googleapis.com/token";
 type NotificationType =
   | "account_approved"
   | "account_rejected"
+  | "account_suspended"
+  | "account_reinstated"
   | "listing_approved"
   | "listing_rejected"
   | "inquiry_received"
@@ -80,6 +82,15 @@ const COPY: Record<NotificationType, { ar: [string, string]; en: [string, string
   account_rejected: {
     ar: ["تحديث على الحساب", "تمت مراجعة حسابك — اضغط للتفاصيل"],
     en: ["Account update", "Your account was reviewed — tap for details"],
+  },
+  // Plan A29 — moderation outcomes. Transactional, never muted.
+  account_suspended: {
+    ar: ["تم تعليق حسابك", "تم تعليق حسابك من قِبل الإدارة — اضغط للتفاصيل"],
+    en: ["Account suspended", "Your account was suspended by the team — tap for details"],
+  },
+  account_reinstated: {
+    ar: ["تمت إعادة تفعيل حسابك", "يمكنك استخدام التطبيق مجدداً"],
+    en: ["Account reinstated", "You can use the app again"],
   },
   listing_approved: {
     ar: ["تم اعتماد الإعلان", "تمت الموافقة على إعلانك"],
