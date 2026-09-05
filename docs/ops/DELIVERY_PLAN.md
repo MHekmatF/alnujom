@@ -1079,9 +1079,10 @@ writes `expires_at` at approval; the backup workflow **keeps no file** without
       the seventy crown icon buttons are the back arrow and none carried a
       label, so TalkBack read "button"; the widget now labels the arrow itself
       ("رجوع" / "Back") and marks it a button, and the two unlabelled crown
-      actions got tooltips. **Still open:** the ~40 feature-level
-      `IconButton`s without tooltips, and the TalkBack walk itself, which
-      needs a device.
+      actions got tooltips. A recount found only four
+      feature-level `IconButton`s without a tooltip (show/hide password,
+      clear search twice, filters); labelled 2026-09-06. **Still open:** the
+      TalkBack walk itself, which needs a device.
 - [x] **A38 — Data export** · **DONE 2026-09-05.** `export_my_data` (v1)
       accepts only the caller's own access token, asks GoTrue who it belongs
       to, then composes one JSON document from every table keyed on that id

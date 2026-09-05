@@ -4973,6 +4973,24 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get a11yShowPassword => _resolve(
+    'a11yShowPassword',
+    (loc) => loc.a11yShowPassword,
+  );
+
+  @override
+  String get a11yHidePassword => _resolve(
+    'a11yHidePassword',
+    (loc) => loc.a11yHidePassword,
+  );
+
+  @override
+  String get a11yClearSearch => _resolve(
+    'a11yClearSearch',
+    (loc) => loc.a11yClearSearch,
+  );
+
+  @override
   String get about_feedback => _resolve(
     'about_feedback',
     (loc) => loc.about_feedback,

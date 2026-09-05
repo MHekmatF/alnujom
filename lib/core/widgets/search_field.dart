@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 
+import '../localization/app_strings.dart';
 import '../theme/colors.dart';
 import 'app_text_field.dart';
 import '_widget_support.dart';
@@ -74,6 +75,7 @@ class _SearchFieldState extends State<SearchField> {
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
+    final strings = AppStrings.of(context).loc;
     final hasText = _controller.text.isNotEmpty;
     return AppTextField(
       label: widget.hint,
@@ -89,11 +91,13 @@ class _SearchFieldState extends State<SearchField> {
           if (hasText)
             IconButton(
               onPressed: widget.enabled ? _handleClear : null,
+              tooltip: strings.a11yClearSearch,
               icon: Icon(LucideIcons.x, color: colors.textMuted),
             ),
           if (widget.showFilterIcon)
             IconButton(
               onPressed: widget.enabled ? widget.onFilterPressed : null,
+              tooltip: strings.search_filters_button,
               icon: Icon(LucideIcons.sliders_horizontal, color: colors.primary),
             ),
         ],

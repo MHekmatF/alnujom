@@ -621,6 +621,7 @@ class _SearchBarState extends State<_SearchBar> {
               }
               return IconButton(
                 icon: const Icon(Icons.close),
+                tooltip: l10n.a11yClearSearch,
                 onPressed: () {
                   _controller.clear();
                   context.read<SearchBloc>().add(
