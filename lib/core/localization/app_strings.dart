@@ -4919,6 +4919,48 @@ final class _DebugAppLocalizations extends AppLocalizations {
   );
 
   @override
+  String get register_terms_consent_prefix => _resolve(
+    'register_terms_consent_prefix',
+    (loc) => loc.register_terms_consent_prefix,
+  );
+
+  @override
+  String get register_terms_link => _resolve(
+    'register_terms_link',
+    (loc) => loc.register_terms_link,
+  );
+
+  @override
+  String get register_terms_conjunction => _resolve(
+    'register_terms_conjunction',
+    (loc) => loc.register_terms_conjunction,
+  );
+
+  @override
+  String get register_privacy_link => _resolve(
+    'register_privacy_link',
+    (loc) => loc.register_privacy_link,
+  );
+
+  @override
+  String get register_terms_required => _resolve(
+    'register_terms_required',
+    (loc) => loc.register_terms_required,
+  );
+
+  @override
+  String get terms_page_title => _resolve(
+    'terms_page_title',
+    (loc) => loc.terms_page_title,
+  );
+
+  @override
+  String get terms_page_load_failed => _resolve(
+    'terms_page_load_failed',
+    (loc) => loc.terms_page_load_failed,
+  );
+
+  @override
   String get settingsEditorPrivacyUrlLabel => _resolve(
     'settingsEditorPrivacyUrlLabel',
     (loc) => loc.settingsEditorPrivacyUrlLabel,

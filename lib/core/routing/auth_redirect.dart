@@ -99,6 +99,8 @@ const _publicPaths = {
   '/splash',
   '/maintenance',
   '/about',
+  // Plan A27 — the terms must be readable before an account exists.
+  '/terms',
   '/search',
   '/map',
   // Every route below declares itself anonymous-accessible in app_router.dart

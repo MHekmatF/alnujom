@@ -1,6 +1,10 @@
+import 'dart:async' show unawaited;
+
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/localization/locale_cubit.dart';
 import '../../../../core/routing/app_router.dart';
@@ -8,6 +12,7 @@ import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_checkbox.dart';
 import '../../../../core/widgets/dc_auth_scaffold.dart';
 import '../widgets/auth_text_field.dart';
 import '../widgets/auth_trust_note.dart';
@@ -18,6 +23,7 @@ import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 import '../../../auth/domain/entities/auth_failure.dart';
 import '../widgets/dismiss_when_signed_in.dart';
+import '../../../settings/presentation/bloc/app_settings_cubit.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -35,6 +41,9 @@ class _RegisterPageState extends State<RegisterPage> {
 
   String? _errorText;
 
+  /// Plan A27 — the terms consent box; submit refuses until it is ticked.
+  bool _agreed = false;
+
   @override
   void dispose() {
     _phoneController.dispose();
@@ -47,6 +56,10 @@ class _RegisterPageState extends State<RegisterPage> {
   void _submit(AppLocalizations l10n) {
     setState(() => _errorText = null);
     if (!_formKey.currentState!.validate()) return;
+    if (!_agreed) {
+      setState(() => _errorText = l10n.register_terms_required);
+      return;
+    }
 
     final PhoneNumber phone;
     try {
@@ -189,6 +202,16 @@ class _RegisterPageState extends State<RegisterPage> {
                       decoration: authFieldDecoration(context),
                     ),
                   ),
+                  const SizedBox(height: AppSpacing.lg),
+                  // Plan A27 — the terms have to be agreed to, and are
+                  // readable from here before an account exists.
+                  _ConsentRow(
+                    agreed: _agreed,
+                    onChanged: (agreed) => setState(() {
+                      _agreed = agreed;
+                      if (agreed) _errorText = null;
+                    }),
+                  ),
                   const SizedBox(height: AppSpacing.xl),
                   if (_errorText != null) ...[
                     Text(
@@ -220,6 +243,85 @@ class _RegisterPageState extends State<RegisterPage> {
           );
         },
       ),
+    );
+  }
+}
+
+// ─── Plan A27 — "I agree to the Terms of Service and the Privacy Policy" ────
+
+class _ConsentRow extends StatefulWidget {
+  const _ConsentRow({required this.agreed, required this.onChanged});
+
+  final bool agreed;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  State<_ConsentRow> createState() => _ConsentRowState();
+}
+
+class _ConsentRowState extends State<_ConsentRow> {
+  final _termsTap = TapGestureRecognizer();
+  final _privacyTap = TapGestureRecognizer();
+
+  @override
+  void dispose() {
+    _termsTap.dispose();
+    _privacyTap.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    final privacyUrl = context
+        .watch<AppSettingsCubit>()
+        .state
+        .settings
+        .privacyUrl;
+    final linkStyle = styles.bodyMedium.copyWith(
+      color: colors.primary,
+      fontWeight: FontWeight.w700,
+    );
+    _termsTap.onTap = () => context.push(AppRoutes.terms);
+    _privacyTap.onTap = () {
+      final uri = privacyUrl == null ? null : Uri.tryParse(privacyUrl);
+      if (uri != null) {
+        unawaited(launchUrl(uri, mode: LaunchMode.externalApplication));
+      }
+    };
+    return Row(
+      children: [
+        AppCheckbox(
+          value: widget.agreed,
+          onChanged: (v) => widget.onChanged(v ?? false),
+        ),
+        const SizedBox(width: AppSpacing.xs),
+        Expanded(
+          child: Text.rich(
+            TextSpan(
+              style: styles.bodyMedium.copyWith(color: colors.onSurface),
+              children: [
+                TextSpan(text: l10n.register_terms_consent_prefix),
+                TextSpan(
+                  text: l10n.register_terms_link,
+                  style: linkStyle,
+                  recognizer: _termsTap,
+                ),
+                if (privacyUrl != null && privacyUrl.isNotEmpty) ...[
+                  TextSpan(text: l10n.register_terms_conjunction),
+                  TextSpan(
+                    text: l10n.register_privacy_link,
+                    style: linkStyle,
+                    recognizer: _privacyTap,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

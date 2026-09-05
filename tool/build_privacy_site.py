@@ -23,6 +23,8 @@ import sys
 
 SRC_AR = 'docs/legal/privacy-policy.md'
 SRC_EN = 'docs/legal/privacy-policy.en.md'
+SRC_TERMS_AR = 'docs/legal/terms-of-service.md'
+SRC_TERMS_EN = 'docs/legal/terms-of-service.en.md'
 SRC_STATIC = 'docs/landing'
 OUT = sys.argv[1] if len(sys.argv) > 1 else 'site'
 
@@ -36,11 +38,18 @@ def inline(text):
     def link(m):
         label, href = m.group(1), m.group(2)
         # The source files cross-link by filename, which reads as a raw ".md"
-        # path once published. Rewrite both the target and the label.
-        swap = {'privacy-policy.en.md': ('en.html', 'English'),
-                'privacy-policy.md': ('index.html', 'العربية')}
-        if href in swap:
-            href, label = swap[href]
+        # path once published. Rewrite the target to the built page; the
+        # policies label their language links with the raw filename, so those
+        # two get a language name, while the terms (plan A27) link the policy
+        # by its title and keep the author's label.
+        built = {'privacy-policy.en.md': ('en.html', 'English'),
+                 'privacy-policy.md': ('index.html', 'العربية'),
+                 'terms-of-service.en.md': ('terms.en.html', None),
+                 'terms-of-service.md': ('terms.html', None)}
+        if href in built:
+            href, forced = built[href]
+            if forced is not None and label.endswith('.md'):
+                label = forced
         ext = ' target="_blank" rel="noopener"' if href.startswith('http') else ''
         return '<a href="%s"%s>%s</a>' % (html.escape(href, quote=True), ext, label)
     t = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', link, t)
@@ -195,13 +204,26 @@ specs = [
          desc='سياسة الخصوصية لتطبيق النجوم، سوق العقارات في سوريا.',
          brand='النجوم', sub='النجوم للتسويق العقاري',
          other='en.html', otherlabel='English',
-         foot='© 2026 النجوم للتسويق العقاري — الجمهورية العربية السورية.'),
+         foot='© 2026 النجوم للتسويق العقاري — الجمهورية العربية السورية. · <a href="terms.html">شروط الاستخدام</a>'),
     dict(src=SRC_EN, out='en.html', lang='en', dir='ltr',
          title='Privacy Policy — AlNujom',
          desc='Privacy policy for AlNujom, a real-estate marketplace for Syria.',
          brand='AlNujom', sub='Al Nujoom for Real Estate Marketing',
          other='index.html', otherlabel='العربية',
-         foot='© 2026 Al Nujoom for Real Estate Marketing — Syrian Arab Republic.'),
+         foot='© 2026 Al Nujoom for Real Estate Marketing — Syrian Arab Republic. · <a href="terms.en.html">Terms of Service</a>'),
+    # Plan A27 — the terms of service, same tokens, same build.
+    dict(src=SRC_TERMS_AR, out='terms.html', lang='ar', dir='rtl',
+         title='شروط الاستخدام — تطبيق النجوم',
+         desc='شروط استخدام تطبيق النجوم، سوق العقارات في سوريا.',
+         brand='النجوم', sub='النجوم للتسويق العقاري',
+         other='terms.en.html', otherlabel='English',
+         foot='© 2026 النجوم للتسويق العقاري — الجمهورية العربية السورية. · <a href="index.html">سياسة الخصوصية</a>'),
+    dict(src=SRC_TERMS_EN, out='terms.en.html', lang='en', dir='ltr',
+         title='Terms of Service — AlNujom',
+         desc='Terms of service for AlNujom, a real-estate marketplace for Syria.',
+         brand='AlNujom', sub='Al Nujoom for Real Estate Marketing',
+         other='terms.html', otherlabel='العربية',
+         foot='© 2026 Al Nujoom for Real Estate Marketing — Syrian Arab Republic. · <a href="en.html">Privacy Policy</a>'),
 ]
 
 for s in specs:

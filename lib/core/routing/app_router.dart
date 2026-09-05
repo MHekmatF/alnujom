@@ -76,6 +76,7 @@ import '../../features/dashboard/presentation/pages/dashboard_entry_page.dart';
 import '../../features/settings/presentation/bloc/app_settings_cubit.dart';
 import '../../features/settings/presentation/pages/about_support_page.dart';
 import '../../features/user_blocks/presentation/pages/blocked_users_page.dart';
+import '../../features/settings/presentation/pages/terms_page.dart';
 import '../../features/settings/presentation/pages/maintenance_screen.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/settings/presentation/widgets/maintenance_gate.dart';
@@ -191,6 +192,8 @@ abstract final class AppRoutes {
   static const about = '/about';
   // Plan A29 — Settings → blocked users (signed-in only).
   static const blockedUsers = '/settings/blocked-users';
+  // Plan A27 — the terms of service, bundled in the app.
+  static const terms = '/terms';
   // Phase 035: unified user settings screen.
   static const settings = '/settings';
   static const themeGallery = '/_debug/theme-gallery';
@@ -308,6 +311,7 @@ abstract final class AppRouteNames {
   static const maintenance = 'maintenance';
   static const about = 'about';
   static const blockedUsers = 'blocked-users';
+  static const terms = 'terms';
   // Phase 035: settings screen route name.
   static const settings = 'settings';
   static const themeGallery = 'theme-gallery';
@@ -919,6 +923,15 @@ GoRouter buildAppRouter({
         path: AppRoutes.blockedUsers,
         name: AppRouteNames.blockedUsers,
         builder: (context, state) => const BlockedUsersPage(),
+      ),
+
+      // ─── Plan A27 — terms of service ───
+      // Anonymous-accessible: a person must be able to read the terms before
+      // they have an account (the register screen links here).
+      GoRoute(
+        path: AppRoutes.terms,
+        name: AppRouteNames.terms,
+        builder: (context, state) => const TermsPage(),
       ),
 
       // ─── Phase 035 — unified user settings (anonymous-accessible, pushed) ──

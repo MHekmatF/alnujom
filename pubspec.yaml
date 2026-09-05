@@ -112,6 +112,11 @@ flutter:
     - assets/branding/
     - assets/onboarding/
     - assets/lottie/
+    # Plan A27 — the terms of service, read in-app before an account exists.
+    # The markdown under docs/legal/ is the single source for the app AND the
+    # website (tool/build_privacy_site.py), so the two can never disagree.
+    - docs/legal/terms-of-service.md
+    - docs/legal/terms-of-service.en.md
   fonts:
     # Phase 033 — Tajawal: the design-system Arabic typeface (UI + body + headings).
     - family: Tajawal

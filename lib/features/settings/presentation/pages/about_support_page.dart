@@ -3,15 +3,16 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/theme/radii.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/typography.dart';
 import '../../../../core/widgets/_widget_support.dart';
 import '../../../../core/widgets/dc_crown_scaffold.dart';
-import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/staggered_list_item.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/support_contact.dart';
@@ -42,17 +43,8 @@ class AboutSupportPage extends StatelessWidget {
         builder: (context, state) {
           final settings = state.settings;
           final contact = settings.supportContact;
-          final hasLinks =
-              _hasAny(settings.termsUrl) || _hasAny(settings.privacyUrl);
-          final hasAnything = contact.hasAny || hasLinks;
-
-          if (!hasAnything) {
-            return EmptyState(
-              icon: Icons.support_agent,
-              headline: l10n.about_empty_title,
-              body: l10n.about_no_info,
-            );
-          }
+          // Plan A27 — the terms are bundled, so the legal section always
+          // exists and the page is never empty.
 
           final sections = <Widget>[
             if (contact.hasAny)
@@ -60,16 +52,16 @@ class AboutSupportPage extends StatelessWidget {
                 title: l10n.about_support_heading,
                 children: _buildContactRows(l10n, contact),
               ),
-            if (hasLinks)
-              _SettingsSection(
+            _SettingsSection(
                 title: l10n.about_legal_heading,
                 children: [
-                  if (_hasAny(settings.termsUrl))
-                    _LinkTile(
-                      icon: Icons.description_outlined,
-                      label: l10n.about_terms,
-                      url: settings.termsUrl!,
-                    ),
+                  // Plan A27 — read in the app; the website copy is the same
+                  // document, so no URL is needed.
+                  _PageTile(
+                    icon: Icons.description_outlined,
+                    label: l10n.about_terms,
+                    onTap: () => context.push(AppRoutes.terms),
+                  ),
                   if (_hasAny(settings.privacyUrl))
                     _LinkTile(
                       icon: Icons.privacy_tip_outlined,
@@ -183,6 +175,67 @@ class _LinkTile extends StatelessWidget {
               const SizedBox(width: AppSpacing.sm),
               Icon(
                 Icons.open_in_new,
+                size: AppSpacing.lg,
+                color: colors.textMuted,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Plan A27 — a row that opens a page inside the app (same look as
+/// [_LinkTile], with a chevron instead of the open-in-new glyph).
+class _PageTile extends StatelessWidget {
+  const _PageTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final styles = AppTextStyles.of(context);
+    return Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
+        child: Padding(
+          padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+          child: Row(
+            children: [
+              Container(
+                width: AppSpacing.xxl + AppSpacing.sm,
+                height: AppSpacing.xxl + AppSpacing.sm,
+                alignment: AlignmentDirectional.center,
+                decoration: BoxDecoration(
+                  color: colors.primary.withValues(alpha: 0.12),
+                  borderRadius: appRadius(AppRadii.md),
+                ),
+                child: Icon(icon, color: colors.primary, size: AppSpacing.xl),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Text(
+                  label,
+                  style: styles.titleMedium,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Icon(
+                Icons.chevron_left,
                 size: AppSpacing.lg,
                 color: colors.textMuted,
               ),
