@@ -132,7 +132,18 @@ class _MarkdownLite extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('•', style: styles.bodyLarge),
+                  // A drawn dot, not a spelled one: the l10n-literal lint
+                  // treats any string handed to Text() as untranslated copy.
+                  Padding(
+                    padding: const EdgeInsetsDirectional.only(
+                      top: AppSpacing.sm,
+                    ),
+                    child: Icon(
+                      Icons.circle,
+                      size: AppSpacing.xs,
+                      color: colors.onSurface,
+                    ),
+                  ),
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: _inline(
