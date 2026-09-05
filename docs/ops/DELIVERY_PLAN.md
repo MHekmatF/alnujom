@@ -206,7 +206,7 @@ deletion is real, so the sweep has to exist.
       the owner creates and deletes. Do that before relying on it, and check
       afterwards: the `auth.users` row gone, the files 404, the queue row
       `purged`.
-- [ ] **Scheduling is deliberately not automated.** A GitHub workflow would need
+- [x] **Scheduling — done 2026-09-05 by A32** (pg_cron, daily 03:30 UTC, through a Vault bearer; the function also still takes an admin JWT). The paragraph below is the original reasoning. ~~Scheduling is deliberately not automated.~~ A GitHub workflow would need
       the service-role key in CI, which ADR-0001 forbids; `pg_cron` reading the
       key from Vault would work but the extension is not installed. Run it by
       hand until one of those is decided — at zero requests that is
@@ -694,7 +694,7 @@ than the one it named:
 **Nothing was deleted.** `purge_audit_logs()` at its default returns **0** today
 — the oldest audit row is 2026-05-09, so nothing qualifies until 2026-11-05.
 
-- [ ] **Owner decision — schedule it, or run it by hand?** `pg_cron` 1.6.4 is
+- [x] **Scheduled 2026-09-05 by A32** (weekly, Sunday 04:00 UTC, 180-day retention). ~~Owner decision — schedule it, or run it by hand?~~ `pg_cron` 1.6.4 is
       available on this project but not installed, and the plan defers that to
       the owner along with A7's. The one-liner for both is in the migration
       header. Until then the retention exists but never runs, and the table just
@@ -903,9 +903,21 @@ writes `expires_at` at approval; the backup workflow **keeps no file** without
 
 ### Tier 1 — before the first real users
 
-- [ ] **A25 — Storage hygiene** · S. Dry-run orphan sweep, then delete
-      (owner yes: it is a delete); purge extended to soft-deleted listings past
-      the 30-day window; photo replacement removes the old object.
+- [x] **A25 — Storage hygiene** · **BUILT + DEPLOYED 2026-09-05**, migration
+      `20260905120002` applied, edge function `sweep_storage` v1 live. Two
+      read-only lists in the database (`list_orphan_media_objects`,
+      `list_purgeable_listing_media` — objects no media row references, and the
+      media of listings soft-deleted more than 30 days ago whose owner has no
+      pending account purge) and one function that removes the files and then
+      the rows, files first. **Dry run through the scheduler's own path**
+      (pg_cron → pg_net → Vault bearer → function → RPCs): `200`, caller
+      `scheduler`, **31 orphans / 12.8 MB found, 0 removed**, 0 deleted-listing
+      media. A replaced photo's original is caught by the same sweep after its
+      7-day grace, so the client was not changed. **The first real run is the
+      scheduled one, Sunday 2026-09-07 04:30 UTC (A32)** — it is a delete, so
+      the owner can stop it before then with
+      `SELECT cron.unschedule('housekeeping_storage_sweep');`, or ask for it
+      sooner.
 - [x] **A26 — Listings expire, publisher hears first** · **DONE 2026-09-05**,
       migration `20260905120001` applied. **F1 answered by making it a setting:**
       `listing_validity_days` (60 by default, 7–365, editable from Admin →
@@ -925,8 +937,14 @@ writes `expires_at` at approval; the backup workflow **keeps no file** without
 - [ ] **A27 — Terms of service** · M. AR + EN beside the privacy policy,
       `terms_url` set, acceptance checkbox at sign-up with the timestamp on the
       profile. Needs B4 facts and the owner's yes on the text and on publishing.
-- [ ] **A28 — Throttle chat and posting** · S. Per-user hourly caps on
-      `messages` insert and `submit_listing`, same shape as A4's throttle.
+- [x] **A28 — Throttle chat and posting** · **DONE 2026-09-05**, migration
+      `20260905120004` applied. `messages`: 60 per conversation per hour, 120
+      per sender per hour (BEFORE INSERT; new index on sender + created_at,
+      which was also an unindexed FK). `listings`: 20 drafts per publisher per
+      hour (BEFORE INSERT). `submit_listing`: 10 per hour, 30 per day, counted
+      from the status history. All raise `rate_limited` / 23514 like the guest
+      throttle. **Proven, rolled back:** as the buyer, 60 messages land and the
+      61st is refused; as a publisher, 20 drafts land and the 21st is refused.
 - [ ] **A29 — Suspend, block, report a person** · M. `moderate_user` RPC +
       admin row action; `user_blocks` honoured by chat, inquiry and viewing
       policies; report-a-user on the existing reports flow.
@@ -935,10 +953,20 @@ writes `expires_at` at approval; the backup workflow **keeps no file** without
       "session expired" message on the auth bounce.
 - [ ] **A31 — Forced-update floor** · S. Honour `min_supported_version`;
       below it the update dialog cannot be dismissed.
-- [ ] **A32 — Schedule the recurring jobs** · S. `pg_cron`: weekly audit
-      purge (A22 recipe), daily `purge_deleted_accounts` via `pg_net`, weekly
-      token sweep, the A25 orphan sweep. **Needs the owner's yes** (asked
-      2026-09-04, unanswered).
+- [x] **A32 — Schedule the recurring jobs** · **DONE 2026-09-05**, migration
+      `20260905120003` applied: `pg_cron` 1.6.4 installed, four jobs (UTC):
+      `housekeeping_listing_expiry` hourly at :10 · `housekeeping_audit_purge`
+      Sun 04:00 (180-day retention) · `housekeeping_account_purge` daily 03:30
+      · `housekeeping_storage_sweep` Sun 04:30. The two edge functions are
+      called through `pg_net` with a Vault secret (`housekeeping_token`,
+      generated in the database, compared there by
+      `housekeeping_token_matches()`); `purge_deleted_accounts` v2 accepts it
+      beside an admin JWT. The service-role key never moves (ADR-0001).
+      **No token sweep** — `notification_tokens` has only `created_at` and the
+      app does not refresh it, so an age cut would delete live tokens; FCM
+      already tells the dispatcher which ones are dead. Taken as the owner's
+      "كمل كلشي" of 2026-09-05; every job can be stopped with
+      `cron.unschedule(name)`.
 - [ ] **A33 — Arabic completeness** · S. Permission catalogue and audit
       action names in Arabic; locale dates with Levantine months; the two
       truncated labels. **Needs F2: translate in the database (recommended) or
@@ -978,9 +1006,9 @@ CRM; video poster frames; the `REVIEW.md` §5 polish backlog.
    page's download button.
 3. **B1** SMTP → password recovery for real users.
 4. **`BACKUP_PASSPHRASE`** (A6) → the weekly backup starts keeping files.
-5. **Six one-word answers:** publish the share page (A20) · schedule the
-   purges (A32) · **F1** validity 30/60/90 · **F2** DB or app · B7 demo
-   data · B14 bucket.
+5. **Answers still open:** publish the share page (A20) · B7 demo data ·
+   B14 bucket. Settled 2026-09-05 by "كمل كلشي": A32 scheduled, **F1** is
+   a setting (60 days), **F2** the database.
 6. **B4** legal facts → A27 and the policy's placeholders. **B3** real
    support channels. **B16** domain, **B17** tile key. **B10/B11/B12** the
    safety nets. Later: B9, B15, the logo, REVIEW.md's questions.

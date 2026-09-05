@@ -1,7 +1,8 @@
 // purge_deleted_accounts — finish what "Delete my account" starts.
 //
 //   POST /functions/v1/purge_deleted_accounts
-//   Headers: Authorization: Bearer <admin user JWT>
+//   Headers: Authorization: Bearer <admin user JWT holding users.suspend>
+//            — or —       Authorization: Bearer <Vault housekeeping_token>   (pg_cron, plan A32)
 //   Body   : { "grace_days": 30 }        (optional, 0–365, default 30)
 //            { "dry_run": true }         (optional — report, change nothing)
 //   Out    : 200 { scanned, purged, skipped, results: [...] }
@@ -32,13 +33,14 @@
 //   default). Deletion by mistake is common and this is the only window in which
 //   it can be undone. Do not lower it without a reason.
 //
-// WHY A PERSON RUNS THIS, NOT A SCHEDULE
-//   The obvious automation is a weekly GitHub workflow, but that would need the
-//   service-role key in CI, and ADR-0001 says that key never leaves the build
-//   machine. The alternative — `pg_cron` reading the key from Vault — needs the
-//   extension enabled first (it is not installed today). Until one of those is
-//   decided, this is invoked by hand; at current volume that is proportionate.
-//   See docs/ops/HANDOVER.md.
+// WHO RUNS THIS (changed 2026-09-05, plan A32)
+//   Daily, by pg_cron, through pg_net, presenting the Vault secret
+//   `housekeeping_token` as its bearer — compared inside the database by
+//   `housekeeping_token_matches`, never logged. The service-role key stays in
+//   Supabase's own runtime, so ADR-0001 holds. A person holding `users.suspend`
+//   can still call it with their JWT, dry_run first. verify_jwt is OFF at the
+//   gateway because the housekeeping token is not a JWT; every path below
+//   still ends in a 403 unless one of the two callers checks out.
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "@supabase/supabase-js";
@@ -96,27 +98,39 @@ Deno.serve(async (req: Request): Promise<Response> => {
     return json({ code: "internal_error", message: "env_missing" }, 500);
   }
 
-  // Gate on a real permission, checked as the CALLER — same shape as
-  // approve_listing. `users.suspend` is the strongest account-lifecycle right
-  // that exists — the four are view / approve / reject / suspend, there is no
-  // `users.manage` — so whoever may put an account out of use may finish
-  // erasing one that asked to go.
-  const jwtClient = createClient(supabaseUrl, anonKey, {
-    global: { headers: { Authorization: authHeader } },
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-  const { data: hasPerm, error: permErr } = await jwtClient.rpc(
-    "current_user_has_permission",
-    { perm_key: "users.suspend" },
-  );
-  if (permErr || hasPerm !== true) {
-    log("permission_denied", { err: permErr?.code });
-    return json({ code: "permission_denied" }, 403);
-  }
-
   const admin = createClient(supabaseUrl, serviceRoleKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+
+  // Caller 1 (plan A32): the scheduler's shared bearer, compared inside the
+  // database against the Vault secret. Never logged.
+  const bearer = authHeader.startsWith("Bearer ") ? authHeader.slice("Bearer ".length).trim() : "";
+  let caller = "";
+  const { data: isJob, error: jobErr } = await admin.rpc("housekeeping_token_matches", {
+    p_token: bearer,
+  });
+  if (!jobErr && isJob === true) {
+    caller = "scheduler";
+  } else {
+    // Caller 2: gate on a real permission, checked as the CALLER — same shape
+    // as approve_listing. `users.suspend` is the strongest account-lifecycle
+    // right that exists — the four are view / approve / reject / suspend, there
+    // is no `users.manage` — so whoever may put an account out of use may
+    // finish erasing one that asked to go.
+    const jwtClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { data: hasPerm, error: permErr } = await jwtClient.rpc(
+      "current_user_has_permission",
+      { perm_key: "users.suspend" },
+    );
+    if (permErr || hasPerm !== true) {
+      log("permission_denied", { err: permErr?.code });
+      return json({ code: "permission_denied" }, 403);
+    }
+    caller = "admin";
+  }
 
   const cutoff = new Date(Date.now() - grace * 86_400_000).toISOString();
   const { data: queue, error: queueErr } = await admin
@@ -217,8 +231,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
     results.push(outcome);
   }
 
-  log("done", { scanned: queue?.length ?? 0, purged, skipped, grace, dryRun });
+  log("done", { caller, scanned: queue?.length ?? 0, purged, skipped, grace, dryRun });
   return json({
+    caller,
     scanned: queue?.length ?? 0,
     purged,
     skipped,
