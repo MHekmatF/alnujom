@@ -22,7 +22,11 @@ enum NotificationType {
   viewingRequested,
   viewingConfirmed,
   viewingDeclined,
-  viewingCancelled;
+  viewingCancelled,
+  // Plan A26 — the clock on a listing: three days before it lapses, and
+  // the moment it does. Both go to the publisher only.
+  listingExpiring,
+  listingExpired;
 
   /// The wire key stored in the database and carried in push payloads.
   String get key {
@@ -51,6 +55,10 @@ enum NotificationType {
         return 'viewing_declined';
       case NotificationType.viewingCancelled:
         return 'viewing_cancelled';
+      case NotificationType.listingExpiring:
+        return 'listing_expiring';
+      case NotificationType.listingExpired:
+        return 'listing_expired';
     }
   }
 

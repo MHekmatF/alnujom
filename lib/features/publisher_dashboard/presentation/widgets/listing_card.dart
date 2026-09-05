@@ -36,10 +36,6 @@ import 'status_badge.dart';
 /// expiry warning + Renew CTA on its card.
 const int _kExpiryWarningDays = 7;
 
-/// Number of days a single renew extends `expires_at` by (matches the RPC
-/// default).
-const int _kRenewDays = 30;
-
 /// Per `contracts/my-listings-page.md § Listing card`. Tap behaviour:
 /// editable status → form; non-editable → read-only preview.
 class ListingCard extends StatelessWidget {
@@ -406,7 +402,7 @@ class _ExpirySection extends StatelessWidget {
                   icon: LucideIcons.refresh_cw,
                   loading: renewing,
                   onPressed: () => context.read<MyListingsBloc>().add(
-                    MyListingsRenewRequested(listing.id, days: _kRenewDays),
+                    MyListingsRenewRequested(listing.id),
                   ),
                 ),
               );

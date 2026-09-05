@@ -41,7 +41,9 @@ type NotificationType =
   | "viewing_requested"
   | "viewing_confirmed"
   | "viewing_declined"
-  | "viewing_cancelled";
+  | "viewing_cancelled"
+  | "listing_expiring"
+  | "listing_expired";
 
 interface DispatchBody {
   notification_id?: unknown;
@@ -123,6 +125,16 @@ const COPY: Record<NotificationType, { ar: [string, string]; en: [string, string
   viewing_cancelled: {
     ar: ["إلغاء معاينة", "تم إلغاء موعد معاينة"],
     en: ["Viewing cancelled", "A viewing appointment was cancelled"],
+  },
+  // Plan A26 — the clock on a listing. Transactional, never muted: a
+  // publisher who misses this loses the listing from the feed.
+  listing_expiring: {
+    ar: ["إعلانك ينتهي قريباً", "ينتهي عرض أحد إعلاناتك خلال 3 أيام — اضغط لتجديده"],
+    en: ["Your listing expires soon", "One of your listings expires in 3 days — tap to renew"],
+  },
+  listing_expired: {
+    ar: ["انتهى عرض إعلانك", "توقّف عرض أحد إعلاناتك — اضغط لتجديده"],
+    en: ["Your listing has expired", "One of your listings is no longer shown — tap to renew"],
   },
 };
 

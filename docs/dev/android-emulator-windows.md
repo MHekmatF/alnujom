@@ -58,7 +58,44 @@ cd H:\alnujom-project
 flutter run --device-id=emulator-5554 --dart-define-from-file=.env.json --debug
 ```
 
-## Open: "too many emulator instances" — blocked since 2026-09-04
+## SOLVED 2026-09-05: "too many emulator instances" = Hyper-V has taken port 5554
+
+**Root cause.** Windows reserves blocks of TCP ports for Hyper-V / WSL at boot
+("excluded port ranges"), and on this machine one of them is **5533–5632** —
+which swallows the emulator's default console/adb pair 5554/5555 and the whole
+scan that follows. The emulator's error for "no free console port" is the
+misleading *"It seems too many emulator instances are running on this machine.
+Aborting."* Nothing in `%LOCALAPPDATA%\Temp\avd\running`, no lock file, no GPU
+setting has anything to do with it. Check with:
+
+```powershell
+netsh int ipv4 show excludedportrange protocol=tcp
+```
+
+**Fix that needs no admin rights: pick a console port outside the range.**
+
+```powershell
+Start-Process -FilePath "F:\mm\sdk\emulator\emulator.exe" `
+  -ArgumentList "-avd","Pixel_8_Pro","-port","5634","-no-snapshot-load","-gpu","swiftshader_indirect","-no-boot-anim" `
+  -WorkingDirectory "F:\mm\sdk\emulator"
+# adb only auto-scans 5555–5585, so attach it by hand:
+& F:\mm\sdk\platform-tools\adb.exe connect 127.0.0.1:5635
+# then the device answers as BOTH 127.0.0.1:5635 and emulator-5634
+```
+
+Verified 2026-09-05: booted to `sys.boot_completed=1` in about four minutes on
+a cold boot, Android 17, 1344×2992. Use `-s emulator-5634` for adb and
+`--device-id=emulator-5634` for `flutter run`. Any even port in 5634–5682
+works; the excluded ranges on this machine are 5533–5632, 5733–5932 and
+6033–6232, so `-port 5634` is the first free pair and `-port 5680` the last.
+
+**The permanent fix is an admin action the owner may take, not Claude** (it
+changes a system network setting): move Hyper-V's dynamic range above the
+emulator's, then reboot —
+`netsh int ipv4 set dynamicport tcp start=49152 num=16384` from an elevated
+PowerShell. After that the plain launch in the canonical sequence works again.
+
+## Superseded: the elimination log for the port problem (kept for the record)
 
 The AVD stopped starting at all. Every launch dies within seconds on:
 

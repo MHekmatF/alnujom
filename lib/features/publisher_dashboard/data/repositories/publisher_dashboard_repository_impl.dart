@@ -52,7 +52,7 @@ class PublisherDashboardRepositoryImpl implements PublisherDashboardRepository {
   @override
   Future<Result<DateTime?>> renewListing({
     required String listingId,
-    int days = 30,
+    int? days,
   }) async {
     try {
       final expiresAt = await _datasource.renewListing(

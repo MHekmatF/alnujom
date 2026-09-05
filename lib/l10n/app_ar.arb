@@ -2382,6 +2382,14 @@
   "@settingsEditorTermsUrlLabel": {
     "description": "Phase 23 FA — Label for terms_url text field."
   },
+  "settingsEditorListingValidityLabel": "مدة عرض الإعلان بالأيام (من 7 إلى 365)",
+  "@settingsEditorListingValidityLabel": {
+    "description": "Plan A26 — label for the listing_validity_days setting."
+  },
+  "settingsValidationListingValidity": "أدخل رقماً بين 7 و365.",
+  "@settingsValidationListingValidity": {
+    "description": "Plan A26 — validation error for listing_validity_days."
+  },
   "settingsEditorPrivacyUrlLabel": "رابط سياسة الخصوصية",
   "@settingsEditorPrivacyUrlLabel": {
     "description": "Phase 23 FA — Label for privacy_url text field."
@@ -3188,6 +3196,32 @@
         "type": "String"
       },
       "savedSearchLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "notification_type_listing_expiring": "إعلانك ينتهي قريباً",
+  "@notification_type_listing_expiring": {
+    "description": "Plan A26 — notification centre title: a listing lapses in 3 days."
+  },
+  "notification_type_listing_expired": "انتهى عرض إعلانك",
+  "@notification_type_listing_expired": {
+    "description": "Plan A26 — notification centre title: a listing has lapsed."
+  },
+  "notification_body_listing_expiring": "«{listingTitle}» ينتهي عرضه خلال 3 أيام — جدّده ليبقى ظاهراً",
+  "@notification_body_listing_expiring": {
+    "description": "Plan A26 — expiring-listing notification body.",
+    "placeholders": {
+      "listingTitle": {
+        "type": "String"
+      }
+    }
+  },
+  "notification_body_listing_expired": "«{listingTitle}» لم يعد ظاهراً للزوار — جدّده من إعلاناتي",
+  "@notification_body_listing_expired": {
+    "description": "Plan A26 — expired-listing notification body.",
+    "placeholders": {
+      "listingTitle": {
         "type": "String"
       }
     }

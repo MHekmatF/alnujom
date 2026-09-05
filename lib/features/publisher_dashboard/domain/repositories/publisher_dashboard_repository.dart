@@ -27,7 +27,7 @@ abstract class PublisherDashboardRepository {
 
   Future<Result<DateTime?>> renewListing({
     required String listingId,
-    int days = 30,
+    int? days,
   });
 
   /// Phase 12 / US2 — full chronological moderation history for a listing.
