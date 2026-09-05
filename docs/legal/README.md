@@ -158,9 +158,16 @@ python tool/build_privacy_site.py docs/legal/site
 ```
 
 `tool/build_privacy_site.py` refuses to render a file that still contains
-`TODO(owner)`, so a half-finished policy cannot reach the web by accident. The
-rendered pages are committed under `docs/legal/site/` and mirrored to the
-`gh-pages` branch, which is what GitHub Pages serves.
+`TODO(owner)`, so a half-finished policy cannot reach the web by accident.
+
+**The output directory is NOT committed.** `.gitignore` carries a blanket
+`site/` rule, so everything the build writes under `docs/legal/site/` is
+ignored; the branch that GitHub Pages actually serves is `gh-pages`, pushed by
+hand. Anything you want to survive a rebuild has to live in a tracked source:
+the policies are the markdown above, and hand-written HTML pages go in
+**`docs/landing/`**, which the build copies into the output verbatim. Today that
+is `docs/landing/l/index.html`, the page a shared listing link opens (review
+§1 M3).
 
 ### Two things still worth doing
 

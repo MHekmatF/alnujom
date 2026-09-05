@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>عقار على تطبيق النجوم</title>
+<meta name="description" content="شاهد تفاصيل العقار وافتحه في تطبيق النجوم، سوق العقارات في سوريا.">
+<meta name="robots" content="noindex">
+<meta property="og:site_name" content="النجوم">
+<meta property="og:type" content="website">
+<!-- Inline so the page needs no second request and no extra file in the repo;
+     the same "N" on brand blue as the header mark. -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231F4FE6'/%3E%3Ctext x='16' y='23' font-family='Segoe UI,Arial,sans-serif' font-size='19' font-weight='700' fill='%23fff' text-anchor='middle'%3EN%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap">
+<style>
+/* Tokens copied from the privacy-policy page so the whole site reads as one
+   thing — same cream, same Steel&Star blue, same card shape. */
+:root{--bg:#FAF7F0;--card:#fff;--ink:#0E1A2E;--muted:#5B6573;--line:#E6E1D6;
+--accent:#1F4FE6;--accent-ink:#163BB0;--accent-soft:#E8EDFD;
+--shadow:0 1px 2px rgba(14,26,46,.05),0 10px 30px rgba(14,26,46,.05)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0B1424;--card:#12203A;
+--ink:#F2F4F8;--muted:#9AA4B2;--line:#22314D;--accent:#7C97FF;--accent-ink:#A9BBFF;
+--accent-soft:#1B2B52;--shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35)}}
+:root[data-theme=dark]{--bg:#0B1424;--card:#12203A;--ink:#F2F4F8;--muted:#9AA4B2;
+--line:#22314D;--accent:#7C97FF;--accent-ink:#A9BBFF;--accent-soft:#1B2B52;
+--shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+font-family:"Tajawal","Segoe UI",Tahoma,Arial,sans-serif;font-size:17px;line-height:1.8;
+-webkit-font-smoothing:antialiased}
+header{background:var(--accent);color:#fff}
+.hin{max-width:560px;margin:0 auto;padding:22px 20px;display:flex;align-items:center;gap:14px}
+.mark{width:44px;height:44px;border-radius:12px;background:#fff;color:var(--accent);
+display:grid;place-items:center;font-weight:800;font-size:20px;flex:none}
+.brand{font-weight:800;font-size:19px;line-height:1.3}
+.brand span{display:block;font-weight:500;font-size:14px;opacity:.85}
+.wrap{max-width:560px;margin:0 auto;padding:24px 20px 60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;
+overflow:hidden;box-shadow:var(--shadow)}
+.photo{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:var(--accent-soft)}
+.body{padding:20px}
+h1{font-size:23px;font-weight:800;line-height:1.4;text-wrap:balance;margin:0 0 6px}
+.price{font-size:26px;font-weight:800;color:var(--accent-ink);margin:0 0 4px;
+font-variant-numeric:tabular-nums}
+.where{color:var(--muted);font-size:15px;margin:0 0 16px}
+.facts{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 20px;padding:0;list-style:none}
+.facts li{background:var(--accent-soft);color:var(--accent-ink);border-radius:999px;
+padding:5px 14px;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
+.cta{display:block;text-align:center;text-decoration:none;font-weight:800;font-size:17px;
+padding:15px 20px;border-radius:14px;margin-bottom:10px}
+.cta.primary{background:var(--accent);color:#fff}
+.cta.ghost{background:transparent;color:var(--accent-ink);border:1px solid var(--line)}
+.note{color:var(--muted);font-size:14px;margin:14px 0 0;text-align:center}
+.state{background:var(--card);border:1px solid var(--line);border-radius:18px;
+padding:36px 24px;text-align:center;box-shadow:var(--shadow)}
+.state h1{font-size:20px;margin-bottom:8px}
+.state p{color:var(--muted);margin:0}
+.skeleton{background:var(--accent-soft);border-radius:8px;height:1em;animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+@media(prefers-reduced-motion:reduce){.skeleton{animation:none}}
+footer{max-width:560px;margin:0 auto;padding:0 20px 40px;color:var(--muted);
+font-size:14px;text-align:center}
+footer a{color:var(--accent-ink)}
+</style>
+</head>
+<body>
+<header><div class="hin">
+  <div class="mark">N</div>
+  <div class="brand">النجوم<span>النجوم للتسويق العقاري</span></div>
+</div></header>
+
+<div class="wrap"><div id="root">
+  <div class="state"><h1>جارٍ التحميل…</h1><p>يتم جلب تفاصيل العقار.</p></div>
+</div></div>
+
+<footer>
+  <a href="../index.html">سياسة الخصوصية</a>
+</footer>
+
+<script>
+// ---------------------------------------------------------------------------
+// Review §1 M3 — the page a shared listing link opens.
+//
+// Sharing is the growth loop for an app handed out over Telegram, and until now
+// the link produced a domain that does not resolve. This is a plain static page
+// on GitHub Pages: it reads the listing id, asks Supabase for the one row the
+// `anon` role is already allowed to read, and offers a way into the app.
+//
+// THE KEY BELOW IS PUBLIC BY DESIGN. It is the same anon key that ships inside
+// every copy of the Android APK; it grants exactly what RLS allows an anonymous
+// visitor, which for `v_listings_public` is approved, published, unexpired
+// listings and nothing else. The service-role key must NEVER appear here
+// (docs/decisions/0001-secrets-and-pii-storage.md).
+//
+// ID FORM: `?id=<uuid>`. A static host has no rewrite, so `/l/<uuid>` would 404
+// on a directory that does not exist. Both forms are accepted by the app's
+// `resolveDeepLink`, so moving to the real domain (plan B16) is a one-constant
+// change and old links keep working.
+// ---------------------------------------------------------------------------
+const SUPABASE_URL = 'https://hczsgceagommznjaohyk.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhjenNnY2VhZ29tbXpuamFvaHlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTQ2MTQsImV4cCI6MjA5MzI3MDYxNH0.n01oZaLvlnH9wuPe33Mn9VG9G1PHa0akqPPJ9JbZfiY';
+
+// Plan B5 — the Telegram post that hands out the APK. Empty until the owner
+// posts it; the download button simply does not render while it is empty,
+// rather than sending anyone to a dead link.
+const TELEGRAM_URL = '';
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const root = document.getElementById('root');
+
+// Everything from the network is untrusted. Nothing is ever assigned through
+// innerHTML — this builds real nodes and sets textContent, so a title carrying
+// markup renders as the characters the publisher typed.
+function el(tag, cls, text) {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = text;
+  return n;
+}
+
+function showState(title, body) {
+  const box = el('div', 'state');
+  box.append(el('h1', null, title), el('p', null, body));
+  root.replaceChildren(box);
+}
+
+const PURPOSE = { sale: 'للبيع', rent: 'للإيجار' };
+const TYPES = {
+  apartment: 'شقة', villa: 'فيلا', house: 'منزل', land: 'أرض',
+  shop: 'محل', office: 'مكتب', building: 'بناء', farm: 'مزرعة',
+  chalet: 'شاليه', warehouse: 'مستودع',
+};
+
+function money(amount, currency) {
+  if (amount == null) return null;
+  const n = Number(amount);
+  if (!isFinite(n)) return null;
+  // Latin digits inside RTL text reorder unless the number is isolated; the
+  // ⁦…⁩ pair pins it left-to-right, the same fix the app applies.
+  const formatted = n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+  const unit = currency === 'USD' ? '$' : (currency || '');
+  return '⁦' + formatted + ' ' + unit + '⁩';
+}
+
+function render(row, id) {
+  const card = el('div', 'card');
+
+  if (row.main_image_path) {
+    const img = el('img', 'photo');
+    // The card-sized copy (Plan A18): a few tens of KB instead of ~156 KB, which
+    // is the right trade for a page whose whole job is "show enough to tap".
+    img.src = SUPABASE_URL + '/storage/v1/object/public/listing-images/'
+            + row.main_image_path.split('/').map(encodeURIComponent).join('/');
+    img.alt = row.title || 'صورة العقار';
+    img.loading = 'eager';
+    img.addEventListener('error', () => img.remove());
+    card.append(img);
+  }
+
+  const body = el('div', 'body');
+
+  const price = money(row.primary_amount, row.primary_currency);
+  if (price) body.append(el('p', 'price', price));
+  body.append(el('h1', null, row.title || 'عقار'));
+
+  const where = [row.city_name_ar, row.governorate_name_ar]
+    .filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join(' · ');
+  if (where) body.append(el('p', 'where', where));
+
+  const facts = el('ul', 'facts');
+  const chips = [];
+  const kind = TYPES[row.property_type];
+  const purpose = PURPOSE[row.purpose];
+  if (kind || purpose) chips.push([kind, purpose].filter(Boolean).join(' '));
+  if (row.rooms) chips.push('⁦' + row.rooms + '⁩ غرف');
+  if (row.bathrooms) chips.push('⁦' + row.bathrooms + '⁩ حمّام');
+  if (row.area_size) chips.push('⁦' + Number(row.area_size) + '⁩ م²');
+  for (const c of chips) facts.append(el('li', null, c));
+  if (chips.length) body.append(facts);
+
+  const open = el('a', 'cta primary', 'افتح في التطبيق');
+  open.href = 'alnujom://listings/' + id;
+  body.append(open);
+
+  if (TELEGRAM_URL) {
+    const dl = el('a', 'cta ghost', 'حمّل التطبيق');
+    dl.href = TELEGRAM_URL;
+    dl.rel = 'noopener';
+    body.append(dl);
+    body.append(el('p', 'note', 'ما عندك التطبيق؟ حمّلو وبتقدر تشوف كل التفاصيل وتتواصل مع الناشر.'));
+  } else {
+    body.append(el('p', 'note', 'افتح الرابط من الموبايل يلي عليه التطبيق.'));
+  }
+
+  card.append(body);
+  root.replaceChildren(card);
+}
+
+async function main() {
+  const id = new URLSearchParams(location.search).get('id')
+          || location.pathname.split('/').filter(Boolean).pop();
+
+  if (!id || !UUID.test(id)) {
+    showState('رابط غير صالح', 'تأكد من نسخ الرابط كاملاً.');
+    return;
+  }
+
+  const url = SUPABASE_URL + '/rest/v1/v_listings_public'
+    + '?select=title,primary_amount,primary_currency,main_image_path,'
+    + 'city_name_ar,governorate_name_ar,rooms,bathrooms,area_size,purpose,property_type'
+    + '&id=eq.' + encodeURIComponent(id) + '&limit=1';
+
+  try {
+    const res = await fetch(url, {
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY },
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const rows = await res.json();
+    if (!Array.isArray(rows) || rows.length === 0) {
+      // Not an error: the view only carries approved, published, unexpired
+      // listings, so a sold or paused one lands here too.
+      showState('هذا الإعلان لم يعد متاحاً', 'ربما تم بيعه أو إيقافه.');
+      return;
+    }
+    render(rows[0], id);
+    document.title = (rows[0].title || 'عقار') + ' — النجوم';
+  } catch (err) {
+    showState('تعذّر تحميل الإعلان', 'تحقق من الاتصال وحاول مرة أخرى.');
+  }
+}
+
+main();
+</script>
+</body>
+</html>

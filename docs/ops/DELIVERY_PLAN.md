@@ -578,14 +578,63 @@ page does no re-ordering at all.
   walk would tell us something the code cannot.
 
 
-### A20 — Make shared links open something · S · **blocked on B16 (domain)**
-Review §1 M3. Until a domain exists, point `_shareLinkBase` at the GitHub Pages
-site and add `docs/legal/site/l/index.html`: a tiny page that reads the listing
-id from the path, fetches `v_listings_public` with the public anon key, shows
-title / price / main photo, and offers **Open in app** (`alnujom://listings/<id>`,
-add that intent filter) and **Download** (the Telegram post). When B16 lands,
-switch the base and add the `https` intent filter with `autoVerify` +
-`assetlinks.json`.
+### A20 — Make shared links open something · S · **BUILT 2026-09-04 — one owner yes from live**
+Review §1 M3. Sharing sends `https://alnujom.app/listings/<id>`. The domain does
+not resolve, **and the app could not have opened it either**: the only VIEW
+intent was the auth callback, and the code comment claiming an https VIEW intent
+existed was pointing at a `<queries>` entry, which is the opposite — what the app
+may *open*, not what it answers. For an app handed out over Telegram, sharing is
+the growth loop, and it produced a link nobody could open.
+
+Both halves are built. Neither is switched on, because the switch is the owner's.
+
+- [x] **The app can open a listing link.** `alnujom://listings/<uuid>` is
+      declared in the manifest and read by `DeepLinkListener` off `app_links`.
+      **Not** by Flutter's own deep linking — `flutter_deeplinking_enabled` has
+      to stay `false` or the router hijacks
+      `alnujom://auth/reset-password#access_token=…` and lands the user on the
+      request-a-reset page (spec 005 D-01). `resolveDeepLink` returns null for
+      `alnujom://auth/...`, so supabase_flutter keeps sole ownership of it.
+- [x] A link is untrusted input, so the mapper accepts a closed set: one route,
+      an id that must match a UUID, otherwise null. The worst a hostile link can
+      do is open the listing page for an id that does not exist.
+- [x] **The page those links point at** — `docs/landing/l/index.html`. Reads the
+      id, fetches the one row `anon` may already read from `v_listings_public`,
+      and shows photo, price, title, location, room/bath/size chips and **Open
+      in app**. Same tokens as the privacy pages, so the site reads as one thing.
+      The anon key in it is the same one that ships in every APK.
+- [x] Verified in a browser against the live database: **found** (light and
+      dark), **"no longer available"** for an id the view does not carry (sold,
+      paused, expired all land here), **"invalid link"** for a non-UUID, and the
+      footer link back to the policy. Seven link forms map correctly and nine
+      hostile or malformed ones map to null, including the auth callback.
+      Six linters green, and the merged manifest carries both intent filters
+      with `flutter_deeplinking_enabled` still `false`.
+- [x] `docs/landing/` is a **tracked source** that `tool/build_privacy_site.py`
+      copies into the output. The output directory is gitignored, so a page
+      written straight into it would be lost on the next run and never reach
+      review — which is also why the README's claim that the rendered pages are
+      "committed under `docs/legal/site/`" was never true.
+- [ ] **⚠️ Owner — publish the page.** It reaches people only when it is pushed
+      to the `gh-pages` branch, which is publishing to a public site and is the
+      owner's call, not Claude's. One yes and it is live at
+      `https://mhekmatf.github.io/alnujom/l/?id=<listing>`.
+- [ ] **⚠️ Then flip `_shareLinkBase`** in `per_listing_action_block.dart` from
+      the dead `https://alnujom.app` to that base. Deliberately NOT changed yet:
+      pointing it at an unpublished page would trade one dead link for another.
+      It needs a new build to reach users either way.
+- [ ] **B5 — the Telegram post URL** fills `TELEGRAM_URL` in the page, and the
+      "download the app" button appears. While it is empty the button simply
+      does not render, rather than sending anyone to a dead link.
+- [ ] **B16 — the real domain** replaces the base again and adds the `https`
+      intent filter with `android:autoVerify="true"` plus
+      `/.well-known/assetlinks.json`. Without verification Android shows a
+      chooser instead of opening the app, and a GitHub *project* Pages site
+      cannot serve that file at the host root — which is why no https filter is
+      declared yet. `resolveDeepLink` already accepts both the `?id=` form a
+      static host can serve and the `/l/<id>` path form a real domain can, so
+      old links keep working across the move.
+
 
 ### A21 — A tile provider that allows apps · S · **blocked on B17 (a key)**
 Review §4. Swap the three `urlTemplate`s for the provider's URL with the key

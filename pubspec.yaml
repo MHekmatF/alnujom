@@ -33,6 +33,12 @@ dependencies:
   # licence); recoloured to the active theme at runtime.
   lottie: ^3.1.2
   go_router: 17.2.2
+  # Review §1 M3 — reading the shared-listing VIEW intent ourselves, because
+  # Flutter's own deep linking has to stay off (it would hijack the auth
+  # callback; see android/app/src/main/AndroidManifest.xml). Already in the tree
+  # as supabase_flutter's dependency at this exact version — declared here
+  # because lib/core/routing/deep_link_listener.dart imports it directly.
+  app_links: 6.4.1
   injectable: 2.5.1
   intl: 0.20.2
   supabase_flutter: 2.12.4

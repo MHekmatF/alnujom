@@ -87,10 +87,20 @@ Ruled out, in this order:
   lines earlier, under `-gpu swiftshader_indirect`. Worth eliminating next by
   trying `-gpu host` and `-gpu guest`.
 
+Two more eliminated on the second attempt, same day:
+
+- **Not stale locks on the OTHER AVDs.** `almaeda28.avd` and `almaeda_aosp.avd`
+  were still carrying `hardware-qemu.ini.lock` / `multiinstance.lock` from
+  2026-08-20, which looked like the instance count. Removing all five lock
+  entries across all three AVDs changed nothing — the very next launch aborted
+  identically.
+- **Not console-port exhaustion.** `Get-NetTCPConnection` shows **5554–5590
+  entirely free** while the abort happens.
+
 Left to try: another AVD (`Pixel_5_API_28`) to tell an AVD-specific fault from a
-machine-wide one; `-port 5560` in case the console-port probe is what is
-failing; `-read-only`; and emulator 36.5.11's own
-`%LOCALAPPDATA%\Temp\AndroidEmulator\` state.
+machine-wide one; `-gpu host` and `-gpu guest`; `-port 5560`; `-read-only`; and
+emulator 36.5.11's own `%LOCALAPPDATA%\Temp\AndroidEmulator\` state. Reinstalling
+the emulator package from SDK Manager is the blunt fallback.
 
 **Consequence:** the project's accepted QA surface is unavailable. On-device
 verification currently needs the owner's Infinix, and a debug install shares
