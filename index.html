@@ -206,6 +206,20 @@ h1{font-size:clamp(30px,1.6rem + 2.6vw,50px);font-weight:700;line-height:1.18;
   letter-spacing:-.01em;margin:0 0 14px;text-wrap:balance;color:#fff}
 .lede{font-size:clamp(16.5px,1rem + .35vw,20px);color:var(--on-navy-muted);
   margin:0 0 26px;text-wrap:pretty}
+.finder{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin-top:22px;padding:8px;
+  background:var(--card);border-radius:16px;max-width:640px;box-shadow:0 10px 30px -18px rgba(0,0,0,.5)}
+.finder label{display:flex;flex-direction:column;gap:2px;flex:1 1 120px;min-width:0;padding:4px 8px}
+.finder label.grow{flex:2 1 180px}
+.finder label span{font-size:12px;font-weight:700;color:var(--muted)}
+.finder select,.finder input{font:inherit;font-size:15px;border:0;background:transparent;color:var(--ink);
+  padding:4px 0;width:100%;min-width:0;outline:none}
+.finder label:focus-within{background:var(--blue-soft);border-radius:10px}
+.finder .btn{flex:0 0 auto;align-self:stretch}
+.trust{display:flex;flex-wrap:wrap;gap:6px 18px;margin:16px 0 0;padding:0;list-style:none;
+  color:var(--on-navy-muted);font-size:14px}
+.trust li::before{content:"✓";margin-inline-end:6px;color:#8FD3A8;font-weight:700}
+.lc .pb{position:absolute;top:11px;inset-inline-end:11px;background:rgba(15,58,102,.92);color:#fff;
+  font-size:12.5px;font-weight:700;padding:2px 10px;border-radius:999px}
 .stats{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px;padding:0;list-style:none}
 .stats li{background:rgba(255,255,255,.07);border:1px solid rgba(201,209,219,.24);
   border-radius:13px;padding:9px 17px;font-size:13.5px;color:var(--on-navy-muted);
@@ -360,10 +374,31 @@ footer{border-top:1px solid var(--line);background:var(--card2);
         <a class="btn wa" href="https://wa.me/963955248245?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C%20%D8%AA%D9%88%D8%A7%D8%B5%D9%84%D8%AA%20%D9%85%D8%B9%D9%83%D9%85%20%D9%85%D9%86%20%D9%85%D9%88%D9%82%D8%B9%20%D8%A7%D9%84%D9%86%D8%AC%D9%88%D9%85." rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M17.47 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.64.08-.3-.15-1.25-.46-2.38-1.47-.88-.78-1.47-1.75-1.65-2.05-.17-.3-.02-.46.13-.6.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.6-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.01-1.04 2.47s1.06 2.87 1.21 3.07c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.75-.72 2-1.41.25-.69.25-1.28.17-1.41-.07-.13-.27-.2-.57-.35zM12.04 21.5h-.01a9.4 9.4 0 0 1-4.79-1.31l-.34-.2-3.56.93.95-3.47-.22-.36a9.38 9.38 0 0 1-1.44-5.01c0-5.18 4.22-9.4 9.41-9.4a9.35 9.35 0 0 1 9.4 9.41c0 5.18-4.22 9.4-9.4 9.4zM20.06 3.93A11.32 11.32 0 0 0 12.04 .6C5.8.6.73 5.67.73 11.91c0 1.99.52 3.94 1.51 5.65L.64 23.4l5.98-1.57a11.3 11.3 0 0 0 5.42 1.38h.01c6.24 0 11.31-5.07 11.31-11.31 0-3.02-1.18-5.86-3.3-8z"/></svg>راسلنا على واتساب</a>
         <a class="btn onnavy" href="#app"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3a1 1 0 0 1 1 1v9.59l3.3-3.3a1 1 0 1 1 1.4 1.42l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 1 1 1.4-1.42l3.3 3.3V4a1 1 0 0 1 1-1zM4 19a1 1 0 0 1 1-1h14a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1z"/></svg>حمّل التطبيق</a>
       </div>
-      <ul class="stats">
-        <li id="stat-listings" hidden><b class="num" data-n>—</b>عقار معروض الآن</li>
-        <li id="stat-cities" hidden><b class="num" data-n>—</b>مدينة</li>
-        <li><b class="num">2</b>فرع في حلب</li>
+      <form class="finder" id="finder" role="search" action="#listings">
+        <label><span>بدك</span>
+          <select id="f-purpose" name="purpose">
+            <option value="sale">شراء</option>
+            <option value="rent">إيجار</option>
+          </select></label>
+        <label><span>النوع</span>
+          <select id="f-type" name="type">
+            <option value="">الكل</option>
+            <option value="apartment">شقة</option>
+            <option value="villa">فيلا</option>
+            <option value="land">أرض</option>
+            <option value="shop">محل</option>
+            <option value="office">مكتب</option>
+            <option value="building">بناء</option>
+            <option value="farm">مزرعة</option>
+          </select></label>
+        <label class="grow"><span>المنطقة</span>
+          <input id="f-area" name="area" type="search" placeholder="مثلاً: الفرقان" autocomplete="off"></label>
+        <button class="btn primary" type="submit">ابحث</button>
+      </form>
+      <ul class="trust">
+        <li>فرعان في حلب: بستان الباشا وحريتان</li>
+        <li>تواصل مباشر على واتساب</li>
+        <li>من 9 الصبح لـ 8 المسا، كل يوم ما عدا الجمعة</li>
       </ul>
     </div>
     <div class="plate" aria-hidden="true"><span dir="ltr">ALNUJOM</span></div>
@@ -374,11 +409,13 @@ footer{border-top:1px solid var(--line);background:var(--card2);
 <section id="listings" hidden>
   <div class="wrap">
     <div class="head">
-      <h2>عقارات مختارة</h2>
-      <p>مختارة من التطبيق. اضغط على أي عقار تشوف تفاصيله وصوره.</p>
+      <h2 id="l-title">عقارات مختارة</h2>
+      <p id="l-lede">مختارة من التطبيق. اضغط على أي عقار تشوف تفاصيله وصوره.</p>
     </div>
     <p class="note" id="preview-note" hidden>معاينة: هذه عقارات من التطبيق لتشوف شكل القسم — القائمة الحقيقية يختارها المشرف.</p>
+    <p class="note" id="no-results" hidden>ما لقينا عقار بهالشروط هلق. جرّب منطقة ثانية أو راسلنا على واتساب ونحنا منلاقيلك.</p>
     <div class="lgrid" id="lgrid"></div>
+    <p class="more" id="back-wrap" hidden><button class="btn ghost" type="button" id="back-picks">رجوع للعقارات المختارة</button></p>
     <p class="more"><a class="btn ghost" href="#app">شوف كل العقارات في التطبيق</a></p>
   </div>
 </section>
@@ -522,7 +559,7 @@ footer{border-top:1px solid var(--line);background:var(--card2);
 // ---------------------------------------------------------------------------
 (function () {
   'use strict';
-  var CFG = {"url":"https://hczsgceagommznjaohyk.supabase.co","key":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhjenNnY2VhZ29tbXpuamFvaHlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTQ2MTQsImV4cCI6MjA5MzI3MDYxNH0.n01oZaLvlnH9wuPe33Mn9VG9G1PHa0akqPPJ9JbZfiY","base":"","page":"home","rtl":true,"cityKey":"city_name_ar","govKey":"governorate_name_ar","t":{"verified":"موثّق","forSale":"للبيع","forRent":"للإيجار","rooms":"غرف","area":"م²","download":"حمّل التطبيق","version":"الإصدار","saved":"تم التنزيل — افتح الملف ليُضاف لجهات الاتصال","types":{"apartment":"شقة","villa":"فيلا","house":"منزل","land":"أرض","shop":"محل","office":"مكتب","building":"بناء","farm":"مزرعة","chalet":"شاليه","warehouse":"مستودع"}},"vcard":{"name":"النجوم للتسويق العقاري","phone":"+963955248245","email":"alnujom.real.estate@gmail.com","url":"https://mhekmatf.github.io/alnujom/","addresses":["بستان الباشا، حلب","حريتان، ريف حلب"]}};
+  var CFG = {"url":"https://hczsgceagommznjaohyk.supabase.co","key":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhjenNnY2VhZ29tbXpuamFvaHlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTQ2MTQsImV4cCI6MjA5MzI3MDYxNH0.n01oZaLvlnH9wuPe33Mn9VG9G1PHa0akqPPJ9JbZfiY","base":"","page":"home","rtl":true,"cityKey":"city_name_ar","govKey":"governorate_name_ar","t":{"verified":"موثّق","forSale":"للبيع","forRent":"للإيجار","rooms":"غرف","area":"م²","download":"حمّل التطبيق","version":"الإصدار","saved":"تم التنزيل — افتح الملف ليُضاف لجهات الاتصال","resultsTitle":"نتائج البحث","resultsLede":"اضغط على أي عقار تشوف تفاصيله وصوره.","listingsTitle":"عقارات مختارة","listingsLede":"مختارة من التطبيق. اضغط على أي عقار تشوف تفاصيله وصوره.","types":{"apartment":"شقة","villa":"فيلا","house":"منزل","land":"أرض","shop":"محل","office":"مكتب","building":"بناء","farm":"مزرعة","chalet":"شاليه","warehouse":"مستودع","factory":"معمل","clinic":"مشفى / مركز طبي","school":"مدرسة"}},"vcard":{"name":"النجوم للتسويق العقاري","phone":"+963955248245","email":"alnujom.real.estate@gmail.com","url":"https://mhekmatf.github.io/alnujom/","addresses":["بستان الباشا، حلب","حريتان، ريف حلب"]}};
   var qs = new URLSearchParams(location.search);
 
   function api(path, extraHeaders) {
@@ -546,34 +583,6 @@ footer{border-top:1px solid var(--line);background:var(--card2);
     var unit = currency === 'USD' ? '$' : (currency || '');
     return iso(n.toLocaleString('en-US', { maximumFractionDigits: 0 }) + ' ' + unit);
   }
-
-  // ── the live numbers in the hero ─────────────────────────────────────────
-  // `limit=0` with an exact count asks for the number and no rows at all, so
-  // this costs one small response however large the table grows.
-  api('/rest/v1/v_listings_public?select=city_id&limit=0', { Prefer: 'count=exact' })
-    .then(function (r) {
-      var range = r.headers.get('content-range') || '';
-      var total = parseInt(range.split('/')[1], 10);
-      if (!isFinite(total) || total <= 0) return;
-      var li = document.getElementById('stat-listings');
-      li.querySelector('[data-n]').textContent = iso(String(total));
-      li.hidden = false;
-    })
-    .catch(function () { /* the strip simply does not appear */ });
-
-  api('/rest/v1/v_listings_public?select=city_name_ar&limit=1000')
-    .then(function (r) { return r.ok ? r.json() : []; })
-    .then(function (rows) {
-      var seen = {}, n = 0;
-      rows.forEach(function (row) {
-        if (row.city_name_ar && !seen[row.city_name_ar]) { seen[row.city_name_ar] = 1; n++; }
-      });
-      if (!n) return;
-      var li = document.getElementById('stat-cities');
-      li.querySelector('[data-n]').textContent = iso(String(n));
-      li.hidden = false;
-    })
-    .catch(function () {});
 
   // ── the chosen listings ──────────────────────────────────────────────────
   // Normally the admin-picked shortlist. `?preview=1` shows live listings
@@ -605,6 +614,8 @@ footer{border-top:1px solid var(--line);background:var(--card2);
       ph.append(img);
     }
     if (row.verification_status === 'verified') ph.append(el('span', 'badge', CFG.t.verified));
+    var pb = row.purpose === 'rent' ? CFG.t.forRent : (row.purpose === 'sale' ? CFG.t.forSale : null);
+    if (pb) ph.append(el('span', 'pb', pb));
     a.append(ph);
 
     var body = el('div', 'body');
@@ -640,11 +651,65 @@ footer{border-top:1px solid var(--line);background:var(--card2);
     .then(function (rows) {
       grid.replaceChildren();
       if (!Array.isArray(rows) || !rows.length) return;   // section stays hidden
+      picks = rows;
       rows.forEach(function (row) { grid.append(card(row)); });
       section.hidden = false;
       if (preview) document.getElementById('preview-note').hidden = false;
     })
     .catch(function () { grid.replaceChildren(); });
+
+  // ── the finder ───────────────────────────────────────────────────────────
+  // The same search the app runs (search_listings: Arabic spellings, area and
+  // city names, both languages), shown in the listings section. «رجوع» puts
+  // the office's picks back.
+  var finder = document.getElementById('finder');
+  var picks = null;
+  function showRows(rows, isResult) {
+    grid.replaceChildren();
+    (rows || []).forEach(function (row) { grid.append(card(row)); });
+    document.getElementById('l-title').textContent = isResult ? CFG.t.resultsTitle : CFG.t.listingsTitle;
+    document.getElementById('l-lede').textContent = isResult ? CFG.t.resultsLede : CFG.t.listingsLede;
+    document.getElementById('no-results').hidden = !(isResult && !(rows || []).length);
+    document.getElementById('back-wrap').hidden = !(isResult && picks && picks.length);
+    section.hidden = false;
+  }
+  if (finder) finder.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var body = { p_purpose: document.getElementById('f-purpose').value, p_limit: 12 };
+    var type = document.getElementById('f-type').value;
+    var area = document.getElementById('f-area').value.trim();
+    if (type) body.p_property_type = type;
+    var btn = finder.querySelector('button');
+    btn.disabled = true;
+    function rpc(name, args) {
+      return fetch(CFG.url + '/rest/v1/rpc/' + name, {
+        method: 'POST',
+        headers: { apikey: CFG.key, Authorization: 'Bearer ' + CFG.key,
+                   'Content-Type': 'application/json' },
+        body: JSON.stringify(args)
+      }).then(function (r) { return r.ok ? r.json() : []; });
+    }
+    // A place name is matched to a city or area first (search_locations, as
+    // the app's location box does); the listing search then filters by it.
+    // Text that names no place is searched as words in the listing instead.
+    (area ? rpc('search_locations', { p_query: area, p_limit: 1 }) : Promise.resolve([]))
+      .then(function (hits) {
+        var hit = Array.isArray(hits) && hits[0];
+        if (hit && hit.area_id) body.p_area_id = hit.area_id;
+        else if (hit && hit.city_id) body.p_city_id = hit.city_id;
+        else if (area) body.p_query = area;
+        return rpc('search_listings', body);
+      })
+      .then(function (rows) {
+        showRows(Array.isArray(rows) ? rows : [], true);
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      })
+      .catch(function () { showRows([], true); })
+      .then(function () { btn.disabled = false; });
+  });
+  document.getElementById('back-picks').addEventListener('click', function () {
+    showRows(picks, false);
+  });
 
   // ── the download button ──────────────────────────────────────────────────
   // Version and link come from the same manifest the app itself reads, so a
