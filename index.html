@@ -33,61 +33,73 @@
 @font-face{font-family:Tajawal;src:url(assets/tajawal-700.woff2) format("woff2");
   font-weight:700;font-style:normal;font-display:swap}
 
-/* ── Palette P1 ───────────────────────────────────────────────────────────
-   The app's own tokens (lib/core/theme/color_palette.dart) and the business
-   card's navy (docs/brand/cards/, design 8). A visitor who scans the card,
-   opens this page and then installs the app should not feel handed between
-   three companies. Gold is the app's Featured badge and nothing else, so
-   the site has none.
+/* ── Look A «هادئ وأنيق» ─────────────────────────────────────────────────
+   The app's own tokens since 1.7 (lib/core/theme/color_palette.dart, drawn in
+   docs/design/plan-1.7-v2/look-a/): a cool ground, white cards lifted by soft
+   navy-tinted shadows instead of borders, navy-tint for selected and icon
+   discs. A visitor who opens this page and then installs the app should not
+   feel handed between two companies. Gold is the app's Featured badge and
+   nothing else, so the site has none.
 
    Three theme states, not two: an explicit choice stamps data-theme on <html>,
    but the default "system" setting stamps nothing, so the un-stamped document
    has to carry a complete light palette on bare :root.                        */
 :root{
-  --bg:#EAEDF2; --card:#FFFFFF; --card2:#F4F6F9;
-  --ink:#1A1C22; --ink2:#454B59; --muted:#5B6070;
-  --line:#D9DEE6; --line2:#C9D1DB;
-  --blue:#0F3A66; --blue-ink:#0F3A66; --blue-hover:#17507F; --blue-soft:#DDE6F0;
+  --bg:#F2F5F9; --card:#FFFFFF; --card2:#F4F7FB;
+  --ink:#0D1B2E; --ink2:#34445A; --muted:#617187;
+  --line:#E6EBF1; --line2:#D5DDE7;
+  --blue:#0F3A66; --blue-ink:#0F3A66; --blue-hover:#17507F; --blue-soft:#E9EFF7;
   --navy:#0F3A66; --navy2:#071C3A;
   --p1:radial-gradient(75% 95% at 50% 40%,#17507F 0%,#0F3A66 38%,#071C3A 100%);
   --on-navy:#FFFFFF; --on-navy-muted:#C9D1DB;
-  --silver:#C9D1DB; --silver-soft:#E4E9F0; --silver-ink:#0F3A66;
+  --silver:#C9D1DB; --silver-soft:#E9EFF7; --silver-ink:#0F3A66;
   --wa:#1DAB61; --wa-ink:#12703F; --on-wa:#06301B;
   --on-blue:#FFFFFF; --on-blue-ink:#FFFFFF;
-  --ok:#0E7A3C; --ok-soft:#E4F3E9;
-  --shadow-1:0 1px 2px rgba(7,28,58,.06);
-  --shadow-2:0 1px 2px rgba(7,28,58,.05),0 10px 30px rgba(7,28,58,.07);
-  --header-bg:rgba(234,237,242,.86);
+  --ok:#17804A; --ok-soft:#E4F4EA;
+  --tag:#FFFFFF; --tag-ink:#0F3A66;
+  --shadow-chip:0 1px 2px rgba(16,40,72,.06),0 3px 8px -2px rgba(16,40,72,.08);
+  --shadow-1:0 1px 2px rgba(16,40,72,.05),0 4px 10px -2px rgba(16,40,72,.05),0 14px 28px -12px rgba(16,40,72,.12);
+  --shadow-2:0 2px 4px rgba(16,40,72,.06),0 12px 24px -8px rgba(16,40,72,.16),0 28px 48px -20px rgba(16,40,72,.24);
+  --shadow-navy:0 8px 18px -8px rgba(15,58,102,.55);
+  --header-bg:rgba(242,245,249,.9);
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --bg:#0C0C10; --card:#131318; --card2:#101015;
-    --ink:#E7E8ED; --ink2:#C3C7D1; --muted:#A7ABB8;
-    --line:#22262E; --line2:#3A424D;
-    --blue:#8FB4DD; --blue-ink:#8FB4DD; --blue-hover:#B5CEEA; --blue-soft:#0F3A66;
+    --bg:#0B0E13; --card:#151A22; --card2:#1C2330;
+    --ink:#E8EDF4; --ink2:#C3CCD8; --muted:#9AA6B6;
+    --line:#232B37; --line2:#334052;
+    --blue:#8FB4DD; --blue-ink:#8FB4DD; --blue-hover:#B5CEEA; --blue-soft:#1A2A40;
     --navy:#0F3A66; --navy2:#071C3A;
-    --silver:#C9D1DB; --silver-soft:#2A323D; --silver-ink:#DCE3EC;
+    --silver:#C9D1DB; --silver-soft:#1A2A40; --silver-ink:#DCE7F3;
     --wa:#2BC272; --wa-ink:#8FE6BA; --on-wa:#04220F;
     --on-blue:#071C3A; --on-blue-ink:#071C3A;
-    --ok:#57C48C; --ok-soft:#163A2A;
-    --shadow-1:0 1px 2px rgba(0,0,0,.4);
-    --shadow-2:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
-    --header-bg:rgba(12,12,16,.86);
+    --ok:#74D99A; --ok-soft:#12331F;
+    --tag:#151A22; --tag-ink:#DCE7F3;
+    --shadow-chip:0 1px 2px rgba(0,0,0,.4);
+    --shadow-1:0 1px 2px rgba(0,0,0,.4),0 10px 28px -12px rgba(0,0,0,.6);
+    --shadow-2:0 2px 4px rgba(0,0,0,.4),0 18px 40px -16px rgba(0,0,0,.7);
+    --shadow-navy:0 8px 18px -8px rgba(0,0,0,.6);
+    --header-bg:rgba(11,14,19,.9);
+    color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#0C0C10; --card:#131318; --card2:#101015;
-  --ink:#E7E8ED; --ink2:#C3C7D1; --muted:#A7ABB8;
-  --line:#22262E; --line2:#3A424D;
-  --blue:#8FB4DD; --blue-ink:#8FB4DD; --blue-hover:#B5CEEA; --blue-soft:#0F3A66;
+  --bg:#0B0E13; --card:#151A22; --card2:#1C2330;
+  --ink:#E8EDF4; --ink2:#C3CCD8; --muted:#9AA6B6;
+  --line:#232B37; --line2:#334052;
+  --blue:#8FB4DD; --blue-ink:#8FB4DD; --blue-hover:#B5CEEA; --blue-soft:#1A2A40;
   --navy:#0F3A66; --navy2:#071C3A;
-  --silver:#C9D1DB; --silver-soft:#2A323D; --silver-ink:#DCE3EC;
+  --silver:#C9D1DB; --silver-soft:#1A2A40; --silver-ink:#DCE7F3;
   --wa:#2BC272; --wa-ink:#8FE6BA; --on-wa:#04220F;
   --on-blue:#071C3A; --on-blue-ink:#071C3A;
-  --ok:#57C48C; --ok-soft:#163A2A;
-  --shadow-1:0 1px 2px rgba(0,0,0,.4);
-  --shadow-2:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
-  --header-bg:rgba(12,12,16,.86);
+  --ok:#74D99A; --ok-soft:#12331F;
+  --tag:#151A22; --tag-ink:#DCE7F3;
+  --shadow-chip:0 1px 2px rgba(0,0,0,.4);
+  --shadow-1:0 1px 2px rgba(0,0,0,.4),0 10px 28px -12px rgba(0,0,0,.6);
+  --shadow-2:0 2px 4px rgba(0,0,0,.4),0 18px 40px -16px rgba(0,0,0,.7);
+  --shadow-navy:0 8px 18px -8px rgba(0,0,0,.6);
+  --header-bg:rgba(11,14,19,.9);
+  color-scheme:dark;
 }
 
 *,*::before,*::after{box-sizing:border-box}
@@ -124,23 +136,23 @@ a{color:var(--blue-ink);text-underline-offset:3px}
 .top .wrap{display:flex;align-items:center;gap:12px;min-height:62px}
 .mark{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;flex:none;
   min-height:44px}
-.mark img{width:38px;height:38px;flex:none;border-radius:10px;
-  box-shadow:var(--shadow-1)}
+.mark img{width:38px;height:38px;flex:none;border-radius:12px;
+  box-shadow:var(--shadow-chip)}
 .mark b{font-size:17px;font-weight:700;line-height:1.2;white-space:nowrap}
 .mark span{display:block;font-weight:400;font-size:12px;color:var(--muted);
   line-height:1.3;white-space:nowrap}
 nav.main{display:none;gap:4px}
 nav.main a{text-decoration:none;color:var(--ink2);font-weight:700;font-size:15px;
-  padding:8px 12px;border-radius:10px;display:inline-flex;align-items:center;min-height:44px}
+  padding:8px 14px;border-radius:999px;display:inline-flex;align-items:center;min-height:44px}
 nav.main a:hover{background:var(--blue-soft);color:var(--blue-ink)}
 /* The end cluster is what pushes right at every width; the nav takes over the
    auto margin only once it is actually displayed, or it would win the push
    while invisible and leave the language button stranded mid-header. */
 .top-end{display:flex;align-items:center;gap:8px;margin-inline-start:auto}
 .lang{text-decoration:none;color:var(--ink2);font-weight:700;font-size:14px;
-  border:1px solid var(--line2);border-radius:999px;padding:7px 14px;min-height:44px;
+  border:0;background:var(--card);box-shadow:var(--shadow-chip);border-radius:999px;padding:7px 16px;min-height:44px;
   display:inline-flex;align-items:center;white-space:nowrap}
-.lang:hover{border-color:var(--blue);color:var(--blue-ink)}
+.lang:hover{color:var(--blue-ink)}
 @media (max-width:559px){.top-end .btn{display:none}}
 @media (min-width:880px){nav.main{display:flex;margin-inline-start:8px}}
 
@@ -154,15 +166,15 @@ nav.main a:hover{background:var(--blue-soft);color:var(--blue-ink)}
 /* Foreground colours come from the token set, never from a literal: the blue
    is dark in the light theme and light in the dark one, so a hard-coded white
    would be unreadable in exactly one of them. */
-.btn.primary{background:var(--blue);color:var(--on-blue);box-shadow:var(--shadow-1)}
+.btn.primary{background:var(--blue);color:var(--on-blue);box-shadow:var(--shadow-navy)}
 .btn.primary:hover{background:var(--blue-hover);color:var(--on-blue-ink)}
 .btn.wa{background:var(--wa);color:var(--on-wa)}
 .btn.wa:hover{filter:brightness(.95)}
-.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line2)}
-.btn.ghost:hover{border-color:var(--blue);color:var(--blue-ink)}
+.btn.ghost{background:var(--card);color:var(--ink);border:0;box-shadow:inset 0 0 0 1.5px var(--line2)}
+.btn.ghost:hover{box-shadow:inset 0 0 0 1.5px var(--blue);color:var(--blue-ink)}
 .btn.onnavy{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.28)}
 .btn.onnavy:hover{background:rgba(255,255,255,.2)}
-.btn.sm{min-height:44px;padding:6px 14px;font-size:14.5px;border-radius:11px}
+.btn.sm{min-height:44px;padding:6px 16px;font-size:14.5px;border-radius:14px}
 .btn svg{width:19px;height:19px;flex:none;fill:currentColor}
 .btn-row{display:flex;flex-wrap:wrap;gap:12px}
 
@@ -202,24 +214,25 @@ nav.main a:hover{background:var(--blue-soft);color:var(--blue-ink)}
   color:var(--on-navy-muted);border:1px solid rgba(201,209,219,.34);border-radius:999px;
   padding:5px 15px;margin:0 0 18px}
 .eyebrow i{width:7px;height:7px;border-radius:50%;background:var(--silver);flex:none}
-h1{font-size:clamp(30px,1.6rem + 2.6vw,50px);font-weight:700;line-height:1.18;
-  letter-spacing:-.01em;margin:0 0 14px;text-wrap:balance;color:#fff}
+h1{font-size:clamp(30px,1.6rem + 2.6vw,50px);font-weight:700;line-height:1.3;
+  letter-spacing:normal;margin:0 0 14px;text-wrap:balance;color:#fff}
 .lede{font-size:clamp(16.5px,1rem + .35vw,20px);color:var(--on-navy-muted);
   margin:0 0 26px;text-wrap:pretty}
 .finder{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin-top:22px;padding:8px;
-  background:var(--card);border-radius:16px;max-width:640px;box-shadow:0 10px 30px -18px rgba(0,0,0,.5)}
+  background:var(--card);border-radius:22px;max-width:640px;box-shadow:var(--shadow-2)}
 .finder label{display:flex;flex-direction:column;gap:2px;flex:1 1 120px;min-width:0;padding:4px 8px}
 .finder label.grow{flex:2 1 180px}
 .finder label span{font-size:12px;font-weight:700;color:var(--muted)}
 .finder select,.finder input{font:inherit;font-size:15px;border:0;background:transparent;color:var(--ink);
   padding:4px 0;width:100%;min-width:0;outline:none}
-.finder label:focus-within{background:var(--blue-soft);border-radius:10px}
+.finder label:focus-within{background:var(--blue-soft);border-radius:14px}
 .finder .btn{flex:0 0 auto;align-self:stretch}
+@media (max-width:559px){.finder .btn{flex:1 1 100%;min-height:50px}}
 .trust{display:flex;flex-wrap:wrap;gap:6px 18px;margin:16px 0 0;padding:0;list-style:none;
   color:var(--on-navy-muted);font-size:14px}
 .trust li::before{content:"✓";margin-inline-end:6px;color:#8FD3A8;font-weight:700}
-.lc .pb{position:absolute;top:11px;inset-inline-end:11px;background:rgba(15,58,102,.92);color:#fff;
-  font-size:12.5px;font-weight:700;padding:2px 10px;border-radius:999px}
+.lc .pb{position:absolute;bottom:10px;inset-inline-start:10px;background:var(--tag);color:var(--tag-ink);
+  font-size:13px;font-weight:700;padding:3px 12px;border-radius:999px;box-shadow:0 2px 8px -2px rgba(7,20,38,.24)}
 .stats{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px;padding:0;list-style:none}
 .stats li{background:rgba(255,255,255,.07);border:1px solid rgba(201,209,219,.24);
   border-radius:13px;padding:9px 17px;font-size:13.5px;color:var(--on-navy-muted);
@@ -229,10 +242,9 @@ h1{font-size:clamp(30px,1.6rem + 2.6vw,50px);font-weight:700;line-height:1.18;
 
 /* ── sections ─────────────────────────────────────────────────────────── */
 section{padding-block:clamp(40px,7vw,68px);scroll-margin-top:70px}
-section + section{border-top:1px solid var(--line)}
 .head{max-width:44em;margin:0 0 26px}
-h2{font-size:clamp(23px,1.5rem + .7vw,32px);font-weight:700;line-height:1.25;
-  letter-spacing:-.01em;margin:0 0 8px;text-wrap:balance}
+h2{font-size:clamp(23px,1.5rem + .7vw,32px);font-weight:700;line-height:1.35;
+  letter-spacing:normal;margin:0 0 8px;text-wrap:balance}
 .head p{margin:0;color:var(--muted);font-size:16.5px}
 h3{font-size:18.5px;font-weight:700;margin:0 0 6px;line-height:1.35}
 .grid{display:grid;gap:16px;grid-template-columns:1fr}
@@ -241,43 +253,45 @@ h3{font-size:18.5px;font-weight:700;margin:0 0 6px;line-height:1.35}
   .grid.three{grid-template-columns:repeat(3,1fr)}
   .grid.four{grid-template-columns:repeat(4,1fr)}
 }
-.card{background:var(--card);border:1px solid var(--line);border-radius:18px;
+.card{background:var(--card);border:0;border-radius:20px;
   padding:22px;box-shadow:var(--shadow-1)}
 .card p{margin:0;color:var(--ink2);font-size:16px}
 /* Running text needs a measure. Inside the multi-column grids the columns
    already provide one, but the full-width "about" card ran to 115
    characters a line at 1920 — about twice what anyone reads comfortably. */
 .card p,.dlnote,.flist p{max-width:64ch}
-.card .ico{width:42px;height:42px;border-radius:12px;background:var(--blue-soft);
+.card .ico{width:44px;height:44px;border-radius:50%;background:var(--blue-soft);
   color:var(--blue-ink);display:grid;place-items:center;margin-bottom:14px}
 .card .ico svg{width:22px;height:22px;fill:currentColor}
 
 /* ── listing cards ────────────────────────────────────────────────────── */
 #listings[hidden]{display:none}
-.note{background:var(--silver-soft);color:var(--silver-ink);border:1px solid var(--silver);
-  border-radius:12px;padding:10px 16px;font-size:14.5px;font-weight:700;margin:0 0 18px}
+.note{background:var(--silver-soft);color:var(--silver-ink);border:0;
+  border-radius:14px;padding:10px 16px;font-size:14.5px;font-weight:700;margin:0 0 18px}
 .lgrid{display:grid;gap:16px;grid-template-columns:1fr}
 @media (min-width:560px){.lgrid{grid-template-columns:repeat(2,1fr)}}
 @media (min-width:920px){.lgrid{grid-template-columns:repeat(3,1fr)}}
-.lc{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);
-  border-radius:18px;overflow:hidden;text-decoration:none;color:inherit;
+.lc{display:flex;flex-direction:column;background:var(--card);border:0;
+  border-radius:20px;padding:8px;text-decoration:none;color:inherit;
   box-shadow:var(--shadow-1);transition:transform .15s ease,box-shadow .15s ease}
 .lc:hover{transform:translateY(-3px);box-shadow:var(--shadow-2)}
-.lc .ph{position:relative;aspect-ratio:4/3;background:var(--blue-soft);overflow:hidden}
+.lc .ph{position:relative;aspect-ratio:16/10;background:var(--blue-soft);overflow:hidden;
+  border-radius:14px}
 .lc .ph img{width:100%;height:100%;object-fit:cover;display:block}
-.lc .badge{position:absolute;top:11px;inset-inline-start:11px;background:var(--ok-soft);
+.lc .badge{position:absolute;top:10px;inset-inline-start:10px;background:var(--ok-soft);
   color:var(--ok);border-radius:999px;padding:3px 11px;font-size:12.5px;font-weight:700}
-.lc .body{padding:15px 17px 18px;display:flex;flex-direction:column;gap:5px;flex:1}
-.lc .price{font-size:21px;font-weight:700;color:var(--blue-ink);margin:0;line-height:1.3}
-.lc .t{font-weight:700;font-size:16.5px;margin:0;line-height:1.4;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.lc .w{color:var(--muted);font-size:14.5px;margin:0}
-.lc .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto;padding-top:10px}
-.lc .chips span{background:var(--blue-soft);color:var(--blue-ink);border-radius:999px;
-  padding:2px 11px;font-size:13.5px;font-weight:700}
-.skel{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden}
-.skel .ph{aspect-ratio:4/3;background:var(--blue-soft);animation:pulse 1.5s ease-in-out infinite}
-.skel .ln{height:1em;margin:14px 17px;background:var(--blue-soft);border-radius:7px;
+.lc .body{padding:12px 8px 8px;display:flex;flex-direction:column;gap:4px;flex:1}
+.lc .price{font-size:20px;font-weight:700;color:var(--blue-ink);margin:4px 0 0;line-height:1.3}
+.lc .t{font-weight:700;font-size:16px;margin:0;line-height:1.5;color:var(--ink);
+  display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.lc .w{color:var(--muted);font-size:13.5px;margin:0;line-height:1.5}
+.lc .chips{display:flex;flex-wrap:wrap;align-items:center;gap:6px 0;margin-top:auto;padding-top:8px}
+.lc .chips span{color:var(--ink2);font-size:13.5px;padding-inline:10px;line-height:1.2}
+.lc .chips span:first-child{padding-inline-start:0}
+.lc .chips span + span{border-inline-start:1px solid var(--line2)}
+.skel{background:var(--card);border-radius:20px;padding:8px;box-shadow:var(--shadow-1)}
+.skel .ph{aspect-ratio:16/10;border-radius:14px;background:var(--blue-soft);animation:pulse 1.5s ease-in-out infinite}
+.skel .ln{height:1em;margin:14px 8px;background:var(--blue-soft);border-radius:7px;
   animation:pulse 1.5s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
 .more{margin-top:22px}
@@ -285,12 +299,12 @@ h3{font-size:18.5px;font-weight:700;margin:0 0 6px;line-height:1.35}
 /* ── the app ──────────────────────────────────────────────────────────── */
 .appwrap{display:grid;gap:26px;grid-template-columns:1fr;align-items:center}
 @media (min-width:820px){.appwrap:not(.solo){grid-template-columns:300px 1fr;gap:44px}}
-.shot{justify-self:center;border-radius:26px;border:1px solid var(--line2);
+.shot{justify-self:center;border-radius:28px;border:6px solid var(--card);
   box-shadow:var(--shadow-2);overflow:hidden;background:var(--card);max-width:280px}
 .shot img{display:block;width:100%}
 .flist{list-style:none;padding:0;margin:0 0 24px;display:grid;gap:16px}
 .flist li{display:grid;grid-template-columns:38px 1fr;gap:14px;align-items:start}
-.flist .ico{width:38px;height:38px;border-radius:11px;background:var(--blue-soft);
+.flist .ico{width:38px;height:38px;border-radius:50%;background:var(--blue-soft);
   color:var(--blue-ink);display:grid;place-items:center}
 .flist .ico svg{width:20px;height:20px;fill:currentColor}
 .flist p{margin:0;color:var(--ink2);font-size:15.5px}
@@ -299,7 +313,7 @@ h3{font-size:18.5px;font-weight:700;margin:0 0 6px;line-height:1.35}
 
 /* ── contact ──────────────────────────────────────────────────────────── */
 .branch{display:flex;flex-direction:column;gap:14px}
-.branch .bmap{margin:12px 0 0;border:1px solid var(--line);border-radius:10px;
+.branch .bmap{margin:12px 0 0;border:0;border-radius:14px;
   overflow:hidden;line-height:0;background:var(--card2)}
 .branch .bmap iframe{width:100%;height:150px;border:0;display:block}
 .branch .addr{color:var(--ink2);margin:0;font-size:16px}
@@ -312,8 +326,8 @@ h3{font-size:18.5px;font-weight:700;margin:0 0 6px;line-height:1.35}
 .rows > li > svg{width:18px;height:18px;flex:none;fill:var(--muted);align-self:center}
 .rows a{font-weight:700;display:inline-flex;align-items:center;min-height:44px}
 .rows li.act{border-bottom:0;padding-top:14px}
-.embed{margin-top:18px;border:1px solid var(--line);border-radius:18px;overflow:hidden;
-  background:var(--card2)}
+.embed{margin-top:18px;border:0;border-radius:20px;overflow:hidden;
+  background:var(--card);box-shadow:var(--shadow-1)}
 .embed iframe{display:block;width:100%;height:300px;border:0}
 .embed figcaption{padding:10px 16px;font-size:14px;color:var(--muted);
   border-top:1px solid var(--line)}
@@ -322,14 +336,14 @@ h3{font-size:18.5px;font-weight:700;margin:0 0 6px;line-height:1.35}
 /* ── mobile action bar ────────────────────────────────────────────────── */
 .bar{position:fixed;inset-inline:0;bottom:0;z-index:60;display:flex;gap:10px;
   padding:10px clamp(12px,4vw,20px) calc(10px + env(safe-area-inset-bottom));
-  background:var(--header-bg);backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);border-top:1px solid var(--line)}
+  background:var(--card);border-top:0;
+  box-shadow:0 -1px 0 rgba(16,40,72,.07),0 -12px 28px -18px rgba(16,40,72,.22)}
 .bar .btn{flex:1}
 @media (min-width:880px){.bar{display:none}}
 @media (max-width:879px){body{padding-bottom:82px}}
 
 /* ── footer ───────────────────────────────────────────────────────────── */
-footer{border-top:1px solid var(--line);background:var(--card2);
+footer{border-top:0;background:var(--card);
   padding-block:34px;margin-top:0}
 .flinks{display:flex;flex-wrap:wrap;gap:8px 22px;margin:0 0 14px;padding:0;list-style:none}
 .flinks a{color:var(--ink2);text-decoration:none;font-weight:700;font-size:15px;
@@ -420,6 +434,17 @@ footer{border-top:1px solid var(--line);background:var(--card2);
   </div>
 </section>
 
+<!-- Plan 2026-09-30, Stage 6 — approved residential projects, live; hidden when none. -->
+<section id="projects" hidden>
+  <div class="wrap">
+    <div class="head">
+      <h2>مشاريع سكنية</h2>
+      <p>مشاريع جديدة بنماذجها وأسعارها. التفاصيل الكاملة والتواصل من التطبيق.</p>
+    </div>
+    <div class="lgrid" id="pgrid"></div>
+  </div>
+</section>
+
 <section id="services">
   <div class="wrap">
     <div class="head"><h2>خدماتنا</h2></div>
@@ -458,7 +483,7 @@ footer{border-top:1px solid var(--line);background:var(--card2);
       <figure class="shot">
         <picture>
           <source srcset="assets/app-shot.webp" type="image/webp">
-          <img src="assets/app-shot.jpg" alt="تطبيق النجوم" width="560" height="592"
+          <img src="assets/app-shot.jpg" alt="تطبيق النجوم" width="560" height="900"
                loading="lazy" decoding="async">
         </picture>
       </figure>
@@ -559,7 +584,7 @@ footer{border-top:1px solid var(--line);background:var(--card2);
 // ---------------------------------------------------------------------------
 (function () {
   'use strict';
-  var CFG = {"url":"https://hczsgceagommznjaohyk.supabase.co","key":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhjenNnY2VhZ29tbXpuamFvaHlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTQ2MTQsImV4cCI6MjA5MzI3MDYxNH0.n01oZaLvlnH9wuPe33Mn9VG9G1PHa0akqPPJ9JbZfiY","base":"","page":"home","rtl":true,"cityKey":"city_name_ar","govKey":"governorate_name_ar","t":{"verified":"موثّق","forSale":"للبيع","forRent":"للإيجار","rooms":"غرف","area":"م²","download":"حمّل التطبيق","version":"الإصدار","saved":"تم التنزيل — افتح الملف ليُضاف لجهات الاتصال","resultsTitle":"نتائج البحث","resultsLede":"اضغط على أي عقار تشوف تفاصيله وصوره.","listingsTitle":"عقارات مختارة","listingsLede":"مختارة من التطبيق. اضغط على أي عقار تشوف تفاصيله وصوره.","types":{"apartment":"شقة","villa":"فيلا","house":"منزل","land":"أرض","shop":"محل","office":"مكتب","building":"بناء","farm":"مزرعة","chalet":"شاليه","warehouse":"مستودع","factory":"معمل","clinic":"مشفى / مركز طبي","school":"مدرسة"}},"vcard":{"name":"النجوم للتسويق العقاري","phone":"+963955248245","email":"alnujom.real.estate@gmail.com","url":"https://mhekmatf.github.io/alnujom/","addresses":["بستان الباشا، حلب","حريتان، ريف حلب"]}};
+  var CFG = {"url":"https://hczsgceagommznjaohyk.supabase.co","key":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhjenNnY2VhZ29tbXpuamFvaHlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTQ2MTQsImV4cCI6MjA5MzI3MDYxNH0.n01oZaLvlnH9wuPe33Mn9VG9G1PHa0akqPPJ9JbZfiY","base":"","page":"home","rtl":true,"cityKey":"city_name_ar","govKey":"governorate_name_ar","t":{"verified":"موثّق","forSale":"للبيع","forRent":"للإيجار","published":"نُشر","rooms":"غرف","area":"م²","download":"حمّل التطبيق","version":"الإصدار","saved":"تم التنزيل — افتح الملف ليُضاف لجهات الاتصال","resultsTitle":"نتائج البحث","resultsLede":"اضغط على أي عقار تشوف تفاصيله وصوره.","listingsTitle":"عقارات مختارة","listingsLede":"مختارة من التطبيق. اضغط على أي عقار تشوف تفاصيله وصوره.","projectsFrom":"تبدأ من","types":{"apartment":"شقة","villa":"فيلا","house":"منزل","land":"أرض","shop":"محل","office":"مكتب","building":"بناء","farm":"مزرعة","chalet":"شاليه","warehouse":"مستودع","factory":"معمل","clinic":"مشفى / مركز طبي","school":"مدرسة","hotel":"فندق","restaurant":"مطعم","resort":"منتجع","cafe":"مقهى","wedding_hall":"صالة أفراح","club":"مسبح / نادي"}},"vcard":{"name":"النجوم للتسويق العقاري","phone":"+963955248245","email":"alnujom.real.estate@gmail.com","url":"https://mhekmatf.github.io/alnujom/","addresses":["بستان الباشا، حلب","حريتان، ريف حلب"]}};
   var qs = new URLSearchParams(location.search);
 
   function api(path, extraHeaders) {
@@ -591,7 +616,7 @@ footer{border-top:1px solid var(--line);background:var(--card2);
   var listPath = preview
     ? '/rest/v1/v_listings_public?select=id,title,property_type,purpose,rooms,bathrooms,' +
       'area_size,primary_amount,primary_currency,main_image_path,city_name_ar,city_name_en,' +
-      'governorate_name_ar,governorate_name_en,verification_status&limit=6'
+      'governorate_name_ar,governorate_name_en,verification_status,published_at,ref_code&limit=6'
     : '/rest/v1/v_site_listings?select=*&order=position.asc&limit=8';
 
   var grid = document.getElementById('lgrid');
@@ -619,21 +644,32 @@ footer{border-top:1px solid var(--line);background:var(--card2);
     a.append(ph);
 
     var body = el('div', 'body');
-    var price = money(row.primary_amount, row.primary_currency);
-    if (price) body.append(el('p', 'price', price));
     body.append(el('p', 't', row.title || ''));
 
     var where = [row[CFG.cityKey], row[CFG.govKey]]
       .filter(Boolean).filter(function (v, i, arr) { return arr.indexOf(v) === i; }).join(' · ');
     if (where) body.append(el('p', 'w', where));
+    // Plan 2026-09-30 (#12c): when the listing was published.
+    if (row.published_at) {
+      var d = new Date(row.published_at);
+      if (!isNaN(d)) {
+        body.append(el('p', 'w', CFG.t.published + ' ' + iso(d.toLocaleDateString(
+          CFG.rtl ? 'ar-SY-u-nu-latn' : 'en-GB',
+          { year: 'numeric', month: 'long', day: 'numeric' }))));
+      }
+    }
+
+    var price = money(row.primary_amount, row.primary_currency);
+    if (price) body.append(el('p', 'price', price));
 
     var chips = el('div', 'chips'), any = false;
     function chip(text) { chips.append(el('span', null, text)); any = true; }
     var kind = CFG.t.types[row.property_type];
-    var purpose = row.purpose === 'rent' ? CFG.t.forRent : (row.purpose === 'sale' ? CFG.t.forSale : null);
-    if (kind || purpose) chip([kind, purpose].filter(Boolean).join(' '));
+    if (kind) chip(kind);
     if (row.rooms) chip(iso(String(row.rooms)) + ' ' + CFG.t.rooms);
     if (row.area_size) chip(iso(String(Number(row.area_size))) + ' ' + CFG.t.area);
+    // Plan 2026-09-30 (#10): the property's code, «LND-0031».
+    if (row.ref_code) chip(iso(row.ref_code));
     if (any) body.append(chips);
 
     a.append(body);
@@ -657,6 +693,55 @@ footer{border-top:1px solid var(--line);background:var(--card2);
       if (preview) document.getElementById('preview-note').hidden = false;
     })
     .catch(function () { grid.replaceChildren(); });
+
+  // ── residential projects (Stage 6) ───────────────────────────────────────
+  // Approved projects only (the row rules let a visitor read nothing else);
+  // the cover is the first live photo. A card opens the app section.
+  api('/rest/v1/projects?select=id,name,developer_name,price_from,price_currency,ref_code,' +
+      'city:cities(display_name),project_media(kind,storage_path,thumbnail_path,position,pending,removed)' +
+      '&status=eq.approved&order=approved_at.desc&limit=6')
+    .then(function (r) { return r.ok ? r.json() : []; })
+    .then(function (rows) {
+      if (!Array.isArray(rows) || !rows.length) return;
+      var pgrid = document.getElementById('pgrid');
+      rows.forEach(function (row) {
+        var a = el('a', 'lc');
+        a.href = '#app';
+        var ph = el('div', 'ph');
+        var media = (row.project_media || []).filter(function (m) {
+          return m.kind === 'image' && !m.pending && !m.removed;
+        }).sort(function (x, y) { return x.position - y.position; });
+        if (media.length) {
+          var img = el('img');
+          img.src = CFG.url + '/storage/v1/object/public/project-images/'
+                  + (media[0].thumbnail_path || media[0].storage_path).split('/').map(encodeURIComponent).join('/');
+          img.alt = '';
+          img.loading = 'lazy';
+          img.decoding = 'async';
+          img.width = 400; img.height = 300;
+          img.addEventListener('error', function () { img.remove(); });
+          ph.append(img);
+        }
+        a.append(ph);
+        var body = el('div', 'body');
+        body.append(el('p', 't', row.name || ''));
+        var dn = row.city && row.city.display_name;
+        var where = dn ? (CFG.rtl ? (dn.ar || dn.en) : (dn.en || dn.ar)) : null;
+        if (row.developer_name) where = [where, row.developer_name].filter(Boolean).join(' · ');
+        if (where) body.append(el('p', 'w', where));
+        var price = money(row.price_from, row.price_currency);
+        if (price) body.append(el('p', 'price', CFG.t.projectsFrom + ' ' + price));
+        if (row.ref_code) {
+          var chips = el('div', 'chips');
+          chips.append(el('span', null, iso(row.ref_code)));
+          body.append(chips);
+        }
+        a.append(body);
+        pgrid.append(a);
+      });
+      document.getElementById('projects').hidden = false;
+    })
+    .catch(function () {});
 
   // ── the finder ───────────────────────────────────────────────────────────
   // The same search the app runs (search_listings: Arabic spellings, area and
