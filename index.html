@@ -4,24 +4,26 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>شركة النجوم للتسويق العقاري — حلب</title>
-<meta name="description" content="شركة النجوم للتسويق العقاري في بستان الباشا وحريتان بحلب. بيع وشراء وإيجار العقارات، وتطبيق مجاني تشوف فيه العقار وتتواصل مع صاحبه مباشرة.">
+<meta name="description" content="شركة النجوم للتسويق العقاري في بستان الباشا وحريتان بحلب. بيع وشراء وإيجار العقارات، وتطبيق مجاني ترى فيه العقار وتتواصل مع صاحبه مباشرة.">
 <meta name="theme-color" content="#0F3A66">
 <link rel="canonical" href="https://mhekmatf.github.io/alnujom/">
 <link rel="alternate" hreflang="ar" href="https://mhekmatf.github.io/alnujom/">
 <link rel="alternate" hreflang="en" href="https://mhekmatf.github.io/alnujom/en/">
 <link rel="icon" href="assets/app-icon.png" sizes="192x192">
 <link rel="apple-touch-icon" href="assets/app-icon.png">
+<link rel="preload" href="assets/tajawal-700.woff2" as="font" type="font/woff2" crossorigin>
 
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="النجوم للتسويق العقاري">
 <meta property="og:title" content="شركة النجوم للتسويق العقاري — حلب">
-<meta property="og:description" content="شركة النجوم للتسويق العقاري في بستان الباشا وحريتان بحلب. بيع وشراء وإيجار العقارات، وتطبيق مجاني تشوف فيه العقار وتتواصل مع صاحبه مباشرة.">
+<meta property="og:description" content="شركة النجوم للتسويق العقاري في بستان الباشا وحريتان بحلب. بيع وشراء وإيجار العقارات، وتطبيق مجاني ترى فيه العقار وتتواصل مع صاحبه مباشرة.">
 <meta property="og:url" content="https://mhekmatf.github.io/alnujom/">
 <meta property="og:locale" content="ar_SY">
 <meta property="og:image" content="https://mhekmatf.github.io/alnujom/assets/og-image.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
+<script>document.documentElement.classList.add('js')</script>
 
 <!-- Tajawal, served from this origin. A third-party font stylesheet is a second
      DNS lookup and a second handshake before any text can paint, and on the
@@ -39,16 +41,17 @@
    navy-tinted shadows instead of borders, navy-tint for selected and icon
    discs. A visitor who opens this page and then installs the app should not
    feel handed between two companies. Gold is the app's Featured badge and
-   nothing else, so the site has none.
+   nothing else, so the site has none. No blur or glass either: look A drops
+   it for the mid-range phones the office's customers carry.
 
    Three theme states, not two: an explicit choice stamps data-theme on <html>,
    but the default "system" setting stamps nothing, so the un-stamped document
    has to carry a complete light palette on bare :root.                        */
 :root{
   --bg:#F2F5F9; --card:#FFFFFF; --card2:#F4F7FB;
-  --ink:#0D1B2E; --ink2:#34445A; --muted:#617187;
+  --ink:#0D1B2E; --ink2:#34445A; --muted:#617187; --faint:#8A96A8;
   --line:#E6EBF1; --line2:#D5DDE7;
-  --blue:#0F3A66; --blue-ink:#0F3A66; --blue-hover:#17507F; --blue-soft:#E9EFF7;
+  --blue:#0F3A66; --blue-ink:#0F3A66; --blue-hover:#17507F; --blue-soft:#E9EFF7; --blue-soft2:#D8E3F0;
   --navy:#0F3A66; --navy2:#071C3A;
   --p1:radial-gradient(75% 95% at 50% 40%,#17507F 0%,#0F3A66 38%,#071C3A 100%);
   --on-navy:#FFFFFF; --on-navy-muted:#C9D1DB;
@@ -61,14 +64,15 @@
   --shadow-1:0 1px 2px rgba(16,40,72,.05),0 4px 10px -2px rgba(16,40,72,.05),0 14px 28px -12px rgba(16,40,72,.12);
   --shadow-2:0 2px 4px rgba(16,40,72,.06),0 12px 24px -8px rgba(16,40,72,.16),0 28px 48px -20px rgba(16,40,72,.24);
   --shadow-navy:0 8px 18px -8px rgba(15,58,102,.55);
-  --header-bg:rgba(242,245,249,.9);
+  --header-bg:#F2F5F9;
+  --map-filter:none;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
     --bg:#0B0E13; --card:#151A22; --card2:#1C2330;
-    --ink:#E8EDF4; --ink2:#C3CCD8; --muted:#9AA6B6;
+    --ink:#E8EDF4; --ink2:#C3CCD8; --muted:#9AA6B6; --faint:#6F7B8C;
     --line:#232B37; --line2:#334052;
-    --blue:#8FB4DD; --blue-ink:#8FB4DD; --blue-hover:#B5CEEA; --blue-soft:#1A2A40;
+    --blue:#8FB4DD; --blue-ink:#8FB4DD; --blue-hover:#B5CEEA; --blue-soft:#1A2A40; --blue-soft2:#22354F;
     --navy:#0F3A66; --navy2:#071C3A;
     --silver:#C9D1DB; --silver-soft:#1A2A40; --silver-ink:#DCE7F3;
     --wa:#2BC272; --wa-ink:#8FE6BA; --on-wa:#04220F;
@@ -79,15 +83,16 @@
     --shadow-1:0 1px 2px rgba(0,0,0,.4),0 10px 28px -12px rgba(0,0,0,.6);
     --shadow-2:0 2px 4px rgba(0,0,0,.4),0 18px 40px -16px rgba(0,0,0,.7);
     --shadow-navy:0 8px 18px -8px rgba(0,0,0,.6);
-    --header-bg:rgba(11,14,19,.9);
+    --header-bg:#0B0E13;
+    --map-filter:invert(.9) hue-rotate(180deg) saturate(.6) brightness(.95);
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --bg:#0B0E13; --card:#151A22; --card2:#1C2330;
-  --ink:#E8EDF4; --ink2:#C3CCD8; --muted:#9AA6B6;
+  --ink:#E8EDF4; --ink2:#C3CCD8; --muted:#9AA6B6; --faint:#6F7B8C;
   --line:#232B37; --line2:#334052;
-  --blue:#8FB4DD; --blue-ink:#8FB4DD; --blue-hover:#B5CEEA; --blue-soft:#1A2A40;
+  --blue:#8FB4DD; --blue-ink:#8FB4DD; --blue-hover:#B5CEEA; --blue-soft:#1A2A40; --blue-soft2:#22354F;
   --navy:#0F3A66; --navy2:#071C3A;
   --silver:#C9D1DB; --silver-soft:#1A2A40; --silver-ink:#DCE7F3;
   --wa:#2BC272; --wa-ink:#8FE6BA; --on-wa:#04220F;
@@ -98,7 +103,8 @@
   --shadow-1:0 1px 2px rgba(0,0,0,.4),0 10px 28px -12px rgba(0,0,0,.6);
   --shadow-2:0 2px 4px rgba(0,0,0,.4),0 18px 40px -16px rgba(0,0,0,.7);
   --shadow-navy:0 8px 18px -8px rgba(0,0,0,.6);
-  --header-bg:rgba(11,14,19,.9);
+  --header-bg:#0B0E13;
+  --map-filter:invert(.9) hue-rotate(180deg) saturate(.6) brightness(.95);
   color-scheme:dark;
 }
 
@@ -117,33 +123,49 @@ body{margin:0;background:var(--bg);color:var(--ink);
   overflow-x:hidden}
 img{max-width:100%;height:auto}
 a{color:var(--blue-ink);text-underline-offset:3px}
-:where(a,button,summary,[tabindex]):focus-visible{outline:3px solid var(--blue);
+:where(a,button,summary,select,input,[tabindex]):focus-visible{outline:3px solid var(--blue);
   outline-offset:3px;border-radius:8px}
-/* On the navy hero the navy ring would vanish. */
-.hero :where(a,button):focus-visible{outline-color:var(--silver)}
+/* On navy the navy ring would vanish. */
+:where(.hero,.panel,footer) :where(a,button):focus-visible{outline-color:var(--silver)}
 .num{font-variant-numeric:tabular-nums}
 .skip{position:absolute;inset-inline-start:0;top:0;z-index:100;font-weight:700;
   background:var(--blue);color:var(--on-blue);padding:10px 18px;border-radius:0 0 10px 0;
   width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
 .skip:focus{width:auto;height:auto;clip-path:none}
-.wrap{max-width:1080px;margin:0 auto;padding-inline:clamp(16px,4vw,28px)}
+.wrap{max-width:1120px;margin:0 auto;padding-inline:clamp(16px,4vw,28px)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+svg.i{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round}
+/* An arrow that points "onward" points left in Arabic. */
+[dir="rtl"] .flip{transform:scaleX(-1)}
+
+/* ── motion: one quiet rise as a block first scrolls into view ───────── */
+@media (prefers-reduced-motion:no-preference){
+  .js .rv{opacity:0;transform:translateY(16px);
+    transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+  .js .rv.in{opacity:1;transform:none}
+  .lc{animation:rise .5s cubic-bezier(.2,.7,.2,1) both}
+  .lc:nth-child(2){animation-delay:.06s}.lc:nth-child(3){animation-delay:.12s}
+  .lc:nth-child(4){animation-delay:.18s}.lc:nth-child(5){animation-delay:.24s}
+  .lc:nth-child(n+6){animation-delay:.3s}
+}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 
 /* ── header ───────────────────────────────────────────────────────────── */
 .top{position:sticky;top:0;z-index:50;background:var(--header-bg);
-  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
   border-bottom:1px solid var(--line)}
-.top .wrap{display:flex;align-items:center;gap:12px;min-height:62px}
+.top .wrap{display:flex;align-items:center;gap:12px;min-height:64px}
 .mark{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;flex:none;
   min-height:44px}
 .mark img{width:38px;height:38px;flex:none;border-radius:12px;
-  box-shadow:var(--shadow-chip)}
+  box-shadow:0 0 0 1.5px var(--silver),var(--shadow-chip)}
 .mark b{font-size:17px;font-weight:700;line-height:1.2;white-space:nowrap}
 .mark span{display:block;font-weight:400;font-size:12px;color:var(--muted);
   line-height:1.3;white-space:nowrap}
-nav.main{display:none;gap:4px}
+nav.main{display:none;gap:2px}
 nav.main a{text-decoration:none;color:var(--ink2);font-weight:700;font-size:15px;
-  padding:8px 14px;border-radius:999px;display:inline-flex;align-items:center;min-height:44px}
+  padding:8px 14px;border-radius:999px;display:inline-flex;align-items:center;min-height:44px;
+  transition:background .15s ease,color .15s ease}
 nav.main a:hover{background:var(--blue-soft);color:var(--blue-ink)}
 /* The end cluster is what pushes right at every width; the nav takes over the
    auto margin only once it is actually displayed, or it would win the push
@@ -154,15 +176,16 @@ nav.main a:hover{background:var(--blue-soft);color:var(--blue-ink)}
   display:inline-flex;align-items:center;white-space:nowrap}
 .lang:hover{color:var(--blue-ink)}
 @media (max-width:559px){.top-end .btn{display:none}}
-@media (min-width:880px){nav.main{display:flex;margin-inline-start:8px}}
+@media (min-width:880px){nav.main{display:flex;margin-inline-start:12px}}
 
 /* ── buttons ──────────────────────────────────────────────────────────── */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;
   min-height:48px;padding:10px 22px;border-radius:14px;border:1px solid transparent;
-  font:inherit;font-weight:700;font-size:16px;text-decoration:none;cursor:pointer;
+  font:inherit;font-weight:700;font-size:16px;line-height:1.3;text-decoration:none;cursor:pointer;
   white-space:nowrap;
-  transition:transform .12s ease,box-shadow .12s ease,background .12s ease}
+  transition:transform .12s ease,box-shadow .15s ease,background .15s ease,color .15s ease}
 .btn:active{transform:translateY(1px)}
+.btn:disabled{opacity:.7;cursor:progress}
 /* Foreground colours come from the token set, never from a literal: the blue
    is dark in the light theme and light in the dark one, so a hard-coded white
    would be unreadable in exactly one of them. */
@@ -172,120 +195,175 @@ nav.main a:hover{background:var(--blue-soft);color:var(--blue-ink)}
 .btn.wa:hover{filter:brightness(.95)}
 .btn.ghost{background:var(--card);color:var(--ink);border:0;box-shadow:inset 0 0 0 1.5px var(--line2)}
 .btn.ghost:hover{box-shadow:inset 0 0 0 1.5px var(--blue);color:var(--blue-ink)}
-.btn.onnavy{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.28)}
-.btn.onnavy:hover{background:rgba(255,255,255,.2)}
-.btn.sm{min-height:44px;padding:6px 16px;font-size:14.5px;border-radius:14px}
+.btn.onnavy{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(201,209,219,.38)}
+.btn.onnavy:hover{background:rgba(255,255,255,.18)}
+.btn.light{background:#fff;color:#0F3A66;box-shadow:0 8px 20px -10px rgba(0,0,0,.5)}
+.btn.light:hover{background:#E9EFF7}
+.btn.sm{min-height:44px;padding:6px 16px;font-size:14.5px}
 .btn svg{width:19px;height:19px;flex:none;fill:currentColor}
+.btn svg.i{fill:none}
 .btn-row{display:flex;flex-wrap:wrap;gap:12px}
+.link{display:inline-flex;align-items:center;gap:6px;font-weight:700;text-decoration:none;
+  color:var(--blue-ink);min-height:44px}
+.link:hover{text-decoration:underline}
+.link svg.i{width:18px;height:18px}
 
 /* ── hero ─────────────────────────────────────────────────────────────── */
 .hero{position:relative;background-color:var(--navy2);background-image:var(--p1);
-  color:var(--on-navy);overflow:hidden;
-  border-bottom:1px solid var(--line)}
-/* The ground is the business card's navy (`--p1`), and over it a hairline
-   silver grid that reads as plotted land rather than as decoration. Both are
-   painted, not downloaded. */
-.hero::after{content:"";position:absolute;inset:0;opacity:.14;pointer-events:none;
-  background-image:linear-gradient(rgba(201,209,219,.5) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(201,209,219,.5) 1px,transparent 1px);
-  background-size:64px 64px;
-  -webkit-mask-image:linear-gradient(to bottom,transparent,#000 55%,transparent);
-  mask-image:linear-gradient(to bottom,transparent,#000 55%,transparent)}
-.hero .wrap{position:relative;z-index:1;padding-block:clamp(34px,6vw,56px) clamp(26px,5vw,44px);
+  color:var(--on-navy);overflow:hidden;isolation:isolate}
+/* Apartment balconies in the brand's navy — a duotone made by
+   tool/build_site_assets.py, so it reads as texture rather than as a claim
+   about one building. A phone fetches the 760 px copy, a desktop the 1200;
+   each is declared inside its own media query, so neither pays for the other. */
+.hero-photo{position:absolute;inset:0;z-index:-1;background-color:var(--navy2);
+  background-size:cover;background-position:center 30%;opacity:.42}
+.hero-photo::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(7,28,58,.55) 0%,rgba(7,28,58,.86) 55%,#071C3A 100%)}
+@media (max-width:899px){
+  .hero-photo{background-image:url(assets/hero-760.jpg);
+    background-image:image-set(url(assets/hero-760.webp) type("image/webp"),url(assets/hero-760.jpg) type("image/jpeg"))}
+}
+@media (min-width:900px){
+  .hero-photo{inset-inline-start:auto;width:56%;opacity:1;
+    background-image:url(assets/hero-1200.jpg);
+    background-image:image-set(url(assets/hero-1200.webp) type("image/webp"),url(assets/hero-1200.jpg) type("image/jpeg"))}
+  /* Mirrored in Arabic so the open sky sits at the outer edge either way. */
+  [dir="rtl"] .hero-photo{transform:scaleX(-1)}
+  /* Faded in from the text side by a mask, not painted over with navy: the
+     ground behind it is a gradient, so any flat colour would leave a seam. */
+  .hero-photo{background-color:transparent;
+    -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 45%);
+    mask-image:linear-gradient(90deg,transparent 0%,#000 45%)}
+  .hero-photo::after{background:
+    linear-gradient(90deg,rgba(7,28,58,.6) 0%,rgba(7,28,58,.3) 60%,rgba(7,28,58,.45) 100%),
+    linear-gradient(180deg,rgba(7,28,58,.2) 0%,transparent 40%,rgba(7,28,58,.75) 100%)}
+}
+.hero .wrap{position:relative;padding-block:clamp(36px,7vw,72px) clamp(92px,11vw,128px);
   display:grid;gap:36px;align-items:center;grid-template-columns:1fr}
-.hero-in{max-width:36em}
+.hero-in{max-width:34em}
 /* The lockup is the business card's: the white mark over the calligraphy on
-   the same navy, with ALNUJOM in silver under them.
-
-   It is a background rather than an <img> on purpose: the plate is hidden below
-   900 px, and a hidden <img> is still downloaded (measured — `loading="lazy"`
-   did not help), while a background declared inside a media query that does not
-   match is never fetched. A phone does not pay for what it cannot see. */
+   the same navy, with ALNUJOM in silver under them. It is a background rather
+   than an <img> on purpose: the plate is hidden below 900 px, and a hidden
+   <img> is still downloaded, while a background inside a media query that does
+   not match is never fetched. */
 .plate{display:none}
 @media (min-width:900px){
-  .hero .wrap{grid-template-columns:minmax(0,1fr) auto}
+  .hero .wrap{grid-template-columns:minmax(0,1fr) minmax(0,.8fr)}
   .plate{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
-    justify-self:center;width:240px;height:282px;
-    background:url(assets/logo-lockup-white.png) no-repeat center top/contain}
-  .plate span{color:var(--silver);font-weight:700;font-size:17px;line-height:1;
+    justify-self:center;width:220px;height:258px;
+    background:url(assets/logo-lockup-white.png) no-repeat center top/contain;
+    filter:drop-shadow(0 10px 24px rgba(0,0,0,.45))}
+  .plate span{color:var(--silver);font-weight:700;font-size:16px;line-height:1;
     letter-spacing:.42em;margin-inline-end:-.42em}
 }
-.eyebrow{display:inline-flex;align-items:center;gap:9px;font-size:13.5px;font-weight:700;
-  color:var(--on-navy-muted);border:1px solid rgba(201,209,219,.34);border-radius:999px;
-  padding:5px 15px;margin:0 0 18px}
-.eyebrow i{width:7px;height:7px;border-radius:50%;background:var(--silver);flex:none}
-h1{font-size:clamp(30px,1.6rem + 2.6vw,50px);font-weight:700;line-height:1.3;
-  letter-spacing:normal;margin:0 0 14px;text-wrap:balance;color:#fff}
-.lede{font-size:clamp(16.5px,1rem + .35vw,20px);color:var(--on-navy-muted);
-  margin:0 0 26px;text-wrap:pretty}
-.finder{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin-top:22px;padding:8px;
-  background:var(--card);border-radius:22px;max-width:640px;box-shadow:var(--shadow-2)}
-.finder label{display:flex;flex-direction:column;gap:2px;flex:1 1 120px;min-width:0;padding:4px 8px}
-.finder label.grow{flex:2 1 180px}
-.finder label span{font-size:12px;font-weight:700;color:var(--muted)}
-.finder select,.finder input{font:inherit;font-size:15px;border:0;background:transparent;color:var(--ink);
-  padding:4px 0;width:100%;min-width:0;outline:none}
-.finder label:focus-within{background:var(--blue-soft);border-radius:14px}
-.finder .btn{flex:0 0 auto;align-self:stretch}
-@media (max-width:559px){.finder .btn{flex:1 1 100%;min-height:50px}}
-.trust{display:flex;flex-wrap:wrap;gap:6px 18px;margin:16px 0 0;padding:0;list-style:none;
-  color:var(--on-navy-muted);font-size:14px}
-.trust li::before{content:"✓";margin-inline-end:6px;color:#8FD3A8;font-weight:700}
-.lc .pb{position:absolute;bottom:10px;inset-inline-start:10px;background:var(--tag);color:var(--tag-ink);
-  font-size:13px;font-weight:700;padding:3px 12px;border-radius:999px;box-shadow:0 2px 8px -2px rgba(7,20,38,.24)}
-.stats{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px;padding:0;list-style:none}
-.stats li{background:rgba(255,255,255,.07);border:1px solid rgba(201,209,219,.24);
-  border-radius:13px;padding:9px 17px;font-size:13.5px;color:var(--on-navy-muted);
-  line-height:1.35}
-.stats b{display:block;font-size:23px;font-weight:700;color:#fff}
-.stats li[hidden]{display:none}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;
+  color:var(--on-navy-muted);background:rgba(7,28,58,.35);
+  border:1px solid rgba(201,209,219,.3);border-radius:999px;
+  padding:4px 14px 4px 14px;margin:0 0 20px;line-height:1.6}
+.eyebrow svg.i{width:16px;height:16px;color:var(--silver)}
+h1{font-size:clamp(32px,1.5rem + 3vw,54px);font-weight:700;line-height:1.3;
+  margin:0 0 16px;text-wrap:balance;color:#fff}
+.lede{font-size:clamp(17px,1rem + .4vw,20.5px);line-height:1.75;color:var(--on-navy-muted);
+  margin:0 0 28px;text-wrap:pretty;max-width:31em}
+
+/* ── the finder: a white card that straddles the hero's bottom edge ───── */
+.find{position:relative;z-index:2;margin-top:clamp(-96px,-8vw,-64px)}
+.fcard{background:var(--card);border-radius:22px;box-shadow:var(--shadow-2);padding:10px}
+.finder{display:grid;gap:8px;grid-template-columns:1fr 1fr}
+.finder label{display:flex;flex-direction:column;gap:0;min-width:0;padding:8px 14px;
+  border-radius:14px;background:var(--card2);cursor:pointer;transition:background .15s ease}
+.finder label.grow{grid-column:1/-1}
+.finder label span{font-size:13px;font-weight:700;color:var(--muted);line-height:1.5}
+.finder select,.finder input{font:inherit;font-size:16px;font-weight:700;border:0;background:transparent;
+  color:var(--ink);padding:2px 0;width:100%;min-width:0;outline:none;line-height:1.6}
+.finder input{font-weight:400}
+.finder input::placeholder{color:var(--faint);opacity:1}
+.finder select{-webkit-appearance:none;appearance:none;padding-inline-end:22px;cursor:pointer;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238A96A8' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat;
+  background-size:18px;background-position:right center}
+[dir="rtl"] .finder select{background-position:left center}
+.finder select option{color:#0D1B2E;background:#fff}
+.finder label:hover{background:var(--blue-soft)}
+.finder label:focus-within{background:var(--blue-soft);box-shadow:inset 0 0 0 1.5px var(--blue)}
+.finder .btn{grid-column:1/-1;min-height:54px;font-size:17px;border-radius:14px}
+@media (min-width:760px){
+  .finder{grid-template-columns:1fr 1fr 1.6fr auto}
+  .finder label.grow{grid-column:auto}
+  .finder .btn{grid-column:auto;padding-inline:30px;min-height:0}
+}
+.trust{display:grid;gap:4px 24px;margin:6px 0 0;padding:10px 12px 4px;list-style:none;
+  border-top:1px solid var(--line);color:var(--ink2);font-size:14.5px;line-height:1.5}
+.trust li{display:flex;align-items:center;gap:10px;min-height:34px}
+.trust svg{width:18px;height:18px;flex:none;color:var(--blue-ink)}
+.trust svg:not(.i){fill:currentColor}
+@media (min-width:760px){.trust{grid-template-columns:repeat(3,auto);justify-content:start}}
 
 /* ── sections ─────────────────────────────────────────────────────────── */
-section{padding-block:clamp(40px,7vw,68px);scroll-margin-top:70px}
-.head{max-width:44em;margin:0 0 26px}
-h2{font-size:clamp(23px,1.5rem + .7vw,32px);font-weight:700;line-height:1.35;
-  letter-spacing:normal;margin:0 0 8px;text-wrap:balance}
-.head p{margin:0;color:var(--muted);font-size:16.5px}
-h3{font-size:18.5px;font-weight:700;margin:0 0 6px;line-height:1.35}
+section{padding-block:clamp(48px,8vw,88px);scroll-margin-top:72px}
+.find + span + section{padding-top:clamp(40px,6vw,64px)}
+.head{max-width:44em;margin:0 0 28px}
+.headrow{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:8px 24px;
+  margin:0 0 28px}
+.headrow .head{margin:0}
+h2{font-size:clamp(25px,1.4rem + 1vw,36px);font-weight:700;line-height:1.35;
+  margin:0 0 8px;text-wrap:balance}
+.head p{margin:0;color:var(--muted);font-size:clamp(16px,.95rem + .2vw,17.5px);text-wrap:pretty}
+h3{font-size:18.5px;font-weight:700;margin:0 0 6px;line-height:1.4}
 .grid{display:grid;gap:16px;grid-template-columns:1fr}
-@media (min-width:600px){.grid.two,.grid.four{grid-template-columns:repeat(2,1fr)}}
-@media (min-width:900px){
-  .grid.three{grid-template-columns:repeat(3,1fr)}
-  .grid.four{grid-template-columns:repeat(4,1fr)}
-}
+@media (min-width:640px){.grid.two{grid-template-columns:repeat(2,1fr)}}
 .card{background:var(--card);border:0;border-radius:20px;
   padding:22px;box-shadow:var(--shadow-1)}
 .card p{margin:0;color:var(--ink2);font-size:16px}
-/* Running text needs a measure. Inside the multi-column grids the columns
-   already provide one, but the full-width "about" card ran to 115
-   characters a line at 1920 — about twice what anyone reads comfortably. */
+/* Running text needs a measure. */
 .card p,.dlnote,.flist p{max-width:64ch}
-.card .ico{width:44px;height:44px;border-radius:50%;background:var(--blue-soft);
-  color:var(--blue-ink);display:grid;place-items:center;margin-bottom:14px}
-.card .ico svg{width:22px;height:22px;fill:currentColor}
 
-/* ── listing cards ────────────────────────────────────────────────────── */
+/* ── services ─────────────────────────────────────────────────────────── */
+.svc{display:grid;gap:14px;grid-template-columns:1fr}
+@media (min-width:640px){.svc{grid-template-columns:repeat(2,1fr);gap:16px}}
+@media (min-width:1000px){.svc{grid-template-columns:repeat(4,1fr)}}
+.svc .card{display:grid;grid-template-columns:52px 1fr;gap:16px;align-items:start;align-content:start;padding:20px;
+  transition:transform .2s ease,box-shadow .2s ease}
+.svc .card:hover{transform:translateY(-3px);box-shadow:var(--shadow-2)}
+@media (min-width:1000px){.svc .card{grid-template-columns:1fr;padding:26px 24px 28px}}
+.ico{width:52px;height:52px;border-radius:16px;background:var(--blue-soft);
+  color:var(--blue-ink);display:grid;place-items:center}
+.ico svg.i{width:26px;height:26px}
+.svc h3{margin-top:4px}
+@media (min-width:1000px){.svc h3{margin-top:18px}}
+.svc p{font-size:15.5px;line-height:1.75}
+
+/* ── listing cards (the app's one anatomy) ────────────────────────────── */
 #listings[hidden]{display:none}
 .note{background:var(--silver-soft);color:var(--silver-ink);border:0;
-  border-radius:14px;padding:10px 16px;font-size:14.5px;font-weight:700;margin:0 0 18px}
+  border-radius:14px;padding:12px 16px;font-size:15px;font-weight:700;margin:0 0 18px}
 .lgrid{display:grid;gap:16px;grid-template-columns:1fr}
 @media (min-width:560px){.lgrid{grid-template-columns:repeat(2,1fr)}}
-@media (min-width:920px){.lgrid{grid-template-columns:repeat(3,1fr)}}
+@media (min-width:920px){.lgrid{grid-template-columns:repeat(3,1fr);gap:20px}}
 .lc{display:flex;flex-direction:column;background:var(--card);border:0;
   border-radius:20px;padding:8px;text-decoration:none;color:inherit;
-  box-shadow:var(--shadow-1);transition:transform .15s ease,box-shadow .15s ease}
+  box-shadow:var(--shadow-1);transition:transform .2s ease,box-shadow .2s ease}
 .lc:hover{transform:translateY(-3px);box-shadow:var(--shadow-2)}
-.lc .ph{position:relative;aspect-ratio:16/10;background:var(--blue-soft);overflow:hidden;
+.lc .ph{position:relative;aspect-ratio:16/10;background:var(--blue-soft);
   border-radius:14px}
-.lc .ph img{width:100%;height:100%;object-fit:cover;display:block}
+.lc .ph img{width:100%;height:100%;object-fit:cover;display:block;border-radius:14px}
+.lc .ph::before{content:"";position:absolute;inset:0;display:grid;border-radius:14px;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238A96A8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 10.5 12 3l9 7.5M5 9v11h14V9M10 20v-5h4v5'/%3E%3C/svg%3E") no-repeat center/40px}
+.lc .ph img{position:absolute;inset:0}
 .lc .badge{position:absolute;top:10px;inset-inline-start:10px;background:var(--ok-soft);
-  color:var(--ok);border-radius:999px;padding:3px 11px;font-size:12.5px;font-weight:700}
-.lc .body{padding:12px 8px 8px;display:flex;flex-direction:column;gap:4px;flex:1}
-.lc .price{font-size:20px;font-weight:700;color:var(--blue-ink);margin:4px 0 0;line-height:1.3}
-.lc .t{font-weight:700;font-size:16px;margin:0;line-height:1.5;color:var(--ink);
+  color:var(--ok);border-radius:999px;padding:2px 11px;font-size:12.5px;font-weight:700}
+/* Purpose tag: a white pill centred on the photo's bottom edge, as in the app. */
+.lc .pb{position:absolute;bottom:-14px;inset-inline-start:12px;background:var(--tag);color:var(--tag-ink);
+  font-size:13px;font-weight:700;line-height:28px;height:28px;padding:0 12px;border-radius:999px;
+  box-shadow:0 2px 8px -2px rgba(7,20,38,.24)}
+.lc .body{padding:24px 10px 8px;display:flex;flex-direction:column;gap:2px;flex:1}
+.lc .t{font-weight:700;font-size:16.5px;margin:0;line-height:1.5;color:var(--ink);
   display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
-.lc .w{color:var(--muted);font-size:13.5px;margin:0;line-height:1.5}
-.lc .chips{display:flex;flex-wrap:wrap;align-items:center;gap:6px 0;margin-top:auto;padding-top:8px}
+.lc .w{color:var(--muted);font-size:13.5px;margin:0;line-height:1.6;display:flex;align-items:center;gap:5px}
+.lc .w svg.i{width:15px;height:15px;stroke-width:2}
+.lc .d{color:var(--faint);font-size:13px;margin:0;line-height:1.6}
+.lc .price{font-size:20px;font-weight:700;color:var(--blue-ink);margin:8px 0 0;line-height:1.3}
+.lc .chips{display:flex;flex-wrap:wrap;align-items:center;gap:6px 0;margin-top:auto;padding-top:10px;
+  border-top:1px solid var(--line);margin-top:10px}
 .lc .chips span{color:var(--ink2);font-size:13.5px;padding-inline:10px;line-height:1.2}
 .lc .chips span:first-child{padding-inline-start:0}
 .lc .chips span + span{border-inline-start:1px solid var(--line2)}
@@ -293,44 +371,102 @@ h3{font-size:18.5px;font-weight:700;margin:0 0 6px;line-height:1.35}
 .skel .ph{aspect-ratio:16/10;border-radius:14px;background:var(--blue-soft);animation:pulse 1.5s ease-in-out infinite}
 .skel .ln{height:1em;margin:14px 8px;background:var(--blue-soft);border-radius:7px;
   animation:pulse 1.5s ease-in-out infinite}
+.skel .ln + .ln{width:55%}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
-.more{margin-top:22px}
+/* On a phone the newest listings are a rail you swipe, as in the app, so
+   seven full-width cards do not push the rest of the page a screen away. The
+   rail scrolls; the page never does. */
+@media (max-width:559px){
+  #lgrid2{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;
+    margin-inline:calc(-1 * clamp(16px,4vw,28px));padding:4px clamp(16px,4vw,28px) 18px;
+    scroll-padding-inline:clamp(16px,4vw,28px);scrollbar-width:none}
+  #lgrid2::-webkit-scrollbar{display:none}
+  #lgrid2 .lc{flex:0 0 80%;scroll-snap-align:start}
+  .hero .btn-row .btn{flex:1 1 100%}
+}
+.sub{display:flex;align-items:center;gap:14px;margin:44px 0 20px}
+.sub h3{margin:0;font-size:clamp(19px,1.1rem + .4vw,22px);white-space:nowrap}
+.sub::after{content:"";flex:1;height:1px;background:var(--line2)}
+.more{margin:26px 0 0}
 
-/* ── the app ──────────────────────────────────────────────────────────── */
-.appwrap{display:grid;gap:26px;grid-template-columns:1fr;align-items:center}
-@media (min-width:820px){.appwrap:not(.solo){grid-template-columns:300px 1fr;gap:44px}}
-.shot{justify-self:center;border-radius:28px;border:6px solid var(--card);
-  box-shadow:var(--shadow-2);overflow:hidden;background:var(--card);max-width:280px}
-.shot img{display:block;width:100%}
-.flist{list-style:none;padding:0;margin:0 0 24px;display:grid;gap:16px}
-.flist li{display:grid;grid-template-columns:38px 1fr;gap:14px;align-items:start}
-.flist .ico{width:38px;height:38px;border-radius:50%;background:var(--blue-soft);
-  color:var(--blue-ink);display:grid;place-items:center}
-.flist .ico svg{width:20px;height:20px;fill:currentColor}
-.flist p{margin:0;color:var(--ink2);font-size:15.5px}
-.dlnote{color:var(--muted);font-size:14.5px;margin:12px 0 0}
-.dlnote a{color:var(--muted)}
+/* ── the app: the one navy panel below the hero ───────────────────────── */
+.panel{position:relative;overflow:hidden;isolation:isolate;border-radius:24px;
+  background-color:var(--navy2);background-image:var(--p1);color:var(--on-navy);
+  padding:clamp(28px,5vw,56px);box-shadow:var(--shadow-2)}
+.panel::before{content:"";position:absolute;inset:0;z-index:-1;opacity:.12;pointer-events:none;
+  background-image:linear-gradient(rgba(201,209,219,.6) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(201,209,219,.6) 1px,transparent 1px);
+  background-size:56px 56px;
+  -webkit-mask-image:radial-gradient(70% 90% at 30% 50%,#000,transparent);
+  mask-image:radial-gradient(70% 90% at 30% 50%,#000,transparent)}
+.panel h2{color:#fff}
+.panel .head p{color:var(--on-navy-muted)}
+.appwrap{display:grid;gap:32px;grid-template-columns:1fr;align-items:center}
+@media (min-width:820px){.appwrap:not(.solo){grid-template-columns:minmax(0,1fr) 300px;gap:56px}}
+.shot{justify-self:center;margin:0;border-radius:30px;padding:7px;background:#0A1526;
+  box-shadow:0 0 0 1.5px rgba(201,209,219,.35),0 30px 60px -24px rgba(0,0,0,.7);
+  max-width:270px;transform:rotate(-2deg)}
+[dir="rtl"] .shot{transform:rotate(2deg)}
+.shot img{display:block;width:100%;border-radius:24px}
+.flist{list-style:none;padding:0;margin:0 0 30px;display:grid;gap:18px}
+.flist li{display:grid;grid-template-columns:46px 1fr;gap:14px;align-items:start}
+.flist .ico{width:46px;height:46px;border-radius:14px;background:rgba(201,209,219,.12);
+  color:#fff;box-shadow:inset 0 0 0 1px rgba(201,209,219,.22)}
+.flist .ico svg.i{width:22px;height:22px}
+.flist h3{color:#fff;margin:0 0 2px;font-size:17.5px}
+.flist p{margin:0;color:var(--on-navy-muted);font-size:15.5px;line-height:1.7}
+.dlnote{color:var(--on-navy-muted);font-size:14px;margin:16px 0 0;opacity:.9;line-height:1.7}
+
+/* ── about ────────────────────────────────────────────────────────────── */
+.about{display:grid;gap:18px;align-items:start;padding:clamp(24px,4vw,40px)}
+@media (min-width:820px){.about{grid-template-columns:minmax(0,.7fr) minmax(0,1.3fr);gap:48px}}
+.about h2{margin:0}
+.about h2::before{content:"";display:block;width:36px;height:4px;border-radius:4px;
+  background:var(--silver);margin-bottom:16px}
+.about p{font-size:clamp(17px,1rem + .3vw,19.5px);line-height:1.9;color:var(--ink2);margin:0}
 
 /* ── contact ──────────────────────────────────────────────────────────── */
-.branch{display:flex;flex-direction:column;gap:14px}
-.branch .bmap{margin:12px 0 0;border:0;border-radius:14px;
-  overflow:hidden;line-height:0;background:var(--card2)}
-.branch .bmap iframe{width:100%;height:150px;border:0;display:block}
-.branch .addr{color:var(--ink2);margin:0;font-size:16px}
-.branch .acts{display:flex;flex-wrap:wrap;gap:9px;margin-top:auto}
-.rows{list-style:none;padding:0;margin:18px 0 0;display:grid;gap:2px}
-.rows li{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;
-  padding:9px 0;border-bottom:1px solid var(--line);font-size:16px}
+.branch{display:flex;flex-direction:column;padding:8px}
+.bmap{position:relative;display:block;aspect-ratio:800/340;border-radius:14px;overflow:hidden;
+  background:var(--card2)}
+.bmap img{display:block;width:100%;height:100%;object-fit:cover;filter:var(--map-filter);
+  transition:transform .4s ease}
+.bmap:hover img{transform:scale(1.03)}
+.bmap .pin{position:absolute;left:50%;top:50%;width:38px;height:38px;margin:-36px 0 0 -19px;
+  color:var(--blue);filter:drop-shadow(0 4px 6px rgba(7,28,58,.35))}
+.bmap .pin svg{width:100%;height:100%;fill:currentColor;stroke:#fff;stroke-width:1.2}
+.bmap .osm{position:absolute;bottom:6px;inset-inline-end:8px;font-size:11px;line-height:1.4;
+  background:rgba(255,255,255,.85);color:#34445A;padding:1px 6px;border-radius:6px}
+.branch .bb{padding:16px 12px 10px;display:flex;flex-direction:column;gap:4px;flex:1}
+.branch .addr{color:var(--muted);margin:0 0 12px;font-size:15.5px;display:flex;align-items:center;gap:6px}
+.branch .addr svg.i{width:17px;height:17px}
+.branch .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto}
+@media (max-width:479px){
+  .branch .acts{display:grid;grid-template-columns:1fr 1fr}
+  .branch .acts .btn:first-child{grid-column:1/-1}
+}
+.info{display:grid;gap:16px;grid-template-columns:1fr;margin-top:16px}
+@media (min-width:640px){.info{grid-template-columns:1fr 1fr}}
+.info h3{display:flex;align-items:center;gap:10px;margin:0 0 6px}
+.info h3 svg.i{width:20px;height:20px;color:var(--blue-ink)}
+.rows{list-style:none;padding:0;margin:0;display:grid}
+.rows li{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 12px;
+  padding:8px 0;border-bottom:1px solid var(--line);font-size:16px;min-height:56px}
 .rows li:last-child{border-bottom:0}
-.rows dfn{font-style:normal;font-weight:700;min-width:7.5em;color:var(--muted);font-size:14.5px}
-.rows > li > svg{width:18px;height:18px;flex:none;fill:var(--muted);align-self:center}
-.rows a{font-weight:700;display:inline-flex;align-items:center;min-height:44px}
-.rows li.act{border-bottom:0;padding-top:14px}
-.embed{margin-top:18px;border:0;border-radius:20px;overflow:hidden;
-  background:var(--card);box-shadow:var(--shadow-1)}
-.embed iframe{display:block;width:100%;height:300px;border:0}
-.embed figcaption{padding:10px 16px;font-size:14px;color:var(--muted);
-  border-top:1px solid var(--line)}
+.rows dfn{font-style:normal;font-weight:700;color:var(--ink);font-size:16px}
+.rows a{font-weight:700;display:inline-flex;align-items:center;min-height:44px;text-decoration:none;
+  font-variant-numeric:tabular-nums}
+.rows a:hover{text-decoration:underline}
+.rows .v{color:var(--ink2)}
+.facts{display:grid;gap:14px;margin:4px 0 0;padding:0;list-style:none}
+.facts li{display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:center}
+.facts .ico{width:44px;height:44px;border-radius:14px}
+.facts .ico svg.i{width:21px;height:21px}
+.facts small{display:block;color:var(--muted);font-size:13.5px;font-weight:700;line-height:1.5}
+.facts span,.facts a{font-size:16px;line-height:1.6;color:var(--ink2);word-break:break-word}
+.facts a{color:var(--blue-ink);font-weight:700;text-decoration:none}
+.facts a:hover{text-decoration:underline}
+.info .btn{margin-top:18px}
 .social{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px}
 
 /* ── mobile action bar ────────────────────────────────────────────────── */
@@ -343,13 +479,19 @@ h3{font-size:18.5px;font-weight:700;margin:0 0 6px;line-height:1.35}
 @media (max-width:879px){body{padding-bottom:82px}}
 
 /* ── footer ───────────────────────────────────────────────────────────── */
-footer{border-top:0;background:var(--card);
-  padding-block:34px;margin-top:0}
-.flinks{display:flex;flex-wrap:wrap;gap:8px 22px;margin:0 0 14px;padding:0;list-style:none}
-.flinks a{color:var(--ink2);text-decoration:none;font-weight:700;font-size:15px;
-  display:inline-flex;align-items:center;min-height:44px}
-.flinks a:hover{color:var(--blue-ink);text-decoration:underline}
-.rights{color:var(--muted);font-size:14.5px;margin:0}
+footer{background-color:var(--navy2);color:var(--on-navy-muted);padding-block:44px 36px}
+.fin{display:grid;gap:24px;align-items:start}
+@media (min-width:820px){.fin{grid-template-columns:1fr auto}}
+.fbrand{display:flex;align-items:center;gap:14px;color:#fff;text-decoration:none}
+.fbrand img{width:48px;height:48px;border-radius:14px;box-shadow:0 0 0 1.5px rgba(201,209,219,.5)}
+.fbrand b{display:block;font-size:18px;line-height:1.4}
+.fbrand span{display:block;font-size:14px;color:var(--on-navy-muted);line-height:1.5}
+.flinks{display:flex;flex-wrap:wrap;gap:4px 22px;margin:0;padding:0;list-style:none}
+.flinks a{color:#fff;text-decoration:none;font-weight:700;font-size:15px;
+  display:inline-flex;align-items:center;min-height:44px;opacity:.9}
+.flinks a:hover{opacity:1;text-decoration:underline}
+.rights{color:var(--on-navy-muted);font-size:14px;margin:24px 0 0;padding-top:20px;
+  border-top:1px solid rgba(201,209,219,.16);opacity:.85}
 
 </style>
 </head>
@@ -379,17 +521,26 @@ footer{border-top:0;background:var(--card);
 <main id="main">
 
 <section class="hero">
+  <div class="hero-photo" aria-hidden="true"></div>
   <div class="wrap">
     <div class="hero-in">
-      <p class="eyebrow"><i></i>بستان الباشا · حريتان</p>
+      <p class="eyebrow"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>بستان الباشا · حريتان</p>
       <h1>شركة النجوم للتسويق العقاري</h1>
-      <p class="lede">بيع وشراء وإيجار العقارات في حلب. وتطبيق مجاني تشوف فيه العقار بصوره وسعره، وتحكي مع صاحبه مباشرة.</p>
+      <p class="lede">بيع وشراء وإيجار العقارات في حلب، مع تطبيق مجاني ترى فيه العقار بصوره وسعره، وتتواصل مع صاحبه مباشرة.</p>
       <div class="btn-row">
         <a class="btn wa" href="https://wa.me/963955248245?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C%20%D8%AA%D9%88%D8%A7%D8%B5%D9%84%D8%AA%20%D9%85%D8%B9%D9%83%D9%85%20%D9%85%D9%86%20%D9%85%D9%88%D9%82%D8%B9%20%D8%A7%D9%84%D9%86%D8%AC%D9%88%D9%85." rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M17.47 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.64.08-.3-.15-1.25-.46-2.38-1.47-.88-.78-1.47-1.75-1.65-2.05-.17-.3-.02-.46.13-.6.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.6-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.01-1.04 2.47s1.06 2.87 1.21 3.07c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.75-.72 2-1.41.25-.69.25-1.28.17-1.41-.07-.13-.27-.2-.57-.35zM12.04 21.5h-.01a9.4 9.4 0 0 1-4.79-1.31l-.34-.2-3.56.93.95-3.47-.22-.36a9.38 9.38 0 0 1-1.44-5.01c0-5.18 4.22-9.4 9.41-9.4a9.35 9.35 0 0 1 9.4 9.41c0 5.18-4.22 9.4-9.4 9.4zM20.06 3.93A11.32 11.32 0 0 0 12.04 .6C5.8.6.73 5.67.73 11.91c0 1.99.52 3.94 1.51 5.65L.64 23.4l5.98-1.57a11.3 11.3 0 0 0 5.42 1.38h.01c6.24 0 11.31-5.07 11.31-11.31 0-3.02-1.18-5.86-3.3-8z"/></svg>راسلنا على واتساب</a>
         <a class="btn onnavy" href="#app"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3a1 1 0 0 1 1 1v9.59l3.3-3.3a1 1 0 1 1 1.4 1.42l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 1 1 1.4-1.42l3.3 3.3V4a1 1 0 0 1 1-1zM4 19a1 1 0 0 1 1-1h14a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1z"/></svg>حمّل التطبيق</a>
       </div>
-      <form class="finder" id="finder" role="search" action="#listings">
-        <label><span>بدك</span>
+    </div>
+    <div class="plate" aria-hidden="true"><span dir="ltr">ALNUJOM</span></div>
+  </div>
+</section>
+
+<div class="find">
+  <div class="wrap">
+    <div class="fcard">
+      <form class="finder" id="finder" role="search" action="#listings" aria-label="ابحث عن عقار">
+        <label><span>تريد</span>
           <select id="f-purpose" name="purpose">
             <option value="sale">شراء</option>
             <option value="rent">إيجار</option>
@@ -407,30 +558,35 @@ footer{border-top:0;background:var(--card);
           </select></label>
         <label class="grow"><span>المنطقة</span>
           <input id="f-area" name="area" type="search" placeholder="مثلاً: الفرقان" autocomplete="off"></label>
-        <button class="btn primary" type="submit">ابحث</button>
+        <button class="btn primary" type="submit"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>ابحث</button>
       </form>
       <ul class="trust">
-        <li>فرعان في حلب: بستان الباشا وحريتان</li>
-        <li>تواصل مباشر على واتساب</li>
-        <li>من 9 الصبح لـ 8 المسا، كل يوم ما عدا الجمعة</li>
+        <li><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>فرعان في حلب: بستان الباشا وحريتان</li>
+        <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M17.47 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.64.08-.3-.15-1.25-.46-2.38-1.47-.88-.78-1.47-1.75-1.65-2.05-.17-.3-.02-.46.13-.6.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.6-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.01-1.04 2.47s1.06 2.87 1.21 3.07c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.75-.72 2-1.41.25-.69.25-1.28.17-1.41-.07-.13-.27-.2-.57-.35zM12.04 21.5h-.01a9.4 9.4 0 0 1-4.79-1.31l-.34-.2-3.56.93.95-3.47-.22-.36a9.38 9.38 0 0 1-1.44-5.01c0-5.18 4.22-9.4 9.41-9.4a9.35 9.35 0 0 1 9.4 9.41c0 5.18-4.22 9.4-9.4 9.4zM20.06 3.93A11.32 11.32 0 0 0 12.04 .6C5.8.6.73 5.67.73 11.91c0 1.99.52 3.94 1.51 5.65L.64 23.4l5.98-1.57a11.3 11.3 0 0 0 5.42 1.38h.01c6.24 0 11.31-5.07 11.31-11.31 0-3.02-1.18-5.86-3.3-8z"/></svg>تواصل مباشر على واتساب</li>
+        <li><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/></svg>من 9 صباحاً حتى 8 مساءً، كل يوم ما عدا الجمعة</li>
       </ul>
     </div>
-    <div class="plate" aria-hidden="true"><span dir="ltr">ALNUJOM</span></div>
   </div>
-</section>
+</div>
 
 <span id="listings-anchor"></span>
 <section id="listings" hidden>
   <div class="wrap">
-    <div class="head">
-      <h2 id="l-title">عقارات مختارة</h2>
-      <p id="l-lede">مختارة من التطبيق. اضغط على أي عقار تشوف تفاصيله وصوره.</p>
+    <div class="headrow">
+      <div class="head">
+        <h2 id="l-title">عقارات مختارة</h2>
+        <p id="l-lede">اختارها المكتب من التطبيق. اضغط على أي عقار لترى تفاصيله وصوره.</p>
+      </div>
+      <a class="link" href="#app">كل العقارات في التطبيق<svg class="i flip" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
     </div>
-    <p class="note" id="preview-note" hidden>معاينة: هذه عقارات من التطبيق لتشوف شكل القسم — القائمة الحقيقية يختارها المشرف.</p>
-    <p class="note" id="no-results" hidden>ما لقينا عقار بهالشروط هلق. جرّب منطقة ثانية أو راسلنا على واتساب ونحنا منلاقيلك.</p>
+    <p class="note" id="preview-note" hidden>معاينة: هذه عقارات من التطبيق لترى شكل القسم، والقائمة الحقيقية يختارها المشرف.</p>
+    <p class="note" id="no-results" hidden>لم نجد عقاراً بهذه الشروط الآن. جرّب منطقة أخرى، أو راسلنا على واتساب ونبحث لك.</p>
     <div class="lgrid" id="lgrid"></div>
-    <p class="more" id="back-wrap" hidden><button class="btn ghost" type="button" id="back-picks">رجوع للعقارات المختارة</button></p>
-    <p class="more"><a class="btn ghost" href="#app">شوف كل العقارات في التطبيق</a></p>
+    <div id="latest" hidden>
+      <div class="sub" id="latest-head"><h3>أحدث العقارات</h3></div>
+      <div class="lgrid" id="lgrid2"></div>
+    </div>
+    <p class="more" id="back-wrap" hidden><button class="btn ghost" type="button" id="back-picks">العودة إلى العقارات</button></p>
   </div>
 </section>
 
@@ -447,39 +603,61 @@ footer{border-top:0;background:var(--card);
 
 <section id="services">
   <div class="wrap">
-    <div class="head"><h2>خدماتنا</h2></div>
-    <div class="grid four">
-      <article class="card">
-        <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2 3 6v6c0 5 3.8 9.4 9 10 5.2-.6 9-5 9-10V6zm-1 14-4-4 1.4-1.4L11 13.2l4.6-4.6L17 10z"/></svg></div>
-        <h3>بيع وشراء</h3>
-        <p>نوصلك بالمشتري المناسب أو بالعقار المناسب، ونتابع المعاملة لآخرها.</p>
+    <div class="head rv"><h2>خدماتنا</h2><p>كل ما تحتاجه لبيع عقارك أو شرائه أو استئجاره في حلب.</p></div>
+    <div class="svc">
+      <article class="card rv">
+        <div class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9v11h14V9"/><path d="M10 20v-5h4v5"/></svg></div>
+        <div><h3>بيع وشراء</h3>
+        <p>نوصلك بالمشتري المناسب أو بالعقار المناسب، ونتابع المعاملة حتى نهايتها.</p></div>
       </article>
-      <article class="card">
-        <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12.6 10a6 6 0 1 0 0 4H16v3h3v-3h2v-4zM7 14a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/></svg></div>
-        <h3>إيجار</h3>
-        <p>شقق ومحلات ومكاتب، بعقود واضحة ومعاينة قبل الاتفاق.</p>
+      <article class="card rv">
+        <div class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="8" cy="15" r="4.5"/><path d="m11.3 11.7 8.7-8.7"/><path d="m16 7 2.5 2.5"/><path d="m18.5 4.5 2 2"/></svg></div>
+        <div><h3>إيجار</h3>
+        <p>شقق ومحلات ومكاتب، بعقود واضحة ومعاينة قبل الاتفاق.</p></div>
       </article>
-      <article class="card">
-        <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 3v2.2L8 8.4V7H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h1.3l1.4 5H10l-1.4-5L18 18.8V21h3V3z"/></svg></div>
-        <h3>سوّق عقارك معنا</h3>
-        <p>عندك عقار للبيع أو الإيجار؟ نعرضه في التطبيق وعلى الموقع، ونوصلك بالمهتمين.</p>
+      <article class="card rv">
+        <div class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 10v4a1 1 0 0 0 1 1h2.5L13 19V5L7.5 9H5a1 1 0 0 0-1 1z"/><path d="M16.5 9a4 4 0 0 1 0 6"/><path d="M19 6.5a7.5 7.5 0 0 1 0 11"/></svg></div>
+        <div><h3>سوّق عقارك معنا</h3>
+        <p>عندك عقار للبيع أو الإيجار؟ نعرضه في التطبيق وعلى الموقع، ونوصلك بالمهتمين.</p></div>
       </article>
-      <article class="card">
-        <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm6.9 6h-2.6a15 15 0 0 0-1.3-3.4A8 8 0 0 1 18.9 8zM12 4c.8 1.1 1.4 2.5 1.8 4h-3.6c.4-1.5 1-2.9 1.8-4zM4.3 14a8 8 0 0 1 0-4h3a17 17 0 0 0 0 4zm.8 2h2.6c.3 1.2.8 2.4 1.3 3.4A8 8 0 0 1 5.1 16zm2.6-8H5.1a8 8 0 0 1 3.9-3.4A15 15 0 0 0 7.7 8zM12 20c-.8-1.1-1.4-2.5-1.8-4h3.6c-.4 1.5-1 2.9-1.8 4zm2.2-6H9.8a15 15 0 0 1 0-4h4.4a15 15 0 0 1 0 4zm.8 5.4c.5-1 1-2.2 1.3-3.4h2.6a8 8 0 0 1-3.9 3.4zm2-5.4a17 17 0 0 0 0-4h3a8 8 0 0 1 0 4z"/></svg></div>
-        <h3>خدمة المغتربين</h3>
-        <p>تشتري أو تبيع وأنت خارج سوريا؟ نمشّي المعاملة عنك، ونبعتلك صور وفيديو للعقار.</p>
+      <article class="card rv">
+        <div class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18"/></svg></div>
+        <div><h3>خدمة المغتربين</h3>
+        <p>تشتري أو تبيع وأنت خارج سوريا؟ نتابع المعاملة عنك، ونرسل لك صور العقار وفيديو له.</p></div>
       </article>
     </div>
   </div>
 </section>
 
-<section id="app">
+<section id="app" style="padding-block:0">
   <div class="wrap">
-    <div class="head">
-      <h2>تطبيق النجوم</h2>
-      <p>مجاني، بالعربي، ويشتغل على أي موبايل أندرويد.</p>
-    </div>
-    <div class="appwrap">
+    <div class="panel rv">
+      <div class="appwrap">
+        <div>
+          <div class="head">
+            <h2>تطبيق النجوم</h2>
+            <p>مجاني، بالعربية، ويعمل على أي هاتف أندرويد.</p>
+          </div>
+          <ul class="flist">
+          <li>
+            <div class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="9.5" r="1.8"/><path d="m21 16-5-5-9.5 9"/></svg></div>
+            <div><h3>عقارات بالصور والأسعار</h3><p>شاهد العقار قبل أن تذهب لرؤيته.</p></div>
+          </li>
+          <li>
+            <div class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20.5 11.5a8 8 0 0 1-11.7 7.1L4 20l1.4-4.4A8 8 0 1 1 20.5 11.5z"/><path d="M8.5 11.5h.01M12.5 11.5h.01M16.5 11.5h.01"/></svg></div>
+            <div><h3>تواصل مباشر</h3><p>واتساب واتصال مع الناشر من داخل التطبيق.</p></div>
+          </li>
+          <li>
+            <div class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></div>
+            <div><h3>بحث بالخريطة</h3><p>ابحث حسب المدينة والمنطقة والسعر ونوع العقار.</p></div>
+          </li>
+          </ul>
+          <div class="btn-row">
+            <a class="btn light" id="dl" href="https://github.com/MHekmatF/alnujom/releases/latest" rel="noopener">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3a1 1 0 0 1 1 1v9.59l3.3-3.3a1 1 0 1 1 1.4 1.42l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 1 1 1.4-1.42l3.3 3.3V4a1 1 0 0 1 1-1zM4 19a1 1 0 0 1 1-1h14a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1z"/></svg><span>حمّل التطبيق</span></a>
+          </div>
+          <p class="dlnote">في صفحة التحميل ملفان: اختر ملف arm64 إذا كان هاتفك من آخر ست سنوات، وملف armeabi إذا كان أقدم.</p>
+        </div>
       <figure class="shot">
         <picture>
           <source srcset="assets/app-shot.webp" type="image/webp">
@@ -487,26 +665,6 @@ footer{border-top:0;background:var(--card);
                loading="lazy" decoding="async">
         </picture>
       </figure>
-      <div>
-        <ul class="flist">
-          <li>
-            <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zM8.9 13.9l2.1 2.5 3.1-4 4 5.1H6z"/></svg></div>
-            <div><h3>عقارات بالصور والأسعار</h3><p>شوف الشقة قبل ما تروح تشوفها.</p></div>
-          </li>
-          <li>
-            <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zM7 9h10v2H7zm0-3h10v2H7zm0 6h7v2H7z"/></svg></div>
-            <div><h3>تواصل مباشر</h3><p>واتساب واتصال مع الناشر من داخل التطبيق.</p></div>
-          </li>
-          <li>
-            <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg></div>
-            <div><h3>بحث بالخريطة</h3><p>دوّر حسب المدينة والمنطقة والسعر ونوع العقار.</p></div>
-          </li>
-        </ul>
-        <div class="btn-row">
-          <a class="btn primary" id="dl" href="https://github.com/MHekmatF/alnujom/releases/latest" rel="noopener">
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3a1 1 0 0 1 1 1v9.59l3.3-3.3a1 1 0 1 1 1.4 1.42l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 1 1 1.4-1.42l3.3 3.3V4a1 1 0 0 1 1-1zM4 19a1 1 0 0 1 1-1h14a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1z"/></svg><span>حمّل التطبيق</span></a>
-        </div>
-        <p class="dlnote">بتلاقي ملفين على صفحة التحميل: خُذ ملف arm64 إذا موبايلك من آخر ست سنين، وملف armeabi إذا أقدم.</p>
       </div>
     </div>
   </div>
@@ -514,41 +672,62 @@ footer{border-top:0;background:var(--card);
 
 <section id="about">
   <div class="wrap">
-    <div class="head"><h2>عن الشركة</h2></div>
-    <div class="card"><p>شركة النجوم للتسويق العقاري للبيع والشراء والإيجار، في بستان الباشا وحريتان بحلب. مبدأنا بسيط — كل عقار بصوره وسعره الحقيقي، والزبون يعرف مع مين عم يتعامل.</p></div>
+    <div class="card about rv">
+      <h2>عن الشركة</h2>
+      <p>شركة النجوم للتسويق العقاري للبيع والشراء والإيجار، في بستان الباشا وحريتان بحلب. مبدؤنا بسيط: كل عقار بصوره وسعره الحقيقي، والزبون يعرف مع من يتعامل.</p>
+    </div>
   </div>
 </section>
 
-<section id="contact">
+<section id="contact" style="padding-top:0">
   <div class="wrap">
-    <div class="head">
+    <div class="head rv">
       <h2>تواصل معنا</h2>
-      <p>اتصل، أو راسلنا على واتساب، أو مرّ على أقرب فرع.</p>
+      <p>اتصل بنا، أو راسلنا على واتساب، أو زرنا في أقرب فرع.</p>
     </div>
     <div class="grid two">
-      <article class="card branch">
-        <h3>الفرع الأول — بستان الباشا</h3>
-        <p class="addr">بستان الباشا، حلب</p>
-        <div class="acts"><a class="btn ghost sm" href="https://maps.google.com/?q=36.225140,37.168335" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>افتح على الخريطة</a><a class="btn ghost sm" href="tel:+963955248245"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.3.2 2.5.57 3.6a1 1 0 0 1-.25 1l-2.2 2.2z"/></svg>اتصل</a><a class="btn ghost sm" href="https://wa.me/963955248245" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M17.47 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.64.08-.3-.15-1.25-.46-2.38-1.47-.88-.78-1.47-1.75-1.65-2.05-.17-.3-.02-.46.13-.6.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.6-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.01-1.04 2.47s1.06 2.87 1.21 3.07c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.75-.72 2-1.41.25-.69.25-1.28.17-1.41-.07-.13-.27-.2-.57-.35zM12.04 21.5h-.01a9.4 9.4 0 0 1-4.79-1.31l-.34-.2-3.56.93.95-3.47-.22-.36a9.38 9.38 0 0 1-1.44-5.01c0-5.18 4.22-9.4 9.41-9.4a9.35 9.35 0 0 1 9.4 9.41c0 5.18-4.22 9.4-9.4 9.4zM20.06 3.93A11.32 11.32 0 0 0 12.04 .6C5.8.6.73 5.67.73 11.91c0 1.99.52 3.94 1.51 5.65L.64 23.4l5.98-1.57a11.3 11.3 0 0 0 5.42 1.38h.01c6.24 0 11.31-5.07 11.31-11.31 0-3.02-1.18-5.86-3.3-8z"/></svg>واتساب</a></div>
-        <figure class="bmap"><iframe loading="lazy" title="الفرع الأول — بستان الباشا"
-          src="https://www.openstreetmap.org/export/embed.html?bbox=37.162335,36.219140,37.174335,36.231140&amp;layer=mapnik&amp;marker=36.225140,37.168335"></iframe></figure>
+      <article class="card branch rv">
+        <a class="bmap" href="https://maps.google.com/?q=36.225140,37.168335" target="_blank" rel="noopener" aria-label="افتح على الخريطة — الفرع الأول — بستان الباشا">
+          <picture><source srcset="assets/map-1.webp" type="image/webp"><img src="assets/map-1.jpg" alt="" width="800" height="340" loading="lazy" decoding="async"></picture>
+          <span class="pin" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 22.5s-8-7-8-12.5a8 8 0 0 1 16 0c0 5.5-8 12.5-8 12.5z"/><circle cx="12" cy="10" r="3" fill="#fff" stroke="none"/></svg></span>
+          <small class="osm" dir="ltr">&copy; OpenStreetMap</small>
+        </a>
+        <div class="bb">
+          <h3>الفرع الأول — بستان الباشا</h3>
+          <p class="addr"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>بستان الباشا، حلب</p>
+          <div class="acts"><a class="btn ghost sm" href="https://maps.google.com/?q=36.225140,37.168335" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>افتح على الخريطة</a><a class="btn ghost sm" href="tel:+963955248245"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.3.2 2.5.57 3.6a1 1 0 0 1-.25 1l-2.2 2.2z"/></svg>اتصل</a><a class="btn ghost sm" href="https://wa.me/963955248245" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M17.47 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.64.08-.3-.15-1.25-.46-2.38-1.47-.88-.78-1.47-1.75-1.65-2.05-.17-.3-.02-.46.13-.6.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.6-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.01-1.04 2.47s1.06 2.87 1.21 3.07c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.75-.72 2-1.41.25-.69.25-1.28.17-1.41-.07-.13-.27-.2-.57-.35zM12.04 21.5h-.01a9.4 9.4 0 0 1-4.79-1.31l-.34-.2-3.56.93.95-3.47-.22-.36a9.38 9.38 0 0 1-1.44-5.01c0-5.18 4.22-9.4 9.41-9.4a9.35 9.35 0 0 1 9.4 9.41c0 5.18-4.22 9.4-9.4 9.4zM20.06 3.93A11.32 11.32 0 0 0 12.04 .6C5.8.6.73 5.67.73 11.91c0 1.99.52 3.94 1.51 5.65L.64 23.4l5.98-1.57a11.3 11.3 0 0 0 5.42 1.38h.01c6.24 0 11.31-5.07 11.31-11.31 0-3.02-1.18-5.86-3.3-8z"/></svg>واتساب</a></div>
+        </div>
       </article>
-      <article class="card branch">
-        <h3>الفرع الثاني — حريتان</h3>
-        <p class="addr">حريتان، ريف حلب</p>
-        <div class="acts"><a class="btn ghost sm" href="https://maps.google.com/?q=36.275333,37.083496" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>افتح على الخريطة</a><a class="btn ghost sm" href="tel:+963955248245"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.3.2 2.5.57 3.6a1 1 0 0 1-.25 1l-2.2 2.2z"/></svg>اتصل</a><a class="btn ghost sm" href="https://wa.me/963955248245" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M17.47 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.64.08-.3-.15-1.25-.46-2.38-1.47-.88-.78-1.47-1.75-1.65-2.05-.17-.3-.02-.46.13-.6.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.6-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.01-1.04 2.47s1.06 2.87 1.21 3.07c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.75-.72 2-1.41.25-.69.25-1.28.17-1.41-.07-.13-.27-.2-.57-.35zM12.04 21.5h-.01a9.4 9.4 0 0 1-4.79-1.31l-.34-.2-3.56.93.95-3.47-.22-.36a9.38 9.38 0 0 1-1.44-5.01c0-5.18 4.22-9.4 9.41-9.4a9.35 9.35 0 0 1 9.4 9.41c0 5.18-4.22 9.4-9.4 9.4zM20.06 3.93A11.32 11.32 0 0 0 12.04 .6C5.8.6.73 5.67.73 11.91c0 1.99.52 3.94 1.51 5.65L.64 23.4l5.98-1.57a11.3 11.3 0 0 0 5.42 1.38h.01c6.24 0 11.31-5.07 11.31-11.31 0-3.02-1.18-5.86-3.3-8z"/></svg>واتساب</a></div>
-        <figure class="bmap"><iframe loading="lazy" title="الفرع الثاني — حريتان"
-          src="https://www.openstreetmap.org/export/embed.html?bbox=37.077496,36.269333,37.089496,36.281333&amp;layer=mapnik&amp;marker=36.275333,37.083496"></iframe></figure>
+      <article class="card branch rv">
+        <a class="bmap" href="https://maps.google.com/?q=36.275333,37.083496" target="_blank" rel="noopener" aria-label="افتح على الخريطة — الفرع الثاني — حريتان">
+          <picture><source srcset="assets/map-2.webp" type="image/webp"><img src="assets/map-2.jpg" alt="" width="800" height="340" loading="lazy" decoding="async"></picture>
+          <span class="pin" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 22.5s-8-7-8-12.5a8 8 0 0 1 16 0c0 5.5-8 12.5-8 12.5z"/><circle cx="12" cy="10" r="3" fill="#fff" stroke="none"/></svg></span>
+          <small class="osm" dir="ltr">&copy; OpenStreetMap</small>
+        </a>
+        <div class="bb">
+          <h3>الفرع الثاني — حريتان</h3>
+          <p class="addr"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>حريتان، ريف حلب</p>
+          <div class="acts"><a class="btn ghost sm" href="https://maps.google.com/?q=36.275333,37.083496" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>افتح على الخريطة</a><a class="btn ghost sm" href="tel:+963955248245"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.3.2 2.5.57 3.6a1 1 0 0 1-.25 1l-2.2 2.2z"/></svg>اتصل</a><a class="btn ghost sm" href="https://wa.me/963955248245" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M17.47 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.64.08-.3-.15-1.25-.46-2.38-1.47-.88-.78-1.47-1.75-1.65-2.05-.17-.3-.02-.46.13-.6.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.6-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.01-1.04 2.47s1.06 2.87 1.21 3.07c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.75-.72 2-1.41.25-.69.25-1.28.17-1.41-.07-.13-.27-.2-.57-.35zM12.04 21.5h-.01a9.4 9.4 0 0 1-4.79-1.31l-.34-.2-3.56.93.95-3.47-.22-.36a9.38 9.38 0 0 1-1.44-5.01c0-5.18 4.22-9.4 9.41-9.4a9.35 9.35 0 0 1 9.4 9.41c0 5.18-4.22 9.4-9.4 9.4zM20.06 3.93A11.32 11.32 0 0 0 12.04 .6C5.8.6.73 5.67.73 11.91c0 1.99.52 3.94 1.51 5.65L.64 23.4l5.98-1.57a11.3 11.3 0 0 0 5.42 1.38h.01c6.24 0 11.31-5.07 11.31-11.31 0-3.02-1.18-5.86-3.3-8z"/></svg>واتساب</a></div>
+        </div>
       </article>
     </div>
-    <ul class="rows">
-      <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.3.2 2.5.57 3.6a1 1 0 0 1-.25 1l-2.2 2.2z"/></svg><dfn>أبو حكمت</dfn><span><a href="tel:+963955248245" dir="ltr">+963955248245</a></span></li>
-      <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.3.2 2.5.57 3.6a1 1 0 0 1-.25 1l-2.2 2.2z"/></svg><dfn>أبو منيب</dfn><span><a href="tel:+963964847378" dir="ltr">+963964847378</a></span></li>
-      <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.3.2 2.5.57 3.6a1 1 0 0 1-.25 1l-2.2 2.2z"/></svg><dfn>أبو علي</dfn><span><a href="tel:+963959610139" dir="ltr">+963959610139</a></span></li>
-      <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5-8-5V6l8 5 8-5z"/></svg><dfn>بريد إلكتروني</dfn><span><a href="mailto:alnujom.real.estate@gmail.com" dir="ltr">alnujom.real.estate@gmail.com</a></span></li>
-      <li><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 10.6V6h-2v7.4l5.2 3.1 1-1.7z"/></svg><dfn>ساعات الدوام</dfn><span>من 9 صباحاً حتى 8 مساءً — كل الأيام ما عدا الجمعة</span></li>
-      <li class="act"><button type="button" class="btn ghost sm" id="save-contact"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7zm-5 16a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm3-10H6V5h9z"/></svg>احفظ رقمنا</button></li>
-    </ul>
+    <div class="info">
+      <div class="card rv">
+        <h3><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 4h3.5l1.5 4.5-2 1.5a12 12 0 0 0 6 6l1.5-2 4.5 1.5V19a1.5 1.5 0 0 1-1.5 1.5A16 16 0 0 1 3.5 5.5 1.5 1.5 0 0 1 5 4z"/></svg>أرقام التواصل</h3>
+        <ul class="rows">
+          <li><dfn>أبو حكمت</dfn><a href="tel:+963955248245" dir="ltr">+963 955 248 245</a></li>
+          <li><dfn>أبو منيب</dfn><a href="tel:+963964847378" dir="ltr">+963 964 847 378</a></li>
+          <li><dfn>أبو علي</dfn><a href="tel:+963959610139" dir="ltr">+963 959 610 139</a></li>
+        </ul>
+      </div>
+      <div class="card rv">
+        <ul class="facts">
+          <li><div class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/></svg></div><div><small>ساعات الدوام</small><span>من 9 صباحاً حتى 8 مساءً — كل الأيام ما عدا الجمعة</span></div></li>
+          <li><div class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg></div><div><small>بريد إلكتروني</small><a href="mailto:alnujom.real.estate@gmail.com" dir="ltr">alnujom.real.estate@gmail.com</a></div></li>
+        </ul>
+        <button type="button" class="btn ghost sm" id="save-contact"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7zm-5 16a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm3-10H6V5h9z"/></svg>احفظ رقمنا</button>
+      </div>
+    </div>
 
   </div>
 </section>
@@ -557,11 +736,18 @@ footer{border-top:0;background:var(--card);
 
 <footer>
   <div class="wrap">
-    <ul class="flinks">
-      <li><a href="privacy.html">سياسة الخصوصية</a></li>
-      <li><a href="terms.html">شروط الاستخدام</a></li>
-      <li><a href="privacy.html#delete">حذف الحساب</a></li>
-    </ul>
+    <div class="fin">
+      <a class="fbrand" href="">
+        <img src="assets/app-icon.png" alt="" width="48" height="48" loading="lazy">
+        <span><b>النجوم للتسويق العقاري</b><span>بستان الباشا · حريتان</span></span>
+      </a>
+      <ul class="flinks">
+        <li><a href="privacy.html">سياسة الخصوصية</a></li>
+        <li><a href="terms.html">شروط الاستخدام</a></li>
+        <li><a href="privacy.html#delete">حذف الحساب</a></li>
+        <li><a href="en/" hreflang="en">English</a></li>
+      </ul>
+    </div>
     <p class="rights">© 2026 النجوم للتسويق العقاري — الجمهورية العربية السورية.</p>
   </div>
 </footer>
@@ -584,8 +770,21 @@ footer{border-top:0;background:var(--card);
 // ---------------------------------------------------------------------------
 (function () {
   'use strict';
-  var CFG = {"url":"https://hczsgceagommznjaohyk.supabase.co","key":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhjenNnY2VhZ29tbXpuamFvaHlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTQ2MTQsImV4cCI6MjA5MzI3MDYxNH0.n01oZaLvlnH9wuPe33Mn9VG9G1PHa0akqPPJ9JbZfiY","base":"","page":"home","rtl":true,"cityKey":"city_name_ar","govKey":"governorate_name_ar","t":{"verified":"موثّق","forSale":"للبيع","forRent":"للإيجار","published":"نُشر","rooms":"غرف","area":"م²","download":"حمّل التطبيق","version":"الإصدار","saved":"تم التنزيل — افتح الملف ليُضاف لجهات الاتصال","resultsTitle":"نتائج البحث","resultsLede":"اضغط على أي عقار تشوف تفاصيله وصوره.","listingsTitle":"عقارات مختارة","listingsLede":"مختارة من التطبيق. اضغط على أي عقار تشوف تفاصيله وصوره.","projectsFrom":"تبدأ من","types":{"apartment":"شقة","villa":"فيلا","house":"منزل","land":"أرض","shop":"محل","office":"مكتب","building":"بناء","farm":"مزرعة","chalet":"شاليه","warehouse":"مستودع","factory":"معمل","clinic":"مشفى / مركز طبي","school":"مدرسة","hotel":"فندق","restaurant":"مطعم","resort":"منتجع","cafe":"مقهى","wedding_hall":"صالة أفراح","club":"مسبح / نادي"}},"vcard":{"name":"النجوم للتسويق العقاري","phone":"+963955248245","email":"alnujom.real.estate@gmail.com","url":"https://mhekmatf.github.io/alnujom/","addresses":["بستان الباشا، حلب","حريتان، ريف حلب"]}};
+  var CFG = {"url":"https://hczsgceagommznjaohyk.supabase.co","key":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhjenNnY2VhZ29tbXpuamFvaHlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTQ2MTQsImV4cCI6MjA5MzI3MDYxNH0.n01oZaLvlnH9wuPe33Mn9VG9G1PHa0akqPPJ9JbZfiY","base":"","page":"home","rtl":true,"cityKey":"city_name_ar","govKey":"governorate_name_ar","t":{"verified":"موثّق","forSale":"للبيع","forRent":"للإيجار","published":"نُشر","rooms":"غرف","area":"م²","download":"حمّل التطبيق","version":"الإصدار","saved":"تم التنزيل — افتح الملف ليُضاف لجهات الاتصال","resultsTitle":"نتائج البحث","resultsLede":"اضغط على أي عقار لترى تفاصيله وصوره.","listingsTitle":"عقارات مختارة","listingsLede":"اختارها المكتب من التطبيق. اضغط على أي عقار لترى تفاصيله وصوره.","latestTitle":"أحدث العقارات","latestLede":"آخر ما نُشر في التطبيق. اضغط على أي عقار لترى تفاصيله وصوره.","projectsFrom":"تبدأ من","types":{"apartment":"شقة","villa":"فيلا","house":"منزل","land":"أرض","shop":"محل","office":"مكتب","building":"بناء","farm":"مزرعة","chalet":"شاليه","warehouse":"مستودع","factory":"معمل","clinic":"مشفى / مركز طبي","school":"مدرسة","hotel":"فندق","restaurant":"مطعم","resort":"منتجع","cafe":"مقهى","wedding_hall":"صالة أفراح","club":"مسبح / نادي"}},"vcard":{"name":"النجوم للتسويق العقاري","phone":"+963955248245","email":"alnujom.real.estate@gmail.com","url":"https://mhekmatf.github.io/alnujom/","addresses":["بستان الباشا، حلب","حريتان، ريف حلب"]}};
   var qs = new URLSearchParams(location.search);
+
+  // ── the quiet rise ───────────────────────────────────────────────────────
+  var rv = document.querySelectorAll('.rv');
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    }, { rootMargin: '0px 0px -8% 0px' });
+    rv.forEach(function (n) { io.observe(n); });
+  } else {
+    rv.forEach(function (n) { n.classList.add('in'); });
+  }
 
   function api(path, extraHeaders) {
     var h = { apikey: CFG.key, Authorization: 'Bearer ' + CFG.key };
@@ -608,19 +807,25 @@ footer{border-top:0;background:var(--card);
     var unit = currency === 'USD' ? '$' : (currency || '');
     return iso(n.toLocaleString('en-US', { maximumFractionDigits: 0 }) + ' ' + unit);
   }
+  // Our own fixed glyph, never data: safe to parse.
+  var PIN = '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>';
 
   // ── the chosen listings ──────────────────────────────────────────────────
   // Normally the admin-picked shortlist. `?preview=1` shows live listings
   // instead, so the owner can judge the layout before choosing any.
   var preview = qs.get('preview') === '1';
-  var listPath = preview
-    ? '/rest/v1/v_listings_public?select=id,title,property_type,purpose,rooms,bathrooms,' +
+  var PUBLIC_COLS = 'id,title,property_type,purpose,rooms,bathrooms,' +
       'area_size,primary_amount,primary_currency,main_image_path,city_name_ar,city_name_en,' +
-      'governorate_name_ar,governorate_name_en,verification_status,published_at,ref_code&limit=6'
+      'governorate_name_ar,governorate_name_en,verification_status,published_at,ref_code';
+  var listPath = preview
+    ? '/rest/v1/v_listings_public?select=' + PUBLIC_COLS + '&order=published_at.desc&limit=6'
     : '/rest/v1/v_site_listings?select=*&order=position.asc&limit=8';
 
   var grid = document.getElementById('lgrid');
+  var grid2 = document.getElementById('lgrid2');
+  var latestBox = document.getElementById('latest');
   var section = document.getElementById('listings');
+  var picks = null, latest = [];
 
   function card(row) {
     var a = el('a', 'lc');
@@ -634,7 +839,7 @@ footer{border-top:0;background:var(--card);
       img.alt = '';
       img.loading = 'lazy';
       img.decoding = 'async';
-      img.width = 400; img.height = 300;
+      img.width = 400; img.height = 250;
       img.addEventListener('error', function () { img.remove(); });
       ph.append(img);
     }
@@ -648,12 +853,17 @@ footer{border-top:0;background:var(--card);
 
     var where = [row[CFG.cityKey], row[CFG.govKey]]
       .filter(Boolean).filter(function (v, i, arr) { return arr.indexOf(v) === i; }).join(' · ');
-    if (where) body.append(el('p', 'w', where));
+    if (where) {
+      var w = el('p', 'w');
+      w.innerHTML = PIN;
+      w.append(document.createTextNode(where));
+      body.append(w);
+    }
     // Plan 2026-09-30 (#12c): when the listing was published.
     if (row.published_at) {
       var d = new Date(row.published_at);
       if (!isNaN(d)) {
-        body.append(el('p', 'w', CFG.t.published + ' ' + iso(d.toLocaleDateString(
+        body.append(el('p', 'd', CFG.t.published + ' ' + iso(d.toLocaleDateString(
           CFG.rtl ? 'ar-SY-u-nu-latn' : 'en-GB',
           { year: 'numeric', month: 'long', day: 'numeric' }))));
       }
@@ -682,15 +892,45 @@ footer{border-top:0;background:var(--card);
     grid.append(s);
   }
 
+  // The office's picks first. While there are fewer than three, one lonely
+  // card reads as an empty shop, so the newest public listings follow under
+  // their own honest heading — «أحدث العقارات», not passed off as picks.
+  function showHome() {
+    var hasPicks = picks && picks.length;
+    grid.replaceChildren();
+    (picks || []).forEach(function (row) { grid.append(card(row)); });
+    grid.hidden = !hasPicks;
+    grid2.replaceChildren();
+    latest.forEach(function (row) { grid2.append(card(row)); });
+    latestBox.hidden = !latest.length;
+    // With no picks at all the newest listings are the section, so they take
+    // its heading and the sub-heading would only repeat it.
+    document.getElementById('latest-head').hidden = !hasPicks;
+    document.getElementById('l-title').textContent = hasPicks ? CFG.t.listingsTitle : CFG.t.latestTitle;
+    document.getElementById('l-lede').textContent = hasPicks ? CFG.t.listingsLede : CFG.t.latestLede;
+    document.getElementById('no-results').hidden = true;
+    document.getElementById('back-wrap').hidden = true;
+    section.hidden = !(hasPicks || latest.length);
+  }
+
   api(listPath)
     .then(function (r) { return r.ok ? r.json() : []; })
     .then(function (rows) {
-      grid.replaceChildren();
-      if (!Array.isArray(rows) || !rows.length) return;   // section stays hidden
-      picks = rows;
-      rows.forEach(function (row) { grid.append(card(row)); });
-      section.hidden = false;
-      if (preview) document.getElementById('preview-note').hidden = false;
+      picks = Array.isArray(rows) ? rows : [];
+      if (preview || picks.length >= 3) return;
+      var ids = picks.map(function (p) { return p.id; });
+      return api('/rest/v1/v_listings_public?select=' + PUBLIC_COLS +
+                 '&order=published_at.desc&limit=' + (6 + ids.length))
+        .then(function (r) { return r.ok ? r.json() : []; })
+        .then(function (more) {
+          latest = (Array.isArray(more) ? more : [])
+            .filter(function (m) { return ids.indexOf(m.id) < 0; }).slice(0, 6);
+        })
+        .catch(function () {});
+    })
+    .then(function () {
+      showHome();
+      if (preview && picks.length) document.getElementById('preview-note').hidden = false;
     })
     .catch(function () { grid.replaceChildren(); });
 
@@ -718,7 +958,7 @@ footer{border-top:0;background:var(--card);
           img.alt = '';
           img.loading = 'lazy';
           img.decoding = 'async';
-          img.width = 400; img.height = 300;
+          img.width = 400; img.height = 250;
           img.addEventListener('error', function () { img.remove(); });
           ph.append(img);
         }
@@ -748,14 +988,16 @@ footer{border-top:0;background:var(--card);
   // city names, both languages), shown in the listings section. «رجوع» puts
   // the office's picks back.
   var finder = document.getElementById('finder');
-  var picks = null;
-  function showRows(rows, isResult) {
+  function showResults(rows) {
     grid.replaceChildren();
-    (rows || []).forEach(function (row) { grid.append(card(row)); });
-    document.getElementById('l-title').textContent = isResult ? CFG.t.resultsTitle : CFG.t.listingsTitle;
-    document.getElementById('l-lede').textContent = isResult ? CFG.t.resultsLede : CFG.t.listingsLede;
-    document.getElementById('no-results').hidden = !(isResult && !(rows || []).length);
-    document.getElementById('back-wrap').hidden = !(isResult && picks && picks.length);
+    rows.forEach(function (row) { grid.append(card(row)); });
+    grid.hidden = false;
+    latestBox.hidden = true;
+    document.getElementById('l-title').textContent = CFG.t.resultsTitle;
+    document.getElementById('l-lede').textContent = CFG.t.resultsLede;
+    document.getElementById('no-results').hidden = rows.length > 0;
+    document.getElementById('back-wrap').hidden =
+      !((picks && picks.length) || latest.length);
     section.hidden = false;
   }
   if (finder) finder.addEventListener('submit', function (e) {
@@ -777,24 +1019,39 @@ footer{border-top:0;background:var(--card);
     // A place name is matched to a city or area first (search_locations, as
     // the app's location box does); the listing search then filters by it.
     // Text that names no place is searched as words in the listing instead.
-    (area ? rpc('search_locations', { p_query: area, p_limit: 1 }) : Promise.resolve([]))
+    // One name can match several places («بستان الباشا» is both an area and
+    // «حي بستان الباشا»), and listings sit on only one of them, so every
+    // matching place is searched and the results merged.
+    function withArgs(extra) {
+      var b = {};
+      for (var k in body) b[k] = body[k];
+      for (var j in extra) b[j] = extra[j];
+      return rpc('search_listings', b);
+    }
+    (area ? rpc('search_locations', { p_query: area, p_limit: 5 }) : Promise.resolve([]))
       .then(function (hits) {
-        var hit = Array.isArray(hits) && hits[0];
-        if (hit && hit.area_id) body.p_area_id = hit.area_id;
-        else if (hit && hit.city_id) body.p_city_id = hit.city_id;
-        else if (area) body.p_query = area;
-        return rpc('search_listings', body);
+        hits = Array.isArray(hits) ? hits : [];
+        if (!hits.length) return area ? withArgs({ p_query: area }) : withArgs({});
+        return Promise.all(hits.map(function (h) {
+          return withArgs(h.area_id ? { p_area_id: h.area_id } : { p_city_id: h.city_id });
+        })).then(function (lists) {
+          var seen = {}, out = [];
+          lists.forEach(function (l) {
+            (Array.isArray(l) ? l : []).forEach(function (r) {
+              if (!seen[r.id]) { seen[r.id] = 1; out.push(r); }
+            });
+          });
+          return out;
+        });
       })
       .then(function (rows) {
-        showRows(Array.isArray(rows) ? rows : [], true);
+        showResults(Array.isArray(rows) ? rows : []);
         section.scrollIntoView({ behavior: 'smooth', block: 'start' });
       })
-      .catch(function () { showRows([], true); })
+      .catch(function () { showResults([]); })
       .then(function () { btn.disabled = false; });
   });
-  document.getElementById('back-picks').addEventListener('click', function () {
-    showRows(picks, false);
-  });
+  document.getElementById('back-picks').addEventListener('click', showHome);
 
   // ── the download button ──────────────────────────────────────────────────
   // Version and link come from the same manifest the app itself reads, so a
@@ -840,7 +1097,7 @@ footer{border-top:0;background:var(--card);
     a.download = 'alnujom.vcf';
     document.body.append(a); a.click(); a.remove();
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
-    save.textContent = CFG.t.saved;
+    save.lastChild.textContent = CFG.t.saved;
   });
 
 })();

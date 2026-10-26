@@ -9,10 +9,14 @@
 <meta property="og:site_name" content="النجوم">
 <meta property="og:type" content="website">
 <link rel="icon" href="../assets/app-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap">
 <style>
+/* Tajawal from this origin, the same two subsets as the home page: a
+   third-party font stylesheet is a second DNS lookup and handshake before any
+   text paints, which a slow Syrian connection feels. */
+@font-face{font-family:Tajawal;src:url(../assets/tajawal-400.woff2) format("woff2");
+font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:Tajawal;src:url(../assets/tajawal-700.woff2) format("woff2");
+font-weight:700;font-style:normal;font-display:swap}
 /* Tokens copied from the privacy-policy page so the whole site reads as one
    thing — the app's P1 navy, the same card shape. */
 :root{--bg:#F2F5F9;--card:#fff;--ink:#0D1B2E;--muted:#617187;--line:#E6EBF1;
@@ -34,21 +38,21 @@ header{background:var(--p1);color:#fff}
 .hin{max-width:560px;margin:0 auto;padding:22px 20px;display:flex;align-items:center;gap:14px}
 .mark{width:44px;height:44px;border-radius:12px;flex:none;display:block;
 box-shadow:0 1px 2px rgba(0,0,0,.25)}
-.brand{font-weight:800;font-size:19px;line-height:1.3}
-.brand span{display:block;font-weight:500;font-size:14px;opacity:.85}
+.brand{font-weight:700;font-size:19px;line-height:1.3}
+.brand span{display:block;font-weight:400;font-size:14px;opacity:.85}
 .wrap{max-width:560px;margin:0 auto;padding:24px 20px 60px}
 .card{background:var(--card);border:0;border-radius:20px;
 overflow:hidden;box-shadow:var(--shadow)}
 .photo{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:var(--accent-soft)}
 .body{padding:20px}
-h1{font-size:23px;font-weight:800;line-height:1.4;text-wrap:balance;margin:0 0 6px}
-.price{font-size:26px;font-weight:800;color:var(--accent-ink);margin:0 0 4px;
+h1{font-size:23px;font-weight:700;line-height:1.4;text-wrap:balance;margin:0 0 6px}
+.price{font-size:26px;font-weight:700;color:var(--accent-ink);margin:0 0 4px;
 font-variant-numeric:tabular-nums}
 .where{color:var(--muted);font-size:15px;margin:0 0 16px}
 .facts{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 20px;padding:0;list-style:none}
 .facts li{background:var(--accent-soft);color:var(--accent-ink);border-radius:999px;
 padding:5px 14px;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
-.cta{display:block;text-align:center;text-decoration:none;font-weight:800;font-size:17px;
+.cta{display:block;text-align:center;text-decoration:none;font-weight:700;font-size:17px;
 padding:15px 20px;border-radius:14px;margin-bottom:10px}
 .cta.primary{background:var(--accent);color:var(--on-accent)}
 .cta.ghost{background:transparent;color:var(--accent-ink);border:1px solid var(--line)}
